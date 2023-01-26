@@ -69,13 +69,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="51dp" />
 
-                    <TextView
+                    <androidx.compose.ui.platform.ComposeView
                         android:id="@+id/top_message"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        android:padding="1dp"
-                        android:layout_marginVertical="2dp" />
+                        android:layout_height="wrap_content" />
 
                     <androidx.compose.ui.platform.ComposeView
                         android:id="@+id/google_pay_divider"
@@ -89,13 +86,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
-                <TextView
+                <androidx.compose.ui.platform.ComposeView
                     android:id="@+id/message"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_marginVertical="2dp"
-                    android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal" />
+                    android:layout_height="wrap_content" />
 
                 <FrameLayout
                     android:id="@+id/button_container"

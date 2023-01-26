@@ -7,14 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ScrollView
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -24,6 +26,7 @@ import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -56,7 +59,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val header: ComposeView by lazy { viewBinding.header }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
-    override val messageView: TextView by lazy { viewBinding.message }
     override val notesView: ComposeView by lazy { viewBinding.notes }
     override val primaryButton: PrimaryButton by lazy { viewBinding.buyButton }
     override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
@@ -65,7 +67,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private val topContainer by lazy { viewBinding.topContainer }
     private val googlePayButton by lazy { viewBinding.googlePayButton }
     private val linkButton by lazy { viewBinding.linkButton }
-    private val topMessage by lazy { viewBinding.topMessage }
     private val googlePayDivider by lazy { viewBinding.googlePayDivider }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -125,6 +126,19 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             linkPaymentLauncher = linkLauncher
         }
 
+        viewBinding.topMessage.setContent {
+            StripeTheme {
+                val buttonState by viewModel.googlePayButtonState.collectAsState(initial = null)
+
+                buttonState?.errorMessage?.let { error ->
+                    ErrorMessage(
+                        error = error.message,
+                        modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
+                    )
+                }
+            }
+        }
+
         viewBinding.contentContainer.setContent {
             StripeTheme {
                 val currentScreen by viewModel.currentScreen.collectAsState()
@@ -134,6 +148,19 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 }
 
                 currentScreen.Content(viewModel)
+            }
+        }
+
+        viewBinding.message.setContent {
+            StripeTheme {
+                val buttonState by viewModel.buyButtonState.collectAsState(initial = null)
+
+                buttonState?.errorMessage?.let { error ->
+                    ErrorMessage(
+                        error = error.message,
+                        modifier = Modifier.padding(vertical = 2.dp, horizontal = 20.dp),
+                    )
+                }
             }
         }
 
@@ -156,7 +183,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewModel.buyButtonState.launchAndCollectIn(this) { viewState ->
-            updateErrorMessage(messageView, viewState?.errorMessage)
             viewBinding.buyButton.updateState(viewState?.convert())
         }
     }
@@ -230,7 +256,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewModel.googlePayButtonState.launchAndCollectIn(this) { viewState ->
-            updateErrorMessage(topMessage, viewState?.errorMessage)
             googlePayButton.updateState(viewState?.convert())
         }
     }

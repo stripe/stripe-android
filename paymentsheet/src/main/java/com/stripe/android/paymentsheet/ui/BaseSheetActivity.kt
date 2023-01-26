@@ -12,7 +12,6 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowMetrics
 import android.widget.ScrollView
-import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -41,8 +40,6 @@ import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.StripeThemeDefaults
-import com.stripe.android.uicore.createTextSpanFromTextStyle
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.stripeColors
@@ -77,7 +74,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val bottomSheet: ViewGroup
     abstract val linkAuthView: ComposeView
     abstract val scrollView: ScrollView
-    abstract val messageView: TextView
     abstract val header: ComposeView
     abstract val fragmentContainerParent: ViewGroup
     abstract val notesView: ComposeView
@@ -165,28 +161,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // TODO(mlb): Consider if this needs to be an abstract function
         setActivityResult(result)
         bottomSheetController.hide()
-    }
-
-    protected fun updateErrorMessage(
-        messageView: TextView,
-        userMessage: BaseSheetViewModel.UserErrorMessage? = null
-    ) {
-        userMessage?.message.let { message ->
-            viewModel.config?.appearance?.let {
-                messageView.text = createTextSpanFromTextStyle(
-                    text = message,
-                    context = this,
-                    fontSizeDp = (
-                        it.typography.sizeScaleFactor
-                            * StripeThemeDefaults.typography.smallFontSize.value
-                        ).dp,
-                    color = Color(it.getColors(this.isSystemDarkTheme()).error),
-                    fontFamily = it.typography.fontResId
-                )
-            }
-        }
-
-        messageView.isVisible = userMessage != null
     }
 
     private fun setupHeader() {

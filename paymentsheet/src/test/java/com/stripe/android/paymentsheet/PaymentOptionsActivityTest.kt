@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.test.onNodeWithText
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -45,6 +46,7 @@ import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepositor
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.HackyComposeTestRule
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -69,8 +71,12 @@ import kotlin.test.BeforeTest
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsActivityTest {
+
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val composeTestRule = HackyComposeTestRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -440,10 +446,16 @@ internal class PaymentOptionsActivityTest {
         scenario.launch(createIntent()).onActivity { activity ->
             viewModel.onError("some error")
             assertThat(activity.viewBinding.message.isVisible).isTrue()
-            assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
+
+            composeTestRule
+                .onNodeWithText("some error")
+                .assertExists()
 
             viewModel.onUserSelection()
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+
+            composeTestRule
+                .onNodeWithText("some error")
+                .assertDoesNotExist()
         }
     }
 
