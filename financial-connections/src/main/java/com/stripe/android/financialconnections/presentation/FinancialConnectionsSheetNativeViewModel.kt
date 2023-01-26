@@ -70,6 +70,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     Message.ClearPartnerWebAuth -> {
                         setState { copy(webAuthFlow = Uninitialized) }
                     }
+
+                    Message.Terminate -> closeAuthFlow()
                 }
             }
         }
@@ -91,6 +93,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         copy(webAuthFlow = Success(receivedUrl))
                     }
                 }
+
                 uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     baseUrl(applicationId)
@@ -192,9 +195,13 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         closeAuthFlow(closeAuthFlowError = null)
     }
 
-    fun onCloseFromErrorClick(error: Throwable) = closeAuthFlow(closeAuthFlowError = error)
+    fun onCloseFromErrorClick(error: Throwable) = closeAuthFlow(
+        closeAuthFlowError = error
+    )
 
-    fun onCloseConfirm() = closeAuthFlow(closeAuthFlowError = null)
+    fun onCloseConfirm() = closeAuthFlow(
+        closeAuthFlowError = null
+    )
 
     fun onCloseDismiss() = setState { copy(showCloseDialog = false) }
 

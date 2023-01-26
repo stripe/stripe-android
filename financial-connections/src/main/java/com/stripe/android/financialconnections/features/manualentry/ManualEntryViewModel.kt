@@ -12,9 +12,12 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
+import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -23,6 +26,7 @@ import javax.inject.Inject
 @Suppress("LongParameterList")
 internal class ManualEntryViewModel @Inject constructor(
     initialState: ManualEntryState,
+    private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
@@ -31,13 +35,14 @@ internal class ManualEntryViewModel @Inject constructor(
 ) : MavericksViewModel<ManualEntryState>(initialState) {
 
     init {
-        logErrors()
+        observeAsyncs()
         observeInputs()
         suspend {
             val manifest = getManifest()
             eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY))
             ManualEntryState.Payload(
-                verifyWithMicrodeposits = manifest.manualEntryUsesMicrodeposits
+                verifyWithMicrodeposits = manifest.manualEntryUsesMicrodeposits,
+                customManualEntry = manifest.manualEntryMode == ManualEntryMode.CUSTOM
             )
         }.execute {
             copy(payload = it)
@@ -74,7 +79,15 @@ internal class ManualEntryViewModel @Inject constructor(
         }
     }
 
-    private fun logErrors() {
+    private fun observeAsyncs() {
+        onAsync(
+            ManualEntryState::payload,
+            onSuccess = { payload ->
+                if (payload.customManualEntry) {
+                    nativeAuthFlowCoordinator().emit(Terminate)
+                }
+            },
+        )
         onAsync(
             ManualEntryState::linkPaymentAccount,
             onFail = {
@@ -156,7 +169,8 @@ internal data class ManualEntryState(
 ) : MavericksState {
 
     data class Payload(
-        val verifyWithMicrodeposits: Boolean
+        val verifyWithMicrodeposits: Boolean,
+        val customManualEntry: Boolean
     )
 
     val isValidForm

@@ -314,7 +314,8 @@ internal fun ManualEntryScreenPreview() {
             isValidForm = true,
             payload = Success(
                 Payload(
-                    verifyWithMicrodeposits = true
+                    verifyWithMicrodeposits = true,
+                    customManualEntry = false
                 )
             ),
             linkPaymentAccountStatus = Uninitialized,
@@ -337,7 +338,8 @@ internal fun ManualEntryScreenErrorPreview() {
             isValidForm = true,
             payload = Success(
                 Payload(
-                    verifyWithMicrodeposits = true
+                    verifyWithMicrodeposits = true,
+                    customManualEntry = false
                 )
             ),
             linkPaymentAccountStatus = Fail(
