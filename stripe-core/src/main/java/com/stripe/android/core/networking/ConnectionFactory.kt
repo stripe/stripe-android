@@ -49,6 +49,8 @@ interface ConnectionFactory {
 
         private fun openConnectionAndApplyFields(request: StripeRequest): HttpURLConnection {
             return (URL(request.url).openConnection() as HttpURLConnection).apply {
+                testConnectionCustomization.get()?.invoke(this)
+
                 connectTimeout = CONNECT_TIMEOUT
                 readTimeout = READ_TIMEOUT
                 useCaches = request.shouldCache
@@ -65,8 +67,6 @@ interface ConnectionFactory {
                     }
                     outputStream.use { output -> request.writePostBody(output) }
                 }
-
-                testConnectionCustomization.get()?.invoke(this)
             }
         }
     }
