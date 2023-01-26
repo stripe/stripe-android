@@ -47,8 +47,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.Loading
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -56,13 +54,13 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
+import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
@@ -428,8 +426,6 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
-
             scenario.launch(intent)
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
 
@@ -441,30 +437,6 @@ internal class PaymentSheetActivityTest {
 
             pressBack()
             expectNoEvents()
-        }
-    }
-
-    @Test
-    fun `updates navigation button`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.toolbar.navigationContentDescription)
-                .isEqualTo(context.getString(R.string.stripe_paymentsheet_close))
-
-            viewModel.transitionToAddPaymentScreen()
-
-            assertThat(activity.toolbar.navigationContentDescription)
-                .isEqualTo(context.getString(R.string.back))
-
-            pressBack()
-
-            assertThat(activity.toolbar.navigationContentDescription)
-                .isEqualTo(context.getString(R.string.stripe_paymentsheet_close))
-
-            pressBack()
-            // animating out
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
         }
     }
 
@@ -542,7 +514,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             viewModel.checkout()
 
-            assertThat(activity.toolbar.isEnabled).isFalse()
             assertThat(activity.viewBinding.googlePayButton.isEnabled).isFalse()
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
         }
@@ -667,18 +638,6 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-        }
-    }
-
-    @Test
-    fun `shows add card screen when no saved payment methods available`() = runTest {
-        val viewModel = createViewModel(paymentMethods = emptyList())
-        val scenario = activityScenario(viewModel)
-
-        viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
-            scenario.launchForResult(intent)
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
         }
     }
 
@@ -851,26 +810,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `when intent is in live mode show no indicator`() {
-        val viewModel = createViewModel(paymentIntent = PAYMENT_INTENT.copy(isLiveMode = true))
-        val scenario = activityScenario(viewModel)
-
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.testmode.isVisible).isFalse()
-        }
-    }
-
-    @Test
-    fun `when intent is not in live mode show indicator`() {
-        val viewModel = createViewModel(paymentIntent = PAYMENT_INTENT.copy(isLiveMode = false))
-        val scenario = activityScenario(viewModel)
-
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.testmode.isVisible).isTrue()
-        }
-    }
-
-    @Test
     fun `Buy button should be enabled when primaryButtonEnabled is true`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
@@ -1033,44 +972,6 @@ internal class PaymentSheetActivityTest {
 
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
         assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
-    }
-
-    @Test
-    fun `Verify if customer has payment methods, display the saved payment methods screen`() = runTest {
-        val viewModel = createViewModel(paymentMethods = PAYMENT_METHODS)
-
-        viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
-            activityScenario(viewModel).launch(intent)
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
-        }
-    }
-
-    @Test
-    fun `Verify if there are no payment methods, display the add payment method screen`() = runTest {
-        val viewModel = createViewModel(paymentMethods = emptyList())
-
-        viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
-            activityScenario(viewModel).launch(intent)
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
-        }
-    }
-
-    @Test
-    fun `Verify doesn't transition to first screen again on activity recreation`() = runTest {
-        val viewModel = createViewModel(paymentMethods = emptyList())
-        val scenario = activityScenario(viewModel)
-
-        viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
-
-            scenario.launch(intent)
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
-
-            scenario.recreate()
-            expectNoEvents()
-        }
     }
 
     @Test

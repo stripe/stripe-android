@@ -1,7 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">Adresse</string>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="address_label_address_line2">Adresselinje 2</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="address_label_ae_emirate">Emirat</string>
+  <!-- Label of an address field -->
+  <string name="address_label_au_suburb_or_city">Forstad eller storby</string>
+  <!-- Label of an address field -->
+  <string name="address_label_bb_jm_parish">Sogn</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_cedex">Cedex</string>
+  <!-- Label of an address field -->
+  <string name="address_label_department">Afdeling</string>
+  <!-- Label for the district field on an address form -->
+  <string name="address_label_district">Distrikt</string>
+  <!-- Label of an address field in hk -->
+  <string name="address_label_hk_area">Område</string>
+  <!-- Label of an address field -->
+  <string name="address_label_ie_eircode">Eircode</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="address_label_ie_townland">Opland</string>
+  <!-- Used to describe postal code in India -->
+  <string name="address_label_in_pin">Pin</string>
+  <!-- Used to describe part of an address -->
+  <string name="address_label_island">Ø</string>
+  <!-- Label of an address field -->
+  <string name="address_label_jp_prefecture">Præfektur</string>
+  <!-- Label of an address field -->
+  <string name="address_label_kr_do_si">Do Si</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_neighborhood">Kvarter</string>
+  <!-- Label of an address field -->
+  <string name="address_label_oblast">Oblast</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">Telefonnr.</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_post_town">Post eller by</string>
+  <!-- Label of an address field -->
+  <string name="address_label_suburb">Forstad</string>
+  <!-- Used to describe an address field. -->
+  <string name="address_label_village_township">Landsby eller byområde</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="address_search_content_description">Søg</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">ZIP-koden er ugyldig.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">ZIP-kode/Postnr. er ugyldigt</string>
   <!-- Used when a required field is blank and submit is clicked. -->
   <string name="blank_and_required">Dette felt kan ikke være tomt.</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->

@@ -234,14 +234,6 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun testConsumerSessionLookupUrl() {
-        assertEquals(
-            "https://api.stripe.com/v1/consumers/sessions/lookup",
-            StripeApiRepository.consumerSessionLookupUrl
-        )
-    }
-
-    @Test
     fun testConsumerSignUpUrl() {
         assertEquals(
             "https://api.stripe.com/v1/consumers/accounts/sign_up",
@@ -1688,36 +1680,6 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRefresh)
-        }
-
-    @Test
-    fun `lookupConsumerSession() sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ConsumerFixtures.EXISTING_CONSUMER_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val email = "email@example.com"
-            val cookie = "cookie1"
-            create().lookupConsumerSession(
-                email,
-                cookie,
-                DEFAULT_OPTIONS
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-            with(params) {
-                assertEquals(this["email_address"], email)
-                withNestedParams("cookies") {
-                    assertEquals(this["verification_session_client_secrets"], listOf(cookie))
-                }
-            }
         }
 
     @Test

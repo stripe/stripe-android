@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import org.junit.Test
 
 class SimpleTextFieldConfigTest {

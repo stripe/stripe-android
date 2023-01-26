@@ -86,7 +86,7 @@ class TestGooglePay {
             testParameters.copy(
                 googlePayState = GooglePayState.On
             ),
-            R.string.stripe_paymentsheet_or_pay_using
+            R.string.stripe_paymentsheet_or_pay_with_card
         )
     }
 
@@ -99,7 +99,7 @@ class TestGooglePay {
                 merchantCountryCode = "US",
                 intentType = IntentType.Setup, // This means only card will show
             ),
-            R.string.stripe_paymentsheet_or_pay_using
+            R.string.stripe_paymentsheet_or_pay_with_card
         )
     }
 

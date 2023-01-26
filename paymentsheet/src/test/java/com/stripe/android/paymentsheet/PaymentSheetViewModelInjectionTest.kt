@@ -8,8 +8,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.PaymentIntentFactory
 import com.stripe.android.utils.fakeCreationExtras
 import org.junit.After

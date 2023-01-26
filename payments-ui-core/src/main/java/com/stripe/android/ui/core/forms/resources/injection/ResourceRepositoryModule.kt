@@ -2,11 +2,11 @@ package com.stripe.android.ui.core.forms.resources.injection
 
 import android.content.Context
 import android.content.res.Resources
-import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.AsyncAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.AsyncLpmResourceRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.uicore.address.AddressRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

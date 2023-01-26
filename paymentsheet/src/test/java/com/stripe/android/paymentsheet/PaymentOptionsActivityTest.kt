@@ -12,7 +12,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
-import app.cash.turbine.test
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -35,21 +34,16 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.Loading
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.state.LinkState.LoginState.LoggedIn
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
+import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -60,7 +54,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
@@ -254,87 +247,6 @@ internal class PaymentOptionsActivityTest {
 
                 activity.finish()
             }
-        }
-    }
-
-    @Test
-    fun `Verify if Google Pay is ready, display the saved payment methods screen`() = runTest {
-        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(isGooglePayReady = true)
-        val viewModel = createViewModel(args)
-
-        viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
-            activityScenario(viewModel).launch(createIntent(args))
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
-        }
-    }
-
-    @Test
-    fun `Verify if Link is available, display the saved payment methods screen`() = runTest {
-        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-            linkState = LinkState(configuration = mock(), loginState = LoggedIn),
-            isGooglePayReady = false,
-            paymentMethods = emptyList(),
-        )
-
-        val viewModel = createViewModel(args)
-
-        viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
-            activityScenario(viewModel).launch(createIntent(args))
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
-        }
-    }
-
-    @Test
-    fun `Verify if customer has payment methods, display the saved payment methods screen`() = runTest {
-        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-            isGooglePayReady = false,
-            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        )
-
-        val viewModel = createViewModel(args)
-
-        viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
-            activityScenario(viewModel).launch(createIntent(args))
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
-        }
-    }
-
-    @Test
-    fun `Verify if there are no payment methods, display the add payment method screen`() = runTest {
-        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-            isGooglePayReady = false,
-            paymentMethods = emptyList(),
-        )
-
-        val viewModel = createViewModel(args)
-
-        viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
-            activityScenario(viewModel).launch(createIntent(args))
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
-        }
-    }
-
-    @Test
-    fun `Verify doesn't transition to first screen again on activity recreation`() = runTest {
-        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-        )
-
-        val viewModel = createViewModel(args)
-        val scenario = activityScenario(viewModel)
-
-        viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
-
-            scenario.launch(createIntent(args))
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
-
-            scenario.recreate()
-            expectNoEvents()
         }
     }
 

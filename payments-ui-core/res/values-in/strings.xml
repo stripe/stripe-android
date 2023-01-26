@@ -1,45 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">Baris alamat ke-2</string>
-  <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">Emirat</string>
-  <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Suburb atau kota</string>
-  <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Parish</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">Cedex</string>
-  <!-- Label of an address field -->
-  <string name="address_label_department">Departemen</string>
-  <!-- Label for the district field on an address form -->
-  <string name="address_label_district">Distrik</string>
-  <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">Area</string>
-  <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">Eircode</string>
-  <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">Townland</string>
-  <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">Pin</string>
-  <!-- Used to describe part of an address -->
-  <string name="address_label_island">Pulau</string>
-  <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">Prefektur</string>
-  <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">Do Si</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">Rukun tetangga</string>
-  <!-- Label of an address field -->
-  <string name="address_label_oblast">Oblast</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">Pos atau Kota</string>
-  <!-- Label of an address field -->
-  <string name="address_label_suburb">Suburb</string>
-  <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">Kelurahan atau Kecamatan</string>
-  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
-  <string name="address_search_content_description">Cari</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Bayar dalam <num_installments/> angsuran bebas bunga sebesar <installment_price/> dengan <img/>]]></string>
   <!-- Text for back button -->

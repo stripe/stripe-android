@@ -8,7 +8,6 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.CardNumberViewOnlyController
-import com.stripe.android.ui.core.elements.CountryElement
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
@@ -21,7 +20,6 @@ import com.stripe.android.ui.core.elements.NameConfig
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
-import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
@@ -31,7 +29,9 @@ import com.stripe.android.ui.core.elements.UpiSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SimpleTextElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before

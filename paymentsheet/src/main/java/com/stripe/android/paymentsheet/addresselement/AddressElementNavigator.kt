@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.lifecycle.asFlow
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,8 +22,13 @@ internal class AddressElementNavigator @Inject constructor() {
     fun setResult(key: String, value: Any?) =
         navigationController?.previousBackStackEntry?.savedStateHandle?.set(key, value)
 
-    fun <T> getResultFlow(key: String) =
-        navigationController?.currentBackStackEntry?.savedStateHandle?.getLiveData<T>(key)?.asFlow()
+    fun <T : Any?> getResultFlow(key: String): Flow<T>? {
+        val currentBackStackEntry = navigationController?.currentBackStackEntry ?: return null
+        return currentBackStackEntry
+            .savedStateHandle
+            .getStateFlow<T?>(key, initialValue = null)
+            .filterNotNull()
+    }
 
     fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled) =
         onDismiss?.let {

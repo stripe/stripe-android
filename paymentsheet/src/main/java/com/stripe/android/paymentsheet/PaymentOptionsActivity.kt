@@ -14,11 +14,10 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -46,10 +45,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
-    override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val linkAuthView: ComposeView by lazy { viewBinding.linkAuth }
-    override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
-    override val testModeIndicator: TextView by lazy { viewBinding.testmode }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val header: ComposeView by lazy { viewBinding.header }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
@@ -83,15 +79,29 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        viewBinding.contentContainer.setContent {
-            StripeTheme {
-                val currentScreen by viewModel.currentScreen.collectAsState()
-                currentScreen.PaymentOptionsContent(starterArgs)
+        val elevation = resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
+        scrollView.viewTreeObserver.addOnScrollChangedListener {
+            viewBinding.topBar.elevation = if (scrollView.scrollY > 0) {
+                elevation
+            } else {
+                0f
             }
         }
 
-        if (savedInstanceState == null) {
-            viewModel.transitionToFirstScreenWhenReady()
+        // This is temporary until we embed the top bar in a Scaffold
+        viewBinding.topBar.clipToPadding = false
+
+        viewBinding.topBar.setContent {
+            StripeTheme {
+                PaymentSheetTopBar(viewModel)
+            }
+        }
+
+        viewBinding.contentContainer.setContent {
+            StripeTheme {
+                val currentScreen by viewModel.currentScreen.collectAsState()
+                currentScreen.Content(viewModel)
+            }
         }
 
         viewModel.selection.launchAndCollectIn(this) {

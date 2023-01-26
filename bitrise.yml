@@ -1,0 +1,56 @@
+---
+format_version: '11'
+default_step_lib_source: 'https://github.com/bitrise-io/bitrise-steplib.git'
+project_type: android
+trigger_map:
+  - push_branch: 'master'
+    pipeline: main-trigger-pipeline
+  - pull_request_source_branch: '*'
+    pipeline: main-trigger-pipeline
+app:
+  envs:
+    - GRADLE_OPTS: -Dkotlin.incremental=false
+
+pipelines:
+  main-trigger-pipeline:
+    stages:
+      - stage-trigger-run-all: {}
+
+stages:
+  stage-trigger-run-all:
+    workflows:
+      - check: {}
+      - test: {}
+
+workflows:
+  check:
+    steps:
+      - activate-ssh-key@4:
+          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+      - git-clone@6: {}
+      - cache-pull@2: {}
+      - script@1:
+          inputs:
+            - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
+      - script@1:
+          inputs:
+          - content: ./gradlew ktlint detekt lintRelease apiCheck
+      - cache-push@2: {}
+  test:
+    steps:
+      - activate-ssh-key@4:
+          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+      - git-clone@6: {}
+      - cache-pull@2: {}
+      - script@1:
+          inputs:
+            - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
+      - script@1:
+          inputs:
+            - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
+      - cache-push@2: {}
+
+meta:
+  bitrise.io:
+    stack: linux-docker-android-20.04
+    machine_type_id: elite

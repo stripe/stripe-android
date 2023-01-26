@@ -29,9 +29,9 @@ internal fun AddressOptionsAppBar(
             Icon(
                 painter = painterResource(
                     id = if (isRootScreen) {
-                        R.drawable.stripe_ic_paymentsheet_close_enabled
+                        R.drawable.stripe_ic_paymentsheet_close
                     } else {
-                        R.drawable.stripe_ic_paymentsheet_back_enabled
+                        R.drawable.stripe_ic_paymentsheet_back
                     }
                 ),
                 contentDescription = stringResource(

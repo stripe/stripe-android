@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.ui.core.elements.AddressType
-import com.stripe.android.ui.core.elements.PhoneNumberState
+import com.stripe.android.uicore.elements.AddressType
+import com.stripe.android.uicore.elements.PhoneNumberState
 
 internal object AddressSpecFactory {
     fun create(

@@ -257,3 +257,551 @@ internal val FILE_UPLOAD_SUCCESS_JSON_STRING = """
       "url": null
     }
 """.trimIndent()
+
+internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING = """
+    {
+      "id": "vs_1MOrPwEGkPhabJTjzCzKF4DM",
+      "object": "identity.verification_page",
+      "biometric_consent": {
+        "accept_button_text": "Accept and continue",
+        "body": "<p><b>How Stripe will verify your identity</b></p><p><a href='https://stripe.com/about'>Stripe</a> will use biometric technology (on images of you and your IDs), as well as other data sources and our service providers, to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with Tora's catfood. You can subsequently opt-out by contacting Stripe. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a></p>",
+        "decline_button_text": "No, don't verify",
+        "privacy_policy": "Data will be stored and may be used according to the <a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "scroll_to_continue_button_text": "Scroll to continue",
+        "time_estimate": "Takes about 1–2 minutes.",
+        "title": "Tora's catfood uses Stripe to verify your identity"
+      },
+      "document_capture": {
+        "autocapture_timeout": 8000,
+        "file_purpose": "identity_private",
+        "high_res_image_compression_quality": 0.92,
+        "high_res_image_crop_padding": 0.08,
+        "high_res_image_max_dimension": 3000,
+        "ios_id_card_back_barcode_timeout": 3000,
+        "ios_id_card_back_country_barcode_symbologies": {
+          "CA": "pdf417",
+          "US": "pdf417"
+        },
+        "low_res_image_compression_quality": 0.82,
+        "low_res_image_max_dimension": 3000,
+        "models": {
+          "id_detector_min_iou": 0.8,
+          "id_detector_min_score": 0.5,
+          "id_detector_url": "https://b.stripecdn.com/gelato-statics-srv/assets/d137be6ecc86477800ea4ef82154174092dc4c16/assets/id_detectors/tflite/2022-08-19/model.tflite"
+        },
+        "motion_blur_min_duration": 500,
+        "motion_blur_min_iou": 0.95,
+        "require_live_capture": true
+      },
+      "document_select": {
+        "body": null,
+        "button_text": "Next",
+        "id_document_type_allowlist": {
+          "driving_license": "Driver's license",
+          "id_card": "Identity card",
+          "passport": "Passport"
+        },
+        "title": "Which form of identification do you want to use?"
+      },
+      "fallback_url": "https://verify.stripe.com/start/test_YWNjdF8xTEliaExFR2tQaGFiSlRqLF9OOTlqVW84aWdKakk3dlBuM3gwWUdiejVrTkdUSWht0100PuDMlvY6",
+      "individual": {
+        "address_countries": {
+          "AT": "Austria",
+          "AU": "Australia",
+          "BE": "Belgium",
+          "BR": "Brazil",
+          "CA": "Canada",
+          "CH": "Switzerland",
+          "CZ": "Czech Republic",
+          "DE": "Germany",
+          "DK": "Denmark",
+          "ES": "Spain",
+          "FI": "Finland",
+          "FR": "France",
+          "GB": "United Kingdom",
+          "HK": "Hong Kong",
+          "ID": "Indonesia",
+          "IE": "Ireland",
+          "IT": "Italy",
+          "LU": "Luxembourg",
+          "MT": "Malta",
+          "MX": "Mexico",
+          "MY": "Malaysia",
+          "NL": "Netherlands",
+          "NO": "Norway",
+          "PL": "Poland",
+          "PT": "Portugal",
+          "RO": "Romania",
+          "SE": "Sweden",
+          "SG": "Singapore",
+          "SK": "Slovakia",
+          "TH": "Thailand",
+          "US": "United States"
+        },
+        "button_text": "Submit",
+        "id_number_countries": {
+          "BR": "Brazil",
+          "SG": "Singapore",
+          "US": "United States"
+        },
+        "title": "Provide personal information"
+      },
+      "livemode": false,
+      "requirements": {
+        "missing": [
+          "biometric_consent",
+          "id_document_front",
+          "id_document_back",
+          "id_document_type",
+          "id_number"
+        ]
+      },
+      "selfie": null,
+      "status": "requires_input",
+      "submitted": false,
+      "success": {
+        "body": "<p>Thank you for providing your information. Tora's catfood will reach out if additional details are required.</p><p><b>Next steps</b></p><p>Tora's catfood will contact you regarding the outcome of your identification process.</p><p><b>More about Stripe Identity</b></p><p><a href='https://support.stripe.com/questions/common-questions-about-stripe-identity'>Common questions about Stripe Identity</a></p><p><a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn how Stripe uses data</a></p><p><a href='https://stripe.com/privacy'>Stripe Privacy Policy</a></p><p><a href='mailto:privacy@stripe.com'>Contact Stripe</a></p>",
+        "button_text": "Complete",
+        "title": "Verification submitted"
+      },
+      "unsupported_client": false
+    }
+
+""".trimIndent()
+
+internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING = """
+    {
+      "id": "vs_1MRjwTEGkPhabJTjIEKiUmmS",
+      "object": "identity.verification_page",
+      "biometric_consent": {
+        "accept_button_text": "Accept and continue",
+        "body": "<p><b>How Stripe will verify your identity</b></p><p><a href='https://stripe.com/about'>Stripe</a> will use biometric technology (on images of you and your IDs), as well as other data sources and our service providers, to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with Tora's catfood. You can subsequently opt-out by contacting Stripe. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a></p>",
+        "decline_button_text": "No, don't verify",
+        "privacy_policy": "Data will be stored and may be used according to the <a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "scroll_to_continue_button_text": "Scroll to continue",
+        "time_estimate": "Takes about 1–2 minutes.",
+        "title": "Tora's catfood uses Stripe to verify your identity"
+      },
+      "document_capture": {
+        "autocapture_timeout": 8000,
+        "file_purpose": "identity_private",
+        "high_res_image_compression_quality": 0.92,
+        "high_res_image_crop_padding": 0.08,
+        "high_res_image_max_dimension": 3000,
+        "ios_id_card_back_barcode_timeout": 3000,
+        "ios_id_card_back_country_barcode_symbologies": {
+          "CA": "pdf417",
+          "US": "pdf417"
+        },
+        "low_res_image_compression_quality": 0.82,
+        "low_res_image_max_dimension": 3000,
+        "models": {
+          "id_detector_min_iou": 0.8,
+          "id_detector_min_score": 0.5,
+          "id_detector_url": "https://b.stripecdn.com/gelato-statics-srv/assets/d137be6ecc86477800ea4ef82154174092dc4c16/assets/id_detectors/tflite/2022-08-19/model.tflite"
+        },
+        "motion_blur_min_duration": 500,
+        "motion_blur_min_iou": 0.95,
+        "require_live_capture": true
+      },
+      "document_select": {
+        "body": null,
+        "button_text": "Next",
+        "id_document_type_allowlist": {
+          "driving_license": "Driver's license",
+          "id_card": "Identity card",
+          "passport": "Passport"
+        },
+        "title": "Which form of identification do you want to use?"
+      },
+      "fallback_url": "https://verify.stripe.com/start/live_YWNjdF8xTEliaExFR2tQaGFiSlRqLF9OQzhDRjQ5TXI5ZGdyM0tKWDI1RzBKMGNTQ3JyNGVU0100vUQ0sLfw",
+      "individual": {
+        "address_countries": {
+          "AT": "Austria",
+          "AU": "Australia",
+          "BE": "Belgium",
+          "BR": "Brazil",
+          "CA": "Canada",
+          "CH": "Switzerland",
+          "CZ": "Czech Republic",
+          "DE": "Germany",
+          "DK": "Denmark",
+          "ES": "Spain",
+          "FI": "Finland",
+          "FR": "France",
+          "GB": "United Kingdom",
+          "HK": "Hong Kong",
+          "ID": "Indonesia",
+          "IE": "Ireland",
+          "IT": "Italy",
+          "LU": "Luxembourg",
+          "MT": "Malta",
+          "MX": "Mexico",
+          "MY": "Malaysia",
+          "NL": "Netherlands",
+          "NO": "Norway",
+          "PL": "Poland",
+          "PT": "Portugal",
+          "RO": "Romania",
+          "SE": "Sweden",
+          "SG": "Singapore",
+          "SK": "Slovakia",
+          "TH": "Thailand",
+          "US": "United States"
+        },
+        "button_text": "Submit",
+        "id_number_countries": {
+          "BR": "Brazil",
+          "SG": "Singapore",
+          "US": "United States"
+        },
+        "title": "Provide personal information"
+      },
+      "livemode": true,
+      "requirements": {
+        "missing": [
+          "address",
+          "biometric_consent",
+          "id_document_front",
+          "id_document_back",
+          "id_document_type"
+        ]
+      },
+      "selfie": null,
+      "status": "requires_input",
+      "submitted": false,
+      "success": {
+        "body": "<p>Thank you for providing your information. Tora's catfood will reach out if additional details are required.</p><p><b>Next steps</b></p><p>Tora's catfood will contact you regarding the outcome of your identification process.</p><p><b>More about Stripe Identity</b></p><p><a href='https://support.stripe.com/questions/common-questions-about-stripe-identity'>Common questions about Stripe Identity</a></p><p><a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn how Stripe uses data</a></p><p><a href='https://stripe.com/privacy'>Stripe Privacy Policy</a></p><p><a href='mailto:privacy@stripe.com'>Contact Stripe</a></p>",
+        "button_text": "Complete",
+        "title": "Verification submitted"
+      },
+      "unsupported_client": false
+    }
+""".trimIndent()
+
+internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_STRING = """
+    {
+      "id": "vs_1MTb71EGkPhabJTjK2kJQ5xI",
+      "object": "identity.verification_page",
+      "biometric_consent": {
+        "accept_button_text": "Accept and continue",
+        "body": "<p><b>How Stripe will verify your identity</b></p><p><a href='https://stripe.com/about'>Stripe</a> will use biometric technology (on images of you and your IDs), as well as other data sources and our service providers, to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with Tora's catfood. You can subsequently opt-out by contacting Stripe. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a></p>",
+        "decline_button_text": "No, don't verify",
+        "privacy_policy": "Data will be stored and may be used according to the <a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "scroll_to_continue_button_text": "Scroll to continue",
+        "time_estimate": "Takes about 1–2 minutes.",
+        "title": "Tora's catfood uses Stripe to verify your identity"
+      },
+      "document_capture": {
+        "autocapture_timeout": 8000,
+        "file_purpose": "identity_private",
+        "high_res_image_compression_quality": 0.92,
+        "high_res_image_crop_padding": 0.08,
+        "high_res_image_max_dimension": 3000,
+        "ios_id_card_back_barcode_timeout": 3000,
+        "ios_id_card_back_country_barcode_symbologies": {
+          "CA": "pdf417",
+          "US": "pdf417"
+        },
+        "low_res_image_compression_quality": 0.82,
+        "low_res_image_max_dimension": 3000,
+        "models": {
+          "id_detector_min_iou": 0.8,
+          "id_detector_min_score": 0.5,
+          "id_detector_url": "https://b.stripecdn.com/gelato-statics-srv/assets/d137be6ecc86477800ea4ef82154174092dc4c16/assets/id_detectors/tflite/2022-08-19/model.tflite"
+        },
+        "motion_blur_min_duration": 500,
+        "motion_blur_min_iou": 0.95,
+        "require_live_capture": true
+      },
+      "document_select": {
+        "body": null,
+        "button_text": "Next",
+        "id_document_type_allowlist": {
+          "driving_license": "Driver's license",
+          "id_card": "Identity card",
+          "passport": "Passport"
+        },
+        "title": "Which form of identification do you want to use?"
+      },
+      "fallback_url": "https://verify.stripe.com/start/test_YWNjdF8xTEliaExFR2tQaGFiSlRqLF9ORTNESmF3b2JCVldkRUladDZTMEw3TFk3aUt5N1BE0100D2Sn0qSX",
+      "individual": {
+        "address_countries": {
+          "AT": "Austria",
+          "AU": "Australia",
+          "BE": "Belgium",
+          "BR": "Brazil",
+          "CA": "Canada",
+          "CH": "Switzerland",
+          "CZ": "Czech Republic",
+          "DE": "Germany",
+          "DK": "Denmark",
+          "ES": "Spain",
+          "FI": "Finland",
+          "FR": "France",
+          "GB": "United Kingdom",
+          "HK": "Hong Kong",
+          "ID": "Indonesia",
+          "IE": "Ireland",
+          "IT": "Italy",
+          "LU": "Luxembourg",
+          "MT": "Malta",
+          "MX": "Mexico",
+          "MY": "Malaysia",
+          "NL": "Netherlands",
+          "NO": "Norway",
+          "PL": "Poland",
+          "PT": "Portugal",
+          "RO": "Romania",
+          "SE": "Sweden",
+          "SG": "Singapore",
+          "SK": "Slovakia",
+          "TH": "Thailand",
+          "US": "United States"
+        },
+        "button_text": "Submit",
+        "id_number_countries": {
+          "BR": "Brazil",
+          "SG": "Singapore",
+          "US": "United States"
+        },
+        "title": "Provide personal information"
+      },
+      "livemode": false,
+      "requirements": {
+        "missing": [
+          "address",
+          "biometric_consent",
+          "id_document_front",
+          "id_document_back",
+          "id_document_type",
+          "id_number"
+        ]
+      },
+      "selfie": null,
+      "status": "requires_input",
+      "submitted": false,
+      "success": {
+        "body": "<p>Thank you for providing your information. Tora's catfood will reach out if additional details are required.</p><p><b>Next steps</b></p><p>Tora's catfood will contact you regarding the outcome of your identification process.</p><p><b>More about Stripe Identity</b></p><p><a href='https://support.stripe.com/questions/common-questions-about-stripe-identity'>Common questions about Stripe Identity</a></p><p><a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn how Stripe uses data</a></p><p><a href='https://stripe.com/privacy'>Stripe Privacy Policy</a></p><p><a href='mailto:privacy@stripe.com'>Contact Stripe</a></p>",
+        "button_text": "Complete",
+        "title": "Verification submitted"
+      },
+      "unsupported_client": false
+    }
+""".trimIndent()
+
+internal val VERIFICATION_PAGE_TYPE_ID_NUMBER_JSON_STRING = """
+    {
+      "id": "vs_1MOrMgEGkPhabJTjkbUNVfh6",
+      "object": "identity.verification_page",
+      "biometric_consent": {
+        "accept_button_text": "Accept and continue",
+        "body": "<p><b>How Stripe will verify your identity</b></p><p><a href='https://stripe.com/about'>Stripe</a> will use biometric technology (on images of you and your IDs), as well as other data sources and our service providers, to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with Tora's catfood. You can subsequently opt-out by contacting Stripe. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a></p>",
+        "decline_button_text": "No, don't verify",
+        "privacy_policy": "Data will be stored and may be used according to the <a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "scroll_to_continue_button_text": "Scroll to continue",
+        "time_estimate": "Takes about 1–2 minutes.",
+        "title": "Tora's catfood uses Stripe to verify your identity"
+      },
+      "document_capture": {
+        "autocapture_timeout": 8000,
+        "file_purpose": "identity_private",
+        "high_res_image_compression_quality": 0.92,
+        "high_res_image_crop_padding": 0.08,
+        "high_res_image_max_dimension": 3000,
+        "ios_id_card_back_barcode_timeout": 3000,
+        "ios_id_card_back_country_barcode_symbologies": {
+          "CA": "pdf417",
+          "US": "pdf417"
+        },
+        "low_res_image_compression_quality": 0.82,
+        "low_res_image_max_dimension": 3000,
+        "models": {
+          "id_detector_min_iou": 0.8,
+          "id_detector_min_score": 0.5,
+          "id_detector_url": "https://b.stripecdn.com/gelato-statics-srv/assets/d137be6ecc86477800ea4ef82154174092dc4c16/assets/id_detectors/tflite/2022-08-19/model.tflite"
+        },
+        "motion_blur_min_duration": 500,
+        "motion_blur_min_iou": 0.95,
+        "require_live_capture": false
+      },
+      "document_select": {
+        "body": null,
+        "button_text": "Next",
+        "id_document_type_allowlist": {
+          "driving_license": "Driver's license",
+          "id_card": "Identity card",
+          "passport": "Passport"
+        },
+        "title": "Which form of identification do you want to use?"
+      },
+      "fallback_url": "https://verify.stripe.com/start/test_YWNjdF8xTEliaExFR2tQaGFiSlRqLF9OOTlnUXJWaWJSMGg3U2NzTGlQODRHR1BhbzlTd1BT0100mJdJgeY7",
+      "individual": {
+        "address_countries": {
+          "AT": "Austria",
+          "AU": "Australia",
+          "BE": "Belgium",
+          "BR": "Brazil",
+          "CA": "Canada",
+          "CH": "Switzerland",
+          "CZ": "Czech Republic",
+          "DE": "Germany",
+          "DK": "Denmark",
+          "ES": "Spain",
+          "FI": "Finland",
+          "FR": "France",
+          "GB": "United Kingdom",
+          "HK": "Hong Kong",
+          "ID": "Indonesia",
+          "IE": "Ireland",
+          "IT": "Italy",
+          "LU": "Luxembourg",
+          "MT": "Malta",
+          "MX": "Mexico",
+          "MY": "Malaysia",
+          "NL": "Netherlands",
+          "NO": "Norway",
+          "PL": "Poland",
+          "PT": "Portugal",
+          "RO": "Romania",
+          "SE": "Sweden",
+          "SG": "Singapore",
+          "SK": "Slovakia",
+          "TH": "Thailand",
+          "US": "United States"
+        },
+        "button_text": "Submit",
+        "id_number_countries": {
+          "BR": "Brazil",
+          "SG": "Singapore",
+          "US": "United States"
+        },
+        "title": "Provide personal information"
+      },
+      "livemode": false,
+      "requirements": {
+        "missing": [
+          "dob",
+          "id_number",
+          "name"
+        ]
+      },
+      "selfie": null,
+      "status": "requires_input",
+      "submitted": false,
+      "success": {
+        "body": "<p>Thank you for providing your information. Tora's catfood will reach out if additional details are required.</p><p><b>Next steps</b></p><p>Tora's catfood will contact you regarding the outcome of your identification process.</p><p><b>More about Stripe Identity</b></p><p><a href='https://support.stripe.com/questions/common-questions-about-stripe-identity'>Common questions about Stripe Identity</a></p><p><a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn how Stripe uses data</a></p><p><a href='https://stripe.com/privacy'>Stripe Privacy Policy</a></p><p><a href='mailto:privacy@stripe.com'>Contact Stripe</a></p>",
+        "button_text": "Complete",
+        "title": "Verification submitted"
+      },
+      "unsupported_client": false
+    }
+""".trimIndent()
+
+internal val VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING = """
+    {
+      "id": "vs_1MOrKBEGkPhabJTjBA2ohFAW",
+      "object": "identity.verification_page",
+      "biometric_consent": {
+        "accept_button_text": "Accept and continue",
+        "body": "<p><b>How Stripe will verify your identity</b></p><p><a href='https://stripe.com/about'>Stripe</a> will use biometric technology (on images of you and your IDs), as well as other data sources and our service providers, to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with Tora's catfood. You can subsequently opt-out by contacting Stripe. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a></p>",
+        "decline_button_text": "No, don't verify",
+        "privacy_policy": "Data will be stored and may be used according to the <a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "scroll_to_continue_button_text": "Scroll to continue",
+        "time_estimate": "Takes about 1–2 minutes.",
+        "title": "Tora's catfood uses Stripe to verify your identity"
+      },
+      "document_capture": {
+        "autocapture_timeout": 8000,
+        "file_purpose": "identity_private",
+        "high_res_image_compression_quality": 0.92,
+        "high_res_image_crop_padding": 0.08,
+        "high_res_image_max_dimension": 3000,
+        "ios_id_card_back_barcode_timeout": 3000,
+        "ios_id_card_back_country_barcode_symbologies": {
+          "CA": "pdf417",
+          "US": "pdf417"
+        },
+        "low_res_image_compression_quality": 0.82,
+        "low_res_image_max_dimension": 3000,
+        "models": {
+          "id_detector_min_iou": 0.8,
+          "id_detector_min_score": 0.5,
+          "id_detector_url": "https://b.stripecdn.com/gelato-statics-srv/assets/d137be6ecc86477800ea4ef82154174092dc4c16/assets/id_detectors/tflite/2022-08-19/model.tflite"
+        },
+        "motion_blur_min_duration": 500,
+        "motion_blur_min_iou": 0.95,
+        "require_live_capture": false
+      },
+      "document_select": {
+        "body": null,
+        "button_text": "Next",
+        "id_document_type_allowlist": {
+          "driving_license": "Driver's license",
+          "id_card": "Identity card",
+          "passport": "Passport"
+        },
+        "title": "Which form of identification do you want to use?"
+      },
+      "fallback_url": "https://verify.stripe.com/start/test_YWNjdF8xTEliaExFR2tQaGFiSlRqLF9OOTlkVWhpa0hIa2s2RndYTjFxMmNwSGdxYm9hbno40100QbvpMKxr",
+      "individual": {
+        "address_countries": {
+          "AT": "Austria",
+          "AU": "Australia",
+          "BE": "Belgium",
+          "BR": "Brazil",
+          "CA": "Canada",
+          "CH": "Switzerland",
+          "CZ": "Czech Republic",
+          "DE": "Germany",
+          "DK": "Denmark",
+          "ES": "Spain",
+          "FI": "Finland",
+          "FR": "France",
+          "GB": "United Kingdom",
+          "HK": "Hong Kong",
+          "ID": "Indonesia",
+          "IE": "Ireland",
+          "IT": "Italy",
+          "LU": "Luxembourg",
+          "MT": "Malta",
+          "MX": "Mexico",
+          "MY": "Malaysia",
+          "NL": "Netherlands",
+          "NO": "Norway",
+          "PL": "Poland",
+          "PT": "Portugal",
+          "RO": "Romania",
+          "SE": "Sweden",
+          "SG": "Singapore",
+          "SK": "Slovakia",
+          "TH": "Thailand",
+          "US": "United States"
+        },
+        "button_text": "Submit",
+        "id_number_countries": {
+          "BR": "Brazil",
+          "SG": "Singapore",
+          "US": "United States"
+        },
+        "title": "Provide personal information"
+      },
+      "livemode": false,
+      "requirements": {
+        "missing": [
+          "address",
+          "dob",
+          "name"
+        ]
+      },
+      "selfie": null,
+      "status": "requires_input",
+      "submitted": false,
+      "success": {
+        "body": "<p>Thank you for providing your information. Tora's catfood will reach out if additional details are required.</p><p><b>Next steps</b></p><p>Tora's catfood will contact you regarding the outcome of your identification process.</p><p><b>More about Stripe Identity</b></p><p><a href='https://support.stripe.com/questions/common-questions-about-stripe-identity'>Common questions about Stripe Identity</a></p><p><a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn how Stripe uses data</a></p><p><a href='https://stripe.com/privacy'>Stripe Privacy Policy</a></p><p><a href='mailto:privacy@stripe.com'>Contact Stripe</a></p>",
+        "button_text": "Complete",
+        "title": "Verification submitted"
+      },
+      "unsupported_client": false
+    }
+""".trimIndent()

@@ -5,9 +5,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.RowController
+import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionFieldComposable
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionFieldErrorController
+import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import kotlinx.coroutines.flow.combine
 import java.util.UUID

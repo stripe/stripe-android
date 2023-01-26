@@ -18,8 +18,6 @@
   <string name="address_country_invalid">Negara Anda tidak valid</string>
   <!-- Error text indicating that county is required, used for UK addresses -->
   <string name="address_county_required">Masukkan county Anda</string>
-  <!-- Caption for Address field on address form -->
-  <string name="address_label_address">Alamat</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Baris alamat ke-1 (opsional)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -70,10 +68,6 @@
   <string name="address_required">Masukkan alamat Anda</string>
   <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Masukkan negara bagian Anda</string>
-  <!-- Error text indicating zip code is invalid, used for US addresses -->
-  <string name="address_zip_invalid">Kode ZIP Anda tidak valid.</string>
-  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
-  <string name="address_zip_postal_invalid">Kode Pos/ZIP Anda tidak valid</string>
   <!-- Pay over time with Affirm copy -->
   <string name="affirm_buy_now_pay_later">Bayar dengan jangka waktu dengan &lt;img src=\"affirm\"&gt;.</string>
   <!-- Label for Name on account field on form -->

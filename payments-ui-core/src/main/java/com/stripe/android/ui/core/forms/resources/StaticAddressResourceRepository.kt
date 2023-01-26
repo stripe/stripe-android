@@ -1,7 +1,7 @@
 package com.stripe.android.ui.core.forms.resources
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.uicore.address.AddressRepository
 
 /**
  * [StaticAddressResourceRepository] that receives address resources pre-loaded.

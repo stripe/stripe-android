@@ -24,7 +24,7 @@ import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.FormUI
-import com.stripe.android.ui.core.elements.CheckboxElementUI
+import com.stripe.android.uicore.elements.CheckboxElementUI
 
 @Composable
 internal fun InputAddressScreen(

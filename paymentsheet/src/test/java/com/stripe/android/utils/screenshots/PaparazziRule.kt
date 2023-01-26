@@ -2,6 +2,7 @@ package com.stripe.android.utils.screenshots
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -64,11 +65,13 @@ class PaparazziRule(
                 }
 
                 paparazzi.snapshot {
-                    StripeTheme(colors = StripeTheme.getColors(testCase.isDarkTheme)) {
+                    StripeTheme {
                         Surface(color = MaterialTheme.colors.surface) {
                             Box(
                                 contentAlignment = Alignment.Center,
-                                modifier = Modifier.padding(padding),
+                                modifier = Modifier
+                                    .padding(padding)
+                                    .fillMaxWidth(),
                             ) {
                                 content()
                             }
@@ -82,18 +85,15 @@ class PaparazziRule(
     }
 
     private fun createPaparazziDeviceConfig(): DeviceConfig {
-        return DeviceConfig.PIXEL_6.copy(
-            // Needed to shrink the screenshot to the height of the composable
-            screenHeight = 1,
-            softButtons = false,
-        )
+        return DeviceConfig.PIXEL_6.copy(softButtons = false)
     }
 
     private fun createPaparazzi(deviceConfig: DeviceConfig): Paparazzi {
         return Paparazzi(
             deviceConfig = deviceConfig,
             // Needed to shrink the screenshot to the height of the composable
-            renderingMode = SessionParams.RenderingMode.V_SCROLL,
+            renderingMode = SessionParams.RenderingMode.SHRINK,
+            showSystemUi = false,
         )
     }
 }
@@ -105,7 +105,6 @@ private fun Array<out Array<out PaparazziConfigOption>>.toTestCases(): List<Test
 private fun createPermutations(
     options: Array<out Array<out PaparazziConfigOption>>,
 ): List<List<PaparazziConfigOption>> {
-    @Suppress("UNCHECKED_CAST")
     return (options.toSet()).fold(listOf(listOf())) { acc, set ->
         acc.flatMap { list -> set.map { element -> list + element } }
     }
@@ -114,9 +113,6 @@ private fun createPermutations(
 private data class TestCase(
     val configOptions: List<PaparazziConfigOption>,
 ) {
-
-    val isDarkTheme: Boolean
-        get() = configOptions.find { it is SystemAppearance } == SystemAppearance.DarkTheme
 
     val name: String
         get() {

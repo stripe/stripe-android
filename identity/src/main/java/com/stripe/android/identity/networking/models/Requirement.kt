@@ -27,7 +27,19 @@ internal enum class Requirement {
     IDDOCUMENTTYPE,
 
     @SerialName("face")
-    FACE;
+    FACE,
+
+    @SerialName("id_number")
+    IDNUMBER,
+
+    @SerialName("dob")
+    DOB,
+
+    @SerialName("name")
+    NAME,
+
+    @SerialName("address")
+    ADDRESS;
 
     internal companion object {
         private val SCAN_UPLOAD_ROUTE_SET = setOf(
@@ -62,6 +74,9 @@ internal enum class Requirement {
                 }
                 FACE -> {
                     fromRoute == SelfieDestination.ROUTE.route
+                }
+                else -> {
+                    false
                 }
             }
     }

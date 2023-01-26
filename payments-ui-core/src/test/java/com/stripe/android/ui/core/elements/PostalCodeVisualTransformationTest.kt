@@ -2,6 +2,8 @@ package com.stripe.android.ui.core.elements
 
 import androidx.compose.ui.text.AnnotatedString
 import com.google.common.truth.Truth
+import com.stripe.android.uicore.elements.PostalCodeConfig
+import com.stripe.android.uicore.elements.PostalCodeVisualTransformation
 import org.junit.Test
 
 internal class PostalCodeVisualTransformationTest {

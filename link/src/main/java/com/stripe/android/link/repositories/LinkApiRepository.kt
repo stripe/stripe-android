@@ -17,6 +17,7 @@ import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
@@ -32,6 +33,7 @@ internal class LinkApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     private val stripeRepository: StripeRepository,
+    private val consumersApiService: ConsumersApiService,
     @IOContext private val workContext: CoroutineContext,
     private val locale: Locale?
 ) : LinkRepository {
@@ -42,7 +44,7 @@ internal class LinkApiRepository @Inject constructor(
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
             requireNotNull(
-                stripeRepository.lookupConsumerSession(
+                consumersApiService.lookupConsumerSession(
                     email,
                     authSessionCookie,
                     ApiRequest.Options(
