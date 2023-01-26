@@ -5,22 +5,24 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.StripeTheme
 
 /**
@@ -49,7 +51,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val header: ComposeView by lazy { viewBinding.header }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
-    override val messageView: TextView by lazy { viewBinding.message }
     override val notesView: ComposeView by lazy { viewBinding.notes }
     override val primaryButton: PrimaryButton by lazy { viewBinding.continueButton }
     override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
@@ -70,13 +71,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         viewModel.paymentOptionResult.launchAndCollectIn(this) {
             closeSheet(it)
-        }
-
-        viewModel.error.launchAndCollectIn(this) { error ->
-            updateErrorMessage(
-                messageView,
-                error?.let { BaseSheetViewModel.UserErrorMessage(it) }
-            )
         }
 
         val elevation = resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
@@ -101,6 +95,19 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             StripeTheme {
                 val currentScreen by viewModel.currentScreen.collectAsState()
                 currentScreen.Content(viewModel)
+            }
+        }
+
+        viewBinding.message.setContent {
+            StripeTheme {
+                val errorMessage by viewModel.error.collectAsState(initial = null)
+
+                errorMessage?.let { error ->
+                    ErrorMessage(
+                        error = error,
+                        modifier = Modifier.padding(vertical = 2.dp, horizontal = 20.dp),
+                    )
+                }
             }
         }
 
