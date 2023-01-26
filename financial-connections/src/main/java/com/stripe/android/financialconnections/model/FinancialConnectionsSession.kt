@@ -81,7 +81,7 @@ data class FinancialConnectionsSession internal constructor(
     enum class Status(val value: String) {
 
         @SerialName(value = "pending")
-        AUTOMATIC("pending"),
+        PENDING("pending"),
 
         @SerialName(value = "succeeded")
         SUCCEEDED("succeeded"),
