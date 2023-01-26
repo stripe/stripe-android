@@ -17,43 +17,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionUi
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel
-import com.stripe.android.paymentsheet.PaymentSheetContract
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
-
-@Composable
-internal fun PaymentOptions(
-    args: PaymentSheetContract.Args,
-    modifier: Modifier = Modifier,
-) {
-    val viewModel = viewModel<PaymentSheetViewModel>(
-        factory = PaymentSheetViewModel.Factory { args },
-    )
-    PaymentOptions(viewModel, modifier)
-}
-
-@Composable
-internal fun PaymentOptions(
-    args: PaymentOptionContract.Args,
-    modifier: Modifier = Modifier,
-) {
-    val viewModel = viewModel<PaymentOptionsViewModel>(
-        factory = PaymentOptionsViewModel.Factory { args },
-    )
-    PaymentOptions(viewModel, modifier)
-}
 
 @Composable
 internal fun PaymentOptions(
