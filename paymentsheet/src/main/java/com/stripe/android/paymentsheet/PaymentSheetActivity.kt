@@ -133,7 +133,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     buttonContainer.isVisible = currentScreen.showsBuyButton
                 }
 
-                currentScreen.PaymentSheetContent(validatedArgs)
+                currentScreen.Content(viewModel)
             }
         }
 
