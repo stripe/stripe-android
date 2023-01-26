@@ -27,6 +27,7 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
+import com.stripe.android.financialconnections.exception.AuthFlowCancelledError
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
@@ -34,6 +35,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
@@ -234,6 +236,20 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         )
                     )
                     when {
+                        session.status == FinancialConnectionsSession.Status.CANCELED -> {
+                            setState {
+                                copy(
+                                    viewEffect = Finish(
+                                        Failed(
+                                            AuthFlowCancelledError(
+                                                session = session
+                                            )
+                                        )
+                                    )
+                                )
+                            }
+                        }
+
                         session.accounts.data.isNotEmpty() ||
                             session.paymentAccount != null ||
                             session.bankAccountToken != null -> {
