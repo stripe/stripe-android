@@ -111,6 +111,8 @@
     <string name="stripe_accountpicker_singleaccount_description">%1$s only needs one account at this time.</string>
     <string name="stripe_accountpicker_singleaccount_description_nobusinessname">This merchant only needs one account at this time.</string>
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
+    <string name="stripe_success_pane_skip_title">Linking accounts</string>
+    <string name="stripe_success_pane_skip_desc">Hold on, we\'re almost done…</string>
     <plurals name="stripe_success_desc">
         <item quantity="zero" />
         <item quantity="one">Your account was successfully linked to %1$s through Stripe.</item>
