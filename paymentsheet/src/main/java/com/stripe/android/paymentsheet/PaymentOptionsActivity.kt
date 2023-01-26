@@ -100,7 +100,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewBinding.contentContainer.setContent {
             StripeTheme {
                 val currentScreen by viewModel.currentScreen.collectAsState()
-                currentScreen.PaymentOptionsContent(starterArgs)
+                currentScreen.Content(viewModel)
             }
         }
 
