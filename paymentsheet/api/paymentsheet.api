@@ -45,7 +45,7 @@ public final class com/stripe/android/paymentsheet/PaymentOptionResult$Succeeded
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/PaymentOptionsAdapterKt {
+public final class com/stripe/android/paymentsheet/PaymentOptionUiKt {
 	public static final field PAYMENT_OPTION_CARD_TEST_TAG Ljava/lang/String;
 }
 
@@ -998,24 +998,6 @@ public final class com/stripe/android/paymentsheet/databinding/FragmentAchBindin
 	public fun getRoot ()Landroidx/fragment/app/FragmentContainerView;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentAchBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentAchBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentOptionsListBinding : androidx/viewbinding/ViewBinding {
-	public final field fragmentContainerViewPaymentOptionsList Landroidx/fragment/app/FragmentContainerView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentOptionsListBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/fragment/app/FragmentContainerView;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentOptionsListBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentOptionsListBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentSheetListBinding : androidx/viewbinding/ViewBinding {
-	public final field fragmentContainerViewPaymentOptionsList Landroidx/fragment/app/FragmentContainerView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentSheetListBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/fragment/app/FragmentContainerView;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentSheetListBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentSheetListBinding;
 }
 
 public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding : androidx/viewbinding/ViewBinding {
