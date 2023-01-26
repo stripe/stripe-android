@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.authentication
 
 import com.stripe.android.PaymentBrowserAuthStarter
+import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -37,6 +38,7 @@ internal class WebIntentAuthenticator @Inject constructor(
     private val defaultReturnUrl: DefaultReturnUrl,
 ) : PaymentAuthenticator<StripeIntent>() {
 
+    @OptIn(StripeCashAppPayBetaApi::class)
     override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,

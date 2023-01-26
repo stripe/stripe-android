@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.CardUtils
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.Stripe
+import com.stripe.android.StripeCashAppPayBetaApi
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import org.json.JSONException
@@ -20,7 +21,8 @@ import org.json.JSONObject
  * See [PaymentMethod] for API object.
  */
 @Parcelize
-data class PaymentMethodCreateParams internal constructor(
+data class PaymentMethodCreateParams @OptIn(StripeCashAppPayBetaApi::class)
+internal constructor(
     internal val code: PaymentMethodCode,
     internal val requiresMandate: Boolean,
     val card: Card? = null,
@@ -34,6 +36,7 @@ data class PaymentMethodCreateParams internal constructor(
     private val netbanking: Netbanking? = null,
     private val usBankAccount: USBankAccount? = null,
     private val link: Link? = null,
+    private val cashAppPay: CashAppPay? = null,
     val billingDetails: PaymentMethod.BillingDetails? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
@@ -51,6 +54,7 @@ data class PaymentMethodCreateParams internal constructor(
     private val overrideParamMap: Map<String, @RawValue Any>? = null
 ) : StripeParamsModel, Parcelable {
 
+    @OptIn(StripeCashAppPayBetaApi::class)
     internal constructor(
         type: PaymentMethod.Type,
         card: Card? = null,
@@ -83,6 +87,7 @@ data class PaymentMethodCreateParams internal constructor(
         netbanking,
         usBankAccount,
         link,
+        cashAppPay,
         billingDetails,
         metadata,
         productUsage,
@@ -211,6 +216,7 @@ data class PaymentMethodCreateParams internal constructor(
         metadata = metadata
     )
 
+    @StripeCashAppPayBetaApi
     private constructor(
         cashAppPay: CashAppPay,
         billingDetails: PaymentMethod.BillingDetails?,
@@ -480,9 +486,8 @@ data class PaymentMethodCreateParams internal constructor(
 
     /**
      * Encapsulates parameters used to create [PaymentMethodCreateParams] when using Cash App Pay.
-     *
-     * **Note**: Cash App Pay is currently in beta. The API of this class is subject to change.
      */
+    @StripeCashAppPayBetaApi
     @Parcelize
     class CashAppPay : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> = emptyMap()
@@ -942,11 +947,10 @@ data class PaymentMethodCreateParams internal constructor(
         /**
          * Helper method to create [PaymentMethodCreateParams] with [CashAppPay] as the payment
          * method type.
-         *
-         * **Note**: Cash App Pay is currently in beta. The API of this class is subject to change.
          */
         @JvmStatic
         @JvmOverloads
+        @StripeCashAppPayBetaApi
         fun createCashAppPay(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null

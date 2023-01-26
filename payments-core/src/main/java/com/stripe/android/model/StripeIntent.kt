@@ -3,6 +3,7 @@ package com.stripe.android.model
 import android.net.Uri
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.parcelize.Parcelize
@@ -295,9 +296,8 @@ sealed interface StripeIntent : StripeModel {
 
         /**
          * Contains the authentication URL for redirecting your customer to Cash App.
-         *
-         * **Note**: Cash App Pay is currently in beta. The API of this class is subject to change.
          */
+        @StripeCashAppPayBetaApi
         @Parcelize
         data class CashAppRedirect(
             val mobileAuthUrl: String,

@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.PaymentIntent.CaptureMethod
@@ -16,6 +17,7 @@ import java.util.regex.Pattern
  * - [Payment Intents Overview](https://stripe.com/docs/payments/payment-intents)
  * - [PaymentIntents API Reference](https://stripe.com/docs/api/payment_intents)
  */
+@OptIn(StripeCashAppPayBetaApi::class)
 @Parcelize
 data class PaymentIntent
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
