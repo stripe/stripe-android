@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
  * @param instantVerificationDisabled
  * @param institutionSearchDisabled
  * @param livemode
- * @param manualEntry
+ * @param manualEntryMode
  * @param manualEntryUsesMicrodeposits
  * @param mobileHandoffEnabled
  * @param nextPane
@@ -85,8 +85,8 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName(value = "next_pane")
     val nextPane: Pane,
 
-    @SerialName(value = "manual_entry")
-    val manualEntry: ManualEntry,
+    @SerialName(value = "manual_entry_mode")
+    val manualEntryMode: ManualEntryMode,
 
     @SerialName(value = "permissions")
     val permissions: List<FinancialConnectionsAccount.Permissions>,
@@ -365,27 +365,3 @@ internal data class FinancialConnectionsSessionManifest(
     }
 }
 
-@Serializable
-@Parcelize
-internal data class ManualEntry(
-    val enabled: Boolean,
-    val mode: Mode
-) : Parcelable {
-    @Serializable(with = Mode.Serializer::class)
-    enum class Mode(val value: String) {
-        @SerialName(value = "automatic")
-        AUTOMATIC("automatic"),
-
-        @SerialName(value = "custom")
-        CUSTOM("custom"),
-
-        @SerialName(value = "unknown")
-        UNKNOWN("unknown");
-
-        internal object Serializer :
-            EnumIgnoreUnknownSerializer<Mode>(
-                Mode.values(),
-                UNKNOWN
-            )
-    }
-}
