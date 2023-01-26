@@ -373,6 +373,9 @@ internal data class ManualEntry(
 ) : Parcelable {
     @Serializable(with = Mode.Serializer::class)
     enum class Mode(val value: String) {
+        @SerialName(value = "automatic")
+        AUTOMATIC("automatic"),
+
         @SerialName(value = "custom")
         CUSTOM("custom"),
 
