@@ -946,7 +946,6 @@ public final class com/stripe/android/paymentsheet/addresselement/ComposableSing
 }
 
 public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentOptionsBinding : androidx/viewbinding/ViewBinding {
-	public final field appbar Lcom/google/android/material/appbar/AppBarLayout;
 	public final field bottomSheet Landroid/widget/LinearLayout;
 	public final field bottomSpacer Landroid/view/View;
 	public final field contentContainer Landroidx/compose/ui/platform/ComposeView;
@@ -958,8 +957,7 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentOp
 	public final field message Landroid/widget/TextView;
 	public final field notes Landroidx/compose/ui/platform/ComposeView;
 	public final field scrollView Landroid/widget/ScrollView;
-	public final field testmode Landroid/widget/TextView;
-	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
+	public final field topBar Landroidx/compose/ui/platform/ComposeView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentOptionsBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroidx/coordinatorlayout/widget/CoordinatorLayout;
@@ -968,7 +966,6 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentOp
 }
 
 public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentSheetBinding : androidx/viewbinding/ViewBinding {
-	public final field appbar Lcom/google/android/material/appbar/AppBarLayout;
 	public final field bottomSheet Landroid/widget/LinearLayout;
 	public final field bottomSpacer Landroid/view/View;
 	public final field buttonContainer Landroid/widget/FrameLayout;
@@ -984,8 +981,7 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentSh
 	public final field message Landroid/widget/TextView;
 	public final field notes Landroidx/compose/ui/platform/ComposeView;
 	public final field scrollView Landroid/widget/ScrollView;
-	public final field testmode Landroid/widget/TextView;
-	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
+	public final field topBar Landroidx/compose/ui/platform/ComposeView;
 	public final field topContainer Landroid/widget/LinearLayout;
 	public final field topMessage Landroid/widget/TextView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentSheetBinding;
@@ -1312,5 +1308,14 @@ public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$Payme
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetTopBarKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetTopBarKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 

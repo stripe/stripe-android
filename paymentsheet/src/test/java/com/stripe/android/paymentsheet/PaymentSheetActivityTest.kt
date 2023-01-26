@@ -441,30 +441,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `updates navigation button`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.toolbar.navigationContentDescription)
-                .isEqualTo(context.getString(R.string.stripe_paymentsheet_close))
-
-            viewModel.transitionToAddPaymentScreen()
-
-            assertThat(activity.toolbar.navigationContentDescription)
-                .isEqualTo(context.getString(R.string.back))
-
-            pressBack()
-
-            assertThat(activity.toolbar.navigationContentDescription)
-                .isEqualTo(context.getString(R.string.stripe_paymentsheet_close))
-
-            pressBack()
-            // animating out
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-        }
-    }
-
-    @Test
     fun `handles buy button clicks`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
@@ -538,7 +514,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             viewModel.checkout()
 
-            assertThat(activity.toolbar.isEnabled).isFalse()
             assertThat(activity.viewBinding.googlePayButton.isEnabled).isFalse()
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
         }
@@ -831,26 +806,6 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
             assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
             assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
-        }
-    }
-
-    @Test
-    fun `when intent is in live mode show no indicator`() {
-        val viewModel = createViewModel(paymentIntent = PAYMENT_INTENT.copy(isLiveMode = true))
-        val scenario = activityScenario(viewModel)
-
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.testmode.isVisible).isFalse()
-        }
-    }
-
-    @Test
-    fun `when intent is not in live mode show indicator`() {
-        val viewModel = createViewModel(paymentIntent = PAYMENT_INTENT.copy(isLiveMode = false))
-        val scenario = activityScenario(viewModel)
-
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.testmode.isVisible).isTrue()
         }
     }
 
