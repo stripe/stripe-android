@@ -176,7 +176,7 @@ class LinkApiRepositoryTest {
         val consumerKey = "key"
         linkRepository.startVerification(secret, consumerKey, cookie)
 
-        verify(stripeRepository).startConsumerVerification(
+        verify(consumersApiService).startConsumerVerification(
             eq(secret),
             eq(Locale.US),
             eq(cookie),
@@ -190,7 +190,7 @@ class LinkApiRepositoryTest {
         val cookie = "cookie1"
         linkRepository.startVerification(secret, null, cookie)
 
-        verify(stripeRepository).startConsumerVerification(
+        verify(consumersApiService).startConsumerVerification(
             eq(secret),
             eq(Locale.US),
             eq(cookie),
@@ -201,7 +201,7 @@ class LinkApiRepositoryTest {
     @Test
     fun `startVerification returns successful result`() = runTest {
         val consumerSession = mock<ConsumerSession>()
-        whenever(stripeRepository.startConsumerVerification(any(), any(), anyOrNull(), any()))
+        whenever(consumersApiService.startConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenReturn(consumerSession)
 
         val result = linkRepository.startVerification("secret", "key", "cookie")
@@ -212,7 +212,7 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `startVerification catches exception and returns failure`() = runTest {
-        whenever(stripeRepository.startConsumerVerification(any(), any(), anyOrNull(), any()))
+        whenever(consumersApiService.startConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenThrow(RuntimeException("error"))
 
         val result = linkRepository.startVerification("secret", "key", "cookie")

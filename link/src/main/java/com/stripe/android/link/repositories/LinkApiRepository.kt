@@ -90,7 +90,7 @@ internal class LinkApiRepository @Inject constructor(
     ): Result<ConsumerSession> = withContext(workContext) {
         runCatching {
             requireNotNull(
-                stripeRepository.startConsumerVerification(
+                consumersApiService.startConsumerVerification(
                     consumerSessionClientSecret,
                     locale ?: Locale.US,
                     authSessionCookie,

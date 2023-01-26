@@ -1,6 +1,6 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.model.ConsumerFixtures
+import com.stripe.android.ConsumerFixtures
 import com.stripe.android.model.ConsumerSession
 import org.junit.Test
 import kotlin.test.assertEquals

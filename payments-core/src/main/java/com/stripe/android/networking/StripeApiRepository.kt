@@ -1217,41 +1217,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Triggers an SMS verification for the consumer corresponding to the given client secret.
-     */
-    override suspend fun startConsumerVerification(
-        consumerSessionClientSecret: String,
-        locale: Locale,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                startConsumerVerificationUrl,
-                requestOptions,
-                mapOf(
-                    "request_surface" to "android_payment_element",
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to consumerSessionClientSecret
-                    ),
-                    "type" to "SMS",
-                    "locale" to locale.toLanguageTag()
-                ).plus(
-                    authSessionCookie?.let {
-                        mapOf(
-                            "cookies" to
-                                mapOf("verification_session_client_secrets" to listOf(it))
-                        )
-                    } ?: emptyMap()
-                )
-            ),
-            ConsumerSessionJsonParser()
-        ) {
-            // no-op
-        }
-    }
-
-    /**
      * Confirms an SMS verification for the consumer corresponding to the given client secret.
      */
     override suspend fun confirmConsumerVerification(
@@ -1997,13 +1962,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val consumerSignUpUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/accounts/sign_up")
-
-        /**
-         * @return `https://api.stripe.com/v1/consumers/sessions/start_verification`
-         */
-        internal val startConsumerVerificationUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("consumers/sessions/start_verification")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/confirm_verification`

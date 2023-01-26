@@ -15,6 +15,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import java.util.Locale
 
 class ConsumersApiServiceImplTest {
 
@@ -62,10 +63,57 @@ class ConsumersApiServiceImplTest {
     }
 
     @Test
+    fun `startConsumerVerification() sends all parameters`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val clientSecret = "secret"
+        val locale = Locale.US
+        val cookie = "cookie2"
+        consumersApiService.startConsumerVerification(
+            clientSecret,
+            locale,
+            cookie,
+            DEFAULT_OPTIONS
+        )
+
+        org.mockito.kotlin.verify(stripeNetworkClient)
+            .executeRequest(apiRequestArgumentCaptor.capture())
+        val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+        with(params) {
+            assertEquals(this["request_surface"], "android_payment_element")
+            assertEquals(this["type"], "SMS")
+            assertEquals(this["locale"], locale.toLanguageTag())
+            assertEquals(
+                this["credentials"],
+                mapOf("consumer_session_client_secret" to clientSecret)
+            )
+            assertEquals(
+                this["cookies"],
+                mapOf("verification_session_client_secrets" to listOf(cookie))
+            )
+        }
+    }
+
+    @Test
     fun testConsumerSessionLookupUrl() {
         assertEquals(
             "https://api.stripe.com/v1/consumers/sessions/lookup",
             ConsumersApiServiceImpl.consumerSessionLookupUrl
+        )
+    }
+
+    @Test
+    fun testStartConsumerVerificationUrl() {
+        kotlin.test.assertEquals(
+            "https://api.stripe.com/v1/consumers/sessions/start_verification",
+            ConsumersApiServiceImpl.startConsumerVerificationUrl
         )
     }
 
