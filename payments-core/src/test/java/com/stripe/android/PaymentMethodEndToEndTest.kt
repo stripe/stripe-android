@@ -129,6 +129,7 @@ internal class PaymentMethodEndToEndTest {
         )
     }
 
+    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun createPaymentMethod_withUSBankAccount_missingEmail_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT.copy(
@@ -143,6 +144,7 @@ internal class PaymentMethodEndToEndTest {
             .isEqualTo(PaymentMethod.Type.USBankAccount)
     }
 
+    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun createPaymentMethod_withUSBankAccount_missingName_shouldFail() {
         val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT.copy(
