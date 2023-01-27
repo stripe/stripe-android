@@ -47,10 +47,14 @@ internal class NetworkDispatcher : Dispatcher() {
         return enqueuedResponses.size
     }
 
+    fun remainingMatchersDescription(): String {
+        return enqueuedResponses.joinToString { it.requestMatcher.toString() }
+    }
+
     override fun dispatch(request: RecordedRequest): MockResponse {
         val testRequest = TestRecordedRequest(request)
         val matchedEntry = enqueuedResponses.firstOrNull { entry ->
-            entry.requestMatcher(testRequest)
+            entry.requestMatcher.matches(testRequest)
         }
 
         matchedEntry?.let { capturedEntry ->

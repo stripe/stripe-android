@@ -68,7 +68,8 @@ private class NetworkStatement(
         if (numberRemainingInQueue != 0) {
             throw IllegalStateException(
                 "${description.testClass}#${description.methodName} - mock responses is not " +
-                    "empty. Remaining: $numberRemainingInQueue."
+                    "empty. Remaining: $numberRemainingInQueue.\nRemaining Matchers: " +
+                    mockWebServer.dispatcher.remainingMatchersDescription()
             )
         }
     }
