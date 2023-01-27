@@ -7,7 +7,6 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Factory to create [StripeConnection], which encapsulates an [HttpURLConnection], triggers the
@@ -29,7 +28,8 @@ interface ConnectionFactory {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object Default : ConnectionFactory {
-        val testConnectionCustomization = AtomicReference<((HttpURLConnection) -> Unit)?>(null)
+        @Volatile
+        var testConnectionCustomization: ((HttpURLConnection) -> Unit)? = null
 
         @Throws(IOException::class, InvalidRequestException::class)
         @JvmSynthetic
@@ -49,7 +49,7 @@ interface ConnectionFactory {
 
         private fun openConnectionAndApplyFields(request: StripeRequest): HttpURLConnection {
             return (URL(request.url).openConnection() as HttpURLConnection).apply {
-                testConnectionCustomization.get()?.invoke(this)
+                testConnectionCustomization?.invoke(this)
 
                 connectTimeout = CONNECT_TIMEOUT
                 readTimeout = READ_TIMEOUT

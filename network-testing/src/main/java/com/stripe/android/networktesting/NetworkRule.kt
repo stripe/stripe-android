@@ -50,15 +50,15 @@ private class NetworkStatement(
     }
 
     private fun setup() {
-        ApiRequest.API_TEST_HOST.set(mockWebServer.baseUrl.toString().removeSuffix("/"))
-        ConnectionFactory.Default.testConnectionCustomization.set { insecureConnection ->
+        ApiRequest.apiTestHost = mockWebServer.baseUrl.toString().removeSuffix("/")
+        ConnectionFactory.Default.testConnectionCustomization = lambda@ { insecureConnection ->
             if (mockWebServer.baseUrl.host != insecureConnection.url.host) {
                 throw RequestNotFoundException(
                     "Test request attempted to reach a non test endpoint. " +
                         "Url: ${insecureConnection.url}"
                 )
             }
-            val connection = insecureConnection as? HttpsURLConnection ?: return@set
+            val connection = insecureConnection as? HttpsURLConnection ?: return@lambda
             connection.sslSocketFactory = mockWebServer.clientSocketFactory()
         }
     }
@@ -76,7 +76,7 @@ private class NetworkStatement(
 
     private fun tearDown() {
         mockWebServer.dispatcher.clear()
-        ConnectionFactory.Default.testConnectionCustomization.set(null)
-        ApiRequest.API_TEST_HOST.set(null)
+        ConnectionFactory.Default.testConnectionCustomization = null
+        ApiRequest.apiTestHost = null
     }
 }
