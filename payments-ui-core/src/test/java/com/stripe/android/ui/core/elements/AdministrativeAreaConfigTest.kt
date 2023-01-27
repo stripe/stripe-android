@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth
+import com.stripe.android.uicore.elements.AdministrativeAreaConfig
 import org.junit.Test
 
 class AdministrativeAreaConfigTest {

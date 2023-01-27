@@ -37,9 +37,6 @@ public final class com/stripe/android/ui/core/FieldValuesToParamsMapConverter$Co
 public final class com/stripe/android/ui/core/FormUIKt {
 }
 
-public final class com/stripe/android/ui/core/address/AddressRepository$Companion {
-}
-
 public final class com/stripe/android/ui/core/address/AddressUtilKt {
 }
 
@@ -67,48 +64,6 @@ public final class com/stripe/android/ui/core/elements/AddressSpec$$serializer :
 
 public final class com/stripe/android/ui/core/elements/AddressSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/AddressTextFieldUIKt {
-}
-
-public abstract class com/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country {
-	public static final field $stable I
-	public synthetic fun <init> (ILjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getAdministrativeAreas ()Ljava/util/List;
-	public fun getLabel ()I
-}
-
-public final class com/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$Canada : com/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country {
-	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (ILjava/util/List;)V
-	public synthetic fun <init> (ILjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()I
-	public final fun component2 ()Ljava/util/List;
-	public final fun copy (ILjava/util/List;)Lcom/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$Canada;
-	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$Canada;ILjava/util/List;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$Canada;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getAdministrativeAreas ()Ljava/util/List;
-	public fun getLabel ()I
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$US : com/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country {
-	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (ILjava/util/List;)V
-	public synthetic fun <init> (ILjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()I
-	public final fun component2 ()Ljava/util/List;
-	public final fun copy (ILjava/util/List;)Lcom/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$US;
-	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$US;ILjava/util/List;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$US;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getAdministrativeAreas ()Ljava/util/List;
-	public fun getLabel ()I
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/ui/core/elements/AffirmElementUIKt {
@@ -221,9 +176,6 @@ public abstract class com/stripe/android/ui/core/elements/CardNumberController :
 	public abstract fun getCardScanEnabled ()Z
 	public fun getEnabled ()Z
 	public final fun onCardScanResult (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult;)V
-}
-
-public final class com/stripe/android/ui/core/elements/CheckboxElementUIKt {
 }
 
 public abstract class com/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs {
@@ -581,19 +533,6 @@ public final class com/stripe/android/ui/core/elements/NextActionSpecKt {
 public final class com/stripe/android/ui/core/elements/OTPElementUIKt {
 }
 
-public final class com/stripe/android/ui/core/elements/PhoneNumberState : java/lang/Enum {
-	public static final field Companion Lcom/stripe/android/ui/core/elements/PhoneNumberState$Companion;
-	public static final field HIDDEN Lcom/stripe/android/ui/core/elements/PhoneNumberState;
-	public static final field OPTIONAL Lcom/stripe/android/ui/core/elements/PhoneNumberState;
-	public static final field REQUIRED Lcom/stripe/android/ui/core/elements/PhoneNumberState;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/PhoneNumberState;
-	public static fun values ()[Lcom/stripe/android/ui/core/elements/PhoneNumberState;
-}
-
-public final class com/stripe/android/ui/core/elements/PhoneNumberState$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
 public abstract class com/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs$Companion;
@@ -665,26 +604,6 @@ public final class com/stripe/android/ui/core/elements/PostConfirmStatusSpecAsso
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/SameAsShippingController : com/stripe/android/uicore/elements/InputController, com/stripe/android/uicore/elements/SectionFieldComposable {
-	public static final field $stable I
-	public fun <init> (Z)V
-	public fun ComposeUI-MxjM1cc (ZLcom/stripe/android/uicore/elements/SectionFieldElement;Landroidx/compose/ui/Modifier;Ljava/util/Set;Lcom/stripe/android/uicore/elements/IdentifierSpec;IILandroidx/compose/runtime/Composer;I)V
-	public fun getError ()Lkotlinx/coroutines/flow/Flow;
-	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
-	public fun getFormFieldValue ()Lkotlinx/coroutines/flow/Flow;
-	public fun getLabel ()Lkotlinx/coroutines/flow/Flow;
-	public fun getRawFieldValue ()Lkotlinx/coroutines/flow/Flow;
-	public fun getShowOptionalLabel ()Z
-	public final fun getValue ()Lkotlinx/coroutines/flow/Flow;
-	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
-	public fun onRawValueChange (Ljava/lang/String;)V
-	public final fun onValueChange (Z)V
-}
-
-public final class com/stripe/android/ui/core/elements/SameAsShippingElementUIKt {
-	public static final field SAME_AS_SHIPPING_CHECKBOX_TEST_TAG Ljava/lang/String;
-}
-
 public final class com/stripe/android/ui/core/elements/SaveForFutureUseElementUIKt {
 	public static final field SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG Ljava/lang/String;
 }
@@ -710,10 +629,6 @@ public final class com/stripe/android/ui/core/elements/SectionElementUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/SimpleDialogElementUIKt {
-}
-
-public final class com/stripe/android/ui/core/elements/SimpleTextFieldConfig$Companion {
-	public final fun getNAME ()Lcom/stripe/android/ui/core/elements/SimpleTextFieldConfig;
 }
 
 public final class com/stripe/android/ui/core/elements/SimpleTextSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -758,10 +673,10 @@ public final class com/stripe/android/ui/core/elements/UpiSpec$Companion {
 }
 
 public final class com/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy$Companion {
-	public final fun create (Landroid/content/Context;Ljava/lang/String;Lcom/stripe/android/ui/core/elements/autocomplete/IsPlacesAvailable;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy;
-	public static synthetic fun create$default (Lcom/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy$Companion;Landroid/content/Context;Ljava/lang/String;Lcom/stripe/android/ui/core/elements/autocomplete/IsPlacesAvailable;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy;
-	public final fun getPlacesPoweredByGoogleDrawable (ZLcom/stripe/android/ui/core/elements/autocomplete/IsPlacesAvailable;)Ljava/lang/Integer;
-	public static synthetic fun getPlacesPoweredByGoogleDrawable$default (Lcom/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy$Companion;ZLcom/stripe/android/ui/core/elements/autocomplete/IsPlacesAvailable;ILjava/lang/Object;)Ljava/lang/Integer;
+	public final fun create (Landroid/content/Context;Ljava/lang/String;Lcom/stripe/android/uicore/elements/IsPlacesAvailable;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy;
+	public static synthetic fun create$default (Lcom/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy$Companion;Landroid/content/Context;Ljava/lang/String;Lcom/stripe/android/uicore/elements/IsPlacesAvailable;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy;
+	public final fun getPlacesPoweredByGoogleDrawable (ZLcom/stripe/android/uicore/elements/IsPlacesAvailable;)Ljava/lang/Integer;
+	public static synthetic fun getPlacesPoweredByGoogleDrawable$default (Lcom/stripe/android/ui/core/elements/autocomplete/PlacesClientProxy$Companion;ZLcom/stripe/android/uicore/elements/IsPlacesAvailable;ILjava/lang/Object;)Ljava/lang/Integer;
 }
 
 public final class com/stripe/android/ui/core/elements/autocomplete/model/AddressComponent$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -822,9 +737,6 @@ public final class com/stripe/android/ui/core/elements/autocomplete/model/Place$
 }
 
 public final class com/stripe/android/ui/core/elements/autocomplete/model/TransformGoogleToStripeAddressKt {
-}
-
-public final class com/stripe/android/ui/core/elements/menu/CheckboxKt {
 }
 
 public final class com/stripe/android/ui/core/forms/ConvertToFormValuesMapKt {

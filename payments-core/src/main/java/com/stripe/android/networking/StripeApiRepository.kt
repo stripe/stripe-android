@@ -50,7 +50,6 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
@@ -74,7 +73,6 @@ import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
-import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.FinancialConnectionsSessionJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
@@ -1173,41 +1171,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Retrieves the ConsumerSession if the given email is associated with a Link account.
-     */
-    override suspend fun lookupConsumerSession(
-        email: String?,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSessionLookup? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                consumerSessionLookupUrl,
-                requestOptions,
-                mapOf(
-                    "request_surface" to "android_payment_element"
-                ).plus(
-                    email?.let {
-                        mapOf(
-                            "email_address" to it.lowercase()
-                        )
-                    } ?: emptyMap()
-                ).plus(
-                    authSessionCookie?.let {
-                        mapOf(
-                            "cookies" to
-                                mapOf("verification_session_client_secrets" to listOf(it))
-                        )
-                    } ?: emptyMap()
-                )
-            ),
-            ConsumerSessionLookupJsonParser()
-        ) {
-            // no-op
-        }
-    }
-
-    /**
      * Creates a new Link account for the credentials provided.
      */
     override suspend fun consumerSignUp(
@@ -2027,13 +1990,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val paymentMethodsUrl: String
             @JvmSynthetic
             get() = getApiUrl("payment_methods")
-
-        /**
-         * @return `https://api.stripe.com/v1/consumers/sessions/lookup`
-         */
-        internal val consumerSessionLookupUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("consumers/sessions/lookup")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`

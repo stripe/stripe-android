@@ -81,7 +81,7 @@ class PlaygroundTestDriver(
             selectors.addPaymentMethodButton.isDisplayed()
         }
 
-        composeTestRule.onNodeWithTag("$PAYMENT_OPTION_CARD_TEST_TAG+ Add").apply {
+        composeTestRule.onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add").apply {
             assertExists()
             performClick()
         }

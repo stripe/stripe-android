@@ -351,6 +351,12 @@ val MaterialTheme.stripeShapes: StripeShapes
     @ReadOnlyComposable
     get() = LocalShapes.current
 
+val MaterialTheme.stripeTypography: StripeTypography
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalTypography.current
+
 @Composable
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

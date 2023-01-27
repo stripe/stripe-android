@@ -36,7 +36,7 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.ui.forms.Form
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
-import com.stripe.android.ui.core.elements.CheckboxElementUI
+import com.stripe.android.uicore.elements.CheckboxElementUI
 
 internal const val DEFAULT_PAYMENT_METHOD_CHECKBOX_TAG = "DEFAULT_PAYMENT_METHOD_CHECKBOX"
 

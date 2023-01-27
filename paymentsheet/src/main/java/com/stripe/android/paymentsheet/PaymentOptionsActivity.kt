@@ -5,23 +5,24 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.StripeTheme
 
 /**
@@ -46,14 +47,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
-    override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val linkAuthView: ComposeView by lazy { viewBinding.linkAuth }
-    override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
-    override val testModeIndicator: TextView by lazy { viewBinding.testmode }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val header: ComposeView by lazy { viewBinding.header }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
-    override val messageView: TextView by lazy { viewBinding.message }
     override val notesView: ComposeView by lazy { viewBinding.notes }
     override val primaryButton: PrimaryButton by lazy { viewBinding.continueButton }
     override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
@@ -76,22 +73,42 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             closeSheet(it)
         }
 
-        viewModel.error.launchAndCollectIn(this) { error ->
-            updateErrorMessage(
-                messageView,
-                error?.let { BaseSheetViewModel.UserErrorMessage(it) }
-            )
+        val elevation = resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
+        scrollView.viewTreeObserver.addOnScrollChangedListener {
+            viewBinding.topBar.elevation = if (scrollView.scrollY > 0) {
+                elevation
+            } else {
+                0f
+            }
+        }
+
+        // This is temporary until we embed the top bar in a Scaffold
+        viewBinding.topBar.clipToPadding = false
+
+        viewBinding.topBar.setContent {
+            StripeTheme {
+                PaymentSheetTopBar(viewModel)
+            }
         }
 
         viewBinding.contentContainer.setContent {
             StripeTheme {
                 val currentScreen by viewModel.currentScreen.collectAsState()
-                currentScreen.PaymentOptionsContent(starterArgs)
+                currentScreen.Content(viewModel)
             }
         }
 
-        if (savedInstanceState == null) {
-            viewModel.transitionToFirstScreenWhenReady()
+        viewBinding.message.setContent {
+            StripeTheme {
+                val errorMessage by viewModel.error.collectAsState(initial = null)
+
+                errorMessage?.let { error ->
+                    ErrorMessage(
+                        error = error,
+                        modifier = Modifier.padding(vertical = 2.dp, horizontal = 20.dp),
+                    )
+                }
+            }
         }
 
         viewModel.selection.launchAndCollectIn(this) {

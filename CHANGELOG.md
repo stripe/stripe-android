@@ -2,7 +2,7 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
-## 20.19.00 - 2023-01-23
+## 20.19.0 - 2023-01-23
 
 ### PaymentSheet
 * [CHANGED][5927](https://github.com/stripe/stripe-android/pull/5927) Customers can now re-enter the autocomplete flow of the Address Element by tapping an icon in the line 1 text field.

@@ -3,11 +3,7 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
@@ -42,9 +38,9 @@ import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -63,8 +59,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -107,19 +101,19 @@ internal abstract class BaseSheetViewModel(
     private val _isResourceRepositoryReady = MutableStateFlow(false)
     internal val isResourceRepositoryReady: StateFlow<Boolean> = _isResourceRepositoryReady
 
-    internal val stripeIntent: StateFlow<StripeIntent?> = savedStateHandle
-        .getStateFlow<StripeIntent?>(SAVE_STRIPE_INTENT, null)
+    private val _stripeIntent = MutableStateFlow<StripeIntent?>(null)
+    internal val stripeIntent: StateFlow<StripeIntent?> = _stripeIntent
 
-    internal var supportedPaymentMethods
-        get() = savedStateHandle.get<List<PaymentMethodCode>>(
-            SAVE_SUPPORTED_PAYMENT_METHOD
-        )?.mapNotNull {
-            lpmResourceRepository.getRepository().fromCode(it)
-        } ?: emptyList()
-        set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value.map { it.code })
+    internal var supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod> = emptyList()
+        set(value) {
+            field = value
+            _supportedPaymentMethodsFlow.tryEmit(value.map { it.code })
+        }
 
-    protected val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> = savedStateHandle
-        .getStateFlow(SAVE_SUPPORTED_PAYMENT_METHOD, initialValue = emptyList())
+    private val _supportedPaymentMethodsFlow =
+        MutableStateFlow<List<PaymentMethodCode>>(emptyList())
+    protected val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> =
+        _supportedPaymentMethodsFlow
 
     /**
      * The list of saved payment methods for the current customer.
@@ -128,8 +122,8 @@ internal abstract class BaseSheetViewModel(
     internal val paymentMethods: StateFlow<List<PaymentMethod>?> = savedStateHandle
         .getStateFlow(SAVE_PAYMENT_METHODS, null)
 
-    internal val amount: StateFlow<Amount?> = savedStateHandle
-        .getStateFlow(SAVE_AMOUNT, null)
+    private val _amount = MutableStateFlow<Amount?>(null)
+    internal val amount: StateFlow<Amount?> = _amount
 
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
@@ -216,9 +210,7 @@ internal abstract class BaseSheetViewModel(
         }
     }.distinctUntilChanged()
 
-    internal var lpmServerSpec
-        get() = savedStateHandle.get<String>(LPM_SERVER_SPEC_STRING)
-        set(value) = savedStateHandle.set(LPM_SERVER_SPEC_STRING, value)
+    internal var lpmServerSpec: String? = null
 
     private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
         PaymentOptionsStateMapper(
@@ -254,18 +246,6 @@ internal abstract class BaseSheetViewModel(
             }.collect()
         }
 
-        if (savedSelection.value == null) {
-            viewModelScope.launch {
-                val savedSelection = withContext(workContext) {
-                    prefsRepository.getSavedSelection(
-                        googlePayState.first().isReadyForUse,
-                        linkHandler.isLinkEnabled.filterNotNull().first()
-                    )
-                }
-                savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection
-            }
-        }
-
         if (!_isResourceRepositoryReady.value) {
             viewModelScope.launch {
                 // This work should be done on the background
@@ -299,39 +279,15 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    protected val isReadyEvents = MediatorLiveData<Boolean>().apply {
-        listOf(
-            savedSelection.asLiveData(),
-            stripeIntent.asLiveData(),
-            paymentMethods.asLiveData(),
-            googlePayState.asLiveData(),
-            linkHandler.isLinkEnabled.asLiveData(),
-            isResourceRepositoryReady.asLiveData()
-        ).forEach { source ->
-            addSource(source) {
-                value = determineIfReady()
-            }
+    protected fun transitionToFirstScreenWhenReady() {
+        viewModelScope.launch {
+            awaitRepositoriesReady()
+            transitionToFirstScreen()
         }
-    }.distinctUntilChanged().map {
-        Event(it)
     }
 
-    private fun determineIfReady(): Boolean {
-        val stripeIntentValue = stripeIntent.value
-        val isGooglePayReadyValue = googlePayState.value
-        val isResourceRepositoryReadyValue = isResourceRepositoryReady.value
-        val isLinkReadyValue = linkHandler.isLinkEnabled.value
-        val savedSelectionValue = savedSelection.value
-        // List of Payment Methods is not passed in the config but we still wait for it to be loaded
-        // before adding the Fragment.
-        val paymentMethodsValue = paymentMethods.value
-
-        return stripeIntentValue != null &&
-            paymentMethodsValue != null &&
-            isGooglePayReadyValue != GooglePayState.Indeterminate &&
-            isResourceRepositoryReadyValue &&
-            isLinkReadyValue != null &&
-            savedSelectionValue != null
+    private suspend fun awaitRepositoriesReady() {
+        isResourceRepositoryReady.filter { it }.first()
     }
 
     abstract fun transitionToFirstScreen()
@@ -368,7 +324,7 @@ internal abstract class BaseSheetViewModel(
     }
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
-        savedStateHandle[SAVE_STRIPE_INTENT] = stripeIntent
+        _stripeIntent.value = stripeIntent
 
         val pmsToAdd = getPMsToAdd(stripeIntent, config, lpmResourceRepository.getRepository())
         supportedPaymentMethods = pmsToAdd
@@ -389,7 +345,7 @@ internal abstract class BaseSheetViewModel(
 
         if (stripeIntent is PaymentIntent) {
             runCatching {
-                savedStateHandle[SAVE_AMOUNT] = Amount(
+                _amount.value = Amount(
                     requireNotNull(stripeIntent.amount),
                     requireNotNull(stripeIntent.currency)
                 )
@@ -572,46 +528,11 @@ internal abstract class BaseSheetViewModel(
 
     data class UserErrorMessage(val message: String)
 
-    /**
-     * Used as a wrapper for data that is exposed via a LiveData that represents an event.
-     * From https://medium.com/androiddevelopers/livedata-with-snackbar-navigation-and-other-events-the-singleliveevent-case-ac2622673150
-     * TODO(brnunes): Migrate to Flows once stable: https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
-     */
-    class Event<out T>(private val content: T) {
-
-        var hasBeenHandled = false
-            private set // Allow external read but not write
-
-        /**
-         * Returns the content and prevents its use again.
-         */
-        fun getContentIfNotHandled(): T? {
-            return if (hasBeenHandled) {
-                null
-            } else {
-                hasBeenHandled = true
-                content
-            }
-        }
-
-        /**
-         * Returns the content, even if it's already been handled.
-         */
-        @TestOnly
-        fun peekContent(): T = content
-    }
-
     companion object {
-        internal const val SAVE_STRIPE_INTENT = "stripe_intent"
         internal const val SAVE_PAYMENT_METHODS = "customer_payment_methods"
-        internal const val SAVE_AMOUNT = "amount"
-        internal const val LPM_SERVER_SPEC_STRING = "lpm_server_spec_string"
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_SAVED_SELECTION = "saved_selection"
-        internal const val SAVE_SUPPORTED_PAYMENT_METHOD = "supported_payment_methods"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
-        internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
-        internal const val LINK_CONFIGURATION = "link_configuration"
     }
 }

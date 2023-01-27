@@ -1,7 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">주소</string>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="address_label_address_line2">주소란 2</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="address_label_ae_emirate">에미리트</string>
+  <!-- Label of an address field -->
+  <string name="address_label_au_suburb_or_city">교외 또는 도시</string>
+  <!-- Label of an address field -->
+  <string name="address_label_bb_jm_parish">교구</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_cedex">세덱스</string>
+  <!-- Label of an address field -->
+  <string name="address_label_department">행정구/현</string>
+  <!-- Label for the district field on an address form -->
+  <string name="address_label_district">지구</string>
+  <!-- Label of an address field in hk -->
+  <string name="address_label_hk_area">지역</string>
+  <!-- Label of an address field -->
+  <string name="address_label_ie_eircode">우편번호(Eircode)</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="address_label_ie_townland">타운랜드</string>
+  <!-- Used to describe postal code in India -->
+  <string name="address_label_in_pin">우편번호(PIN)</string>
+  <!-- Used to describe part of an address -->
+  <string name="address_label_island">섬</string>
+  <!-- Label of an address field -->
+  <string name="address_label_jp_prefecture">도/현</string>
+  <!-- Label of an address field -->
+  <string name="address_label_kr_do_si">도시</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_neighborhood">지역</string>
+  <!-- Label of an address field -->
+  <string name="address_label_oblast">주</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">전화번호</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_post_town">주둔지 또는 마을</string>
+  <!-- Label of an address field -->
+  <string name="address_label_suburb">교외</string>
+  <!-- Used to describe an address field. -->
+  <string name="address_label_village_township">마을 또는 면/리</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="address_search_content_description">검색</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">우편번호가 유효하지 않습니다.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">우편번호가 유효하지 않습니다</string>
   <!-- Used when a required field is blank and submit is clicked. -->
   <string name="blank_and_required">이 필드는 공란으로 비워둘 수 없습니다.</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->

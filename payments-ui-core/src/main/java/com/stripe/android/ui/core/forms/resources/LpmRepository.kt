@@ -62,8 +62,7 @@ class LpmRepository constructor(
 
     private val lpmSerializer = LpmSerializer()
 
-    @Volatile
-    private var serverInitializedLatch = CountDownLatch(1)
+    private val serverInitializedLatch = CountDownLatch(1)
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
 
     val supportedPaymentMethods: List<String> by lazy {
@@ -116,8 +115,6 @@ class LpmRepository constructor(
         stripeIntent: StripeIntent,
         serverLpmSpecs: String?,
     ) {
-        val countDownLatch = CountDownLatch(1)
-        serverInitializedLatch = countDownLatch
         val expectedLpms = stripeIntent.paymentMethodTypes
 
         serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
@@ -156,7 +153,7 @@ class LpmRepository constructor(
                 }
         }
 
-        countDownLatch.countDown()
+        serverInitializedLatch.countDown()
     }
 
     @VisibleForTesting
