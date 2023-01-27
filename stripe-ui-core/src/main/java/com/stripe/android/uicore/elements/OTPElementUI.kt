@@ -1,3 +1,5 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.uicore.elements
 
 import android.view.KeyEvent
@@ -130,7 +132,7 @@ fun OTPElementUI(
                     element = element,
                     index = index,
                     focusManager = focusManager,
-                    textFieldModifier = textFieldModifier,
+                    modifier = textFieldModifier,
                     enabled = enabled,
                     colors = colors
                 )
@@ -147,7 +149,7 @@ private fun OTPInputBox(
     element: OTPElement,
     index: Int,
     focusManager: FocusManager,
-    textFieldModifier: Modifier,
+    modifier: Modifier,
     enabled: Boolean,
     colors: OTPElementColors
 ) {
@@ -162,7 +164,7 @@ private fun OTPInputBox(
             val inputLength = element.controller.onValueChanged(index, it.text)
             (0 until inputLength).forEach { _ -> focusManager.moveFocus(FocusDirection.Next) }
         },
-        modifier = textFieldModifier,
+        modifier = modifier,
         enabled = enabled,
         textStyle = TextStyle(
             fontFamily = FontFamily.Default,
