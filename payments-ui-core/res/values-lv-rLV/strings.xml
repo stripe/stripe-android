@@ -6,10 +6,6 @@
   <string name="back">Atpakaļ</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Norēķinu adrese</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">E-pasts</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">E-pasta adrese nav derīga.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">Elektronisko maksājumu pakalpojumu banka</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

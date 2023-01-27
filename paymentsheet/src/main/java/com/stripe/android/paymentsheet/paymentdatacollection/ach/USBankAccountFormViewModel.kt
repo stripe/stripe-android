@@ -37,10 +37,10 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
-import com.stripe.android.ui.core.elements.EmailConfig
 import com.stripe.android.ui.core.elements.NameConfig
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -6,10 +6,6 @@
   <string name="back">Geri</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Fatura adresi</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">E-posta</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">E-postanız geçersiz.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">EPS Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

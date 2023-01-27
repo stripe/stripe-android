@@ -6,10 +6,6 @@
   <string name="back">Voltar</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Endereço de cobrança</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">E-mail</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Seu e-mail é inválido.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">Banco EPS</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

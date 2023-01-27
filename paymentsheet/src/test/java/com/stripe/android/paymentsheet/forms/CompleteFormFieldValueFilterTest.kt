@@ -2,10 +2,10 @@ package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.ui.core.elements.EmailConfig
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.SectionController
 import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.forms.FormFieldEntry
