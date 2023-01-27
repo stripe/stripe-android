@@ -167,13 +167,13 @@ internal fun PaymentOptionUi(
                 RemoveBadge(
                     onRemoveAccessibilityDescription = onRemoveAccessibilityDescription,
                     onPressed = { openRemoveDialog.value = true },
-                    modifier = Modifier.offset(x = (-15).dp),
+                    modifier = Modifier.offset(x = (-14).dp, y = 1.dp),
                 )
             }
 
             if (isSelected) {
                 SelectedBadge(
-                    modifier = Modifier.offset(x = (-20).dp, y = 58.dp),
+                    modifier = Modifier.offset(x = (-18).dp, y = 58.dp),
                 )
             }
         },
