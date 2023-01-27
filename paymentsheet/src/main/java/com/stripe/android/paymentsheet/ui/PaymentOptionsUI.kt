@@ -3,8 +3,10 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -57,11 +59,13 @@ internal fun PaymentOptions(
     onItemSelected: (PaymentSelection?) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
+    scrollState: LazyListState = rememberLazyListState(),
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
         val width = rememberItemWidth(maxWidth)
 
         LazyRow(
+            state = scrollState,
             userScrollEnabled = !isProcessing,
             contentPadding = PaddingValues(horizontal = 17.dp),
         ) {
