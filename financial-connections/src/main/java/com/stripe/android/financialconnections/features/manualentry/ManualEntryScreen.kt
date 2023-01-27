@@ -109,19 +109,22 @@ private fun ManualEntryContent(
                 onCloseFromErrorClick = {}
             )
 
-            is Success -> ManualEntryLoaded(
-                scrollState = scrollState,
-                linkPaymentAccountStatus = linkPaymentAccountStatus,
-                payload = payload(),
-                routing = routing,
-                onRoutingEntered = onRoutingEntered,
-                account = account,
-                onAccountEntered = onAccountEntered,
-                accountConfirm = accountConfirm,
-                onAccountConfirmEntered = onAccountConfirmEntered,
-                isValidForm = isValidForm,
-                onSubmit = onSubmit
-            )
+            is Success -> when(payload().customManualEntry) {
+                true -> LoadingContent()
+                false -> ManualEntryLoaded(
+                    scrollState = scrollState,
+                    linkPaymentAccountStatus = linkPaymentAccountStatus,
+                    payload = payload(),
+                    routing = routing,
+                    onRoutingEntered = onRoutingEntered,
+                    account = account,
+                    onAccountEntered = onAccountEntered,
+                    accountConfirm = accountConfirm,
+                    onAccountConfirmEntered = onAccountConfirmEntered,
+                    isValidForm = isValidForm,
+                    onSubmit = onSubmit
+                )
+            }
         }
     }
 }
