@@ -10,5 +10,6 @@ fun MockResponse.testBodyFromFile(filename: String): MockResponse {
     val buffer = Buffer()
     buffer.readFrom(inputStream)
     setBody(buffer)
+
     return this
 }
