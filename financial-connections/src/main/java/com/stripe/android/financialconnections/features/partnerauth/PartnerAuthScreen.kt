@@ -258,22 +258,12 @@ private fun LoadedContent(
 ) {
     when (authenticationStatus) {
         is Uninitialized -> when (payload.authSession.isOAuth) {
-            true -> if (payload.authSession.display == null) {
-                DefaultPrePaneContent(
-                    institution = payload.institution,
-                    flow = payload.authSession.flow,
-                    isStripeDirect = payload.isStripeDirect,
-                    showPartnerDisclosure = payload.authSession.showPartnerDisclosure ?: false,
-                    onContinueClick = onContinueClick
-                )
-            } else {
-                InstitutionalPrePaneContent(
-                    onClickableTextClick = onClickableTextClick,
-                    isStripeDirect = payload.isStripeDirect,
-                    onContinueClick = onContinueClick,
-                    content = payload.authSession.display.text.oauthPrepane,
-                )
-            }
+            true -> InstitutionalPrePaneContent(
+                onClickableTextClick = onClickableTextClick,
+                isStripeDirect = payload.isStripeDirect,
+                onContinueClick = onContinueClick,
+                content = payload.authSession.display!!.text.oauthPrepane,
+            )
 
             false -> LoadingContent(
                 stringResource(id = R.string.stripe_partnerauth_loading_title),
@@ -289,60 +279,6 @@ private fun LoadedContent(
         is Fail -> {
             // TODO@carlosmuvi translate error type to specific error screen.
             InstitutionUnknownErrorContent(onSelectAnotherBank)
-        }
-    }
-}
-
-// TODO@carlosmuvi BANKCON-6003: remove once Backend-driven prepane is fully rolled out.
-@Composable
-private fun DefaultPrePaneContent(
-    institution: FinancialConnectionsInstitution,
-    flow: Flow?,
-    showPartnerDisclosure: Boolean,
-    isStripeDirect: Boolean,
-    onContinueClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .padding(
-                top = 8.dp,
-                start = 24.dp,
-                end = 24.dp,
-                bottom = 24.dp
-            )
-    ) {
-        val modifier = Modifier
-            .size(36.dp)
-            .clip(RoundedCornerShape(6.dp))
-        StripeImage(
-            url = institution.icon?.default ?: "",
-            contentDescription = null,
-            imageLoader = LocalImageLoader.current,
-            errorContent = { InstitutionPlaceholder(modifier) },
-            modifier = modifier
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        Text(
-            text = stringResource(R.string.stripe_prepane_title, institution.name),
-            style = FinancialConnectionsTheme.typography.subtitle
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        Text(
-            text = stringResource(R.string.stripe_prepane_desc, institution.name),
-            style = FinancialConnectionsTheme.typography.body
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        if (flow != null && showPartnerDisclosure) PartnerCallout(flow, isStripeDirect)
-        Spacer(modifier = Modifier.size(16.dp))
-        FinancialConnectionsButton(
-            onClick = onContinueClick,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = stringResource(R.string.stripe_prepane_continue),
-                textAlign = TextAlign.Center
-            )
         }
     }
 }
