@@ -12,13 +12,11 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowMetrics
 import android.widget.ScrollView
-import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.collectAsState
@@ -30,30 +28,23 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.StripeThemeDefaults
-import com.stripe.android.uicore.createTextSpanFromTextStyle
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.utils.AnimationConstants
-import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
 
 internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
@@ -81,14 +72,10 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup
-    abstract val appbar: AppBarLayout
     abstract val linkAuthView: ComposeView
     abstract val scrollView: ScrollView
-    abstract val toolbar: MaterialToolbar
-    abstract val messageView: TextView
     abstract val header: ComposeView
     abstract val fragmentContainerParent: ViewGroup
-    abstract val testModeIndicator: TextView
     abstract val notesView: ComposeView
     abstract val primaryButton: PrimaryButton
     abstract val bottomSpacer: View
@@ -96,10 +83,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     protected var earlyExitDueToIllegalState: Boolean = false
 
     abstract fun setActivityResult(result: ResultType)
-
-    private val keyboardController: KeyboardController by lazy {
-        KeyboardController(this)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,18 +95,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             // In Oreo, Activities where `android:windowIsTranslucent=true` can't request
             // orientation. See https://stackoverflow.com/a/50832408/11103900
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
-
-        viewModel.currentScreen.launchAndCollectIn(this) { currentScreen ->
-            updateToolbarButton(currentScreen)
-        }
-
-        scrollView.viewTreeObserver.addOnScrollChangedListener {
-            appbar.elevation = if (scrollView.scrollY > 0) {
-                resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
-            } else {
-                0f
-            }
         }
 
         bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
@@ -143,19 +114,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
         viewModel.processing.launchAndCollectIn(this) { isProcessing ->
             updateRootViewClickHandling(isProcessing)
-            toolbar.isEnabled = !isProcessing
             onBackPressedCallback.isEnabled = !isProcessing
-        }
-
-        // Set Toolbar to act as the ActionBar so it displays the menu items.
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-
-        toolbar.setNavigationOnClickListener {
-            if (toolbar.isEnabled) {
-                keyboardController.hide()
-                viewModel.handleBackPressed()
-            }
         }
 
         setupHeader()
@@ -181,17 +140,9 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // `rootView`'s click listener
         bottomSheet.isClickable = true
 
-        viewModel.stripeIntent.launchAndCollectIn(this) { stripeIntent ->
-            val isLiveMode = stripeIntent?.isLiveMode ?: true
-            testModeIndicator.isGone = isLiveMode
-        }
-
         val isDark = baseContext.isSystemDarkTheme()
         viewModel.config?.let {
             bottomSheet.setBackgroundColor(
-                Color(it.appearance.getColors(isDark).surface).toArgb()
-            )
-            toolbar.setBackgroundColor(
                 Color(it.appearance.getColors(isDark).surface).toArgb()
             )
         }
@@ -210,28 +161,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // TODO(mlb): Consider if this needs to be an abstract function
         setActivityResult(result)
         bottomSheetController.hide()
-    }
-
-    protected fun updateErrorMessage(
-        messageView: TextView,
-        userMessage: BaseSheetViewModel.UserErrorMessage? = null
-    ) {
-        userMessage?.message.let { message ->
-            viewModel.config?.appearance?.let {
-                messageView.text = createTextSpanFromTextStyle(
-                    text = message,
-                    context = this,
-                    fontSizeDp = (
-                        it.typography.sizeScaleFactor
-                            * StripeThemeDefaults.typography.smallFontSize.value
-                        ).dp,
-                    color = Color(it.getColors(this.isSystemDarkTheme()).error),
-                    fontFamily = it.typography.fontResId
-                )
-            }
-        }
-
-        messageView.isVisible = userMessage != null
     }
 
     private fun setupHeader() {
@@ -310,34 +239,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
     }
 
-    private fun updateToolbarButton(currentScreen: PaymentSheetScreen?) {
-        val showClose = currentScreen != PaymentSheetScreen.AddAnotherPaymentMethod
-
-        val toolbarResources = if (showClose) {
-            ToolbarResources(
-                R.drawable.stripe_paymentsheet_toolbar_close,
-                R.string.stripe_paymentsheet_close
-            )
-        } else {
-            ToolbarResources(
-                R.drawable.stripe_paymentsheet_toolbar_back,
-                R.string.back
-            )
-        }
-
-        val navigationIconDrawable = AppCompatResources.getDrawable(this, toolbarResources.icon)
-        viewModel.config?.appearance?.let {
-            navigationIconDrawable?.setTintList(
-                ColorStateList.valueOf(
-                    it.getColors(baseContext.isSystemDarkTheme()).appBarIcon
-                )
-            )
-        }
-
-        toolbar.navigationIcon = navigationIconDrawable
-        toolbar.navigationContentDescription = resources.getString(toolbarResources.description)
-    }
-
     private fun updateRootViewClickHandling(isProcessing: Boolean) {
         if (!isProcessing) {
             // Handle taps outside of bottom sheet
@@ -374,7 +275,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     }
 
     internal companion object {
-        const val EXTRA_FRAGMENT_CONFIG = "com.stripe.android.paymentsheet.extra_fragment_config"
         const val EXTRA_STARTER_ARGS = "com.stripe.android.paymentsheet.extra_starter_args"
         const val TABLET_WIDTH_RATIO = .6
     }

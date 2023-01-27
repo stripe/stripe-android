@@ -26,6 +26,7 @@ data class VerificationSessionCreationRequest(
         @SerialName("allowed_types") val allowedTypes: List<String>? = null,
         @SerialName("require_id_number") val requireIdNumber: Boolean? = null,
         @SerialName("require_live_capture") val requireLiveCapture: Boolean? = null,
-        @SerialName("require_matching_selfie") val requireMatchingSelfie: Boolean? = null
+        @SerialName("require_matching_selfie") val requireMatchingSelfie: Boolean? = null,
+        @SerialName("require_address") val requireAddress: Boolean? = null
     )
 }

@@ -4,6 +4,7 @@ import android.animation.LayoutTransition
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.test.onNodeWithText
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
@@ -63,6 +64,7 @@ import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.HackyComposeTestRule
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -91,8 +93,12 @@ import kotlin.test.BeforeTest
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSheetActivityTest {
+
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val composeTestRule = HackyComposeTestRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -245,14 +251,23 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
 
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+            val error = "some error"
 
-            viewModel.onError("some error")
-            assertThat(activity.viewBinding.message.isVisible).isTrue()
-            assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
+            composeTestRule
+                .onNodeWithText(error)
+                .assertDoesNotExist()
+
+            viewModel.onError(error)
+
+            composeTestRule
+                .onNodeWithText(error)
+                .assertExists()
 
             activity.viewBinding.buyButton.callOnClick()
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+
+            composeTestRule
+                .onNodeWithText(error)
+                .assertDoesNotExist()
         }
     }
 
@@ -261,14 +276,23 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
 
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+            val error = "some error"
 
-            viewModel.onError("some error")
-            assertThat(activity.viewBinding.message.isVisible).isTrue()
-            assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
+            composeTestRule
+                .onNodeWithText(error)
+                .assertDoesNotExist()
+
+            viewModel.onError(error)
+
+            composeTestRule
+                .onNodeWithText(error)
+                .assertExists()
 
             activity.viewBinding.googlePayButton.callOnClick()
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+
+            composeTestRule
+                .onNodeWithText(error)
+                .assertDoesNotExist()
         }
     }
 
@@ -277,14 +301,22 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
 
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+            val error = "some error"
+            composeTestRule
+                .onNodeWithText(error)
+                .assertDoesNotExist()
 
-            viewModel.onError("some error")
-            assertThat(activity.viewBinding.message.isVisible).isTrue()
-            assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
+            viewModel.onError(error)
+
+            composeTestRule
+                .onNodeWithText(error)
+                .assertExists()
 
             activity.viewBinding.linkButton.onClick(mock())
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+
+            composeTestRule
+                .onNodeWithText(error)
+                .assertDoesNotExist()
         }
     }
 
@@ -295,11 +327,17 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+            val error = "some error"
 
-            viewModel.onError("some error")
-            assertThat(activity.viewBinding.message.isVisible).isTrue()
-            assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
+            composeTestRule
+                .onNodeWithText(error)
+                .assertDoesNotExist()
+
+            viewModel.onError(error)
+
+            composeTestRule
+                .onNodeWithText(error)
+                .assertExists()
 
             val newSelection = PaymentSelection.Saved(paymentMethod = paymentMethods.last())
             viewModel.updateSelection(newSelection)
@@ -307,7 +345,9 @@ internal class PaymentSheetActivityTest {
             activity.viewBinding.googlePayButton.performClick()
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+            composeTestRule
+                .onNodeWithText(error)
+                .assertDoesNotExist()
         }
     }
 
@@ -318,17 +358,25 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+            val error = "some error"
+
+            composeTestRule
+                .onNodeWithText(error)
+                .assertDoesNotExist()
 
             viewModel.transitionToAddPaymentScreen()
 
-            viewModel.onError("some error")
-            assertThat(activity.viewBinding.message.isVisible).isTrue()
-            assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
+            viewModel.onError(error)
+
+            composeTestRule
+                .onNodeWithText(error)
+                .assertExists()
 
             pressBack()
 
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+            composeTestRule
+                .onNodeWithText(error)
+                .assertDoesNotExist()
         }
     }
 
@@ -339,14 +387,23 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+            val error = "some error"
 
-            viewModel.onError("some error")
-            assertThat(activity.viewBinding.message.isVisible).isTrue()
-            assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
+            composeTestRule
+                .onNodeWithText(error)
+                .assertDoesNotExist()
+
+            viewModel.onError(error)
+
+            composeTestRule
+                .onNodeWithText(error)
+                .assertExists()
 
             viewModel.transitionToAddPaymentScreen()
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+
+            composeTestRule
+                .onNodeWithText(error)
+                .assertDoesNotExist()
         }
     }
 
@@ -441,30 +498,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `updates navigation button`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.toolbar.navigationContentDescription)
-                .isEqualTo(context.getString(R.string.stripe_paymentsheet_close))
-
-            viewModel.transitionToAddPaymentScreen()
-
-            assertThat(activity.toolbar.navigationContentDescription)
-                .isEqualTo(context.getString(R.string.back))
-
-            pressBack()
-
-            assertThat(activity.toolbar.navigationContentDescription)
-                .isEqualTo(context.getString(R.string.stripe_paymentsheet_close))
-
-            pressBack()
-            // animating out
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-        }
-    }
-
-    @Test
     fun `handles buy button clicks`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
@@ -538,7 +571,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             viewModel.checkout()
 
-            assertThat(activity.toolbar.isEnabled).isFalse()
             assertThat(activity.viewBinding.googlePayButton.isEnabled).isFalse()
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
         }
@@ -734,16 +766,19 @@ internal class PaymentSheetActivityTest {
     fun `GPay button error message is displayed`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
-            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
+            val errorMessage = "Error message"
+
+            composeTestRule
+                .onNodeWithText(errorMessage)
+                .assertDoesNotExist()
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
-            val errorMessage = "Error message"
             viewModel.viewState.value =
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
-            assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
-            assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
+            composeTestRule
+                .onNodeWithText(errorMessage)
+                .assertExists()
         }
     }
 
@@ -751,43 +786,39 @@ internal class PaymentSheetActivityTest {
     fun `when new payment method is selected then error message is cleared`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
-            assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
-            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
-            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
-
             val errorMessage = "Error message"
+
+            composeTestRule
+                .onNodeWithText(errorMessage)
+                .assertDoesNotExist()
+
             viewModel.viewState.value =
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
-            assertThat(activity.viewBinding.message.isVisible).isTrue()
-            assertThat(activity.viewBinding.message.text.toString()).isEqualTo(errorMessage)
-            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
-            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
+            composeTestRule
+                .onNodeWithText(errorMessage)
+                .assertExists()
 
             viewModel.updateSelection(PaymentSelection.GooglePay)
 
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
-            assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
-            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
-            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
+            composeTestRule
+                .onNodeWithText(errorMessage)
+                .assertDoesNotExist()
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
             viewModel.viewState.value =
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
-            assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
-            assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
-            assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
+            composeTestRule
+                .onNodeWithText(errorMessage)
+                .assertExists()
 
             activity.viewBinding.googlePayButton.performClick()
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
-            assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
-            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
-            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
+            composeTestRule
+                .onNodeWithText(errorMessage)
+                .assertDoesNotExist()
         }
     }
 
@@ -795,62 +826,38 @@ internal class PaymentSheetActivityTest {
     fun `when checkout starts then error message is cleared`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
-            assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
-            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
-            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
-
             val errorMessage = "Error message"
+
+            composeTestRule
+                .onNodeWithText(errorMessage)
+                .assertDoesNotExist()
+
             viewModel.viewState.value =
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
-            assertThat(activity.viewBinding.message.isVisible).isTrue()
-            assertThat(activity.viewBinding.message.text.toString()).isEqualTo(errorMessage)
-            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
-            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
+            composeTestRule
+                .onNodeWithText(errorMessage)
+                .assertExists()
 
             viewModel.checkout()
 
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
-            assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
-            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
-            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
+            composeTestRule
+                .onNodeWithText(errorMessage)
+                .assertDoesNotExist()
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
             viewModel.viewState.value =
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
-            assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
-            assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
-            assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
+            composeTestRule
+                .onNodeWithText(errorMessage)
+                .assertExists()
 
             viewModel.checkout()
 
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
-            assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
-            assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
-            assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
-        }
-    }
-
-    @Test
-    fun `when intent is in live mode show no indicator`() {
-        val viewModel = createViewModel(paymentIntent = PAYMENT_INTENT.copy(isLiveMode = true))
-        val scenario = activityScenario(viewModel)
-
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.testmode.isVisible).isFalse()
-        }
-    }
-
-    @Test
-    fun `when intent is not in live mode show indicator`() {
-        val viewModel = createViewModel(paymentIntent = PAYMENT_INTENT.copy(isLiveMode = false))
-        val scenario = activityScenario(viewModel)
-
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.testmode.isVisible).isTrue()
+            composeTestRule
+                .onNodeWithText(errorMessage)
+                .assertDoesNotExist()
         }
     }
 

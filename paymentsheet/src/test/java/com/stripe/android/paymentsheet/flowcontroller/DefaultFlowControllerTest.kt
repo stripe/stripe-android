@@ -62,6 +62,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
@@ -78,6 +79,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -179,6 +181,11 @@ internal class DefaultFlowControllerTest {
         val lifecycle = LifecycleRegistry(lifeCycleOwner)
         lifecycle.currentState = Lifecycle.State.CREATED
         whenever(lifeCycleOwner.lifecycle).thenReturn(lifecycle)
+    }
+
+    @AfterTest
+    fun after() {
+        Dispatchers.resetMain()
     }
 
     @Test

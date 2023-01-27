@@ -20,7 +20,7 @@ jobs:
       - name: Build base branch
         run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release-unsigned.apk identity-example/build/outputs/apk/theme1/release/identity-example-release-base.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: apk
           path: identity-example/build/outputs/apk/theme1/release/identity-example-release-base.apk
@@ -35,7 +35,7 @@ jobs:
       - name: Build PR branch
         run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release-unsigned.apk identity-example/build/outputs/apk/theme1/release/identity-example-release-pr.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: apk
           path: identity-example/build/outputs/apk/theme1/release/identity-example-release-pr.apk
@@ -80,7 +80,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload diffuse output
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: diffuse-output
           path: ${{ steps.diffuse.outputs.diff-file }}

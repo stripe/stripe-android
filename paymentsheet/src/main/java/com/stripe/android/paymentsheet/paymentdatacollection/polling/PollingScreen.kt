@@ -149,7 +149,7 @@ private fun FailedPolling(
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
                         Icon(
-                            painter = painterResource(R.drawable.stripe_ic_paymentsheet_back_enabled),
+                            painter = painterResource(R.drawable.stripe_ic_paymentsheet_back),
                             contentDescription = stringResource(R.string.back),
                         )
                     }

@@ -105,7 +105,6 @@ private fun Array<out Array<out PaparazziConfigOption>>.toTestCases(): List<Test
 private fun createPermutations(
     options: Array<out Array<out PaparazziConfigOption>>,
 ): List<List<PaparazziConfigOption>> {
-    @Suppress("UNCHECKED_CAST")
     return (options.toSet()).fold(listOf(listOf())) { acc, set ->
         acc.flatMap { list -> set.map { element -> list + element } }
     }
@@ -114,9 +113,6 @@ private fun createPermutations(
 private data class TestCase(
     val configOptions: List<PaparazziConfigOption>,
 ) {
-
-    val isDarkTheme: Boolean
-        get() = configOptions.find { it is SystemAppearance } == SystemAppearance.DarkTheme
 
     val name: String
         get() {

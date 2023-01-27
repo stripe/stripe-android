@@ -15,5 +15,7 @@
 
     <string name="classic_example">Classic Activity example</string>
     <string name="compose_example">Compose Activity example</string>
+    <string name="verification_type">Verification Type</string>
+    <string name="require_address">Require address</string>
 
 </resources>

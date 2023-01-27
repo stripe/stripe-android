@@ -45,7 +45,7 @@ public final class com/stripe/android/paymentsheet/PaymentOptionResult$Succeeded
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/PaymentOptionsAdapterKt {
+public final class com/stripe/android/paymentsheet/PaymentOptionUiKt {
 	public static final field PAYMENT_OPTION_CARD_TEST_TAG Ljava/lang/String;
 }
 
@@ -946,7 +946,6 @@ public final class com/stripe/android/paymentsheet/addresselement/ComposableSing
 }
 
 public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentOptionsBinding : androidx/viewbinding/ViewBinding {
-	public final field appbar Lcom/google/android/material/appbar/AppBarLayout;
 	public final field bottomSheet Landroid/widget/LinearLayout;
 	public final field bottomSpacer Landroid/view/View;
 	public final field contentContainer Landroidx/compose/ui/platform/ComposeView;
@@ -955,11 +954,10 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentOp
 	public final field fragmentContainerParent Landroid/widget/LinearLayout;
 	public final field header Landroidx/compose/ui/platform/ComposeView;
 	public final field linkAuth Landroidx/compose/ui/platform/ComposeView;
-	public final field message Landroid/widget/TextView;
+	public final field message Landroidx/compose/ui/platform/ComposeView;
 	public final field notes Landroidx/compose/ui/platform/ComposeView;
 	public final field scrollView Landroid/widget/ScrollView;
-	public final field testmode Landroid/widget/TextView;
-	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
+	public final field topBar Landroidx/compose/ui/platform/ComposeView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentOptionsBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroidx/coordinatorlayout/widget/CoordinatorLayout;
@@ -968,7 +966,6 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentOp
 }
 
 public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentSheetBinding : androidx/viewbinding/ViewBinding {
-	public final field appbar Lcom/google/android/material/appbar/AppBarLayout;
 	public final field bottomSheet Landroid/widget/LinearLayout;
 	public final field bottomSpacer Landroid/view/View;
 	public final field buttonContainer Landroid/widget/FrameLayout;
@@ -981,13 +978,12 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentSh
 	public final field header Landroidx/compose/ui/platform/ComposeView;
 	public final field linkAuth Landroidx/compose/ui/platform/ComposeView;
 	public final field linkButton Lcom/stripe/android/link/ui/LinkButtonView;
-	public final field message Landroid/widget/TextView;
+	public final field message Landroidx/compose/ui/platform/ComposeView;
 	public final field notes Landroidx/compose/ui/platform/ComposeView;
 	public final field scrollView Landroid/widget/ScrollView;
-	public final field testmode Landroid/widget/TextView;
-	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
+	public final field topBar Landroidx/compose/ui/platform/ComposeView;
 	public final field topContainer Landroid/widget/LinearLayout;
-	public final field topMessage Landroid/widget/TextView;
+	public final field topMessage Landroidx/compose/ui/platform/ComposeView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentSheetBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroidx/coordinatorlayout/widget/CoordinatorLayout;
@@ -1002,33 +998,6 @@ public final class com/stripe/android/paymentsheet/databinding/FragmentAchBindin
 	public fun getRoot ()Landroidx/fragment/app/FragmentContainerView;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentAchBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentAchBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentOptionsListBinding : androidx/viewbinding/ViewBinding {
-	public final field fragmentContainerViewPaymentOptionsList Landroidx/fragment/app/FragmentContainerView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentOptionsListBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/fragment/app/FragmentContainerView;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentOptionsListBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentOptionsListBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentSheetListBinding : androidx/viewbinding/ViewBinding {
-	public final field fragmentContainerViewPaymentOptionsList Landroidx/fragment/app/FragmentContainerView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentSheetListBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/fragment/app/FragmentContainerView;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentSheetListBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentSheetListBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding : androidx/viewbinding/ViewBinding {
-	public final field content Landroidx/compose/ui/platform/ComposeView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding;
 }
 
 public final class com/stripe/android/paymentsheet/databinding/PrimaryButtonBinding : androidx/viewbinding/ViewBinding {
@@ -1312,5 +1281,14 @@ public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$Payme
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetTopBarKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetTopBarKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
