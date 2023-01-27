@@ -8,11 +8,7 @@ import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
 
 internal class NetworkDispatcher : Dispatcher() {
-    private val enqueuedResponses: Queue<Entry>
-
-    init {
-        enqueuedResponses = ConcurrentLinkedQueue()
-    }
+    private val enqueuedResponses: Queue<Entry> = ConcurrentLinkedQueue()
 
     fun enqueue(vararg requestMatcher: RequestMatcher, responseFactory: (MockResponse) -> Unit) {
         enqueuedResponses.add(
