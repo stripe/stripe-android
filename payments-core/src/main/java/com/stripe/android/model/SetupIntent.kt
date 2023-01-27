@@ -122,11 +122,13 @@ data class SetupIntent internal constructor(
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
+            is StripeIntent.NextActionData.CashAppRedirect -> {
+                StripeIntent.NextActionType.CashAppRedirect
+            }
             is StripeIntent.NextActionData.AlipayRedirect,
             is StripeIntent.NextActionData.BlikAuthorize,
             is StripeIntent.NextActionData.WeChatPayRedirect,
             is StripeIntent.NextActionData.UpiAwaitNotification,
-            is StripeIntent.NextActionData.CashAppRedirect,
             null -> {
                 null
             }

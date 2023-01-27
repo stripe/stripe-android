@@ -6,6 +6,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
+import com.stripe.android.StripeCashAppPayBetaApi
+import com.stripe.android.confirmPaymentIntent
+import com.stripe.android.confirmSetupIntent
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -415,6 +418,90 @@ internal class EndToEndTest {
                 }
             )
         }
+    }
+
+    @OptIn(StripeCashAppPayBetaApi::class)
+    @Test
+    fun `test cashapp payment intent flow`() = runTest {
+        val stripe = Stripe(context, settings.publishableKey)
+
+        val paymentIntent = service.createPaymentIntent(
+            Request.CreatePaymentIntentParams(
+                createParams = Request.CreateParams(paymentMethodTypes = listOf("cashapp")),
+            )
+        )
+
+        val confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+            paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
+            clientSecret = paymentIntent.secret,
+        ).copy(
+            returnUrl = "myapp://success",
+        )
+
+        val confirmedPaymentIntent = stripe.confirmPaymentIntent(confirmParams)
+
+        assertThat(confirmedPaymentIntent.status).isEqualTo(StripeIntent.Status.RequiresAction)
+
+        assertThat(confirmedPaymentIntent.nextActionType)
+            .isEqualTo(StripeIntent.NextActionType.CashAppRedirect)
+    }
+
+    @OptIn(StripeCashAppPayBetaApi::class)
+    @Test
+    fun `test cashapp payment intent flow with setup future usage`() = runTest {
+        val stripe = Stripe(context, settings.publishableKey)
+
+        val paymentIntent = service.createPaymentIntent(
+            Request.CreatePaymentIntentParams(
+                createParams = Request.CreateParams(paymentMethodTypes = listOf("cashapp")),
+            )
+        )
+
+        val confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+            paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
+            clientSecret = paymentIntent.secret,
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+        ).copy(
+            returnUrl = "myapp://success",
+            mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+        )
+
+        val confirmedPaymentIntent = stripe.confirmPaymentIntent(confirmParams)
+
+        assertThat(confirmedPaymentIntent.status).isEqualTo(StripeIntent.Status.RequiresAction)
+
+        assertThat(confirmedPaymentIntent.nextActionType)
+            .isEqualTo(StripeIntent.NextActionType.CashAppRedirect)
+    }
+
+    @OptIn(StripeCashAppPayBetaApi::class)
+    @Test
+    fun `test cashapp setup intent flow`() = runTest {
+        val stripe = Stripe(context, settings.publishableKey)
+
+        val paymentIntent = service.createSetupIntent(
+            Request.CreateSetupIntentParams(
+                createParams = Request.CreateParams(
+                    paymentMethodTypes = listOf("cashapp"),
+                    customer = "cus_LO3hhHz7XpE7Ty",
+                ),
+            )
+        )
+
+        val confirmParams = ConfirmSetupIntentParams.create(
+            paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
+            clientSecret = paymentIntent.secret,
+        ).copy(
+            returnUrl = "myapp://success",
+            mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+        )
+
+        val confirmedSetupIntent = stripe.confirmSetupIntent(confirmParams)
+
+        assertThat(confirmedSetupIntent.status).isEqualTo(StripeIntent.Status.RequiresAction)
+
+        assertThat(confirmedSetupIntent.nextActionType)
+            .isEqualTo(StripeIntent.NextActionType.CashAppRedirect)
     }
 
     @Test
