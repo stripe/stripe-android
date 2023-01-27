@@ -91,6 +91,8 @@ import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSheetActivityTest {
@@ -1055,13 +1057,34 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel(
             paymentIntent = PAYMENT_INTENT.copy(
                 amount = 9999,
-                currency = "CAD"
-            )
+                currency = "CAD",
+            ),
+            paymentMethods = emptyList(),
         )
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.buyButton.externalLabel)
-                .isEqualTo("Pay CA\$99.99")
+            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Pay CA\$99.99")
+        }
+    }
+
+    @Test
+    fun `amount label should be built from stripe intent when response is delayed`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            paymentIntent = PAYMENT_INTENT.copy(
+                amount = 9999,
+                currency = "CAD",
+            ),
+            paymentMethods = emptyList(),
+            loadDelay = 200.milliseconds,
+        )
+
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(intent).onActivity { activity ->
+            testDispatcher.scheduler.advanceTimeBy(50)
+            assertThat(activity.viewBinding.buyButton.externalLabel).isNull()
+            testDispatcher.scheduler.advanceTimeBy(250)
+            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Pay CA\$99.99")
         }
     }
 
@@ -1077,7 +1100,8 @@ internal class PaymentSheetActivityTest {
 
     private fun createViewModel(
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
-        paymentMethods: List<PaymentMethod> = PAYMENT_METHODS
+        paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
+        loadDelay: Duration = Duration.ZERO,
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = mock<LpmRepository>()
         whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
@@ -1102,6 +1126,7 @@ internal class PaymentSheetActivityTest {
                 FakePaymentSheetLoader(
                     stripeIntent = paymentIntent,
                     customerPaymentMethods = paymentMethods,
+                    delay = loadDelay,
                 ),
                 FakeCustomerRepository(paymentMethods),
                 FakePrefsRepository(),
