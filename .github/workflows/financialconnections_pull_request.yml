@@ -20,7 +20,7 @@ jobs:
       - name: Build base branch
         run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-base.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: apk
           path: financial-connections-example/build/outputs/apk/release/financial-connections-example-release-base.apk
@@ -35,7 +35,7 @@ jobs:
       - name: Build PR branch
         run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-pr.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: apk
           path: financial-connections-example/build/outputs/apk/release/financial-connections-example-release-pr.apk
@@ -80,7 +80,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload diffuse output
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: diffuse-output
           path: ${{ steps.diffuse.outputs.diff-file }}
