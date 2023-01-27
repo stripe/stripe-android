@@ -51,7 +51,7 @@ private class NetworkStatement(
 
     private fun setup() {
         ApiRequest.apiTestHost = mockWebServer.baseUrl.toString().removeSuffix("/")
-        ConnectionFactory.Default.testConnectionCustomization = lambda@ { insecureConnection ->
+        ConnectionFactory.Default.testConnectionCustomization = lambda@{ insecureConnection ->
             if (mockWebServer.baseUrl.host != insecureConnection.url.host) {
                 throw RequestNotFoundException(
                     "Test request attempted to reach a non test endpoint. " +
