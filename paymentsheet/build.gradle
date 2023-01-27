@@ -92,7 +92,7 @@ dependencies {
     androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
     androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
     androidTestImplementation "com.google.truth:truth:$truthVersion"
-    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestImplementation "androidx.test.uiautomator:uiautomator:$uiautomator"
 
     androidTestImplementation project(':network-testing')
 
