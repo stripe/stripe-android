@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.PaymentDetailsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.runner.RunWith
@@ -16,165 +17,325 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Init event with full config should return expected toString()`() {
+        val event = PaymentSheetEvent.Init(
+            mode = EventReporter.Mode.Complete,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        )
         assertThat(
-            PaymentSheetEvent.Init(
-                mode = EventReporter.Mode.Complete,
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-            ).eventName
+            event.eventName
         ).isEqualTo(
             "mc_complete_init_customer_googlepay"
         )
+        assertThat(
+            event.additionalParams
+        ).containsEntry("locale", "en_US")
     }
 
     @Test
     fun `Init event with minimum config should return expected toString()`() {
+        val event = PaymentSheetEvent.Init(
+            mode = EventReporter.Mode.Complete,
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM
+        )
         assertThat(
-            PaymentSheetEvent.Init(
-                mode = EventReporter.Mode.Complete,
-                configuration = PaymentSheetFixtures.CONFIG_MINIMUM
-            ).eventName
+            event.eventName
         ).isEqualTo(
             "mc_complete_init_default"
         )
+        assertThat(
+            event.additionalParams
+        ).containsEntry("locale", "en_US")
     }
 
     @Test
-    fun `Payment event should return expected toString()`() {
+    fun `New payment method event should return expected event`() {
+        val newPMEvent = PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = PaymentSelection.New.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                mock(),
+                mock()
+            ),
+            durationMillis = 1L,
+            result = PaymentSheetEvent.Payment.Result.Success,
+            currency = "usd"
+        )
         assertThat(
-            PaymentSheetEvent.Payment(
-                mode = EventReporter.Mode.Complete,
-                paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock()),
-                durationMillis = 1L,
-                result = PaymentSheetEvent.Payment.Result.Success
-            ).eventName
+            newPMEvent.eventName
         ).isEqualTo(
             "mc_complete_payment_newpm_success"
         )
-
         assertThat(
-            PaymentSheetEvent.Payment(
-                mode = EventReporter.Mode.Complete,
-                paymentSelection = PaymentSelection.Saved(mock()),
-                durationMillis = 1L,
-                result = PaymentSheetEvent.Payment.Result.Success
-            ).eventName
+            newPMEvent.additionalParams
         ).isEqualTo(
-            "mc_complete_payment_savedpm_success"
-        )
-
-        assertThat(
-            PaymentSheetEvent.Payment(
-                mode = EventReporter.Mode.Complete,
-                paymentSelection = PaymentSelection.GooglePay,
-                durationMillis = 1L,
-                result = PaymentSheetEvent.Payment.Result.Success
-            ).eventName
-        ).isEqualTo(
-            "mc_complete_payment_googlepay_success"
-        )
-
-        assertThat(
-            PaymentSheetEvent.Payment(
-                mode = EventReporter.Mode.Complete,
-                paymentSelection = PaymentSelection.Link,
-                durationMillis = 1L,
-                result = PaymentSheetEvent.Payment.Result.Success
-            ).eventName
-        ).isEqualTo(
-            "mc_complete_payment_link_success"
-        )
-
-        assertThat(
-            PaymentSheetEvent.Payment(
-                mode = EventReporter.Mode.Complete,
-                paymentSelection = PaymentSelection.New.LinkInline(
-                    LinkPaymentDetails.New(
-                        PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                        mock(),
-                        mock()
-                    )
-                ),
-                durationMillis = 1L,
-                result = PaymentSheetEvent.Payment.Result.Success
-            ).eventName
-        ).isEqualTo(
-            "mc_complete_payment_link_success"
+            mapOf(
+                "locale" to "en_US",
+                "currency" to "usd",
+                "duration" to 0.001F
+            )
         )
     }
 
     @Test
-    fun `Payment failure event should return expected toString()`() {
+    fun `Saved payment method event should return expected event`() {
+        val savedPMEvent = PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            durationMillis = 1L,
+            result = PaymentSheetEvent.Payment.Result.Success,
+            currency = "usd"
+        )
         assertThat(
-            PaymentSheetEvent.Payment(
-                mode = EventReporter.Mode.Complete,
-                paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock()),
-                durationMillis = 1L,
-                result = PaymentSheetEvent.Payment.Result.Failure
-            ).eventName
+            savedPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_savedpm_success"
+        )
+        assertThat(
+            savedPMEvent.additionalParams
+        ).isEqualTo(
+            mapOf(
+                "locale" to "en_US",
+                "currency" to "usd",
+                "duration" to 0.001F
+            )
+        )
+    }
+
+    @Test
+    fun `Google pay payment method event should return expected event`() {
+        val googlePayEvent = PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = PaymentSelection.GooglePay,
+            durationMillis = 1L,
+            result = PaymentSheetEvent.Payment.Result.Success,
+            currency = "usd"
+        )
+        assertThat(
+            googlePayEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_googlepay_success"
+        )
+        assertThat(
+            googlePayEvent.additionalParams
+        ).isEqualTo(
+            mapOf(
+                "locale" to "en_US",
+                "currency" to "usd",
+                "duration" to 0.001F
+            )
+        )
+    }
+
+    @Test
+    fun `Link payment method event should return expected event`() {
+        val linkEvent = PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = PaymentSelection.Link,
+            durationMillis = 1L,
+            result = PaymentSheetEvent.Payment.Result.Success,
+            currency = "usd"
+        )
+        assertThat(
+            linkEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_link_success"
+        )
+        assertThat(
+            linkEvent.additionalParams
+        ).isEqualTo(
+            mapOf(
+                "locale" to "en_US",
+                "currency" to "usd",
+                "duration" to 0.001F
+            )
+        )
+    }
+
+    @Test
+    fun `Inline Link payment method event should return expected event`() {
+        val inlineLinkEvent = PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = PaymentSelection.New.LinkInline(
+                LinkPaymentDetails.New(
+                    PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
+                    mock(),
+                    mock()
+                )
+            ),
+            durationMillis = 1L,
+            result = PaymentSheetEvent.Payment.Result.Success,
+            currency = "usd"
+        )
+        assertThat(
+            inlineLinkEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_link_success"
+        )
+        assertThat(
+            inlineLinkEvent.additionalParams
+        ).isEqualTo(
+            mapOf(
+                "locale" to "en_US",
+                "currency" to "usd",
+                "duration" to 0.001F
+            )
+        )
+    }
+
+    @Test
+    fun `New payment method failure event should return expected event`() {
+        val newPMEvent = PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = PaymentSelection.New.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                mock(),
+                mock()
+            ),
+            durationMillis = 1L,
+            result = PaymentSheetEvent.Payment.Result.Failure,
+            currency = "usd"
+        )
+        assertThat(
+            newPMEvent.eventName
         ).isEqualTo(
             "mc_complete_payment_newpm_failure"
         )
-
         assertThat(
-            PaymentSheetEvent.Payment(
-                mode = EventReporter.Mode.Complete,
-                paymentSelection = PaymentSelection.Saved(mock()),
-                durationMillis = 1L,
-                result = PaymentSheetEvent.Payment.Result.Failure
-            ).eventName
+            newPMEvent.additionalParams
+        ).isEqualTo(
+            mapOf(
+                "locale" to "en_US",
+                "currency" to "usd",
+                "duration" to 0.001F
+            )
+        )
+    }
+
+    @Test
+    fun `Saved payment method failure event should return expected event`() {
+        val savedPMEvent = PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            durationMillis = 1L,
+            result = PaymentSheetEvent.Payment.Result.Failure,
+            currency = "usd"
+        )
+        assertThat(
+            savedPMEvent.eventName
         ).isEqualTo(
             "mc_complete_payment_savedpm_failure"
         )
-
         assertThat(
-            PaymentSheetEvent.Payment(
-                mode = EventReporter.Mode.Complete,
-                paymentSelection = PaymentSelection.GooglePay,
-                durationMillis = 1L,
-                result = PaymentSheetEvent.Payment.Result.Failure
-            ).eventName
+            savedPMEvent.additionalParams
+        ).isEqualTo(
+            mapOf(
+                "locale" to "en_US",
+                "currency" to "usd",
+                "duration" to 0.001F
+            )
+        )
+    }
+
+    @Test
+    fun `Google pay payment method failure event should return expected event`() {
+        val googlePayEvent = PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = PaymentSelection.GooglePay,
+            durationMillis = 1L,
+            result = PaymentSheetEvent.Payment.Result.Failure,
+            currency = "usd"
+        )
+        assertThat(
+            googlePayEvent.eventName
         ).isEqualTo(
             "mc_complete_payment_googlepay_failure"
         )
-
         assertThat(
-            PaymentSheetEvent.Payment(
-                mode = EventReporter.Mode.Complete,
-                paymentSelection = PaymentSelection.Link,
-                durationMillis = 1L,
-                result = PaymentSheetEvent.Payment.Result.Failure
-            ).eventName
+            googlePayEvent.additionalParams
+        ).isEqualTo(
+            mapOf(
+                "locale" to "en_US",
+                "currency" to "usd",
+                "duration" to 0.001F
+            )
+        )
+    }
+
+    @Test
+    fun `Link payment method failure event should return expected event`() {
+        val linkEvent = PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = PaymentSelection.Link,
+            durationMillis = 1L,
+            result = PaymentSheetEvent.Payment.Result.Failure,
+            currency = "usd"
+        )
+        assertThat(
+            linkEvent.eventName
         ).isEqualTo(
             "mc_complete_payment_link_failure"
         )
-
         assertThat(
-            PaymentSheetEvent.Payment(
-                mode = EventReporter.Mode.Complete,
-                paymentSelection = PaymentSelection.New.LinkInline(
-                    LinkPaymentDetails.New(
-                        PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                        mock(),
-                        mock()
-                    )
-                ),
-                durationMillis = 1L,
-                result = PaymentSheetEvent.Payment.Result.Failure
-            ).eventName
+            linkEvent.additionalParams
+        ).isEqualTo(
+            mapOf(
+                "locale" to "en_US",
+                "currency" to "usd",
+                "duration" to 0.001F
+            )
+        )
+    }
+
+    @Test
+    fun `Inline Link payment method failure event should return expected event`() {
+        val inlineLinkEvent = PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = PaymentSelection.New.LinkInline(
+                LinkPaymentDetails.New(
+                    PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
+                    mock(),
+                    mock()
+                )
+            ),
+            durationMillis = 1L,
+            result = PaymentSheetEvent.Payment.Result.Failure,
+            currency = "usd"
+        )
+        assertThat(
+            inlineLinkEvent.eventName
         ).isEqualTo(
             "mc_complete_payment_link_failure"
+        )
+        assertThat(
+            inlineLinkEvent.additionalParams
+        ).isEqualTo(
+            mapOf(
+                "locale" to "en_US",
+                "currency" to "usd",
+                "duration" to 0.001F
+            )
         )
     }
 
     @Test
     fun `SelectPaymentOption event should return expected toString()`() {
+        val event = PaymentSheetEvent.SelectPaymentOption(
+            mode = EventReporter.Mode.Custom,
+            paymentSelection = PaymentSelection.GooglePay,
+            currency = "usd"
+        )
         assertThat(
-            PaymentSheetEvent.SelectPaymentOption(
-                mode = EventReporter.Mode.Custom,
-                paymentSelection = PaymentSelection.GooglePay
-            ).eventName
+            event.eventName
         ).isEqualTo(
             "mc_custom_paymentoption_googlepay_select"
+        )
+        assertThat(
+            event.additionalParams
+        ).isEqualTo(
+            mapOf(
+                "locale" to "en_US",
+                "currency" to "usd",
+            )
         )
     }
 
@@ -211,7 +372,10 @@ class PaymentSheetEventTest {
                 configuration = PaymentSheetFixtures.CONFIG_MINIMUM
             ).additionalParams
         ).isEqualTo(
-            mapOf("mpe_config" to expectedConfigMap)
+            mapOf(
+                "mpe_config" to expectedConfigMap,
+                "locale" to "en_US"
+            )
         )
     }
 
@@ -248,7 +412,10 @@ class PaymentSheetEventTest {
                 configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
             ).additionalParams
         ).isEqualTo(
-            mapOf("mpe_config" to expectedConfigMap)
+            mapOf(
+                "mpe_config" to expectedConfigMap,
+                "locale" to "en_US"
+            )
         )
     }
 }

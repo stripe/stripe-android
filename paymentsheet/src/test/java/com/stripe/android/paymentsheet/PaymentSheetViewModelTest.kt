@@ -418,7 +418,10 @@ internal class PaymentSheetViewModelTest {
                 .isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
-                .onPaymentSuccess(selection)
+                .onPaymentSuccess(
+                    paymentSelection = selection,
+                    currency = "usd"
+                )
             assertThat(prefsRepository.paymentSelectionArgs)
                 .containsExactly(selection)
             assertThat(
@@ -463,7 +466,10 @@ internal class PaymentSheetViewModelTest {
             assertThat(resultTurbine.awaitItem()).isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
-                .onPaymentSuccess(selection)
+                .onPaymentSuccess(
+                    paymentSelection = selection,
+                    currency = "usd"
+                )
 
             assertThat(prefsRepository.paymentSelectionArgs)
                 .containsExactly(
@@ -494,7 +500,11 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.stripeIntent.test {
             viewModel.onPaymentResult(PaymentResult.Failed(Throwable()))
-            verify(eventReporter).onPaymentFailure(selection)
+            verify(eventReporter)
+                .onPaymentFailure(
+                    paymentSelection = selection,
+                    currency = "usd"
+                )
 
             val stripeIntent = awaitItem()
             assertThat(stripeIntent).isNull()
@@ -964,6 +974,7 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(false),
             activeLinkSession = eq(false),
+            currency = eq("usd")
         )
 
         receiver.cancelAndIgnoreRemainingEvents()
@@ -986,6 +997,7 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(true),
             activeLinkSession = eq(false),
+            currency = eq("usd")
         )
 
         receiver.cancelAndIgnoreRemainingEvents()
@@ -1008,6 +1020,7 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(true),
             activeLinkSession = eq(true),
+            currency = eq("usd")
         )
 
         receiver.cancelAndIgnoreRemainingEvents()
@@ -1025,6 +1038,7 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onShowExistingPaymentOptions(
             linkEnabled = eq(false),
             activeLinkSession = eq(false),
+            currency = eq("usd")
         )
 
         viewModel.transitionToAddPaymentScreen()
@@ -1032,6 +1046,7 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(false),
             activeLinkSession = eq(false),
+            currency = eq("usd")
         )
 
         receiver.cancelAndIgnoreRemainingEvents()

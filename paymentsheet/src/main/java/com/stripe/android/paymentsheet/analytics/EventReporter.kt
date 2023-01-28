@@ -8,15 +8,32 @@ internal interface EventReporter {
 
     fun onDismiss()
 
-    fun onShowExistingPaymentOptions(linkEnabled: Boolean, activeLinkSession: Boolean)
+    fun onShowExistingPaymentOptions(
+        linkEnabled: Boolean,
+        activeLinkSession: Boolean,
+        currency: String?
+    )
 
-    fun onShowNewPaymentOptionForm(linkEnabled: Boolean, activeLinkSession: Boolean)
+    fun onShowNewPaymentOptionForm(
+        linkEnabled: Boolean,
+        activeLinkSession: Boolean,
+        currency: String?
+    )
 
-    fun onSelectPaymentOption(paymentSelection: PaymentSelection)
+    fun onSelectPaymentOption(
+        paymentSelection: PaymentSelection,
+        currency: String?
+    )
 
-    fun onPaymentSuccess(paymentSelection: PaymentSelection?)
+    fun onPaymentSuccess(
+        paymentSelection: PaymentSelection?,
+        currency: String?
+    )
 
-    fun onPaymentFailure(paymentSelection: PaymentSelection?)
+    fun onPaymentFailure(
+        paymentSelection: PaymentSelection?,
+        currency: String?
+    )
 
     fun onLpmSpecFailure()
 
