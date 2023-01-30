@@ -8,6 +8,7 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.lifecycle.Lifecycle
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
@@ -31,7 +32,7 @@ internal class PaymentSheetTest {
     val networkRule = NetworkRule()
 
     @Test
-    fun testPaymentSheet() {
+    fun testCompleteFlowWithSuccessfulCardPayment() {
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -82,13 +83,13 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-intent-get.json")
         }
 
-        onView(withId(R.id.buy_button)).perform(click())
+        onView(withId(R.id.buy_button)).perform(scrollTo(), click())
 
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
     @Test
-    fun testFlowController() {
+    fun testCustomFlowWithSuccessfulCardPayment() {
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -154,7 +155,7 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-intent-get.json")
         }
 
-        onView(withId(R.id.continue_button)).perform(click())
+        onView(withId(R.id.continue_button)).perform(scrollTo(), click())
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
