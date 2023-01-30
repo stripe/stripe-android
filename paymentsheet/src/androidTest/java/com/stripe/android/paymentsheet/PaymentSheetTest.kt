@@ -80,7 +80,7 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_intents/pi_example"),
         ) { response ->
-            response.testBodyFromFile("payment-intent-get.json")
+            response.testBodyFromFile("payment-intent-get-success.json")
         }
 
         onView(withId(R.id.primary_button)).perform(scrollTo(), click())
@@ -152,12 +152,185 @@ internal class PaymentSheetTest {
             method("GET"),
             path("/v1/payment_intents/pi_example"),
         ) { response ->
-            response.testBodyFromFile("payment-intent-get.json")
+            response.testBodyFromFile("payment-intent-get-success.json")
         }
 
         onView(withId(R.id.primary_button)).perform(scrollTo(), click())
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    }
+
+    @Test
+    fun testCustomFlowWithFailedElementsSessionCall() {
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.setResponseCode(400)
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+        }
+
+        val resultCountDownLatch = CountDownLatch(1)
+        val activityScenarioRule = composeTestRule.activityRule
+        val scenario = activityScenarioRule.scenario
+        scenario.moveToState(Lifecycle.State.CREATED)
+        lateinit var flowController: PaymentSheet.FlowController
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            flowController = PaymentSheet.FlowController.create(
+                activity = it,
+                paymentOptionCallback = { paymentOption ->
+                    assertThat(paymentOption?.label).endsWith("4242")
+                    flowController.confirm()
+                },
+                paymentResultCallback = { result ->
+                    assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
+                    resultCountDownLatch.countDown()
+                },
+            )
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        scenario.onActivity {
+            flowController.configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = null,
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    flowController.presentPaymentOptions()
+                }
+            )
+        }
+
+        fillOutCard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-success.json")
+        }
+
+        onView(withId(R.id.continue_button)).perform(click())
+
+        assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    }
+
+    @Test
+    fun testCustomFlowWithFailedConfirmCall() {
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        val resultCountDownLatch = CountDownLatch(1)
+        val activityScenarioRule = composeTestRule.activityRule
+        val scenario = activityScenarioRule.scenario
+        scenario.moveToState(Lifecycle.State.CREATED)
+        lateinit var flowController: PaymentSheet.FlowController
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            flowController = PaymentSheet.FlowController.create(
+                activity = it,
+                paymentOptionCallback = { paymentOption ->
+                    assertThat(paymentOption?.label).endsWith("4242")
+                    flowController.confirm()
+                },
+                paymentResultCallback = { result ->
+                    assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+                    resultCountDownLatch.countDown()
+                },
+            )
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        scenario.onActivity {
+            flowController.configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = null,
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    flowController.presentPaymentOptions()
+                }
+            )
+        }
+
+        composeTestRule.waitUntil {
+            composeTestRule.onAllNodes(hasText("+ Add"))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNode(hasText("+ Add"))
+            .onParent()
+            .onParent()
+            .performClick()
+
+        fillOutCard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+        ) { response ->
+            response.setResponseCode(400)
+        }
+
+        onView(withId(R.id.continue_button)).perform(click())
+
+        assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    }
+
+    @Test
+    fun testCompleteFlowFailureWhenSetupRequestsFail() {
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.setResponseCode(400)
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.setResponseCode(400)
+        }
+
+        val countDownLatch = CountDownLatch(1)
+        val activityScenarioRule = composeTestRule.activityRule
+        val scenario = activityScenarioRule.scenario
+        scenario.moveToState(Lifecycle.State.CREATED)
+        lateinit var paymentSheet: PaymentSheet
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            paymentSheet = PaymentSheet(it) { result ->
+                assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+                countDownLatch.countDown()
+            }
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        scenario.onActivity {
+            paymentSheet.presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = null,
+            )
+        }
+
+        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
     private fun fillOutCard() {
