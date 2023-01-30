@@ -7,6 +7,8 @@ trigger_map:
     pipeline: main-trigger-pipeline
   - pull_request_source_branch: '*'
     pipeline: main-trigger-pipeline
+  - pull_request_source_branch: 'carlosmuvi/bitrise-maestro-nightly'
+    workflow: financial-connections-nightly
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
