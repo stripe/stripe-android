@@ -59,6 +59,8 @@ workflows:
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
+            - content:
+      - wait-for-android-emulator@1: {}
       - script@1:
           inputs:
             - content: |-
@@ -71,12 +73,9 @@ workflows:
                 curl -Ls "https://get.maestro.mobile.dev" | bash
                 export PATH="$PATH":"$HOME/.maestro/bin"
                 maestro -v
-
-            - content:
-      - wait-for-android-emulator@1: {}
-      - script@1:
-          inputs:
-            - content: bash scripts/execute_maestro_tests.sh
+                
+                # Run tests
+                bash scripts/execute_maestro_tests.sh
       - cache-push@2: {}
 meta:
   bitrise.io:
