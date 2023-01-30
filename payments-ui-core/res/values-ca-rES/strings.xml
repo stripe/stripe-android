@@ -6,10 +6,6 @@
   <string name="back">Tornar</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Adreça de facturació</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">Correu electrònic</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">L\'adreça electrònica no és vàlida.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">Banc EPS</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

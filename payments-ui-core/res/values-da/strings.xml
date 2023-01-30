@@ -6,10 +6,6 @@
   <string name="back">Tilbage</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Faktureringsadresse</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">E-mailadresse</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Din e-mail er ugyldig.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">EPS Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

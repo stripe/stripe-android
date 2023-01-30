@@ -6,10 +6,6 @@
   <string name="back">Atgal</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Atsiskaitymo adresas</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">El. paštas</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Jūsų el. paštas yra neteisingas.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">EPS bankas</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

@@ -6,10 +6,6 @@
   <string name="back">뒤로</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">청구 주소</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">이메일</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">이메일이 잘못되었습니다.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">EPS 은행</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
