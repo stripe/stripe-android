@@ -2,9 +2,12 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.19.1 - 2023-01-30
+
 ### PaymentSheet
 * [FIXED][6136](https://github.com/stripe/stripe-android/pull/6136) Fixed an issue where the primary button wouldn't show the amount for payment intents.
 * [FIXED][6142](https://github.com/stripe/stripe-android/pull/6142) Fixed an issue where pressing the back button during processing would cause a `PaymentSheetResult.Canceled`.
+
 ## 20.19.0 - 2023-01-23
 
 ### PaymentSheet
