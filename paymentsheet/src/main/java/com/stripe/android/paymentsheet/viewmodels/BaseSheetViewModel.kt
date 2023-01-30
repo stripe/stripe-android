@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
@@ -311,6 +312,7 @@ internal abstract class BaseSheetViewModel(
                 eventReporter.onShowExistingPaymentOptions(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
                     activeLinkSession = linkHandler.activeLinkSession.value,
+                    currency = stripeIntent.value?.currency
                 )
             }
             AddFirstPaymentMethod,
@@ -318,6 +320,7 @@ internal abstract class BaseSheetViewModel(
                 eventReporter.onShowNewPaymentOptionForm(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
                     activeLinkSession = linkHandler.activeLinkSession.value,
+                    currency = stripeIntent.value?.currency
                 )
             }
         }
@@ -500,6 +503,9 @@ internal abstract class BaseSheetViewModel(
     )
 
     fun handleBackPressed() {
+        if (processing.value) {
+            return
+        }
         if (backStack.value.size > 1) {
             onUserBack()
         } else {

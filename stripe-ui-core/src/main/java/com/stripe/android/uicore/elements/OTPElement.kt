@@ -1,7 +1,6 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -10,7 +9,7 @@ import kotlinx.coroutines.flow.map
 data class OTPElement(
     override val identifier: IdentifierSpec,
     override val controller: OTPController
-) : FormElement() {
+) : FormElement {
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
         return controller.fieldValue.map {
             listOf(identifier to FormFieldEntry(it, it.length == controller.otpLength))

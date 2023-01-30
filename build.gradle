@@ -78,6 +78,7 @@ ext {
     playServicesVersion = '1.6.4'
     leakCanaryVersion = '2.10'
     okhttpVersion = '4.10.0'
+    stripe3ds2Version = '6.1.6'
 
     androidTestVersion = '1.5.0'
     androidTestOrchestratorVersion = '1.4.2'
@@ -133,7 +134,7 @@ tasks.dokkaHtmlMultiModule.configure {
 
 apiValidation {
     ignoredPackages += ["com.stripe.android.databinding"]
-    ignoredProjects += ["example", "paymentsheet-example", "stripecardscan-example", "identity-example", "financial-connections-example"]
+    ignoredProjects += ["example", "paymentsheet-example", "stripecardscan-example", "identity-example", "financial-connections-example", "network-testing"]
     nonPublicMarkers.add("androidx.annotation.RestrictTo")
     nonPublicMarkers.add("dagger.internal.DaggerGenerated")
 }

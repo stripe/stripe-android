@@ -1,4 +1,6 @@
-package com.stripe.android.ui.core.elements
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
+package com.stripe.android.uicore.elements
 
 import android.view.KeyEvent
 import androidx.annotation.RestrictTo
@@ -27,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -39,11 +42,14 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.stripe.android.uicore.elements.SectionCard
+import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.stripeColors
 
@@ -120,75 +126,92 @@ fun OTPElementUI(
                     textFieldModifier = textFieldModifier.focusRequester(focusRequester)
                 }
 
-                // Need to use BasicTextField instead of TextField to be able to customize the
-                // internal contentPadding
-                BasicTextField(
-                    value = TextFieldValue(
-                        text = value,
-                        selection = if (isSelected) {
-                            TextRange(value.length)
-                        } else {
-                            TextRange.Zero
-                        }
-                    ),
-                    onValueChange = {
-                        val inputLength = element.controller.onValueChanged(index, it.text)
-                        (0 until inputLength).forEach { _ ->
-                            focusManager.moveFocus(FocusDirection.Next)
-                        }
-                    },
+                OTPInputBox(
+                    value = value,
+                    isSelected = isSelected,
+                    element = element,
+                    index = index,
+                    focusManager = focusManager,
                     modifier = textFieldModifier,
                     enabled = enabled,
-                    textStyle = MaterialTheme.typography.h2.copy(
-                        color = MaterialTheme.stripeColors.onComponent,
-                        textAlign = TextAlign.Center
-                    ),
-                    cursorBrush = SolidColor(MaterialTheme.stripeColors.textCursor),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = element.controller.keyboardType
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onNext = {
-                            focusManager.moveFocus(FocusDirection.Next)
-                        },
-                        onDone = {
-                            focusManager.clearFocus(true)
-                        }
-                    ),
-                    singleLine = true,
-                    decorationBox = @Composable { innerTextField ->
-                        TextFieldDefaults.TextFieldDecorationBox(
-                            value = value,
-                            visualTransformation = VisualTransformation.None,
-                            innerTextField = innerTextField,
-                            placeholder = {
-                                Text(
-                                    text = if (!isSelected) "●" else "",
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center
-                                )
-                            },
-                            singleLine = true,
-                            enabled = enabled,
-                            interactionSource = remember { MutableInteractionSource() },
-                            colors = TextFieldDefaults.textFieldColors(
-                                textColor = MaterialTheme.stripeColors.onComponent,
-                                backgroundColor = Color.Transparent,
-                                cursorColor = MaterialTheme.stripeColors.textCursor,
-                                focusedIndicatorColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                placeholderColor = colors.placeholder,
-                                disabledPlaceholderColor = colors.placeholder
-                            ),
-                            // TextField has a default padding, here we are specifying 0.dp padding
-                            contentPadding = PaddingValues()
-                        )
-                    }
+                    colors = colors
                 )
             }
         }
     }
+}
+
+@Composable
+@OptIn(ExperimentalMaterialApi::class)
+private fun OTPInputBox(
+    value: String,
+    isSelected: Boolean,
+    element: OTPElement,
+    index: Int,
+    focusManager: FocusManager,
+    modifier: Modifier,
+    enabled: Boolean,
+    colors: OTPElementColors
+) {
+    // Need to use BasicTextField instead of TextField to be able to customize the
+    // internal contentPadding
+    BasicTextField(
+        value = TextFieldValue(
+            text = value,
+            selection = if (isSelected) { TextRange(value.length) } else { TextRange.Zero }
+        ),
+        onValueChange = {
+            val inputLength = element.controller.onValueChanged(index, it.text)
+            (0 until inputLength).forEach { _ -> focusManager.moveFocus(FocusDirection.Next) }
+        },
+        modifier = modifier,
+        enabled = enabled,
+        textStyle = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 24.sp,
+            color = MaterialTheme.stripeColors.onComponent,
+            textAlign = TextAlign.Center
+        ),
+        cursorBrush = SolidColor(MaterialTheme.stripeColors.textCursor),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = element.controller.keyboardType
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = { focusManager.moveFocus(FocusDirection.Next) },
+            onDone = { focusManager.clearFocus(true) }
+        ),
+        singleLine = true,
+        decorationBox = @Composable { innerTextField ->
+            TextFieldDefaults.TextFieldDecorationBox(
+                value = value,
+                visualTransformation = VisualTransformation.None,
+                innerTextField = innerTextField,
+                placeholder = {
+                    Text(
+                        text = if (!isSelected) "●" else "",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                },
+                singleLine = true,
+                enabled = enabled,
+                interactionSource = remember { MutableInteractionSource() },
+                colors = TextFieldDefaults.textFieldColors(
+                    textColor = MaterialTheme.stripeColors.onComponent,
+                    backgroundColor = Color.Transparent,
+                    cursorColor = MaterialTheme.stripeColors.textCursor,
+                    focusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    placeholderColor = colors.placeholder,
+                    disabledPlaceholderColor = colors.placeholder
+                ),
+                // TextField has a default padding, here we are specifying 0.dp padding
+                contentPadding = PaddingValues()
+            )
+        }
+    )
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

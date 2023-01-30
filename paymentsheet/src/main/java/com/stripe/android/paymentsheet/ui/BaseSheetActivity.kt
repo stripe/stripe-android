@@ -108,13 +108,12 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
-        val onBackPressedCallback = onBackPressedDispatcher.addCallback {
+        onBackPressedDispatcher.addCallback {
             viewModel.handleBackPressed()
         }
 
         viewModel.processing.launchAndCollectIn(this) { isProcessing ->
             updateRootViewClickHandling(isProcessing)
-            onBackPressedCallback.isEnabled = !isProcessing
         }
 
         setupHeader()

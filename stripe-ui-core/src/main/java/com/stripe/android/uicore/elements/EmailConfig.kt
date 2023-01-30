@@ -1,15 +1,11 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.SimpleTextFieldController
-import com.stripe.android.uicore.elements.TextFieldConfig
-import com.stripe.android.uicore.elements.TextFieldIcon
-import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,6 +50,7 @@ class EmailConfig : TextFieldConfig {
 
     private fun cannotBecomeValid(str: String) = str.count { it == '@' } > 1
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun createController(initialValue: String?) = SimpleTextFieldController(
             EmailConfig(),

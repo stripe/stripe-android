@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +16,7 @@ data class SaveForFutureUseElement(
     override val identifier: IdentifierSpec,
     override val controller: SaveForFutureUseController,
     val merchantName: String?
-) : FormElement() {
+) : FormElement {
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         controller.formFieldValue.map {
             listOf(
