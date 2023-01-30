@@ -60,6 +60,12 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
     }
 
+    /**
+     * This variable is a temporary way of passing parameters to [USBankAccountFormFragment] from
+     * [AddPaymentMethod], while the former is not fully refactored to Compose.
+     * These arguments can't be passed through the Fragment's arguments because the Fragment is
+     * added with an [AndroidViewBinding] from Compose, which doesn't allow that.
+     */
     var formArgs: FormArguments? = null
 
     abstract val rootView: ViewGroup
