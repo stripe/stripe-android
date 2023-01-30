@@ -76,6 +76,9 @@ workflows:
                 
                 # Run tests
                 bash scripts/execute_maestro_tests.sh
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - deploy_path: financial-connections-example/build/reports
       - cache-push@2: {}
 meta:
   bitrise.io:
