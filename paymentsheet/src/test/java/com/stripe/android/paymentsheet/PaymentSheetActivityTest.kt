@@ -39,6 +39,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -186,6 +187,9 @@ internal class PaymentSheetActivityTest {
             PaymentSheetResult.Canceled
         )
     }
+
+    private val ActivityPaymentSheetBinding.buyButton: PrimaryButton
+        get() = root.findViewById(R.id.primary_button)
 
     @Test
     fun `disables primary button when editing`() {
