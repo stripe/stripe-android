@@ -4,9 +4,10 @@ import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.StripeThemeDefaults
+import java.util.Locale
 
 internal sealed class PaymentSheetEvent : AnalyticsEvent {
-    abstract val additionalParams: Map<String, Any>
+    abstract val additionalParams: Map<String, Any?>
 
     class Init(
         private val mode: EventReporter.Mode,
@@ -20,7 +21,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 ).takeUnless { it.isEmpty() }?.joinToString(separator = "_") ?: "default"
                 return formatEventName(mode, "init_$configValue")
             }
-        override val additionalParams: Map<String, Any>
+        override val additionalParams: Map<String, Any?>
             get() {
                 val primaryButtonConfig = configuration?.appearance?.primaryButton
                 val primaryButtonConfigMap = mapOf(
@@ -76,7 +77,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_DELAYED_PMS to (configuration?.allowsDelayedPaymentMethods),
                     FIELD_APPEARANCE to appearanceConfigMap
                 )
-                return mapOf(FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap)
+                return mapOf(
+                    FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
+                    "locale" to Locale.getDefault().toString()
+                )
             }
     }
 
@@ -90,47 +94,61 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class ShowNewPaymentOptionForm(
         mode: EventReporter.Mode,
         linkEnabled: Boolean,
-        activeLinkSession: Boolean
+        activeLinkSession: Boolean,
+        currency: String?
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_newpm_show")
-        override val additionalParams: Map<String, Any> = mapOf(
+        override val additionalParams: Map<String, Any?> = mapOf(
             "link_enabled" to linkEnabled,
-            "active_link_session" to activeLinkSession
+            "active_link_session" to activeLinkSession,
+            "locale" to Locale.getDefault().toString(),
+            "currency" to currency
         )
     }
 
     class ShowExistingPaymentOptions(
         mode: EventReporter.Mode,
         linkEnabled: Boolean,
-        activeLinkSession: Boolean
+        activeLinkSession: Boolean,
+        currency: String?,
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_savedpm_show")
-        override val additionalParams: Map<String, Any> = mapOf(
+        override val additionalParams: Map<String, Any?> = mapOf(
             "link_enabled" to linkEnabled,
-            "active_link_session" to activeLinkSession
+            "active_link_session" to activeLinkSession,
+            "locale" to Locale.getDefault().toString(),
+            "currency" to currency
         )
     }
 
     class SelectPaymentOption(
         mode: EventReporter.Mode,
-        paymentSelection: PaymentSelection?
+        paymentSelection: PaymentSelection?,
+        currency: String?
     ) : PaymentSheetEvent() {
         override val eventName: String =
             formatEventName(mode, "paymentoption_${analyticsValue(paymentSelection)}_select")
-        override val additionalParams: Map<String, Any> = mapOf()
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "locale" to Locale.getDefault().toString(),
+            "currency" to currency,
+        )
     }
 
     class Payment(
         mode: EventReporter.Mode,
         result: Result,
         durationMillis: Long?,
-        paymentSelection: PaymentSelection?
+        paymentSelection: PaymentSelection?,
+        currency: String?
     ) : PaymentSheetEvent() {
         override val eventName: String =
             formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_$result")
-        override val additionalParams: Map<String, Any> = durationMillis?.let {
-            mapOf("duration" to it / 1000f)
-        } ?: mapOf()
+        override val additionalParams: Map<String, Any?> =
+            mapOf(
+                "duration" to durationMillis?.div(1000f),
+                "locale" to Locale.getDefault().toString(),
+                "currency" to currency,
+            )
 
         enum class Result(private val code: String) {
             Success("success"),
@@ -141,7 +159,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 
     class LpmSerializeFailureEvent : PaymentSheetEvent() {
-        override val additionalParams: Map<String, Any>
+        override val additionalParams: Map<String, Any?>
             get() = emptyMap()
         override val eventName: String = "luxe_serialize_failure"
     }

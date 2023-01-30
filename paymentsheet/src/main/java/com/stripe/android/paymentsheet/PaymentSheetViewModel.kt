@@ -47,6 +47,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -203,7 +204,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
             }
             LinkHandler.ProcessingState.Completed -> {
-                eventReporter.onPaymentSuccess(PaymentSelection.Link)
+                eventReporter.onPaymentSuccess(PaymentSelection.Link, stripeIntent.value?.currency)
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
             }
@@ -444,7 +445,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun processPayment(stripeIntent: StripeIntent, paymentResult: PaymentResult) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
-                eventReporter.onPaymentSuccess(selection.value)
+                eventReporter.onPaymentSuccess(selection.value, stripeIntent.currency)
 
                 // SavedSelection needs to happen after new cards have been saved.
                 when (selection.value) {
@@ -463,7 +464,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             else -> {
                 if (paymentResult is PaymentResult.Failed) {
-                    eventReporter.onPaymentFailure(selection.value)
+                    eventReporter.onPaymentFailure(selection.value, stripeIntent.currency)
                 }
 
                 runCatching {
@@ -491,7 +492,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 logger.error("Error processing Google Pay payment", result.error)
-                eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
+                eventReporter.onPaymentFailure(
+                    PaymentSelection.GooglePay,
+                    stripeIntent.value?.currency
+                )
                 onError(
                     when (result.errorCode) {
                         GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
@@ -527,7 +531,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun transitionToFirstScreen() {
         val target = if (paymentMethods.value.isNullOrEmpty()) {
-            updateSelection(null)
             PaymentSheetScreen.AddFirstPaymentMethod
         } else {
             PaymentSheetScreen.SelectSavedPaymentMethods

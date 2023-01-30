@@ -101,6 +101,10 @@ public final class com/stripe/android/uicore/elements/DropdownConfig$DefaultImpl
 public final class com/stripe/android/uicore/elements/DropdownFieldUIKt {
 }
 
+public final class com/stripe/android/uicore/elements/FormElement$DefaultImpls {
+	public static fun getTextFieldIdentifiers (Lcom/stripe/android/uicore/elements/FormElement;)Lkotlinx/coroutines/flow/Flow;
+}
+
 public final class com/stripe/android/uicore/elements/H6TextKt {
 }
 
@@ -149,9 +153,6 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$Creator : a
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/uicore/elements/PhoneNumberElementUIKt {
 }
 
 public final class com/stripe/android/uicore/elements/PhoneNumberState$Companion {

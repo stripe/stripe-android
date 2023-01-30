@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [FIXED][6136](https://github.com/stripe/stripe-android/pull/6136) Fixed an issue where the primary button wouldn't show the amount for payment intents.
+
 ## 20.19.0 - 2023-01-23
 
 ### PaymentSheet

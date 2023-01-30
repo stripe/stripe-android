@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -129,7 +130,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onPaymentResult(PaymentResult.Canceled)
             }
             LinkHandler.ProcessingState.Completed -> {
-                eventReporter.onPaymentSuccess(PaymentSelection.Link)
+                eventReporter.onPaymentSuccess(
+                    PaymentSelection.Link,
+                    stripeIntent.value?.currency
+                )
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 onPaymentResult(PaymentResult.Completed)
             }
@@ -198,7 +202,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         selection.value?.let { paymentSelection ->
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
-            eventReporter.onSelectPaymentOption(paymentSelection)
+            eventReporter.onSelectPaymentOption(paymentSelection, stripeIntent.value?.currency)
 
             when (paymentSelection) {
                 is PaymentSelection.Saved ->
