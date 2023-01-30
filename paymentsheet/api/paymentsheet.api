@@ -1084,7 +1084,7 @@ public final class com/stripe/android/paymentsheet/databinding/StripeCountryDrop
 public final class com/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding : androidx/viewbinding/ViewBinding {
 	public final field googlePayButtonContent Landroid/widget/ImageView;
 	public final field googlePayButtonLayout Landroid/widget/RelativeLayout;
-	public final field primaryButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
+	public final field googlePayPrimaryButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding;
 	public fun getRoot ()Landroid/view/View;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding;
