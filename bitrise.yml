@@ -59,6 +59,9 @@ workflows:
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
+      - script@1:
+          inputs:
+            - content: curl -Ls "https://get.maestro.mobile.dev" | bash
       - wait-for-android-emulator@1: {}
       - script@1:
           inputs:
