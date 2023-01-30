@@ -176,10 +176,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             googlePayButton.isEnabled = enabled
         }
 
-        viewModel.amount.launchAndCollectIn(this) {
-            resetPrimaryButtonState()
-        }
-
         viewModel.selection.launchAndCollectIn(this) {
             viewModel.clearErrorMessages()
         }
