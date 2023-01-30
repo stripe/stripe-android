@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.ui
 
 import android.animation.LayoutTransition
 import android.content.pm.ActivityInfo
-import android.content.res.ColorStateList
 import android.graphics.Insets
 import android.os.Build
 import android.os.Bundle
@@ -40,7 +39,6 @@ import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
@@ -62,12 +60,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
     }
 
-    /**
-     * This variable is a temporary way of passing parameters to [USBankAccountFormFragment] from
-     * [BaseAddPaymentMethodFragment], while the former is not fully refactored to Compose.
-     * These arguments can't be passed through the Fragment's arguments because the Fragment is
-     * added with an [AndroidViewBinding] from Compose, which doesn't allow that.
-     */
     var formArgs: FormArguments? = null
 
     abstract val rootView: ViewGroup
@@ -77,7 +69,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val header: ComposeView
     abstract val fragmentContainerParent: ViewGroup
     abstract val notesView: ComposeView
-    abstract val primaryButton: PrimaryButton
     abstract val bottomSpacer: View
 
     protected var earlyExitDueToIllegalState: Boolean = false
@@ -185,38 +176,12 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     private fun setupPrimaryButton() {
         viewModel.primaryButtonUIState.launchAndCollectIn(this) { state ->
             state?.let {
-                primaryButton.setOnClickListener {
-                    state.onClick?.invoke()
-                }
-                primaryButton.setLabel(state.label)
-                primaryButton.isVisible = state.visible
                 bottomSpacer.isVisible = state.visible
-            } ?: run {
-                resetPrimaryButtonState()
             }
         }
 
-        viewModel.primaryButtonState.launchAndCollectIn(this) { state ->
-            primaryButton.updateState(state)
-        }
-
-        viewModel.isPrimaryButtonEnabled.launchAndCollectIn(this) { isEnabled ->
-            primaryButton.isEnabled = isEnabled
-        }
-
-        primaryButton.setAppearanceConfiguration(
-            StripeTheme.primaryButtonStyle,
-            tintList = viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
-                StripeTheme.primaryButtonStyle.getBackgroundColor(baseContext)
-            )
-        )
         bottomSpacer.isVisible = true
     }
-
-    /**
-     * Reset the primary button to its default state.
-     */
-    abstract fun resetPrimaryButtonState()
 
     private fun setupNotes() {
         viewModel.notesText.launchAndCollectIn(this) { text ->
