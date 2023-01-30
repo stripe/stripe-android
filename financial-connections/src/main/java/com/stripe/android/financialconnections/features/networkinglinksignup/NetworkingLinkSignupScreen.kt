@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
@@ -23,6 +24,7 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -33,6 +35,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.TextFieldSection
 
 @Composable
 internal fun NetworkingLinkSignupScreen() {
@@ -48,7 +52,7 @@ internal fun NetworkingLinkSignupScreen() {
 
 @Composable
 private fun NetworkingLinkSignupContent(
-    payload: Async<Unit>,
+    payload: Async<Payload>,
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
@@ -63,7 +67,8 @@ private fun NetworkingLinkSignupContent(
         when (payload) {
             Uninitialized, is Loading -> LoadingContent()
             is Success -> NetworkingLinkSignupLoaded(
-                scrollState = scrollState
+                scrollState = scrollState,
+                payload = payload()
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -75,7 +80,10 @@ private fun NetworkingLinkSignupContent(
 }
 
 @Composable
-fun NetworkingLinkSignupLoaded(scrollState: ScrollState) {
+private fun NetworkingLinkSignupLoaded(
+    scrollState: ScrollState,
+    payload: Payload
+) {
     Column(
         Modifier.fillMaxSize()
     ) {
@@ -93,7 +101,7 @@ fun NetworkingLinkSignupLoaded(scrollState: ScrollState) {
 
             Spacer(modifier = Modifier.size(16.dp))
             AnnotatedText(
-                text = TextResource.Text("Save your accounts to Link"),
+                text = TextResource.Text("Save your account to Link"),
                 defaultStyle = FinancialConnectionsTheme.typography.subtitle,
                 annotationStyles = mapOf(
                     StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.subtitle
@@ -101,6 +109,11 @@ fun NetworkingLinkSignupLoaded(scrollState: ScrollState) {
                         .copy(color = FinancialConnectionsTheme.colors.textBrand),
                 ),
                 onClickableTextClick = {},
+            )
+            TextFieldSection(
+                textFieldController = payload.emailController,
+                imeAction = ImeAction.Default,
+                enabled = true,
             )
             Spacer(modifier = Modifier.weight(1f))
         }
@@ -129,7 +142,9 @@ fun NetworkingLinkSignupLoaded(scrollState: ScrollState) {
 internal fun NetworkingLinkSignupScreenPreview() {
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
-            payload = Success(Unit),
+            payload = Success(
+                Payload(emailController = EmailConfig.createController(""))
+            ),
             onCloseClick = {}
         ) {}
     }

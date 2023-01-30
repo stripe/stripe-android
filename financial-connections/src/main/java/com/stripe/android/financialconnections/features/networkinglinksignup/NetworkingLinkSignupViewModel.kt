@@ -10,21 +10,28 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.SimpleTextFieldController
 import javax.inject.Inject
 
 internal class NetworkingLinkSignupViewModel @Inject constructor(
     initialState: NetworkingLinkSignupState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val getManifest: GetManifest,
     private val logger: Logger
 ) : MavericksViewModel<NetworkingLinkSignupState>(initialState) {
 
     init {
         logErrors()
         suspend {
+            val manifest = getManifest()
             eventTracker.track(PaneLoaded(Pane.NETWORKING_LINK_SIGNUP_PANE))
-            Unit
+            NetworkingLinkSignupState.Payload(
+                EmailConfig.createController(manifest.accountholderCustomerEmailAddress)
+            )
         }.execute { copy(payload = it) }
     }
 
@@ -57,5 +64,9 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
 }
 
 internal data class NetworkingLinkSignupState(
-    val payload: Async<Unit> = Uninitialized
-) : MavericksState
+    val payload: Async<Payload> = Uninitialized
+) : MavericksState {
+    data class Payload(
+        val emailController: SimpleTextFieldController
+    )
+}
