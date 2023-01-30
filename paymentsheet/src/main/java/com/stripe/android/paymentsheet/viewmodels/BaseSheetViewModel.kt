@@ -500,6 +500,9 @@ internal abstract class BaseSheetViewModel(
     )
 
     fun handleBackPressed() {
+        if (processing.value) {
+            return
+        }
         if (backStack.value.size > 1) {
             onUserBack()
         } else {

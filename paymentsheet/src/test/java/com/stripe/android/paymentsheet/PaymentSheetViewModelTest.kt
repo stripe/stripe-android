@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
@@ -904,6 +905,41 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.paymentMethods.test {
             assertThat(awaitItem()).isNull()
+        }
+    }
+
+    @Test
+    fun `handleBackPressed is consumed when processing is true`() = runTest {
+        val viewModel = createViewModel(customerPaymentMethods = emptyList())
+        viewModel.savedStateHandle[SAVE_PROCESSING] = true
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+            viewModel.handleBackPressed()
+        }
+    }
+
+    @Test
+    fun `handleBackPressed delivers cancelled when pressing back on last screen`() = runTest {
+        val viewModel = createViewModel(customerPaymentMethods = emptyList())
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+            viewModel.paymentSheetResult.test {
+                viewModel.handleBackPressed()
+                assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Canceled)
+            }
+        }
+    }
+
+    @Test
+    fun `handleBackPressed goes from AddAnother to SelectSaved screen`() = runTest {
+        val viewModel = createViewModel(
+            customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+        viewModel.transitionToAddPaymentScreen()
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(AddAnotherPaymentMethod)
+            viewModel.handleBackPressed()
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
     }
 
