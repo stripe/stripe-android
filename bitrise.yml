@@ -61,10 +61,18 @@ workflows:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
       - script@1:
           inputs:
-            - content: curl -Ls "https://get.maestro.mobile.dev" | bash
-      - script@1:
-          inputs:
-            - content: export PATH="$PATH":"$HOME/.maestro/bin"
+            - content: |-
+                #!/usr/bin/env bash
+                set -e
+                set -o pipefail
+                set -x
+
+                # Install Maestro
+                curl -Ls "https://get.maestro.mobile.dev" | bash
+                export PATH="$PATH":"$HOME/.maestro/bin"
+                maestro -v
+
+            - content:
       - wait-for-android-emulator@1: {}
       - script@1:
           inputs:
