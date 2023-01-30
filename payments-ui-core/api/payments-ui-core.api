@@ -530,9 +530,6 @@ public final class com/stripe/android/ui/core/elements/NextActionSpecKt {
 	public static final fun transform (Lcom/stripe/android/ui/core/elements/NextActionSpec;)Lcom/stripe/android/model/LuxePostConfirmActionRepository$LuxeAction;
 }
 
-public final class com/stripe/android/ui/core/elements/OTPElementUIKt {
-}
-
 public abstract class com/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/ui/core/elements/PostConfirmHandlingPiStatusSpecs$Companion;

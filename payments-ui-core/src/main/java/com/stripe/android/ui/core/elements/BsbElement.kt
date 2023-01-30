@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.uicore.elements.Controller
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
@@ -15,7 +16,7 @@ class BsbElement(
     private val identifierSpec: IdentifierSpec,
     private val banks: List<BecsDebitBanks.Bank>,
     initialValue: String?
-) : FormElement() {
+) : FormElement {
     override val controller: Controller?
         get() = null
     override val identifier: IdentifierSpec
