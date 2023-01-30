@@ -66,7 +66,11 @@ internal class PaymentOptionsViewModelTest {
             ensureAllEventsConsumed()
         }
 
-        verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
+        verify(eventReporter)
+            .onSelectPaymentOption(
+                paymentSelection = SELECTION_SAVED_PAYMENT_METHOD,
+                currency = "usd"
+            )
     }
 
     @Test
@@ -86,7 +90,11 @@ internal class PaymentOptionsViewModelTest {
                 ensureAllEventsConsumed()
             }
 
-            verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
+            verify(eventReporter)
+                .onSelectPaymentOption(
+                    paymentSelection = NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
+                    currency = "usd"
+                )
             assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(SavedSelection.None)
         }
@@ -103,7 +111,11 @@ internal class PaymentOptionsViewModelTest {
                     awaitItem() as PaymentOptionResult.Succeeded
                 assertThat((paymentOptionResultSucceeded).paymentSelection)
                     .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
-                verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)
+                verify(eventReporter)
+                    .onSelectPaymentOption(
+                        paymentSelection = paymentOptionResultSucceeded.paymentSelection,
+                        currency = "usd"
+                    )
                 ensureAllEventsConsumed()
             }
         }

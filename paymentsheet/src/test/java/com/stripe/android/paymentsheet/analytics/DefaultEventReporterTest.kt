@@ -48,33 +48,46 @@ class DefaultEventReporterTest {
         completeEventReporter.onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_complete_init_customer_googlepay"
+                req.params["event"] == "mc_complete_init_customer_googlepay" &&
+                    req.params["locale"] == "en_US"
             }
         )
     }
 
     @Test
     fun `onShowExistingPaymentOptions() should fire analytics request with expected event value`() {
-        completeEventReporter.onShowExistingPaymentOptions(true, false)
+        completeEventReporter.onShowExistingPaymentOptions(
+            linkEnabled = true,
+            activeLinkSession = false,
+            currency = "usd"
+        )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_sheet_savedpm_show" &&
                     req.params["link_enabled"] == true &&
-                    req.params["active_link_session"] == false
+                    req.params["active_link_session"] == false &&
+                    req.params["currency"] == "usd" &&
+                    req.params["locale"] == "en_US"
             }
         )
     }
 
     @Test
     fun `onShowNewPaymentOptionForm() should fire analytics request with expected event value`() {
-        completeEventReporter.onShowNewPaymentOptionForm(false, true)
+        completeEventReporter.onShowNewPaymentOptionForm(
+            linkEnabled = false,
+            activeLinkSession = true,
+            currency = "usd"
+        )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_sheet_newpm_show" &&
                     req.params["link_enabled"] == false &&
-                    req.params["active_link_session"] == true
+                    req.params["active_link_session"] == true &&
+                    req.params["currency"] == "usd" &&
+                    req.params["locale"] == "en_US"
             }
         )
     }
@@ -82,17 +95,24 @@ class DefaultEventReporterTest {
     @Test
     fun `onPaymentSuccess() should fire analytics request with expected event value`() {
         // Log initial event so that duration is tracked
-        completeEventReporter.onShowExistingPaymentOptions(false, false)
+        completeEventReporter.onShowExistingPaymentOptions(
+            linkEnabled = false,
+            activeLinkSession = false,
+            currency = "usd"
+        )
         reset(analyticsRequestExecutor)
         whenever(eventTimeProvider.currentTimeMillis()).thenReturn(2000L)
 
         completeEventReporter.onPaymentSuccess(
-            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            currency = "usd"
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_payment_savedpm_success" &&
-                    req.params["duration"] == 1f
+                    req.params["duration"] == 1f &&
+                    req.params["currency"] == "usd" &&
+                    req.params["locale"] == "en_US"
             }
         )
     }
@@ -100,17 +120,24 @@ class DefaultEventReporterTest {
     @Test
     fun `onPaymentFailure() should fire analytics request with expected event value`() {
         // Log initial event so that duration is tracked
-        completeEventReporter.onShowExistingPaymentOptions(false, false)
+        completeEventReporter.onShowExistingPaymentOptions(
+            linkEnabled = false,
+            activeLinkSession = false,
+            currency = "usd"
+        )
         reset(analyticsRequestExecutor)
         whenever(eventTimeProvider.currentTimeMillis()).thenReturn(2000L)
 
         completeEventReporter.onPaymentFailure(
-            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            currency = "usd"
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_payment_savedpm_failure" &&
-                    req.params["duration"] == 1f
+                    req.params["duration"] == 1f &&
+                    req.params["currency"] == "usd" &&
+                    req.params["locale"] == "en_US"
             }
         )
     }
@@ -118,11 +145,14 @@ class DefaultEventReporterTest {
     @Test
     fun `onSelectPaymentOption() should fire analytics request with expected event value`() {
         customEventReporter.onSelectPaymentOption(
-            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            currency = "usd"
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_custom_paymentoption_savedpm_select"
+                req.params["event"] == "mc_custom_paymentoption_savedpm_select" &&
+                    req.params["currency"] == "usd" &&
+                    req.params["locale"] == "en_US"
             }
         )
     }

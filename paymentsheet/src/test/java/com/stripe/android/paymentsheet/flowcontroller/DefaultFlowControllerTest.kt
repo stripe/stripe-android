@@ -204,24 +204,46 @@ internal class DefaultFlowControllerTest {
     fun `successful payment should fire analytics event`() {
         val viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
         val flowController = createFlowController(viewModel = viewModel)
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+        ) { _, _ -> }
 
-        viewModel.paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())
+        viewModel.paymentSelection = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            mock(),
+            mock()
+        )
 
         flowController.onPaymentResult(PaymentResult.Completed)
 
-        verify(eventReporter).onPaymentSuccess(isA<PaymentSelection.New>())
+        verify(eventReporter)
+            .onPaymentSuccess(
+                paymentSelection = isA<PaymentSelection.New>(),
+                currency = eq("usd")
+            )
     }
 
     @Test
     fun `failed payment should fire analytics event`() {
         val viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
         val flowController = createFlowController(viewModel = viewModel)
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+        ) { _, _ -> }
 
-        viewModel.paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())
+        viewModel.paymentSelection = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            mock(),
+            mock()
+        )
 
         flowController.onPaymentResult(PaymentResult.Failed(RuntimeException()))
 
-        verify(eventReporter).onPaymentFailure(isA<PaymentSelection.New>())
+        verify(eventReporter)
+            .onPaymentFailure(
+                paymentSelection = isA<PaymentSelection.New>(),
+                currency = eq("usd")
+            )
     }
 
     @Test

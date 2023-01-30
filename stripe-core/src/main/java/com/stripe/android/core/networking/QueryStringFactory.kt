@@ -113,7 +113,7 @@ object QueryStringFactory {
         keyPrefix: String
     ): List<Parameter> {
         return when (value) {
-            is Map<*, *> -> flattenParamsMap(value as Map<String, Any>?, keyPrefix)
+            is Map<*, *> -> flattenParamsMap(value as Map<String, Any?>?, keyPrefix)
             is List<*> -> flattenParamsList(value, keyPrefix)
             null -> {
                 listOf(Parameter(keyPrefix, ""))
@@ -124,7 +124,7 @@ object QueryStringFactory {
         }
     }
 
-    private data class Parameter internal constructor(
+    private data class Parameter constructor(
         private val key: String,
         private val value: String
     ) {
