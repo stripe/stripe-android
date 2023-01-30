@@ -62,6 +62,9 @@ workflows:
       - script@1:
           inputs:
             - content: curl -Ls "https://get.maestro.mobile.dev" | bash
+      - script@1:
+          inputs:
+            - content: export PATH="$PATH":"$HOME/.maestro/bin"
       - wait-for-android-emulator@1: {}
       - script@1:
           inputs:
