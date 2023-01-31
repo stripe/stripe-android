@@ -56,7 +56,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     @VisibleForTesting
     internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
 
-    protected val bottomSheetController: BottomSheetController by lazy {
+    private val bottomSheetController: BottomSheetController by lazy {
         BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
     }
 
@@ -97,7 +97,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
         fragmentContainerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
-        bottomSheetController.setup()
+        bottomSheetController.setup(bottomSheet)
 
         bottomSheetController.shouldFinish.launchAndCollectIn(this) { shouldFinish ->
             if (shouldFinish) {
@@ -225,6 +225,8 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         if (!resources.getBoolean(R.bool.isTablet)) {
             return
         }
+
+        println("Tablet")
 
         val screenWidth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val windowMetrics: WindowMetrics = windowManager.currentWindowMetrics

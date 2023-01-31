@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.view.View
+import android.view.View.OnLayoutChangeListener
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.flow.Flow
@@ -12,12 +13,35 @@ internal class BottomSheetController(
     private val _shouldFinish = MutableSharedFlow<Boolean>(replay = 1)
     internal val shouldFinish: Flow<Boolean> = _shouldFinish
 
-    fun setup() {
+    fun setup(bottomSheet: ViewGroup) {
         bottomSheetBehavior.isHideable = true
         bottomSheetBehavior.isDraggable = false
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         bottomSheetBehavior.saveFlags = BottomSheetBehavior.SAVE_ALL
-        bottomSheetBehavior.isFitToContents = false
+        bottomSheetBehavior.isFitToContents = true
+
+        val layoutChangeListener = object : OnLayoutChangeListener {
+            override fun onLayoutChange(
+                v: View?,
+                left: Int,
+                top: Int,
+                right: Int,
+                bottom: Int,
+                oldLeft: Int,
+                oldTop: Int,
+                oldRight: Int,
+                oldBottom: Int
+            ) {
+                bottomSheet.removeOnLayoutChangeListener(this)
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+
+                bottomSheet.post {
+                    bottomSheetBehavior.isFitToContents = false
+                }
+            }
+        }
+
+        bottomSheet.addOnLayoutChangeListener(layoutChangeListener)
 
         bottomSheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
