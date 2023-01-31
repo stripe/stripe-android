@@ -32,8 +32,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -336,15 +334,12 @@ private fun InstitutionalPrePaneContent(
                 when (bodyItem) {
                     is Entry.Image -> {
                         Box(
-                            modifier = Modifier.background(
-                                Brush.horizontalGradient(
-                                    listOf(
-                                        Color.Transparent,
-                                        Color.DarkGray,
-                                        Color.Transparent
-                                    )
+                            modifier = Modifier
+                                .background(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = FinancialConnectionsTheme.colors.backgroundContainer
                                 )
-                            )
+
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.stripe_prepane_phone_bg),
@@ -498,52 +493,6 @@ internal fun InstitutionalPrepaneContentPreview() {
                                     )
                                 )
                             )
-                        ),
-                        isStripeDirect = false
-                    )
-                ),
-                authenticationStatus = Uninitialized,
-                viewEffect = null
-            ),
-            onContinueClick = {},
-            onSelectAnotherBank = {},
-            onEnterDetailsManually = {},
-            onCloseClick = {},
-            modalBottomSheetState = rememberModalBottomSheetState(
-                initialValue = ModalBottomSheetValue.Hidden
-            ),
-            onClickableTextClick = {},
-            onCloseFromErrorClick = {},
-            onConfirmModalClick = {}
-        )
-    }
-}
-
-@Composable
-@Preview
-internal fun PrepaneContentPreview() {
-    FinancialConnectionsPreview {
-        PartnerAuthScreenContent(
-            state = PartnerAuthState(
-                payload = Success(
-                    PartnerAuthState.Payload(
-                        institution = FinancialConnectionsInstitution(
-                            id = "id",
-                            name = "name",
-                            url = "url",
-                            featured = true,
-                            icon = null,
-                            logo = null,
-                            featuredOrder = null,
-                            mobileHandoffCapable = false
-                        ),
-                        authSession = FinancialConnectionsAuthorizationSession(
-                            flow = Flow.FINICITY_CONNECT_V2_OAUTH,
-                            showPartnerDisclosure = true,
-                            _isOAuth = true,
-                            nextPane = Pane.PARTNER_AUTH,
-                            id = "1234",
-                            display = null
                         ),
                         isStripeDirect = false
                     )
