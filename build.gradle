@@ -67,7 +67,7 @@ ext {
 
     kotlinCoroutinesVersion = '1.6.4'
     kotlinSerializationVersion = '1.4.1'
-    accompanistVersion = '0.27.0'
+    accompanistVersion = '0.28.0'
     ktlintVersion = '0.47.1'
     // material 1.6 causes paymentsheet to not render correctly.
     // see here: https://github.com/material-components/material-components-android/issues/2702

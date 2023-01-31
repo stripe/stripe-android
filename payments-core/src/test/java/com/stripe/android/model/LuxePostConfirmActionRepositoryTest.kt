@@ -10,7 +10,7 @@ import com.stripe.android.model.PaymentIntentFixtures.AFTERPAY_REQUIRES_ACTION
 import com.stripe.android.model.PaymentIntentFixtures.AFTERPAY_REQUIRES_ACTION_JSON
 import com.stripe.android.model.PaymentIntentFixtures.KONBINI_REQUIRES_ACTION
 import com.stripe.android.model.PaymentIntentFixtures.KONBINI_REQUIRES_ACTION_JSON
-import com.stripe.android.model.PaymentIntentFixtures.OXXO_REQUIES_ACTION
+import com.stripe.android.model.PaymentIntentFixtures.OXXO_REQUIRES_ACTION
 import org.json.JSONObject
 import org.junit.Ignore
 import org.junit.Test
@@ -87,7 +87,7 @@ class LuxePostConfirmActionRepositoryTest {
         repository.update(DEFAULT_DATA)
         assertThat(
             repository.getPostAuthorizeIntentOutcome(
-                OXXO_REQUIES_ACTION
+                OXXO_REQUIRES_ACTION
             )
         ).isNull()
     }

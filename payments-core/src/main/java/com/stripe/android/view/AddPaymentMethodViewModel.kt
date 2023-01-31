@@ -9,6 +9,7 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.Stripe
+import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.core.StripeError
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -46,6 +47,7 @@ internal class AddPaymentMethodViewModel(
         return resultData
     }
 
+    @OptIn(StripeCashAppPayBetaApi::class)
     @VisibleForTesting
     internal fun updatedPaymentMethodCreateParams(
         params: PaymentMethodCreateParams
