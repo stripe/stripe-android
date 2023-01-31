@@ -96,10 +96,10 @@ internal object FinancialConnectionsSheetSharedModule {
 
     @Provides
     @Singleton
-    fun providesApiRequestFactory(): ApiRequest.Factory = ApiRequest.Factory(
-        apiVersion = ApiVersion(
-            betas = setOf("financial_connections_client_api_beta=v1")
-        ).code
+    fun providesApiRequestFactory(
+        apiVersion: ApiVersion
+    ): ApiRequest.Factory = ApiRequest.Factory(
+        apiVersion = apiVersion.code
     )
 
     @Provides

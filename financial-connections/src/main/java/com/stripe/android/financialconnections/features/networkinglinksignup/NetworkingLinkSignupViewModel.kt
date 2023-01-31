@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Form
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.SignUpState.*
@@ -32,6 +33,7 @@ import javax.inject.Inject
 internal class NetworkingLinkSignupViewModel @Inject constructor(
     initialState: NetworkingLinkSignupState,
     private val saveAccountToLink: SaveAccountToLink,
+    private val lookupAccount: LookupAccount,
     private val getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
