@@ -5,7 +5,6 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -22,6 +21,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -31,16 +31,14 @@ import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -110,6 +108,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             setStripeIntent(args.state.stripeIntent)
         }
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.state.customerPaymentMethods
+        savedStateHandle[SAVE_SAVED_SELECTION] = args.state.savedSelection
         savedStateHandle[SAVE_PROCESSING] = false
 
         // If we are not recovering from don't keep activities than the resources
@@ -119,6 +118,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
             lpmServerSpec =
                 lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
         }
+
+        transitionToFirstScreenWhenReady()
     }
 
     override val shouldCompleteLinkFlowInline: Boolean = false
@@ -129,7 +130,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onPaymentResult(PaymentResult.Canceled)
             }
             LinkHandler.ProcessingState.Completed -> {
-                eventReporter.onPaymentSuccess(PaymentSelection.Link)
+                eventReporter.onPaymentSuccess(
+                    PaymentSelection.Link,
+                    stripeIntent.value?.currency
+                )
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 onPaymentResult(PaymentResult.Completed)
             }
@@ -198,7 +202,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         selection.value?.let { paymentSelection ->
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
-            eventReporter.onSelectPaymentOption(paymentSelection)
+            eventReporter.onSelectPaymentOption(paymentSelection, stripeIntent.value?.currency)
 
             when (paymentSelection) {
                 is PaymentSelection.Saved ->
@@ -295,22 +299,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 paymentMethods = paymentMethods.value
             )
         )
-    }
-
-    fun transitionToFirstScreenWhenReady() {
-        viewModelScope.launch {
-            awaitReady()
-            awaitRepositoriesReady()
-            transitionToFirstScreen()
-        }
-    }
-
-    private suspend fun awaitReady() {
-        isReadyEvents.asFlow().filter { it.peekContent() }.first()
-    }
-
-    private suspend fun awaitRepositoriesReady() {
-        isResourceRepositoryReady.filter { it }.first()
     }
 
     override fun transitionToFirstScreen() {

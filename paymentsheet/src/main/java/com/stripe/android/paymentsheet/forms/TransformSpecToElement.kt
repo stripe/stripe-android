@@ -4,10 +4,10 @@ import android.content.Context
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
-import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.uicore.address.AddressRepository
 import javax.inject.Inject
 
 /**

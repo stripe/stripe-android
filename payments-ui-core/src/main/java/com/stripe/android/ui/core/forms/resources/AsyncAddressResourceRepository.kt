@@ -4,7 +4,7 @@ import android.content.res.Resources
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.joinAll

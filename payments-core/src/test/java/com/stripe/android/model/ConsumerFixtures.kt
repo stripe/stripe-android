@@ -1,42 +1,8 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
-import com.stripe.android.model.parsers.ConsumerSessionJsonParser
-import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import org.json.JSONObject
 
 object ConsumerFixtures {
-
-    val NO_EXISTING_CONSUMER_JSON = JSONObject(
-        """
-            {
-              "consumer_session": null,
-              "error_message": "No consumer found for the given email address.",
-              "exists": false
-            }
-        """.trimIndent()
-    )
-    val NO_EXISTING_CONSUMER = ConsumerSessionLookupJsonParser().parse(NO_EXISTING_CONSUMER_JSON)
-
-    val EXISTING_CONSUMER_JSON = JSONObject(
-        """
-            {
-              "auth_session_client_secret": null,
-              "consumer_session": {
-                "client_secret": "secret",
-                "email_address": "email@example.com",
-                "redacted_phone_number": "+1********68",
-                "support_payment_details_types": [
-                  "CARD"
-                ],
-                "verification_sessions": []
-              },
-              "error_message": null,
-              "exists": true
-            }
-        """.trimIndent()
-    )
-    val EXISTING_CONSUMER = ConsumerSessionLookupJsonParser().parse(EXISTING_CONSUMER_JSON)
 
     val CONSUMER_VERIFICATION_STARTED_JSON = JSONObject(
         """
@@ -60,8 +26,6 @@ object ConsumerFixtures {
             }
         """.trimIndent()
     )
-    val CONSUMER_VERIFICATION_STARTED =
-        ConsumerSessionJsonParser().parse(CONSUMER_VERIFICATION_STARTED_JSON)
 
     val CONSUMER_VERIFIED_JSON = JSONObject(
         """
@@ -84,7 +48,6 @@ object ConsumerFixtures {
             }
         """.trimIndent()
     )
-    val CONSUMER_VERIFIED = ConsumerSessionJsonParser().parse(CONSUMER_VERIFIED_JSON)
 
     val CONSUMER_SIGNUP_STARTED_JSON = JSONObject(
         """
@@ -107,7 +70,6 @@ object ConsumerFixtures {
             }
         """.trimIndent()
     )
-    val CONSUMER_SIGNUP_STARTED = ConsumerSessionJsonParser().parse(CONSUMER_SIGNUP_STARTED_JSON)
 
     val CONSUMER_LOGGED_OUT_JSON = JSONObject(
         """
@@ -130,7 +92,6 @@ object ConsumerFixtures {
             }
         """.trimIndent()
     )
-    val CONSUMER_LOGGED_OUT = ConsumerSessionJsonParser().parse(CONSUMER_LOGGED_OUT_JSON)
 
     val CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON = JSONObject(
         """
@@ -167,8 +128,6 @@ object ConsumerFixtures {
             }
         """.trimIndent()
     )
-    val CONSUMER_SINGLE_CARD_PAYMENT_DETAILS =
-        ConsumerPaymentDetailsJsonParser().parse(CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON)
 
     val CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_JSON = JSONObject(
         """
@@ -201,8 +160,6 @@ object ConsumerFixtures {
             }
         """.trimIndent()
     )
-    val CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS =
-        ConsumerPaymentDetailsJsonParser().parse(CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_JSON)
 
     val CONSUMER_PAYMENT_DETAILS_JSON = JSONObject(
         """
@@ -293,6 +250,4 @@ object ConsumerFixtures {
             }
         """.trimIndent()
     )
-    val CONSUMER_PAYMENT_DETAILS =
-        ConsumerPaymentDetailsJsonParser().parse(CONSUMER_PAYMENT_DETAILS_JSON)
 }

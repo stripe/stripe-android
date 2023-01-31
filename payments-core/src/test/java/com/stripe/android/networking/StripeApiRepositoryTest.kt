@@ -10,6 +10,7 @@ import com.stripe.android.FinancialConnectionsFixtures
 import com.stripe.android.FraudDetectionDataFixtures
 import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
+import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.model.StripeFileParams
@@ -230,14 +231,6 @@ internal class StripeApiRepositoryTest {
         assertEquals(
             "https://api.stripe.com/v1/payment_intents/pi123/confirm",
             StripeApiRepository.getConfirmPaymentIntentUrl("pi123")
-        )
-    }
-
-    @Test
-    fun testConsumerSessionLookupUrl() {
-        assertEquals(
-            "https://api.stripe.com/v1/consumers/sessions/lookup",
-            StripeApiRepository.consumerSessionLookupUrl
         )
     }
 
@@ -676,6 +669,7 @@ internal class StripeApiRepositoryTest {
                 )
         }
 
+    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun confirmPaymentIntent_withPaymentMethodCreateParamsAttribution_setsCorrectPaymentUserAgent() =
         runTest {
@@ -786,6 +780,7 @@ internal class StripeApiRepositoryTest {
                 )
         }
 
+    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun confirmSetupIntent_withPaymentMethodCreateParamsAttribution_setsCorrectPaymentUserAgent() =
         runTest {
@@ -1688,36 +1683,6 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRefresh)
-        }
-
-    @Test
-    fun `lookupConsumerSession() sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ConsumerFixtures.EXISTING_CONSUMER_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val email = "email@example.com"
-            val cookie = "cookie1"
-            create().lookupConsumerSession(
-                email,
-                cookie,
-                DEFAULT_OPTIONS
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-            with(params) {
-                assertEquals(this["email_address"], email)
-                withNestedParams("cookies") {
-                    assertEquals(this["verification_session_client_secrets"], listOf(cookie))
-                }
-            }
         }
 
     @Test

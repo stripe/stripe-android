@@ -11,6 +11,7 @@
     <ID>SerialVersionUIDInSerializableClass:StripeError.kt$StripeError : StripeModelSerializable</ID>
     <ID>SwallowedException:StripeJsonUtils.kt$StripeJsonUtils$classCastException: ClassCastException</ID>
     <ID>SwallowedException:StripeJsonUtils.kt$StripeJsonUtils$jsonException: JSONException</ID>
+    <ID>ThrowsCount:RequestExecutor.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) suspend fun &lt;Response : StripeModel> executeRequestWithModelJsonParser( stripeNetworkClient: StripeNetworkClient, stripeErrorJsonParser: StripeErrorJsonParser, request: StripeRequest, responseJsonParser: ModelJsonParser&lt;Response>, ): Response</ID>
     <ID>TooGenericExceptionCaught:Storage.kt$SharedPreferencesStorage$t: Throwable</ID>
     <ID>TooManyFunctions:Storage.kt$SharedPreferencesStorage : Storage</ID>
     <ID>TooManyFunctions:Storage.kt$Storage</ID>

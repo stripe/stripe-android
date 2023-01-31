@@ -53,12 +53,13 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.validate
-import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.uicore.address.AddressRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -338,7 +339,10 @@ internal class DefaultFlowController @Inject internal constructor(
                         )
                     },
                     onFailure = {
-                        eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
+                        eventReporter.onPaymentFailure(
+                            PaymentSelection.GooglePay,
+                            viewModel.state?.stripeIntent?.currency
+                        )
                         paymentResultCallback.onPaymentSheetResult(
                             PaymentSheetResult.Failed(it)
                         )
@@ -346,7 +350,10 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
-                eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
+                eventReporter.onPaymentFailure(
+                    PaymentSelection.GooglePay,
+                    viewModel.state?.stripeIntent?.currency
+                )
                 paymentResultCallback.onPaymentSheetResult(
                     PaymentSheetResult.Failed(
                         GooglePayException(
@@ -436,12 +443,23 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentResult.Completed -> {
                 if ((viewModel.paymentSelection as? PaymentSelection.Saved)?.isGooglePay == true) {
                     // Google Pay is treated as a saved PM after confirmation
-                    eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
+                    eventReporter.onPaymentSuccess(
+                        PaymentSelection.GooglePay,
+                        viewModel.state?.stripeIntent?.currency
+                    )
                 } else {
-                    eventReporter.onPaymentSuccess(viewModel.paymentSelection)
+                    eventReporter.onPaymentSuccess(
+                        viewModel.paymentSelection,
+                        viewModel.state?.stripeIntent?.currency
+                    )
                 }
             }
-            is PaymentResult.Failed -> eventReporter.onPaymentFailure(viewModel.paymentSelection)
+            is PaymentResult.Failed -> {
+                eventReporter.onPaymentFailure(
+                    viewModel.paymentSelection,
+                    viewModel.state?.stripeIntent?.currency
+                )
+            }
             else -> {}
         }
     }

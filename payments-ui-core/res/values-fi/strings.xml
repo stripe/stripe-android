@@ -1,55 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">Osoiterivi 2</string>
-  <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">Emiraatti</string>
-  <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Esikaupunki tai kaupunki</string>
-  <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Kunta</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">Cedex</string>
-  <!-- Label of an address field -->
-  <string name="address_label_department">Osasto</string>
-  <!-- Label for the district field on an address form -->
-  <string name="address_label_district">Piirikunta</string>
-  <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">Alue</string>
-  <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">EIR-koodi</string>
-  <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">Kaupunkikunta</string>
-  <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">Pin</string>
-  <!-- Used to describe part of an address -->
-  <string name="address_label_island">Saari</string>
-  <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">Prefektuuri</string>
-  <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">Do Si</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">Naapurusto</string>
-  <!-- Label of an address field -->
-  <string name="address_label_oblast">Oblasti</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">Toimipaikka tai kylä</string>
-  <!-- Label of an address field -->
-  <string name="address_label_suburb">Esikaupunki</string>
-  <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">Kylä tai kaupunkikunta</string>
-  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
-  <string name="address_search_content_description">Etsi</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Maksu <num_installments/> korottomassa <installment_price/> osassa maksutavalla <img/>]]></string>
   <!-- Text for back button -->
   <string name="back">Takaisin</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Laskutusosoite</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">Sähköposti</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Sähköposti on virheellinen.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">EPS-pankki</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

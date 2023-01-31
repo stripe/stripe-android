@@ -2,6 +2,8 @@ package com.stripe.android.ui.core.elements
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 
@@ -13,7 +15,7 @@ class CardDetailsSectionElement(
     override val identifier: IdentifierSpec,
     override val controller: CardDetailsSectionController =
         CardDetailsSectionController(context, initialValues, viewOnlyFields)
-) : FormElement() {
+) : FormElement {
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         controller.cardDetailsElement.getFormFieldValueFlow()
 

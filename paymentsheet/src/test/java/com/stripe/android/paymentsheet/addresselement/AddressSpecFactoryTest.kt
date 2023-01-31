@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.elements.AddressType
-import com.stripe.android.ui.core.elements.PhoneNumberState
+import com.stripe.android.uicore.elements.AddressType
+import com.stripe.android.uicore.elements.PhoneNumberState
 import org.junit.Test
 
 class AddressSpecFactoryTest {

@@ -7,27 +7,29 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ScrollView
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
-import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.databinding.FragmentPaymentSheetPrimaryButtonBinding
 import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
-import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.ui.convert
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.flow.filter
@@ -53,23 +55,16 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
-    override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val linkAuthView: ComposeView by lazy { viewBinding.linkAuth }
-    override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
-    override val testModeIndicator: TextView by lazy { viewBinding.testmode }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val header: ComposeView by lazy { viewBinding.header }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
-    override val messageView: TextView by lazy { viewBinding.message }
     override val notesView: ComposeView by lazy { viewBinding.notes }
-    override val primaryButton: PrimaryButton by lazy { viewBinding.buyButton }
     override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
-    private val buttonContainer: ViewGroup by lazy { viewBinding.buttonContainer }
     private val topContainer by lazy { viewBinding.topContainer }
     private val googlePayButton by lazy { viewBinding.googlePayButton }
     private val linkButton by lazy { viewBinding.linkButton }
-    private val topMessage by lazy { viewBinding.topMessage }
     private val googlePayDivider by lazy { viewBinding.googlePayDivider }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,6 +97,24 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             bottomSheetController.expand()
         }
 
+        val elevation = resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
+        scrollView.viewTreeObserver.addOnScrollChangedListener {
+            viewBinding.topBar.elevation = if (scrollView.scrollY > 0) {
+                elevation
+            } else {
+                0f
+            }
+        }
+
+        // This is temporary until we embed the top bar in a Scaffold
+        viewBinding.topBar.clipToPadding = false
+
+        viewBinding.topBar.setContent {
+            StripeTheme {
+                PaymentSheetTopBar(viewModel)
+            }
+        }
+
         setupTopContainer()
 
         linkButton.apply {
@@ -111,20 +124,43 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             linkPaymentLauncher = linkLauncher
         }
 
-        viewBinding.contentContainer.setContent {
+        viewBinding.topMessage.setContent {
             StripeTheme {
-                val currentScreen by viewModel.currentScreen.collectAsState()
+                val buttonState by viewModel.googlePayButtonState.collectAsState(initial = null)
 
-                LaunchedEffect(currentScreen) {
-                    buttonContainer.isVisible = currentScreen.showsBuyButton
+                buttonState?.errorMessage?.let { error ->
+                    ErrorMessage(
+                        error = error.message,
+                        modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
+                    )
                 }
-
-                currentScreen.PaymentSheetContent(validatedArgs)
             }
         }
 
-        if (savedInstanceState == null) {
-            viewModel.transitionToFirstScreenWhenReady()
+        viewBinding.contentContainer.setContent {
+            StripeTheme {
+                val currentScreen by viewModel.currentScreen.collectAsState()
+                currentScreen.Content(viewModel)
+            }
+        }
+
+        viewBinding.message.setContent {
+            StripeTheme {
+                val buttonState by viewModel.buyButtonState.collectAsState(initial = null)
+
+                buttonState?.errorMessage?.let { error ->
+                    ErrorMessage(
+                        error = error.message,
+                        modifier = Modifier.padding(vertical = 2.dp, horizontal = 20.dp),
+                    )
+                }
+            }
+        }
+
+        viewBinding.buttonContainer.setContent {
+            AndroidViewBinding(
+                factory = FragmentPaymentSheetPrimaryButtonBinding::inflate,
+            )
         }
 
         viewModel.processing.filter { it }.launchAndCollectIn(this) {
@@ -140,14 +176,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             googlePayButton.isEnabled = enabled
         }
 
-        viewModel.selection.filterNotNull().launchAndCollectIn(this) {
+        viewModel.selection.launchAndCollectIn(this) {
             viewModel.clearErrorMessages()
-            resetPrimaryButtonState()
-        }
-
-        viewModel.buyButtonState.launchAndCollectIn(this) { viewState ->
-            updateErrorMessage(messageView, viewState?.errorMessage)
-            viewBinding.buyButton.updateState(viewState?.convert())
         }
     }
 
@@ -169,26 +199,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         earlyExitDueToIllegalState = result.isFailure
         return result
-    }
-
-    override fun resetPrimaryButtonState() {
-        viewBinding.buyButton.updateState(PrimaryButton.State.Ready)
-
-        val customLabel = starterArgs?.config?.primaryButtonLabel
-
-        val label = if (customLabel != null) {
-            starterArgs?.config?.primaryButtonLabel
-        } else if (viewModel.isProcessingPaymentIntent) {
-            viewModel.amount.value?.buildPayButtonLabel(resources)
-        } else {
-            getString(R.string.stripe_setup_button_label)
-        }
-
-        viewBinding.buyButton.setLabel(label)
-
-        viewBinding.buyButton.setOnClickListener {
-            viewModel.checkout()
-        }
     }
 
     private fun setupTopContainer() {
@@ -220,7 +230,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewModel.googlePayButtonState.launchAndCollectIn(this) { viewState ->
-            updateErrorMessage(topMessage, viewState?.errorMessage)
             googlePayButton.updateState(viewState?.convert())
         }
     }
@@ -238,20 +247,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewModel.unregisterFromActivity()
         }
         super.onDestroy()
-    }
-
-    /**
-     * Convert a [PaymentSheetViewState] to a [PrimaryButton.State]
-     */
-    private fun PaymentSheetViewState.convert(): PrimaryButton.State {
-        return when (this) {
-            is PaymentSheetViewState.Reset ->
-                PrimaryButton.State.Ready
-            is PaymentSheetViewState.StartProcessing ->
-                PrimaryButton.State.StartProcessing
-            is PaymentSheetViewState.FinishProcessing ->
-                PrimaryButton.State.FinishProcessing(this.onComplete)
-        }
     }
 
     private fun finishWithError(error: Throwable?) {

@@ -356,6 +356,13 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = true
+        ),
+        CashAppPay(
+            code = "cashapp",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

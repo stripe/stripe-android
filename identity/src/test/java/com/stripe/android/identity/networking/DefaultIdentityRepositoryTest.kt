@@ -3,6 +3,8 @@ package com.stripe.android.identity.networking
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.model.Country
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
@@ -16,6 +18,7 @@ import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.createCollectedDataParamEntry
+import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.utils.IdentityIO
@@ -49,28 +52,112 @@ class DefaultIdentityRepositoryTest {
     private val requestCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
 
     @Test
-    fun `retrieveVerificationPage returns VerificationPage`() {
-        runBlocking {
-            whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
-                StripeResponse(
-                    code = HTTP_OK,
-                    body = VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING
-                )
+    fun `retrieveVerificationPage - type document, not require live capture`() {
+        testFetchVerificationPage(VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING) {
+            assertThat(it.documentCapture.requireLiveCapture).isFalse()
+            assertThat(it.requirements.missing).containsExactly(
+                Requirement.BIOMETRICCONSENT,
+                Requirement.IDDOCUMENTTYPE,
+                Requirement.IDDOCUMENTFRONT,
+                Requirement.IDDOCUMENTBACK
             )
-            val verificationPage = identityRepository.retrieveVerificationPage(
-                TEST_ID,
-                TEST_EPHEMERAL_KEY
+        }
+    }
+
+    @Test
+    fun `retrieveVerificationPage - type document, require selfie`() {
+        testFetchVerificationPage(VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING) {
+            assertThat(it.selfieCapture).isNotNull()
+            assertThat(it.requirements.missing).containsExactly(
+                Requirement.BIOMETRICCONSENT,
+                Requirement.IDDOCUMENTTYPE,
+                Requirement.IDDOCUMENTFRONT,
+                Requirement.IDDOCUMENTBACK,
+                Requirement.FACE
             )
+        }
+    }
 
-            assertThat(verificationPage).isInstanceOf(VerificationPage::class.java)
-            verify(mockStripeNetworkClient).executeRequest(requestCaptor.capture())
+    @Test
+    fun `retrieveVerificationPage - type document, require id_number`() {
+        testFetchVerificationPage(VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING) {
+            assertThat(it.requirements.missing).containsExactly(
+                Requirement.BIOMETRICCONSENT,
+                Requirement.IDDOCUMENTTYPE,
+                Requirement.IDDOCUMENTFRONT,
+                Requirement.IDDOCUMENTBACK,
+                Requirement.IDNUMBER
+            )
+        }
+    }
 
-            val request = requestCaptor.firstValue
+    @Test
+    fun `retrieveVerificationPage - type document, require address`() {
+        testFetchVerificationPage(VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING) {
+            assertThat(it.requirements.missing).containsExactly(
+                Requirement.BIOMETRICCONSENT,
+                Requirement.IDDOCUMENTTYPE,
+                Requirement.IDDOCUMENTFRONT,
+                Requirement.IDDOCUMENTBACK,
+                Requirement.ADDRESS
+            )
+        }
+    }
 
-            assertThat(request).isInstanceOf(ApiRequest::class.java)
-            assertThat(request.method).isEqualTo(StripeRequest.Method.GET)
-            assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID")
-            assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
+    @Test
+    fun `retrieveVerificationPage - type document, require address and id_number`() {
+        testFetchVerificationPage(
+            VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_STRING
+        ) {
+            assertThat(it.requirements.missing).containsExactly(
+                Requirement.BIOMETRICCONSENT,
+                Requirement.IDDOCUMENTTYPE,
+                Requirement.IDDOCUMENTFRONT,
+                Requirement.IDDOCUMENTBACK,
+                Requirement.ADDRESS,
+                Requirement.IDNUMBER,
+            )
+        }
+    }
+
+    @Test
+    fun `retrieveVerificationPage - type id`() {
+        testFetchVerificationPage(
+            VERIFICATION_PAGE_TYPE_ID_NUMBER_JSON_STRING
+        ) {
+            assertThat(it.requirements.missing).containsExactly(
+                Requirement.IDNUMBER,
+                Requirement.NAME,
+                Requirement.DOB
+            )
+        }
+    }
+
+    @Test
+    fun `retrieveVerificationPage - type address`() {
+        testFetchVerificationPage(
+            VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING
+        ) {
+            assertThat(it.requirements.missing).containsExactly(
+                Requirement.ADDRESS,
+                Requirement.NAME,
+                Requirement.DOB
+            )
+        }
+    }
+
+    @Test
+    fun `retrieveVerificationPage - verify individual static page`() {
+        testFetchVerificationPage(
+            VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING
+        ) {
+            assertThat(it.individual).isNotNull()
+            assertThat(requireNotNull(it.individual).addressCountries).hasSize(31)
+            assertThat(requireNotNull(it.individual).idNumberCountries).containsExactly(
+                Country(CountryCode("BR"), "Brazil"),
+                Country(CountryCode("SG"), "Singapore"),
+                Country(CountryCode("US"), "United States"),
+            )
         }
     }
 
@@ -313,6 +400,36 @@ class DefaultIdentityRepositoryTest {
                 assertThat(apiConnectionException.message).isEqualTo("Fail to download file at $TEST_URL")
                 assertThat(apiConnectionException.cause).isSameInstanceAs(networkException)
             }
+        }
+    }
+
+    private fun testFetchVerificationPage(
+        body: String,
+        verificationPageBlock: (VerificationPage) -> Unit
+    ) {
+        runBlocking {
+            whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
+                StripeResponse(
+                    code = HTTP_OK,
+                    body = body
+                )
+            )
+            val verificationPage = identityRepository.retrieveVerificationPage(
+                TEST_ID,
+                TEST_EPHEMERAL_KEY
+            )
+
+            assertThat(verificationPage).isInstanceOf(VerificationPage::class.java)
+            verify(mockStripeNetworkClient).executeRequest(requestCaptor.capture())
+
+            val request = requestCaptor.firstValue
+
+            assertThat(request).isInstanceOf(ApiRequest::class.java)
+            assertThat(request.method).isEqualTo(StripeRequest.Method.GET)
+            assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID")
+            assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
+
+            verificationPageBlock(verificationPage)
         }
     }
 

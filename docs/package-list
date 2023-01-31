@@ -27,6 +27,8 @@ com.stripe.android.link.model
 com.stripe.android.link.ui
 com.stripe.android.link.ui.inline
 com.stripe.android.link.ui.verification
+module:network-testing
+com.stripe.android.networktesting
 module:payments-core
 com.stripe.android
 com.stripe.android.cards
@@ -54,6 +56,7 @@ com.stripe.android
 com.stripe.android.cards
 com.stripe.android.model
 com.stripe.android.model.parsers
+com.stripe.android.repository
 module:payments-ui-core
 com.stripe.android.paymentsheet.forms
 com.stripe.android.ui.core
@@ -61,7 +64,6 @@ com.stripe.android.ui.core.address
 com.stripe.android.ui.core.elements
 com.stripe.android.ui.core.elements.autocomplete
 com.stripe.android.ui.core.elements.autocomplete.model
-com.stripe.android.ui.core.elements.menu
 com.stripe.android.ui.core.forms
 com.stripe.android.ui.core.forms.resources
 com.stripe.android.ui.core.forms.resources.injection
@@ -83,7 +85,10 @@ com.stripe.android.core.storage
 com.stripe.android.core.utils
 com.stripe.android.core.version
 module:stripe-ui-core
+com.stripe.android.uicore
+com.stripe.android.uicore.address
 com.stripe.android.uicore.elements
+com.stripe.android.uicore.elements.menu
 com.stripe.android.uicore.format
 com.stripe.android.uicore.forms
 com.stripe.android.uicore.image

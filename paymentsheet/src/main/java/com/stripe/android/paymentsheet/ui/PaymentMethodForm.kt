@@ -12,8 +12,8 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.FormUI
-import com.stripe.android.ui.core.elements.FormElement
-import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
 
 @Composable

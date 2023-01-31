@@ -68,6 +68,7 @@ class AlipayPaymentWebActivity : StripeIntentActivity() {
         stripeAccountId: String?,
         existingPaymentMethodId: String?,
         mandateDataParams: MandateDataParams?,
+        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
         onPaymentIntentCreated: (String) -> Unit
     ) {
         viewModel.status.value +=

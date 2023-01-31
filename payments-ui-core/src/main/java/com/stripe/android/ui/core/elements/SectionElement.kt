@@ -1,6 +1,9 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -10,7 +13,7 @@ data class SectionElement(
     override val identifier: IdentifierSpec,
     val fields: List<SectionFieldElement>,
     override val controller: SectionController
-) : FormElement() {
+) : FormElement {
     constructor(
         identifier: IdentifierSpec,
         field: SectionFieldElement,

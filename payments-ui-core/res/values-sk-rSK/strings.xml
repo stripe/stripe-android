@@ -1,55 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">Riadok adresy 2</string>
-  <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">Emirát</string>
-  <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Predmestie alebo mesto</string>
-  <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Parish</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">Cedex</string>
-  <!-- Label of an address field -->
-  <string name="address_label_department">Oddelenie</string>
-  <!-- Label for the district field on an address form -->
-  <string name="address_label_district">Obvod</string>
-  <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">Okres</string>
-  <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">Kód Eir</string>
-  <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">Okres</string>
-  <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">Pin</string>
-  <!-- Used to describe part of an address -->
-  <string name="address_label_island">Island</string>
-  <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">Prefektúra</string>
-  <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">Do Si</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">Štvrť</string>
-  <!-- Label of an address field -->
-  <string name="address_label_oblast">Oblasť</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">Pošta alebo mesto</string>
-  <!-- Label of an address field -->
-  <string name="address_label_suburb">Predmestie</string>
-  <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">Obec alebo obvod</string>
-  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
-  <string name="address_search_content_description">Vyhľadať</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Zaplaťte v <num_installments/>bezúročných splátkach čiastku <installment_price/> pomocou <img/>]]></string>
   <!-- Text for back button -->
   <string name="back">Späť</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Fakturačná adresa</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">E-mail</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Váš e-mail je neplatný.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">EPS banka</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

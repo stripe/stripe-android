@@ -91,6 +91,7 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
             StripeIntent.NextActionType.AlipayRedirect,
             StripeIntent.NextActionType.BlikAuthorize,
             StripeIntent.NextActionType.WeChatPayRedirect,
+            StripeIntent.NextActionType.CashAppRedirect,
             null -> {
                 false
             }

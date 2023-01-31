@@ -8,9 +8,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth
 import com.stripe.android.R
 import com.stripe.android.uicore.DefaultStripeTheme
-import com.stripe.android.ui.core.elements.AddressTextFieldController
-import com.stripe.android.ui.core.elements.AddressTextFieldUI
-import com.stripe.android.ui.core.elements.SimpleTextFieldConfig
+import com.stripe.android.uicore.elements.AddressTextFieldController
+import com.stripe.android.uicore.elements.AddressTextFieldUI
+import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -8,7 +8,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -48,6 +47,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -59,9 +59,9 @@ import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -71,7 +71,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -168,12 +167,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val walletsContainerState: Flow<WalletsContainerState> = combine(
         linkHandler.isLinkEnabled,
         googlePayState,
-        isReadyEvents.asFlow(),
         supportedPaymentMethodsFlow,
-    ) { isLinkAvailable, googlePayState, isReady, paymentMethodTypes ->
+    ) { isLinkAvailable, googlePayState, paymentMethodTypes ->
         WalletsContainerState(
-            showLink = isLinkAvailable == true && isReady.peekContent() == true,
-            showGooglePay = googlePayState.isReadyForUse && isReady.peekContent() == true,
+            showLink = isLinkAvailable == true,
+            showGooglePay = googlePayState.isReadyForUse,
             dividerTextResource = if (paymentMethodTypes.singleOrNull() == Card.code) {
                 R.string.stripe_paymentsheet_or_pay_with_card
             } else {
@@ -192,9 +190,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         eventReporter.onInit(config)
-        if (googlePayLauncherConfig == null) {
-            savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.NotAvailable
-        }
 
         viewModelScope.launch {
             loadPaymentSheetState()
@@ -209,7 +204,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
             }
             LinkHandler.ProcessingState.Completed -> {
-                eventReporter.onPaymentSuccess(PaymentSelection.Link)
+                eventReporter.onPaymentSuccess(PaymentSelection.Link, stripeIntent.value?.currency)
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
             }
@@ -264,6 +259,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         lpmServerSpec = lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
 
         savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
+        savedStateHandle[SAVE_SAVED_SELECTION] = state.savedSelection
+
+        savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (state.isGooglePayReady) {
+            GooglePayState.Available
+        } else {
+            GooglePayState.NotAvailable
+        }
+
         setStripeIntent(state.stripeIntent)
 
         val linkState = state.linkState
@@ -271,6 +274,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         linkHandler.setupLinkLaunchingEagerly(viewModelScope, linkState)
 
         resetViewState()
+        transitionToFirstScreenWhenReady()
     }
 
     fun setupGooglePay(
@@ -282,13 +286,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 googlePayPaymentMethodLauncherFactory.create(
                     lifecycleScope = lifecycleScope,
                     config = config,
-                    readyCallback = { isReady ->
-                        savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (isReady) {
-                            GooglePayState.Available
-                        } else {
-                            GooglePayState.NotAvailable
-                        }
-                    },
+                    readyCallback = { /* Nothing to do here */ },
                     activityResultLauncher = activityResultLauncher
                 )
         }
@@ -447,7 +445,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun processPayment(stripeIntent: StripeIntent, paymentResult: PaymentResult) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
-                eventReporter.onPaymentSuccess(selection.value)
+                eventReporter.onPaymentSuccess(selection.value, stripeIntent.currency)
 
                 // SavedSelection needs to happen after new cards have been saved.
                 when (selection.value) {
@@ -466,7 +464,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             else -> {
                 if (paymentResult is PaymentResult.Failed) {
-                    eventReporter.onPaymentFailure(selection.value)
+                    eventReporter.onPaymentFailure(selection.value, stripeIntent.currency)
                 }
 
                 runCatching {
@@ -494,7 +492,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 logger.error("Error processing Google Pay payment", result.error)
-                eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
+                eventReporter.onPaymentFailure(
+                    PaymentSelection.GooglePay,
+                    stripeIntent.value?.currency
+                )
                 onError(
                     when (result.errorCode) {
                         GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
@@ -528,20 +529,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onError(error: String?) = resetViewState(error)
 
-    fun transitionToFirstScreenWhenReady() {
-        viewModelScope.launch {
-            awaitReady()
-            transitionToFirstScreen()
-        }
-    }
-
-    private suspend fun awaitReady() {
-        isReadyEvents.asFlow().filter { it.peekContent() }.first()
-    }
-
     override fun transitionToFirstScreen() {
         val target = if (paymentMethods.value.isNullOrEmpty()) {
-            updateSelection(null)
             PaymentSheetScreen.AddFirstPaymentMethod
         } else {
             PaymentSheetScreen.SelectSavedPaymentMethods

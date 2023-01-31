@@ -2,11 +2,20 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.19.1 - 2023-01-30
+
+### PaymentSheet
+* [FIXED][6136](https://github.com/stripe/stripe-android/pull/6136) Fixed an issue where the primary button wouldn't show the amount for payment intents.
+* [FIXED][6142](https://github.com/stripe/stripe-android/pull/6142) Fixed an issue where pressing the back button during processing would cause a `PaymentSheetResult.Canceled`.
+
+## 20.19.0 - 2023-01-23
+
 ### PaymentSheet
 * [CHANGED][5927](https://github.com/stripe/stripe-android/pull/5927) Customers can now re-enter the autocomplete flow of the Address Element by tapping an icon in the line 1 text field.
 * [FIXED][6090](https://github.com/stripe/stripe-android/pull/6090) Fixed an issue where adding a payment method to a Link account didn’t work when using `PaymentSheet.FlowController`.
 
 ## 20.18.0 - 2023-01-17
+
 ### Payments
 * [ADDED][6012](https://github.com/stripe/stripe-android/pull/6012) Support for the predictive back gesture.
 

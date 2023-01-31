@@ -18,8 +18,6 @@
   <string name="address_country_invalid">Het land is ongeldig</string>
   <!-- Error text indicating that county is required, used for UK addresses -->
   <string name="address_county_required">Geef je graafschap op</string>
-  <!-- Caption for Address field on address form -->
-  <string name="address_label_address">Adres</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Adresregel 1 (optioneel)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -70,10 +68,6 @@
   <string name="address_required">Geef je adres op</string>
   <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Geef je staat op</string>
-  <!-- Error text indicating zip code is invalid, used for US addresses -->
-  <string name="address_zip_invalid">Je postcode is ongeldig.</string>
-  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
-  <string name="address_zip_postal_invalid">Je postcode is ongeldig</string>
   <!-- Pay over time with Affirm copy -->
   <string name="affirm_buy_now_pay_later">Betalen in termijnen met &lt;img src=\"affirm\"&gt;.</string>
   <!-- Label for Name on account field on form -->

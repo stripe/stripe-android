@@ -23,9 +23,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
-import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.OTPController
-import com.stripe.android.ui.core.elements.OTPElement
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.OTPController
+import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import org.junit.Rule

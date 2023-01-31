@@ -29,7 +29,15 @@ internal data class CollectedDataParam(
     @SerialName("id_document_back")
     val idDocumentBack: DocumentUploadParam? = null,
     @SerialName("face")
-    val face: FaceUploadParam? = null
+    val face: FaceUploadParam? = null,
+    @SerialName("id_number")
+    val idNumber: IdNumberParam? = null,
+    @SerialName("dob")
+    val dob: DobParam? = null,
+    @SerialName("name")
+    val name: NameParam? = null,
+    @SerialName("address")
+    val address: RequiredInternationalAddress? = null
 ) : Parcelable {
     @Serializable
     internal enum class Type {
@@ -161,24 +169,15 @@ internal data class CollectedDataParam(
 
         fun CollectedDataParam.clearData(field: Requirement): CollectedDataParam {
             return when (field) {
-                Requirement.BIOMETRICCONSENT ->
-                    this.copy(
-                        biometricConsent = null
-                    )
-                Requirement.IDDOCUMENTBACK ->
-                    this.copy(
-                        idDocumentBack = null
-                    )
-                Requirement.IDDOCUMENTFRONT ->
-                    this.copy(
-                        idDocumentFront = null
-                    )
-                Requirement.IDDOCUMENTTYPE ->
-                    this.copy(
-                        idDocumentType = null
-                    )
-                Requirement.FACE ->
-                    this.copy(face = null)
+                Requirement.BIOMETRICCONSENT -> this.copy(biometricConsent = null)
+                Requirement.IDDOCUMENTBACK -> this.copy(idDocumentBack = null)
+                Requirement.IDDOCUMENTFRONT -> this.copy(idDocumentFront = null)
+                Requirement.IDDOCUMENTTYPE -> this.copy(idDocumentType = null)
+                Requirement.FACE -> this.copy(face = null)
+                Requirement.IDNUMBER -> this.copy(idNumber = null)
+                Requirement.DOB -> this.copy(dob = null)
+                Requirement.NAME -> this.copy(name = null)
+                Requirement.ADDRESS -> this.copy(address = null)
             }
         }
 
