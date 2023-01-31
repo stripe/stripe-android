@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Form
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.SignUpState.*
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -66,7 +67,18 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                         validEmail = validEmail,
                         validPhone = validPhone
                     )
-                }.collect { setState { copy(form = it) } }
+                }.collect {
+                    setState {
+                        copy(
+                            form = it,
+                            signupState = if (it.validEmail != null) {
+                                InputtingPhoneOrName
+                            } else {
+                                InputtingEmail
+                            }
+                        )
+                    }
+                }
             },
             onFail = { error ->
                 logger.error("Error fetching payload", error)
@@ -87,12 +99,12 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             val state = awaitState()
             val authSessionId = getManifest().activeAuthSession!!.id
             val selectedAccounts = getAuthorizationSessionAccounts(authSessionId)
-            val form = state.form
-            require(form.valid()) { "Form invalid! $form" }
+            val phoneController = state.payload()!!.phoneController
+            require(state.form.valid()) { "Form invalid! ${state.form}" }
             saveAccountToLink(
-                country = state.payload()!!.phoneController.getCountryCode(),
-                email = form.validEmail!!,
-                phoneNumber = form.validPhone!!,
+                country = phoneController.getCountryCode(),
+                email = state.form.validEmail!!,
+                phoneNumber = phoneController.getE164PhoneNumber(state.form.validPhone!!),
                 selectedAccounts = selectedAccounts.data.map { it.id },
             ).also {
                 goNext(nextPane = it.nextPane)
@@ -129,6 +141,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
 internal data class NetworkingLinkSignupState(
     val payload: Async<Payload> = Uninitialized,
     val saveAccountToLink: Async<FinancialConnectionsSessionManifest> = Uninitialized,
+    val signupState: SignUpState = InputtingEmail,
     val form: Form = Form()
 ) : MavericksState {
 
@@ -139,6 +152,15 @@ internal data class NetworkingLinkSignupState(
         fun valid(): Boolean {
             return validEmail != null && validPhone != null
         }
+    }
+
+    /**
+     * Enum representing the state of the Sign Up screen.
+     */
+    internal enum class SignUpState {
+        InputtingEmail,
+        VerifyingEmail,
+        InputtingPhoneOrName
     }
 
     data class Payload(

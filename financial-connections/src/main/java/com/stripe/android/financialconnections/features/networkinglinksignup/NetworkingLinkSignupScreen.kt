@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,6 +26,7 @@ import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Form
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.SignUpState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -74,7 +76,8 @@ private fun NetworkingLinkSignupContent(
                 scrollState = scrollState,
                 validForm = state.form.valid(),
                 payload = payload(),
-                onSaveToLink = onSaveToLink
+                onSaveToLink = onSaveToLink,
+                signupState = state.signupState
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -89,6 +92,7 @@ private fun NetworkingLinkSignupContent(
 private fun NetworkingLinkSignupLoaded(
     scrollState: ScrollState,
     validForm: Boolean,
+    signupState: SignUpState,
     payload: Payload,
     onSaveToLink: () -> Unit
 ) {
@@ -123,11 +127,15 @@ private fun NetworkingLinkSignupLoaded(
                 imeAction = ImeAction.Default,
                 enabled = true,
             )
-            PhoneNumberCollectionSection(
-                phoneNumberController = payload.phoneController,
-                imeAction = ImeAction.Default,
-                enabled = true,
-            )
+            AnimatedVisibility(
+                visible = signupState == SignUpState.InputtingPhoneOrName
+            ) {
+                PhoneNumberCollectionSection(
+                    phoneNumberController = payload.phoneController,
+                    imeAction = ImeAction.Default,
+                    enabled = true,
+                )
+            }
             Spacer(modifier = Modifier.weight(1f))
         }
         Column(
@@ -138,14 +146,18 @@ private fun NetworkingLinkSignupLoaded(
                 bottom = 24.dp
             )
         ) {
-            FinancialConnectionsButton(
-                enabled = validForm,
-                type = FinancialConnectionsButton.Type.Primary,
-                onClick = onSaveToLink,
-                modifier = Modifier
-                    .fillMaxWidth()
+            AnimatedVisibility(
+                visible = signupState == SignUpState.InputtingPhoneOrName
             ) {
-                Text(text = "Save to Link")
+                FinancialConnectionsButton(
+                    enabled = validForm,
+                    type = FinancialConnectionsButton.Type.Primary,
+                    onClick = onSaveToLink,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(text = "Save to Link")
+                }
             }
             FinancialConnectionsButton(
                 type = FinancialConnectionsButton.Type.Secondary,
@@ -164,8 +176,7 @@ private fun NetworkingLinkSignupLoaded(
 internal fun NetworkingLinkSignupScreenPreview() {
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
-            state =
-            NetworkingLinkSignupState(
+            state = NetworkingLinkSignupState(
                 payload = Success(
                     Payload(
                         emailController = EmailConfig.createController(""),
