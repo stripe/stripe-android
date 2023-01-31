@@ -91,7 +91,7 @@ ext {
     espressoVersion = '3.5.0'
     jsonVersion = '20220924'
     uiautomator = '2.2.0'
-    showkaseVersion = '1.0.0-beta14'
+    showkaseVersion = '1.0.0-kotlin1.5.30-1'
 
     group_name = GROUP
     version_name = VERSION_NAME
