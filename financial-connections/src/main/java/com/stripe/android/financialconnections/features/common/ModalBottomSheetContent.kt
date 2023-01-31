@@ -99,6 +99,7 @@ private fun ModalBottomSheetContent(
     Column {
         Column(
             Modifier
+                .weight(1f, fill = false)
                 .verticalScroll(scrollState)
                 .padding(24.dp)
         ) {
