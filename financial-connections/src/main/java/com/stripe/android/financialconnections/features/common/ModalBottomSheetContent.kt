@@ -27,7 +27,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.uicore.image.StripeImage
 
 @Composable
@@ -38,6 +39,9 @@ internal fun DataAccessBottomSheetContent(
 ) {
     val title = remember(dataDialog.title) {
         TextResource.Text(fromHtml(dataDialog.title))
+    }
+    val subtitle = remember(dataDialog.subtitle) {
+        dataDialog.subtitle?.let { TextResource.Text(fromHtml(it)) }
     }
     val learnMore = remember(dataDialog.learnMore) {
         TextResource.Text(fromHtml(dataDialog.learnMore))
@@ -50,6 +54,7 @@ internal fun DataAccessBottomSheetContent(
     }
     ModalBottomSheetContent(
         title = title,
+        subtitle = subtitle,
         onClickableTextClick = onClickableTextClick,
         bullets = bullets,
         connectedAccountNotice = connectedAccountNotice,
@@ -76,6 +81,7 @@ internal fun LegalDetailsBottomSheetContent(
     }
     ModalBottomSheetContent(
         title = title,
+        subtitle = null,
         onClickableTextClick = onClickableTextClick,
         bullets = bullets,
         connectedAccountNotice = null,
@@ -88,6 +94,7 @@ internal fun LegalDetailsBottomSheetContent(
 @Composable
 private fun ModalBottomSheetContent(
     title: TextResource.Text,
+    subtitle: TextResource.Text?,
     onClickableTextClick: (String) -> Unit,
     bullets: List<BulletUI>,
     connectedAccountNotice: TextResource?,
@@ -105,12 +112,30 @@ private fun ModalBottomSheetContent(
         ) {
             AnnotatedText(
                 text = title,
-                defaultStyle = FinancialConnectionsTheme.typography.heading.copy(
-                    color = FinancialConnectionsTheme.colors.textPrimary
+                defaultStyle = typography.heading.copy(
+                    color = colors.textPrimary
                 ),
                 annotationStyles = emptyMap(),
                 onClickableTextClick = onClickableTextClick
             )
+            subtitle?.let {
+                Spacer(modifier = Modifier.size(4.dp))
+                AnnotatedText(
+                    text = it,
+                    defaultStyle = typography.body.copy(
+                        color = colors.textPrimary
+                    ),
+                    annotationStyles = mapOf(
+                        StringAnnotation.CLICKABLE to typography.detail
+                            .toSpanStyle()
+                            .copy(color = colors.textBrand),
+                        StringAnnotation.BOLD to typography.detailEmphasized
+                            .toSpanStyle()
+                            .copy(color = colors.textPrimary),
+                    ),
+                    onClickableTextClick = onClickableTextClick
+                )
+            }
             bullets.forEach {
                 Spacer(modifier = Modifier.size(16.dp))
                 BulletItem(
@@ -130,16 +155,16 @@ private fun ModalBottomSheetContent(
                 AnnotatedText(
                     text = connectedAccountNotice,
                     onClickableTextClick = onClickableTextClick,
-                    defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                        color = FinancialConnectionsTheme.colors.textSecondary
+                    defaultStyle = typography.caption.copy(
+                        color = colors.textSecondary
                     ),
                     annotationStyles = mapOf(
-                        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                        StringAnnotation.CLICKABLE to typography.captionEmphasized
                             .toSpanStyle()
-                            .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                        StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
+                            .copy(color = colors.textBrand),
+                        StringAnnotation.BOLD to typography.captionEmphasized
                             .toSpanStyle()
-                            .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                            .copy(color = colors.textSecondary),
                     )
                 )
                 Spacer(modifier = Modifier.size(12.dp))
@@ -147,16 +172,16 @@ private fun ModalBottomSheetContent(
             AnnotatedText(
                 text = learnMore,
                 onClickableTextClick = onClickableTextClick,
-                defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                    color = FinancialConnectionsTheme.colors.textSecondary
+                defaultStyle = typography.caption.copy(
+                    color = colors.textSecondary
                 ),
                 annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                    StringAnnotation.CLICKABLE to typography.captionEmphasized
                         .toSpanStyle()
-                        .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                    StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
+                        .copy(color = colors.textBrand),
+                    StringAnnotation.BOLD to typography.captionEmphasized
                         .toSpanStyle()
-                        .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                        .copy(color = colors.textSecondary),
                 )
             )
             Spacer(modifier = Modifier.size(16.dp))
@@ -184,32 +209,32 @@ internal fun BulletItem(
                 bullet.title != null && bullet.content != null -> {
                     AnnotatedText(
                         text = bullet.title,
-                        defaultStyle = FinancialConnectionsTheme.typography.body.copy(
-                            color = FinancialConnectionsTheme.colors.textPrimary
+                        defaultStyle = typography.body.copy(
+                            color = colors.textPrimary
                         ),
                         annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.bodyEmphasized
+                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
                                 .toSpanStyle()
-                                .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized
+                                .copy(color = colors.textBrand),
+                            StringAnnotation.BOLD to typography.bodyEmphasized
                                 .toSpanStyle()
-                                .copy(color = FinancialConnectionsTheme.colors.textPrimary),
+                                .copy(color = colors.textPrimary),
                         ),
                         onClickableTextClick = onClickableTextClick
                     )
                     Spacer(modifier = Modifier.size(2.dp))
                     AnnotatedText(
                         text = bullet.content,
-                        defaultStyle = FinancialConnectionsTheme.typography.detail.copy(
-                            color = FinancialConnectionsTheme.colors.textSecondary
+                        defaultStyle = typography.detail.copy(
+                            color = colors.textSecondary
                         ),
                         annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.detailEmphasized
+                            StringAnnotation.CLICKABLE to typography.detailEmphasized
                                 .toSpanStyle()
-                                .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.detailEmphasized
+                                .copy(color = colors.textBrand),
+                            StringAnnotation.BOLD to typography.detailEmphasized
                                 .toSpanStyle()
-                                .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                                .copy(color = colors.textSecondary),
                         ),
                         onClickableTextClick = onClickableTextClick
                     )
@@ -218,16 +243,16 @@ internal fun BulletItem(
                 bullet.title != null -> {
                     AnnotatedText(
                         text = bullet.title,
-                        defaultStyle = FinancialConnectionsTheme.typography.body.copy(
-                            color = FinancialConnectionsTheme.colors.textPrimary
+                        defaultStyle = typography.body.copy(
+                            color = colors.textPrimary
                         ),
                         annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.bodyEmphasized
+                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
                                 .toSpanStyle()
-                                .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized
+                                .copy(color = colors.textBrand),
+                            StringAnnotation.BOLD to typography.bodyEmphasized
                                 .toSpanStyle()
-                                .copy(color = FinancialConnectionsTheme.colors.textPrimary),
+                                .copy(color = colors.textPrimary),
                         ),
                         onClickableTextClick = onClickableTextClick
                     )
@@ -236,16 +261,16 @@ internal fun BulletItem(
                 bullet.content != null -> {
                     AnnotatedText(
                         text = bullet.content,
-                        defaultStyle = FinancialConnectionsTheme.typography.body.copy(
-                            color = FinancialConnectionsTheme.colors.textSecondary
+                        defaultStyle = typography.body.copy(
+                            color = colors.textSecondary
                         ),
                         annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.bodyEmphasized
+                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
                                 .toSpanStyle()
-                                .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized
+                                .copy(color = colors.textBrand),
+                            StringAnnotation.BOLD to typography.bodyEmphasized
                                 .toSpanStyle()
-                                .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                                .copy(color = colors.textSecondary),
                         ),
                         onClickableTextClick = onClickableTextClick
                     )
@@ -261,7 +286,7 @@ private fun BulletIcon(iconUrl: String?) {
         .size(16.dp)
         .offset(y = 2.dp)
     if (iconUrl == null) {
-        val color = FinancialConnectionsTheme.colors.textPrimary
+        val color = colors.textPrimary
         Canvas(
             modifier = Modifier
                 .size(16.dp)
@@ -273,7 +298,7 @@ private fun BulletIcon(iconUrl: String?) {
         StripeImage(
             url = iconUrl,
             errorContent = {
-                val color = FinancialConnectionsTheme.colors.textSecondary
+                val color = colors.textSecondary
                 Canvas(
                     modifier = Modifier
                         .size(6.dp)
