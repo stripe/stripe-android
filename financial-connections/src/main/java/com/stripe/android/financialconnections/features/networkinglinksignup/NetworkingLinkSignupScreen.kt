@@ -37,6 +37,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -122,19 +123,23 @@ private fun NetworkingLinkSignupLoaded(
                 ),
                 onClickableTextClick = {},
             )
-            TextFieldSection(
-                textFieldController = payload.emailController,
-                imeAction = ImeAction.Default,
-                enabled = true,
-            )
-            AnimatedVisibility(
-                visible = signupState == SignUpState.InputtingPhoneOrName
-            ) {
-                PhoneNumberCollectionSection(
-                    phoneNumberController = payload.phoneController,
+            StripeThemeForConnections {
+                TextFieldSection(
+                    textFieldController = payload.emailController,
                     imeAction = ImeAction.Default,
                     enabled = true,
                 )
+            }
+            AnimatedVisibility(
+                visible = signupState == SignUpState.InputtingPhoneOrName
+            ) {
+                StripeThemeForConnections {
+                    PhoneNumberCollectionSection(
+                        phoneNumberController = payload.phoneController,
+                        imeAction = ImeAction.Default,
+                        enabled = true,
+                    )
+                }
             }
             Spacer(modifier = Modifier.weight(1f))
         }
@@ -177,6 +182,7 @@ internal fun NetworkingLinkSignupScreenPreview() {
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
             state = NetworkingLinkSignupState(
+                signupState = SignUpState.InputtingPhoneOrName,
                 payload = Success(
                     Payload(
                         emailController = EmailConfig.createController(""),
