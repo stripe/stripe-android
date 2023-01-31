@@ -28,8 +28,8 @@ dependencies {
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
-    implementation "androidx.compose.ui:ui:$androidxComposeVersion"
-    implementation "androidx.compose.ui:ui-viewbinding:$androidxComposeVersion"
+    implementation "androidx.compose.ui:ui:$androidxComposeUiVersion"
+    implementation "androidx.compose.ui:ui-viewbinding:$androidxComposeUiVersion"
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
     implementation "androidx.compose.foundation:foundation:$androidxComposeVersion"
     // Material Design
@@ -43,11 +43,11 @@ dependencies {
     // Integration with constraint layouts
     implementation "androidx.constraintlayout:constraintlayout-compose:$androidxConstraintlayoutComposeVersion"
     // Integration with observables
-    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
+    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeRuntimeVersion"
     implementation "com.google.accompanist:accompanist-flowlayout:$accompanistVersion"
     // Tooling support (Previews, etc.)
-    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeVersion"
-    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
+    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeUiVersion"
+    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeUiVersion"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
@@ -70,7 +70,7 @@ dependencies {
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
-    testImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
+    testImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion"
     testImplementation testLibs.turbine
 
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
@@ -88,7 +88,7 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
     androidTestImplementation "androidx.test:core-ktx:$androidTestVersion"
     // Test rules and transitive dependencies:
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion"
     androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
     androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
     androidTestImplementation "com.google.truth:truth:$truthVersion"
@@ -97,12 +97,12 @@ dependencies {
     androidTestImplementation project(':network-testing')
 
     // Tooling support (Previews, etc.)
-    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
+    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeUiVersion"
     // Needed for createComposeRule, but not createAndroidComposeRule:
-    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeUiVersion"
 
     // Test rules and transitive dependencies:
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$androidxComposeVersion")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion")
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
