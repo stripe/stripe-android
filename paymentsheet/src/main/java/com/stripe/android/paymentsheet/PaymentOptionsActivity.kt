@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
-import androidx.core.view.doOnNextLayout
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentOptionsPrimaryButtonBinding
@@ -117,13 +116,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         viewModel.selection.launchAndCollectIn(this) {
             viewModel.clearErrorMessages()
-        }
-
-        rootView.doOnNextLayout {
-            // Expand sheet only after the first fragment is attached so that it
-            // animates in. Further calls to expand() are no-op if the sheet is already
-            // expanded.
-            bottomSheetController.expand()
         }
     }
 

@@ -15,8 +15,9 @@ internal class BottomSheetController(
     fun setup() {
         bottomSheetBehavior.isHideable = true
         bottomSheetBehavior.isDraggable = false
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetBehavior.saveFlags = BottomSheetBehavior.SAVE_ALL
+        bottomSheetBehavior.isFitToContents = false
 
         bottomSheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
@@ -25,12 +26,6 @@ internal class BottomSheetController(
 
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     when (newState) {
-                        BottomSheetBehavior.STATE_EXPANDED -> {
-                            // isFitToContents causes conflicts when calculating the sheet position
-                            // upon resize. CoordinatorLayout will already position the sheet
-                            // correctly with gravity = bottom.
-                            bottomSheetBehavior.isFitToContents = false
-                        }
                         BottomSheetBehavior.STATE_HIDDEN -> {
                             // finish the activity only after the bottom sheet's state has
                             // transitioned to `BottomSheetBehavior.STATE_HIDDEN`
@@ -42,10 +37,6 @@ internal class BottomSheetController(
                 }
             }
         )
-    }
-
-    fun expand() {
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
     fun hide() {
