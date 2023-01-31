@@ -13,7 +13,7 @@ internal class SaveAccountToLink @Inject constructor(
     suspend operator fun invoke(
         email: String,
         phoneNumber: String,
-        selectAccounts: List<String>,
+        selectedAccounts: List<String>,
         country: String
     ): FinancialConnectionsSessionManifest {
         return repository.postSaveAccountsToLink(
@@ -21,7 +21,7 @@ internal class SaveAccountToLink @Inject constructor(
             email = email,
             country = country,
             phoneNumber = phoneNumber,
-            selectAccounts = selectAccounts
+            selectedAccounts = selectedAccounts
         )
     }
 }

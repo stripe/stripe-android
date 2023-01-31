@@ -119,7 +119,7 @@ internal interface FinancialConnectionsManifestRepository {
         email: String,
         country: String,
         phoneNumber: String,
-        selectAccounts: List<String>
+        selectedAccounts: List<String>
     ): FinancialConnectionsSessionManifest
 
     fun updateLocalManifest(
@@ -336,7 +336,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
         email: String,
         country: String,
         phoneNumber: String,
-        selectAccounts: List<String>,
+        selectedAccounts: List<String>,
     ): FinancialConnectionsSessionManifest {
         val request = apiRequestFactory.createPost(
             url = saveAccountToLinkUrl,
@@ -344,9 +344,10 @@ private class FinancialConnectionsManifestRepositoryImpl(
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "country" to country,
+                "locale" to locale.toLanguageTag(),
                 "email_address" to email,
                 "phone_number" to phoneNumber
-            ) + selectAccounts.mapIndexed { index, account -> "${NetworkConstants.PARAM_SELECTED_ACCOUNTS}[$index]" to account }
+            ) + selectedAccounts.mapIndexed { index, account -> "${NetworkConstants.PARAM_SELECTED_ACCOUNTS}[$index]" to account }
         )
         return requestExecutor.execute(
             request,

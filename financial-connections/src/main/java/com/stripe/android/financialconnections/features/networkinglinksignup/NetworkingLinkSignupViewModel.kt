@@ -10,6 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
@@ -30,6 +31,7 @@ import javax.inject.Inject
 internal class NetworkingLinkSignupViewModel @Inject constructor(
     initialState: NetworkingLinkSignupState,
     private val saveAccountToLink: SaveAccountToLink,
+    private val getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
@@ -67,7 +69,14 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 }.collect { setState { copy(form = it) } }
             },
             onFail = { error ->
-                logger.error("Error", error)
+                logger.error("Error fetching payload", error)
+                eventTracker.track(Error(Pane.NETWORKING_LINK_SIGNUP_PANE, error))
+            },
+        )
+        onAsync(
+            NetworkingLinkSignupState::saveAccountToLink,
+            onFail = { error ->
+                logger.error("Error saving account to Link", error)
                 eventTracker.track(Error(Pane.NETWORKING_LINK_SIGNUP_PANE, error))
             },
         )
@@ -76,18 +85,17 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     fun onSaveAccount() {
         suspend {
             val state = awaitState()
+            val authSessionId = getManifest().activeAuthSession!!.id
+            val selectedAccounts = getAuthorizationSessionAccounts(authSessionId)
             val form = state.form
             require(form.valid()) { "Form invalid! $form" }
-            // TODO@carlosmuvi retrieve selected accounts.
-            saveAccountToLink.invoke(
+            saveAccountToLink(
                 country = state.payload()!!.phoneController.getCountryCode(),
                 email = form.validEmail!!,
                 phoneNumber = form.validPhone!!,
-                selectAccounts = emptyList(),
+                selectedAccounts = selectedAccounts.data.map { it.id },
             ).also {
-                goNext(
-                    nextPane = it.nextPane
-                )
+                goNext(nextPane = it.nextPane)
             }
         }.execute { copy(saveAccountToLink = it) }
     }
