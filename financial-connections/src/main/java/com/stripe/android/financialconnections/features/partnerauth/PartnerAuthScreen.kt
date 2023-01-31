@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -335,6 +336,7 @@ private fun InstitutionalPrePaneContent(
                     is Entry.Image -> {
                         Box(
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .background(
                                     shape = RoundedCornerShape(8.dp),
                                     color = FinancialConnectionsTheme.colors.backgroundContainer
@@ -346,14 +348,16 @@ private fun InstitutionalPrePaneContent(
                                 contentDescription = "Test",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(264.dp)
+                                    .align(Alignment.Center)
+                                    .width(PHONE_BACKGROUND_HEIGHT_DP.dp)
+                                    .height(PHONE_BACKGROUND_WIDTH_DP.dp)
                             )
                             GifWebView(
                                 modifier = Modifier
-                                    .padding(horizontal = 28.dp)
-                                    .fillMaxWidth()
-                                    .height(264.dp),
+                                    .align(Alignment.Center)
+                                    .width(PHONE_BACKGROUND_HEIGHT_DP.dp)
+                                    .height(PHONE_BACKGROUND_WIDTH_DP.dp)
+                                    .padding(horizontal = 16.dp),
                                 bodyItem.content.default!!
                             )
                         }
@@ -430,7 +434,12 @@ private fun GifWebView(
 }
 
 @Composable
-@Preview
+@Preview(
+    device = "id:4in WVGA (Nexus S)"
+)
+@Preview(
+    device = "spec:width=1280dp,height=800dp,dpi=240"
+)
 internal fun InstitutionalPrepaneContentPreview() {
     FinancialConnectionsPreview {
         val sampleImage =
@@ -513,3 +522,6 @@ internal fun InstitutionalPrepaneContentPreview() {
         )
     }
 }
+
+private const val PHONE_BACKGROUND_WIDTH_DP = 272
+private const val PHONE_BACKGROUND_HEIGHT_DP = 264
