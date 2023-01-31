@@ -32,7 +32,6 @@ internal class BottomSheetController(
             }
         }
 
-
         bottomSheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, slideOffset: Float) {
