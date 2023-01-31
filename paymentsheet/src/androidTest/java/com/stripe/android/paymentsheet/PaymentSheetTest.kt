@@ -224,7 +224,7 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-intent-get-success.json")
         }
 
-        onView(withId(R.id.continue_button)).perform(click())
+        onView(withId(R.id.primary_button)).perform(click())
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
@@ -289,7 +289,7 @@ internal class PaymentSheetTest {
             response.setResponseCode(400)
         }
 
-        onView(withId(R.id.continue_button)).perform(click())
+        onView(withId(R.id.primary_button)).perform(click())
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
