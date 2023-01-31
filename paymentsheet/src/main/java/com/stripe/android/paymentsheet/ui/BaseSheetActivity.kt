@@ -226,8 +226,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             return
         }
 
-        println("Tablet")
-
         val screenWidth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val windowMetrics: WindowMetrics = windowManager.currentWindowMetrics
             val insets: Insets = windowMetrics.windowInsets
