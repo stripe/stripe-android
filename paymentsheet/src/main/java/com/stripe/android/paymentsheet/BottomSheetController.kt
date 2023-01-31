@@ -33,9 +33,13 @@ internal class BottomSheetController(
                 oldBottom: Int
             ) {
                 bottomSheet.removeOnLayoutChangeListener(this)
+                // Wait until the a layout change has occurred so we expand to the correct size.
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
 
                 bottomSheet.post {
+                    // Tell the bottom sheet that we handle our own sizing.
+                    // We have to wait to do this until after we've expanded, so the initial
+                    // animations appears correctly.
                     bottomSheetBehavior.isFitToContents = false
                 }
             }
