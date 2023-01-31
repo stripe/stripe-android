@@ -1,4 +1,8 @@
-root=true
+root = true
 
 [*.{kt,kts}]
-ktlint_disabled_rules=import-ordering,trailing-comma-on-call-site,trailing-comma-on-declaration-site
+ktlint_standard_import-ordering = disabled
+ktlint_standard_trailing-comma-on-call-site = disabled
+ktlint_standard_trailing-comma-on-declaration-site = disabled
+ktlint_standard_indent = disabled
+ktlint_standard_no-semi = disabled

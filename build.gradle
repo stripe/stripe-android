@@ -68,7 +68,7 @@ ext {
     kotlinCoroutinesVersion = '1.6.4'
     kotlinSerializationVersion = '1.4.1'
     accompanistVersion = '0.28.0'
-    ktlintVersion = '0.47.1'
+    ktlintVersion = '0.48.2'
     materialVersion = '1.8.0'
     daggerVersion = '2.44.2'
     playServicesWalletVersion = '19.1.0'
