@@ -21,7 +21,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
 
     testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation "androidx.test:runner:$androidTestVersion"
+    testImplementation "androidx.test:runner:$androidTestRunnerVersion"
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
@@ -31,7 +31,7 @@ dependencies {
     testImplementation "org.robolectric:robolectric:$robolectricVersion"
 
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
     androidTestImplementation "androidx.test:core-ktx:1.4.0"

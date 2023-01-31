@@ -75,7 +75,7 @@ dependencies {
     androidTestImplementation "com.google.truth:truth:$truthVersion"
 
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
 
     kaptAndroidTest "com.airbnb.android:showkase-processor:$showkaseVersion"
 
