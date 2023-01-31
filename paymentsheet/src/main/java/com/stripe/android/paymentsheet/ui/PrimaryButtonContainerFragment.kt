@@ -8,9 +8,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
-import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPrimaryButtonContainerBinding
@@ -82,11 +80,7 @@ internal abstract class BasePrimaryButtonContainerFragment : Fragment() {
 internal class PaymentSheetPrimaryButtonContainerFragment : BasePrimaryButtonContainerFragment() {
 
     override val viewModel: PaymentSheetViewModel by activityViewModels {
-        PaymentSheetViewModel.Factory {
-            requireNotNull(
-                requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
-            )
-        }
+        PaymentSheetViewModel.Factory { error("PaymentSheetViewModel should already exist") }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -126,11 +120,7 @@ internal class PaymentSheetPrimaryButtonContainerFragment : BasePrimaryButtonCon
 internal class PaymentOptionsPrimaryButtonContainerFragment : BasePrimaryButtonContainerFragment() {
 
     override val viewModel: PaymentOptionsViewModel by activityViewModels {
-        PaymentOptionsViewModel.Factory {
-            requireNotNull(
-                requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
-            )
-        }
+        PaymentOptionsViewModel.Factory { error("PaymentOptionsViewModel should already exist") }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
