@@ -46,7 +46,7 @@ class Selectors(
     testParameters: TestParameters
 ) {
     val reset = EspressoIdButton(R.id.reset_button)
-    val continueButton = EspressoIdButton(R.id.continue_button)
+    val continueButton = EspressoIdButton(R.id.primary_button)
     val complete = EspressoLabelIdButton(R.string.checkout_complete)
     val reload = EspressoLabelIdButton(R.string.reload_paymentsheet)
     val multiStepSelect = EspressoIdButton(R.id.payment_method)

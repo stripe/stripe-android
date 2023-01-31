@@ -83,7 +83,7 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-intent-get.json")
         }
 
-        onView(withId(R.id.buy_button)).perform(scrollTo(), click())
+        onView(withId(R.id.primary_button)).perform(scrollTo(), click())
 
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
@@ -155,7 +155,7 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-intent-get.json")
         }
 
-        onView(withId(R.id.continue_button)).perform(scrollTo(), click())
+        onView(withId(R.id.primary_button)).perform(scrollTo(), click())
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
