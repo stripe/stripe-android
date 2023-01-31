@@ -1,7 +1,9 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,12 +12,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
@@ -24,9 +32,9 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Form
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.SignUpState
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -41,6 +49,7 @@ import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnection
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 
 @Composable
@@ -48,6 +57,7 @@ internal fun NetworkingLinkSignupScreen() {
     val viewModel: NetworkingLinkSignupViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
+    BackHandler(enabled = true) {}
     NetworkingLinkSignupContent(
         state = state.value,
         onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.RESET) },
@@ -67,6 +77,7 @@ private fun NetworkingLinkSignupContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
+                showBack = false,
                 onCloseClick = onCloseClick
             )
         }
@@ -75,10 +86,11 @@ private fun NetworkingLinkSignupContent(
             Uninitialized, is Loading -> LoadingContent()
             is Success -> NetworkingLinkSignupLoaded(
                 scrollState = scrollState,
-                validForm = state.form.valid(),
+                validForm = state.valid(),
                 payload = payload(),
                 onSaveToLink = onSaveToLink,
-                signupState = state.signupState
+                signupState = state.signupState,
+                saveAccountToLinkSync = state.saveAccountToLink
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -95,6 +107,7 @@ private fun NetworkingLinkSignupLoaded(
     validForm: Boolean,
     signupState: SignUpState,
     payload: Payload,
+    saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
     onSaveToLink: () -> Unit
 ) {
     Column(
@@ -124,14 +137,14 @@ private fun NetworkingLinkSignupLoaded(
                 onClickableTextClick = {},
             )
             StripeThemeForConnections {
-                TextFieldSection(
-                    textFieldController = payload.emailController,
-                    imeAction = ImeAction.Default,
+                EmailCollectionSection(
+                    signUpState = signupState,
+                    emailController = payload.emailController,
                     enabled = true,
                 )
             }
             AnimatedVisibility(
-                visible = signupState == SignUpState.InputtingPhoneOrName
+                visible = signupState == SignUpState.InputtingPhone
             ) {
                 StripeThemeForConnections {
                     PhoneNumberCollectionSection(
@@ -152,9 +165,10 @@ private fun NetworkingLinkSignupLoaded(
             )
         ) {
             AnimatedVisibility(
-                visible = signupState == SignUpState.InputtingPhoneOrName
+                visible = signupState == SignUpState.InputtingPhone
             ) {
                 FinancialConnectionsButton(
+                    loading = saveAccountToLinkSync is Loading,
                     enabled = validForm,
                     type = FinancialConnectionsButton.Type.Primary,
                     onClick = onSaveToLink,
@@ -177,12 +191,53 @@ private fun NetworkingLinkSignupLoaded(
 }
 
 @Composable
+internal fun EmailCollectionSection(
+    enabled: Boolean,
+    emailController: TextFieldController,
+    signUpState: SignUpState,
+    focusRequester: FocusRequester = remember { FocusRequester() }
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(0.dp),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        TextFieldSection(
+            textFieldController = emailController,
+            imeAction = if (signUpState == SignUpState.InputtingPhone) {
+                ImeAction.Next
+            } else {
+                ImeAction.Done
+            },
+            enabled = enabled,
+            modifier = Modifier
+                .focusRequester(focusRequester)
+        )
+        if (signUpState == SignUpState.VerifyingEmail) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(32.dp)
+                    .padding(
+                        start = 0.dp,
+                        top = 8.dp,
+                        end = 16.dp,
+                        bottom = 8.dp
+                    ),
+                color = FinancialConnectionsTheme.colors.iconBrand,
+                strokeWidth = 2.dp
+            )
+        }
+    }
+}
+
+@Composable
 @Preview
 internal fun NetworkingLinkSignupScreenPreview() {
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
             state = NetworkingLinkSignupState(
-                signupState = SignUpState.InputtingPhoneOrName,
+                signupState = SignUpState.InputtingPhone,
                 payload = Success(
                     Payload(
                         emailController = EmailConfig.createController(""),
@@ -192,7 +247,8 @@ internal fun NetworkingLinkSignupScreenPreview() {
                         )
                     )
                 ),
-                form = Form(),
+                validEmail = null,
+                validPhone = null,
                 saveAccountToLink = Uninitialized
             ),
             onCloseClick = {},

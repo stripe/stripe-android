@@ -15,7 +15,6 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
-import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Form
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.SignUpState.*
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -24,10 +23,12 @@ import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class NetworkingLinkSignupViewModel @Inject constructor(
@@ -61,24 +62,21 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             NetworkingLinkSignupState::payload,
             onSuccess = { payload ->
                 // Observe controllers and set current form in state.
-                combine(
-                    payload.emailController.validFormFieldState(),
-                    payload.phoneController.validFormFieldState()
-                ) { validEmail, validPhone ->
-                    Form(
-                        validEmail = validEmail,
-                        validPhone = validPhone
-                    )
-                }.collect {
-                    setState {
-                        copy(
-                            form = it,
-                            signupState = if (it.validEmail != null) {
-                                InputtingPhoneOrName
-                            } else {
-                                InputtingEmail
-                            }
-                        )
+                viewModelScope.launch {
+                    payload.emailController.validFormFieldState().collectLatest { validEmail ->
+                        setState { copy(validEmail = validEmail) }
+                        if (validEmail != null) {
+                            setState { copy(signupState = VerifyingEmail) }
+                            delay(2000) // API call looking up for email
+                            setState { copy(signupState = InputtingPhone) }
+                        } else {
+                            setState { copy(signupState = InputtingEmail) }
+                        }
+                    }
+                }
+                viewModelScope.launch {
+                    payload.phoneController.validFormFieldState().collectLatest {
+                        setState { copy(validPhone = it) }
                     }
                 }
             },
@@ -96,20 +94,21 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         )
     }
 
+
     fun onSaveAccount() {
         suspend {
             val state = awaitState()
             val authSessionId = getManifest().activeAuthSession!!.id
             val selectedAccounts = getAuthorizationSessionAccounts(authSessionId)
             val phoneController = state.payload()!!.phoneController
-            require(state.form.valid()) { "Form invalid! ${state.form}" }
+            require(state.valid()) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
             saveAccountToLink(
                 country = phoneController.getCountryCode(),
-                email = state.form.validEmail!!,
-                phoneNumber = phoneController.getE164PhoneNumber(state.form.validPhone!!),
+                email = state.validEmail!!,
+                phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
                 selectedAccounts = selectedAccounts.data.map { it.id },
             ).also {
-                goNext(nextPane = it.nextPane)
+                goNext(nextPane = Pane.SUCCESS)
             }
         }.execute { copy(saveAccountToLink = it) }
     }
@@ -142,18 +141,14 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
 
 internal data class NetworkingLinkSignupState(
     val payload: Async<Payload> = Uninitialized,
+    val validEmail: String? = null,
+    val validPhone: String? = null,
     val saveAccountToLink: Async<FinancialConnectionsSessionManifest> = Uninitialized,
     val signupState: SignUpState = InputtingEmail,
-    val form: Form = Form()
 ) : MavericksState {
 
-    data class Form(
-        val validEmail: String? = null,
-        val validPhone: String? = null
-    ) {
-        fun valid(): Boolean {
-            return validEmail != null && validPhone != null
-        }
+    fun valid(): Boolean {
+        return validEmail != null && validPhone != null
     }
 
     /**
@@ -162,7 +157,7 @@ internal data class NetworkingLinkSignupState(
     internal enum class SignUpState {
         InputtingEmail,
         VerifyingEmail,
-        InputtingPhoneOrName
+        InputtingPhone
     }
 
     data class Payload(

@@ -343,6 +343,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
             options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "expand" to listOf("active_auth_session"),
                 "country" to country,
                 "locale" to locale.toLanguageTag(),
                 "email_address" to email,
