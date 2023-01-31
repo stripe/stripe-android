@@ -114,6 +114,14 @@ internal interface FinancialConnectionsManifestRepository {
         sessionId: String
     ): FinancialConnectionsAuthorizationSession
 
+    suspend fun postSaveAccountsToLink(
+        clientSecret: String,
+        email: String,
+        country: String,
+        phoneNumber: String,
+        selectAccounts: List<String>
+    ): FinancialConnectionsSessionManifest
+
     fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     )
@@ -323,6 +331,31 @@ private class FinancialConnectionsManifestRepositoryImpl(
         }
     }
 
+    override suspend fun postSaveAccountsToLink(
+        clientSecret: String,
+        email: String,
+        country: String,
+        phoneNumber: String,
+        selectAccounts: List<String>,
+    ): FinancialConnectionsSessionManifest {
+        val request = apiRequestFactory.createPost(
+            url = saveAccountToLinkUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "country" to country,
+                "email_address" to email,
+                "phone_number" to phoneNumber
+            ) + selectAccounts.mapIndexed { index, account -> "${NetworkConstants.PARAM_SELECTED_ACCOUNTS}[$index]" to account }
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsSessionManifest.serializer()
+        ).also {
+            updateCachedManifest("postSaveAccountsToLink", it)
+        }
+    }
+
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     ) {
@@ -385,5 +418,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal val linkMoreAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_more_accounts"
+
+        internal val saveAccountToLinkUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/save_accounts_to_link"
     }
 }

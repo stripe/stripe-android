@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
+import com.stripe.android.financialconnections.network.NetworkConstants.PARAM_SELECTED_ACCOUNTS
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -149,8 +150,6 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     }
 
     companion object {
-        internal const val PARAM_SELECTED_ACCOUNTS: String = "selected_accounts"
-
         internal val accountsSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/accounts"
 

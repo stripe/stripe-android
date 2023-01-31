@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
@@ -24,6 +23,7 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Form
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -36,25 +36,29 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
+import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.TextFieldSection
 
 @Composable
 internal fun NetworkingLinkSignupScreen() {
     val viewModel: NetworkingLinkSignupViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
-    val payload = viewModel.collectAsState { it.payload }
+    val state = viewModel.collectAsState()
     NetworkingLinkSignupContent(
-        payload = payload.value,
+        state = state.value,
         onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.RESET) },
-        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
+        onSaveToLink = viewModel::onSaveAccount
     )
 }
 
 @Composable
 private fun NetworkingLinkSignupContent(
-    payload: Async<Payload>,
+    state: NetworkingLinkSignupState,
     onCloseClick: () -> Unit,
-    onCloseFromErrorClick: (Throwable) -> Unit
+    onCloseFromErrorClick: (Throwable) -> Unit,
+    onSaveToLink: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
@@ -64,11 +68,13 @@ private fun NetworkingLinkSignupContent(
             )
         }
     ) {
-        when (payload) {
+        when (val payload = state.payload) {
             Uninitialized, is Loading -> LoadingContent()
             is Success -> NetworkingLinkSignupLoaded(
                 scrollState = scrollState,
-                payload = payload()
+                validForm = state.form.valid(),
+                payload = payload(),
+                onSaveToLink = onSaveToLink
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -82,7 +88,9 @@ private fun NetworkingLinkSignupContent(
 @Composable
 private fun NetworkingLinkSignupLoaded(
     scrollState: ScrollState,
-    payload: Payload
+    validForm: Boolean,
+    payload: Payload,
+    onSaveToLink: () -> Unit
 ) {
     Column(
         Modifier.fillMaxSize()
@@ -115,6 +123,11 @@ private fun NetworkingLinkSignupLoaded(
                 imeAction = ImeAction.Default,
                 enabled = true,
             )
+            PhoneNumberCollectionSection(
+                phoneNumberController = payload.phoneController,
+                imeAction = ImeAction.Default,
+                enabled = true,
+            )
             Spacer(modifier = Modifier.weight(1f))
         }
         Column(
@@ -125,6 +138,15 @@ private fun NetworkingLinkSignupLoaded(
                 bottom = 24.dp
             )
         ) {
+            FinancialConnectionsButton(
+                enabled = validForm,
+                type = FinancialConnectionsButton.Type.Primary,
+                onClick = onSaveToLink,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(text = "Save to Link")
+            }
             FinancialConnectionsButton(
                 type = FinancialConnectionsButton.Type.Secondary,
                 onClick = { },
@@ -142,10 +164,23 @@ private fun NetworkingLinkSignupLoaded(
 internal fun NetworkingLinkSignupScreenPreview() {
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
-            payload = Success(
-                Payload(emailController = EmailConfig.createController(""))
+            state =
+            NetworkingLinkSignupState(
+                payload = Success(
+                    Payload(
+                        emailController = EmailConfig.createController(""),
+                        phoneController = PhoneNumberController.createPhoneNumberController(
+                            initialValue = "",
+                            initiallySelectedCountryCode = null,
+                        )
+                    )
+                ),
+                form = Form(),
+                saveAccountToLink = Uninitialized
             ),
-            onCloseClick = {}
-        ) {}
+            onCloseClick = {},
+            onSaveToLink = {},
+            onCloseFromErrorClick = {}
+        )
     }
 }
