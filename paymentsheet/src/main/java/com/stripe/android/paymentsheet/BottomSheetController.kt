@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet
 
 import android.view.View
-import android.view.View.OnLayoutChangeListener
 import android.view.ViewGroup
+import androidx.core.view.doOnNextLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,32 +20,18 @@ internal class BottomSheetController(
         bottomSheetBehavior.saveFlags = BottomSheetBehavior.SAVE_ALL
         bottomSheetBehavior.isFitToContents = true
 
-        val layoutChangeListener = object : OnLayoutChangeListener {
-            override fun onLayoutChange(
-                v: View?,
-                left: Int,
-                top: Int,
-                right: Int,
-                bottom: Int,
-                oldLeft: Int,
-                oldTop: Int,
-                oldRight: Int,
-                oldBottom: Int
-            ) {
-                bottomSheet.removeOnLayoutChangeListener(this)
-                // Wait until the a layout change has occurred so we expand to the correct size.
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        bottomSheet.doOnNextLayout {
+            // Wait until the a layout change has occurred so we expand to the correct size.
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
 
-                bottomSheet.post {
-                    // Tell the bottom sheet that we handle our own sizing.
-                    // We have to wait to do this until after we've expanded, so the initial
-                    // animations appears correctly.
-                    bottomSheetBehavior.isFitToContents = false
-                }
+            bottomSheet.post {
+                // Tell the bottom sheet that we handle our own sizing.
+                // We have to wait to do this until after we've expanded, so the initial
+                // animations appears correctly.
+                bottomSheetBehavior.isFitToContents = false
             }
         }
 
-        bottomSheet.addOnLayoutChangeListener(layoutChangeListener)
 
         bottomSheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
