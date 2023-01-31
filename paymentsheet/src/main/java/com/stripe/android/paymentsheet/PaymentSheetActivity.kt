@@ -17,7 +17,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
-import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -91,11 +90,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             window.statusBarColor = it
         }
         setContentView(viewBinding.root)
-
-        rootView.doOnNextLayout {
-            // Show bottom sheet only after the Activity has been laid out so that it animates in
-            bottomSheetController.expand()
-        }
 
         val elevation = resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
         scrollView.viewTreeObserver.addOnScrollChangedListener {
