@@ -163,7 +163,7 @@ private fun LoadedContent(
     onSelectAnotherBank: () -> Unit
 ) {
     when (authenticationStatus) {
-        is Uninitialized -> when (payload.authSession.isOAuth ?: false) {
+        is Uninitialized -> when (payload.authSession.isOAuth) {
             true -> PrePaneContent(
                 institution = payload.institution,
                 flow = payload.authSession.flow,
@@ -178,9 +178,14 @@ private fun LoadedContent(
             )
         }
 
-        is Loading, is Success -> LoadingContent(
+        is Loading -> LoadingContent(
             stringResource(id = R.string.stripe_partnerauth_loading_title),
             stringResource(id = R.string.stripe_partnerauth_loading_desc)
+        )
+
+        is Success -> LoadingContent(
+            stringResource(R.string.stripe_account_picker_loading_title),
+            stringResource(R.string.stripe_account_picker_loading_desc)
         )
 
         is Fail -> {
