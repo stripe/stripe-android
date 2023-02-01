@@ -1,10 +1,10 @@
 package com.stripe.android.link.injection
 
 import com.stripe.android.Stripe
-import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.repositories.LinkApiRepository
@@ -35,7 +35,7 @@ internal interface LinkCommonModule {
             @IOContext workContext: CoroutineContext,
         ): ConsumersApiService = ConsumersApiServiceImpl(
             appInfo = Stripe.appInfo,
-            sdkVersion = ApiVersion(betas = emptySet()).code,
+            sdkVersion = StripeSdkVersion.VERSION,
             apiVersion = Stripe.API_VERSION,
             stripeNetworkClient = DefaultStripeNetworkClient(
                 logger = logger,
