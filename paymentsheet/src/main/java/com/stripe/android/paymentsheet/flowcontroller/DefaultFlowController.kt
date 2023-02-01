@@ -23,14 +23,10 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.ConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -41,13 +37,10 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
-import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerFlowControllerComponent
 import com.stripe.android.paymentsheet.injection.FlowControllerComponent
 import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -70,7 +63,6 @@ import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -89,7 +81,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentSheetLoader: PaymentSheetLoader,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
-    private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     // even though unused this forces Dagger to initialize it here.
     private val lpmResourceRepository: ResourceRepository<LpmRepository>,
     private val addressResourceRepository: ResourceRepository<AddressRepository>,
@@ -97,12 +88,12 @@ internal class DefaultFlowController @Inject internal constructor(
      * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
      * stripeAccountId after creating a [DefaultFlowController].
      */
-    private val lazyPaymentConfiguration: Provider<PaymentConfiguration>,
     @UIContext private val uiContext: CoroutineContext,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
-    private val linkLauncher: LinkPaymentLauncher
+    private val linkLauncher: LinkPaymentLauncher,
+    private val confirmationHandler: ConfirmationHandler,
 ) : PaymentSheet.FlowController, NonFallbackInjector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val googlePayActivityLauncher:
@@ -113,8 +104,6 @@ internal class DefaultFlowController @Inject internal constructor(
      * after [DefaultFlowController].
      */
     lateinit var flowControllerComponent: FlowControllerComponent
-
-    private var paymentLauncher: StripePaymentLauncher? = null
 
     private val resourceRepositories = listOf(lpmResourceRepository, addressResourceRepository)
 
@@ -146,16 +135,7 @@ internal class DefaultFlowController @Inject internal constructor(
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onCreate(owner: LifecycleOwner) {
-                    paymentLauncher = paymentLauncherFactory.create(
-                        { lazyPaymentConfiguration.get().publishableKey },
-                        { lazyPaymentConfiguration.get().stripeAccountId },
-                        activityResultCaller.registerForActivityResult(
-                            PaymentLauncherContract(),
-                            ::onPaymentResult
-                        )
-                    ).also {
-                        it.registerPollingAuthenticator()
-                    }
+                    confirmationHandler.registerFromActivity(activityResultCaller)
 
                     linkLauncher.register(
                         activityResultCaller = activityResultCaller,
@@ -164,23 +144,21 @@ internal class DefaultFlowController @Inject internal constructor(
                 }
 
                 override fun onDestroy(owner: LifecycleOwner) {
-                    paymentLauncher?.unregisterPollingAuthenticator()
-                    paymentLauncher = null
+                    confirmationHandler.unregisterFromActivity()
                     linkLauncher.unregister()
                 }
             }
         )
 
-        paymentOptionActivityLauncher =
-            activityResultCaller.registerForActivityResult(
-                PaymentOptionContract(),
-                ::onPaymentOptionResult
-            )
-        googlePayActivityLauncher =
-            activityResultCaller.registerForActivityResult(
-                GooglePayPaymentMethodLauncherContract(),
-                ::onGooglePayResult
-            )
+        paymentOptionActivityLauncher = activityResultCaller.registerForActivityResult(
+            PaymentOptionContract(),
+            ::onPaymentOptionResult
+        )
+
+        googlePayActivityLauncher = activityResultCaller.registerForActivityResult(
+            GooglePayPaymentMethodLauncherContract(),
+            ::onGooglePayResult
+        )
     }
 
     override fun configureWithPaymentIntent(
@@ -291,30 +269,17 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
     ) {
-        val confirmParamsFactory =
-            ConfirmStripeIntentParamsFactory.createFactory(
-                state.clientSecret,
-                state.config?.shippingDetails?.toConfirmPaymentIntentShipping()
-            )
+        val selection = paymentSelection ?: return
 
-        when (paymentSelection) {
-            is PaymentSelection.Saved -> {
-                confirmParamsFactory.create(paymentSelection)
-            }
-            is PaymentSelection.New -> {
-                confirmParamsFactory.create(paymentSelection)
-            }
-            else -> null
-        }?.let { confirmParams ->
-            lifecycleScope.launch {
-                when (confirmParams) {
-                    is ConfirmPaymentIntentParams -> {
-                        paymentLauncher?.confirm(confirmParams)
-                    }
-                    is ConfirmSetupIntentParams -> {
-                        paymentLauncher?.confirm(confirmParams)
-                    }
-                }
+        lifecycleScope.launch {
+            val paymentResult = confirmationHandler.confirm(
+                paymentSelection = selection,
+                clientSecret = state.clientSecret,
+                shipping = state.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
+            ).getOrNull()
+
+            if (paymentResult != null) {
+                onPaymentResult(paymentResult, selection)
             }
         }
     }
@@ -369,8 +334,9 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun onLinkActivityResult(result: LinkActivityResult) =
-        onPaymentResult(result.convertToPaymentResult())
+    private fun onLinkActivityResult(result: LinkActivityResult) {
+        onPaymentResult(result.convertToPaymentResult(), PaymentSelection.Link)
+    }
 
     private suspend fun dispatchResult(
         result: PaymentSheetLoader.Result,
@@ -429,8 +395,8 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    internal fun onPaymentResult(paymentResult: PaymentResult) {
-        logPaymentResult(paymentResult)
+    internal fun onPaymentResult(paymentResult: PaymentResult, selection: PaymentSelection) {
+        logPaymentResult(paymentResult, selection)
         lifecycleScope.launch {
             paymentResultCallback.onPaymentSheetResult(
                 paymentResult.convertToPaymentSheetResult()
@@ -438,10 +404,10 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun logPaymentResult(paymentResult: PaymentResult?) {
+    private fun logPaymentResult(paymentResult: PaymentResult?, selection: PaymentSelection) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
-                if ((viewModel.paymentSelection as? PaymentSelection.Saved)?.isGooglePay == true) {
+                if ((selection as? PaymentSelection.Saved)?.isGooglePay == true) {
                     // Google Pay is treated as a saved PM after confirmation
                     eventReporter.onPaymentSuccess(
                         PaymentSelection.GooglePay,
@@ -449,14 +415,14 @@ internal class DefaultFlowController @Inject internal constructor(
                     )
                 } else {
                     eventReporter.onPaymentSuccess(
-                        viewModel.paymentSelection,
+                        selection,
                         viewModel.state?.stripeIntent?.currency
                     )
                 }
             }
             is PaymentResult.Failed -> {
                 eventReporter.onPaymentFailure(
-                    viewModel.paymentSelection,
+                    selection,
                     viewModel.state?.stripeIntent?.currency
                 )
             }

@@ -30,7 +30,10 @@ import kotlin.coroutines.CoroutineContext
  * handle next actions for intents.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class StripePaymentLauncher @AssistedInject internal constructor(
+class StripePaymentLauncher
+@AssistedInject
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     @Assisted(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Assisted(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     @Assisted private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>,

@@ -19,7 +19,6 @@ import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
@@ -28,9 +27,7 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
@@ -388,7 +385,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     )
 
                     if (args.isCompleteFlow) {
-                        confirm(clientSecret, paymentSelection)
+                        confirm(paymentSelection)
                     } else {
                         _currentScreenState.update { screenState ->
                             if (screenState is USBankAccountFormScreenState.SavedAccount) {
@@ -407,15 +404,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    private fun confirm(clientSecret: ClientSecret, paymentSelection: PaymentSelection.New) {
-        viewModelScope.launch {
-            val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-                clientSecret,
-                args.shippingDetails?.toConfirmPaymentIntentShipping()
-            )
-            val confirmIntent = confirmParamsFactory.create(paymentSelection)
-            args.onConfirmStripeIntent(confirmIntent)
-        }
+    private fun confirm(paymentSelection: PaymentSelection.New) {
+        args.onConfirmPaymentSelection(paymentSelection)
     }
 
     private fun buildPrimaryButtonText(): String? {
@@ -495,7 +485,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val clientSecret: ClientSecret?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
-        val onConfirmStripeIntent: (ConfirmStripeIntentParams) -> Unit,
+        val onConfirmPaymentSelection: (PaymentSelection) -> Unit,
         val onUpdateSelectionAndFinish: (PaymentSelection) -> Unit,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     )

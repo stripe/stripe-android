@@ -524,7 +524,7 @@ internal abstract class BaseSheetViewModel(
         updateSelection(paymentOptionsState.selectedItem?.toPaymentSelection())
     }
 
-    abstract fun onPaymentResult(paymentResult: PaymentResult)
+    abstract fun onPaymentResult(paymentResult: PaymentResult, selection: PaymentSelection)
 
     abstract fun onFinish()
 

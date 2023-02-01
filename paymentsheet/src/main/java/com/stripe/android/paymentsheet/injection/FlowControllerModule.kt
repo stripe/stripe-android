@@ -5,9 +5,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.ConfirmationHandler
+import com.stripe.android.paymentsheet.DefaultConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import com.stripe.android.uicore.image.StripeImageLoader
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -17,8 +20,11 @@ import javax.inject.Singleton
 @Module(
     subcomponents = [
         PaymentOptionsViewModelSubcomponent::class,
-        FormViewModelSubcomponent::class
-    ]
+        FormViewModelSubcomponent::class,
+    ],
+    includes = [
+        FlowControllerModule.ConfirmationHandlerModule::class,
+    ],
 )
 internal object FlowControllerModule {
 
@@ -46,5 +52,12 @@ internal object FlowControllerModule {
     @Singleton
     fun provideStripeImageLoader(context: Context): StripeImageLoader {
         return StripeImageLoader(context)
+    }
+
+    @Module
+    interface ConfirmationHandlerModule {
+
+        @Binds
+        fun bindConfirmationHandler(impl: DefaultConfirmationHandler): ConfirmationHandler
     }
 }

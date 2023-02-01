@@ -127,7 +127,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
             LinkHandler.ProcessingState.Cancelled -> {
-                onPaymentResult(PaymentResult.Canceled)
+                onPaymentResult(PaymentResult.Canceled, PaymentSelection.Link)
             }
             LinkHandler.ProcessingState.Completed -> {
                 eventReporter.onPaymentSuccess(
@@ -135,11 +135,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     stripeIntent.value?.currency
                 )
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
-                onPaymentResult(PaymentResult.Completed)
+                onPaymentResult(PaymentResult.Completed, PaymentSelection.Link)
             }
             is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
                 setContentVisible(true)
-                onPaymentResult(processingState.result)
+                onPaymentResult(processingState.result, PaymentSelection.Link)
             }
             is LinkHandler.ProcessingState.Error -> {
                 onError(processingState.message)
@@ -220,7 +220,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
-    override fun onPaymentResult(paymentResult: PaymentResult) {
+    override fun onPaymentResult(
+        paymentResult: PaymentResult,
+        selection: PaymentSelection,
+    ) {
         savedStateHandle[SAVE_PROCESSING] = false
     }
 

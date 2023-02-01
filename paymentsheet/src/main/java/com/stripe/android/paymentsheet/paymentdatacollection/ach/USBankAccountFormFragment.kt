@@ -129,8 +129,8 @@ internal class USBankAccountFormFragment : Fragment() {
                 clientSecret = clientSecret,
                 savedPaymentMethod = savedPaymentMethod,
                 shippingDetails = sheetViewModel?.config?.shippingDetails,
-                onConfirmStripeIntent = { params ->
-                    (sheetViewModel as? PaymentSheetViewModel)?.confirmStripeIntent(params)
+                onConfirmPaymentSelection = { paymentSelection ->
+                    (sheetViewModel as? PaymentSheetViewModel)?.confirmPaymentSelection(paymentSelection)
                 },
                 onUpdateSelectionAndFinish = { paymentSelection ->
                     sheetViewModel?.updateSelection(paymentSelection)
