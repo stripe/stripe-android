@@ -9,7 +9,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
@@ -41,7 +40,7 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 class USBankAccountFormViewModelTest {
 
-    private val onConfirmStripeIntent: (ConfirmStripeIntentParams) -> Unit = mock()
+    private val onConfirmPaymentSelection: (PaymentSelection) -> Unit = mock()
     private val onUpdateSelectionAndFinish: (PaymentSelection) -> Unit = mock()
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
@@ -60,7 +59,7 @@ class USBankAccountFormViewModelTest {
         clientSecret = PaymentIntentClientSecret("pi_12345"),
         savedPaymentMethod = null,
         shippingDetails = null,
-        onConfirmStripeIntent = onConfirmStripeIntent,
+        onConfirmPaymentSelection = onConfirmPaymentSelection,
         onUpdateSelectionAndFinish = onUpdateSelectionAndFinish
     )
 
@@ -154,7 +153,7 @@ class USBankAccountFormViewModelTest {
             assertThat(newScreenState)
                 .isInstanceOf(USBankAccountFormScreenState.VerifyWithMicrodeposits::class.java)
 
-            verify(onConfirmStripeIntent).invoke(any())
+            verify(onConfirmPaymentSelection).invoke(any())
         }
 
     @Test
@@ -178,7 +177,7 @@ class USBankAccountFormViewModelTest {
             assertThat(newScreenState)
                 .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
 
-            verify(onConfirmStripeIntent).invoke(any())
+            verify(onConfirmPaymentSelection).invoke(any())
         }
 
     @Test

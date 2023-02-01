@@ -33,10 +33,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
@@ -64,6 +61,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.utils.FakeConfirmationHandler
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
@@ -84,7 +82,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
@@ -112,20 +109,7 @@ internal class PaymentSheetActivityTest {
     private val googlePayPaymentMethodLauncherFactory =
         createGooglePayPaymentMethodLauncherFactory()
 
-    private val paymentLauncherFactory = PaymentLauncherFactory(
-        context = context,
-        hostActivityLauncher = mock(),
-    )
-
-    private val paymentLauncher: StripePaymentLauncher by lazy {
-        paymentLauncherFactory.create(
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-        ) as StripePaymentLauncher
-    }
-
-    private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory> {
-        on { create(any(), any(), any()) } doReturn paymentLauncher
-    }
+    private val fakeConfirmationHandler = FakeConfirmationHandler()
 
     private lateinit var viewModel: PaymentSheetViewModel
 
@@ -699,10 +683,18 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `successful payment should dismiss bottom sheet`() {
         Dispatchers.setMain(testDispatcher)
+
+        val viewModel = createViewModel(confirmationHandler = fakeConfirmationHandler)
         val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
+            val selection = PaymentSelection.Saved(paymentMethod = PAYMENT_METHODS.first())
+            viewModel.updateSelection(selection)
+
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-            viewModel.onPaymentResult(PaymentResult.Completed)
+            viewModel.checkout()
+
+            fakeConfirmationHandler.emitPaymentResult(PaymentResult.Completed)
 
             idleLooper()
 
@@ -1106,6 +1098,7 @@ internal class PaymentSheetActivityTest {
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
         loadDelay: Duration = Duration.ZERO,
+        confirmationHandler: ConfirmationHandler = mock(),
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = mock<LpmRepository>()
         whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
@@ -1121,28 +1114,27 @@ internal class PaymentSheetActivityTest {
             linkLauncher = linkPaymentLauncher,
         ) { linkHandler, savedStateHandle ->
             PaymentSheetViewModel(
-                ApplicationProvider.getApplicationContext(),
-                PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-                eventReporter,
-                { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-                StripeIntentRepository.Static(paymentIntent),
-                StripeIntentValidator(),
-                FakePaymentSheetLoader(
+                application = ApplicationProvider.getApplicationContext(),
+                args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+                eventReporter = eventReporter,
+                stripeIntentRepository = StripeIntentRepository.Static(paymentIntent),
+                stripeIntentValidator = StripeIntentValidator(),
+                paymentSheetLoader = FakePaymentSheetLoader(
                     stripeIntent = paymentIntent,
                     customerPaymentMethods = paymentMethods,
                     delay = loadDelay,
                 ),
-                FakeCustomerRepository(paymentMethods),
-                FakePrefsRepository(),
-                StaticLpmResourceRepository(lpmRepository),
-                mock(),
-                stripePaymentLauncherAssistedFactory,
-                googlePayPaymentMethodLauncherFactory,
-                Logger.noop(),
-                testDispatcher,
-                DUMMY_INJECTOR_KEY,
+                customerRepository = FakeCustomerRepository(paymentMethods),
+                prefsRepository = FakePrefsRepository(),
+                lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
+                addressResourceRepository = mock(),
+                googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
+                logger = Logger.noop(),
+                workContext = testDispatcher,
+                injectorKey = DUMMY_INJECTOR_KEY,
                 savedStateHandle = savedStateHandle,
-                linkHandler = linkHandler
+                linkHandler = linkHandler,
+                confirmationHandler = confirmationHandler,
             ).also {
                 it.injector = injector
             }

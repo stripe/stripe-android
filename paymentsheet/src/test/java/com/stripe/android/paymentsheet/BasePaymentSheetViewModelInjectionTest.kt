@@ -5,8 +5,6 @@ import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
@@ -17,7 +15,6 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
@@ -53,7 +50,6 @@ internal open class BasePaymentSheetViewModelInjectionTest {
     private val eventReporter = mock<EventReporter>()
     private val googlePayPaymentMethodLauncherFactory =
         createGooglePayPaymentMethodLauncherFactory()
-    private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
 
     private lateinit var injector: NonFallbackInjector
 
@@ -85,18 +81,17 @@ internal open class BasePaymentSheetViewModelInjectionTest {
     ): PaymentSheetViewModel = runBlocking {
         TestViewModelFactory.create { linkHandler, savedStateHandle ->
             PaymentSheetViewModel(
-                ApplicationProvider.getApplicationContext(),
-                args,
-                eventReporter,
-                { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-                StripeIntentRepository.Static(stripeIntent),
-                StripeIntentValidator(),
-                FakePaymentSheetLoader(
+                application = ApplicationProvider.getApplicationContext(),
+                args = args,
+                eventReporter = eventReporter,
+                stripeIntentRepository = StripeIntentRepository.Static(stripeIntent),
+                stripeIntentValidator = StripeIntentValidator(),
+                paymentSheetLoader = FakePaymentSheetLoader(
                     stripeIntent = stripeIntent,
                     customerPaymentMethods = customerRepositoryPMs,
                 ),
-                FakeCustomerRepository(customerRepositoryPMs),
-                FakePrefsRepository(),
+                customerRepository = FakeCustomerRepository(customerRepositoryPMs),
+                prefsRepository = FakePrefsRepository(),
                 lpmResourceRepository = StaticLpmResourceRepository(
                     LpmRepository(
                         LpmRepository.LpmRepositoryArguments(
@@ -114,14 +109,14 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                         )
                     }
                 ),
-                mock(),
-                stripePaymentLauncherAssistedFactory,
-                googlePayPaymentMethodLauncherFactory,
-                Logger.noop(),
-                testDispatcher,
-                injectorKey,
+                addressResourceRepository = mock(),
+                googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
+                logger = Logger.noop(),
+                workContext = testDispatcher,
+                injectorKey = injectorKey,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
+                confirmationHandler = mock(),
             )
         }
     }
