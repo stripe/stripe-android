@@ -7,8 +7,10 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LuxePostConfirmActionRepository
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
@@ -206,7 +208,7 @@ class LpmRepository constructor(
         inputStream?.bufferedReader().use { it?.readText() }
 
     private fun convertToSupportedPaymentMethod(
-        @Suppress("UNUSED_PARAMETER") stripeIntent: StripeIntent,
+        stripeIntent: StripeIntent,
         sharedDataSpec: SharedDataSpec,
     ) = when (sharedDataSpec.type) {
         PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
@@ -329,7 +331,7 @@ class LpmRepository constructor(
         )
         PaymentMethod.Type.PayPal.code -> SupportedPaymentMethod(
             code = "paypal",
-            requiresMandate = false,
+            requiresMandate = stripeIntent.payPalRequiresMandate(),
             displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -531,4 +533,11 @@ class LpmRepository constructor(
         val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
             DefaultIsFinancialConnectionsAvailable(),
     )
+}
+
+private fun StripeIntent.payPalRequiresMandate(): Boolean {
+    return when (this) {
+        is PaymentIntent -> setupFutureUsage != null
+        is SetupIntent -> true
+    }
 }
