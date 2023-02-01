@@ -153,14 +153,16 @@ private fun computeItemWidthWhenExceedingMaxWidth(
     spacing: Dp,
 ): Dp {
     val itemWithSpacing = minItemWidth + spacing
+    val lastCardPeekAmount = .3
 
-    val remainingWidthAfterAddingFirstCard = availableWidth - minItemWidth
-    val numberOfAdditionalCards = (remainingWidthAfterAddingFirstCard / itemWithSpacing).toInt()
+    val peekingCardWidth = (minItemWidth.value * lastCardPeekAmount).dp
+    val remainingWidthAfterAddingFixedCards = availableWidth - minItemWidth - peekingCardWidth
+    val numberOfAdditionalCards = (remainingWidthAfterAddingFixedCards / itemWithSpacing).toInt()
 
-    val visibleCards = numberOfAdditionalCards + 1
+    val visibleCards = numberOfAdditionalCards + 1 + lastCardPeekAmount
     val overallSpacing = spacing * numberOfAdditionalCards
 
-    return (availableWidth - overallSpacing) / visibleCards
+    return ((availableWidth - overallSpacing).value / visibleCards).dp
 }
 
 @Composable

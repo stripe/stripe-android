@@ -73,4 +73,41 @@ class PaymentMethodsUIScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testLongPaymentMethodName() {
+        val paymentMethods = paymentMethods.toMutableList()
+        paymentMethods.add(
+            1,
+            MockPaymentMethodsFactory.mockPaymentMethod(
+                code = "us_bank_account",
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
+                tintIconOnSelection = true
+            )
+        )
+        paparazziRule.snapshot {
+            PaymentMethodsUI(
+                paymentMethods = paymentMethods,
+                selectedIndex = 0,
+                isEnabled = true,
+                onItemSelectedListener = {},
+                imageLoader = mock(),
+            )
+        }
+    }
+
+    @Test
+    fun testTwoPaymentMethodsExpandToFit() {
+        val paymentMethods = paymentMethods.take(2)
+        paparazziRule.snapshot {
+            PaymentMethodsUI(
+                paymentMethods = paymentMethods,
+                selectedIndex = 0,
+                isEnabled = true,
+                onItemSelectedListener = {},
+                imageLoader = mock(),
+            )
+        }
+    }
 }
