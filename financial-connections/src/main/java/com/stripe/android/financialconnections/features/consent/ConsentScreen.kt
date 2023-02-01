@@ -142,7 +142,7 @@ private fun ConsentContent(
 }
 
 @Composable
-fun ConsentLoadingContent() {
+private fun ConsentLoadingContent() {
     FinancialConnectionsScaffold(
         topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
     ) {
