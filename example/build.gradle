@@ -82,7 +82,7 @@ dependencies {
     androidTestImplementation "androidx.test:core-ktx:$androidTestVersion"
 
     // AndroidJUnitRunner and JUnit Rules
-    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
 
     // Assertions
