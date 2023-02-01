@@ -239,13 +239,12 @@ internal class PartnerAuthViewModel @Inject constructor(
                 )
             }
         }
-        val date = Date()
         if (URLUtil.isNetworkUrl(uri)) {
             setState {
                 copy(
                     viewEffect = OpenUrl(
                         uri,
-                        date.time
+                        Date().time
                     )
                 )
             }
@@ -256,7 +255,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 PartnerAuthState.ClickableText.DATA -> {
                     setState {
                         copy(
-                            viewEffect = OpenBottomSheet(date.time)
+                            viewEffect = OpenBottomSheet(Date().time)
                         )
                     }
                 }
