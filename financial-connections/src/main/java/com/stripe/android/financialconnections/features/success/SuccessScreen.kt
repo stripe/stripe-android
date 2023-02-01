@@ -116,7 +116,6 @@ private fun SuccessContent(
 
 @Composable
 private fun SuccessLoading() {
-    // TODO@carlosmuvi check designs for loading state.
     LoadingContent(
         title = stringResource(id = R.string.stripe_success_pane_skip_title),
         content = stringResource(id = R.string.stripe_success_pane_skip_desc),
