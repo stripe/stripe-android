@@ -22,7 +22,6 @@
     <ID>LongMethod:PaymentElement.kt$@Composable internal fun PaymentElement( sheetViewModel: BaseSheetViewModel, enabled: Boolean, supportedPaymentMethods: List&lt;LpmRepository.SupportedPaymentMethod>, selectedItem: LpmRepository.SupportedPaymentMethod, showLinkInlineSignup: Boolean, linkPaymentLauncher: LinkPaymentLauncher, showCheckboxFlow: Flow&lt;Boolean>, onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit, onLinkSignupStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit, formArguments: FormArguments, onFormFieldValuesChanged: (FormFieldValues?) -> Unit, )</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentOptionUi.kt$@Composable internal fun PaymentOptionUi( viewWidth: Dp, isSelected: Boolean, isEditing: Boolean, isEnabled: Boolean, iconRes: Int, modifier: Modifier = Modifier, iconTint: Color? = null, @DrawableRes labelIcon: Int? = null, labelText: String = "", removePmDialogTitle: String = "", description: String, onRemoveListener: (() -> Unit)? = null, onRemoveAccessibilityDescription: String = "", onItemSelectedListener: (() -> Unit), )</ID>
-    <ID>LongMethod:PaymentOptionsActivity.kt$PaymentOptionsActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:PaymentSheetActivity.kt$PaymentSheetActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:USBankAccountFormFragment.kt$USBankAccountFormFragment$@Composable private fun AccountDetailsForm( bankName: String?, last4: String?, saveForFutureUsage: Boolean )</ID>
@@ -30,6 +29,7 @@
     <ID>LongMethod:USBankAccountFormViewModel.kt$USBankAccountFormViewModel$private fun attachFinancialAccountToIntent( clientSecret: ClientSecret, intentId: String, linkAccountId: String, bankName: String?, last4: String? )</ID>
     <ID>MagicNumber:AutocompleteScreen.kt$0.07f</ID>
     <ID>MagicNumber:GooglePayButton.kt$GooglePayButton$0.5f</ID>
+    <ID>MagicNumber:PaymentMethodsUI.kt$.3</ID>
     <ID>MagicNumber:PaymentMethodsUI.kt$0.6F</ID>
     <ID>MagicNumber:PaymentOptionUi.kt$0.6F</ID>
     <ID>MagicNumber:PaymentOptionUi.kt$18</ID>
@@ -41,7 +41,6 @@
     <ID>MaxLineLength:CustomerRepositoryTest.kt$CustomerRepositoryTest$onBlocking { detachPaymentMethod(anyString(), any(), anyString(), any()) }.doThrow(InvalidParameterException("error"))</ID>
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$.</ID>
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$fun</ID>
-    <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$viewModel.paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$val d = delegate ?: throw IllegalStateException("Cannot run onActivity since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.Address$*</ID>
@@ -49,7 +48,6 @@
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.Configuration$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.GooglePayConfiguration$*</ID>
     <ID>MaxLineLength:PaymentSheetActivityTest.kt$PaymentSheetActivityTest$fun</ID>
-    <ID>MaxLineLength:PaymentSheetEventTest.kt$PaymentSheetEventTest$paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())</ID>
     <ID>MaxLineLength:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$fun</ID>
     <ID>MaxLineLength:PrimaryButtonTest.kt$PrimaryButtonTest$primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))</ID>
     <ID>MaxLineLength:StripeIntentRepositoryTest.kt$StripeIntentRepositoryTest$fun</ID>
