@@ -29,7 +29,13 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
         /**
          * Triggers a termination of the AuthFlow, completing the session in the current state.
          */
-        object Terminate : Message
+        data class Terminate(
+            val cause: EarlyTerminationCause
+        ) : Message {
+            enum class EarlyTerminationCause(val value: String) {
+                USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY("user_initiated_with_custom_manual_entry")
+            }
+        }
 
         data class Finish(
             val result: FinancialConnectionsSheetActivityResult

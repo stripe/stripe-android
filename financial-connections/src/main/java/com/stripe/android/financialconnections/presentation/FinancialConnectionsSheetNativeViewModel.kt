@@ -27,6 +27,7 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
@@ -73,7 +74,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         setState { copy(webAuthFlow = Uninitialized) }
                     }
 
-                    Message.Terminate -> closeAuthFlow()
+                    is Terminate -> closeAuthFlow(
+                        earlyTerminationCause = message.cause
+                    )
                 }
             }
         }
@@ -223,11 +226,16 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      * 3. User closes without an error, and fetching accounts returns NO accounts. That's a cancel.
      */
     private fun closeAuthFlow(
+        earlyTerminationCause: Terminate.EarlyTerminationCause? = null,
         closeAuthFlowError: Throwable? = null
     ) {
         viewModelScope.launch {
             kotlin
-                .runCatching { completeFinancialConnectionsSession() }
+                .runCatching {
+                    completeFinancialConnectionsSession(
+                        terminalError = earlyTerminationCause?.value
+                    )
+                }
                 .onSuccess { session ->
                     eventTracker.track(
                         Complete(

@@ -11,8 +11,7 @@ import kotlinx.serialization.Serializable
 data class ManualEntry(
     val enabled: Boolean,
     val mode: ManualEntryMode
-) : Parcelable {
-}
+) : Parcelable
 
 @Serializable(with = ManualEntryMode.Serializer::class)
 enum class ManualEntryMode(val value: String) {

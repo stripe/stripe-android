@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate.EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
@@ -84,7 +85,11 @@ internal class ManualEntryViewModel @Inject constructor(
             ManualEntryState::payload,
             onSuccess = { payload ->
                 if (payload.customManualEntry) {
-                    nativeAuthFlowCoordinator().emit(Terminate)
+                    nativeAuthFlowCoordinator().emit(
+                        Terminate(
+                            USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
+                        )
+                    )
                 }
             },
         )

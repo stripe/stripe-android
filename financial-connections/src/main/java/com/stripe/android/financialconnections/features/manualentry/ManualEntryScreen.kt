@@ -109,7 +109,7 @@ private fun ManualEntryContent(
                 onCloseFromErrorClick = {}
             )
 
-            is Success -> when(payload().customManualEntry) {
+            is Success -> when (payload().customManualEntry) {
                 true -> LoadingContent()
                 false -> ManualEntryLoaded(
                     scrollState = scrollState,

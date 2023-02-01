@@ -364,4 +364,3 @@ internal data class FinancialConnectionsSessionManifest(
             )
     }
 }
-
