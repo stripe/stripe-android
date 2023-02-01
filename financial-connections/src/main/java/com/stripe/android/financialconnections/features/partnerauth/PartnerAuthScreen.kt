@@ -258,10 +258,9 @@ private fun LoadedContent(
     when (authenticationStatus) {
         is Uninitialized -> when (payload.authSession.isOAuth) {
             true -> InstitutionalPrePaneContent(
-                onClickableTextClick = onClickableTextClick,
-                isStripeDirect = payload.isStripeDirect,
                 onContinueClick = onContinueClick,
                 content = payload.authSession.display!!.text.oauthPrepane,
+                onClickableTextClick = onClickableTextClick,
             )
 
             false -> LoadingContent(
@@ -284,7 +283,6 @@ private fun LoadedContent(
 
 @Composable
 private fun InstitutionalPrePaneContent(
-    isStripeDirect: Boolean,
     onContinueClick: () -> Unit,
     content: OauthPrepane,
     onClickableTextClick: (String) -> Unit
@@ -383,8 +381,8 @@ private fun InstitutionalPrePaneContent(
             content.partnerNotice?.let {
                 Spacer(modifier = Modifier.size(16.dp))
                 PartnerCallout(
-                    isStripeDirect = isStripeDirect,
-                    partnerNotice = content.partnerNotice
+                    partnerNotice = content.partnerNotice,
+                    onClickableTextClick = onClickableTextClick
                 )
             }
         }

@@ -10,10 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.domain.PartnerNotice
-import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
@@ -24,11 +22,10 @@ import com.stripe.android.uicore.image.StripeImage
 
 @Composable
 internal fun PartnerCallout(
-    isStripeDirect: Boolean,
+    modifier: Modifier = Modifier,
     partnerNotice: PartnerNotice,
-    modifier: Modifier = Modifier
+    onClickableTextClick: (String) -> Unit
 ) {
-    val uriHandler = LocalUriHandler.current
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -60,11 +57,7 @@ internal fun PartnerCallout(
                     .toSpanStyle()
                     .copy(color = FinancialConnectionsTheme.colors.textSecondary)
             ),
-            onClickableTextClick = {
-                uriHandler.openUri(
-                    FinancialConnectionsUrlResolver.getPartnerNotice(isStripeDirect)
-                )
-            }
+            onClickableTextClick = onClickableTextClick
         )
     }
 }
