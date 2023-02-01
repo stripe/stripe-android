@@ -64,8 +64,10 @@ internal class DefaultConfirmationHandler @Inject constructor(
             confirmIntent(params)
         } else {
             Result.failure(
-                IllegalStateException("Attempted to create ConfirmStripeIntentParams " +
-                    "for invalid payment selection $paymentSelection")
+                IllegalStateException(
+                    "Attempted to create ConfirmStripeIntentParams " +
+                        "for invalid payment selection $paymentSelection"
+                )
             )
         }
     }
