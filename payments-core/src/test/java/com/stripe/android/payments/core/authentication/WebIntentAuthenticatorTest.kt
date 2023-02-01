@@ -19,6 +19,7 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -59,14 +60,15 @@ class WebIntentAuthenticatorTest {
     private var threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
 
     private val authenticator = WebIntentAuthenticator(
-        paymentBrowserAuthStarterFactory,
-        analyticsRequestExecutor,
-        analyticsRequestFactory,
+        paymentBrowserAuthStarterFactory = paymentBrowserAuthStarterFactory,
+        analyticsRequestExecutor = analyticsRequestExecutor,
+        paymentAnalyticsRequestFactory = analyticsRequestFactory,
         enableLogging = false,
-        testDispatcher,
-        threeDs1IntentReturnUrlMap,
-        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-        false
+        uiContext = testDispatcher,
+        threeDs1IntentReturnUrlMap = threeDs1IntentReturnUrlMap,
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        isInstantApp = false,
+        defaultReturnUrl = DefaultReturnUrl("some_package_name"),
     )
 
     @Before
@@ -124,12 +126,24 @@ class WebIntentAuthenticatorTest {
     @Test
     fun authenticate_whenDisplayOxxoDetails() {
         verifyAuthenticate(
-            stripeIntent = PaymentIntentFixtures.OXXO_REQUIES_ACTION,
+            stripeIntent = PaymentIntentFixtures.OXXO_REQUIRES_ACTION,
             expectedUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb",
             expectedReturnUrl = null,
             expectedRequestCode = PAYMENT_REQUEST_CODE,
             expectedAnalyticsEvent = null,
             expectedShouldCancelIntentOnUserNavigation = false
+        )
+    }
+
+    @Test
+    fun authenticate_whenRedirectingToCashApp() {
+        verifyAuthenticate(
+            stripeIntent = PaymentIntentFixtures.CASH_APP_PAY_REQUIRES_ACTION,
+            expectedUrl = "https://pm-redirects.stripe.com/authorize/acct_1HvTI7Lu5o3P18Zp/pa_nonce_NC1mezV544wpYmFaXyJpnleeurKO3TZ",
+            expectedReturnUrl = "stripesdk://payment_return_url/some_package_name",
+            expectedRequestCode = PAYMENT_REQUEST_CODE,
+            expectedAnalyticsEvent = null,
+            expectedShouldCancelIntentOnUserNavigation = false,
         )
     }
 

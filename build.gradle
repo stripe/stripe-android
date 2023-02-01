@@ -4,7 +4,7 @@ import java.time.Duration
 buildscript {
     apply from: 'dependencies.gradle'
     apply from: './build-configuration/build-environment.gradle'
-    ext.kotlinVersion = '1.7.20'
+    ext.kotlinVersion = '1.8.0'
     ext.dokkaVersion = '1.7.20'
 
     repositories {
@@ -21,8 +21,8 @@ buildscript {
         classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.12.1"
         classpath 'com.karumi:shot:5.14.1'
         classpath 'app.cash.paparazzi:paparazzi-gradle-plugin:1.2.0'
-        classpath 'com.google.gms:google-services:4.3.14'
-        classpath 'com.google.firebase:firebase-appdistribution-gradle:3.1.1'
+        classpath 'com.google.gms:google-services:4.3.15'
+        classpath 'com.google.firebase:firebase-appdistribution-gradle:3.2.0'
         classpath buildLibs.detektGradlePlugin
     }
 }
@@ -54,11 +54,13 @@ ext {
     androidxArchCoreVersion = '2.1.0'
     androidxBrowserVersion = '1.4.0'
     androidxComposeVersion = '1.3.1'
-    androidxComposeCompilerVersion = '1.3.2'
+    androidxComposeRuntimeVersion = '1.3.3'
+    androidxComposeUiVersion = '1.3.3'
+    androidxComposeCompilerVersion = '1.4.0'
     androidxConstraintlayoutComposeVersion = '1.0.1'
     androidxConstraintlayoutVersion = '2.1.4'
     androidxCoreVersion = '1.9.0'
-    androidxFragmentVersion = '1.5.4'
+    androidxFragmentVersion = '1.5.5'
     androidxLifecycleVersion = '2.5.1'
     androidxNavigationVersion = '2.5.3'
     androidxPreferenceVersion = '1.2.0'
@@ -67,27 +69,27 @@ ext {
 
     kotlinCoroutinesVersion = '1.6.4'
     kotlinSerializationVersion = '1.4.1'
-    accompanistVersion = '0.27.0'
+    accompanistVersion = '0.28.0'
     ktlintVersion = '0.47.1'
-    // material 1.6 causes paymentsheet to not render correctly.
-    // see here: https://github.com/material-components/material-components-android/issues/2702
-    materialVersion = '1.5.0'
+    materialVersion = '1.8.0'
     daggerVersion = '2.44.2'
     playServicesWalletVersion = '19.1.0'
-    placesVersion = '2.7.0'
+    placesVersion = '3.0.0'
     playServicesVersion = '1.6.4'
     leakCanaryVersion = '2.10'
     okhttpVersion = '4.10.0'
+    stripe3ds2Version = '6.1.6'
 
     androidTestVersion = '1.5.0'
+    androidTestRunnerVersion = '1.5.2'
     androidTestOrchestratorVersion = '1.4.2'
     androidTestJunitVersion = '1.1.5'
     truthVersion = '1.1.3'
     junitVersion = '4.13.2'
     robolectricVersion = '4.9.2'
-    mockitoCoreVersion = '5.0.0'
+    mockitoCoreVersion = '5.1.1'
     mockitoKotlinVersion = '4.1.0'
-    espressoVersion = '3.5.0'
+    espressoVersion = '3.5.1'
     jsonVersion = '20220924'
     uiautomator = '2.2.0'
     showkaseVersion = '1.0.0-beta14'
@@ -133,7 +135,7 @@ tasks.dokkaHtmlMultiModule.configure {
 
 apiValidation {
     ignoredPackages += ["com.stripe.android.databinding"]
-    ignoredProjects += ["example", "paymentsheet-example", "stripecardscan-example", "identity-example", "financial-connections-example"]
+    ignoredProjects += ["example", "paymentsheet-example", "stripecardscan-example", "identity-example", "financial-connections-example", "network-testing"]
     nonPublicMarkers.add("androidx.annotation.RestrictTo")
     nonPublicMarkers.add("dagger.internal.DaggerGenerated")
 }

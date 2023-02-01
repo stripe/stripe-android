@@ -38,55 +38,77 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onShowExistingPaymentOptions(linkEnabled: Boolean, activeLinkSession: Boolean) {
+    override fun onShowExistingPaymentOptions(
+        linkEnabled: Boolean,
+        activeLinkSession: Boolean,
+        currency: String?
+    ) {
         paymentSheetShownMillis = eventTimeProvider.currentTimeMillis()
         fireEvent(
             PaymentSheetEvent.ShowExistingPaymentOptions(
                 mode = mode,
                 linkEnabled = linkEnabled,
-                activeLinkSession = activeLinkSession
+                activeLinkSession = activeLinkSession,
+                currency = currency
             )
         )
     }
 
-    override fun onShowNewPaymentOptionForm(linkEnabled: Boolean, activeLinkSession: Boolean) {
+    override fun onShowNewPaymentOptionForm(
+        linkEnabled: Boolean,
+        activeLinkSession: Boolean,
+        currency: String?
+    ) {
         paymentSheetShownMillis = eventTimeProvider.currentTimeMillis()
         fireEvent(
             PaymentSheetEvent.ShowNewPaymentOptionForm(
                 mode = mode,
                 linkEnabled = linkEnabled,
-                activeLinkSession = activeLinkSession
+                activeLinkSession = activeLinkSession,
+                currency = currency
             )
         )
     }
 
-    override fun onSelectPaymentOption(paymentSelection: PaymentSelection) {
+    override fun onSelectPaymentOption(
+        paymentSelection: PaymentSelection,
+        currency: String?
+    ) {
         fireEvent(
             PaymentSheetEvent.SelectPaymentOption(
                 mode = mode,
-                paymentSelection = paymentSelection
+                paymentSelection = paymentSelection,
+                currency = currency
             )
         )
     }
 
-    override fun onPaymentSuccess(paymentSelection: PaymentSelection?) {
+    override fun onPaymentSuccess(
+        paymentSelection: PaymentSelection?,
+        currency: String?
+    ) {
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
                 paymentSelection = paymentSelection,
                 durationMillis = durationMillisFrom(paymentSheetShownMillis),
-                result = PaymentSheetEvent.Payment.Result.Success
+                result = PaymentSheetEvent.Payment.Result.Success,
+                currency = currency
             )
         )
     }
 
-    override fun onPaymentFailure(paymentSelection: PaymentSelection?) {
+    override fun onPaymentFailure(
+        paymentSelection: PaymentSelection?,
+        currency: String?
+    ) {
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
                 paymentSelection = paymentSelection,
                 durationMillis = durationMillisFrom(paymentSheetShownMillis),
-                result = PaymentSheetEvent.Payment.Result.Failure
+                result = PaymentSheetEvent.Payment.Result.Failure,
+                currency = currency
             )
         )
     }

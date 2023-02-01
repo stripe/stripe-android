@@ -6,10 +6,6 @@
   <string name="back">返回</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">账单地址</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">电子邮件</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">您的邮件地址无效。</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">EPS 银行</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

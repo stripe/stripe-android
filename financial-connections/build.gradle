@@ -30,8 +30,8 @@ dependencies {
     implementation "androidx.browser:browser:$androidxBrowserVersion"
     implementation "androidx.compose.foundation:foundation:$androidxComposeVersion"
     implementation "androidx.compose.material:material:$androidxComposeVersion"
-    implementation "androidx.compose.ui:ui:$androidxComposeVersion"
-    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeVersion"
+    implementation "androidx.compose.ui:ui:$androidxComposeUiVersion"
+    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeUiVersion"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$androidxLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidxLifecycleVersion"
@@ -44,8 +44,8 @@ dependencies {
     implementation libs.mavericks
     implementation libs.mavericksCompose
 
-    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
-    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
+    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeUiVersion"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeUiVersion"
     debugImplementation "com.airbnb.android:showkase:$showkaseVersion"
 
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
@@ -69,13 +69,13 @@ dependencies {
     testImplementation testLibs.mavericks
     testImplementation testLibs.turbine
 
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
     androidTestImplementation "com.google.truth:truth:$truthVersion"
 
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
 
     kaptAndroidTest "com.airbnb.android:showkase-processor:$showkaseVersion"
 

@@ -6,10 +6,6 @@
   <string name="back">Terug</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Factuuradres</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">E-mailadres</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Je e-mailadres is ongeldig.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">EPS Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
