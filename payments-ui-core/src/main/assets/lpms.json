@@ -454,6 +454,11 @@
     ]
   },
   {
+    "type": "cashapp",
+    "async": false,
+    "fields": []
+  },
+  {
     "async": false,
     "fields": [],
     "next_action_spec": {
