@@ -38,6 +38,7 @@ class ConsumersApiServiceImplTest {
             method("POST"),
             path("/v1/consumers/sessions/lookup"),
             header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
+            header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart("email_address", "email%40example.com"),
             bodyPart("cookies%5Bverification_session_client_secrets%5D%5B%5D", cookie),
             bodyPart("request_surface", "android_payment_element"),

@@ -19,7 +19,7 @@ dependencies {
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
-    implementation "androidx.compose.ui:ui:$androidxComposeVersion"
+    implementation "androidx.compose.ui:ui:$androidxComposeUiVersion"
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
     implementation "androidx.compose.foundation:foundation:$androidxComposeVersion"
     // Material Design
@@ -29,9 +29,9 @@ dependencies {
     // Integration with activities
     implementation "androidx.activity:activity-compose:$androidxActivityVersion"
     // Integration with observables
-    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
+    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeRuntimeVersion"
     implementation "com.google.accompanist:accompanist-flowlayout:$accompanistVersion"
-    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeVersion"
+    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeUiVersion"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
@@ -40,7 +40,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$playServicesVersion"
 
     // Tooling support (Previews, etc.)
-    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
+    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeUiVersion"
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
