@@ -13,7 +13,6 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int? = when (type) {
         ?: R.drawable.stripe_ic_paymentsheet_card_unknown
     PaymentMethod.Type.SepaDebit -> R.drawable.stripe_ic_paymentsheet_pm_sepa_debit
     PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
-    PaymentMethod.Type.PayPal -> R.drawable.stripe_ic_paymentsheet_pm_paypal
     else -> null
 }
 
@@ -39,7 +38,6 @@ internal fun PaymentMethod.getLabel(resources: Resources): String? = when (type)
         R.string.paymentsheet_payment_method_item_card_number,
         usBankAccount?.last4
     )
-    PaymentMethod.Type.PayPal -> resources.getString(R.string.stripe_paymentsheet_payment_method_paypal)
     else -> null
 }
 

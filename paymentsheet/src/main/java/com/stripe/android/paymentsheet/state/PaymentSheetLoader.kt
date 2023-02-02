@@ -180,7 +180,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             customerConfig,
             paymentMethodTypes
         ).filter { paymentMethod ->
-            paymentMethod.hasExpectedDetails()
+            paymentMethod.hasExpectedDetails() &&
+                paymentMethod.type != PaymentMethod.Type.PayPal
         }
     }
 
