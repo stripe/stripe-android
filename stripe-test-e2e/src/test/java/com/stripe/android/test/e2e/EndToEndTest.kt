@@ -46,10 +46,12 @@ internal class EndToEndTest {
     )
 
     /**
-     * MARK: LOG.04.01c
+     * MARK: PAP.01.08d
      * In this test, a PaymentIntent object is created from an example merchant backend,
      * confirmed by the Android SDK, and then retrieved to validate that the original amount,
      * currency, and merchant are the same as the original inputs.
+     *
+     * https://confluence.corp.stripe.com/x/dAHfHQ
      */
     @Test
     fun testRigCon() = runTest {
