@@ -8,7 +8,9 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -46,7 +48,6 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
-import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
@@ -58,6 +59,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherP
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -211,30 +213,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `google pay button should not be enabled when editing`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.googlePayButton.isEnabled).isTrue()
-
-            viewModel.toggleEditing()
-
-            assertThat(activity.viewBinding.googlePayButton.isEnabled).isFalse()
-        }
-    }
-
-    @Test
-    fun `google pay button should not be enabled when processing`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.googlePayButton.isEnabled).isTrue()
-
-            activity.viewBinding.buyButton.callOnClick()
-
-            assertThat(activity.viewBinding.googlePayButton.isEnabled).isFalse()
-        }
-    }
-
-    @Test
     fun `link button should not be enabled when editing`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
@@ -285,7 +263,8 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Errors are cleared when checking out with Google Pay`() {
-        val scenario = activityScenario()
+        val viewModel = createViewModel(isGooglePayAvailable = true)
+        val scenario = activityScenario(viewModel = viewModel)
 
         scenario.launch(intent).onActivity { activity ->
             val error = "some error"
@@ -300,7 +279,9 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertExists()
 
-            activity.viewBinding.googlePayButton.callOnClick()
+            composeTestRule
+                .onNodeWithTag(GooglePayButton.TEST_TAG)
+                .performClick()
 
             composeTestRule
                 .onNodeWithText(error)
@@ -335,10 +316,15 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `Errors are cleared when updating the payment selection`() {
         val paymentMethods = PAYMENT_METHODS
-        val viewModel = createViewModel(paymentMethods = paymentMethods)
+
+        val viewModel = createViewModel(
+            paymentMethods = paymentMethods,
+            isGooglePayAvailable = true,
+        )
+
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             val error = "some error"
 
             composeTestRule
@@ -354,7 +340,10 @@ internal class PaymentSheetActivityTest {
             val newSelection = PaymentSelection.Saved(paymentMethod = paymentMethods.last())
             viewModel.updateSelection(newSelection)
 
-            activity.viewBinding.googlePayButton.performClick()
+            composeTestRule
+                .onNodeWithTag(GooglePayButton.TEST_TAG)
+                .performClick()
+
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
             composeTestRule
@@ -527,42 +516,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `google pay button state updated on start processing`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            activity.viewBinding.googlePayButton.callOnClick()
-
-            val googlePayButton =
-                StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
-            assertThat(googlePayButton.googlePayPrimaryButton.isVisible).isTrue()
-            assertThat(googlePayButton.googlePayButtonContent.isVisible).isFalse()
-            assertThat(googlePayButton.googlePayPrimaryButton.externalLabel)
-                .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
-        }
-    }
-
-    @Test
-    fun `google pay button state updated on finish processing`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            activity.viewBinding.googlePayButton.callOnClick()
-
-            var finishProcessingCalled = false
-            viewModel.viewState.value = PaymentSheetViewState.FinishProcessing {
-                finishProcessingCalled = true
-            }
-
-            idleLooper()
-
-            val googlePayButton =
-                StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
-            assertThat(googlePayButton.googlePayPrimaryButton.isVisible).isTrue()
-            assertThat(googlePayButton.googlePayButtonContent.isVisible).isFalse()
-            assertThat(finishProcessingCalled).isTrue()
-        }
-    }
-
-    @Test
     fun `Verify Ready state updates the buy button label`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
@@ -574,17 +527,6 @@ internal class PaymentSheetActivityTest {
                 .isFalse()
 
             activity.finish()
-        }
-    }
-
-    @Test
-    fun `Verify processing state disables toolbar and buttons`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            viewModel.checkout()
-
-            assertThat(activity.viewBinding.googlePayButton.isEnabled).isFalse()
-            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
         }
     }
 
@@ -624,23 +566,12 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Verify StartProcessing state updates the google button label`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
-            viewModel.viewState.value = PaymentSheetViewState.StartProcessing
-
-            val googlePayButton =
-                StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
-            assertThat(googlePayButton.googlePayPrimaryButton.externalLabel)
-                .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
-        }
-    }
-
-    @Test
     fun `Verify FinishProcessing state calls the callback on google pay view state observer`() {
         Dispatchers.setMain(testDispatcher)
-        val scenario = activityScenario()
+
+        val viewModel = createViewModel(isGooglePayAvailable = true)
+        val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity {
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
 
@@ -650,6 +581,7 @@ internal class PaymentSheetActivityTest {
             }
 
             idleLooper()
+            composeTestRule.waitForIdle()
 
             testDispatcher.scheduler.apply {
                 advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
@@ -662,11 +594,17 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `google pay flow updates the scroll view before and after`() {
-        val scenario = activityScenario()
+        val viewModel = createViewModel(isGooglePayAvailable = true)
+        val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+            idleLooper()
 
-            activity.viewBinding.googlePayButton.performClick()
+            composeTestRule
+                .onNodeWithTag(GooglePayButton.TEST_TAG)
+                .performClick()
+            idleLooper()
 
             assertThat(viewModel.contentVisible.value).isEqualTo(false)
 
@@ -707,26 +645,6 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-        }
-    }
-
-    @Test
-    fun `buyButton and googlePayButton are enabled when not processing, transition target, and a selection has been made`() {
-        val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.buyButton.isEnabled)
-                .isTrue()
-            assertThat(activity.viewBinding.googlePayButton.isEnabled)
-                .isTrue()
-
-            viewModel.updateSelection(
-                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            )
-
-            assertThat(activity.viewBinding.buyButton.isEnabled)
-                .isTrue()
-            assertThat(activity.viewBinding.googlePayButton.isEnabled)
-                .isTrue()
         }
     }
 
@@ -791,46 +709,6 @@ internal class PaymentSheetActivityTest {
             composeTestRule
                 .onNodeWithText(errorMessage)
                 .assertExists()
-        }
-    }
-
-    @Test
-    fun `when new payment method is selected then error message is cleared`() {
-        val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
-            val errorMessage = "Error message"
-
-            composeTestRule
-                .onNodeWithText(errorMessage)
-                .assertDoesNotExist()
-
-            viewModel.viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
-
-            composeTestRule
-                .onNodeWithText(errorMessage)
-                .assertExists()
-
-            viewModel.updateSelection(PaymentSelection.GooglePay)
-
-            composeTestRule
-                .onNodeWithText(errorMessage)
-                .assertDoesNotExist()
-
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
-            viewModel.viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
-
-            composeTestRule
-                .onNodeWithText(errorMessage)
-                .assertExists()
-
-            activity.viewBinding.googlePayButton.performClick()
-            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
-
-            composeTestRule
-                .onNodeWithText(errorMessage)
-                .assertDoesNotExist()
         }
     }
 
@@ -1119,6 +997,7 @@ internal class PaymentSheetActivityTest {
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
         loadDelay: Duration = Duration.ZERO,
+        isGooglePayAvailable: Boolean = false,
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = mock<LpmRepository>()
         whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
@@ -1143,6 +1022,7 @@ internal class PaymentSheetActivityTest {
                 FakePaymentSheetLoader(
                     stripeIntent = paymentIntent,
                     customerPaymentMethods = paymentMethods,
+                    isGooglePayAvailable = isGooglePayAvailable,
                     delay = loadDelay,
                 ),
                 FakeCustomerRepository(paymentMethods),
