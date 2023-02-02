@@ -441,26 +441,20 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun logPaymentResult(paymentResult: PaymentResult?) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
-                if ((viewModel.paymentSelection as? PaymentSelection.Saved)?.isGooglePay == true) {
-                    // Google Pay is treated as a saved PM after confirmation
-                    eventReporter.onPaymentSuccess(
-                        PaymentSelection.GooglePay,
-                        viewModel.state?.stripeIntent?.currency
-                    )
-                } else {
-                    eventReporter.onPaymentSuccess(
-                        viewModel.paymentSelection,
-                        viewModel.state?.stripeIntent?.currency
-                    )
-                }
+                eventReporter.onPaymentSuccess(
+                    paymentSelection = viewModel.paymentSelection,
+                    currency = viewModel.state?.stripeIntent?.currency,
+                )
             }
             is PaymentResult.Failed -> {
                 eventReporter.onPaymentFailure(
-                    viewModel.paymentSelection,
-                    viewModel.state?.stripeIntent?.currency
+                    paymentSelection = viewModel.paymentSelection,
+                    currency = viewModel.state?.stripeIntent?.currency,
                 )
             }
-            else -> {}
+            else -> {
+                // Nothing to do here
+            }
         }
     }
 
