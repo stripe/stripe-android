@@ -5,7 +5,6 @@ package com.stripe.android.financialconnections.features.accountpicker
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -64,7 +63,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
-import com.stripe.android.financialconnections.ui.theme.Success100
 
 @Composable
 internal fun AccountPickerScreen() {
@@ -83,19 +81,6 @@ internal fun AccountPickerScreen() {
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.ACCOUNT_PICKER) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick
-    )
-}
-
-@Composable
-private fun LinkedAccountBadge() {
-    Text(
-        modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(color = Success100)
-            .padding(horizontal = 4.dp, vertical = 2.dp),
-        text = "Linked",
-        color = colors.textSuccess,
-        style = FinancialConnectionsTheme.typography.caption
     )
 }
 
@@ -443,9 +428,6 @@ private fun AccountItem(
                         style = FinancialConnectionsTheme.typography.captionTight
                     )
                 }
-            }
-            if (accountUI.account.linkedAccountId != null) {
-                LinkedAccountBadge()
             }
         }
     }
