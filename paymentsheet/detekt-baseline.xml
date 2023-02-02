@@ -5,6 +5,8 @@
     <ID>EmptyFunctionBlock:BottomSheetController.kt$BottomSheetController.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:PrimaryButtonAnimator.kt$PrimaryButtonAnimator.&lt;no name provided>${ }</ID>
     <ID>ForbiddenComment:PaymentOptionFactory.kt$PaymentOptionFactory$// TODO: Should use labelResource paymentMethodCreateParams or extension function</ID>
+    <ID>FunctionNaming:PaymentOptionUi.kt$@Preview(name = "Payment option in editing mode") @Composable internal fun PaymentOptionUi2_Editing()</ID>
+    <ID>FunctionNaming:PaymentOptionUi.kt$@Preview(name = "Selected payment option") @Composable internal fun PaymentOptionUi_Selected()</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun PaymentSheetTopBar_Preview()</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun TestModeBadge_Preview()</ID>
     <ID>FunctionOnlyReturningConstant:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput.Companion$fun toCsvHeader()</ID>
@@ -21,8 +23,6 @@
     <ID>LongMethod:InputAddressScreen.kt$@Composable internal fun InputAddressScreen( injector: NonFallbackInjector )</ID>
     <ID>LongMethod:PaymentElement.kt$@Composable internal fun PaymentElement( sheetViewModel: BaseSheetViewModel, enabled: Boolean, supportedPaymentMethods: List&lt;LpmRepository.SupportedPaymentMethod>, selectedItem: LpmRepository.SupportedPaymentMethod, showLinkInlineSignup: Boolean, linkPaymentLauncher: LinkPaymentLauncher, showCheckboxFlow: Flow&lt;Boolean>, onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit, onLinkSignupStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit, formArguments: FormArguments, onFormFieldValuesChanged: (FormFieldValues?) -> Unit, )</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
-    <ID>LongMethod:PaymentOptionUi.kt$@Composable internal fun PaymentOptionUi( viewWidth: Dp, isSelected: Boolean, isEditing: Boolean, isEnabled: Boolean, iconRes: Int, modifier: Modifier = Modifier, iconTint: Color? = null, @DrawableRes labelIcon: Int? = null, labelText: String = "", removePmDialogTitle: String = "", description: String, onRemoveListener: (() -> Unit)? = null, onRemoveAccessibilityDescription: String = "", onItemSelectedListener: (() -> Unit), )</ID>
-    <ID>LongMethod:PaymentSheetActivity.kt$PaymentSheetActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:USBankAccountFormFragment.kt$USBankAccountFormFragment$@Composable private fun AccountDetailsForm( bankName: String?, last4: String?, saveForFutureUsage: Boolean )</ID>
     <ID>LongMethod:USBankAccountFormFragment.kt$USBankAccountFormFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? ): View</ID>
@@ -34,8 +34,8 @@
     <ID>MagicNumber:PaymentMethodsUI.kt$.5f</ID>
     <ID>MagicNumber:PaymentMethodsUI.kt$0.6F</ID>
     <ID>MagicNumber:PaymentOptionUi.kt$0.6F</ID>
+    <ID>MagicNumber:PaymentOptionUi.kt$14</ID>
     <ID>MagicNumber:PaymentOptionUi.kt$18</ID>
-    <ID>MagicNumber:PaymentOptionUi.kt$9</ID>
     <ID>MagicNumber:PrimaryButton.kt$PrimaryButton$0.5f</ID>
     <ID>MagicNumber:USBankAccountFormFragment.kt$USBankAccountFormFragment$0.5f</ID>
     <ID>MaxLineLength:BillingAddressViewTest.kt$BillingAddressViewTest$fun</ID>
@@ -49,7 +49,6 @@
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.BillingDetails$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.Configuration$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.GooglePayConfiguration$*</ID>
-    <ID>MaxLineLength:PaymentSheetActivityTest.kt$PaymentSheetActivityTest$fun</ID>
     <ID>MaxLineLength:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$fun</ID>
     <ID>MaxLineLength:PrimaryButtonTest.kt$PrimaryButtonTest$primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))</ID>
     <ID>MaxLineLength:StripeIntentRepositoryTest.kt$StripeIntentRepositoryTest$fun</ID>
