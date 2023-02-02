@@ -162,6 +162,8 @@ class FinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - intent with cancel url should fire analytics event and set cancel result`() {
         runTest {
             // Given
+            whenever(fetchFinancialConnectionsSession(any()))
+                .thenReturn(financialConnectionsSessionWithNoMoreAccounts)
             whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
             val viewModel = createViewModel(defaultInitialState)
             val cancelIntent = cancelIntent()
@@ -180,6 +182,8 @@ class FinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - when intent with cancel URL received, then finish with Result#Cancel`() =
         runTest {
             // Given
+            whenever(fetchFinancialConnectionsSession(any()))
+                .thenReturn(financialConnectionsSessionWithNoMoreAccounts)
             whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
             val viewModel = createViewModel(defaultInitialState)
 
