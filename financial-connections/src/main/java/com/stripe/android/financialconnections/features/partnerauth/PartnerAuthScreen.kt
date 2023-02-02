@@ -3,6 +3,7 @@
 
 package com.stripe.android.financialconnections.features.partnerauth
 
+import androidx.compose.foundation.layout.Box
 import android.webkit.WebView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,6 +24,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -30,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -269,15 +272,26 @@ private fun LoadedContent(
             )
         }
 
-        is Loading, is Success -> LoadingContent(
-            stringResource(id = R.string.stripe_partnerauth_loading_title),
-            stringResource(id = R.string.stripe_partnerauth_loading_desc)
+        is Loading -> BrowserLoadingContent()
+
+        is Success -> LoadingContent(
+            stringResource(R.string.stripe_account_picker_loading_title),
+            stringResource(R.string.stripe_account_picker_loading_desc)
         )
 
         is Fail -> {
             // TODO@carlosmuvi translate error type to specific error screen.
             InstitutionUnknownErrorContent(onSelectAnotherBank)
         }
+    }
+}
+
+@Composable
+private fun BrowserLoadingContent() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(
+            color = FinancialConnectionsTheme.colors.iconBrand
+        )
     }
 }
 

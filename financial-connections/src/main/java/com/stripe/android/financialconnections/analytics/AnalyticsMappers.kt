@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.exception.WebAuthFlowFailedExcept
  */
 internal fun Throwable.toEventParams(): Map<String, String?> = when (this) {
     is WebAuthFlowFailedException -> mapOf(
+        "error" to reason,
         "error_type" to reason,
         "error_message" to message,
         "code" to null
@@ -22,12 +23,14 @@ internal fun Throwable.toEventParams(): Map<String, String?> = when (this) {
     )
 
     is StripeException -> mapOf(
+        "error" to (stripeError?.type ?: this::class.java.simpleName),
         "error_type" to (stripeError?.type ?: this::class.java.simpleName),
         "error_message" to (stripeError?.message ?: this.message)?.take(MAX_LOG_LENGTH),
         "code" to (stripeError?.code ?: this.statusCode.toString())
     )
 
     else -> mapOf(
+        "error" to this::class.java.simpleName,
         "error_type" to this::class.java.simpleName,
         "error_message" to message?.take(MAX_LOG_LENGTH),
         "code" to null

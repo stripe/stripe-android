@@ -118,6 +118,34 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onPaymentSuccess() for Google Pay payment should fire analytics request with expected event value`() {
+        // Log initial event so that duration is tracked
+        completeEventReporter.onShowExistingPaymentOptions(
+            linkEnabled = false,
+            activeLinkSession = false,
+            currency = "usd",
+        )
+
+        reset(analyticsRequestExecutor)
+        whenever(eventTimeProvider.currentTimeMillis()).thenReturn(2000L)
+
+        completeEventReporter.onPaymentSuccess(
+            paymentSelection = PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                isGooglePay = true,
+            ),
+            currency = "usd",
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_complete_payment_googlepay_success" &&
+                    req.params["duration"] == 1f
+            }
+        )
+    }
+
+    @Test
     fun `onPaymentFailure() should fire analytics request with expected event value`() {
         // Log initial event so that duration is tracked
         completeEventReporter.onShowExistingPaymentOptions(
