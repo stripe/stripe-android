@@ -244,10 +244,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         )
                     )
                     when {
-                        session.isCustomManualEntryError() -> setState {
-                            copy(
-                                viewEffect = Finish(Failed(CustomManualEntryRequiredError()))
-                            )
+                        session.isCustomManualEntryError() -> {
+                            val result = Failed(CustomManualEntryRequiredError())
+                            setState { copy(viewEffect = Finish(result)) }
                         }
 
                         session.accounts.data.isNotEmpty() ||
