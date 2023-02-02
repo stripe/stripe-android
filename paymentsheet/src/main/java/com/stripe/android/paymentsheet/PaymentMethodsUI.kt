@@ -128,7 +128,7 @@ internal fun calculateViewWidth(
     numberOfPaymentMethods: Int
 ): Dp {
     val targetWidth = maxWidth - (Spacing.carouselOuterPadding * 2)
-    val minItemWidth = 100.dp
+    val minItemWidth = 90.dp
 
     val minimumCardsWidth = minItemWidth * numberOfPaymentMethods
     val spacingWidth = Spacing.carouselInnerPadding * (numberOfPaymentMethods - 1)
@@ -138,11 +138,15 @@ internal fun calculateViewWidth(
         // Stretch cards to fill entire width
         (targetWidth - spacingWidth) / numberOfPaymentMethods
     } else {
-        computeItemWidthWhenExceedingMaxWidth(
-            availableWidth = targetWidth,
-            minItemWidth = minItemWidth,
-            spacing = Spacing.carouselInnerPadding,
-        )
+        // Naively finds the minimum item width for the target peek amount
+        listOf(.3f, .4f, .5f).minOf { lastCardPeekAmount ->
+            computeItemWidthWhenExceedingMaxWidth(
+                availableWidth = targetWidth,
+                minItemWidth = minItemWidth,
+                spacing = Spacing.carouselInnerPadding,
+                lastCardPeekAmount = lastCardPeekAmount,
+            )
+        }
     }
     return viewWidth
 }
@@ -151,9 +155,9 @@ private fun computeItemWidthWhenExceedingMaxWidth(
     availableWidth: Dp,
     minItemWidth: Dp,
     spacing: Dp,
+    lastCardPeekAmount: Float,
 ): Dp {
     val itemWithSpacing = minItemWidth + spacing
-    val lastCardPeekAmount = .3
 
     val peekingCardWidth = (minItemWidth.value * lastCardPeekAmount).dp
     val remainingWidthAfterAddingFixedCards = availableWidth - minItemWidth - peekingCardWidth

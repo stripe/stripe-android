@@ -29,7 +29,9 @@
     <ID>LongMethod:USBankAccountFormViewModel.kt$USBankAccountFormViewModel$private fun attachFinancialAccountToIntent( clientSecret: ClientSecret, intentId: String, linkAccountId: String, bankName: String?, last4: String? )</ID>
     <ID>MagicNumber:AutocompleteScreen.kt$0.07f</ID>
     <ID>MagicNumber:GooglePayButton.kt$GooglePayButton$0.5f</ID>
-    <ID>MagicNumber:PaymentMethodsUI.kt$.3</ID>
+    <ID>MagicNumber:PaymentMethodsUI.kt$.3f</ID>
+    <ID>MagicNumber:PaymentMethodsUI.kt$.4f</ID>
+    <ID>MagicNumber:PaymentMethodsUI.kt$.5f</ID>
     <ID>MagicNumber:PaymentMethodsUI.kt$0.6F</ID>
     <ID>MagicNumber:PaymentOptionUi.kt$0.6F</ID>
     <ID>MagicNumber:PaymentOptionUi.kt$18</ID>
