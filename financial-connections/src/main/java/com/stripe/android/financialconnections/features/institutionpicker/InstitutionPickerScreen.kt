@@ -176,7 +176,7 @@ private fun LoadedContent(
                 onCancelSearchClick = onCancelSearchClick
             )
         }
-        if (input.text.isNotEmpty()) {
+        if (input.text.isNotBlank()) {
             SearchInstitutionsList(
                 institutionsProvider = institutionsProvider,
                 onInstitutionSelected = onInstitutionSelected,

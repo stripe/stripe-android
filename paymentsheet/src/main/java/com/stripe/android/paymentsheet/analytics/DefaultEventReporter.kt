@@ -87,10 +87,20 @@ internal class DefaultEventReporter @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         currency: String?
     ) {
+        // Google Pay is treated as a saved payment method after confirmation, so we need to
+        // "reset" to PaymentSelection.GooglePay for accurate reporting
+        val isGooglePay = (paymentSelection as? PaymentSelection.Saved)?.isGooglePay == true
+
+        val realSelection = if (isGooglePay) {
+            PaymentSelection.GooglePay
+        } else {
+            paymentSelection
+        }
+
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
-                paymentSelection = paymentSelection,
+                paymentSelection = realSelection,
                 durationMillis = durationMillisFrom(paymentSheetShownMillis),
                 result = PaymentSheetEvent.Payment.Result.Success,
                 currency = currency
