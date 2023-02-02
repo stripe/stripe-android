@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
+import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
@@ -25,6 +26,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountFixtures
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -189,6 +191,34 @@ class FinancialConnectionsSheetViewModelTest {
             withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
                 assertThat(it.viewEffect).isEqualTo(FinishWithResult(Canceled))
+            }
+        }
+
+    @Test
+    fun `handleOnNewIntent - when intent with cancel URL and custom manual entry, finish Result#Failed`() =
+        runTest {
+            // Given
+            val expectedSession = financialConnectionsSession().copy(
+                statusDetails = StatusDetails(
+                    cancelled = StatusDetails.Cancelled(
+                        reason = StatusDetails.Cancelled.Reason.CUSTOM_MANUAL_ENTRY
+                    )
+                )
+            )
+            whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
+            whenever(fetchFinancialConnectionsSession(any())).thenReturn(expectedSession)
+            val viewModel = createViewModel(defaultInitialState)
+
+            // When
+            // end auth flow
+            viewModel.handleOnNewIntent(cancelIntent())
+
+            // Then
+            withState(viewModel) {
+                require(it.viewEffect is FinishWithResult)
+                require(it.viewEffect.result is Failed)
+                assertThat(it.viewEffect.result.error).isInstanceOf(CustomManualEntryRequiredError::class.java)
+                assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
             }
         }
 

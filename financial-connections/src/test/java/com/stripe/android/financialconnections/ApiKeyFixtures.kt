@@ -4,6 +4,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 
@@ -48,6 +49,7 @@ internal object ApiKeyFixtures {
         product = FinancialConnectionsSessionManifest.Product.STRIPE_CARD,
         singleAccount = true,
         useSingleSortSearch = true,
+        manualEntryMode = ManualEntryMode.AUTOMATIC,
         successUrl = SUCCESS_URL,
         cancelUrl = CANCEL_URL,
         hostedAuthUrl = HOSTED_AUTH_URL
