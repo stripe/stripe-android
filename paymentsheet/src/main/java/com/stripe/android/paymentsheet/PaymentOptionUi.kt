@@ -50,6 +50,86 @@ import com.stripe.android.uicore.shouldUseDarkDynamicColor
 const val PAYMENT_OPTION_CARD_TEST_TAG = "PAYMENT_OPTION_CARD_TEST_TAG"
 
 @Composable
+internal fun PaymentOptionUi(
+    viewWidth: Dp,
+    isSelected: Boolean,
+    isEditing: Boolean,
+    isEnabled: Boolean,
+    iconRes: Int,
+    modifier: Modifier = Modifier,
+    iconTint: Color? = null,
+    @DrawableRes labelIcon: Int? = null,
+    labelText: String = "",
+    removePmDialogTitle: String = "",
+    description: String,
+    onRemoveListener: (() -> Unit)? = null,
+    onRemoveAccessibilityDescription: String = "",
+    onItemSelectedListener: (() -> Unit),
+) {
+    val openRemoveDialog = remember { mutableStateOf(false) }
+
+    BadgedBox(
+        badge = {
+            if (isEditing) {
+                RemoveBadge(
+                    onRemoveAccessibilityDescription = onRemoveAccessibilityDescription,
+                    onPressed = { openRemoveDialog.value = true },
+                    modifier = Modifier.offset(x = (-14).dp, y = 1.dp),
+                )
+            }
+
+            if (isSelected) {
+                SelectedBadge(
+                    modifier = Modifier.offset(x = (-18).dp, y = 58.dp),
+                )
+            }
+        },
+        content = {
+            Column {
+                PaymentOptionCard(
+                    isSelected = isSelected,
+                    isEnabled = isEnabled,
+                    labelText = labelText,
+                    iconRes = iconRes,
+                    iconTint = iconTint,
+                    onItemSelectedListener = onItemSelectedListener,
+                )
+
+                LpmSelectorText(
+                    icon = labelIcon,
+                    text = labelText,
+                    textColor = MaterialTheme.colors.onSurface,
+                    isEnabled = isEnabled,
+                    modifier = Modifier
+                        .padding(top = 4.dp, start = 6.dp, end = 6.dp)
+                        .semantics {
+                            // This makes the screen reader read out numbers digit by digit
+                            // one one one one vs one thousand one hundred eleven
+                            this.contentDescription =
+                                description.replace("\\d".toRegex(), "$0 ")
+                        }
+                )
+            }
+        },
+        modifier = modifier
+            .padding(top = 12.dp)
+            .requiredWidth(viewWidth)
+            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+    )
+
+    if (isEditing && onRemoveListener != null) {
+        SimpleDialogElementUI(
+            openDialog = openRemoveDialog,
+            titleText = removePmDialogTitle,
+            messageText = description,
+            confirmText = stringResource(R.string.remove),
+            dismissText = stringResource(R.string.cancel),
+            onConfirmListener = onRemoveListener
+        )
+    }
+}
+
+@Composable
 private fun PaymentOptionCard(
     isSelected: Boolean,
     isEnabled: Boolean,
@@ -142,89 +222,9 @@ private fun SelectedBadge(
     }
 }
 
-@Composable
-internal fun PaymentOptionUi(
-    viewWidth: Dp,
-    isSelected: Boolean,
-    isEditing: Boolean,
-    isEnabled: Boolean,
-    iconRes: Int,
-    modifier: Modifier = Modifier,
-    iconTint: Color? = null,
-    @DrawableRes labelIcon: Int? = null,
-    labelText: String = "",
-    removePmDialogTitle: String = "",
-    description: String,
-    onRemoveListener: (() -> Unit)? = null,
-    onRemoveAccessibilityDescription: String = "",
-    onItemSelectedListener: (() -> Unit),
-) {
-    val openRemoveDialog = remember { mutableStateOf(false) }
-
-    BadgedBox(
-        badge = {
-            if (isEditing) {
-                RemoveBadge(
-                    onRemoveAccessibilityDescription = onRemoveAccessibilityDescription,
-                    onPressed = { openRemoveDialog.value = true },
-                    modifier = Modifier.offset(x = (-14).dp, y = 1.dp),
-                )
-            }
-
-            if (isSelected) {
-                SelectedBadge(
-                    modifier = Modifier.offset(x = (-18).dp, y = 58.dp),
-                )
-            }
-        },
-        content = {
-            Column {
-                PaymentOptionCard(
-                    isSelected = isSelected,
-                    isEnabled = isEnabled,
-                    labelText = labelText,
-                    iconRes = iconRes,
-                    iconTint = iconTint,
-                    onItemSelectedListener = onItemSelectedListener,
-                )
-
-                LpmSelectorText(
-                    icon = labelIcon,
-                    text = labelText,
-                    textColor = MaterialTheme.colors.onSurface,
-                    isEnabled = isEnabled,
-                    modifier = Modifier
-                        .padding(top = 4.dp, start = 6.dp, end = 6.dp)
-                        .semantics {
-                            // This makes the screen reader read out numbers digit by digit
-                            // one one one one vs one thousand one hundred eleven
-                            this.contentDescription =
-                                description.replace("\\d".toRegex(), "$0 ")
-                        }
-                )
-            }
-        },
-        modifier = modifier
-            .padding(top = 12.dp)
-            .requiredWidth(viewWidth)
-            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
-    )
-
-    if (isEditing && onRemoveListener != null) {
-        SimpleDialogElementUI(
-            openDialog = openRemoveDialog,
-            titleText = removePmDialogTitle,
-            messageText = description,
-            confirmText = stringResource(R.string.remove),
-            dismissText = stringResource(R.string.cancel),
-            onConfirmListener = onRemoveListener
-        )
-    }
-}
-
 @Preview(name = "Selected payment option")
 @Composable
-internal fun PaymentOptionUi_Selected() {
+private fun PaymentOptionUi_Selected() {
     StripeTheme {
         PaymentOptionUi(
             viewWidth = 100.dp,
@@ -241,7 +241,7 @@ internal fun PaymentOptionUi_Selected() {
 
 @Preview(name = "Payment option in editing mode")
 @Composable
-internal fun PaymentOptionUi2_Editing() {
+private fun PaymentOptionUi_Editing() {
     StripeTheme {
         PaymentOptionUi(
             viewWidth = 100.dp,
