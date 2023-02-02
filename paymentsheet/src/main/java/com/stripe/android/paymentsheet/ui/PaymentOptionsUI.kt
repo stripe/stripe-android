@@ -86,12 +86,12 @@ internal fun PaymentOptions(
 }
 
 @Composable
-internal fun rememberItemWidth(maxWidth: Dp): Dp {
+internal fun rememberItemWidth(maxWidth: Dp): Dp = remember(maxWidth) {
     val targetWidth = maxWidth - 17.dp * 2
     val minItemWidth = 100.dp + (6.dp * 2)
     // numVisibleItems is incremented in steps of 0.5 items (1, 1.5, 2, 2.5, 3, ...)
     val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
-    return (targetWidth / numVisibleItems)
+    (targetWidth / numVisibleItems)
 }
 
 @Composable
