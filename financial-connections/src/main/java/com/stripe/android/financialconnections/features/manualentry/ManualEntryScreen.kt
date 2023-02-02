@@ -147,7 +147,6 @@ private fun ManualEntryLoaded(
     Column(
         Modifier.fillMaxSize()
     ) {
-
         // Scrollable content
         Column(
             modifier = Modifier
