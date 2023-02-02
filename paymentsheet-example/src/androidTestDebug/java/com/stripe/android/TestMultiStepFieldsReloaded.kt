@@ -210,6 +210,45 @@ class TestMultiStepFieldsReloaded {
         )
     }
 
+    @Test
+    fun testCashAppPay_Success() {
+        testDriver.confirmCustom(
+            newUser.copy(
+                paymentMethod = lpmRepository.fromCode("cashapp")!!,
+                currency = Currency.USD,
+                merchantCountryCode = "US",
+                authorizationAction = AuthorizeAction.Authorize,
+                supportedPaymentMethods = listOf("card", "cashapp"),
+            )
+        )
+    }
+
+    @Test
+    fun testCashAppPay_Fail() {
+        testDriver.confirmCustom(
+            newUser.copy(
+                paymentMethod = lpmRepository.fromCode("cashapp")!!,
+                currency = Currency.USD,
+                merchantCountryCode = "US",
+                authorizationAction = AuthorizeAction.Fail,
+                supportedPaymentMethods = listOf("card", "cashapp"),
+            )
+        )
+    }
+
+    @Test
+    fun testCashAppPay_Cancel() {
+        testDriver.confirmCustom(
+            newUser.copy(
+                paymentMethod = lpmRepository.fromCode("cashapp")!!,
+                currency = Currency.USD,
+                merchantCountryCode = "US",
+                authorizationAction = AuthorizeAction.Cancel,
+                supportedPaymentMethods = listOf("card", "cashapp"),
+            )
+        )
+    }
+
     companion object {
         // There exists only one screenshot processor so that all tests put
         // their files in the same directory.
