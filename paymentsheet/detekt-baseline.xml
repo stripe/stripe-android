@@ -5,8 +5,8 @@
     <ID>EmptyFunctionBlock:BottomSheetController.kt$BottomSheetController.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:PrimaryButtonAnimator.kt$PrimaryButtonAnimator.&lt;no name provided>${ }</ID>
     <ID>ForbiddenComment:PaymentOptionFactory.kt$PaymentOptionFactory$// TODO: Should use labelResource paymentMethodCreateParams or extension function</ID>
-    <ID>FunctionNaming:PaymentOptionUi.kt$@Preview(name = "Payment option in editing mode") @Composable internal fun PaymentOptionUi2_Editing()</ID>
-    <ID>FunctionNaming:PaymentOptionUi.kt$@Preview(name = "Selected payment option") @Composable internal fun PaymentOptionUi_Selected()</ID>
+    <ID>FunctionNaming:PaymentOptionUi.kt$@Preview(name = "Payment option in editing mode") @Composable private fun PaymentOptionUi_Editing()</ID>
+    <ID>FunctionNaming:PaymentOptionUi.kt$@Preview(name = "Selected payment option") @Composable private fun PaymentOptionUi_Selected()</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun PaymentSheetTopBar_Preview()</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun TestModeBadge_Preview()</ID>
     <ID>FunctionOnlyReturningConstant:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput.Companion$fun toCsvHeader()</ID>
