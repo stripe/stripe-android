@@ -2,10 +2,13 @@ package com.stripe.android.paymentsheet
 
 import android.animation.LayoutTransition
 import android.content.Context
+import android.view.Gravity
+import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
@@ -89,6 +92,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -1091,6 +1095,25 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Pay CA\$99.99")
         }
     }
+
+
+    @Test
+    @Config(qualifiers = "sw800dp-w1250dp-h800dp")
+    fun `tablet launches payment sheet centered horizontally`() = runTest(testDispatcher) {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(STATE_EXPANDED)
+            assertThat(activity.bottomSheetBehavior.isFitToContents)
+                .isFalse()
+            idleLooper()
+            val bottomSheet = activity.findViewById<ViewGroup>(R.id.bottom_sheet)
+            val layoutParams = bottomSheet.layoutParams as CoordinatorLayout.LayoutParams
+            assertThat(layoutParams.gravity).isEqualTo(Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM)
+            assertThat(layoutParams.width).isEqualTo(750)
+        }
+    }
+
 
     private fun activityScenario(
         viewModel: PaymentSheetViewModel = this.viewModel
