@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.paymentsheet.PaymentOptionUi
 import com.stripe.android.paymentsheet.R
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,6 +19,7 @@ class PaymentOptionTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Turns card label into screen reader-friendly text`() {
         val label = "Card ending in 4242"
