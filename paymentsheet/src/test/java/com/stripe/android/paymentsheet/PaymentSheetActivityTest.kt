@@ -1096,7 +1096,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-
     @Test
     @Config(qualifiers = "sw800dp-w1250dp-h800dp")
     fun `tablet launches payment sheet centered horizontally`() = runTest(testDispatcher) {
@@ -1113,7 +1112,6 @@ internal class PaymentSheetActivityTest {
             assertThat(layoutParams.width).isEqualTo(750)
         }
     }
-
 
     private fun activityScenario(
         viewModel: PaymentSheetViewModel = this.viewModel
