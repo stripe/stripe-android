@@ -3,6 +3,14 @@ apply from: configs.androidLibrary
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
+android {
+    testOptions {
+        kotlinOptions {
+            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+        }
+    }
+}
+
 dependencies {
     implementation project(":stripe-core")
     implementation "androidx.core:core-ktx:$androidxCoreVersion"
@@ -10,7 +18,7 @@ dependencies {
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 
-
+    testImplementation project(':network-testing')
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.json:json:$jsonVersion"
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"

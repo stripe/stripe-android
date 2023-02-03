@@ -13,15 +13,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
-import androidx.core.view.doOnNextLayout
-import androidx.core.view.isVisible
+import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.databinding.FragmentPaymentOptionsPrimaryButtonBinding
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.uicore.StripeTheme
 
@@ -52,7 +50,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val header: ComposeView by lazy { viewBinding.header }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     override val notesView: ComposeView by lazy { viewBinding.notes }
-    override val primaryButton: PrimaryButton by lazy { viewBinding.continueButton }
     override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -111,25 +108,14 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             }
         }
 
-        viewModel.selection.launchAndCollectIn(this) {
-            viewModel.clearErrorMessages()
-            resetPrimaryButtonState()
+        viewBinding.buttonContainer.setContent {
+            AndroidViewBinding(
+                factory = FragmentPaymentOptionsPrimaryButtonBinding::inflate,
+            )
         }
 
-        viewModel.currentScreen.launchAndCollectIn(this) { currentScreen ->
-            val visible = currentScreen is PaymentSheetScreen.AddFirstPaymentMethod ||
-                currentScreen is PaymentSheetScreen.AddAnotherPaymentMethod ||
-                viewModel.primaryButtonUIState.value?.visible == true
-
-            viewBinding.continueButton.isVisible = visible
-            viewBinding.bottomSpacer.isVisible = visible
-
-            rootView.doOnNextLayout {
-                // Expand sheet only after the first fragment is attached so that it
-                // animates in. Further calls to expand() are no-op if the sheet is already
-                // expanded.
-                bottomSheetController.expand()
-            }
+        viewModel.selection.launchAndCollectIn(this) {
+            viewModel.clearErrorMessages()
         }
     }
 
@@ -137,20 +123,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         starterArgs?.state?.config?.appearance?.parseAppearance()
         earlyExitDueToIllegalState = starterArgs == null
         return starterArgs
-    }
-
-    override fun resetPrimaryButtonState() {
-        viewBinding.continueButton.lockVisible = false
-        viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
-
-        val customLabel = starterArgs?.state?.config?.primaryButtonLabel
-        val label = customLabel ?: getString(R.string.stripe_continue_button_label)
-
-        viewBinding.continueButton.setLabel(label)
-
-        viewBinding.continueButton.setOnClickListener {
-            viewModel.onUserSelection()
-        }
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {

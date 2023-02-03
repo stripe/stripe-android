@@ -32,6 +32,7 @@
     <string name="upi_example">UPI Confirmation Example</string>
     <string name="netbanking_example">Netbanking Confirmation Example</string>
     <string name="manual_us_bank_account_example">"Manual US Bank Account Example"</string>
+    <string name="cash_app_pay_example">Cash App Pay</string>
     <string name="card_brands">Card Brands</string>
 
     <string name="select_add_card">Select or add card</string>

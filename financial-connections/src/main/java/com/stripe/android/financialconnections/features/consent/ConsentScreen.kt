@@ -125,7 +125,7 @@ private fun ConsentContent(
     onCloseClick: () -> Unit
 ) {
     when (val consent = state.consent) {
-        Uninitialized, is Loading -> LoadingContent()
+        Uninitialized, is Loading -> ConsentLoadingContent()
         is Success -> LoadedContent(
             payload = consent(),
             bottomSheetMode = state.currentBottomSheet,
@@ -138,6 +138,20 @@ private fun ConsentContent(
         )
 
         is Fail -> UnclassifiedErrorContent(error = consent.error, onCloseFromErrorClick = {})
+    }
+}
+
+@Composable
+private fun ConsentLoadingContent() {
+    FinancialConnectionsScaffold(
+        topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            LoadingContent()
+        }
     }
 }
 
