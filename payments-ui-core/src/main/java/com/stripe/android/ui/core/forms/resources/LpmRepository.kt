@@ -38,8 +38,10 @@ import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Compani
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.EmptyFormSpec
+import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
+import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.ui.core.elements.transform
@@ -329,17 +331,25 @@ class LpmRepository constructor(
             requirement = KlarnaRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
-        PaymentMethod.Type.PayPal.code -> SupportedPaymentMethod(
-            code = "paypal",
-            requiresMandate = stripeIntent.payPalRequiresMandate(),
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = false,
-            requirement = PaypalRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields)
-        )
+        PaymentMethod.Type.PayPal.code -> {
+            val localLayoutSpecs: List<FormItemSpec> = if (stripeIntent.payPalRequiresMandate()) {
+                // TODO: Need to reference paypal mandate.
+                listOf(MandateTextSpec(stringResId = R.string.sepa_mandate))
+            } else {
+                emptyList()
+            }
+            SupportedPaymentMethod(
+                code = "paypal",
+                requiresMandate = stripeIntent.payPalRequiresMandate(),
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+                lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+                darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+                tintIconOnSelection = false,
+                requirement = PaypalRequirement,
+                formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs)
+            )
+        }
         PaymentMethod.Type.Affirm.code -> SupportedPaymentMethod(
             code = "affirm",
             requiresMandate = false,
