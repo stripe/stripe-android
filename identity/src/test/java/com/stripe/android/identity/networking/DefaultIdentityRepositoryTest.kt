@@ -151,12 +151,37 @@ class DefaultIdentityRepositoryTest {
         testFetchVerificationPage(
             VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING
         ) {
-            assertThat(it.individual).isNotNull()
-            assertThat(requireNotNull(it.individual).addressCountries).hasSize(31)
-            assertThat(requireNotNull(it.individual).idNumberCountries).containsExactly(
+            assertThat(it.individual.addressCountries).hasSize(31)
+            assertThat(it.individual.idNumberCountries).containsExactly(
                 Country(CountryCode("BR"), "Brazil"),
                 Country(CountryCode("SG"), "Singapore"),
                 Country(CountryCode("US"), "United States"),
+            )
+            assertThat(it.individual.title).isEqualTo("Provide personal information")
+            assertThat(it.individual.addressCountryNotListedTextButtonText).isEqualTo("My country is not listed")
+            assertThat(it.individual.idNumberCountryNotListedTextButtonText).isEqualTo("My country is not listed")
+        }
+    }
+
+    @Test
+    fun `retrieveVerificationPage - verify countryNotListed page`() {
+        testFetchVerificationPage(
+            VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING
+        ) {
+            assertThat(it.countryNotListedPage.title).isEqualTo(
+                "We cannot verify your identity"
+            )
+            assertThat(it.countryNotListedPage.idFromOtherCountryTextButtonText).isEqualTo(
+                "Have an ID from another country?"
+            )
+            assertThat(it.countryNotListedPage.addressFromOtherCountryTextButtonText).isEqualTo(
+                "Have an Address from another country?"
+            )
+            assertThat(it.countryNotListedPage.body).isEqualTo(
+                "The countries not listed are not supported yet. Unfortunately, we cannot verify your identity."
+            )
+            assertThat(it.countryNotListedPage.cancelButtonText).isEqualTo(
+                "Cancel verification"
             )
         }
     }
