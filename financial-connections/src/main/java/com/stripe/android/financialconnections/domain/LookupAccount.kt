@@ -12,11 +12,11 @@ internal class LookupAccount @Inject constructor(
 
     suspend operator fun invoke(
         email: String
-    ): ConsumerSessionLookup? {
-        return consumersApiService.lookupConsumerSession(
+    ): ConsumerSessionLookup = requireNotNull(
+        consumersApiService.lookupConsumerSession(
             email = email,
             authSessionCookie = null,
             requestOptions = apiOptions
         )
-    }
+    )
 }

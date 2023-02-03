@@ -15,10 +15,12 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
-import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.SignUpState.*
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.ConflatedJob
+import com.stripe.android.financialconnections.utils.isCancellationError
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -42,6 +44,8 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private val logger: Logger
 ) : MavericksViewModel<NetworkingLinkSignupState>(initialState) {
 
+    private var searchJob = ConflatedJob()
+
     init {
         logErrors()
         suspend {
@@ -63,16 +67,11 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             onSuccess = { payload ->
                 // Observe controllers and set current form in state.
                 viewModelScope.launch {
-                    payload.emailController.validFormFieldState().collectLatest { validEmail ->
-                        setState { copy(validEmail = validEmail) }
-                        if (validEmail != null) {
-                            setState { copy(signupState = VerifyingEmail) }
-                            delay(2000) // API call looking up for email
-                            setState { copy(signupState = InputtingPhone) }
-                        } else {
-                            setState { copy(signupState = InputtingEmail) }
+                    payload.emailController
+                        .validFormFieldState()
+                        .collectLatest {
+                            onEmailEntered(it)
                         }
-                    }
                 }
                 viewModelScope.launch {
                     payload.phoneController.validFormFieldState().collectLatest {
@@ -92,8 +91,31 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 eventTracker.track(Error(Pane.NETWORKING_LINK_SIGNUP_PANE, error))
             },
         )
+        onAsync(
+            NetworkingLinkSignupState::lookupAccount,
+            onFail = { error ->
+                logger.error("Error looking up account", error)
+                eventTracker.track(Error(Pane.NETWORKING_LINK_SIGNUP_PANE, error))
+            },
+        )
     }
 
+    /**
+     * @param validEmail valid email, or null if entered email is invalid.
+     */
+    private suspend fun onEmailEntered(
+        validEmail: String?
+    ) {
+        setState { copy(validEmail = validEmail) }
+        if (validEmail != null) {
+            logger.debug("VALID EMAIL ADDRESS $validEmail.")
+            setState { copy(showFullForm = true) }
+            searchJob += suspend {
+                delay(SEARCH_DEBOUNCE_MS)
+                lookupAccount(validEmail)
+            }.execute { copy(lookupAccount = if (it.isCancellationError()) Uninitialized else it) }
+        }
+    }
 
     fun onSaveAccount() {
         suspend {
@@ -136,6 +158,8 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        private const val SEARCH_DEBOUNCE_MS = 300L
     }
 }
 
@@ -143,21 +167,13 @@ internal data class NetworkingLinkSignupState(
     val payload: Async<Payload> = Uninitialized,
     val validEmail: String? = null,
     val validPhone: String? = null,
+    val showFullForm: Boolean = false,
     val saveAccountToLink: Async<FinancialConnectionsSessionManifest> = Uninitialized,
-    val signupState: SignUpState = InputtingEmail,
+    val lookupAccount: Async<ConsumerSessionLookup> = Uninitialized,
 ) : MavericksState {
 
     fun valid(): Boolean {
         return validEmail != null && validPhone != null
-    }
-
-    /**
-     * Enum representing the state of the Sign Up screen.
-     */
-    internal enum class SignUpState {
-        InputtingEmail,
-        VerifyingEmail,
-        InputtingPhone
     }
 
     data class Payload(

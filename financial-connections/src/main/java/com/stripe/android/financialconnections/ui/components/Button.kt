@@ -51,7 +51,7 @@ internal fun FinancialConnectionsButton(
 ) {
     CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
         Button(
-            onClick = { if (loading.not()) onClick() } ,
+            onClick = { if (loading.not()) onClick() },
             modifier = modifier,
             elevation = ButtonDefaults.elevation(
                 defaultElevation = 0.dp,

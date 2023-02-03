@@ -348,7 +348,9 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 "locale" to locale.toLanguageTag(),
                 "email_address" to email,
                 "phone_number" to phoneNumber
-            ) + selectedAccounts.mapIndexed { index, account -> "${NetworkConstants.PARAM_SELECTED_ACCOUNTS}[$index]" to account }
+            ) + selectedAccounts.mapIndexed { index, account ->
+                "${NetworkConstants.PARAM_SELECTED_ACCOUNTS}[$index]" to account
+            }
         )
         return requestExecutor.execute(
             request,

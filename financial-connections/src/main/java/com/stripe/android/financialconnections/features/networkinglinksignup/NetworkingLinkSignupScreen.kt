@@ -33,7 +33,6 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
-import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.SignUpState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -46,6 +45,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -88,9 +88,10 @@ private fun NetworkingLinkSignupContent(
                 scrollState = scrollState,
                 validForm = state.valid(),
                 payload = payload(),
+                lookupAccountSync = state.lookupAccount,
+                saveAccountToLinkSync = state.saveAccountToLink,
+                showFullForm = state.showFullForm,
                 onSaveToLink = onSaveToLink,
-                signupState = state.signupState,
-                saveAccountToLinkSync = state.saveAccountToLink
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -102,12 +103,14 @@ private fun NetworkingLinkSignupContent(
 }
 
 @Composable
+@Suppress("LongMethod")
 private fun NetworkingLinkSignupLoaded(
     scrollState: ScrollState,
     validForm: Boolean,
-    signupState: SignUpState,
     payload: Payload,
     saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
+    lookupAccountSync: Async<ConsumerSessionLookup>,
+    showFullForm: Boolean,
     onSaveToLink: () -> Unit
 ) {
     Column(
@@ -138,13 +141,14 @@ private fun NetworkingLinkSignupLoaded(
             )
             StripeThemeForConnections {
                 EmailCollectionSection(
-                    signUpState = signupState,
+                    showFullForm = showFullForm,
+                    loading = lookupAccountSync is Loading,
                     emailController = payload.emailController,
                     enabled = true,
                 )
             }
             AnimatedVisibility(
-                visible = signupState == SignUpState.InputtingPhone
+                visible = showFullForm
             ) {
                 StripeThemeForConnections {
                     PhoneNumberCollectionSection(
@@ -165,7 +169,7 @@ private fun NetworkingLinkSignupLoaded(
             )
         ) {
             AnimatedVisibility(
-                visible = signupState == SignUpState.InputtingPhone
+                visible = showFullForm
             ) {
                 FinancialConnectionsButton(
                     loading = saveAccountToLinkSync is Loading,
@@ -194,8 +198,9 @@ private fun NetworkingLinkSignupLoaded(
 internal fun EmailCollectionSection(
     enabled: Boolean,
     emailController: TextFieldController,
-    signUpState: SignUpState,
-    focusRequester: FocusRequester = remember { FocusRequester() }
+    focusRequester: FocusRequester = remember { FocusRequester() },
+    showFullForm: Boolean,
+    loading: Boolean
 ) {
     Box(
         modifier = Modifier
@@ -205,7 +210,7 @@ internal fun EmailCollectionSection(
     ) {
         TextFieldSection(
             textFieldController = emailController,
-            imeAction = if (signUpState == SignUpState.InputtingPhone) {
+            imeAction = if (showFullForm) {
                 ImeAction.Next
             } else {
                 ImeAction.Done
@@ -214,7 +219,7 @@ internal fun EmailCollectionSection(
             modifier = Modifier
                 .focusRequester(focusRequester)
         )
-        if (signUpState == SignUpState.VerifyingEmail) {
+        if (loading) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .size(32.dp)
@@ -237,7 +242,7 @@ internal fun NetworkingLinkSignupScreenPreview() {
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
             state = NetworkingLinkSignupState(
-                signupState = SignUpState.InputtingPhone,
+                showFullForm = true,
                 payload = Success(
                     Payload(
                         emailController = EmailConfig.createController(""),
@@ -249,6 +254,7 @@ internal fun NetworkingLinkSignupScreenPreview() {
                 ),
                 validEmail = null,
                 validPhone = null,
+                lookupAccount = Uninitialized,
                 saveAccountToLink = Uninitialized
             ),
             onCloseClick = {},
