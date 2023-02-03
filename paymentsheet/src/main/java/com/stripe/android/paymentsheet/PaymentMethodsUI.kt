@@ -60,7 +60,8 @@ internal fun PaymentMethodsUI(
     state: LazyListState = rememberLazyListState(),
 ) {
     LaunchedEffect(selectedIndex) {
-        state.animateScrollToItem(selectedIndex)
+        // TODO Figure out why using animateScrollToItem() causes AppNotIdleException
+        state.scrollToItem(selectedIndex)
     }
 
     BoxWithConstraints(
