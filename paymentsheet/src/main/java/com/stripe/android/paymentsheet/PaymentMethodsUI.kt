@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -59,9 +60,14 @@ internal fun PaymentMethodsUI(
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
 ) {
+    val isTest = LocalInspectionMode.current
+
     LaunchedEffect(selectedIndex) {
-        // TODO Figure out why using animateScrollToItem() causes AppNotIdleException
-        state.scrollToItem(selectedIndex)
+        if (isTest) {
+            state.scrollToItem(selectedIndex)
+        } else {
+            state.animateScrollToItem(selectedIndex)
+        }
     }
 
     BoxWithConstraints(
