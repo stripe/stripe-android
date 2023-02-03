@@ -54,7 +54,7 @@ dependencies {
 
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
 
     androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
 

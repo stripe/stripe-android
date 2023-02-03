@@ -265,4 +265,43 @@ class TestHardCodedLpms {
             }
         )
     }
+
+    @Test
+    fun testCashAppPay_Success() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = newUser.copy(
+                paymentMethod = lpmRepository.fromCode("cashapp")!!,
+                currency = Currency.USD,
+                merchantCountryCode = "US",
+                authorizationAction = AuthorizeAction.Authorize,
+                supportedPaymentMethods = listOf("card", "cashapp"),
+            ),
+        )
+    }
+
+    @Test
+    fun testCashAppPay_Fail() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = newUser.copy(
+                paymentMethod = lpmRepository.fromCode("cashapp")!!,
+                currency = Currency.USD,
+                merchantCountryCode = "US",
+                authorizationAction = AuthorizeAction.Fail,
+                supportedPaymentMethods = listOf("card", "cashapp"),
+            ),
+        )
+    }
+
+    @Test
+    fun testCashAppPay_Cancel() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = newUser.copy(
+                paymentMethod = lpmRepository.fromCode("cashapp")!!,
+                currency = Currency.USD,
+                merchantCountryCode = "US",
+                authorizationAction = AuthorizeAction.Cancel,
+                supportedPaymentMethods = listOf("card", "cashapp"),
+            ),
+        )
+    }
 }

@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
+import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.view.AddPaymentMethodActivity
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -169,6 +170,7 @@ class PaymentMethodCreateParamsTest {
             .isEmpty()
     }
 
+    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun attribution_whenFpxAndProductUsageIsNotEmpty_shouldBeProductUsage() {
         val params = createFpx().copy(
@@ -191,6 +193,7 @@ class PaymentMethodCreateParamsTest {
         )
     }
 
+    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun attribution_whenCardAndProductUsageIsNotEmpty_shouldBeAttributionPlusProductUsage() {
         val params = PaymentMethodCreateParams.create(

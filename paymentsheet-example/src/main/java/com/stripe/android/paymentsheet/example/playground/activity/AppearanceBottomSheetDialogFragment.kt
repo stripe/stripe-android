@@ -63,6 +63,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.godaddy.android.colorpicker.ClassicColorPicker
+import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
@@ -587,6 +588,7 @@ private fun ColorPicker(
             text = {
                 ClassicColorPicker(
                     modifier = Modifier.fillMaxSize(),
+                    color = HsvColor.from(currentColor.value),
                     onColorChanged = {
                         currentColor.value = it.toColor()
                     }

@@ -1,15 +1,19 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
@@ -163,7 +167,7 @@ private fun LoadedContent(
     onSelectAnotherBank: () -> Unit
 ) {
     when (authenticationStatus) {
-        is Uninitialized -> when (payload.authSession.isOAuth ?: false) {
+        is Uninitialized -> when (payload.authSession.isOAuth) {
             true -> PrePaneContent(
                 institution = payload.institution,
                 flow = payload.authSession.flow,
@@ -178,15 +182,26 @@ private fun LoadedContent(
             )
         }
 
-        is Loading, is Success -> LoadingContent(
-            stringResource(id = R.string.stripe_partnerauth_loading_title),
-            stringResource(id = R.string.stripe_partnerauth_loading_desc)
+        is Loading -> BrowserLoadingContent()
+
+        is Success -> LoadingContent(
+            stringResource(R.string.stripe_account_picker_loading_title),
+            stringResource(R.string.stripe_account_picker_loading_desc)
         )
 
         is Fail -> {
             // TODO@carlosmuvi translate error type to specific error screen.
             InstitutionUnknownErrorContent(onSelectAnotherBank)
         }
+    }
+}
+
+@Composable
+private fun BrowserLoadingContent() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(
+            color = FinancialConnectionsTheme.colors.iconBrand
+        )
     }
 }
 

@@ -31,6 +31,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
@@ -112,6 +113,9 @@ internal class PaymentOptionsActivityTest {
         enabled = true,
         visible = true
     )
+
+    private val ActivityPaymentOptionsBinding.continueButton: PrimaryButton
+        get() = root.findViewById(R.id.primary_button)
 
     @BeforeTest
     fun setup() {

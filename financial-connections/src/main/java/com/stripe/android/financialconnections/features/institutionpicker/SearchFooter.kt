@@ -19,13 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Info100
@@ -40,7 +38,6 @@ internal fun SearchFooter(
             .background(color = FinancialConnectionsTheme.colors.backgroundContainer)
             .padding(16.dp),
         content = {
-            val uriHandler = LocalUriHandler.current
             Text(
                 text = stringResource(id = R.string.stripe_institutionpicker_footer_title),
                 style = FinancialConnectionsTheme.typography.kicker.copy(
@@ -65,16 +62,6 @@ internal fun SearchFooter(
                     modifier = Modifier.clickable { onManualEntryClick() }
                 )
             }
-            SearchFooterRow(
-                title = stringResource(id = R.string.stripe_institutionpicker_footer_item_support),
-                titleColor = FinancialConnectionsTheme.colors.textBrand,
-                icon = R.drawable.stripe_ic_mail,
-                iconColor = FinancialConnectionsTheme.colors.iconBrand,
-                iconBackgroundColor = Info100,
-                modifier = Modifier.clickable {
-                    uriHandler.openUri(FinancialConnectionsUrlResolver.supportUrl)
-                }
-            )
         }
     )
 }

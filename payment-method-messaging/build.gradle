@@ -30,7 +30,7 @@ dependencies {
 
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
     implementation "androidx.browser:browser:$androidxBrowserVersion"
-    implementation "androidx.compose.ui:ui:$androidxComposeVersion"
+    implementation "androidx.compose.ui:ui:$androidxComposeUiVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
