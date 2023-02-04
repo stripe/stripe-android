@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Looper.getMainLooper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.asLiveData
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FieldError
@@ -14,6 +15,8 @@ import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Invalid
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Full
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Limitless
+import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,6 +44,19 @@ internal class TextFieldControllerTest {
             }
         controller.onValueChange("limitless")
         assertThat(paramValue).isEqualTo("limitless")
+    }
+
+    @Test
+    fun `verify FormFieldEntry is correct when moving from full to invalid state`() = runTest {
+        val controller = createControllerWithState()
+
+        controller.formFieldValue.test {
+            skipItems(1)
+            controller.onValueChange("full")
+            assertThat(awaitItem()).isEqualTo(FormFieldEntry("full", true))
+            controller.onValueChange("invalid")
+            assertThat(awaitItem()).isEqualTo(FormFieldEntry("invalid", false))
+        }
     }
 
     @Test

@@ -57,6 +57,7 @@ dependencies {
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
     testImplementation "com.google.android.libraries.places:places:$placesVersion"
+    testImplementation testLibs.turbine
     testImplementation project(':stripecardscan')
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"

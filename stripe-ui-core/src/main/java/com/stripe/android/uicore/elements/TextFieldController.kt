@@ -15,6 +15,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -109,22 +110,24 @@ class SimpleTextFieldController constructor(
     override val debugLabel = textFieldConfig.debugLabel
 
     /** This is all the information that can be observed on the element */
-    private val _fieldValue = MutableStateFlow("")
-    override val fieldValue: Flow<String> = _fieldValue
+    private val _textField: MutableStateFlow<TextField> = MutableStateFlow(
+        TextField(value = "", state = Blank)
+    )
 
-    override val rawFieldValue: Flow<String> = _fieldValue.map { textFieldConfig.convertToRaw(it) }
+    override val fieldValue: Flow<String> = _textField.map { it.value }.distinctUntilChanged()
 
-    override val contentDescription: Flow<String> = _fieldValue
+    override val rawFieldValue: Flow<String> = fieldValue.map { textFieldConfig.convertToRaw(it) }
 
-    private val _fieldState = MutableStateFlow<TextFieldState>(Blank)
-    override val fieldState: Flow<TextFieldState> = _fieldState
+    override val contentDescription: Flow<String> = fieldValue
+
+    override val fieldState: Flow<TextFieldState> = _textField.map { it.state }.distinctUntilChanged()
 
     override val loading: Flow<Boolean> = textFieldConfig.loading
 
     private val _hasFocus = MutableStateFlow(false)
 
     override val visibleError: Flow<Boolean> =
-        combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
+        combine(fieldState, _hasFocus) { fieldState, hasFocus ->
             fieldState.shouldShowError(hasFocus)
         }
 
@@ -132,16 +135,17 @@ class SimpleTextFieldController constructor(
      * An error must be emitted if it is visible or not visible.
      **/
     override val error: Flow<FieldError?> = visibleError.map { visibleError ->
-        _fieldState.value.getError()?.takeIf { visibleError }
+        _textField.value.state.getError()?.takeIf { visibleError }
     }
 
-    override val isComplete: Flow<Boolean> = _fieldState.map {
-        it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
-    }
+    override val isComplete: Flow<Boolean> = _textField.map { it.state }.map { it.isComplete() }
 
     override val formFieldValue: Flow<FormFieldEntry> =
-        combine(isComplete, rawFieldValue) { complete, value ->
-            FormFieldEntry(value, complete)
+        _textField.map {
+            FormFieldEntry(
+                it.value,
+                it.state.isComplete()
+            )
         }
 
     init {
@@ -152,17 +156,15 @@ class SimpleTextFieldController constructor(
      * This is called when the value changed to is a display value.
      */
     override fun onValueChange(displayFormatted: String): TextFieldState? {
-        val originalTextStateValue = _fieldState.value
-        _fieldValue.value = textFieldConfig.filter(displayFormatted)
+        val originalState = _textField.value.state
+        val newValue = textFieldConfig.filter(displayFormatted)
+        val newState = textFieldConfig.determineState(newValue)
+        _textField.value = TextField(
+            value = newValue,
+            state = newState
+        )
 
-        // Should be filtered value
-        _fieldState.value = textFieldConfig.determineState(_fieldValue.value)
-
-        return if (_fieldState.value != originalTextStateValue) {
-            _fieldState.value
-        } else {
-            null
-        }
+        return if (newState != originalState) newState else null
     }
 
     /**
@@ -175,4 +177,12 @@ class SimpleTextFieldController constructor(
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
     }
+
+    private fun TextFieldState.isComplete() =
+        isValid() || (!isValid() && showOptionalLabel && isBlank())
+
+    private data class TextField(
+        val value: String,
+        val state: TextFieldState
+    )
 }
