@@ -51,7 +51,7 @@ internal class TextFieldControllerTest {
         val controller = createControllerWithState()
 
         controller.formFieldValue.test {
-            skipItems(1)
+            skipItems(1) // ignore first emission with initial TextField value.
             controller.onValueChange("full")
             assertThat(awaitItem()).isEqualTo(FormFieldEntry("full", true))
             controller.onValueChange("invalid")
