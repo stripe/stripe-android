@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.animation.LayoutTransition
 import android.content.Context
+import android.os.Build
 import android.view.Gravity
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
@@ -14,6 +15,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
@@ -82,7 +84,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -91,7 +92,6 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import javax.inject.Provider
 import kotlin.test.AfterTest
@@ -99,7 +99,8 @@ import kotlin.test.BeforeTest
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
+@Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentSheetActivityTest {
 
     @get:Rule
@@ -257,7 +258,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Errors are cleared when checking out with a generic payment method`() {
         val scenario = activityScenario()
@@ -283,7 +283,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Errors are cleared when checking out with Google Pay`() {
         val scenario = activityScenario()
@@ -309,7 +308,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Errors are cleared when checking out with Link`() {
         val scenario = activityScenario()
@@ -334,7 +332,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Errors are cleared when updating the payment selection`() {
         val paymentMethods = PAYMENT_METHODS
@@ -366,7 +363,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Errors are cleared when navigating back from payment form to saved payment methods`() {
         val paymentMethods = PAYMENT_METHODS
@@ -396,7 +392,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Errors are cleared when transitioning to new screen`() {
         val paymentMethods = PAYMENT_METHODS
@@ -779,7 +774,6 @@ internal class PaymentSheetActivityTest {
         )
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `GPay button error message is displayed`() {
         val scenario = activityScenario(viewModel)
@@ -800,7 +794,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `when new payment method is selected then error message is cleared`() {
         val scenario = activityScenario(viewModel)
@@ -841,7 +834,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `when checkout starts then error message is cleared`() {
         val scenario = activityScenario(viewModel)
