@@ -242,7 +242,6 @@ internal fun NetworkingLinkSignupScreenPreview() {
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
             state = NetworkingLinkSignupState(
-                showFullForm = true,
                 payload = Success(
                     Payload(
                         emailController = EmailConfig.createController(""),

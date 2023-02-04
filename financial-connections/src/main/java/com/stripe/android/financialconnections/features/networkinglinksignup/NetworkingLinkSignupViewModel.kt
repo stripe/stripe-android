@@ -109,11 +109,12 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         setState { copy(validEmail = validEmail) }
         if (validEmail != null) {
             logger.debug("VALID EMAIL ADDRESS $validEmail.")
-            setState { copy(showFullForm = true) }
             searchJob += suspend {
                 delay(SEARCH_DEBOUNCE_MS)
                 lookupAccount(validEmail)
             }.execute { copy(lookupAccount = if (it.isCancellationError()) Uninitialized else it) }
+        } else {
+            setState { copy(lookupAccount = Uninitialized) }
         }
     }
 
@@ -167,10 +168,12 @@ internal data class NetworkingLinkSignupState(
     val payload: Async<Payload> = Uninitialized,
     val validEmail: String? = null,
     val validPhone: String? = null,
-    val showFullForm: Boolean = false,
     val saveAccountToLink: Async<FinancialConnectionsSessionManifest> = Uninitialized,
     val lookupAccount: Async<ConsumerSessionLookup> = Uninitialized,
 ) : MavericksState {
+
+    val showFullForm: Boolean
+        get() = lookupAccount()?.let { !it.exists } ?: false
 
     fun valid(): Boolean {
         return validEmail != null && validPhone != null
