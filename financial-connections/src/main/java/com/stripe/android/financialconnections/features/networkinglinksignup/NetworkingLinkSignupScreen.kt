@@ -20,7 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
@@ -31,6 +33,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.BulletItem
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
@@ -44,6 +47,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
+import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.model.ConsumerSessionLookup
@@ -144,6 +148,25 @@ private fun NetworkingLinkSignupLoaded(
                 ),
                 onClickableTextClick = {},
             )
+            Spacer(modifier = Modifier.size(8.dp))
+            BulletItem(
+                bullet = BulletUI(
+                    title = null,
+                    content = TextResource.StringId(R.string.stripe_networking_signup_bullet1),
+                    icon = null
+                ),
+                onClickableTextClick = {}
+            )
+            Spacer(modifier = Modifier.size(12.dp))
+            BulletItem(
+                bullet = BulletUI(
+                    title = null,
+                    TextResource.StringId(R.string.stripe_networking_signup_bullet2),
+                    icon = null
+                ),
+                onClickableTextClick = {}
+            )
+            Spacer(modifier = Modifier.size(24.dp))
             StripeThemeForConnections {
                 EmailCollectionSection(
                     showFullForm = showFullForm,
@@ -155,29 +178,31 @@ private fun NetworkingLinkSignupLoaded(
             AnimatedVisibility(
                 visible = showFullForm
             ) {
-                StripeThemeForConnections {
-                    PhoneNumberCollectionSection(
-                        phoneNumberController = payload.phoneController,
-                        imeAction = ImeAction.Default,
-                        enabled = true,
+                Column {
+                    StripeThemeForConnections {
+                        PhoneNumberCollectionSection(
+                            phoneNumberController = payload.phoneController,
+                            requestFocusWhenShown = payload.phoneController.initialPhoneNumber.isEmpty(),
+                            imeAction = ImeAction.Default,
+                            enabled = true,
+                        )
+                    }
+                    AnnotatedText(
+                        text = TextResource.StringId(R.string.stripe_networking_signup_phone_number_disclaimer),
+                        onClickableTextClick = onClickableTextClick,
+                        defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+                            color = FinancialConnectionsTheme.colors.textSecondary
+                        ),
+                        annotationStyles = mapOf(
+                            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                                .toSpanStyle()
+                                .copy(color = FinancialConnectionsTheme.colors.textBrand),
+                            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
+                                .toSpanStyle()
+                                .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                        )
                     )
                 }
-                Spacer(modifier = Modifier.size(4.dp))
-                AnnotatedText(
-                    text = TextResource.StringId(R.string.stripe_networking_signup_terms),
-                    onClickableTextClick = onClickableTextClick,
-                    defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                        color = FinancialConnectionsTheme.colors.textSecondary
-                    ),
-                    annotationStyles = mapOf(
-                        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
-                            .toSpanStyle()
-                            .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                        StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
-                            .toSpanStyle()
-                            .copy(color = FinancialConnectionsTheme.colors.textSecondary),
-                    )
-                )
             }
             Spacer(modifier = Modifier.weight(1f))
         }
@@ -192,31 +217,35 @@ private fun NetworkingLinkSignupLoaded(
             AnimatedVisibility(
                 visible = showFullForm
             ) {
-                AnnotatedText(
-                    text = TextResource.StringId(R.string.stripe_networking_signup_terms),
-                    onClickableTextClick = onClickableTextClick,
-                    defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                        color = FinancialConnectionsTheme.colors.textSecondary
-                    ),
-                    annotationStyles = mapOf(
-                        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
-                            .toSpanStyle()
-                            .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                        StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
-                            .toSpanStyle()
-                            .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                Column {
+                    AnnotatedText(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = TextResource.StringId(R.string.stripe_networking_signup_terms),
+                        onClickableTextClick = onClickableTextClick,
+                        defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+                            textAlign = TextAlign.Center,
+                            color = FinancialConnectionsTheme.colors.textSecondary
+                        ),
+                        annotationStyles = mapOf(
+                            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                                .toSpanStyle()
+                                .copy(color = FinancialConnectionsTheme.colors.textBrand),
+                            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
+                                .toSpanStyle()
+                                .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                        )
                     )
-                )
-                Spacer(modifier = Modifier.size(16.dp))
-                FinancialConnectionsButton(
-                    loading = saveAccountToLinkSync is Loading,
-                    enabled = validForm,
-                    type = FinancialConnectionsButton.Type.Primary,
-                    onClick = onSaveToLink,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text(text = "Save to Link")
+                    Spacer(modifier = Modifier.size(16.dp))
+                    FinancialConnectionsButton(
+                        loading = saveAccountToLinkSync is Loading,
+                        enabled = validForm,
+                        type = FinancialConnectionsButton.Type.Primary,
+                        onClick = onSaveToLink,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(text = stringResource(R.string.stripe_networking_signup_cta_save))
+                    }
                 }
             }
             Spacer(modifier = Modifier.size(12.dp))
@@ -226,7 +255,7 @@ private fun NetworkingLinkSignupLoaded(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                Text(text = "No thanks")
+                Text(text = stringResource(R.string.stripe_networking_signup_cta_negative))
             }
         }
     }

@@ -106,6 +106,11 @@
     <string name="stripe_accountpicker_singleaccount_description_nobusinessname">This merchant only needs one account at this time.</string>
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
     <string name="stripe_networking_signup_terms">Stripe’s Terms and Privacy Policy</string>
+    <string name="stripe_networking_signup_phone_number_disclaimer">We’ll use this to verify and manage your account.</string>
+    <string name="stripe_networking_signup_bullet1">Connect your account faster on [Merchant] and thousands of sites.</string>
+    <string name="stripe_networking_signup_bullet2">Link with Stripe encrypts your data and never shares your login details.</string>
+    <string name="stripe_networking_signup_cta_save">Save to Link</string>
+    <string name="stripe_networking_signup_cta_negative">No thanks</string>
     <plurals name="stripe_success_desc">
         <item quantity="zero" />
         <item quantity="one">Your account was successfully linked to %1$s through Stripe.</item>
