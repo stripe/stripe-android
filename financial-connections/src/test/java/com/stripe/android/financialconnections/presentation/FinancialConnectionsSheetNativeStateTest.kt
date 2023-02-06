@@ -42,18 +42,7 @@ internal class FinancialConnectionsSheetNativeStateTest {
         ).isFalse()
     }
 
-    @Test
-    fun `init - reducedBranding includes reducedBranding when null`() {
-        assertThat(
-            FinancialConnectionsSheetNativeState(
-                args = args(
-                    visual = null
-                )
-            ).reducedBranding,
-        ).isFalse()
-    }
-
-    private fun args(visual: VisualUpdate?) = FinancialConnectionsSheetNativeActivityArgs(
+    private fun args(visual: VisualUpdate) = FinancialConnectionsSheetNativeActivityArgs(
         configuration = configuration,
         initialSyncResponse = ApiKeyFixtures.syncResponse().copy(
             visual = visual
