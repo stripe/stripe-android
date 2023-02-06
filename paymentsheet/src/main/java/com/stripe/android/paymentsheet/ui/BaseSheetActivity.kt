@@ -6,6 +6,7 @@ import android.graphics.Insets
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
@@ -27,6 +28,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.link.LinkPaymentLauncher
@@ -239,9 +241,11 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             displayMetrics.widthPixels
         }
 
-        val params: ViewGroup.LayoutParams = bottomSheet.layoutParams
-        params.width = (screenWidth * TABLET_WIDTH_RATIO).roundToInt()
-        bottomSheet.layoutParams = params
+        val params = bottomSheet.layoutParams
+        val clParams = params as CoordinatorLayout.LayoutParams
+        clParams.gravity = clParams.gravity or Gravity.CENTER_HORIZONTAL
+        clParams.width = (screenWidth * TABLET_WIDTH_RATIO).roundToInt()
+        bottomSheet.layoutParams = clParams
     }
 
     internal companion object {
