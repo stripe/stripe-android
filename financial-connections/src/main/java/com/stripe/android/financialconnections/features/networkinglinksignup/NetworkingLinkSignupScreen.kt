@@ -30,6 +30,7 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
@@ -62,6 +63,7 @@ internal fun NetworkingLinkSignupScreen() {
         state = state.value,
         onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.RESET) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
+        onClickableTextClick = viewModel::onClickableTextClick,
         onSaveToLink = viewModel::onSaveAccount
     )
 }
@@ -71,6 +73,7 @@ private fun NetworkingLinkSignupContent(
     state: NetworkingLinkSignupState,
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
+    onClickableTextClick: (String) -> Unit,
     onSaveToLink: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -92,6 +95,7 @@ private fun NetworkingLinkSignupContent(
                 saveAccountToLinkSync = state.saveAccountToLink,
                 showFullForm = state.showFullForm,
                 onSaveToLink = onSaveToLink,
+                onClickableTextClick = onClickableTextClick,
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -111,6 +115,7 @@ private fun NetworkingLinkSignupLoaded(
     saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
     lookupAccountSync: Async<ConsumerSessionLookup>,
     showFullForm: Boolean,
+    onClickableTextClick: (String) -> Unit,
     onSaveToLink: () -> Unit
 ) {
     Column(
@@ -157,6 +162,22 @@ private fun NetworkingLinkSignupLoaded(
                         enabled = true,
                     )
                 }
+                Spacer(modifier = Modifier.size(4.dp))
+                AnnotatedText(
+                    text = TextResource.StringId(R.string.stripe_networking_signup_terms),
+                    onClickableTextClick = onClickableTextClick,
+                    defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+                        color = FinancialConnectionsTheme.colors.textSecondary
+                    ),
+                    annotationStyles = mapOf(
+                        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                            .toSpanStyle()
+                            .copy(color = FinancialConnectionsTheme.colors.textBrand),
+                        StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
+                            .toSpanStyle()
+                            .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                    )
+                )
             }
             Spacer(modifier = Modifier.weight(1f))
         }
@@ -171,6 +192,22 @@ private fun NetworkingLinkSignupLoaded(
             AnimatedVisibility(
                 visible = showFullForm
             ) {
+                AnnotatedText(
+                    text = TextResource.StringId(R.string.stripe_networking_signup_terms),
+                    onClickableTextClick = onClickableTextClick,
+                    defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+                        color = FinancialConnectionsTheme.colors.textSecondary
+                    ),
+                    annotationStyles = mapOf(
+                        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                            .toSpanStyle()
+                            .copy(color = FinancialConnectionsTheme.colors.textBrand),
+                        StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
+                            .toSpanStyle()
+                            .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                    )
+                )
+                Spacer(modifier = Modifier.size(16.dp))
                 FinancialConnectionsButton(
                     loading = saveAccountToLinkSync is Loading,
                     enabled = validForm,
@@ -182,6 +219,7 @@ private fun NetworkingLinkSignupLoaded(
                     Text(text = "Save to Link")
                 }
             }
+            Spacer(modifier = Modifier.size(12.dp))
             FinancialConnectionsButton(
                 type = FinancialConnectionsButton.Type.Secondary,
                 onClick = { },
@@ -237,8 +275,8 @@ internal fun EmailCollectionSection(
 }
 
 @Composable
-@Preview
-internal fun NetworkingLinkSignupScreenPreview() {
+@Preview(group = "NetworkingLinkSignup Pane", name = "Entering email")
+internal fun NetworkingLinkSignupScreenEnteringEmailPreview() {
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
             state = NetworkingLinkSignupState(
@@ -258,6 +296,41 @@ internal fun NetworkingLinkSignupScreenPreview() {
             ),
             onCloseClick = {},
             onSaveToLink = {},
+            onClickableTextClick = {},
+            onCloseFromErrorClick = {}
+        )
+    }
+}
+
+@Composable
+@Preview(group = "NetworkingLinkSignup Pane", name = "Entering phone")
+internal fun NetworkingLinkSignupScreenEnteringPhonePreview() {
+    FinancialConnectionsPreview {
+        NetworkingLinkSignupContent(
+            state = NetworkingLinkSignupState(
+                payload = Success(
+                    Payload(
+                        emailController = EmailConfig.createController("test@test.com"),
+                        phoneController = PhoneNumberController.createPhoneNumberController(
+                            initialValue = "",
+                            initiallySelectedCountryCode = null,
+                        )
+                    )
+                ),
+                validEmail = "test@test.com",
+                validPhone = null,
+                lookupAccount = Success(
+                    ConsumerSessionLookup(
+                        exists = false,
+                        consumerSession = null,
+                        errorMessage = null
+                    )
+                ),
+                saveAccountToLink = Uninitialized
+            ),
+            onCloseClick = {},
+            onSaveToLink = {},
+            onClickableTextClick = {},
             onCloseFromErrorClick = {}
         )
     }

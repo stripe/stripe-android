@@ -136,6 +136,10 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         }.execute { copy(saveAccountToLink = it) }
     }
 
+    fun onClickableTextClick(text: String) {
+        TODO("Not yet implemented")
+    }
+
     /**
      * Emits the entered [InputController.formFieldValue] if the form is valid, null otherwise.
      */

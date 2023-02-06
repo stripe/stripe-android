@@ -9,7 +9,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class ConsumerSessionLookup internal constructor(
+data class ConsumerSessionLookup(
     val exists: Boolean,
     val consumerSession: ConsumerSession?,
     val errorMessage: String?
