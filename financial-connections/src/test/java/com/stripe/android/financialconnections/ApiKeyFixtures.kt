@@ -6,6 +6,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.model.VisualUpdate
 
 internal object ApiKeyFixtures {
     const val DEFAULT_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
@@ -17,7 +18,11 @@ internal object ApiKeyFixtures {
 
     fun syncResponse() = SynchronizeSessionResponse(
         manifest = sessionManifest(),
-        text = null
+        text = null,
+        visual = VisualUpdate(
+            reducedBranding = false,
+            merchantLogos = emptyList()
+        )
     )
 
     fun financialConnectionsSessionNoAccounts() = FinancialConnectionsSession(

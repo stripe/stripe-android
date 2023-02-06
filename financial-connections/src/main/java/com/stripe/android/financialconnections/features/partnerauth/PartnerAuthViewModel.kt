@@ -1,9 +1,9 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
+import android.webkit.URLUtil
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Success
@@ -25,15 +25,16 @@ import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOA
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.PartnerAuthViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
-import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
-import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
@@ -46,6 +47,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val cancelAuthorizationSession: CancelAuthorizationSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     @Named(APPLICATION_ID) private val applicationId: String,
+    private val uriUtils: UriUtils,
     private val postAuthSessionEvent: PostAuthSessionEvent,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
@@ -225,6 +227,44 @@ internal class PartnerAuthViewModel @Inject constructor(
         navigationManager.navigate(NavigationDirections.manualEntry)
     }
 
+    fun onClickableTextClick(uri: String) {
+        // if clicked uri contains an eventName query param, track click event.
+        viewModelScope.launch {
+            uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
+                eventTracker.track(
+                    FinancialConnectionsEvent.Click(
+                        eventName,
+                        pane = Pane.PARTNER_AUTH
+                    )
+                )
+            }
+        }
+        if (URLUtil.isNetworkUrl(uri)) {
+            setState {
+                copy(
+                    viewEffect = OpenUrl(
+                        uri,
+                        Date().time
+                    )
+                )
+            }
+        } else {
+            val managedUri = PartnerAuthState.ClickableText.values()
+                .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
+            when (managedUri) {
+                PartnerAuthState.ClickableText.DATA -> {
+                    setState {
+                        copy(
+                            viewEffect = OpenBottomSheet(Date().time)
+                        )
+                    }
+                }
+
+                null -> logger.error("Unrecognized clickable text: $uri")
+            }
+        }
+    }
+
     fun onViewEffectLaunched() {
         setState {
             copy(viewEffect = null)
@@ -245,29 +285,5 @@ internal class PartnerAuthViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
-    }
-}
-
-internal data class PartnerAuthState(
-    val payload: Async<Payload> = Uninitialized,
-    val viewEffect: PartnerAuthViewEffect? = null,
-    val authenticationStatus: Async<String> = Uninitialized
-) : MavericksState {
-    data class Payload(
-        val isStripeDirect: Boolean,
-        val institution: FinancialConnectionsInstitution,
-        val authSession: FinancialConnectionsAuthorizationSession
-    )
-
-    val canNavigateBack: Boolean
-        get() =
-            // Authentication running -> don't allow back navigation
-            authenticationStatus !is Loading &&
-                authenticationStatus !is Success &&
-                // Failures posting institution -> don't allow back navigation
-                payload !is Fail
-
-    sealed interface PartnerAuthViewEffect {
-        data class OpenPartnerAuth(val url: String) : PartnerAuthViewEffect
     }
 }
