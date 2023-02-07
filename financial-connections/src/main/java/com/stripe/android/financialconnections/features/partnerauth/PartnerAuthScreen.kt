@@ -274,7 +274,7 @@ private fun LoadedContent(
 
         is Success -> LoadingContent(
             title = stringResource(R.string.stripe_account_picker_loading_title),
-            content =  stringResource(R.string.stripe_account_picker_loading_desc)
+            content = stringResource(R.string.stripe_account_picker_loading_desc)
         )
 
         is Fail -> {
