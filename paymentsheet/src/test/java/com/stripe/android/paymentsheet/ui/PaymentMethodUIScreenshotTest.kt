@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -21,7 +20,7 @@ internal class PaymentMethodUIScreenshotTest {
         PaymentSheetAppearance.values(),
         FontSize.values(),
         boxModifier = Modifier
-            .padding(PaddingValues(16.dp))
+            .padding(16.dp)
     )
 
     @Test

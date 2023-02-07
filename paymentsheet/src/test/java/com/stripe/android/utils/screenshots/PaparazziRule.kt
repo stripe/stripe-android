@@ -18,7 +18,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
-class PaparazziRule constructor(
+class PaparazziRule(
     vararg configOptions: Array<out PaparazziConfigOption>,
     private val boxModifier: Modifier = Modifier.defaultBoxModifier(),
 ) : TestRule {

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
@@ -22,7 +21,7 @@ class AddressElementPrimaryButtonScreenshotTest {
         SystemAppearance.values(),
         PaymentSheetAppearance.values(),
         FontSize.values(),
-        boxModifier = Modifier.padding(PaddingValues(horizontal = 16.dp)).fillMaxWidth(),
+        boxModifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
     )
 
     @Test
