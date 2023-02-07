@@ -66,7 +66,7 @@ internal fun NetworkingLinkSignupScreen() {
     BackHandler(enabled = true) {}
     NetworkingLinkSignupContent(
         state = state.value,
-        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.RESET) },
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onSaveToLink = viewModel::onSaveAccount
