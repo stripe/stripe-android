@@ -4,7 +4,7 @@ import com.stripe.android.paymentsheet.R
 import org.junit.Assert
 import org.junit.Test
 
-class TransformToBankIconTest {
+class TransformToBankImageResourceTest {
     @Test
     fun `given valid bank name, transform returns the correct bank icon`() {
         // bank of america

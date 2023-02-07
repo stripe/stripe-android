@@ -41,6 +41,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.ImageResource
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -152,8 +153,12 @@ private fun NetworkingLinkSignupLoaded(
             BulletItem(
                 bullet = BulletUI(
                     title = null,
-                    content = TextResource.StringId(R.string.stripe_networking_signup_bullet1),
-                    icon = null
+                    // TODO handle no merchant name case.
+                    content = TextResource.StringId(
+                        R.string.stripe_networking_signup_bullet1,
+                        listOf(payload.merchantName ?: "")
+                    ),
+                    imageResource = ImageResource.Local(R.drawable.stripe_ic_convert)
                 ),
                 onClickableTextClick = {}
             )
@@ -162,7 +167,7 @@ private fun NetworkingLinkSignupLoaded(
                 bullet = BulletUI(
                     title = null,
                     TextResource.StringId(R.string.stripe_networking_signup_bullet2),
-                    icon = null
+                    imageResource = ImageResource.Local(R.drawable.stripe_ic_disputeprotection)
                 ),
                 onClickableTextClick = {}
             )
@@ -311,6 +316,7 @@ internal fun NetworkingLinkSignupScreenEnteringEmailPreview() {
             state = NetworkingLinkSignupState(
                 payload = Success(
                     Payload(
+                        merchantName = "Test",
                         emailController = EmailConfig.createController(""),
                         phoneController = PhoneNumberController.createPhoneNumberController(
                             initialValue = "",
@@ -339,6 +345,7 @@ internal fun NetworkingLinkSignupScreenEnteringPhonePreview() {
             state = NetworkingLinkSignupState(
                 payload = Success(
                     Payload(
+                        merchantName = "Test",
                         emailController = EmailConfig.createController("test@test.com"),
                         phoneController = PhoneNumberController.createPhoneNumberController(
                             initialValue = "",

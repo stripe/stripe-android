@@ -107,8 +107,8 @@
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
     <string name="stripe_networking_signup_terms">Stripe’s Terms and Privacy Policy</string>
     <string name="stripe_networking_signup_phone_number_disclaimer">We’ll use this to verify and manage your account.</string>
-    <string name="stripe_networking_signup_bullet1">Connect your account faster on [Merchant] and thousands of sites.</string>
-    <string name="stripe_networking_signup_bullet2">Link with Stripe encrypts your data and never shares your login details.</string>
+    <string name="stripe_networking_signup_bullet1">Connect your account faster on %1$s and everywhere Link is accepted.</string>
+    <string name="stripe_networking_signup_bullet2">Link encrypts your data and never shares your login details.</string>
     <string name="stripe_networking_signup_cta_save">Save to Link</string>
     <string name="stripe_networking_signup_cta_negative">No thanks</string>
     <plurals name="stripe_success_desc">
