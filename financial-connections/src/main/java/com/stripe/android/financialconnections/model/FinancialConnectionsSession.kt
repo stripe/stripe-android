@@ -14,16 +14,19 @@ import kotlinx.serialization.Serializable
 import org.json.JSONObject
 
 /**
- * A Financial Connections Session is the secure way to programmatically launch the client-side modal that lets your users link their accounts.
+ * A Financial Connections Session is the secure way to programmatically launch the client-side
+ * modal that lets your users link their accounts.
  *
  * @param accounts
  * @param clientSecret A value that will be passed to the client to launch the authentication flow.
  * @param id Unique identifier for the object.
- * @param livemode Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.
+ * @param livemode Has the value `true` if the object exists in live mode or the value `false` if
+ * the object exists in test mode.
  * @param bankAccountToken
  * @param manualEntry
  * @param paymentAccount
- * @param returnUrl For webview integrations only. Upon completing OAuth login in the native browser, the user will be redirected to this URL to return to your app.
+ * @param returnUrl For webview integrations only. Upon completing OAuth login in the native browser,
+ * the user will be redirected to this URL to return to your app.
  * @param status The current state of the session.
  * @param statusDetails
  */
