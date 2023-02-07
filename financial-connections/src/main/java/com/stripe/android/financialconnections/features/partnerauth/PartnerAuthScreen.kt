@@ -273,8 +273,8 @@ private fun LoadedContent(
         is Loading -> BrowserLoadingContent()
 
         is Success -> LoadingContent(
-            stringResource(R.string.stripe_account_picker_loading_title),
-            stringResource(R.string.stripe_account_picker_loading_desc)
+            title = stringResource(R.string.stripe_account_picker_loading_title),
+            content =  stringResource(R.string.stripe_account_picker_loading_desc)
         )
 
         is Fail -> {
