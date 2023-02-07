@@ -13,7 +13,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.features.MarkdownParser
 import com.stripe.android.financialconnections.features.consent.ConsentState.BottomSheetContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
@@ -50,7 +49,7 @@ internal class ConsentViewModel @Inject constructor(
                 .experimentAssignment(CONNECTIONS_CONSENT_COMBINED_LOGO) == "treatment"
             eventTracker.trackExposure(CONNECTIONS_CONSENT_COMBINED_LOGO, manifest)
             ConsentState.Payload(
-                consent = MarkdownParser.toHtml(sync.text!!.consent!!),
+                consent = sync.text!!.consent!!,
                 shouldShowMerchantLogos = shouldShowMerchantLogos,
                 merchantLogos = sync.visual?.merchantLogos ?: emptyList()
             )

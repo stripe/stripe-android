@@ -151,13 +151,13 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     companion object {
         internal const val PARAM_SELECTED_ACCOUNTS: String = "selected_accounts"
 
-        internal const val accountsSessionUrl: String =
+        internal val accountsSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/accounts"
 
-        internal const val attachPaymentAccountUrl: String =
+        internal val attachPaymentAccountUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/attach_payment_account"
 
-        internal const val authorizationSessionSelectedAccountsUrl: String =
+        internal val authorizationSessionSelectedAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/selected_accounts"
     }
 }

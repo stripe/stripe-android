@@ -5,7 +5,6 @@
 # adb logcat &
 
 # Exclude any modules with screenshot tests here. Then run them with the screenshot test package excluded.
-# Don't forget to add your module to actions/upload-artifact@v2 task.
 ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest
 
 ./gradlew :paymentsheet:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.notPackage=com.stripe.android.paymentsheet.screenshot

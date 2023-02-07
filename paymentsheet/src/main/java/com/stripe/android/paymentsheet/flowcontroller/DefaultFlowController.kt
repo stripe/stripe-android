@@ -53,6 +53,7 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.validate
@@ -338,7 +339,10 @@ internal class DefaultFlowController @Inject internal constructor(
                         )
                     },
                     onFailure = {
-                        eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
+                        eventReporter.onPaymentFailure(
+                            PaymentSelection.GooglePay,
+                            viewModel.state?.stripeIntent?.currency
+                        )
                         paymentResultCallback.onPaymentSheetResult(
                             PaymentSheetResult.Failed(it)
                         )
@@ -346,7 +350,10 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
-                eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
+                eventReporter.onPaymentFailure(
+                    PaymentSelection.GooglePay,
+                    viewModel.state?.stripeIntent?.currency
+                )
                 paymentResultCallback.onPaymentSheetResult(
                     PaymentSheetResult.Failed(
                         GooglePayException(
@@ -434,15 +441,20 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun logPaymentResult(paymentResult: PaymentResult?) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
-                if ((viewModel.paymentSelection as? PaymentSelection.Saved)?.isGooglePay == true) {
-                    // Google Pay is treated as a saved PM after confirmation
-                    eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
-                } else {
-                    eventReporter.onPaymentSuccess(viewModel.paymentSelection)
-                }
+                eventReporter.onPaymentSuccess(
+                    paymentSelection = viewModel.paymentSelection,
+                    currency = viewModel.state?.stripeIntent?.currency,
+                )
             }
-            is PaymentResult.Failed -> eventReporter.onPaymentFailure(viewModel.paymentSelection)
-            else -> {}
+            is PaymentResult.Failed -> {
+                eventReporter.onPaymentFailure(
+                    paymentSelection = viewModel.paymentSelection,
+                    currency = viewModel.state?.stripeIntent?.currency,
+                )
+            }
+            else -> {
+                // Nothing to do here
+            }
         }
     }
 

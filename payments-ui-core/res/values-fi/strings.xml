@@ -6,10 +6,6 @@
   <string name="back">Takaisin</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Laskutusosoite</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">Sähköposti</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Sähköposti on virheellinen.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">EPS-pankki</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

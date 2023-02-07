@@ -1,6 +1,10 @@
 package com.stripe.android.paymentsheet.navigation
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetLoading
@@ -29,7 +33,13 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel) {
-            PaymentOptions(viewModel)
+            PaymentOptions(
+                viewModel = viewModel,
+                modifier = Modifier.padding(
+                    top = dimensionResource(R.dimen.stripe_paymentsheet_paymentoptions_margin_top),
+                    bottom = dimensionResource(R.dimen.stripe_paymentsheet_paymentoptions_margin_bottom),
+                )
+            )
         }
     }
 

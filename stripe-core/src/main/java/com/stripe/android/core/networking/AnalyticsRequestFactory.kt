@@ -15,8 +15,7 @@ open class AnalyticsRequestFactory(
     private val packageManager: PackageManager?,
     private val packageInfo: PackageInfo?,
     private val packageName: String,
-    private val publishableKeyProvider: Provider<String>,
-    internal val defaultProductUsageTokens: Set<String> = emptySet()
+    private val publishableKeyProvider: Provider<String>
 ) {
     @VisibleForTesting
     val sessionId: UUID = UUID.randomUUID()
@@ -31,7 +30,7 @@ open class AnalyticsRequestFactory(
      */
     fun createRequest(
         event: AnalyticsEvent,
-        additionalParams: Map<String, Any>
+        additionalParams: Map<String, Any?>
     ): AnalyticsRequest {
         return AnalyticsRequest(
             params = createParams(event) + additionalParams,

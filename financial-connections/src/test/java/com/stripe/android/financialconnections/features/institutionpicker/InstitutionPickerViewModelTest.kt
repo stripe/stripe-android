@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.test.MvRxTestRule
+import com.airbnb.mvrx.test.MavericksTestRule
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
@@ -21,15 +21,17 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 @ExperimentalCoroutinesApi
 internal class InstitutionPickerViewModelTest {
 
     @get:Rule
-    val mvrxRule = MvRxTestRule()
+    val mvrxRule = MavericksTestRule()
 
     private val searchInstitutions = mock<SearchInstitutions>()
     private val featuredInstitutions = mock<FeaturedInstitutions>()
@@ -130,6 +132,23 @@ internal class InstitutionPickerViewModelTest {
                     "query" to query
                 )
             )
+        }
+    }
+
+    @Test
+    fun `onQueryChanged - no institutions are searched when blank query`() = runTest {
+        val query = "  "
+
+        givenManifestReturns(ApiKeyFixtures.sessionManifest())
+
+        val viewModel = buildViewModel(InstitutionPickerState())
+        viewModel.onQueryChanged(query)
+        advanceUntilIdle()
+
+        withState(viewModel) { state ->
+            verifyNoInteractions(searchInstitutions)
+            assertTrue(eventTracker.sentEvents.none { it.eventName == "linked_accounts.search.succeeded" })
+            assertEquals(state.searchInstitutions()!!.data, emptyList())
         }
     }
 

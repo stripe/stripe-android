@@ -6,6 +6,7 @@ import androidx.compose.ui.text.intl.Locale
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.Controller
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.format.CurrencyFormatter
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -17,7 +18,7 @@ data class AfterpayClearpayHeaderElement(
     override val identifier: IdentifierSpec,
     private val amount: Amount,
     override val controller: Controller? = null
-) : FormElement() {
+) : FormElement {
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         MutableStateFlow(emptyList())
 

@@ -2,12 +2,12 @@ package com.stripe.android.ui.core
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
-import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

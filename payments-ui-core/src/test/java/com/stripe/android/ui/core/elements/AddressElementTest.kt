@@ -9,6 +9,7 @@ import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressType
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberState
 import com.stripe.android.uicore.elements.SameAsShippingController

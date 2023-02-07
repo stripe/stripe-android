@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
