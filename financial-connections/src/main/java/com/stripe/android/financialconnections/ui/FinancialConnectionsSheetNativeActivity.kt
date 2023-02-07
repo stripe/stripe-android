@@ -35,6 +35,7 @@ import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
 import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessScreen
+import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupScreen
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
@@ -200,6 +201,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     LaunchedPane(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT)
                     BackHandler(navController, Pane.ATTACH_LINKED_PAYMENT_ACCOUNT)
                     AttachPaymentScreen()
+                }
+                composable(NavigationDirections.networkingLinkLoginWarmup.destination) {
+                    LaunchedPane(Pane.NETWORKING_LINK_LOGIN_WARMUP)
+                    BackHandler(navController, Pane.NETWORKING_LINK_LOGIN_WARMUP)
+                    NetworkingLinkLoginWarmupScreen()
                 }
             }
         }

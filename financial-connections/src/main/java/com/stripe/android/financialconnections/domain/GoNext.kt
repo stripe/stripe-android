@@ -40,6 +40,7 @@ internal fun Pane.toNavigationCommand(
     Pane.MANUAL_ENTRY_SUCCESS -> NavigationDirections.ManualEntrySuccess(args)
     Pane.ATTACH_LINKED_PAYMENT_ACCOUNT -> NavigationDirections.attachLinkedPaymentAccount
     Pane.RESET -> NavigationDirections.reset
+    Pane.NETWORKING_LINK_LOGIN_WARMUP -> NavigationDirections.networkingLinkLoginWarmup
     Pane.NETWORKING_LINK_SIGNUP_PANE -> {
         logger.error("Link not supported on native flows yet. Navigating to Success.")
         NavigationDirections.success
@@ -47,7 +48,6 @@ internal fun Pane.toNavigationCommand(
     Pane.AUTH_OPTIONS,
     Pane.LINK_CONSENT,
     Pane.LINK_LOGIN,
-    Pane.NETWORKING_LINK_LOGIN_WARMUP,
     Pane.NETWORKING_LINK_VERIFICATION,
     Pane.UNEXPECTED_ERROR -> {
         TODO("Unimplemented navigation command: ${this.value}")

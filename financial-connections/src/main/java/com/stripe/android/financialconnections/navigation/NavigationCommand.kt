@@ -53,6 +53,11 @@ internal object NavigationDirections {
         override val destination = "attach_linked_payment_account"
     }
 
+    val networkingLinkLoginWarmup = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "networking_link_login_warmup"
+    }
+
     val reset = object : NavigationCommand {
         override val arguments = emptyList<NamedNavArgument>()
         override val destination = "reset"
