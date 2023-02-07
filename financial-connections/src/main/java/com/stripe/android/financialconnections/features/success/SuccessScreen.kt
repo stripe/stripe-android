@@ -334,7 +334,7 @@ internal fun SuccessScreenPreview() {
             showLinkAnotherAccount = true,
             onLearnMoreAboutDataAccessClick = {},
             onDisconnectLinkClick = {},
-            {},
+            onCloseClick = {},
         )
     }
 }
