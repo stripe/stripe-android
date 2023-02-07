@@ -137,7 +137,6 @@ private fun NetworkingLinkSignupLoaded(
                     bottom = 24.dp
                 )
         ) {
-
             Spacer(modifier = Modifier.size(16.dp))
             AnnotatedText(
                 text = TextResource.Text("Save your account to Link"),
