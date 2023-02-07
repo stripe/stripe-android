@@ -139,7 +139,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     }
 
     fun onClickableTextClick(text: String) {
-        //TODO handle clicks.
+        // TODO handle clicks.
         logger.debug("Clicked text: $text")
     }
 
