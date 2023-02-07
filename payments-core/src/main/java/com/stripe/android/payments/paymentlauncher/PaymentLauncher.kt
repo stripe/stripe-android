@@ -50,6 +50,8 @@ interface PaymentLauncher {
          * This API registers an [ActivityResultLauncher] into the [ComponentActivity],  it needs
          * to be called before the [ComponentActivity] is created.
          */
+        @JvmStatic
+        @JvmOverloads
         fun create(
             activity: ComponentActivity,
             publishableKey: String,
@@ -63,6 +65,8 @@ interface PaymentLauncher {
          * This API registers an [ActivityResultLauncher] into the [Fragment]'s hosting Activity, it
          * needs to be called before the [Fragment] is created.
          */
+        @JvmStatic
+        @JvmOverloads
         fun create(
             fragment: Fragment,
             publishableKey: String,

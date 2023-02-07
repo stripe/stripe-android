@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.features.partnerauth
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.test.MvRxTestRule
+import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
@@ -13,6 +14,7 @@ import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOA
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.model.MixedOAuthParams
+import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -145,6 +147,7 @@ internal class PartnerAuthViewModelTest {
             pollAuthorizationSessionOAuthResults = pollAuthorizationSessionOAuthResults,
             logger = mock(),
             initialState = initialState,
+            uriUtils = UriUtils(Logger.noop()),
             applicationId = applicationId
         )
     }
