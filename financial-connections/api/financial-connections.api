@@ -1321,15 +1321,13 @@ public final class com/stripe/android/financialconnections/model/ManualEntry : a
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/financialconnections/model/ManualEntry$Companion;
-	public synthetic fun <init> (IZLcom/stripe/android/financialconnections/model/ManualEntryMode;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
-	public fun <init> (ZLcom/stripe/android/financialconnections/model/ManualEntryMode;)V
-	public final fun component1 ()Z
-	public final fun component2 ()Lcom/stripe/android/financialconnections/model/ManualEntryMode;
-	public final fun copy (ZLcom/stripe/android/financialconnections/model/ManualEntryMode;)Lcom/stripe/android/financialconnections/model/ManualEntry;
-	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/model/ManualEntry;ZLcom/stripe/android/financialconnections/model/ManualEntryMode;ILjava/lang/Object;)Lcom/stripe/android/financialconnections/model/ManualEntry;
+	public synthetic fun <init> (ILcom/stripe/android/financialconnections/model/ManualEntryMode;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/financialconnections/model/ManualEntryMode;)V
+	public final fun component1 ()Lcom/stripe/android/financialconnections/model/ManualEntryMode;
+	public final fun copy (Lcom/stripe/android/financialconnections/model/ManualEntryMode;)Lcom/stripe/android/financialconnections/model/ManualEntry;
+	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/model/ManualEntry;Lcom/stripe/android/financialconnections/model/ManualEntryMode;ILjava/lang/Object;)Lcom/stripe/android/financialconnections/model/ManualEntry;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEnabled ()Z
 	public final fun getMode ()Lcom/stripe/android/financialconnections/model/ManualEntryMode;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

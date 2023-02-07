@@ -9,7 +9,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 data class ManualEntry(
-    val enabled: Boolean,
     val mode: ManualEntryMode
 ) : Parcelable
 
