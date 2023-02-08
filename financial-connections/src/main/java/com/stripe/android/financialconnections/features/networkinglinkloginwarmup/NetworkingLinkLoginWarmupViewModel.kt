@@ -12,6 +12,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -21,6 +22,7 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
     initialState: NetworkingLinkLoginWarmupState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
+    private val updateLocalManifest: UpdateLocalManifest,
     private val goNext: GoNext,
     private val logger: Logger
 ) : MavericksViewModel<NetworkingLinkLoginWarmupState>(initialState) {
@@ -47,8 +49,21 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         )
     }
 
+    fun onContinueClick() {
+        goNext(Pane.NETWORKING_LINK_VERIFICATION)
+    }
+
     fun onClickableTextClick(text: String) {
-        TODO("Not yet implemented")
+        when (text) {
+            "skip" -> onSkipClicked()
+            else -> TODO("Unknown click handler!")
+        }
+    }
+
+    private fun onSkipClicked() {
+        // TODO disable networking in session (API call)
+        updateLocalManifest { it.copy(isNetworkingUserFlow = false) }
+        goNext(Pane.INSTITUTION_PICKER)
     }
 
     companion object :

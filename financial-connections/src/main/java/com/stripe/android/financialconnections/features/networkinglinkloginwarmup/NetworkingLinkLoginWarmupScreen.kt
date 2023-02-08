@@ -2,17 +2,14 @@ package com.stripe.android.financialconnections.features.networkinglinkloginwarm
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,21 +20,24 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.ui.TextResource.StringId
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.elements.TextFieldIcon.Trailing
 import com.stripe.android.uicore.elements.TextFieldSection
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun NetworkingLinkLoginWarmupScreen() {
@@ -50,6 +50,7 @@ internal fun NetworkingLinkLoginWarmupScreen() {
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
+        onContinueClick = viewModel::onContinueClick,
     )
 }
 
@@ -57,6 +58,7 @@ internal fun NetworkingLinkLoginWarmupScreen() {
 private fun NetworkingLinkLoginWarmupContent(
     state: NetworkingLinkLoginWarmupState,
     onCloseClick: () -> Unit,
+    onContinueClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onClickableTextClick: (String) -> Unit,
 ) {
@@ -75,6 +77,7 @@ private fun NetworkingLinkLoginWarmupContent(
                 scrollState = scrollState,
                 payload = payload(),
                 onClickableTextClick = onClickableTextClick,
+                onContinueClick = onContinueClick
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -91,6 +94,7 @@ private fun NetworkingLinkLoginWarmupLoaded(
     scrollState: ScrollState,
     payload: Payload,
     onClickableTextClick: (String) -> Unit,
+    onContinueClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -105,18 +109,18 @@ private fun NetworkingLinkLoginWarmupLoaded(
     ) {
         Spacer(modifier = Modifier.size(16.dp))
         AnnotatedText(
-            text = TextResource.Text("Sign in to Link with Stripe"),
+            text = StringId(R.string.stripe_networking_link_login_warmup_title),
             defaultStyle = FinancialConnectionsTheme.typography.subtitle,
             annotationStyles = mapOf(
                 StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.subtitle
                     .toSpanStyle()
                     .copy(color = FinancialConnectionsTheme.colors.textBrand),
             ),
-            onClickableTextClick = {},
+            onClickableTextClick = onClickableTextClick,
         )
         Spacer(modifier = Modifier.size(8.dp))
         AnnotatedText(
-            text = TextResource.Text("It looks like you have a Link with Stripe account. Signing in will let you quickly access your saved bank accounts."),
+            text = StringId(R.string.stripe_networking_link_login_warmup_description),
             defaultStyle = FinancialConnectionsTheme.typography.body.copy(
                 color = FinancialConnectionsTheme.colors.textSecondary
             ),
@@ -125,46 +129,50 @@ private fun NetworkingLinkLoginWarmupLoaded(
                     .toSpanStyle()
                     .copy(color = FinancialConnectionsTheme.colors.textBrand),
             ),
-            onClickableTextClick = {},
+            onClickableTextClick = onClickableTextClick,
         )
         Spacer(modifier = Modifier.size(24.dp))
-        EmailCollectionSection(
-            email = payload.email
+        ExistingEmailSection(
+            email = payload.email,
+            onContinueClick = onContinueClick
         )
         AnnotatedText(
-            text = TextResource.Text("Not you? Continue without signing in"),
+            text = StringId(R.string.stripe_networking_link_login_warmup_skip),
             defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
                 color = FinancialConnectionsTheme.colors.textSecondary
             ),
             annotationStyles = mapOf(
-                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption
+                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
                     .toSpanStyle()
                     .copy(color = FinancialConnectionsTheme.colors.textBrand),
             ),
-            onClickableTextClick = {},
+            onClickableTextClick = onClickableTextClick,
         )
     }
 }
 
 @Composable
-internal fun EmailCollectionSection(
-    email: String
+internal fun ExistingEmailSection(
+    email: String,
+    onContinueClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp),
-        contentAlignment = Alignment.CenterEnd
-    ) {
-        TextFieldSection(
-            imeAction = ImeAction.Done,
-            enabled = true,
-            textFieldController = SimpleTextFieldController(
-                EmailConfig(),
-                initialValue = email
+    TextFieldSection(
+        imeAction = ImeAction.Done,
+        enabled = true,
+        textFieldController = SimpleTextFieldController(
+            SimpleTextFieldConfig(
+                label = R.string.stripe_networking_link_login_warmup_email_label,
+                trailingIcon = MutableStateFlow(
+                    Trailing(
+                        R.drawable.stripe_ic_arrow_right_circle,
+                        isTintable = true,
+                        onClick = onContinueClick
+                    )
+                )
             ),
-        )
-    }
+            initialValue = email
+        ),
+    )
 }
 
 @Composable
@@ -182,8 +190,8 @@ internal fun NetworkingLinkLoginWarmupScreenEnteringEmailPreview() {
             ),
             onCloseClick = {},
             onClickableTextClick = {},
+            onContinueClick = {},
             onCloseFromErrorClick = {}
         )
     }
 }
-
