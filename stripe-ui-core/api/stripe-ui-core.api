@@ -162,6 +162,9 @@ public final class com/stripe/android/uicore/elements/SameAsShippingElementUIKt 
 	public static final field SAME_AS_SHIPPING_CHECKBOX_TEST_TAG Ljava/lang/String;
 }
 
+public final class com/stripe/android/uicore/elements/SectionElementUIKt {
+}
+
 public final class com/stripe/android/uicore/elements/SectionFieldElement$DefaultImpls {
 	public static fun getShouldRenderOutsideCard (Lcom/stripe/android/uicore/elements/SectionFieldElement;)Z
 }
