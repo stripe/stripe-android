@@ -50,6 +50,7 @@ internal class SuccessViewModel @Inject constructor(
         suspend {
             val manifest = getManifest()
             SuccessState.Payload(
+                skipSuccessPane = manifest.skipSuccessPane ?: false,
                 accessibleData = AccessibleDataCalloutModel.fromManifest(manifest),
                 accounts = getAuthorizationSessionAccounts(manifest.activeAuthSession!!.id),
                 institution = manifest.activeInstitution!!,
@@ -67,8 +68,16 @@ internal class SuccessViewModel @Inject constructor(
     private fun observeAsyncs() {
         onAsync(
             SuccessState::payload,
-            onFail = { logger.error("Error retrieving payload", it) },
-            onSuccess = { eventTracker.track(PaneLoaded(Pane.SUCCESS)) }
+            onFail = {
+                logger.error("Error retrieving payload", it)
+            },
+            onSuccess = {
+                if (it.skipSuccessPane.not()) {
+                    eventTracker.track(PaneLoaded(Pane.SUCCESS))
+                } else {
+                    completeSession()
+                }
+            }
         )
         onAsync(
             SuccessState::completeSession,
@@ -108,9 +117,11 @@ internal class SuccessViewModel @Inject constructor(
     }
 
     fun onDoneClick() {
-        viewModelScope.launch {
-            eventTracker.track(ClickDone(Pane.SUCCESS))
-        }
+        viewModelScope.launch { eventTracker.track(ClickDone(Pane.SUCCESS)) }
+        completeSession()
+    }
+
+    private fun completeSession() {
         suspend {
             completeFinancialConnectionsSession()
         }.execute { copy(completeSession = it) }
@@ -162,6 +173,7 @@ internal data class SuccessState(
         val institution: FinancialConnectionsInstitution,
         val accounts: PartnerAccountsList,
         val disconnectUrl: String,
-        val businessName: String?
+        val businessName: String?,
+        val skipSuccessPane: Boolean
     )
 }
