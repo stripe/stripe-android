@@ -58,7 +58,7 @@ private fun SignUpBodyPreview() {
                 emailController = EmailConfig.createController("email"),
                 phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
                 nameController = NameConfig.createController("My Name"),
-                signUpState = SignUpState.VerifyingEmail,
+                signUpState = SignUpState.InputtingPhoneOrName,
                 isReadyToSignUp = false,
                 requiresNameCollection = true,
                 errorMessage = null,
