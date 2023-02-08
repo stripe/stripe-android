@@ -138,7 +138,9 @@ private fun AccessibleDataText(
     onLearnMoreClick: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
-    val permissionsReadable = remember(model.permissions) { model.permissions.toStringRes() }
+    val permissionsReadable = remember(model.sortedPermissions) {
+        model.sortedPermissions.toStringRes()
+    }
     AnnotatedText(
         text = TextResource.StringId(
             value = when (model.isStripeDirect) {
@@ -199,6 +201,7 @@ private fun readableListOfPermissions(permissionsReadable: List<Int>): String =
                 index == 0 -> arg.replaceFirstChar { char ->
                     if (char.isLowerCase()) char.titlecase() else char.toString()
                 }
+
                 permissionsReadable.lastIndex == index -> "$current and $arg"
                 else -> "$current, $arg"
             }
@@ -210,7 +213,6 @@ private fun List<Permissions>.toStringRes(): List<Int> = mapNotNull {
         Permissions.OWNERSHIP -> R.string.data_accessible_type_ownership
         Permissions.PAYMENT_METHOD,
         Permissions.ACCOUNT_NUMBERS -> R.string.data_accessible_type_accountdetails
-
         Permissions.TRANSACTIONS -> R.string.data_accessible_type_transactions
         Permissions.UNKNOWN -> null
     }
@@ -218,10 +220,23 @@ private fun List<Permissions>.toStringRes(): List<Int> = mapNotNull {
 
 internal data class AccessibleDataCalloutModel(
     val businessName: String?,
-    val permissions: List<Permissions>,
+    private val permissions: List<Permissions>,
     val isStripeDirect: Boolean,
     val dataPolicyUrl: String
 ) {
+
+    val sortedPermissions = permissions.sortedBy { it.priority }
+
+    private val Permissions.priority: Int
+        get() = when (this) {
+            Permissions.PAYMENT_METHOD -> 1
+            Permissions.ACCOUNT_NUMBERS -> 1
+            Permissions.BALANCES -> 2
+            Permissions.OWNERSHIP -> 3
+            Permissions.TRANSACTIONS -> 4
+            Permissions.UNKNOWN -> 5
+        }
+
     companion object {
         fun fromManifest(manifest: FinancialConnectionsSessionManifest): AccessibleDataCalloutModel =
             AccessibleDataCalloutModel(
