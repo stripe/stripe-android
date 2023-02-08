@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.ui.unit.dp
 import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
@@ -16,7 +14,6 @@ class ErrorMessageScreenshotTest {
         SystemAppearance.values(),
         FontSize.values(),
         PaymentSheetAppearance.values(),
-        padding = PaddingValues(16.dp),
     )
 
     @Test
