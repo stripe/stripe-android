@@ -139,7 +139,7 @@ private fun NetworkingLinkSignupLoaded(
         ) {
             Spacer(modifier = Modifier.size(16.dp))
             AnnotatedText(
-                text = TextResource.Text("Save your account to Link"),
+                text = TextResource.Text(stringResource(R.string.stripe_networking_signup_title)),
                 defaultStyle = FinancialConnectionsTheme.typography.subtitle,
                 annotationStyles = mapOf(
                     StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.subtitle

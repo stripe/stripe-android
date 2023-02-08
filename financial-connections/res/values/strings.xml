@@ -111,6 +111,7 @@
     <string name="stripe_networking_signup_bullet2">Link encrypts your data and never shares your login details.</string>
     <string name="stripe_networking_signup_cta_save">Save to Link</string>
     <string name="stripe_networking_signup_cta_negative">Not now</string>
+    <string name="stripe_networking_signup_title">Save your account to Link</string>
     <plurals name="stripe_success_desc">
         <item quantity="zero" />
         <item quantity="one">Your account was successfully linked to %1$s through Stripe.</item>
