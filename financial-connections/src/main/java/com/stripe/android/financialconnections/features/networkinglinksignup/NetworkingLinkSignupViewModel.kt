@@ -55,10 +55,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             NetworkingLinkSignupState.Payload(
                 merchantName = ConsentTextBuilder.getBusinessName(manifest),
                 emailController = EmailConfig.createController(manifest.accountholderCustomerEmailAddress),
-                phoneController = PhoneNumberController.createPhoneNumberController(
-                    initialValue = manifest.accountholderCustomerEmailAddress ?: "",
-                    initiallySelectedCountryCode = null,
-                )
+                phoneController = PhoneNumberController.createPhoneNumberController()
             )
         }.execute { copy(payload = it) }
     }
