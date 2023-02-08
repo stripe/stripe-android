@@ -68,7 +68,9 @@ internal class SuccessViewModel @Inject constructor(
     private fun observeAsyncs() {
         onAsync(
             SuccessState::payload,
-            onFail = { logger.error("Error retrieving payload", it) },
+            onFail = {
+                logger.error("Error retrieving payload", it)
+            },
             onSuccess = {
                 if (it.skipSuccessPane.not()) {
                     eventTracker.track(PaneLoaded(Pane.SUCCESS))
