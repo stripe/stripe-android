@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -58,8 +59,17 @@ internal fun PaymentMethodsUI(
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
 ) {
+    // This is to fix an issue in tests involving this composable
+    // where the test would succeed when run in isolation, but would
+    // fail when run as part of test suite.
+    val inspectionMode = LocalInspectionMode.current
+
     LaunchedEffect(selectedIndex) {
-        state.animateScrollToItem(selectedIndex)
+        if (inspectionMode) {
+            state.scrollToItem(selectedIndex)
+        } else {
+            state.animateScrollToItem(selectedIndex)
+        }
     }
 
     BoxWithConstraints(

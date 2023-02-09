@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.os.Build
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -12,15 +13,16 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
+@Config(sdk = [Build.VERSION_CODES.Q])
 class PaymentSheetTopBarTest {
 
     @get:Rule
@@ -80,7 +82,6 @@ class PaymentSheetTopBarTest {
         assertThat(didCallOnNavigationIconPressed).isFalse()
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Handles edit icon press correctly`() {
         var didCallOnEditIconPressed = false
