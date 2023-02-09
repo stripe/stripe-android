@@ -79,12 +79,16 @@ workflows:
                 ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:installDebug
                 
                 # Run tests.
-                maestro test --format junit --output $BITRISE_DEPLOY_DIR/report.xml maestro/financial-connections
+                maestro test --format junit maestro/financial-connections
       - slack@3:
           is_always_run: true
           inputs:
           - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
           - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+      - custom-test-results-export@0:
+          inputs:
+            - search_pattern: '*'
+            - test_name: Maestro tests
       - deploy-to-bitrise-io@2: {}
       - cache-push@2: {}
 meta:
