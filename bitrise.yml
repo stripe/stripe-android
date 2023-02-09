@@ -87,7 +87,7 @@ workflows:
           - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
       - custom-test-results-export@0:
           inputs:
-            - search_pattern: 'maestroReport.xml'
+            - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
       - deploy-to-bitrise-io@2: {}
       - cache-push@2: {}
