@@ -189,6 +189,7 @@
     <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"</ID>
     <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02"</ID>
     <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb"</ID>
+    <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://pm-redirects.stripe.com/authorize/acct_1HvTI7Lu5o3P18Zp/pa_nonce_NC1mezV544wpYmFaXyJpnleeurKO3TZ"</ID>
     <ID>MaximumLineLength:com.stripe.android.PaymentRelayContract.kt:9</ID>
     <ID>ReturnCount:DateUtils.kt$DateUtils$@VisibleForTesting @JvmStatic fun isExpiryDataValid(expiryMonth: Int, expiryYear: Int, calendar: Calendar): Boolean</ID>
     <ID>ReturnCount:DefaultPaymentAuthenticatorRegistry.kt$DefaultPaymentAuthenticatorRegistry$@Suppress("UNCHECKED_CAST") override fun &lt;Authenticatable> getAuthenticator( authenticatable: Authenticatable ): PaymentAuthenticator&lt;Authenticatable></ID>

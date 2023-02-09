@@ -2,15 +2,20 @@ package com.stripe.android.paymentsheet
 
 import android.animation.LayoutTransition
 import android.content.Context
+import android.os.Build
+import android.view.Gravity
+import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
@@ -39,6 +44,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -78,7 +84,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -87,14 +92,15 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
+@Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentSheetActivityTest {
 
     @get:Rule
@@ -187,6 +193,9 @@ internal class PaymentSheetActivityTest {
         )
     }
 
+    private val ActivityPaymentSheetBinding.buyButton: PrimaryButton
+        get() = root.findViewById(R.id.primary_button)
+
     @Test
     fun `disables primary button when editing`() {
         val scenario = activityScenario(viewModel)
@@ -249,7 +258,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Errors are cleared when checking out with a generic payment method`() {
         val scenario = activityScenario()
@@ -275,7 +283,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Errors are cleared when checking out with Google Pay`() {
         val scenario = activityScenario()
@@ -301,7 +308,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Errors are cleared when checking out with Link`() {
         val scenario = activityScenario()
@@ -326,7 +332,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Errors are cleared when updating the payment selection`() {
         val paymentMethods = PAYMENT_METHODS
@@ -358,7 +363,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Errors are cleared when navigating back from payment form to saved payment methods`() {
         val paymentMethods = PAYMENT_METHODS
@@ -388,7 +392,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Errors are cleared when transitioning to new screen`() {
         val paymentMethods = PAYMENT_METHODS
@@ -531,9 +534,9 @@ internal class PaymentSheetActivityTest {
 
             val googlePayButton =
                 StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
-            assertThat(googlePayButton.primaryButton.isVisible).isTrue()
+            assertThat(googlePayButton.googlePayPrimaryButton.isVisible).isTrue()
             assertThat(googlePayButton.googlePayButtonContent.isVisible).isFalse()
-            assertThat(googlePayButton.primaryButton.externalLabel)
+            assertThat(googlePayButton.googlePayPrimaryButton.externalLabel)
                 .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
         }
     }
@@ -553,7 +556,7 @@ internal class PaymentSheetActivityTest {
 
             val googlePayButton =
                 StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
-            assertThat(googlePayButton.primaryButton.isVisible).isTrue()
+            assertThat(googlePayButton.googlePayPrimaryButton.isVisible).isTrue()
             assertThat(googlePayButton.googlePayButtonContent.isVisible).isFalse()
             assertThat(finishProcessingCalled).isTrue()
         }
@@ -629,7 +632,7 @@ internal class PaymentSheetActivityTest {
 
             val googlePayButton =
                 StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
-            assertThat(googlePayButton.primaryButton.externalLabel)
+            assertThat(googlePayButton.googlePayPrimaryButton.externalLabel)
                 .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
         }
     }
@@ -771,7 +774,6 @@ internal class PaymentSheetActivityTest {
         )
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `GPay button error message is displayed`() {
         val scenario = activityScenario(viewModel)
@@ -792,7 +794,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `when new payment method is selected then error message is cleared`() {
         val scenario = activityScenario(viewModel)
@@ -833,7 +834,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `when checkout starts then error message is cleared`() {
         val scenario = activityScenario(viewModel)
@@ -1085,6 +1085,23 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.buyButton.externalLabel).isNull()
             testDispatcher.scheduler.advanceTimeBy(250)
             assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Pay CA\$99.99")
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "sw800dp-w1250dp-h800dp")
+    fun `tablet launches payment sheet centered horizontally`() = runTest(testDispatcher) {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(STATE_EXPANDED)
+            assertThat(activity.bottomSheetBehavior.isFitToContents)
+                .isFalse()
+            idleLooper()
+            val bottomSheet = activity.findViewById<ViewGroup>(R.id.bottom_sheet)
+            val layoutParams = bottomSheet.layoutParams as CoordinatorLayout.LayoutParams
+            assertThat(layoutParams.gravity).isEqualTo(Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM)
+            assertThat(layoutParams.width).isEqualTo(750)
         }
     }
 

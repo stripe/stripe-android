@@ -6,7 +6,7 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.stripe.android.paymentsheet.example.R
 
-class BuyButton(private val device: UiDevice) : EspressoIdButton(R.id.buy_button) {
+class BuyButton(private val device: UiDevice) : EspressoIdButton(R.id.primary_button) {
     fun waitProcessingComplete() {
         device.wait(
             Until.findObject(

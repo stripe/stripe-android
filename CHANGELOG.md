@@ -2,8 +2,17 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.19.2 - 2023-02-06
+
+### PaymentSheet
+[ADDED][6174](https://github.com/stripe/stripe-android/pull/6174) Make PaymentLauncher.create methods Java-friendly.
+[FIXED][6172](https://github.com/stripe/stripe-android/pull/6172) Centers PaymentSheet on tablets.
+
+## 20.19.1 - 2023-01-30
+
 ### PaymentSheet
 * [FIXED][6136](https://github.com/stripe/stripe-android/pull/6136) Fixed an issue where the primary button wouldn't show the amount for payment intents.
+* [FIXED][6142](https://github.com/stripe/stripe-android/pull/6142) Fixed an issue where pressing the back button during processing would cause a `PaymentSheetResult.Canceled`.
 
 ## 20.19.0 - 2023-01-23
 

@@ -6,10 +6,6 @@
   <string name="back">Kembali</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Alamat tagihan</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">Email</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Email Anda tidak valid.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">Bank EPS</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

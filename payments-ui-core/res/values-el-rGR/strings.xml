@@ -6,10 +6,6 @@
   <string name="back">Πίσω</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Διεύθυνση χρέωσης</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">Διεύθυνση ηλεκτρονικού ταχυδρομείου</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Η διεύθυνση email σας δεν είναι έγκυρη.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">Τράπεζα με EPS</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

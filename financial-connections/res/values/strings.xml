@@ -5,7 +5,6 @@
     <string name="consent_pane_manual_entry_microdeposits"><annotation clickable="manual_entry">Enter account details manually instead</annotation> (takes 1–2 business days)</string>
     <string name="stripe_ok">OK</string>
     <string name="stripe_prepane_title">Link with %1$s</string>
-    <string name="stripe_prepane_desc">A new window will open for you to log in and select the %1$s account(s) you want to link.</string>
     <string name="stripe_prepane_continue">Continue</string>
     <string name="stripe_institutionpicker_pane_select_bank">Select your bank</string>
     <string name="stripe_institutionpicker_footer_title">CAN\'T FIND YOUR BANK?</string>
@@ -53,11 +52,6 @@
     <string name="success_pane_done">Done</string>
     <string name="success_pane_disconnect">You can <annotation clickable="disconnect">disconnect your account</annotation> any time.</string>
     <string name="stripe_prepane_partner_callout">Stripe works with partners like %1$s to reliably offer access to thousands of financial institutions. <annotation clickable="privacy_center">Learn more</annotation></string>
-    <string name="stripe_partner_finicity">Finicity</string>
-    <string name="stripe_partner_mx">MX</string>
-    <string name="stripe_partner_truelayer">Truelayer</string>
-    <string name="stripe_partner_testmode">TestMode</string>
-    <string name="stripe_partner_wellsfargo">Wells Fargo</string>
     <string name="stripe_account_picker_error_no_payment_method_title">No checking or savings account available</string>
     <string name="stripe_account_picker_error_no_payment_method_desc">We found %1$s %2$s accounts but you can only link checking or savings to %3$s. Please try selecting another bank.</string>
     <string name="stripe_account_picker_error_no_account_available_title">There was a problem accessing your %1$s account</string>
@@ -88,12 +82,12 @@
         <item quantity="other">Linking accounts</item>
     </plurals>
     <plurals name="stripe_attachlinkedpaymentaccount_desc">
-        <item quantity="one">Please wait while your account is linked to %1$s</item>
-        <item quantity="other">Please wait while your accounts are linked to %1$s</item>
+        <item quantity="one">Please wait while your account is connected to %1$s</item>
+        <item quantity="other">Please wait while your accounts are connected to %1$s</item>
     </plurals>
     <plurals name="stripe_attachlinkedpaymentaccount_desc_no_business">
-        <item quantity="one">Please wait while your account is linked to this business</item>
-        <item quantity="other">Please wait while your accounts are linked to this business</item>
+        <item quantity="one">Please wait while your account is connected to this business</item>
+        <item quantity="other">Please wait while your accounts are connected to this business</item>
     </plurals>
     <string name="stripe_attachlinkedpaymentaccount_error_title">Your account number couldn’t be accessed at this time</string>
     <string name="stripe_attachlinkedpaymentaccount_error_desc">Please enter your bank details manually</string>
@@ -111,6 +105,8 @@
     <string name="stripe_accountpicker_singleaccount_description">%1$s only needs one account at this time.</string>
     <string name="stripe_accountpicker_singleaccount_description_nobusinessname">This merchant only needs one account at this time.</string>
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
+    <string name="stripe_success_pane_skip_title">Finishing up</string>
+    <string name="stripe_success_pane_skip_desc">Hold on, we\'re almost done…</string>
     <plurals name="stripe_success_desc">
         <item quantity="zero" />
         <item quantity="one">Your account was successfully linked to %1$s through Stripe.</item>

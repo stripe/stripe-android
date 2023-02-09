@@ -6,10 +6,6 @@
   <string name="back">ย้อนกลับ</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">ที่อยู่ในการเรียกเก็บเงิน</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">อีเมล</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">อีเมลไม่ถูกต้อง</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">EPS Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

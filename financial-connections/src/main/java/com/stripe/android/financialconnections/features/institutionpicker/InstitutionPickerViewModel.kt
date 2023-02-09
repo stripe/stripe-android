@@ -88,14 +88,14 @@ internal class InstitutionPickerViewModel @Inject constructor(
 
     fun onQueryChanged(query: String) {
         searchJob += suspend {
-            delay(SEARCH_DEBOUNCE_MS)
-            val (result, millis) = measureTimeMillis {
-                searchInstitutions(
-                    clientSecret = configuration.financialConnectionsSessionClientSecret,
-                    query = query
-                )
-            }
-            if (query.isNotEmpty()) {
+            if (query.isNotBlank()) {
+                delay(SEARCH_DEBOUNCE_MS)
+                val (result, millis) = measureTimeMillis {
+                    searchInstitutions(
+                        clientSecret = configuration.financialConnectionsSessionClientSecret,
+                        query = query
+                    )
+                }
                 eventTracker.track(
                     SearchSucceeded(
                         pane = Pane.INSTITUTION_PICKER,
@@ -104,8 +104,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
                         resultCount = result.data.count()
                     )
                 )
+                result
+            } else {
+                InstitutionResponse(emptyList())
             }
-            result
         }.execute {
             copy(searchInstitutions = if (it.isCancellationError()) Loading() else it)
         }

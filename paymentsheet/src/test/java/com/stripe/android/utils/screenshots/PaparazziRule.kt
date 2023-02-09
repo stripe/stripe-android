@@ -20,7 +20,7 @@ import org.junit.runners.model.Statement
 
 class PaparazziRule(
     vararg configOptions: Array<out PaparazziConfigOption>,
-    private val padding: PaddingValues = PaddingValues(vertical = 16.dp),
+    private val boxModifier: Modifier = Modifier.defaultBoxModifier(),
 ) : TestRule {
 
     private val testCases: List<TestCase> = configOptions.toTestCases()
@@ -69,9 +69,7 @@ class PaparazziRule(
                         Surface(color = MaterialTheme.colors.surface) {
                             Box(
                                 contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .padding(padding)
-                                    .fillMaxWidth(),
+                                modifier = boxModifier,
                             ) {
                                 content()
                             }
@@ -96,6 +94,11 @@ class PaparazziRule(
             showSystemUi = false,
         )
     }
+}
+
+private fun Modifier.defaultBoxModifier(): Modifier {
+    return padding(PaddingValues(vertical = 16.dp))
+        .fillMaxWidth()
 }
 
 private fun Array<out Array<out PaparazziConfigOption>>.toTestCases(): List<TestCase> {

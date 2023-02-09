@@ -3,10 +3,11 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -14,6 +15,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -31,6 +33,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
@@ -57,7 +60,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,19 +67,20 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
+@Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentOptionsActivityTest {
 
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<PaymentOptionsActivity>()
+    val composeTestRule = createEmptyComposeRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -112,6 +115,9 @@ internal class PaymentOptionsActivityTest {
         enabled = true,
         visible = true
     )
+
+    private val ActivityPaymentOptionsBinding.continueButton: PrimaryButton
+        get() = root.findViewById(R.id.primary_button)
 
     @BeforeTest
     fun setup() {
@@ -441,7 +447,6 @@ internal class PaymentOptionsActivityTest {
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Clears error on user selection`() {
         val scenario = activityScenario()
