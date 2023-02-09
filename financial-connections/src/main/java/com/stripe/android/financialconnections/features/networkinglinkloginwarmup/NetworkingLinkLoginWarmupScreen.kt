@@ -2,16 +2,26 @@ package com.stripe.android.financialconnections.features.networkinglinkloginwarm
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Fail
@@ -33,11 +43,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.uicore.elements.SimpleTextFieldConfig
-import com.stripe.android.uicore.elements.SimpleTextFieldController
-import com.stripe.android.uicore.elements.TextFieldIcon.Trailing
-import com.stripe.android.uicore.elements.TextFieldSection
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun NetworkingLinkLoginWarmupScreen() {
@@ -136,6 +141,7 @@ private fun NetworkingLinkLoginWarmupLoaded(
             email = payload.email,
             onContinueClick = onContinueClick
         )
+        Spacer(modifier = Modifier.size(20.dp))
         AnnotatedText(
             text = StringId(R.string.stripe_networking_link_login_warmup_skip),
             defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
@@ -156,27 +162,45 @@ internal fun ExistingEmailSection(
     email: String,
     onContinueClick: () -> Unit
 ) {
-    TextFieldSection(
-        imeAction = ImeAction.Done,
-        enabled = true,
-        textFieldController = SimpleTextFieldController(
-            SimpleTextFieldConfig(
-                label = R.string.stripe_networking_link_login_warmup_email_label,
-                trailingIcon = MutableStateFlow(
-                    Trailing(
-                        R.drawable.stripe_ic_arrow_right_circle,
-                        isTintable = true,
-                        onClick = onContinueClick
-                    )
-                )
-            ),
-            initialValue = email
-        ),
-    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onContinueClick() }
+            .clip(RoundedCornerShape(8.dp))
+            .border(
+                width = 1.dp,
+                color = FinancialConnectionsTheme.colors.borderDefault,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(12.dp)
+    ) {
+        Column(
+            Modifier.weight(0.7f)
+        ) {
+            Text(
+                text = "Continue as",
+                style = FinancialConnectionsTheme.typography.caption,
+                color = FinancialConnectionsTheme.colors.textSecondary
+            )
+            Text(
+                text = email,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = FinancialConnectionsTheme.typography.body,
+                color = FinancialConnectionsTheme.colors.textPrimary
+            )
+        }
+        Icon(
+            painter = painterResource(id = R.drawable.stripe_ic_arrow_right_circle),
+            tint = FinancialConnectionsTheme.colors.textBrand,
+            contentDescription = "test"
+        )
+    }
 }
 
 @Composable
-@Preview(group = "NetworkingLinkLoginWarmup Pane", name = "Entering email")
+@Preview(group = "NetworkingLinkLoginWarmup Pane", name = "Canonical")
 internal fun NetworkingLinkLoginWarmupScreenEnteringEmailPreview() {
     FinancialConnectionsPreview {
         NetworkingLinkLoginWarmupContent(
@@ -184,7 +208,7 @@ internal fun NetworkingLinkLoginWarmupScreenEnteringEmailPreview() {
                 payload = Success(
                     Payload(
                         merchantName = "Test",
-                        email = "test@test.com",
+                        email = "verylongemailthatshouldellipsize@gmail.com",
                     )
                 ),
             ),

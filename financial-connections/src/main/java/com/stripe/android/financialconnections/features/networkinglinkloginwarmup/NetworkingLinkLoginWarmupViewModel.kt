@@ -10,10 +10,11 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.domain.DisableNetworking
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
@@ -22,7 +23,7 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
     initialState: NetworkingLinkLoginWarmupState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
-    private val updateLocalManifest: UpdateLocalManifest,
+    private val disableNetworking: DisableNetworking,
     private val goNext: GoNext,
     private val logger: Logger
 ) : MavericksViewModel<NetworkingLinkLoginWarmupState>(initialState) {
@@ -47,6 +48,13 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
                 eventTracker.track(Error(Pane.NETWORKING_LINK_SIGNUP_PANE, error))
             },
         )
+        onAsync(
+            NetworkingLinkLoginWarmupState::disableNetworkingAsync,
+            onFail = { error ->
+                logger.error("Error disabling networking", error)
+                eventTracker.track(Error(Pane.NETWORKING_LINK_SIGNUP_PANE, error))
+            },
+        )
     }
 
     fun onContinueClick() {
@@ -61,9 +69,9 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
     }
 
     private fun onSkipClicked() {
-        // TODO disable networking in session (API call)
-        updateLocalManifest { it.copy(isNetworkingUserFlow = false) }
-        goNext(Pane.INSTITUTION_PICKER)
+        suspend {
+            disableNetworking().also { goNext(it.nextPane) }
+        }.execute { copy(disableNetworkingAsync = it) }
     }
 
     companion object :
@@ -86,6 +94,7 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
 
 internal data class NetworkingLinkLoginWarmupState(
     val payload: Async<Payload> = Uninitialized,
+    val disableNetworkingAsync: Async<FinancialConnectionsSessionManifest> = Uninitialized,
 ) : MavericksState {
 
     data class Payload(
