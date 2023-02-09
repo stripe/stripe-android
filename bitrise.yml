@@ -10,7 +10,7 @@ trigger_map:
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
-    - STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: https://night-discreet-femur.glitch.me/
+    - STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: 'https://night-discreet-femur.glitch.me/'
 
 pipelines:
   main-trigger-pipeline:
