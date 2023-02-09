@@ -2,12 +2,17 @@ package com.stripe.android.financialconnections.utils
 
 import androidx.activity.ComponentActivity
 import com.airbnb.mvrx.ActivityViewModelContext
+import com.airbnb.mvrx.Async
+import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.InternalMavericksApi
+import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Mavericks
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.MavericksViewModelProvider
+import com.stripe.android.core.exception.StripeException
+import kotlinx.coroutines.CancellationException
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
@@ -52,4 +57,15 @@ internal fun <V> argsOrNull() = object : ReadOnlyProperty<ComponentActivity, V?>
         }
         return value
     }
+}
+
+/**
+ * Prevents [CancellationException] to map to [Fail] when coroutine being cancelled
+ * due to search query changes. In these cases, re-map the [Async] instance to [Loading]
+ */
+internal fun Async<*>.isCancellationError(): Boolean = when {
+    this !is Fail -> false
+    error is CancellationException -> true
+    error is StripeException && error.cause is CancellationException -> true
+    else -> false
 }

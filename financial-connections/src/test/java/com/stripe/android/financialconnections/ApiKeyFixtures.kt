@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections
 
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -75,5 +76,14 @@ internal object ApiKeyFixtures {
         hasMore = false,
         nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
         url = ""
+    )
+
+    fun institution() = FinancialConnectionsInstitution(
+        id = "id",
+        name = "name",
+        url = "url",
+        featured = true,
+        featuredOrder = null,
+        mobileHandoffCapable = false
     )
 }

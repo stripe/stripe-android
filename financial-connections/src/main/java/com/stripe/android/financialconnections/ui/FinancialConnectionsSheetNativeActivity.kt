@@ -35,6 +35,7 @@ import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
 import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessScreen
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupScreen
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupScreen
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.reset.ResetScreen
@@ -142,7 +143,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         val initialDestination =
             remember(initialPane) {
                 initialPane.toNavigationCommand(
-                    logger,
                     emptyMap()
                 ).destination
             }
@@ -201,6 +201,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     LaunchedPane(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT)
                     BackHandler(navController, Pane.ATTACH_LINKED_PAYMENT_ACCOUNT)
                     AttachPaymentScreen()
+                }
+                composable(NavigationDirections.networkingLinkSignup.destination) {
+                    LaunchedPane(Pane.NETWORKING_LINK_SIGNUP_PANE)
+                    BackHandler(navController, Pane.NETWORKING_LINK_SIGNUP_PANE)
+                    NetworkingLinkSignupScreen()
                 }
                 composable(NavigationDirections.networkingLinkLoginWarmup.destination) {
                     LaunchedPane(Pane.NETWORKING_LINK_LOGIN_WARMUP)

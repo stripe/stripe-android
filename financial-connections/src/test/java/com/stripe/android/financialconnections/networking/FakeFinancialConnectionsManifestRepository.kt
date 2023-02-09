@@ -61,6 +61,16 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         sessionId: String
     ): FinancialConnectionsAuthorizationSession = cancelAuthorizationSessionProvider()
 
+    override suspend fun postSaveAccountsToLink(
+        clientSecret: String,
+        email: String,
+        country: String,
+        phoneNumber: String,
+        selectedAccounts: List<String>
+    ): FinancialConnectionsSessionManifest {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun synchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String
