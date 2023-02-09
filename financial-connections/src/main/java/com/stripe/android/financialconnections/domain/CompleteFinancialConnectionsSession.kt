@@ -11,8 +11,11 @@ internal class CompleteFinancialConnectionsSession @Inject constructor(
     private val configuration: FinancialConnectionsSheet.Configuration
 ) {
 
-    suspend operator fun invoke(): FinancialConnectionsSession {
+    suspend operator fun invoke(
+        terminalError: String? = null
+    ): FinancialConnectionsSession {
         val session = repository.postCompleteFinancialConnectionsSessions(
+            terminalError = terminalError,
             clientSecret = configuration.financialConnectionsSessionClientSecret
         )
         return fetchPaginatedAccountsForSession(session)
