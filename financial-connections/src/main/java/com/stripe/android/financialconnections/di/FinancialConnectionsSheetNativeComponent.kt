@@ -10,8 +10,8 @@ import com.stripe.android.financialconnections.features.consent.ConsentSubcompon
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
 import com.stripe.android.financialconnections.features.manualentry.ManualEntrySubcomponent
 import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessSubcomponent
-import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupSubcomponent
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupSubcomponent
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupSubcomponent
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
 import com.stripe.android.financialconnections.features.reset.ResetSubcomponent
 import com.stripe.android.financialconnections.features.success.SuccessSubcomponent

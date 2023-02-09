@@ -35,8 +35,8 @@ import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
 import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessScreen
-import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupScreen
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupScreen
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupScreen
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
