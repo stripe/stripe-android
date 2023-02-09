@@ -57,11 +57,12 @@ internal fun LoadingShimmerEffect(
 
 @Composable
 internal fun LoadingContent(
+    modifier: Modifier = Modifier,
     title: String? = null,
     content: String? = null
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 24.dp)
     ) {
         Spacer(modifier = Modifier.size(8.dp))

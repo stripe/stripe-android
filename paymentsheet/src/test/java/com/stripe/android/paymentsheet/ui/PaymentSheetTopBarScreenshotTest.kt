@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.utils.screenshots.FontSize
@@ -17,7 +19,7 @@ class PaymentSheetTopBarScreenshotTest {
         SystemAppearance.values(),
         FontSize.values(),
         PaymentSheetAppearance.values(),
-        padding = PaddingValues(0.dp),
+        boxModifier = Modifier.padding(0.dp).fillMaxWidth(),
     )
 
     @Test

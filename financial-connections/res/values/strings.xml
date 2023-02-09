@@ -105,6 +105,8 @@
     <string name="stripe_accountpicker_singleaccount_description">%1$s only needs one account at this time.</string>
     <string name="stripe_accountpicker_singleaccount_description_nobusinessname">This merchant only needs one account at this time.</string>
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
+    <string name="stripe_success_pane_skip_title">Finishing up</string>
+    <string name="stripe_success_pane_skip_desc">Hold on, we\'re almost done…</string>
     <string name="stripe_networking_signup_terms">Stripe’s Terms and Privacy Policy</string>
     <string name="stripe_networking_signup_phone_number_disclaimer">We’ll use this to verify and manage your account.</string>
     <string name="stripe_networking_signup_bullet1">Connect your account faster on %1$s and everywhere Link is accepted.</string>
