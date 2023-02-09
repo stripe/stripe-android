@@ -81,19 +81,14 @@ workflows:
                   :financial-connections-example:installDebug
                 
                 # Run tests.
-                for file in "maestro/financial-connections"/*; do
-                  if [ -f "$file" ]; then
-                  maestro record "$file"
-                  fi
-                done
+                maestro test --format junit --output $BITRISE_DEPLOY_DIR/report.xml maestro/financial-connections
       - slack@3:
           is_always_run: true
           inputs:
           - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
           - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-      - deploy-to-bitrise-io@2:
-          inputs:
-            - deploy_path: financial-connections-example/build/reports
+      - deploy-to-bitrise-io@2: {}
+
       - cache-push@2: {}
 meta:
   bitrise.io:
