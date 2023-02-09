@@ -89,8 +89,8 @@ workflows:
       - slack@3:
           is_always_run: true
           inputs:
-            - webhook_url: "$WEBHOOK_SLACK_CARLOSMUVI_MAESTRO"
-            - webhook_url_on_error: "$WEBHOOK_SLACK_CARLOSMUVI_MAESTRO"
+          - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+          - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
       - deploy-to-bitrise-io@2:
           inputs:
             - deploy_path: financial-connections-example/build/reports
