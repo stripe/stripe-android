@@ -76,9 +76,7 @@ workflows:
                 maestro -v
                 
                 # Compile and install APK.
-                ./gradlew \ 
-                  -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL \
-                  :financial-connections-example:installDebug
+                ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:installDebug
                 
                 # Run tests.
                 maestro test --format junit --output $BITRISE_TEST_RESULT_DIR/report.xml maestro/financial-connections
@@ -88,7 +86,6 @@ workflows:
           - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
           - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
       - deploy-to-bitrise-io@2: {}
-
       - cache-push@2: {}
 meta:
   bitrise.io:
