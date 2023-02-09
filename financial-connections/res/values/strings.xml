@@ -28,8 +28,8 @@
     <string name="stripe_error_cta_select_another_bank">Select another bank</string>
     <string name="stripe_error_cta_retry">Try again</string>
     <string name="stripe_error_cta_manual_entry">Enter bank details manually</string>
-    <string name="stripe_account_picker_loading_title">Retrieving accounts</string>
-    <string name="stripe_account_picker_loading_desc">Please wait while Stripe loads your accounts</string>
+    <string name="stripe_account_picker_loading_title">Pulling up your accounts</string>
+    <string name="stripe_account_picker_loading_desc">After this, there\'s just one more step.</string>
     <string name="stripe_account_picker_select_account">Select your account</string>
     <string name="stripe_account_picker_singleselect_account">Confirm your account</string>
     <string name="stripe_account_picker_multiselect_account">Select accounts</string>
