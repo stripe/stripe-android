@@ -7,8 +7,8 @@ adb uninstall com.stripe.android.financialconnections.example || true
 ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:installDebug
 
 # Run tests.
-for file in "$folder"/*; do
+for file in "maestro/financial-connections"/*; do
   if [ -f "$file" ]; then
-    echo "maestro record maestro/financial-connections/$file"
+    maestro record "$file"
   fi
 done
