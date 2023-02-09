@@ -16,8 +16,8 @@ fun AddressTextFieldUI(
 ) {
     TextField(
         textFieldController = controller,
-        imeAction = ImeAction.Next,
         enabled = false,
+        imeAction = ImeAction.Next,
         modifier = Modifier.clickable {
             onClick()
         }

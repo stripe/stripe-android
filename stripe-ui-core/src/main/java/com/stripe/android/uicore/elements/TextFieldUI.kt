@@ -58,6 +58,7 @@ fun TextFieldSection(
     imeAction: ImeAction,
     enabled: Boolean,
     modifier: Modifier = Modifier,
+    readOnly: Boolean = false,
     @StringRes sectionTitle: Int? = null,
     onTextStateChanged: (TextFieldState?) -> Unit = {}
 ) {
@@ -78,6 +79,7 @@ fun TextFieldSection(
             enabled = enabled,
             imeAction = imeAction,
             modifier = modifier,
+            readOnly = readOnly,
             onTextStateChanged = onTextStateChanged
         )
     }
@@ -91,6 +93,10 @@ fun TextFieldSection(
  * @param enabled Whether to show this TextField as enabled or not. Note that the `enabled`
  * attribute of [textFieldController] is also taken into account to decide if the UI should be
  * enabled.
+ * @param readOnly - controls the editable state of the TextField.
+ * When true, the text field can not be modified, however, a user can focus it and copy text from it.
+ * Read-only text fields are usually used to display pre-filled forms that user can not edit.
+ *
  */
 @Composable
 fun TextField(
@@ -98,6 +104,7 @@ fun TextField(
     enabled: Boolean,
     imeAction: ImeAction,
     modifier: Modifier = Modifier,
+    readOnly: Boolean = false,
     onTextStateChanged: (TextFieldState?) -> Unit = {},
     nextFocusDirection: FocusDirection = FocusDirection.Next,
     previousFocusDirection: FocusDirection = FocusDirection.Previous
@@ -110,7 +117,7 @@ fun TextField(
     val contentDescription by textFieldController.contentDescription.collectAsState("")
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
-    val colors = TextFieldColors(shouldShowError)
+    val colors = textFieldColors(shouldShowError)
     val fieldState by textFieldController.fieldState.collectAsState(
         TextFieldStateConstants.Error.Blank
     )
@@ -160,6 +167,7 @@ fun TextField(
                 this.editableText = AnnotatedString("")
             },
         enabled = enabled && textFieldController.enabled,
+        readOnly = readOnly,
         label = {
             FormLabel(
                 text = if (textFieldController.showOptionalLabel) {
@@ -179,6 +187,7 @@ fun TextField(
                         is TextFieldIcon.Trailing -> {
                             TrailingIcon(it, loading)
                         }
+
                         is TextFieldIcon.MultiTrailing -> {
                             Row(modifier = Modifier.padding(10.dp)) {
                                 it.staticIcons.forEach {
@@ -238,7 +247,7 @@ fun AnimatedIcons(
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun TextFieldColors(
+fun textFieldColors(
     shouldShowError: Boolean = false
 ) = TextFieldDefaults.textFieldColors(
     textColor = if (shouldShowError) {
