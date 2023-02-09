@@ -82,9 +82,9 @@ workflows:
                 
                 # Run tests.
                 for file in "maestro/financial-connections"/*; do
-                if [ -f "$file" ]; then
-                maestro record "$file"
-                fi
+                  if [ -f "$file" ]; then
+                  maestro record "$file"
+                  fi
                 done
       - deploy-to-bitrise-io@2:
           inputs:
