@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +33,6 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -77,19 +78,31 @@ private fun NetworkingLinkLoginWarmupContent(
         }
     ) {
         when (val payload = state.payload) {
-            Uninitialized, is Loading -> LoadingContent()
-            is Success -> NetworkingLinkLoginWarmupLoaded(
-                scrollState = scrollState,
-                payload = payload(),
-                onClickableTextClick = onClickableTextClick,
-                onContinueClick = onContinueClick
-            )
+            Uninitialized, is Loading -> NetworkingLinkLoginWarmupLoading()
+            is Success -> when (state.disableNetworkingAsync) {
+                is Loading -> NetworkingLinkLoginWarmupLoading()
+                else -> NetworkingLinkLoginWarmupLoaded(
+                    scrollState = scrollState,
+                    payload = payload(),
+                    onClickableTextClick = onClickableTextClick,
+                    onContinueClick = onContinueClick
+                )
+            }
 
             is Fail -> UnclassifiedErrorContent(
                 error = payload.error,
                 onCloseFromErrorClick = onCloseFromErrorClick
             )
         }
+    }
+}
+
+@Composable
+private fun NetworkingLinkLoginWarmupLoading() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(
+            color = FinancialConnectionsTheme.colors.iconBrand
+        )
     }
 }
 
