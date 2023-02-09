@@ -82,12 +82,12 @@
         <item quantity="other">Linking accounts</item>
     </plurals>
     <plurals name="stripe_attachlinkedpaymentaccount_desc">
-        <item quantity="one">Please wait while your account is linked to %1$s</item>
-        <item quantity="other">Please wait while your accounts are linked to %1$s</item>
+        <item quantity="one">Please wait while your account is connected to %1$s</item>
+        <item quantity="other">Please wait while your accounts are connected to %1$s</item>
     </plurals>
     <plurals name="stripe_attachlinkedpaymentaccount_desc_no_business">
-        <item quantity="one">Please wait while your account is linked to this business</item>
-        <item quantity="other">Please wait while your accounts are linked to this business</item>
+        <item quantity="one">Please wait while your account is connected to this business</item>
+        <item quantity="other">Please wait while your accounts are connected to this business</item>
     </plurals>
     <string name="stripe_attachlinkedpaymentaccount_error_title">Your account number couldn’t be accessed at this time</string>
     <string name="stripe_attachlinkedpaymentaccount_error_desc">Please enter your bank details manually</string>
@@ -105,6 +105,8 @@
     <string name="stripe_accountpicker_singleaccount_description">%1$s only needs one account at this time.</string>
     <string name="stripe_accountpicker_singleaccount_description_nobusinessname">This merchant only needs one account at this time.</string>
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
+    <string name="stripe_success_pane_skip_title">Finishing up</string>
+    <string name="stripe_success_pane_skip_desc">Hold on, we\'re almost done…</string>
     <plurals name="stripe_success_desc">
         <item quantity="zero" />
         <item quantity="one">Your account was successfully linked to %1$s through Stripe.</item>

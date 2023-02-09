@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.os.Build
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -9,19 +10,19 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
 import kotlin.math.roundToInt
 
 @RunWith(AndroidJUnit4::class)
+@Config(sdk = [Build.VERSION_CODES.Q])
 class PaymentOptionsTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Navigates to AddAnotherPaymentMethod screen when add card is pressed`() {
         var didCallOnAddCardPressed = false
@@ -52,7 +53,6 @@ class PaymentOptionsTest {
         assertThat(didCallOnAddCardPressed).isTrue()
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Updates selection when item is pressed`() {
         var didCallOnItemSelected = false

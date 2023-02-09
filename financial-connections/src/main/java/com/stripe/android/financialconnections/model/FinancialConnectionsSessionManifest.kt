@@ -174,6 +174,9 @@ internal data class FinancialConnectionsSessionManifest(
 
     @SerialName(value = "success_url")
     val successUrl: String? = null,
+
+    @SerialName("skip_success_pane")
+    val skipSuccessPane: Boolean? = null,
 ) : Parcelable {
 
     /**
