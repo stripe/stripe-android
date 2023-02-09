@@ -6,6 +6,7 @@ import android.os.Build
 import android.text.Html
 import android.text.Spanned
 import com.stripe.android.financialconnections.model.Bullet
+import com.stripe.android.financialconnections.ui.ImageResource
 import com.stripe.android.financialconnections.ui.TextResource
 
 /**
@@ -14,11 +15,11 @@ import com.stripe.android.financialconnections.ui.TextResource
 internal data class BulletUI(
     val title: TextResource?,
     val content: TextResource?,
-    val icon: String?
+    val imageResource: ImageResource?
 ) {
     companion object {
         fun from(bullet: Bullet): BulletUI = BulletUI(
-            icon = bullet.icon?.default,
+            imageResource = bullet.icon?.default?.let { ImageResource.Network(it) },
             title = bullet.title?.let { TextResource.Text(fromHtml(it)) },
             content = bullet.content?.let { TextResource.Text(fromHtml(it)) },
         )

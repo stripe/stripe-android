@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.ui
 
 import android.text.TextUtils
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -36,4 +37,12 @@ internal sealed interface TextResource {
             }
         }
     }
+}
+
+/**
+ * TextResource is a domain specific model to represent images.
+ */
+internal sealed interface ImageResource {
+    data class Network(val url: String) : ImageResource
+    data class Local(@DrawableRes val resId: Int) : ImageResource
 }
