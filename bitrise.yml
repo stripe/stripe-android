@@ -75,8 +75,17 @@ workflows:
                 export PATH="$PATH":"$HOME/.maestro/bin"
                 maestro -v
                 
-                # Run tests
-                bash scripts/execute_maestro_tests.sh
+                # Compile and install APK.
+                ./gradlew \ 
+                  -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL \
+                  :financial-connections-example:installDebug
+                
+                # Run tests.
+                for file in "maestro/financial-connections"/*; do
+                if [ -f "$file" ]; then
+                maestro record "$file"
+                fi
+                done
       - deploy-to-bitrise-io@2:
           inputs:
             - deploy_path: financial-connections-example/build/reports
