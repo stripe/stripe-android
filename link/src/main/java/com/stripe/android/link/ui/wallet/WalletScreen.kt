@@ -64,11 +64,11 @@ import com.stripe.android.model.CvcCheck
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.ui.core.elements.DateConfig
-import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionElementUI
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowController
 import com.stripe.android.uicore.elements.RowElement
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
