@@ -72,7 +72,7 @@ ext {
     accompanistVersion = '0.28.0'
     ktlintVersion = '0.47.1'
     materialVersion = '1.8.0'
-    daggerVersion = '2.44.2'
+    daggerVersion = '2.45'
     playServicesWalletVersion = '19.1.0'
     placesVersion = '3.0.0'
     playServicesVersion = '1.6.4'

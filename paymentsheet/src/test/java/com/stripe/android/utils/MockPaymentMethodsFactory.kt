@@ -33,7 +33,7 @@ object MockPaymentMethodsFactory {
         )
     }
 
-    private fun mockPaymentMethod(
+    fun mockPaymentMethod(
         code: String,
         displayNameResource: Int,
         iconResource: Int,
