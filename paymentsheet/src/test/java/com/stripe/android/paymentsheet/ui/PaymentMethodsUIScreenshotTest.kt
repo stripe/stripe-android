@@ -73,4 +73,18 @@ class PaymentMethodsUIScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testTwoPaymentMethodsExpandToFit() {
+        val paymentMethods = paymentMethods.take(2)
+        paparazziRule.snapshot {
+            PaymentMethodsUI(
+                paymentMethods = paymentMethods,
+                selectedIndex = 0,
+                isEnabled = true,
+                onItemSelectedListener = {},
+                imageLoader = mock(),
+            )
+        }
+    }
 }
