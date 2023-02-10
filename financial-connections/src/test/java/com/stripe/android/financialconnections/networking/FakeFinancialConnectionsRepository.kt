@@ -28,7 +28,8 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
     ): FinancialConnectionsSession = getFinancialConnectionsSessionResultProvider()
 
     override suspend fun postCompleteFinancialConnectionsSessions(
-        clientSecret: String
+        clientSecret: String,
+        terminalError: String?
     ): FinancialConnectionsSession = postCompleteFinancialConnectionsSessionsResultProvider()
 
     override suspend fun postAuthorizationSessionOAuthResults(

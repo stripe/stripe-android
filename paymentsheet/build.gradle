@@ -82,7 +82,6 @@ dependencies {
     androidTestImplementation ("androidx.test.espresso:espresso-contrib:$espressoVersion") {
         exclude group: 'org.checkerframework', module: 'checker'
     }
-    implementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
     androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
     androidTestImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
