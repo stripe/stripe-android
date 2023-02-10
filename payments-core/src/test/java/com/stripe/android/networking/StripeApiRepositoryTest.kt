@@ -243,14 +243,6 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun testConfirmConsumerVerificationUrl() {
-        assertEquals(
-            "https://api.stripe.com/v1/consumers/sessions/confirm_verification",
-            StripeApiRepository.confirmConsumerVerificationUrl
-        )
-    }
-
-    @Test
     fun testLogoutConsumerUrl() {
         assertEquals(
             "https://api.stripe.com/v1/consumers/sessions/log_out",
@@ -1716,43 +1708,6 @@ internal class StripeApiRepositoryTest {
                 assertEquals(this["legal_name"], name)
                 assertEquals(this["locale"], locale.toLanguageTag())
                 assertEquals(this["consent_action"], "clicked_button_mobile")
-                withNestedParams("cookies") {
-                    assertEquals(this["verification_session_client_secrets"], listOf(cookie))
-                }
-            }
-        }
-
-    @Test
-    fun `confirmConsumerVerification() sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ConsumerFixtures.CONSUMER_VERIFIED_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val clientSecret = "secret"
-            val verificationCode = "1234"
-            val cookie = "cookie1"
-            create().confirmConsumerVerification(
-                clientSecret,
-                verificationCode,
-                cookie,
-                DEFAULT_OPTIONS
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-            with(params) {
-                assertEquals(this["request_surface"], "android_payment_element")
-                assertEquals(this["type"], "SMS")
-                assertEquals(this["code"], verificationCode)
-                withNestedParams("credentials") {
-                    assertEquals(this["consumer_session_client_secret"], clientSecret)
-                }
                 withNestedParams("cookies") {
                     assertEquals(this["verification_session_client_secrets"], listOf(cookie))
                 }

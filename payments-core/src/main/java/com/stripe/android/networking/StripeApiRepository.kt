@@ -1217,41 +1217,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Confirms an SMS verification for the consumer corresponding to the given client secret.
-     */
-    override suspend fun confirmConsumerVerification(
-        consumerSessionClientSecret: String,
-        verificationCode: String,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                confirmConsumerVerificationUrl,
-                requestOptions,
-                mapOf(
-                    "request_surface" to "android_payment_element",
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to consumerSessionClientSecret
-                    ),
-                    "type" to "SMS",
-                    "code" to verificationCode
-                ).plus(
-                    authSessionCookie?.let {
-                        mapOf(
-                            "cookies" to
-                                mapOf("verification_session_client_secrets" to listOf(it))
-                        )
-                    } ?: emptyMap()
-                )
-            ),
-            ConsumerSessionJsonParser()
-        ) {
-            // no-op
-        }
-    }
-
-    /**
      * Logs out the consumer and invalidates the cookie.
      */
     override suspend fun logoutConsumer(
@@ -1962,13 +1927,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val consumerSignUpUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/accounts/sign_up")
-
-        /**
-         * @return `https://api.stripe.com/v1/consumers/sessions/confirm_verification`
-         */
-        internal val confirmConsumerVerificationUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("consumers/sessions/confirm_verification")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/log_out`

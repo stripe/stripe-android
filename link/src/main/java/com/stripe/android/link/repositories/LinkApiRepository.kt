@@ -115,11 +115,12 @@ internal class LinkApiRepository @Inject constructor(
     ): Result<ConsumerSession> = withContext(workContext) {
         runCatching {
             requireNotNull(
-                stripeRepository.confirmConsumerVerification(
-                    consumerSessionClientSecret,
-                    verificationCode,
-                    authSessionCookie,
-                    consumerPublishableKey?.let {
+                consumersApiService.confirmConsumerVerification(
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    verificationCode = verificationCode,
+                    authSessionCookie = authSessionCookie,
+                    requestSurface = REQUEST_SURFACE,
+                    requestOptions = consumerPublishableKey?.let {
                         ApiRequest.Options(it)
                     } ?: ApiRequest.Options(
                         publishableKeyProvider(),
