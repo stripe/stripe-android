@@ -60,7 +60,7 @@ class LinkApiRepositoryTest {
         verify(consumersApiService).lookupConsumerSession(
             eq(email),
             eq(cookie),
-            "android_payment_element",
+            eq(CONSUMER_SURFACE),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
@@ -72,7 +72,7 @@ class LinkApiRepositoryTest {
             consumersApiService.lookupConsumerSession(
                 any(),
                 any(),
-                "android_payment_element",
+                any(),
                 any()
             )
         )
@@ -90,7 +90,7 @@ class LinkApiRepositoryTest {
             consumersApiService.lookupConsumerSession(
                 any(),
                 any(),
-                "android_payment_element",
+                any(),
                 any()
             )
         )
@@ -196,7 +196,7 @@ class LinkApiRepositoryTest {
             eq(secret),
             eq(Locale.US),
             eq(cookie),
-            "android_payment_element",
+            eq(CONSUMER_SURFACE),
             eq(ApiRequest.Options(consumerKey))
         )
     }
@@ -211,7 +211,7 @@ class LinkApiRepositoryTest {
             eq(secret),
             eq(Locale.US),
             eq(cookie),
-            "android_payment_element",
+            eq(CONSUMER_SURFACE),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
@@ -224,7 +224,7 @@ class LinkApiRepositoryTest {
                 any(),
                 any(),
                 anyOrNull(),
-                "android_payment_element",
+                any(),
                 any()
             )
         )
@@ -243,7 +243,7 @@ class LinkApiRepositoryTest {
                 any(),
                 any(),
                 anyOrNull(),
-                "android_payment_element",
+                any(),
                 any()
             )
         )
@@ -767,5 +767,6 @@ class LinkApiRepositoryTest {
     companion object {
         const val PUBLISHABLE_KEY = "publishableKey"
         const val STRIPE_ACCOUNT_ID = "stripeAccountId"
+        const val CONSUMER_SURFACE = "android_payment_element"
     }
 }
