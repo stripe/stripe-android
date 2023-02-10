@@ -4,29 +4,6 @@ import org.json.JSONObject
 
 object ConsumerFixtures {
 
-    val CONSUMER_VERIFICATION_STARTED_JSON = JSONObject(
-        """
-            {
-              "auth_session_client_secret": "21yKkFYNnhMVTlXbXdBQUFJRmEaJDNmZDE1",
-              "publishable_key": "asdfg123",
-              "consumer_session": {
-                "client_secret": "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDNmZDE1MjA5LTM1YjctND",
-                "email_address": "test@stripe.com",
-                "redacted_phone_number": "+1********56",
-                "support_payment_details_types": [
-                  "CARD"
-                ],
-                "verification_sessions": [
-                  {
-                    "state": "STARTED",
-                    "type": "SMS"
-                  }
-                ]
-              }
-            }
-        """.trimIndent()
-    )
-
     val CONSUMER_VERIFIED_JSON = JSONObject(
         """
             {
@@ -42,28 +19,6 @@ object ConsumerFixtures {
                   {
                     "state": "VERIFIED",
                     "type": "SMS"
-                  }
-                ]
-              }
-            }
-        """.trimIndent()
-    )
-
-    val CONSUMER_SIGNUP_STARTED_JSON = JSONObject(
-        """
-            {
-              "auth_session_client_secret": null,
-              "consumer_session": {
-                "client_secret": "12oBEhVjc21yKkFYNmNWT0JmaFFBQUFLUXcaJDk5OGFjYTFlLTkxMWYtND",
-                "email_address": "test@stripe.com",
-                "redacted_phone_number": "+1********23",
-                "support_payment_details_types": [
-                  "CARD"
-                ],
-                "verification_sessions": [
-                  {
-                    "state": "STARTED",
-                    "type": "SIGNUP"
                   }
                 ]
               }
