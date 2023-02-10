@@ -7,23 +7,18 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
-import kotlin.test.assertFailsWith
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.verify
-import org.mockito.kotlin.KArgumentCaptor
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import java.util.Locale
+import kotlin.test.assertFailsWith
 
 class ConsumersApiServiceImplTest {
     @get:Rule
@@ -93,41 +88,38 @@ class ConsumersApiServiceImplTest {
 
     @Test
     fun `startConsumerVerification() sends all parameters`() = runTest {
-        val stripeResponse = StripeResponse(
-            200,
-            ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString(),
-            emptyMap()
-        )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-            .thenReturn(stripeResponse)
-
         val clientSecret = "secret"
         val locale = Locale.US
         val cookie = "cookie2"
-        consumersApiService.startConsumerVerification(
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/start_verification"),
+            header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
+            header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
+            bodyPart("request_surface", "android_payment_element"),
+            bodyPart("credentials%5Bconsumer_session_client_secret%5D", clientSecret),
+            bodyPart("type", "SMS"),
+            bodyPart("locale", locale.toLanguageTag()),
+            bodyPart("cookies%5Bverification_session_client_secrets%5D%5B%5D", cookie),
+        ) { response ->
+            response.setBody(ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString())
+        }
+
+        val consumerSession = consumersApiService.startConsumerVerification(
             clientSecret,
             locale,
             cookie,
             DEFAULT_OPTIONS
         )
 
-        org.mockito.kotlin.verify(stripeNetworkClient)
-            .executeRequest(apiRequestArgumentCaptor.capture())
-        val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-        with(params) {
-            assertEquals(this["request_surface"], "android_payment_element")
-            assertEquals(this["type"], "SMS")
-            assertEquals(this["locale"], locale.toLanguageTag())
-            assertEquals(
-                this["credentials"],
-                mapOf("consumer_session_client_secret" to clientSecret)
+        assertThat(consumerSession.redactedPhoneNumber).isEqualTo("+1********56")
+        assertThat(consumerSession.verificationSessions).contains(
+            ConsumerSession.VerificationSession(
+                ConsumerSession.VerificationSession.SessionType.Sms,
+                ConsumerSession.VerificationSession.SessionState.Started
             )
-            assertEquals(
-                this["cookies"],
-                mapOf("verification_session_client_secrets" to listOf(cookie))
-            )
-        }
+        )
     }
 
     @Test
