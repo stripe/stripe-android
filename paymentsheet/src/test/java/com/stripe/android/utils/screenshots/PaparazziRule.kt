@@ -20,7 +20,7 @@ import org.junit.runners.model.Statement
 
 class PaparazziRule(
     vararg configOptions: Array<out PaparazziConfigOption>,
-    private val padding: PaddingValues = PaddingValues(vertical = 16.dp),
+    private val boxModifier: Modifier = Modifier.defaultBoxModifier(),
 ) : TestRule {
 
     private val testCases: List<TestCase> = configOptions.toTestCases()
@@ -69,9 +69,7 @@ class PaparazziRule(
                         Surface(color = MaterialTheme.colors.surface) {
                             Box(
                                 contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .padding(padding)
-                                    .fillMaxWidth(),
+                                modifier = boxModifier,
                             ) {
                                 content()
                             }
@@ -98,6 +96,11 @@ class PaparazziRule(
     }
 }
 
+private fun Modifier.defaultBoxModifier(): Modifier {
+    return padding(PaddingValues(vertical = 16.dp))
+        .fillMaxWidth()
+}
+
 private fun Array<out Array<out PaparazziConfigOption>>.toTestCases(): List<TestCase> {
     return createPermutations(this).map { TestCase(it) }
 }
@@ -105,7 +108,6 @@ private fun Array<out Array<out PaparazziConfigOption>>.toTestCases(): List<Test
 private fun createPermutations(
     options: Array<out Array<out PaparazziConfigOption>>,
 ): List<List<PaparazziConfigOption>> {
-    @Suppress("UNCHECKED_CAST")
     return (options.toSet()).fold(listOf(listOf())) { acc, set ->
         acc.flatMap { list -> set.map { element -> list + element } }
     }
@@ -114,9 +116,6 @@ private fun createPermutations(
 private data class TestCase(
     val configOptions: List<PaparazziConfigOption>,
 ) {
-
-    val isDarkTheme: Boolean
-        get() = configOptions.find { it is SystemAppearance } == SystemAppearance.DarkTheme
 
     val name: String
         get() {

@@ -78,18 +78,18 @@ dependencies {
     // Jetpack Compose
     implementation "androidx.activity:activity-compose:$androidxActivityVersion"
     implementation "androidx.compose.material:material:$androidxComposeVersion"
-    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
+    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeRuntimeVersion"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$androidxLifecycleVersion"
-    implementation "androidx.compose.ui:ui:$androidxComposeVersion"
-    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeVersion"
+    implementation "androidx.compose.ui:ui:$androidxComposeUiVersion"
+    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeUiVersion"
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
 
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
-    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
-    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion"
+    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeUiVersion"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeUiVersion"
 
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
 }

@@ -5,23 +5,22 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.core.view.doOnNextLayout
-import androidx.core.view.isVisible
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.databinding.FragmentPaymentOptionsPrimaryButtonBinding
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
-import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.StripeTheme
 
 /**
@@ -46,16 +45,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
-    override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val linkAuthView: ComposeView by lazy { viewBinding.linkAuth }
-    override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
-    override val testModeIndicator: TextView by lazy { viewBinding.testmode }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val header: ComposeView by lazy { viewBinding.header }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
-    override val messageView: TextView by lazy { viewBinding.message }
     override val notesView: ComposeView by lazy { viewBinding.notes }
-    override val primaryButton: PrimaryButton by lazy { viewBinding.continueButton }
     override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,39 +70,52 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             closeSheet(it)
         }
 
-        viewModel.error.launchAndCollectIn(this) { error ->
-            updateErrorMessage(
-                messageView,
-                error?.let { BaseSheetViewModel.UserErrorMessage(it) }
-            )
+        val elevation = resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
+        scrollView.viewTreeObserver.addOnScrollChangedListener {
+            viewBinding.topBar.elevation = if (scrollView.scrollY > 0) {
+                elevation
+            } else {
+                0f
+            }
+        }
+
+        // This is temporary until we embed the top bar in a Scaffold
+        viewBinding.topBar.clipToPadding = false
+
+        viewBinding.topBar.setContent {
+            StripeTheme {
+                PaymentSheetTopBar(viewModel)
+            }
         }
 
         viewBinding.contentContainer.setContent {
             StripeTheme {
                 val currentScreen by viewModel.currentScreen.collectAsState()
-                currentScreen.PaymentOptionsContent(starterArgs)
+                currentScreen.Content(viewModel)
             }
+        }
+
+        viewBinding.message.setContent {
+            StripeTheme {
+                val errorMessage by viewModel.error.collectAsState(initial = null)
+
+                errorMessage?.let { error ->
+                    ErrorMessage(
+                        error = error,
+                        modifier = Modifier.padding(vertical = 2.dp, horizontal = 20.dp),
+                    )
+                }
+            }
+        }
+
+        viewBinding.buttonContainer.setContent {
+            AndroidViewBinding(
+                factory = FragmentPaymentOptionsPrimaryButtonBinding::inflate,
+            )
         }
 
         viewModel.selection.launchAndCollectIn(this) {
             viewModel.clearErrorMessages()
-            resetPrimaryButtonState()
-        }
-
-        viewModel.currentScreen.launchAndCollectIn(this) { currentScreen ->
-            val visible = currentScreen is PaymentSheetScreen.AddFirstPaymentMethod ||
-                currentScreen is PaymentSheetScreen.AddAnotherPaymentMethod ||
-                viewModel.primaryButtonUIState.value?.visible == true
-
-            viewBinding.continueButton.isVisible = visible
-            viewBinding.bottomSpacer.isVisible = visible
-
-            rootView.doOnNextLayout {
-                // Expand sheet only after the first fragment is attached so that it
-                // animates in. Further calls to expand() are no-op if the sheet is already
-                // expanded.
-                bottomSheetController.expand()
-            }
         }
     }
 
@@ -116,20 +123,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         starterArgs?.state?.config?.appearance?.parseAppearance()
         earlyExitDueToIllegalState = starterArgs == null
         return starterArgs
-    }
-
-    override fun resetPrimaryButtonState() {
-        viewBinding.continueButton.lockVisible = false
-        viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
-
-        val customLabel = starterArgs?.state?.config?.primaryButtonLabel
-        val label = customLabel ?: getString(R.string.stripe_continue_button_label)
-
-        viewBinding.continueButton.setLabel(label)
-
-        viewBinding.continueButton.setOnClickListener {
-            viewModel.onUserSelection()
-        }
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {

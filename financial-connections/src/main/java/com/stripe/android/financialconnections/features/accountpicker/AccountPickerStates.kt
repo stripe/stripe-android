@@ -28,7 +28,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
                     accessibleData = accessibleCallout(),
                     singleAccount = false,
-                    institutionSkipAccountSelection = false,
+                    userSelectedSingleAccountInInstitution = false,
                     businessName = "Random business",
                     stripeDirect = false,
                 )
@@ -44,7 +44,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     selectionMode = AccountPickerState.SelectionMode.RADIO,
                     accessibleData = accessibleCallout(),
                     singleAccount = true,
-                    institutionSkipAccountSelection = false,
+                    userSelectedSingleAccountInInstitution = false,
                     businessName = "Random business",
                     stripeDirect = false,
                 )

@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
@@ -93,9 +92,7 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
                 injectorKey = injectorKey,
                 lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
                 addressResourceRepository = addressResourceRepository,
-                savedStateHandle = savedStateHandle.apply {
-                    set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
-                },
+                savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
             )
         }

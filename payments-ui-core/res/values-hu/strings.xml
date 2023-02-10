@@ -6,10 +6,6 @@
   <string name="back">Vissza</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Számlázási cím</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">E-mail</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Érvénytelen e-mail-cím.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">EPS Bank</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

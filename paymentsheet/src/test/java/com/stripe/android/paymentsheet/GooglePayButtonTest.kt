@@ -27,7 +27,7 @@ class GooglePayButtonTest {
     }
 
     private val primaryButton: PrimaryButton by lazy {
-        googlePayButton.viewBinding.primaryButton
+        googlePayButton.viewBinding.googlePayPrimaryButton
     }
 
     @BeforeTest

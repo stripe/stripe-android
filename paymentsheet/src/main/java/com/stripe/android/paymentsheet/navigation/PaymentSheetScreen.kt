@@ -1,37 +1,28 @@
 package com.stripe.android.paymentsheet.navigation
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.viewinterop.AndroidViewBinding
-import com.stripe.android.paymentsheet.PaymentOptionContract
-import com.stripe.android.paymentsheet.PaymentSheetContract
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentOptionsListBinding
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentSheetListBinding
+import androidx.compose.ui.res.dimensionResource
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
+import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetLoading
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal sealed interface PaymentSheetScreen {
 
     val showsBuyButton: Boolean
 
     @Composable
-    fun PaymentSheetContent(args: PaymentSheetContract.Args)
-
-    @Composable
-    fun PaymentOptionsContent(args: PaymentOptionContract.Args)
+    fun Content(viewModel: BaseSheetViewModel)
 
     object Loading : PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = false
 
         @Composable
-        override fun PaymentSheetContent(args: PaymentSheetContract.Args) {
-            PaymentSheetLoading()
-        }
-
-        @Composable
-        override fun PaymentOptionsContent(args: PaymentOptionContract.Args) {
+        override fun Content(viewModel: BaseSheetViewModel) {
             PaymentSheetLoading()
         }
     }
@@ -41,18 +32,13 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = true
 
         @Composable
-        override fun PaymentSheetContent(args: PaymentSheetContract.Args) {
-            AndroidViewBinding(
-                factory = FragmentPaymentSheetListBinding::inflate,
-                modifier = Modifier.testTag(testTag),
-            )
-        }
-
-        @Composable
-        override fun PaymentOptionsContent(args: PaymentOptionContract.Args) {
-            AndroidViewBinding(
-                factory = FragmentPaymentOptionsListBinding::inflate,
-                modifier = Modifier.testTag(testTag),
+        override fun Content(viewModel: BaseSheetViewModel) {
+            PaymentOptions(
+                viewModel = viewModel,
+                modifier = Modifier.padding(
+                    top = dimensionResource(R.dimen.stripe_paymentsheet_paymentoptions_margin_top),
+                    bottom = dimensionResource(R.dimen.stripe_paymentsheet_paymentoptions_margin_bottom),
+                )
             )
         }
     }
@@ -62,13 +48,8 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = true
 
         @Composable
-        override fun PaymentSheetContent(args: PaymentSheetContract.Args) {
-            AddPaymentMethod(args = args)
-        }
-
-        @Composable
-        override fun PaymentOptionsContent(args: PaymentOptionContract.Args) {
-            AddPaymentMethod(args = args)
+        override fun Content(viewModel: BaseSheetViewModel) {
+            AddPaymentMethod(viewModel)
         }
     }
 
@@ -77,16 +58,8 @@ internal sealed interface PaymentSheetScreen {
         override val showsBuyButton: Boolean = true
 
         @Composable
-        override fun PaymentSheetContent(args: PaymentSheetContract.Args) {
-            AddPaymentMethod(args = args)
-        }
-
-        @Composable
-        override fun PaymentOptionsContent(args: PaymentOptionContract.Args) {
-            AddPaymentMethod(args = args)
+        override fun Content(viewModel: BaseSheetViewModel) {
+            AddPaymentMethod(viewModel)
         }
     }
 }
-
-private val PaymentSheetScreen.testTag: String
-    get() = this::class.java.simpleName

@@ -6,7 +6,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 
 internal class TestFinancialConnectionsAnalyticsTracker : FinancialConnectionsAnalyticsTracker {
 
-    private val sentEvents = mutableListOf<FinancialConnectionsEvent>()
+    val sentEvents = mutableListOf<FinancialConnectionsEvent>()
 
     override suspend fun track(event: FinancialConnectionsEvent): Result<Unit> {
         sentEvents += event

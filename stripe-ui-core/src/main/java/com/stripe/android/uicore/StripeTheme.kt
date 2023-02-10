@@ -5,6 +5,7 @@ import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.os.Build
 import android.text.SpannableString
 import android.text.TextPaint
 import android.text.style.AbsoluteSizeSpan
@@ -28,6 +29,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -300,10 +302,17 @@ fun StripeTheme(
     typography: StripeTypography = StripeTheme.typographyMutable,
     content: @Composable () -> Unit
 ) {
+    val isRobolectricTest = runCatching {
+        Build.FINGERPRINT.lowercase() == "robolectric"
+    }.getOrDefault(false)
+
+    val inspectionMode = LocalInspectionMode.current || isRobolectricTest
+
     CompositionLocalProvider(
         LocalColors provides colors,
         LocalShapes provides shapes,
-        LocalTypography provides typography
+        LocalTypography provides typography,
+        LocalInspectionMode provides inspectionMode,
     ) {
         MaterialTheme(
             colors = colors.materialColors,
@@ -350,6 +359,12 @@ val MaterialTheme.stripeShapes: StripeShapes
     @Composable
     @ReadOnlyComposable
     get() = LocalShapes.current
+
+val MaterialTheme.stripeTypography: StripeTypography
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalTypography.current
 
 @Composable
 @ReadOnlyComposable

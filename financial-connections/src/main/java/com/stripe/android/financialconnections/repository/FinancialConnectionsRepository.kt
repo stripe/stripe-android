@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.model.GetFinancialConnectionsAccc
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
+import com.stripe.android.financialconnections.utils.filterNotNullValues
 import javax.inject.Inject
 
 internal interface FinancialConnectionsRepository {
@@ -41,7 +42,8 @@ internal interface FinancialConnectionsRepository {
         APIException::class
     )
     suspend fun postCompleteFinancialConnectionsSessions(
-        clientSecret: String
+        clientSecret: String,
+        terminalError: String?
     ): FinancialConnectionsSession
 
     suspend fun postAuthorizationSessionOAuthResults(
@@ -87,14 +89,16 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun postCompleteFinancialConnectionsSessions(
-        clientSecret: String
+        clientSecret: String,
+        terminalError: String?
     ): FinancialConnectionsSession {
         val financialConnectionsRequest = apiRequestFactory.createPost(
             url = completeUrl,
             options = apiOptions,
             params = mapOf(
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
-            )
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "terminal_error" to terminalError
+            ).filterNotNullValues()
         )
         return requestExecutor.execute(
             financialConnectionsRequest,
@@ -122,22 +126,22 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
 
     internal companion object {
 
-        internal const val listAccountsUrl: String =
+        internal val listAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/list_accounts"
 
-        internal const val sessionReceiptUrl: String =
+        internal val sessionReceiptUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/session_receipt"
 
-        internal const val authorizationSessionUrl: String =
+        internal val authorizationSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions"
 
-        internal const val completeUrl: String =
+        internal val completeUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/complete"
 
-        internal const val authorizationSessionOAuthResultsUrl: String =
+        internal val authorizationSessionOAuthResultsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/oauth_results"
 
-        internal const val authorizeSessionUrl: String =
+        internal val authorizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/authorized"
     }
 }

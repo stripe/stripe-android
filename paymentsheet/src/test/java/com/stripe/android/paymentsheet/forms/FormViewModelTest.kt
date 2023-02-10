@@ -21,7 +21,6 @@ import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
@@ -30,6 +29,7 @@ import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowElement
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController

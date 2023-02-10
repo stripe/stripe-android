@@ -371,19 +371,19 @@ private class FinancialConnectionsManifestRepositoryImpl(
         internal const val PARAMS_FULLSCREEN = "fullscreen"
         internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
 
-        internal const val synchronizeSessionUrl: String =
+        internal val synchronizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
 
-        internal const val cancelAuthSessionUrl: String =
+        internal val cancelAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/cancel"
 
-        internal const val eventsAuthSessionUrl: String =
+        internal val eventsAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/events"
 
-        internal const val consentAcquiredUrl: String =
+        internal val consentAcquiredUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/consent_acquired"
 
-        internal const val linkMoreAccountsUrl: String =
+        internal val linkMoreAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_more_accounts"
     }
 }

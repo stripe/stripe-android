@@ -10,7 +10,7 @@
         android:contentDescription="@string/google_pay">
 
         <com.stripe.android.paymentsheet.ui.PrimaryButton
-            android:id="@+id/primary_button"
+            android:id="@+id/google_pay_primary_button"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="invisible" />
