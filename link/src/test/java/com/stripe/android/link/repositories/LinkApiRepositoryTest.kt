@@ -32,6 +32,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 
+@Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 class LinkApiRepositoryTest {
     private val stripeRepository = mock<StripeRepository>()
@@ -59,6 +60,7 @@ class LinkApiRepositoryTest {
         verify(consumersApiService).lookupConsumerSession(
             eq(email),
             eq(cookie),
+            "android_payment_element",
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
@@ -66,7 +68,14 @@ class LinkApiRepositoryTest {
     @Test
     fun `lookupConsumer returns successful result`() = runTest {
         val consumerSessionLookup = mock<ConsumerSessionLookup>()
-        whenever(consumersApiService.lookupConsumerSession(any(), any(), any()))
+        whenever(
+            consumersApiService.lookupConsumerSession(
+                any(),
+                any(),
+                "android_payment_element",
+                any()
+            )
+        )
             .thenReturn(consumerSessionLookup)
 
         val result = linkRepository.lookupConsumer("email", "cookie")
@@ -77,7 +86,14 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `lookupConsumer catches exception and returns failure`() = runTest {
-        whenever(consumersApiService.lookupConsumerSession(any(), any(), any()))
+        whenever(
+            consumersApiService.lookupConsumerSession(
+                any(),
+                any(),
+                "android_payment_element",
+                any()
+            )
+        )
             .thenThrow(RuntimeException("error"))
 
         val result = linkRepository.lookupConsumer("email", "cookie")
@@ -180,6 +196,7 @@ class LinkApiRepositoryTest {
             eq(secret),
             eq(Locale.US),
             eq(cookie),
+            "android_payment_element",
             eq(ApiRequest.Options(consumerKey))
         )
     }
@@ -194,6 +211,7 @@ class LinkApiRepositoryTest {
             eq(secret),
             eq(Locale.US),
             eq(cookie),
+            "android_payment_element",
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
@@ -201,7 +219,15 @@ class LinkApiRepositoryTest {
     @Test
     fun `startVerification returns successful result`() = runTest {
         val consumerSession = mock<ConsumerSession>()
-        whenever(consumersApiService.startConsumerVerification(any(), any(), anyOrNull(), any()))
+        whenever(
+            consumersApiService.startConsumerVerification(
+                any(),
+                any(),
+                anyOrNull(),
+                "android_payment_element",
+                any()
+            )
+        )
             .thenReturn(consumerSession)
 
         val result = linkRepository.startVerification("secret", "key", "cookie")
@@ -212,7 +238,15 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `startVerification catches exception and returns failure`() = runTest {
-        whenever(consumersApiService.startConsumerVerification(any(), any(), anyOrNull(), any()))
+        whenever(
+            consumersApiService.startConsumerVerification(
+                any(),
+                any(),
+                anyOrNull(),
+                "android_payment_element",
+                any()
+            )
+        )
             .thenThrow(RuntimeException("error"))
 
         val result = linkRepository.startVerification("secret", "key", "cookie")

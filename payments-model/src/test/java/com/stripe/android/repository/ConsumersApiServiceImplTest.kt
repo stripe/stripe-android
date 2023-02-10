@@ -21,6 +21,7 @@ import java.util.Locale
 import kotlin.test.assertFailsWith
 
 class ConsumersApiServiceImplTest {
+
     @get:Rule
     val networkRule = NetworkRule()
 
@@ -35,6 +36,7 @@ class ConsumersApiServiceImplTest {
     fun `lookupConsumerSession() sends all parameters`() = runTest {
         val email = "email@example.com"
         val cookie = "cookie1"
+        val requestSurface = "android_payment_element"
 
         networkRule.enqueue(
             method("POST"),
@@ -43,15 +45,16 @@ class ConsumersApiServiceImplTest {
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart("email_address", "email%40example.com"),
             bodyPart("cookies%5Bverification_session_client_secrets%5D%5B%5D", cookie),
-            bodyPart("request_surface", "android_payment_element"),
+            bodyPart("request_surface", requestSurface),
         ) { response ->
             response.setBody(ConsumerFixtures.EXISTING_CONSUMER_JSON.toString())
         }
 
         val lookup = consumersApiService.lookupConsumerSession(
-            email,
-            cookie,
-            DEFAULT_OPTIONS
+            email = email,
+            authSessionCookie = cookie,
+            requestSurface = requestSurface,
+            requestOptions = DEFAULT_OPTIONS
         )
 
         assertThat(lookup.exists).isTrue()
@@ -68,6 +71,7 @@ class ConsumersApiServiceImplTest {
     fun `lookupConsumerSession() returns error message with invalid json`() = runTest {
         val email = "email@example.com"
         val cookie = "cookie1"
+        val requestSurface = "android_payment_element"
 
         networkRule.enqueue(
             method("POST"),
@@ -79,9 +83,10 @@ class ConsumersApiServiceImplTest {
 
         assertFailsWith<APIException> {
             consumersApiService.lookupConsumerSession(
-                email,
-                cookie,
-                DEFAULT_OPTIONS
+                email = email,
+                authSessionCookie = cookie,
+                requestSurface = requestSurface,
+                requestOptions = DEFAULT_OPTIONS
             )
         }
     }
@@ -110,6 +115,7 @@ class ConsumersApiServiceImplTest {
             clientSecret,
             locale,
             cookie,
+            "android_payment_element",
             DEFAULT_OPTIONS
         )
 

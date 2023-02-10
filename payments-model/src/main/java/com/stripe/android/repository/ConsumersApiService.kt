@@ -19,6 +19,7 @@ interface ConsumersApiService {
     suspend fun lookupConsumerSession(
         email: String?,
         authSessionCookie: String?,
+        requestSurface: String,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup
 
@@ -26,6 +27,7 @@ interface ConsumersApiService {
         consumerSessionClientSecret: String,
         locale: Locale,
         authSessionCookie: String?,
+        requestSurface: String,
         requestOptions: ApiRequest.Options
     ): ConsumerSession
 }
@@ -52,6 +54,7 @@ class ConsumersApiServiceImpl(
     override suspend fun lookupConsumerSession(
         email: String?,
         authSessionCookie: String?,
+        requestSurface: String,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup {
         return executeRequestWithModelJsonParser(
@@ -61,7 +64,7 @@ class ConsumersApiServiceImpl(
                 consumerSessionLookupUrl,
                 requestOptions,
                 mapOf(
-                    "request_surface" to "android_payment_element"
+                    "request_surface" to requestSurface
                 ).plus(
                     email?.let {
                         mapOf(
@@ -88,6 +91,7 @@ class ConsumersApiServiceImpl(
         consumerSessionClientSecret: String,
         locale: Locale,
         authSessionCookie: String?,
+        requestSurface: String,
         requestOptions: ApiRequest.Options
     ): ConsumerSession {
         return executeRequestWithModelJsonParser(
@@ -97,7 +101,7 @@ class ConsumersApiServiceImpl(
                 startConsumerVerificationUrl,
                 requestOptions,
                 mapOf(
-                    "request_surface" to "android_payment_element",
+                    "request_surface" to requestSurface,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
