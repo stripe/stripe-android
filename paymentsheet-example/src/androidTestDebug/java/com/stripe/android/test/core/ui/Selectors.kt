@@ -184,7 +184,7 @@ class Selectors(
         .getInstalledApplications(PackageManager.GET_META_DATA)
 
     val authorizeAction = when (testParameters.authorizationAction) {
-        AuthorizeAction.Authorize -> {
+        is AuthorizeAction.Authorize -> {
             object : UiAutomatorText(
                 label = testParameters.authorizationAction.text,
                 className = "android.widget.Button",
@@ -203,7 +203,7 @@ class Selectors(
                 }
             }
         }
-        AuthorizeAction.Cancel -> {
+        is AuthorizeAction.Cancel -> {
             object : UiAutomatorText(
                 label = testParameters.authorizationAction.text,
                 className = "android.widget.Button",
@@ -214,7 +214,7 @@ class Selectors(
                 }
             }
         }
-        AuthorizeAction.Fail -> {
+        is AuthorizeAction.Fail -> {
             object : UiAutomatorText(
                 label = testParameters.authorizationAction.text,
                 className = "android.widget.Button",
