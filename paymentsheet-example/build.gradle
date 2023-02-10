@@ -88,10 +88,9 @@ dependencies {
     }
     androidTestImplementation "androidx.test.espresso:espresso-web:$espressoVersion"
     androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$espressoVersion"
-    // The following Espresso dependency can be either "implementation"
-    // or "androidTestImplementation", depending on whether you want the
-    // dependency to appear on your APK's compile classpath or the test APK
-    // classpath.
+
+    // We need "implementation" here because we're using the idling resource in
+    // PaymentSheetPlaygroundActivity.
     implementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
 
     androidTestImplementation 'com.jakewharton.espresso:okhttp3-idling-resource:1.0.0'
