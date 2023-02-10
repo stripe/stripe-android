@@ -131,7 +131,6 @@ class ConsumersApiServiceImplTest {
     fun `confirmConsumerVerification() sends all parameters`() = runTest {
         val clientSecret = "secret"
         val verificationCode = "1234"
-        val locale = Locale.US
         val cookie = "cookie2"
 
         networkRule.enqueue(
@@ -143,7 +142,6 @@ class ConsumersApiServiceImplTest {
             bodyPart("credentials%5Bconsumer_session_client_secret%5D", clientSecret),
             bodyPart("type", "SMS"),
             bodyPart("code", verificationCode),
-            bodyPart("locale", locale.toLanguageTag()),
             bodyPart("cookies%5Bverification_session_client_secrets%5D%5B%5D", cookie),
         ) { response ->
             response.setBody(ConsumerFixtures.CONSUMER_VERIFIED_JSON.toString())
