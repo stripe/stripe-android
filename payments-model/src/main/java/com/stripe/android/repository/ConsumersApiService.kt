@@ -30,6 +30,14 @@ interface ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): ConsumerSession
+
+    suspend fun confirmConsumerVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String,
+        authSessionCookie: String?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -120,6 +128,40 @@ class ConsumersApiServiceImpl(
         )
     }
 
+    /**
+     * Confirms an SMS verification for the consumer corresponding to the given client secret.
+     */
+    override suspend fun confirmConsumerVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String,
+        authSessionCookie: String?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession = executeRequestWithModelJsonParser(
+        stripeErrorJsonParser = stripeErrorJsonParser,
+        stripeNetworkClient = stripeNetworkClient,
+        request = apiRequestFactory.createPost(
+            confirmConsumerVerificationUrl,
+            requestOptions,
+            mapOf(
+                "request_surface" to requestSurface,
+                "credentials" to mapOf(
+                    "consumer_session_client_secret" to consumerSessionClientSecret
+                ),
+                "type" to "SMS",
+                "code" to verificationCode
+            ).plus(
+                authSessionCookie?.let {
+                    mapOf(
+                        "cookies" to
+                            mapOf("verification_session_client_secrets" to listOf(it))
+                    )
+                } ?: emptyMap()
+            )
+        ),
+        responseJsonParser = ConsumerSessionJsonParser()
+    )
+
     internal companion object {
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/lookup`
@@ -134,6 +176,13 @@ class ConsumersApiServiceImpl(
         internal val startConsumerVerificationUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/sessions/start_verification")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/sessions/confirm_verification`
+         */
+        internal val confirmConsumerVerificationUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/sessions/confirm_verification")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"

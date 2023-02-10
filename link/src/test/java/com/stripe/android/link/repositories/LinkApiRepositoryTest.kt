@@ -262,11 +262,12 @@ class LinkApiRepositoryTest {
         val consumerKey = "key2"
         linkRepository.confirmVerification(code, secret, consumerKey, cookie)
 
-        verify(stripeRepository).confirmConsumerVerification(
-            eq(secret),
-            eq(code),
-            eq(cookie),
-            eq(ApiRequest.Options(consumerKey))
+        verify(consumersApiService).confirmConsumerVerification(
+            consumerSessionClientSecret = eq(secret),
+            verificationCode = eq(code),
+            authSessionCookie = eq(cookie),
+            requestSurface = eq(CONSUMER_SURFACE),
+            requestOptions = eq(ApiRequest.Options(consumerKey))
         )
     }
 
@@ -277,21 +278,35 @@ class LinkApiRepositoryTest {
         val cookie = "cookie2"
         linkRepository.confirmVerification(code, secret, null, cookie)
 
-        verify(stripeRepository).confirmConsumerVerification(
-            eq(secret),
-            eq(code),
-            eq(cookie),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        verify(consumersApiService).confirmConsumerVerification(
+            consumerSessionClientSecret = eq(secret),
+            verificationCode = eq(code),
+            authSessionCookie = eq(cookie),
+            requestSurface = eq(CONSUMER_SURFACE),
+            requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
 
     @Test
     fun `confirmVerification returns successful result`() = runTest {
         val consumerSession = mock<ConsumerSession>()
-        whenever(stripeRepository.confirmConsumerVerification(any(), any(), anyOrNull(), any()))
+        whenever(
+            consumersApiService.confirmConsumerVerification(
+                consumerSessionClientSecret = any(),
+                verificationCode = any(),
+                authSessionCookie = anyOrNull(),
+                requestSurface = any(),
+                requestOptions = any()
+            )
+        )
             .thenReturn(consumerSession)
 
-        val result = linkRepository.confirmVerification("code", "secret", "key", "cookie")
+        val result = linkRepository.confirmVerification(
+            verificationCode = "code",
+            consumerSessionClientSecret = "secret",
+            consumerPublishableKey = "key",
+            authSessionCookie = "cookie"
+        )
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(consumerSession)
@@ -299,10 +314,23 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `confirmVerification catches exception and returns failure`() = runTest {
-        whenever(stripeRepository.confirmConsumerVerification(any(), any(), anyOrNull(), any()))
+        whenever(
+            consumersApiService.confirmConsumerVerification(
+                consumerSessionClientSecret = any(),
+                verificationCode = any(),
+                authSessionCookie = anyOrNull(),
+                requestSurface = any(),
+                requestOptions = any()
+            )
+        )
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.confirmVerification("code", "secret", "key", "cookie")
+        val result = linkRepository.confirmVerification(
+            verificationCode = "code",
+            consumerSessionClientSecret = "secret",
+            consumerPublishableKey = "key",
+            authSessionCookie = "cookie"
+        )
 
         assertThat(result.isFailure).isTrue()
     }

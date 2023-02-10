@@ -128,17 +128,61 @@ class ConsumersApiServiceImplTest {
     }
 
     @Test
+    fun `confirmConsumerVerification() sends all parameters`() = runTest {
+        val clientSecret = "secret"
+        val verificationCode = "1234"
+        val cookie = "cookie2"
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/confirm_verification"),
+            header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
+            header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
+            bodyPart("request_surface", "android_payment_element"),
+            bodyPart("credentials%5Bconsumer_session_client_secret%5D", clientSecret),
+            bodyPart("type", "SMS"),
+            bodyPart("code", verificationCode),
+            bodyPart("cookies%5Bverification_session_client_secrets%5D%5B%5D", cookie),
+        ) { response ->
+            response.setBody(ConsumerFixtures.CONSUMER_VERIFIED_JSON.toString())
+        }
+
+        val consumerSession = consumersApiService.confirmConsumerVerification(
+            consumerSessionClientSecret = clientSecret,
+            verificationCode = verificationCode,
+            authSessionCookie = cookie,
+            requestSurface = "android_payment_element",
+            requestOptions = DEFAULT_OPTIONS
+        )
+
+        assertThat(consumerSession.redactedPhoneNumber).isEqualTo("+1********56")
+        assertThat(consumerSession.verificationSessions).contains(
+            ConsumerSession.VerificationSession(
+                ConsumerSession.VerificationSession.SessionType.Sms,
+                ConsumerSession.VerificationSession.SessionState.Verified
+            )
+        )
+    }
+
+    @Test
     fun testConsumerSessionLookupUrl() {
         ApiRequest.apiTestHost = null
-        assertThat("https://api.stripe.com/v1/consumers/sessions/lookup",)
+        assertThat("https://api.stripe.com/v1/consumers/sessions/lookup")
             .isEqualTo(ConsumersApiServiceImpl.consumerSessionLookupUrl)
     }
 
     @Test
     fun testStartConsumerVerificationUrl() {
         ApiRequest.apiTestHost = null
-        assertThat("https://api.stripe.com/v1/consumers/sessions/start_verification",)
+        assertThat("https://api.stripe.com/v1/consumers/sessions/start_verification")
             .isEqualTo(ConsumersApiServiceImpl.startConsumerVerificationUrl)
+    }
+
+    @Test
+    fun testConfirmConsumerVerificationUrl() {
+        ApiRequest.apiTestHost = null
+        assertThat("https://api.stripe.com/v1/consumers/sessions/confirm_verification")
+            .isEqualTo(ConsumersApiServiceImpl.confirmConsumerVerificationUrl)
     }
 
     private companion object {
