@@ -5,6 +5,8 @@ project_type: android
 trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
+  - pull_request_source_branch: '*'
+    pipeline: main-trigger-pipeline
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -47,7 +49,7 @@ workflows:
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
       - cache-push@2: {}
-  financial-connections-nightly:
+  maestro-financial-connections:
     steps:
       - avd-manager@1: {}
       - activate-ssh-key@4:
