@@ -14,7 +14,6 @@ import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import java.util.Locale
@@ -131,18 +130,15 @@ class ConsumersApiServiceImplTest {
     @Test
     fun testConsumerSessionLookupUrl() {
         ApiRequest.apiTestHost = null
-        assertEquals(
-            "https://api.stripe.com/v1/consumers/sessions/lookup",
-            ConsumersApiServiceImpl.consumerSessionLookupUrl
-        )
+        assertThat("https://api.stripe.com/v1/consumers/sessions/lookup",)
+            .isEqualTo(ConsumersApiServiceImpl.consumerSessionLookupUrl)
     }
 
     @Test
     fun testStartConsumerVerificationUrl() {
-        kotlin.test.assertEquals(
-            "https://api.stripe.com/v1/consumers/sessions/start_verification",
-            ConsumersApiServiceImpl.startConsumerVerificationUrl
-        )
+        ApiRequest.apiTestHost = null
+        assertThat("https://api.stripe.com/v1/consumers/sessions/start_verification",)
+            .isEqualTo(ConsumersApiServiceImpl.startConsumerVerificationUrl)
     }
 
     private companion object {
