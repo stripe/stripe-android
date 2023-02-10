@@ -45,9 +45,10 @@ internal class LinkApiRepository @Inject constructor(
         runCatching {
             requireNotNull(
                 consumersApiService.lookupConsumerSession(
-                    email,
-                    authSessionCookie,
-                    ApiRequest.Options(
+                    email = email,
+                    authSessionCookie = authSessionCookie,
+                    requestSurface = REQUEST_SURFACE,
+                    requestOptions = ApiRequest.Options(
                         publishableKeyProvider(),
                         stripeAccountIdProvider()
                     )
@@ -90,11 +91,12 @@ internal class LinkApiRepository @Inject constructor(
     ): Result<ConsumerSession> = withContext(workContext) {
         runCatching {
             requireNotNull(
-                stripeRepository.startConsumerVerification(
-                    consumerSessionClientSecret,
-                    locale ?: Locale.US,
-                    authSessionCookie,
-                    consumerPublishableKey?.let {
+                consumersApiService.startConsumerVerification(
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    locale = locale ?: Locale.US,
+                    authSessionCookie = authSessionCookie,
+                    requestSurface = REQUEST_SURFACE,
+                    requestOptions = consumerPublishableKey?.let {
                         ApiRequest.Options(it)
                     } ?: ApiRequest.Options(
                         publishableKeyProvider(),
@@ -288,5 +290,9 @@ internal class LinkApiRepository @Inject constructor(
                 )
             )
         }
+    }
+
+    private companion object {
+        const val REQUEST_SURFACE = "android_payment_element"
     }
 }

@@ -32,6 +32,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 
+@Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 class LinkApiRepositoryTest {
     private val stripeRepository = mock<StripeRepository>()
@@ -59,6 +60,7 @@ class LinkApiRepositoryTest {
         verify(consumersApiService).lookupConsumerSession(
             eq(email),
             eq(cookie),
+            eq(CONSUMER_SURFACE),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
@@ -66,7 +68,14 @@ class LinkApiRepositoryTest {
     @Test
     fun `lookupConsumer returns successful result`() = runTest {
         val consumerSessionLookup = mock<ConsumerSessionLookup>()
-        whenever(consumersApiService.lookupConsumerSession(any(), any(), any()))
+        whenever(
+            consumersApiService.lookupConsumerSession(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        )
             .thenReturn(consumerSessionLookup)
 
         val result = linkRepository.lookupConsumer("email", "cookie")
@@ -77,7 +86,14 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `lookupConsumer catches exception and returns failure`() = runTest {
-        whenever(consumersApiService.lookupConsumerSession(any(), any(), any()))
+        whenever(
+            consumersApiService.lookupConsumerSession(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        )
             .thenThrow(RuntimeException("error"))
 
         val result = linkRepository.lookupConsumer("email", "cookie")
@@ -176,10 +192,11 @@ class LinkApiRepositoryTest {
         val consumerKey = "key"
         linkRepository.startVerification(secret, consumerKey, cookie)
 
-        verify(stripeRepository).startConsumerVerification(
+        verify(consumersApiService).startConsumerVerification(
             eq(secret),
             eq(Locale.US),
             eq(cookie),
+            eq(CONSUMER_SURFACE),
             eq(ApiRequest.Options(consumerKey))
         )
     }
@@ -190,10 +207,11 @@ class LinkApiRepositoryTest {
         val cookie = "cookie1"
         linkRepository.startVerification(secret, null, cookie)
 
-        verify(stripeRepository).startConsumerVerification(
+        verify(consumersApiService).startConsumerVerification(
             eq(secret),
             eq(Locale.US),
             eq(cookie),
+            eq(CONSUMER_SURFACE),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
@@ -201,7 +219,15 @@ class LinkApiRepositoryTest {
     @Test
     fun `startVerification returns successful result`() = runTest {
         val consumerSession = mock<ConsumerSession>()
-        whenever(stripeRepository.startConsumerVerification(any(), any(), anyOrNull(), any()))
+        whenever(
+            consumersApiService.startConsumerVerification(
+                any(),
+                any(),
+                anyOrNull(),
+                any(),
+                any()
+            )
+        )
             .thenReturn(consumerSession)
 
         val result = linkRepository.startVerification("secret", "key", "cookie")
@@ -212,7 +238,15 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `startVerification catches exception and returns failure`() = runTest {
-        whenever(stripeRepository.startConsumerVerification(any(), any(), anyOrNull(), any()))
+        whenever(
+            consumersApiService.startConsumerVerification(
+                any(),
+                any(),
+                anyOrNull(),
+                any(),
+                any()
+            )
+        )
             .thenThrow(RuntimeException("error"))
 
         val result = linkRepository.startVerification("secret", "key", "cookie")
@@ -733,5 +767,6 @@ class LinkApiRepositoryTest {
     companion object {
         const val PUBLISHABLE_KEY = "publishableKey"
         const val STRIPE_ACCOUNT_ID = "stripeAccountId"
+        const val CONSUMER_SURFACE = "android_payment_element"
     }
 }
