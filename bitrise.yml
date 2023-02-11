@@ -57,6 +57,7 @@ workflows:
       - git-clone@7.0: {}
       - cache-pull@2: {}
       - script@1:
+          title: Populate CI gradle.properties
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
             - content: null
