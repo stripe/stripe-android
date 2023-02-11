@@ -63,13 +63,6 @@ workflows:
             - content: null
       - wait-for-android-emulator@1: {}
       - script@1:
-          title: Start screen recording
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                $ANDROID_HOME/platform-tools/adb shell "screenrecord /sdcard/video.mp4 --verbose" &> $BITRISE_DEPLOY_DIR/logs.txt & disown 
-                $ANDROID_HOME/platform-tools/adb shell "screencap -p /sdcard/screen.png" &> $BITRISE_DEPLOY_DIR/logs.txt & disown
-      - script@1:
           title: Run Maestro tests
           inputs:
             - content: |-
@@ -82,6 +75,9 @@ workflows:
                 # Compile and install APK.
                 ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:installDebug
                 
+                # Record video
+                $ANDROID_HOME/platform-tools/adb shell "screenrecord /sdcard/video.mp4 --verbose" &> $BITRISE_DEPLOY_DIR/logs.txt & disown 
+
                 # Run tests.
                 maestro test --format junit --output maestroReport.xml maestro/financial-connections
       - script@1:
