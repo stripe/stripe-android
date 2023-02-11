@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
@@ -37,6 +38,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -75,6 +77,7 @@ private fun NetworkingLinkVerificationContent(
             is Success -> NetworkingLinkVerificationLoaded(
                 scrollState = scrollState,
                 payload = payload(),
+                confirmVerificationAsync = state.confirmVerification
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -88,6 +91,7 @@ private fun NetworkingLinkVerificationContent(
 @Composable
 @Suppress("LongMethod")
 private fun NetworkingLinkVerificationLoaded(
+    confirmVerificationAsync: Async<ConsumerSession>,
     scrollState: ScrollState,
     payload: Payload,
 ) {
@@ -134,7 +138,7 @@ private fun NetworkingLinkVerificationLoaded(
             Spacer(modifier = Modifier.size(24.dp))
             StripeThemeForConnections {
                 OTPElementUI(
-                    enabled = true,
+                    enabled = confirmVerificationAsync !is Loading,
                     element = payload.otpElement
                 )
             }

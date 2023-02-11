@@ -53,7 +53,6 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.stripeColors
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun OTPElementUI(
