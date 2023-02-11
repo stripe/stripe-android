@@ -59,16 +59,20 @@ workflows:
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
-            - content:
+            - content: null
       - wait-for-android-emulator@1: {}
       - script@1:
+          title: Start screen recording
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                set -e
-                set -o pipefail
-                set -x
-
+                $ANDROID_HOME/platform-tools/adb shell "screenrecord /sdcard/video.mp4 --verbose" &> $BITRISE_DEPLOY_DIR/logs.txt & disown 
+                $ANDROID_HOME/platform-tools/adb shell "screencap -p /sdcard/screen.png" &> $BITRISE_DEPLOY_DIR/logs.txt & disown
+      - script@1:
+          title: Run Maestro tests
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
                 # Install Maestro
                 curl -Ls "https://get.maestro.mobile.dev" | bash
                 export PATH="$PATH":"$HOME/.maestro/bin"
@@ -79,11 +83,21 @@ workflows:
                 
                 # Run tests.
                 maestro test --format junit --output maestroReport.xml maestro/financial-connections
+      - script@1:
+          title: Stop Screen recording & get file from emulator
+          inputs:
+            - content: |-
+                $ANDROID_HOME/platform-tools/adb shell "killall -INT screenrecord"
+                sleep 10
+                $ANDROID_HOME/platform-tools/adb pull /sdcard/video.mp4 $BITRISE_DEPLOY_DIR/video.mp4
+                adb pull /sdcard/screen.png $BITRISE_DEPLOY_DIR/
+                $ANDROID_HOME/platform-tools/adb shell "screencap -p /sdcard/screen2.png" &> $BITRISE_DEPLOY_DIR/logs.txt & disown
+                adb pull /sdcard/screen2.png $BITRISE_DEPLOY_DIR/
       - slack@3:
           is_always_run: true
           inputs:
-          - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-          - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+            - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+            - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
       - custom-test-results-export@0:
           inputs:
             - search_pattern: '*/maestroReport.xml'
