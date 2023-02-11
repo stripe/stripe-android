@@ -135,10 +135,7 @@ private fun NetworkingLinkVerificationLoaded(
             StripeThemeForConnections {
                 OTPElementUI(
                     enabled = true,
-                    element = OTPElement(
-                        IdentifierSpec.Generic("otp"),
-                        OTPController()
-                    )
+                    element = payload.otpElement
                 )
             }
             Spacer(modifier = Modifier.size(24.dp))
@@ -187,7 +184,10 @@ internal fun NetworkingLinkVerificationScreenPreview() {
                     Payload(
                         phoneNumber = "12345678",
                         email = "12345678",
-                        otpController = OTPController()
+                        otpElement = OTPElement(
+                            IdentifierSpec.Generic("otp"),
+                            OTPController()
+                        )
                     )
                 )
             ),

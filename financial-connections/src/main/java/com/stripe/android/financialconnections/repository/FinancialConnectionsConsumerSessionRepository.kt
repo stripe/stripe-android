@@ -14,6 +14,10 @@ interface FinancialConnectionsConsumerSessionRepository {
     suspend fun getCachedConsumerSession(): ConsumerSession?
     suspend fun lookupConsumerSession(email: String?): ConsumerSessionLookup
     suspend fun startConsumerVerification(consumerSessionClientSecret: String): ConsumerSession
+    suspend fun confirmConsumerVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String,
+    ): ConsumerSession
 
     companion object {
         operator fun invoke(
@@ -63,6 +67,21 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             requestOptions = apiOptions
         ).also { session ->
             updateCachedConsumerSession("startConsumerVerification", session)
+        }
+    }
+
+    override suspend fun confirmConsumerVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String
+    ): ConsumerSession {
+        return consumersApiService.confirmConsumerVerification(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            authSessionCookie = null,
+            verificationCode = verificationCode,
+            requestSurface = CONSUMER_SURFACE,
+            requestOptions = apiOptions
+        ).also { session ->
+            updateCachedConsumerSession("confirmConsumerVerification", session)
         }
     }
 
