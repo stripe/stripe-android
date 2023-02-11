@@ -87,9 +87,6 @@ workflows:
                 $ANDROID_HOME/platform-tools/adb shell "killall -INT screenrecord"
                 sleep 10
                 $ANDROID_HOME/platform-tools/adb pull /sdcard/video.mp4 $BITRISE_DEPLOY_DIR/video.mp4
-                adb pull /sdcard/screen.png $BITRISE_DEPLOY_DIR/
-                $ANDROID_HOME/platform-tools/adb shell "screencap -p /sdcard/screen2.png" &> $BITRISE_DEPLOY_DIR/logs.txt & disown
-                adb pull /sdcard/screen2.png $BITRISE_DEPLOY_DIR/
       - slack@3:
           is_always_run: true
           inputs:
