@@ -10,7 +10,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetConsumerSession
+import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.uicore.elements.OTPController
@@ -19,18 +20,21 @@ import javax.inject.Inject
 internal class NetworkingLinkVerificationViewModel @Inject constructor(
     initialState: NetworkingLinkVerificationState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val getManifest: GetManifest,
+    private val getConsumerSession: GetConsumerSession,
+    private val startVerification: StartVerification,
     private val logger: Logger
 ) : MavericksViewModel<NetworkingLinkVerificationState>(initialState) {
 
     init {
         logErrors()
         suspend {
-            val manifest = getManifest()
+            val consumerSession = requireNotNull(getConsumerSession())
+            val startVerification = startVerification(consumerSession.emailAddress)
+            logger.debug(startVerification.verificationSessions.first().toString())
             eventTracker.track(PaneLoaded(Pane.NETWORKING_LINK_VERIFICATION))
             NetworkingLinkVerificationState.Payload(
-                email = manifest.accountholderCustomerEmailAddress ?: "",
-                phoneNumber = manifest.accountholderPhoneNumber ?: "",
+                email = consumerSession.emailAddress,
+                phoneNumber = consumerSession.redactedPhoneNumber,
                 otpController = OTPController()
             )
         }.execute { copy(payload = it) }

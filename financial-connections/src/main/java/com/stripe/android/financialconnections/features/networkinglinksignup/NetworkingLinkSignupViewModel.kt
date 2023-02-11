@@ -92,6 +92,9 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         )
         onAsync(
             NetworkingLinkSignupState::lookupAccount,
+            onSuccess = {
+                if (it.exists) goNext(Pane.NETWORKING_LINK_VERIFICATION)
+            },
             onFail = { error ->
                 logger.error("Error looking up account", error)
                 eventTracker.track(Error(Pane.NETWORKING_LINK_SIGNUP_PANE, error))
