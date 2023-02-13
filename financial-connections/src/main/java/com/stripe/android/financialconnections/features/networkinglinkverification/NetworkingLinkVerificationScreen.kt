@@ -12,7 +12,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -90,11 +96,22 @@ private fun NetworkingLinkVerificationContent(
 
 @Composable
 @Suppress("LongMethod")
+@OptIn(ExperimentalComposeUiApi::class)
 private fun NetworkingLinkVerificationLoaded(
     confirmVerificationAsync: Async<ConsumerSession>,
     scrollState: ScrollState,
     payload: Payload,
 ) {
+    val focusManager = LocalFocusManager.current
+    val focusRequester: FocusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    LaunchedEffect(confirmVerificationAsync) {
+        if (confirmVerificationAsync is Loading) {
+            focusManager.clearFocus(true)
+            keyboardController?.hide()
+        }
+    }
+
     Column(
         Modifier.fillMaxSize()
     ) {
@@ -138,6 +155,7 @@ private fun NetworkingLinkVerificationLoaded(
             Spacer(modifier = Modifier.size(24.dp))
             StripeThemeForConnections {
                 OTPElementUI(
+                    focusRequester = focusRequester,
                     enabled = confirmVerificationAsync !is Loading,
                     element = payload.otpElement
                 )
