@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.core.os.bundleOf
@@ -373,31 +374,25 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `notes visibility is visible`() {
+    fun `notes visibility is set correctly`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent()
         ).use {
-            it.onActivity { activity ->
-                viewModel.updateBelowButtonText(
-                    ApplicationProvider.getApplicationContext<Context>().getString(
-                        R.string.stripe_paymentsheet_payment_method_us_bank_account
-                    )
-                )
-                assertThat(activity.viewBinding.notes.isVisible).isTrue()
-            }
-        }
-    }
+            it.onActivity {
+                val text = "a below-button text"
 
-    @Test
-    fun `notes visibility is gone`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity { activity ->
+                viewModel.updateBelowButtonText(text)
+
+                composeTestRule
+                    .onNodeWithText(text)
+                    .assertIsDisplayed()
+
                 viewModel.updateBelowButtonText(null)
-                assertThat(activity.viewBinding.notes.isVisible).isFalse()
+
+                composeTestRule
+                    .onNodeWithText(text)
+                    .assertDoesNotExist()
             }
         }
     }
@@ -451,17 +446,17 @@ internal class PaymentOptionsActivityTest {
     fun `Clears error on user selection`() {
         val scenario = activityScenario()
         scenario.launch(createIntent()).onActivity { activity ->
-            viewModel.onError("some error")
-            assertThat(activity.viewBinding.message.isVisible).isTrue()
+            val text = "some error"
+            viewModel.onError(text)
 
             composeTestRule
-                .onNodeWithText("some error")
-                .assertExists()
+                .onNodeWithText(text)
+                .assertIsDisplayed()
 
             viewModel.onUserSelection()
 
             composeTestRule
-                .onNodeWithText("some error")
+                .onNodeWithText(text)
                 .assertDoesNotExist()
         }
     }
