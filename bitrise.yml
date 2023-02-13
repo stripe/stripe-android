@@ -36,17 +36,16 @@ workflows:
     steps:
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@6: { }
-      - cache-pull@2: { }
+      - git-clone@6: {}
+      - cache-pull@2: {}
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
-      - gradle-unit-test@1:
+      - android-unit-test@1:
           inputs:
-            - unit_test_flags: -x :stripe-test-e2e:testDebugUnitTest
-            - unit_test_task: testDebugUnitTest
-          title: Unit tests
-      - cache-push@2: { }
+            - arguments: -x=":stripe-test-e2e:testDebugUnitTest"
+            - variant: debug
+      - cache-push@2: {}
   maestro-financial-connections:
     steps:
       - avd-manager@1: {}
