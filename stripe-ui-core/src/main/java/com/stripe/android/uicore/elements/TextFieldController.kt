@@ -15,6 +15,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -26,13 +27,15 @@ interface TextFieldController : InputController, SectionFieldComposable {
     val trailingIcon: Flow<TextFieldIcon?>
     val capitalization: KeyboardCapitalization
     val keyboardType: KeyboardType
-    override val label: Flow<Int>
+    override val label: Flow<Int?>
     val visualTransformation: VisualTransformation
     override val showOptionalLabel: Boolean
     val fieldState: Flow<TextFieldState>
     override val fieldValue: Flow<String>
     val visibleError: Flow<Boolean>
     val loading: Flow<Boolean>
+    val placeHolder : Flow<String?>
+        get() = flowOf(null)
 
     // Whether the TextField should be enabled or not
     val enabled: Boolean
@@ -105,8 +108,10 @@ class SimpleTextFieldController constructor(
     override val visualTransformation =
         textFieldConfig.visualTransformation ?: VisualTransformation.None
 
-    override val label: Flow<Int> = MutableStateFlow(textFieldConfig.label)
+    override val label = MutableStateFlow(textFieldConfig.label)
     override val debugLabel = textFieldConfig.debugLabel
+
+    override val placeHolder = MutableStateFlow(textFieldConfig.placeHolder)
 
     /** This is all the information that can be observed on the element */
     private val _fieldValue = MutableStateFlow("")

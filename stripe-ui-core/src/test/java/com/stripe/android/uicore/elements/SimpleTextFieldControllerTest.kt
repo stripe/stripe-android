@@ -1,15 +1,11 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import android.os.Build
 import android.os.Looper.getMainLooper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.FieldError
-import com.stripe.android.uicore.elements.SimpleTextFieldController
-import com.stripe.android.uicore.elements.TextFieldConfig
-import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Invalid
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Full
@@ -26,7 +22,7 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
-internal class TextFieldControllerTest {
+internal class SimpleTextFieldControllerTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
@@ -225,8 +221,32 @@ internal class TextFieldControllerTest {
         verify(config).filter("1a2b3c4d")
     }
 
+
+    fun `Verify null label`() {
+        val controller = createControllerWithState(nullLabel = true)
+        assertThat(controller.label.value).isNull()
+    }
+
+    fun `Verify non-null label`() {
+        val controller = createControllerWithState(nullLabel = false)
+        assertThat(controller.label.value).isNotNull()
+    }
+
+    fun `Verify null placeHolder`() {
+        val controller = createControllerWithState(nullPlaceHolder = true)
+        assertThat(controller.placeHolder.value).isNull()
+    }
+
+    fun `Verify non-null placeHolder`() {
+        val controller = createControllerWithState(nullPlaceHolder = false)
+        assertThat(controller.placeHolder.value).isNotNull()
+
+    }
+
     private fun createControllerWithState(
-        showOptionalLabel: Boolean = false
+        showOptionalLabel: Boolean = false,
+        nullLabel: Boolean = false,
+        nullPlaceHolder: Boolean = true
     ): SimpleTextFieldController {
         val config: TextFieldConfig = mock {
             on { determineState("full") } doReturn Full
@@ -248,7 +268,13 @@ internal class TextFieldControllerTest {
             on { determineState("") } doReturn Blank
             on { filter("") } doReturn ""
 
-            on { label } doReturn R.string.address_label_full_name
+            if (!nullLabel) {
+                on { label } doReturn R.string.address_label_full_name
+            }
+
+            if (!nullPlaceHolder) {
+                on { placeHolder } doReturn "PlaceHolder"
+            }
         }
 
         return SimpleTextFieldController(config, showOptionalLabel)
