@@ -189,7 +189,7 @@ internal fun ExistingEmailSection(
             .padding(12.dp)
     ) {
         Column(
-            Modifier.weight(0.7f)
+            Modifier.weight(1f)
         ) {
             Text(
                 text = "Continue as",

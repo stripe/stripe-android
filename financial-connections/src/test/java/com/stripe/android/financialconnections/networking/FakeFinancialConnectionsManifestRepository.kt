@@ -71,6 +71,13 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         TODO("Not yet implemented")
     }
 
+    override suspend fun disableNetworking(
+        clientSecret: String,
+        disabledReason: String?
+    ): FinancialConnectionsSessionManifest {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun synchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String
