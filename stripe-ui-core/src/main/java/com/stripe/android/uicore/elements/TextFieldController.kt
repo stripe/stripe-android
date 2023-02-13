@@ -34,7 +34,7 @@ interface TextFieldController : InputController, SectionFieldComposable {
     override val fieldValue: Flow<String>
     val visibleError: Flow<Boolean>
     val loading: Flow<Boolean>
-    val placeHolder : Flow<String?>
+    val placeHolder: Flow<String?>
         get() = flowOf(null)
 
     // Whether the TextField should be enabled or not

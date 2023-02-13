@@ -221,7 +221,6 @@ internal class SimpleTextFieldControllerTest {
         verify(config).filter("1a2b3c4d")
     }
 
-
     fun `Verify null label`() {
         val controller = createControllerWithState(nullLabel = true)
         assertThat(controller.label.value).isNull()
@@ -240,7 +239,6 @@ internal class SimpleTextFieldControllerTest {
     fun `Verify non-null placeHolder`() {
         val controller = createControllerWithState(nullPlaceHolder = false)
         assertThat(controller.placeHolder.value).isNotNull()
-
     }
 
     private fun createControllerWithState(
