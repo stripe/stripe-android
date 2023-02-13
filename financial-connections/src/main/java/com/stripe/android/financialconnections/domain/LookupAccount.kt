@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.network.NetworkConstants.CONSUMER_SURFACE
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.repository.ConsumersApiService
 import javax.inject.Inject
@@ -16,7 +17,8 @@ internal class LookupAccount @Inject constructor(
         consumersApiService.lookupConsumerSession(
             email = email,
             authSessionCookie = null,
-            requestOptions = apiOptions
+            requestOptions = apiOptions,
+            requestSurface = CONSUMER_SURFACE
         )
     )
 }
