@@ -1,6 +1,9 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.financialconnections.features.networkinglinkloginwarmup
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
