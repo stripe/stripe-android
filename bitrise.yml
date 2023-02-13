@@ -48,6 +48,11 @@ workflows:
       - script@1:
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
+      - custom-test-results-export@0:
+          inputs:
+            - search_pattern: '*/build/test-results/testDebugUnitTest/*.xml'
+            - test_name: Unit tests
+        - deploy-to-bitrise-io@2: { }
       - cache-push@2: {}
   maestro-financial-connections:
     steps:
