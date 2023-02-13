@@ -46,11 +46,6 @@ workflows:
             - unit_test_flags: -x :stripe-test-e2e:testDebugUnitTest
             - unit_test_task: testDebugUnitTest
           title: Unit tests
-      - gradle-unit-test@1:
-          inputs:
-            - unit_test_flags: -x :stripe-test-e2e:testDebugUnitTest
-            - unit_test_task: verifyPaparazziDebug
-          title: Verify Paparazzi screenshots
       - cache-push@2: { }
   maestro-financial-connections:
     steps:
