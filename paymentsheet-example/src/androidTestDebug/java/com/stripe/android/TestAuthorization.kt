@@ -91,7 +91,10 @@ class TestAuthorization {
         testDriver.confirmNewOrGuestComplete(
             bancontactNewUser.copy(
                 paymentMethod = lpmRepository.fromCode("ideal")!!,
-                authorizationAction = AuthorizeAction.Fail,
+                authorizationAction = AuthorizeAction.Fail(
+                    expectedError = "We are unable to authenticate your payment method. " +
+                        "Please choose a different payment method and try again.",
+                ),
             )
         )
     }

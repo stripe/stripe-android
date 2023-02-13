@@ -105,7 +105,9 @@ internal class AccountPickerViewModel @Inject constructor(
                     dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
                 ),
                 singleAccount = manifest.singleAccount,
-                institutionSkipAccountSelection = activeAuthSession.institutionSkipAccountSelection == true,
+                userSelectedSingleAccountInInstitution = manifest.singleAccount &&
+                    activeAuthSession.institutionSkipAccountSelection == true &&
+                    accounts.size == 1,
                 businessName = manifest.businessName,
                 stripeDirect = manifest.isStripeDirect ?: false
             ).also {
@@ -125,9 +127,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 // the user saw an OAuth account selection screen and selected
                 // just one to send back in a single-account context. treat these as if
                 // we had done account selection, and submit.
-                payload.singleAccount &&
-                    payload.institutionSkipAccountSelection &&
-                    payload.accounts.size == 1 -> submitAccounts(
+                payload.userSelectedSingleAccountInInstitution -> submitAccounts(
                     selectedIds = setOf(payload.accounts.first().account.id),
                     updateLocalCache = true
                 )
@@ -283,11 +283,14 @@ internal data class AccountPickerState(
         val singleAccount: Boolean,
         val stripeDirect: Boolean,
         val businessName: String?,
-        val institutionSkipAccountSelection: Boolean
+        val userSelectedSingleAccountInInstitution: Boolean
     ) {
 
         val selectableAccounts
             get() = accounts.filter { it.account.allowSelection }
+
+        val shouldSkipPane: Boolean
+            get() = skipAccountSelection || userSelectedSingleAccountInInstitution
 
         val subtitle: TextResource?
             get() = when {

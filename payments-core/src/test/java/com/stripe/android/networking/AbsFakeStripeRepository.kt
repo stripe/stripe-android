@@ -298,24 +298,6 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return null
     }
 
-    override suspend fun startConsumerVerification(
-        consumerSessionClientSecret: String,
-        locale: Locale,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        return null
-    }
-
-    override suspend fun confirmConsumerVerification(
-        consumerSessionClientSecret: String,
-        verificationCode: String,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        return null
-    }
-
     override suspend fun logoutConsumer(
         consumerSessionClientSecret: String,
         authSessionCookie: String?,

@@ -78,14 +78,23 @@ enum class Browser {
  * Indicate the payment method for this test expects authorization and how the authorization
  * should be handled: complete, fail, cancel
  */
-enum class AuthorizeAction(
-    val text: String,
-) {
-    // These do not get localized.
-    Authorize("AUTHORIZE TEST PAYMENT"),
-    Fail("FAIL TEST PAYMENT"),
-    Cancel("")
+sealed interface AuthorizeAction {
+
+    abstract val text: String
+
+    object Authorize : AuthorizeAction {
+        override val text: String = "AUTHORIZE TEST PAYMENT"
+    }
+
+    data class Fail(val expectedError: String) : AuthorizeAction {
+        override val text: String = "FAIL TEST PAYMENT"
+    }
+
+    object Cancel : AuthorizeAction {
+        override val text: String = ""
+    }
 }
+
 
 /**
  * Indicates how the payment intent should be set: PaymentIntent, PaymentIntent with

@@ -199,6 +199,7 @@ private fun readableListOfPermissions(permissionsReadable: List<Int>): String =
                 index == 0 -> arg.replaceFirstChar { char ->
                     if (char.isLowerCase()) char.titlecase() else char.toString()
                 }
+
                 permissionsReadable.lastIndex == index -> "$current and $arg"
                 else -> "$current, $arg"
             }
@@ -222,6 +223,7 @@ internal data class AccessibleDataCalloutModel(
     val isStripeDirect: Boolean,
     val dataPolicyUrl: String
 ) {
+
     companion object {
         fun fromManifest(manifest: FinancialConnectionsSessionManifest): AccessibleDataCalloutModel =
             AccessibleDataCalloutModel(

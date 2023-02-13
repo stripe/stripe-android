@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.model.GetFinancialConnectionsAccc
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
+import com.stripe.android.financialconnections.utils.filterNotNullValues
 import javax.inject.Inject
 
 internal interface FinancialConnectionsRepository {
@@ -41,7 +42,8 @@ internal interface FinancialConnectionsRepository {
         APIException::class
     )
     suspend fun postCompleteFinancialConnectionsSessions(
-        clientSecret: String
+        clientSecret: String,
+        terminalError: String?
     ): FinancialConnectionsSession
 
     suspend fun postAuthorizationSessionOAuthResults(
@@ -87,14 +89,16 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun postCompleteFinancialConnectionsSessions(
-        clientSecret: String
+        clientSecret: String,
+        terminalError: String?
     ): FinancialConnectionsSession {
         val financialConnectionsRequest = apiRequestFactory.createPost(
             url = completeUrl,
             options = apiOptions,
             params = mapOf(
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
-            )
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "terminal_error" to terminalError
+            ).filterNotNullValues()
         )
         return requestExecutor.execute(
             financialConnectionsRequest,

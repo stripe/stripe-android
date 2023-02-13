@@ -16,6 +16,9 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanActivity
 import com.stripe.android.uicore.elements.H6Text
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionController
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SectionElementUI
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

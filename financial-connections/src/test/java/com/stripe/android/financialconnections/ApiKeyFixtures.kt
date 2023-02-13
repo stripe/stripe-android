@@ -1,10 +1,13 @@
 package com.stripe.android.financialconnections
 
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.ManualEntryMode
+import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.model.VisualUpdate
@@ -54,6 +57,7 @@ internal object ApiKeyFixtures {
         product = FinancialConnectionsSessionManifest.Product.STRIPE_CARD,
         singleAccount = true,
         useSingleSortSearch = true,
+        manualEntryMode = ManualEntryMode.AUTOMATIC,
         successUrl = SUCCESS_URL,
         cancelUrl = CANCEL_URL,
         hostedAuthUrl = HOSTED_AUTH_URL
@@ -85,5 +89,14 @@ internal object ApiKeyFixtures {
         featured = true,
         featuredOrder = null,
         mobileHandoffCapable = false
+    )
+
+    fun partnerAccount() = PartnerAccount(
+        authorization = "test",
+        name = "Partner account",
+        id = "id",
+        category = FinancialConnectionsAccount.Category.INVESTMENT,
+        subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+        supportedPaymentMethodTypes = listOf(FinancialConnectionsAccount.SupportedPaymentMethodTypes.US_BANK_ACCOUNT)
     )
 }

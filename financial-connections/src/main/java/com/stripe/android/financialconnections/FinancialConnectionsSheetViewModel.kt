@@ -19,6 +19,8 @@ import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsS
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
+import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
+import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForToken
@@ -276,12 +278,25 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     /**
      * If a user cancels the hosted auth flow either by closing the custom tab with the back button
      * or clicking a cancel link within the hosted auth flow and the activity received the canceled
-     * URL callback, notify the [FinancialConnectionsSheetResultCallback] with [Canceled]
+     * URL callback, fetch the current session to check its status, and notify
+     * the [FinancialConnectionsSheetResultCallback] with the corresponding result.
      */
     private fun onUserCancel(state: FinancialConnectionsSheetState) {
-        val result = Canceled
-        eventReporter.onResult(state.initialArgs.configuration, result)
-        setState { copy(viewEffect = FinishWithResult(result)) }
+        viewModelScope.launch {
+            kotlin.runCatching {
+                fetchFinancialConnectionsSession(clientSecret = state.sessionSecret)
+            }.onSuccess {
+                val result = if (it.isCustomManualEntryError()) {
+                    Failed(CustomManualEntryRequiredError())
+                } else {
+                    Canceled
+                }
+                eventReporter.onResult(state.initialArgs.configuration, result)
+                setState { copy(viewEffect = FinishWithResult(result)) }
+            }.onFailure {
+                onFatal(state, it)
+            }
+        }
     }
 
     /**
