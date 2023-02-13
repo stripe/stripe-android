@@ -37,6 +37,8 @@ import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
 import com.stripe.android.identity.navigation.IdentityNavGraph
+import com.stripe.android.identity.navigation.IndividualDestination
+import com.stripe.android.identity.navigation.IndividualDestination.Companion.ARG_STANDALONE
 import com.stripe.android.identity.navigation.clearDataAndNavigateUp
 import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
@@ -128,16 +130,18 @@ internal class IdentityActivity :
                     finishWithResult(
                         if (it.submitted) {
                             identityViewModel.sendAnalyticsRequest(
-                                identityViewModel.identityAnalyticsRequestFactory.verificationSucceeded(
-                                    isFromFallbackUrl = true
-                                )
+                                identityViewModel.identityAnalyticsRequestFactory
+                                    .verificationSucceeded(
+                                        isFromFallbackUrl = true
+                                    )
                             )
                             VerificationFlowResult.Completed
                         } else {
                             identityViewModel.sendAnalyticsRequest(
-                                identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
-                                    isFromFallbackUrl = true
-                                )
+                                identityViewModel.identityAnalyticsRequestFactory
+                                    .verificationCanceled(
+                                        isFromFallbackUrl = true
+                                    )
                             )
                             VerificationFlowResult.Canceled
                         }
@@ -260,6 +264,13 @@ internal class IdentityActivity :
                     IdentityTopBarState.DEFAULT
                 }
             }
+            IndividualDestination.ROUTE.route -> {
+                if (args?.getBoolean(ARG_STANDALONE, false) == true) {
+                    IdentityTopBarState.INDIVIDUAL_STANDALONE
+                } else {
+                    IdentityTopBarState.DEFAULT
+                }
+            }
             else -> {
                 IdentityTopBarState.DEFAULT
             }
@@ -322,7 +333,8 @@ internal class IdentityActivity :
                         identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
                             isFromFallbackUrl = false,
                             lastScreenName = SCREEN_NAME_CONSENT,
-                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
+                            requireSelfie =
+                            identityViewModel.verificationPage.value?.data?.requireSelfie()
                         )
                     )
                     verificationFlowFinishable.finishWithResult(
@@ -346,12 +358,29 @@ internal class IdentityActivity :
                         identityViewModel.sendAnalyticsRequest(
                             identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
                                 isFromFallbackUrl = false,
-                                requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                                requireSelfie =
+                                identityViewModel.verificationPage.value?.data?.requireSelfie(),
                                 throwable = failedReason
                             )
                         )
                         verificationFlowFinishable.finishWithResult(
                             VerificationFlowResult.Failed(failedReason)
+                        )
+                    } else {
+                        navController.clearDataAndNavigateUp(identityViewModel)
+                    }
+                }
+                IndividualDestination.ROUTE.route -> {
+                    if (args?.getBoolean(ARG_STANDALONE, false) == true) {
+                        identityViewModel.sendAnalyticsRequest(
+                            identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
+                                isFromFallbackUrl = false,
+                                lastScreenName = SCREEN_NAME_CONSENT,
+                                requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
+                            )
+                        )
+                        verificationFlowFinishable.finishWithResult(
+                            VerificationFlowResult.Canceled
                         )
                     } else {
                         navController.clearDataAndNavigateUp(identityViewModel)

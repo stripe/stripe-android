@@ -16,4 +16,14 @@
     <string name="description_close">close verification page</string>
     <!-- Content description for back button -->
     <string name="description_go_back">go back to the previous screen</string>
+    <string name="country_of_id_number">Country of ID Number</string>
+    <string name="last_4_of_ssn">Last 4 of Social Security Number</string>
+    <string name="individual_cpf">Individual CPF</string>
+    <string name="nric_or_fin">NRIC or FIN</string>
+    <string name="dob">Date of Birth</string>
+    <string name="first_name">First</string>
+    <string name="last_name">Last</string>
+    <string name="name">Name</string>
+    <string name="invalid_dob_error">Date of birth does not look valid</string>
+    <string name="incomplete_id_number">The ID number you entered is incomplete</string>
 </resources>

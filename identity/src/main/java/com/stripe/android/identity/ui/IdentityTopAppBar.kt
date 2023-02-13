@@ -35,12 +35,15 @@ internal fun IdentityTopAppBar(
                         IdentityTopBarState.CONFIRMATION -> painterResource(id = R.drawable.ic_baseline_close_24)
                         IdentityTopBarState.ERROR_SHOULD_FAIL -> painterResource(id = R.drawable.ic_baseline_close_24)
                         IdentityTopBarState.DEFAULT -> painterResource(id = R.drawable.ic_baseline_arrow_back_24)
+                        IdentityTopBarState.INDIVIDUAL_STANDALONE ->
+                            painterResource(id = R.drawable.ic_baseline_close_24)
                     },
                     contentDescription = when (topBarState) {
                         IdentityTopBarState.CONSENT -> stringResource(id = R.string.description_close)
                         IdentityTopBarState.CONFIRMATION -> stringResource(id = R.string.description_close)
                         IdentityTopBarState.ERROR_SHOULD_FAIL -> stringResource(id = R.string.description_close)
                         IdentityTopBarState.DEFAULT -> stringResource(id = R.string.description_go_back)
+                        IdentityTopBarState.INDIVIDUAL_STANDALONE -> stringResource(id = R.string.description_close)
                     }
                 )
             }
@@ -48,6 +51,7 @@ internal fun IdentityTopAppBar(
     )
 }
 
+// TODO(ccen) - change this to just two state -> go back/close
 internal enum class IdentityTopBarState {
-    CONSENT, CONFIRMATION, ERROR_SHOULD_FAIL, DEFAULT
+    CONSENT, CONFIRMATION, ERROR_SHOULD_FAIL, DEFAULT, INDIVIDUAL_STANDALONE
 }
