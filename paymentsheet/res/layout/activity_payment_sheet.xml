@@ -54,10 +54,8 @@
                     android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
                     android:orientation="vertical">
 
-                    <com.stripe.android.paymentsheet.ui.GooglePayButton
+                    <androidx.compose.ui.platform.ComposeView
                         android:id="@+id/google_pay_button"
-                        android:visibility="gone"
-                        android:layout_marginTop="7dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
