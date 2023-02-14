@@ -405,7 +405,7 @@ internal fun AccessibleDataCalloutWithOneAccountPreview() {
     FinancialConnectionsPreview {
         AccessibleDataCalloutWithAccounts(
             AccessibleDataCalloutModel(
-                businessName = "My business",
+                businessName = "My business - Test screenshot failure",
                 permissions = listOf(
                     Permissions.PAYMENT_METHOD,
                     Permissions.BALANCES,
