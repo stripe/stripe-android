@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -195,7 +196,7 @@ internal fun ExistingEmailSection(
             Modifier.weight(1f)
         ) {
             Text(
-                text = "Continue as",
+                text = stringResource(id = R.string.stripe_networking_link_login_warmup_email_label),
                 style = FinancialConnectionsTheme.typography.caption,
                 color = FinancialConnectionsTheme.colors.textSecondary
             )
@@ -210,7 +211,7 @@ internal fun ExistingEmailSection(
         Icon(
             painter = painterResource(id = R.drawable.stripe_ic_arrow_right_circle),
             tint = FinancialConnectionsTheme.colors.textBrand,
-            contentDescription = "test"
+            contentDescription = null
         )
     }
 }
