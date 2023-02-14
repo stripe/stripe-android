@@ -2,6 +2,12 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+
+## 20.19.3 - 2023-02-13
+
+### Financial Connections
+* Stability and efficiency improvements.
+
 ## 20.19.2 - 2023-02-06
 
 ### PaymentSheet
