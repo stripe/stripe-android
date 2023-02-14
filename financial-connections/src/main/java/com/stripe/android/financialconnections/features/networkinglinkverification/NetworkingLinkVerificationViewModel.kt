@@ -12,7 +12,9 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetConsumerSession
+import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
+import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -31,6 +33,8 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     private val startVerification: StartVerification,
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
+    private val pollNetworkedAccounts: PollNetworkedAccounts,
+    private val goNext: GoNext,
     private val logger: Logger
 ) : MavericksViewModel<NetworkingLinkVerificationState>(initialState) {
 
@@ -72,17 +76,35 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         )
     }
 
-    private fun onOTPEntered(otp: String) {
-        suspend {
-            val consumerSession = requireNotNull(getConsumerSession())
-            confirmVerification(
-                consumerSessionClientSecret = consumerSession.clientSecret,
-                verificationCode = otp
-            )
-            val markLinkVerified = markLinkVerified()
-            logger.debug("Navigating to next pane: ${markLinkVerified.nextPane}")
-        }.execute { copy(confirmVerification = it) }
-    }
+    private fun onOTPEntered(otp: String) = suspend {
+        val consumerSession = requireNotNull(getConsumerSession())
+        confirmVerification(
+            consumerSessionClientSecret = consumerSession.clientSecret,
+            verificationCode = otp
+        )
+        val updatedManifest = markLinkVerified()
+        val pollResult = runCatching { pollNetworkedAccounts(consumerSession.clientSecret) }
+        pollResult.fold(
+            onSuccess = { accounts ->
+                if (accounts.data.isEmpty()) {
+                    // Networked user has no accounts
+                    goNext(updatedManifest.nextPane)
+                } else {
+                    // Networked user has linked accounts
+                    // TODO@carlosmuvi navigate to linked accounts picker once implemented
+                    logger.debug("Navigate to linked accounts picker")
+                }
+                Unit
+            },
+            onFailure = {
+                // Error fetching accounts
+                logger.error("Error fetching networked accounts")
+                eventTracker.track(Error(Pane.NETWORKING_LINK_VERIFICATION, it))
+                goNext(updatedManifest.nextPane)
+                Unit
+            }
+        )
+    }.execute { copy(confirmVerification = it) }
 
     companion object :
         MavericksViewModelFactory<NetworkingLinkVerificationViewModel, NetworkingLinkVerificationState> {
