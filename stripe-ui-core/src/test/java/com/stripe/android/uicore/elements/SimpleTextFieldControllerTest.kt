@@ -221,16 +221,19 @@ internal class SimpleTextFieldControllerTest {
         verify(config).filter("1a2b3c4d")
     }
 
+    @Test
     fun `Verify null label`() {
         val controller = createControllerWithState(nullLabel = true)
         assertThat(controller.label.value).isNull()
     }
 
+    @Test
     fun `Verify non-null label`() {
         val controller = createControllerWithState(nullLabel = false)
-        assertThat(controller.label.value).isNotNull()
+        assertThat(controller.label.value).isEqualTo(R.string.address_label_full_name)
     }
 
+    @Test
     fun `Verify null placeHolder`() {
         val controller = createControllerWithState(nullPlaceHolder = true)
         assertThat(controller.placeHolder.value).isNull()
@@ -266,7 +269,9 @@ internal class SimpleTextFieldControllerTest {
             on { determineState("") } doReturn Blank
             on { filter("") } doReturn ""
 
-            if (!nullLabel) {
+            if (nullLabel) {
+                on { label } doReturn null
+            } else {
                 on { label } doReturn R.string.address_label_full_name
             }
 
