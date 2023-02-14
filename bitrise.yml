@@ -45,6 +45,7 @@ workflows:
           inputs:
             - arguments: -x=":stripe-test-e2e:testDebugUnitTest"
             - variant: debug
+      - deploy-to-bitrise-io@2: { }
       - cache-push@2: {}
   maestro-financial-connections:
     steps:
