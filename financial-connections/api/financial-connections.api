@@ -408,6 +408,13 @@ public final class com/stripe/android/financialconnections/features/manualentrys
 	public final fun getLambda-5$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/financialconnections/features/networkinglinkloginwarmup/ComposableSingletons$NetworkingLinkLoginWarmupScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/networkinglinkloginwarmup/ComposableSingletons$NetworkingLinkLoginWarmupScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/financialconnections/features/networkinglinksignup/ComposableSingletons$NetworkingLinkSignupScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/networkinglinksignup/ComposableSingletons$NetworkingLinkSignupScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;

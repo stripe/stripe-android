@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
+import com.stripe.android.financialconnections.utils.filterNotNullValues
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.Date
@@ -115,12 +116,31 @@ internal interface FinancialConnectionsManifestRepository {
         sessionId: String
     ): FinancialConnectionsAuthorizationSession
 
+    /**
+     * Save the authorized bank accounts to Link.
+     *
+     * This method could be called on behalf of a Link consumer or non-Link consumer.
+     *
+     * @return [FinancialConnectionsSessionManifest]
+     */
     suspend fun postSaveAccountsToLink(
         clientSecret: String,
         email: String,
         country: String,
         phoneNumber: String,
         selectedAccounts: List<String>
+    ): FinancialConnectionsSessionManifest
+
+    /**
+     * Disable networking in Connections Auth Flow
+     *
+     * Disable networking in Connections Auth Flow when the user chooses to continue in guest mode.
+     *
+     * @return [FinancialConnectionsSessionManifest]
+     */
+    suspend fun disableNetworking(
+        clientSecret: String,
+        disabledReason: String?
     ): FinancialConnectionsSessionManifest
 
     suspend fun postMarkLinkVerified(
@@ -365,6 +385,27 @@ private class FinancialConnectionsManifestRepositoryImpl(
         }
     }
 
+    override suspend fun disableNetworking(
+        clientSecret: String,
+        disabledReason: String?
+    ): FinancialConnectionsSessionManifest {
+        val request = apiRequestFactory.createPost(
+            url = disableNetworking,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "expand" to listOf("active_auth_session"),
+                "disabled_reason" to disabledReason,
+            ).filterNotNullValues()
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsSessionManifest.serializer()
+        ).also {
+            updateCachedManifest("postSaveAccountsToLink", it)
+        }
+    }
+
     override suspend fun postMarkLinkVerified(
         clientSecret: String
     ): FinancialConnectionsSessionManifest {
@@ -452,5 +493,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal val linkVerifiedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_verified"
+
+        internal val disableNetworking: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"
     }
 }

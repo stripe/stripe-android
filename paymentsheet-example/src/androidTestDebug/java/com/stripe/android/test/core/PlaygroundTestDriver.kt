@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -264,10 +265,16 @@ class PlaygroundTestDriver(
     }
 
     internal fun pressEdit() {
-        selectors.editButton.apply {
-            waitProcessingComplete()
-            click()
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodesWithText("EDIT")
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
+
+        composeTestRule
+            .onNodeWithText("EDIT")
+            .performClick()
     }
 
     /**

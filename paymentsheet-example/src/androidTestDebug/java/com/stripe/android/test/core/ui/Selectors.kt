@@ -107,8 +107,6 @@ class Selectors(
 
     val buyButton = BuyButton(device)
 
-    val editButton = EditButton(device)
-
     val addPaymentMethodButton = AddPaymentMethodButton(device)
 
     val selectBrowserPrompt = UiAutomatorText("Verify your payment", device = device)
