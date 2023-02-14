@@ -116,6 +116,13 @@ internal interface FinancialConnectionsManifestRepository {
         sessionId: String
     ): FinancialConnectionsAuthorizationSession
 
+    /**
+     * Save the authorized bank accounts to Link.
+     *
+     * This method could be called on behalf of a Link consumer or non-Link consumer.
+     *
+     * @return [FinancialConnectionsSessionManifest]
+     */
     suspend fun postSaveAccountsToLink(
         clientSecret: String,
         email: String,
@@ -124,6 +131,13 @@ internal interface FinancialConnectionsManifestRepository {
         selectedAccounts: List<String>
     ): FinancialConnectionsSessionManifest
 
+    /**
+     * Disable networking in Connections Auth Flow
+     *
+     * Disable networking in Connections Auth Flow when the user chooses to continue in guest mode.
+     *
+     * @return [FinancialConnectionsSessionManifest]
+     */
     suspend fun disableNetworking(
         clientSecret: String,
         disabledReason: String?
