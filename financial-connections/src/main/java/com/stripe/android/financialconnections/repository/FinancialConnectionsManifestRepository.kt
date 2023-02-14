@@ -22,6 +22,7 @@ import java.util.Locale
  * Repository to centralize reads and writes to the [FinancialConnectionsSessionManifest]
  * of the current flow.
  */
+@Suppress("TooManyFunctions")
 internal interface FinancialConnectionsManifestRepository {
 
     /**
