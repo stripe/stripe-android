@@ -97,7 +97,6 @@ private fun NetworkingLinkVerificationContent(
 }
 
 @Composable
-@Suppress("LongMethod")
 @OptIn(ExperimentalComposeUiApi::class)
 private fun NetworkingLinkVerificationLoaded(
     confirmVerificationAsync: Async<Unit>,
@@ -128,54 +127,17 @@ private fun NetworkingLinkVerificationLoaded(
                 )
         ) {
             Spacer(modifier = Modifier.size(16.dp))
-            AnnotatedText(
-                text = TextResource.Text(
-                    stringResource(R.string.stripe_networking_verification_title)
-                ),
-                defaultStyle = FinancialConnectionsTheme.typography.subtitle,
-                annotationStyles = emptyMap(),
-                onClickableTextClick = {},
-            )
+            Title()
             Spacer(modifier = Modifier.size(8.dp))
-            AnnotatedText(
-                text = TextResource.Text(
-                    stringResource(
-                        R.string.stripe_networking_verification_desc,
-                        payload.phoneNumber
-                    )
-                ),
-                defaultStyle = FinancialConnectionsTheme.typography.body.copy(
-                    color = FinancialConnectionsTheme.colors.textSecondary
-                ),
-                annotationStyles = mapOf(
-                    StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized
-                        .toSpanStyle()
-                        .copy(color = FinancialConnectionsTheme.colors.textSecondary),
-                ),
-                onClickableTextClick = {},
+            Description(payload.phoneNumber)
+            Spacer(modifier = Modifier.size(24.dp))
+            ExistingEmailSection(
+                focusRequester = focusRequester,
+                otpElement = payload.otpElement,
+                enabled = confirmVerificationAsync !is Loading
             )
             Spacer(modifier = Modifier.size(24.dp))
-            StripeThemeForConnections {
-                OTPElementUI(
-                    focusRequester = focusRequester,
-                    enabled = confirmVerificationAsync !is Loading,
-                    element = payload.otpElement
-                )
-            }
-            Spacer(modifier = Modifier.size(24.dp))
-            AnnotatedText(
-                text = TextResource.Text(
-                    stringResource(
-                        R.string.stripe_networking_verification_email,
-                        payload.email
-                    )
-                ),
-                defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                    color = FinancialConnectionsTheme.colors.textDisabled
-                ),
-                annotationStyles = emptyMap(),
-                onClickableTextClick = {},
-            )
+            EmailSubtext(payload.email)
         }
         Spacer(modifier = Modifier.weight(1f))
         Column(
@@ -186,16 +148,86 @@ private fun NetworkingLinkVerificationLoaded(
                 bottom = 24.dp
             )
         ) {
-            FinancialConnectionsButton(
-                type = FinancialConnectionsButton.Type.Secondary,
-                onClick = { },
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(text = stringResource(R.string.stripe_networking_signup_cta_negative))
-            }
+            SkipButton()
         }
     }
+}
+
+@Composable
+private fun SkipButton() {
+    FinancialConnectionsButton(
+        type = FinancialConnectionsButton.Type.Secondary,
+        onClick = { },
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Text(text = stringResource(R.string.stripe_networking_signup_cta_negative))
+    }
+}
+
+@Composable
+private fun ExistingEmailSection(
+    focusRequester: FocusRequester,
+    otpElement: OTPElement,
+    enabled: Boolean
+) {
+    StripeThemeForConnections {
+        OTPElementUI(
+            focusRequester = focusRequester,
+            enabled = enabled,
+            element = otpElement
+        )
+    }
+}
+
+@Composable
+private fun EmailSubtext(email: String) {
+    AnnotatedText(
+        text = TextResource.Text(
+            stringResource(
+                R.string.stripe_networking_verification_email,
+                email
+            )
+        ),
+        defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+            color = FinancialConnectionsTheme.colors.textDisabled
+        ),
+        annotationStyles = emptyMap(),
+        onClickableTextClick = {},
+    )
+}
+
+@Composable
+private fun Description(phoneNumber: String) {
+    AnnotatedText(
+        text = TextResource.Text(
+            stringResource(
+                R.string.stripe_networking_verification_desc,
+                phoneNumber
+            )
+        ),
+        defaultStyle = FinancialConnectionsTheme.typography.body.copy(
+            color = FinancialConnectionsTheme.colors.textSecondary
+        ),
+        annotationStyles = mapOf(
+            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized
+                .toSpanStyle()
+                .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+        ),
+        onClickableTextClick = {},
+    )
+}
+
+@Composable
+private fun Title() {
+    AnnotatedText(
+        text = TextResource.Text(
+            stringResource(R.string.stripe_networking_verification_title)
+        ),
+        defaultStyle = FinancialConnectionsTheme.typography.subtitle,
+        annotationStyles = emptyMap(),
+        onClickableTextClick = {},
+    )
 }
 
 @Composable
