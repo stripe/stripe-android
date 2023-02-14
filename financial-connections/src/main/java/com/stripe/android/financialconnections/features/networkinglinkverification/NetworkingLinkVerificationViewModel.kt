@@ -17,7 +17,9 @@ import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.domain.StartVerification
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
@@ -45,8 +47,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         suspend {
             val email = requireNotNull(getManifest().accountholderCustomerEmailAddress)
             val consumerSession = requireNotNull(lookupAccount(email).consumerSession)
-            val startVerification = startVerification(consumerSession.clientSecret)
-            logger.debug(startVerification.verificationSessions.first().toString())
+            startVerification(consumerSession.clientSecret)
             eventTracker.track(PaneLoaded(Pane.NETWORKING_LINK_VERIFICATION))
             NetworkingLinkVerificationState.Payload(
                 email = consumerSession.emailAddress,
@@ -87,28 +88,34 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             verificationCode = otp
         )
         val updatedManifest = markLinkVerified()
-        val pollResult = runCatching { pollNetworkedAccounts(payload.consumerSessionClientSecret) }
-        pollResult.fold(
-            onSuccess = { accounts ->
-                if (accounts.data.isEmpty()) {
-                    // Networked user has no accounts
-                    goNext(updatedManifest.nextPane)
-                } else {
-                    // Networked user has linked accounts
-                    // TODO@carlosmuvi navigate to linked accounts picker once implemented
-                    logger.debug("Navigate to linked accounts picker")
-                }
-                Unit
-            },
-            onFailure = {
-                // Error fetching accounts
-                logger.error("Error fetching networked accounts", it)
-                eventTracker.track(Error(Pane.NETWORKING_LINK_VERIFICATION, it))
-                goNext(updatedManifest.nextPane)
-                Unit
-            }
-        )
+        runCatching { pollNetworkedAccounts(payload.consumerSessionClientSecret) }
+            .fold(
+                onSuccess = { onNetworkedAccountsSuccess(it, updatedManifest) },
+                onFailure = { onNetworkedAccountsFailed(it, updatedManifest) }
+            )
     }.execute { copy(confirmVerification = it) }
+
+    private suspend fun onNetworkedAccountsFailed(
+        error: Throwable,
+        updatedManifest: FinancialConnectionsSessionManifest
+    ) {
+        logger.error("Error fetching networked accounts", error)
+        eventTracker.track(Error(Pane.NETWORKING_LINK_VERIFICATION, error))
+        goNext(updatedManifest.nextPane)
+    }
+
+    private fun onNetworkedAccountsSuccess(
+        accounts: PartnerAccountsList,
+        updatedManifest: FinancialConnectionsSessionManifest
+    ) {
+        if (accounts.data.isEmpty()) {
+            // Networked user has no accounts
+            goNext(updatedManifest.nextPane)
+        } else {
+            // Networked user has linked accounts
+            goNext(Pane.LINK_ACCOUNT_PICKER)
+        }
+    }
 
     companion object :
         MavericksViewModelFactory<NetworkingLinkVerificationViewModel, NetworkingLinkVerificationState> {

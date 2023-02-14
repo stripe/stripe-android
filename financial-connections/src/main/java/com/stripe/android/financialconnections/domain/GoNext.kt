@@ -45,6 +45,7 @@ internal fun Pane.toNavigationCommand(
     Pane.AUTH_OPTIONS,
     Pane.LINK_CONSENT,
     Pane.LINK_LOGIN,
+    Pane.LINK_ACCOUNT_PICKER,
     Pane.UNEXPECTED_ERROR -> {
         TODO("Unimplemented navigation command: ${this.value}")
     }

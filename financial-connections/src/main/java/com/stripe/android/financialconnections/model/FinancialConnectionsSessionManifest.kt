@@ -234,6 +234,9 @@ internal data class FinancialConnectionsSessionManifest(
         UNEXPECTED_ERROR("unexpected_error"),
 
         // CLIENT SIDE PANES
+        @SerialName(value = "link_account_picker")
+        LINK_ACCOUNT_PICKER("link_account_picker"),
+
         @SerialName(value = "reset")
         RESET("reset");
 
