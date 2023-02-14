@@ -13,7 +13,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -116,9 +115,7 @@ internal fun PaymentOptionsScreenContent(
                 html = text,
                 color = MaterialTheme.stripeColors.subtitle,
                 style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
-                modifier = Modifier
-                    .testTag("notes")
-                    .padding(top = 8.dp), // TODO
+                modifier = Modifier.padding(top = 8.dp),
             )
         }
     }
