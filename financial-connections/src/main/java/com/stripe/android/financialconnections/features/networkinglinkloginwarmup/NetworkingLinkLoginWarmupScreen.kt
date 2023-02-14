@@ -111,7 +111,6 @@ private fun NetworkingLinkLoginWarmupLoading() {
 }
 
 @Composable
-@Suppress("LongMethod")
 private fun NetworkingLinkLoginWarmupLoaded(
     scrollState: ScrollState,
     payload: Payload,
@@ -130,48 +129,65 @@ private fun NetworkingLinkLoginWarmupLoaded(
             )
     ) {
         Spacer(modifier = Modifier.size(16.dp))
-        AnnotatedText(
-            text = StringId(R.string.stripe_networking_link_login_warmup_title),
-            defaultStyle = FinancialConnectionsTheme.typography.subtitle,
-            annotationStyles = mapOf(
-                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.subtitle
-                    .toSpanStyle()
-                    .copy(color = FinancialConnectionsTheme.colors.textBrand),
-            ),
-            onClickableTextClick = onClickableTextClick,
+        Title(
+            onClickableTextClick = onClickableTextClick
         )
         Spacer(modifier = Modifier.size(8.dp))
-        AnnotatedText(
-            text = StringId(R.string.stripe_networking_link_login_warmup_description),
-            defaultStyle = FinancialConnectionsTheme.typography.body.copy(
-                color = FinancialConnectionsTheme.colors.textSecondary
-            ),
-            annotationStyles = mapOf(
-                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.body
-                    .toSpanStyle()
-                    .copy(color = FinancialConnectionsTheme.colors.textBrand),
-            ),
-            onClickableTextClick = onClickableTextClick,
-        )
+        Description(onClickableTextClick)
         Spacer(modifier = Modifier.size(24.dp))
         ExistingEmailSection(
             email = payload.email,
             onContinueClick = onContinueClick
         )
         Spacer(modifier = Modifier.size(20.dp))
-        AnnotatedText(
-            text = StringId(R.string.stripe_networking_link_login_warmup_skip),
-            defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                color = FinancialConnectionsTheme.colors.textSecondary
-            ),
-            annotationStyles = mapOf(
-                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
-                    .toSpanStyle()
-                    .copy(color = FinancialConnectionsTheme.colors.textBrand),
-            ),
-            onClickableTextClick = onClickableTextClick,
-        )
+        SkipSignIn(onClickableTextClick)
     }
+}
+
+@Composable
+private fun SkipSignIn(onClickableTextClick: (String) -> Unit) {
+    AnnotatedText(
+        text = StringId(R.string.stripe_networking_link_login_warmup_skip),
+        defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+            color = FinancialConnectionsTheme.colors.textSecondary
+        ),
+        annotationStyles = mapOf(
+            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                .toSpanStyle()
+                .copy(color = FinancialConnectionsTheme.colors.textBrand),
+        ),
+        onClickableTextClick = onClickableTextClick,
+    )
+}
+
+@Composable
+private fun Description(onClickableTextClick: (String) -> Unit) {
+    AnnotatedText(
+        text = StringId(R.string.stripe_networking_link_login_warmup_description),
+        defaultStyle = FinancialConnectionsTheme.typography.body.copy(
+            color = FinancialConnectionsTheme.colors.textSecondary
+        ),
+        annotationStyles = mapOf(
+            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.body
+                .toSpanStyle()
+                .copy(color = FinancialConnectionsTheme.colors.textBrand),
+        ),
+        onClickableTextClick = onClickableTextClick,
+    )
+}
+
+@Composable
+private fun Title(onClickableTextClick: (String) -> Unit) {
+    AnnotatedText(
+        text = StringId(R.string.stripe_networking_link_login_warmup_title),
+        defaultStyle = FinancialConnectionsTheme.typography.subtitle,
+        annotationStyles = mapOf(
+            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.subtitle
+                .toSpanStyle()
+                .copy(color = FinancialConnectionsTheme.colors.textBrand),
+        ),
+        onClickableTextClick = onClickableTextClick,
+    )
 }
 
 @Composable
