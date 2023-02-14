@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.databinding.FragmentPaymentSheetPrimaryBu
 import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.convert
@@ -62,7 +63,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
     private val topContainer by lazy { viewBinding.topContainer }
-    private val googlePayButton by lazy { viewBinding.googlePayButton }
     private val linkButton by lazy { viewBinding.linkButton }
     private val googlePayDivider by lazy { viewBinding.googlePayDivider }
 
@@ -167,7 +167,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.buttonsEnabled.launchAndCollectIn(this) { enabled ->
             linkButton.isEnabled = enabled
-            googlePayButton.isEnabled = enabled
         }
 
         viewModel.selection.launchAndCollectIn(this) {
@@ -200,7 +199,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.walletsContainerState.launchAndCollectIn(this) { config ->
             linkButton.isVisible = config.showLink
-            googlePayButton.isVisible = config.showGooglePay
             topContainer.isVisible = config.shouldShow
         }
 
@@ -219,12 +217,22 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun setupGooglePayButton() {
-        googlePayButton.setOnClickListener {
-            viewModel.checkoutWithGooglePay()
-        }
+        viewBinding.googlePayButton.setContent {
+            val containerState by viewModel.walletsContainerState.collectAsState(
+                initial = WalletsContainerState(),
+            )
 
-        viewModel.googlePayButtonState.launchAndCollectIn(this) { viewState ->
-            googlePayButton.updateState(viewState?.convert())
+            val buttonState by viewModel.googlePayButtonState.collectAsState(initial = null)
+            val isEnabled by viewModel.buttonsEnabled.collectAsState(initial = false)
+
+            if (containerState.showGooglePay) {
+                GooglePayButton(
+                    state = buttonState?.convert(),
+                    isEnabled = isEnabled,
+                    onPressed = viewModel::checkoutWithGooglePay,
+                    modifier = Modifier.padding(top = 7.dp),
+                )
+            }
         }
     }
 
