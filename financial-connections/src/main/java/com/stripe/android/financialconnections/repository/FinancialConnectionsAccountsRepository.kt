@@ -30,6 +30,11 @@ internal interface FinancialConnectionsAccountsRepository {
         sessionId: String
     ): PartnerAccountsList
 
+    /**
+     * Retrieve the networked accounts for the Link consumer after verification
+     *
+     * This method is called after the account holder has been verified as an existing Link consumer.
+     */
     suspend fun postNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String,

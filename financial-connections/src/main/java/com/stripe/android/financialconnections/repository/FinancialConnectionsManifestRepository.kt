@@ -143,6 +143,14 @@ internal interface FinancialConnectionsManifestRepository {
         disabledReason: String?
     ): FinancialConnectionsSessionManifest
 
+    /**
+     * Mark when the user has verified (logged in) via SMS OTP to their Link account in the networking auth flow
+     *
+     * When the user verifies via SMS OTP and logs in to their Link account in
+     * the networking auth flow, mark it on the link account session so we don't ask them to log in again.
+     *
+     * @return [FinancialConnectionsSessionManifest]
+     */
     suspend fun postMarkLinkVerified(
         clientSecret: String,
     ): FinancialConnectionsSessionManifest
