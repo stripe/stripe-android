@@ -39,11 +39,12 @@ class PaymentSheetContract :
 
     @Parcelize
     data class Args @VisibleForTesting internal constructor(
-        internal val clientSecret: ClientSecret,
+        internal val origin: PaymentSheetOrigin,
         internal val config: PaymentSheet.Configuration?,
         @ColorInt internal val statusBarColor: Int? = null,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     ) : ActivityStarter.Args {
+
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
 
         companion object {
@@ -55,7 +56,7 @@ class PaymentSheetContract :
                 clientSecret: String,
                 config: PaymentSheet.Configuration? = null
             ) = Args(
-                PaymentIntentClientSecret(clientSecret),
+                PaymentSheetOrigin.Intent(PaymentIntentClientSecret(clientSecret)),
                 config
             )
 
@@ -63,7 +64,7 @@ class PaymentSheetContract :
                 clientSecret: String,
                 config: PaymentSheet.Configuration? = null
             ) = Args(
-                SetupIntentClientSecret(clientSecret),
+                PaymentSheetOrigin.Intent(SetupIntentClientSecret(clientSecret)),
                 config
             )
 
@@ -72,7 +73,7 @@ class PaymentSheetContract :
                 config: PaymentSheet.Configuration? = null,
                 @InjectorKey injectorKey: String
             ) = Args(
-                PaymentIntentClientSecret(clientSecret),
+                PaymentSheetOrigin.Intent(PaymentIntentClientSecret(clientSecret)),
                 config,
                 injectorKey = injectorKey
             )
@@ -82,7 +83,7 @@ class PaymentSheetContract :
                 config: PaymentSheet.Configuration? = null,
                 @InjectorKey injectorKey: String
             ) = Args(
-                SetupIntentClientSecret(clientSecret),
+                PaymentSheetOrigin.Intent(SetupIntentClientSecret(clientSecret)),
                 config,
                 injectorKey = injectorKey
             )

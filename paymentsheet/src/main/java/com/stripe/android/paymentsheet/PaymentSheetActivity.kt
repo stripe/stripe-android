@@ -181,8 +181,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             Result.failure(defaultInitializationError())
         } else {
             try {
+                starterArgs.origin.validate()
                 starterArgs.config?.validate()
-                starterArgs.clientSecret.validate()
                 starterArgs.config?.appearance?.parseAppearance()
                 Result.success(starterArgs)
             } catch (e: InvalidParameterException) {

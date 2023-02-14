@@ -220,16 +220,16 @@ constructor(
             null -> false
         }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
-        return isTopLevelSetupFutureUsageSet() || paymentMethodOptionsJsonString?.let {
-            JSONObject(paymentMethodOptionsJsonString)
-                .optJSONObject(code)
-                ?.optString("setup_future_usage")?.let {
-                    true
-                } ?: false
-        } ?: false
-    }
+//    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+//    fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
+//        return isTopLevelSetupFutureUsageSet() || paymentMethodOptionsJsonString?.let {
+//            JSONObject(paymentMethodOptionsJsonString)
+//                .optJSONObject(code)
+//                ?.optString("setup_future_usage")?.let {
+//                    true
+//                } ?: false
+//        } ?: false
+//    }
 
     /**
      * The payment error encountered in the previous [PaymentIntent] confirmation.

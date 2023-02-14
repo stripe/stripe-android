@@ -150,8 +150,9 @@ private fun BaseSheetViewModel.showLinkInlineSignupView(
         AccountStatus.SignedOut,
     )
     val linkInlineSelectionValid = linkHandler.linkInlineSelection.value != null
-    return linkHandler.isLinkEnabled.value == true && stripeIntent.value
-        ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
+    val fundingSources = options.value?.linkFundingSources.orEmpty()
+    return linkHandler.isLinkEnabled.value == true &&
+        fundingSources.contains(PaymentMethod.Type.Card.code) &&
         paymentMethodCode == PaymentMethod.Type.Card.code &&
         (linkAccountStatus in validStatusStates || linkInlineSelectionValid)
 }

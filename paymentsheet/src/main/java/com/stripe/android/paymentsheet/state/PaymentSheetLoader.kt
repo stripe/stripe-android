@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetOrigin
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
@@ -42,7 +43,7 @@ import kotlin.coroutines.CoroutineContext
 internal interface PaymentSheetLoader {
 
     suspend fun load(
-        clientSecret: ClientSecret,
+        origin: PaymentSheetOrigin,
         paymentSheetConfiguration: PaymentSheet.Configuration? = null
     ): Result
 
@@ -68,6 +69,17 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 ) : PaymentSheetLoader {
 
     override suspend fun load(
+        origin: PaymentSheetOrigin,
+        paymentSheetConfiguration: PaymentSheet.Configuration?
+    ): PaymentSheetLoader.Result {
+        return when (origin) {
+            is PaymentSheetOrigin.Intent -> {
+                loadWithClientSecret(origin.clientSecret, paymentSheetConfiguration)
+            }
+        }
+    }
+
+    private suspend fun loadWithClientSecret(
         clientSecret: ClientSecret,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ) = withContext(workContext) {
@@ -147,11 +159,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             }
         }
 
+        val options = stripeIntent.toPaymentSheetOptions()
+
         return@coroutineScope PaymentSheetLoader.Result.Success(
             PaymentSheetState.Full(
                 config = config,
-                clientSecret = clientSecret,
-                stripeIntent = stripeIntent,
+                options = options,
                 customerPaymentMethods = paymentMethods.await(),
                 savedSelection = savedSelection.await(),
                 isGooglePayReady = isGooglePayReady,
@@ -167,7 +180,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         customerConfig: PaymentSheet.CustomerConfiguration
     ): List<PaymentMethod> {
         val paymentMethodTypes = getSupportedSavedCustomerPMs(
-            stripeIntent,
+            stripeIntent.toPaymentSheetOptions(),
             config,
             lpmResourceRepository.getRepository()
         ).mapNotNull {
@@ -227,8 +240,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val paymentMethodPreference = stripeIntentRepository.get(clientSecret)
         val lpmRepository = lpmResourceRepository.getRepository()
 
+        val options = paymentMethodPreference.intent.toPaymentSheetOptions()
+
         lpmRepository.update(
-            stripeIntent = paymentMethodPreference.intent,
+            mode = options.mode,
+            setupFutureUsage = options.setupFutureUsage,
+            expectedLpms = options.supportedPaymentMethodTypes,
             serverLpmSpecs = paymentMethodPreference.formUI,
         )
 

@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -104,8 +103,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
         // After recovering from don't keep activities the stripe intent will be saved,
         // calling setStripeIntent would require the repository be initialized, which
         // would not be the case.
-        if (stripeIntent.value == null) {
-            setStripeIntent(args.state.stripeIntent)
+        if (options.value == null) {
+            setPaymentSheetOptions(args.state.options)
         }
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.state.customerPaymentMethods
         savedStateHandle[SAVE_SAVED_SELECTION] = args.state.savedSelection
@@ -132,7 +131,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             LinkHandler.ProcessingState.Completed -> {
                 eventReporter.onPaymentSuccess(
                     PaymentSelection.Link,
-                    stripeIntent.value?.currency
+                    options.value?.currency
                 )
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 onPaymentResult(PaymentResult.Completed)
@@ -202,7 +201,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         selection.value?.let { paymentSelection ->
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
-            eventReporter.onSelectPaymentOption(paymentSelection, stripeIntent.value?.currency)
+            eventReporter.onSelectPaymentOption(paymentSelection, options.value?.currency)
 
             when (paymentSelection) {
                 is PaymentSelection.Saved ->

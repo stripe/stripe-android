@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getPMAddForm
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.state.PaymentSheetData
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 
@@ -12,7 +12,7 @@ internal object FormArgumentsFactory {
 
     fun create(
         paymentMethod: LpmRepository.SupportedPaymentMethod,
-        stripeIntent: StripeIntent,
+        stripeIntent: PaymentSheetData,
         config: PaymentSheet.Configuration?,
         merchantName: String,
         amount: Amount? = null,
