@@ -33,9 +33,10 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         suspend {
             val manifest = getManifest()
             eventTracker.track(PaneLoaded(Pane.NETWORKING_LINK_SIGNUP_PANE))
+            val emailAddress = requireNotNull(manifest.accountholderCustomerEmailAddress)
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = ConsentTextBuilder.getBusinessName(manifest),
-                email = manifest.accountholderCustomerEmailAddress!!
+                email = emailAddress
             )
         }.execute { copy(payload = it) }
     }
@@ -62,9 +63,9 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
     }
 
     fun onClickableTextClick(text: String) {
-        when (text) {
-            "skip" -> onSkipClicked()
-            else -> TODO("Unknown click handler!")
+        when (ClickableText.values().firstOrNull { text == it.value }) {
+            ClickableText.SKIP_LOGIN -> onSkipClicked()
+            null -> logger.error("Unknown clicked text $text")
         }
     }
 
@@ -90,6 +91,10 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
                 .viewModel
         }
     }
+}
+
+private enum class ClickableText(val value: String) {
+    SKIP_LOGIN("skip_login"),
 }
 
 internal data class NetworkingLinkLoginWarmupState(
