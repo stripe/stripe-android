@@ -1,6 +1,7 @@
 package com.stripe.android.utils
 
 import android.content.Context
+import com.stripe.android.ui.core.PaymentSheetMode
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 
 internal fun initializedLpmRepository(context: Context): LpmRepository {
@@ -9,9 +10,12 @@ internal fun initializedLpmRepository(context: Context): LpmRepository {
     )
 
     repository.update(
-        stripeIntent = PaymentIntentFactory.create(
-            paymentMethodTypes = repository.supportedPaymentMethods,
+        mode = PaymentSheetMode.Payment(
+            amount = 1000L,
+            currency = "usd",
         ),
+        setupFutureUsage = null,
+        expectedLpms = repository.supportedPaymentMethods,
         serverLpmSpecs = null,
     )
 

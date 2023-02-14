@@ -141,7 +141,9 @@ internal class PaymentSheetActivityTest {
     private val intent = contract.createIntent(
         context,
         PaymentSheetContract.Args(
-            PaymentIntentClientSecret("client_secret"),
+            origin = PaymentSheetOrigin.Intent(
+                clientSecret = PaymentIntentClientSecret("client_secret"),
+            ),
             PaymentSheetFixtures.CONFIG_CUSTOMER,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
         )
@@ -658,7 +660,9 @@ internal class PaymentSheetActivityTest {
             val intent = contract.createIntent(
                 activity,
                 PaymentSheetContract.Args(
-                    PaymentIntentClientSecret("client_secret"),
+                    origin = PaymentSheetOrigin.Intent(
+                        clientSecret = PaymentIntentClientSecret("client_secret"),
+                    ),
                     PaymentSheetFixtures.CONFIG_CUSTOMER
                 )
             )
@@ -875,7 +879,9 @@ internal class PaymentSheetActivityTest {
         )
 
         val args = PaymentSheetContract.Args(
-            clientSecret = PaymentIntentClientSecret("abc"),
+            origin = PaymentSheetOrigin.Intent(
+                clientSecret = PaymentIntentClientSecret("abc"),
+            ),
             config = PaymentSheet.Configuration(
                 merchantDisplayName = "Some name",
                 customer = invalidCustomerConfig,
@@ -898,7 +904,9 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `Handles invalid client secret correctly`() {
         val args = PaymentSheetContract.Args(
-            clientSecret = PaymentIntentClientSecret(""),
+            origin = PaymentSheetOrigin.Intent(
+                clientSecret = PaymentIntentClientSecret(""),
+            ),
             config = null,
         )
 

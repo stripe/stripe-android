@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.state.toPaymentSheetOptions
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
@@ -65,15 +66,21 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
             ),
         )
+
+        val options = PaymentIntentFactory.create(
+            paymentMethodTypes = listOf(
+                PaymentMethod.Type.Card.code,
+                PaymentMethod.Type.USBankAccount.code
+            )
+        ).toPaymentSheetOptions()
+
         lpmRepository.update(
-            PaymentIntentFactory.create(
-                paymentMethodTypes = listOf(
-                    PaymentMethod.Type.Card.code,
-                    PaymentMethod.Type.USBankAccount.code
-                )
-            ),
-            null
+            mode = options.mode,
+            setupFutureUsage = options.setupFutureUsage,
+            expectedLpms = options.supportedPaymentMethodTypes,
+            serverLpmSpecs = null,
         )
+
         TestViewModelFactory.create(
             linkLauncher = mock<LinkPaymentLauncher>().apply {
                 whenever(getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))

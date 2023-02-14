@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.toPaymentSheetOptions
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
@@ -88,19 +89,23 @@ internal class PaymentSheetViewModelTest {
     private val lpmRepository = LpmRepository(
         arguments = LpmRepository.LpmRepositoryArguments(application.resources),
     ).apply {
+        val options = PaymentIntentFactory.create(
+            paymentMethodTypes = listOf(
+                PaymentMethod.Type.Card.code,
+                PaymentMethod.Type.USBankAccount.code,
+                PaymentMethod.Type.Ideal.code,
+                PaymentMethod.Type.SepaDebit.code,
+                PaymentMethod.Type.Sofort.code,
+                PaymentMethod.Type.Affirm.code,
+                PaymentMethod.Type.AfterpayClearpay.code,
+            )
+        ).toPaymentSheetOptions()
+
         this.update(
-            PaymentIntentFactory.create(
-                paymentMethodTypes = listOf(
-                    PaymentMethod.Type.Card.code,
-                    PaymentMethod.Type.USBankAccount.code,
-                    PaymentMethod.Type.Ideal.code,
-                    PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Sofort.code,
-                    PaymentMethod.Type.Affirm.code,
-                    PaymentMethod.Type.AfterpayClearpay.code,
-                )
-            ),
-            null
+            mode = options.mode,
+            setupFutureUsage = options.setupFutureUsage,
+            expectedLpms = options.supportedPaymentMethodTypes,
+            serverLpmSpecs = null,
         )
     }
 

@@ -5,20 +5,19 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER
+import com.stripe.android.paymentsheet.state.toPaymentSheetOptions
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.utils.PaymentIntentFactory
+import com.stripe.android.utils.PaymentSheetDataFactory
 import kotlinx.serialization.Serializable
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import java.io.File
 
 @RunWith(AndroidJUnit4::class)
@@ -28,9 +27,15 @@ class SupportedPaymentMethodTest {
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
         )
     ).apply {
-        this.update(
-            PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethods),
-            null
+        val options = PaymentIntentFactory
+            .create(paymentMethodTypes = this.supportedPaymentMethods)
+            .toPaymentSheetOptions()
+
+        update(
+            mode = options.mode,
+            setupFutureUsage = options.setupFutureUsage,
+            expectedLpms = options.supportedPaymentMethodTypes,
+            serverLpmSpecs = null,
         )
     }
     private val card = LpmRepository.HardcodedCard
@@ -41,7 +46,7 @@ class SupportedPaymentMethodTest {
         assertThat(
             LpmRepository.HardcodedCard
                 .getSpecWithFullfilledRequirements(
-                    PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET,
+                    PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET.toPaymentSheetOptions(),
                     CONFIG_CUSTOMER
                 )?.showCheckbox
         ).isFalse()
@@ -64,10 +69,10 @@ class SupportedPaymentMethodTest {
             )
 
             generatePaymentIntentScenarios().mapIndexed { index, testInput ->
-                val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
+                val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getOptions(lpm), testInput.getConfig())
                 val testOutput = TestOutput.create(
                     supportCustomerSavedCard = getSupportedSavedCustomerPMs(
-                        testInput.getIntent(lpm),
+                        testInput.getOptions(lpm),
                         testInput.getConfig(),
                         lpmRepository
                     ).contains(lpm),
@@ -75,7 +80,7 @@ class SupportedPaymentMethodTest {
                     formShowsSaveCheckbox = formDescriptor?.showCheckbox,
                     formShowsCheckboxControlledFields = formDescriptor?.showCheckboxControlledFields,
                     supportsAdding = getPMsToAdd(
-                        testInput.getIntent(lpm),
+                        testInput.getOptions(lpm),
                         testInput.getConfig(),
                         lpmRepository
                     ).contains(lpm)
@@ -98,50 +103,54 @@ class SupportedPaymentMethodTest {
 
     @Test
     fun `Test supported payment method doesn't filter with empty unactivated list in test mode`() {
-        val mockIntent = mock<PaymentIntent>()
-        whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card"))
-        whenever(mockIntent.isLiveMode).thenReturn(false)
-        whenever(mockIntent.unactivatedPaymentMethods).thenReturn(emptyList())
+        val paymentSheetData = PaymentSheetDataFactory.create(
+            paymentMethodTypes = listOf("card"),
+            isLiveMode = false,
+            unactivatedPaymentMethodTypes = emptyList(),
+        )
 
         val expected = listOf<SupportedPaymentMethod>().plus(card)
 
-        assertThat(getPMsToAdd(mockIntent, null, lpmRepository)).isEqualTo(expected)
+        assertThat(getPMsToAdd(paymentSheetData, null, lpmRepository)).isEqualTo(expected)
     }
 
     @Test
     fun `Test supported payment method doesn't filter with empty unactivated list in live mode`() {
-        val mockIntent = mock<PaymentIntent>()
-        whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card"))
-        whenever(mockIntent.isLiveMode).thenReturn(true)
-        whenever(mockIntent.unactivatedPaymentMethods).thenReturn(emptyList())
+        val paymentSheetData = PaymentSheetDataFactory.create(
+            paymentMethodTypes = listOf("card"),
+            isLiveMode = true,
+            unactivatedPaymentMethodTypes = emptyList(),
+        )
 
         val expected = listOf<SupportedPaymentMethod>().plus(card)
 
-        assertThat(getPMsToAdd(mockIntent, null, lpmRepository)).isEqualTo(expected)
+        assertThat(getPMsToAdd(paymentSheetData, null, lpmRepository)).isEqualTo(expected)
     }
 
     @Test
     fun `Test supported payment method does filter with unactivated list in live mode`() {
-        val mockIntent = mock<PaymentIntent>()
-        whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card"))
-        whenever(mockIntent.isLiveMode).thenReturn(true)
-        whenever(mockIntent.unactivatedPaymentMethods).thenReturn(listOf("card"))
+        val paymentSheetData = PaymentSheetDataFactory.create(
+            paymentMethodTypes = listOf("card"),
+            isLiveMode = false,
+            unactivatedPaymentMethodTypes = listOf("card"),
+        )
 
         val expected = listOf<SupportedPaymentMethod>()
 
-        assertThat(getPMsToAdd(mockIntent, null, lpmRepository)).isEqualTo(expected)
+        assertThat(getPMsToAdd(paymentSheetData, null, lpmRepository)).isEqualTo(expected)
     }
 
     @Test
     fun `Test supported payment method doesn't filter with unactivated list in test mode`() {
-        val mockIntent = mock<PaymentIntent>()
-        whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card"))
-        whenever(mockIntent.isLiveMode).thenReturn(false)
-        whenever(mockIntent.unactivatedPaymentMethods).thenReturn(listOf("card"))
+        val paymentSheetData = PaymentSheetDataFactory.create(
+            paymentMethodTypes = listOf("card"),
+            isLiveMode = false,
+            unactivatedPaymentMethodTypes = listOf("card"),
+        )
 
         val expected = listOf<SupportedPaymentMethod>().plus(card)
 
-        assertThat(getPMsToAdd(mockIntent, null, lpmRepository)).isEqualTo(expected)
+        assertThat(getPMsToAdd(paymentSheetData, null, lpmRepository)).isEqualTo(expected)
     }
 
     /**
@@ -212,18 +221,18 @@ class SupportedPaymentMethodTest {
 
         fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${intentPMs.joinToString("/")}"
 
-        fun getIntent(lpm: SupportedPaymentMethod) = when (intentHasShipping) {
+        fun getOptions(lpm: SupportedPaymentMethod) = when (intentHasShipping) {
             false ->
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     shipping = null,
                     setupFutureUsage = intentSetupFutureUsage,
                     paymentMethodTypes = intentPMs.plus(lpm.code).toList()
-                )
+                ).toPaymentSheetOptions()
             true ->
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     setupFutureUsage = intentSetupFutureUsage,
                     paymentMethodTypes = intentPMs.plus(lpm.code).toList()
-                )
+                ).toPaymentSheetOptions()
         }
 
         fun getConfig() = if (hasCustomer) {
