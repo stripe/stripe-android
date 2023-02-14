@@ -9,6 +9,7 @@ trigger_map:
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
+    - GRADLEW_PATH: ./gradlew
 pipelines:
   main-trigger-pipeline:
     stages:
@@ -31,26 +32,6 @@ workflows:
       - script@1:
           inputs:
             - content: ./gradlew ktlint detekt lintRelease apiCheck
-      - cache-push@2: {}
-  test:
-    steps:
-      - activate-ssh-key@4:
-          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@6: {}
-      - cache-pull@2: {}
-      - script@1:
-          inputs:
-            - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
-      - android-unit-test@1:
-          title: Unit tests
-          inputs:
-            - arguments: -x=":stripe-test-e2e:testDebugUnitTest"
-            - variant: debug
-      - script@1:
-          title: Verify screenshots
-          inputs:
-            - content: ./gradlew verifyPaparazziDebug
-      - deploy-to-bitrise-io@2: { }
       - cache-push@2: {}
   maestro-financial-connections:
     steps:
@@ -93,6 +74,21 @@ workflows:
             - test_name: Maestro tests
       - deploy-to-bitrise-io@2: {}
       - cache-push@2: {}
+  test:
+    steps:
+      - activate-ssh-key@4:
+          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+      - git-clone@6: {}
+      - cache-pull@2: {}
+      - script@1:
+          inputs:
+            - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
+      - gradle-unit-test@1:
+          inputs:
+            - unit_test_flags: -x=":stripe-test-e2e:testDebugUnitTest"
+            - unit_test_task: testDebugUnitTest verifyPaparazziDebug
+      - deploy-to-bitrise-io@2: { }
+      - cache-push@2: { }
 meta:
   bitrise.io:
     stack: linux-docker-android-20.04
