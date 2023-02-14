@@ -6,7 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.EmptyFormSpec
-import com.stripe.android.utils.PaymentIntentFactory
+import com.stripe.android.utils.LpmUpdateParamsFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -35,7 +35,7 @@ class LpmRepositoryTest {
                 ApplicationProvider.getApplicationContext<Application>().resources
             )
         )
-        lpmRepository.updateFromDisk(PaymentIntentFactory.create())
+        lpmRepository.updateFromDisk(LpmUpdateParamsFactory.create())
         assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
             .isEqualTo(R.string.stripe_paymentsheet_payment_method_clearpay)
 
@@ -50,7 +50,7 @@ class LpmRepositoryTest {
                 ApplicationProvider.getApplicationContext<Application>().resources
             )
         )
-        lpmRepository.updateFromDisk(PaymentIntentFactory.create())
+        lpmRepository.updateFromDisk(LpmUpdateParamsFactory.create())
         assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
             .isEqualTo(R.string.stripe_paymentsheet_payment_method_afterpay)
     }
@@ -58,15 +58,17 @@ class LpmRepositoryTest {
     @Test
     fun `Verify failing to read server schema reads from disk`() {
         lpmRepository.update(
-            PaymentIntentFactory.create(paymentMethodTypes = listOf("affirm")),
-            """
-          [
-            {
-                "type": "affirm",
-                invalid schema
-              }
-         ]
-            """.trimIndent()
+            LpmUpdateParamsFactory.create(
+                paymentMethodTypes = listOf("affirm"),
+                serverLpmSpecs = """
+                    [
+                        {
+                            "type": "affirm",
+                            invalid schema
+                        }
+                    ]
+                """.trimIndent()
+            )
         )
         assertThat(lpmRepository.fromCode("affirm")).isNotNull()
     }
@@ -74,20 +76,22 @@ class LpmRepositoryTest {
     @Test
     fun `Verify field not found in schema is read from disk`() {
         lpmRepository.update(
-            PaymentIntentFactory.create(paymentMethodTypes = listOf("card", "afterpay_clearpay")),
-            """
-          [
-            {
-                "type": "afterpay_clearpay",
-                "async": false,
-                "fields": [
-                  {
-                    "type": "affirm_header"
-                  }
-                ]
-              }
-         ]
-            """.trimIndent()
+            LpmUpdateParamsFactory.create(
+                paymentMethodTypes = listOf("card", "afterpay_clearpay"),
+                serverLpmSpecs = """
+                    [
+                        {
+                            "type": "afterpay_clearpay",
+                            "async": false,
+                            "fields": [
+                                {
+                                    "type": "affirm_header"
+                                }
+                            ]
+                        }
+                    ]
+                """.trimIndent()
+            )
         )
         assertThat(lpmRepository.fromCode("afterpay_clearpay")).isNotNull()
         assertThat(lpmRepository.fromCode("card")).isNotNull()
@@ -96,7 +100,7 @@ class LpmRepositoryTest {
     @Test
     fun `Verify latest server spec`() {
         lpmRepository.update(
-            PaymentIntentFactory.create(
+            LpmUpdateParamsFactory.create(
                 paymentMethodTypes = listOf(
                     "bancontact",
                     "sofort",
@@ -105,22 +109,22 @@ class LpmRepositoryTest {
                     "p24",
                     "eps",
                     "giropay"
-                )
-            ),
-            """
-                [
-                  {
-                    "type": "an lpm",
-                    "async": false,
-                    "fields": [
-                      {
-                        "api_path": null,
-                        "type": "afterpay_header"
-                      }
+                ),
+                serverLpmSpecs = """
+                    [
+                        {
+                            "type": "an lpm",
+                            "async": false,
+                            "fields": [
+                                {
+                                    "api_path": null,
+                                    "type": "afterpay_header"
+                                }
+                            ]
+                        }
                     ]
-                  }
-                ]
-            """.trimIndent()
+                """.trimIndent()
+            )
         )
         assertThat(lpmRepository.fromCode("sofort")).isNotNull()
         assertThat(lpmRepository.fromCode("ideal")).isNotNull()
@@ -133,29 +137,31 @@ class LpmRepositoryTest {
     @Test
     fun `Repository will contain LPMs in ordered and schema`() {
         lpmRepository.update(
-            PaymentIntentFactory.create(paymentMethodTypes = listOf("afterpay_clearpay")),
-            """
-          [
-            {
-                "type": "affirm",
-                "async": false,
-                "fields": [
-                  {
-                    "type": "affirm_header"
-                  }
-                ]
-            },
-            {
-                "type": "afterpay_clearpay",
-                "async": false,
-                "fields": [
-                  {
-                    "type": "affirm_header"
-                  }
-                ]
-              }
-         ]
-            """.trimIndent()
+            LpmUpdateParamsFactory.create(
+                paymentMethodTypes = listOf("afterpay_clearpay"),
+                serverLpmSpecs = """
+                    [
+                        {
+                            "type": "affirm",
+                            "async": false,
+                            "fields": [
+                                {
+                                    "type": "affirm_header"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "afterpay_clearpay",
+                            "async": false,
+                            "fields": [
+                                {
+                                    "type": "affirm_header"
+                                }
+                            ]
+                        }
+                    ]
+                """.trimIndent()
+            )
         )
         assertThat(lpmRepository.fromCode("afterpay_clearpay")).isNotNull()
         assertThat(lpmRepository.fromCode("affirm")).isNotNull()
@@ -163,7 +169,7 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify no fields in the default json are ignored the lpms package should be correct`() {
-        lpmRepository.updateFromDisk(PaymentIntentFactory.create())
+        lpmRepository.updateFromDisk(LpmUpdateParamsFactory.create())
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
         lpmRepository.supportedPaymentMethods.forEach { code ->
@@ -196,20 +202,22 @@ class LpmRepositoryTest {
 
         assertThat(lpmRepository.fromCode("card")).isNull()
         lpmRepository.update(
-            PaymentIntentFactory.create(paymentMethodTypes = emptyList()),
-            """
-          [
-            {
-                "type": "affirm",
-                "async": false,
-                "fields": [
-                  {
-                    "type": "affirm_header"
-                  }
-                ]
-              }
-         ]
-            """.trimIndent()
+            LpmUpdateParamsFactory.create(
+                paymentMethodTypes = emptyList(),
+                serverLpmSpecs = """
+                    [
+                        {
+                            "type": "affirm",
+                            "async": false,
+                            "fields": [
+                                {
+                                    "type": "affirm_header"
+                                }
+                            ]
+                        }
+                    ]
+                """.trimIndent()
+            )
         )
         assertThat(lpmRepository.fromCode("card")).isNull()
     }
@@ -217,53 +225,55 @@ class LpmRepositoryTest {
     @Test
     fun `Verify that unknown LPMs are not shown because not listed as exposed`() {
         lpmRepository.update(
-            PaymentIntentFactory.create(paymentMethodTypes = emptyList()),
-            """
-              [
-                {
-                    "type": "affirm",
-                    "async": false,
-                    "fields": [
-                      {
-                        "type": "affirm_header"
-                      }
+            LpmUpdateParamsFactory.create(
+                paymentMethodTypes = emptyList(),
+                serverLpmSpecs = """
+                    [
+                        {
+                            "type": "affirm",
+                            "async": false,
+                            "fields": [
+                                {
+                                    "type": "affirm_header"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "unknown_lpm",
+                            "async": false,
+                            "fields": [
+                                {
+                                    "type": "affirm_header"
+                                }
+                            ]
+                        }
                     ]
-                  },
-                {
-                    "type": "unknown_lpm",
-                    "async": false,
-                    "fields": [
-                      {
-                        "type": "affirm_header"
-                      }
-                    ]
-                  }
-             ]
-            """.trimIndent()
+                """.trimIndent()
+            ),
         )
         assertThat(lpmRepository.fromCode("unknown_lpm")).isNull()
     }
 
     @Test
     fun `Verify that payment methods hardcoded to delayed remain regardless of json`() {
-        val stripeIntent = PaymentIntentFactory.create()
-        lpmRepository.updateFromDisk(stripeIntent)
+        val updateParams = LpmUpdateParamsFactory.create(
+            serverLpmSpecs = """
+                [
+                    {
+                        "type": "sofort",
+                        "async": false,
+                        "fields": []
+                    }
+                ]
+            """.trimIndent()
+        )
+        lpmRepository.updateFromDisk(updateParams)
+
         assertThat(
             lpmRepository.fromCode("sofort")?.requirement?.piRequirements
         ).contains(Delayed)
 
-        lpmRepository.update(
-            stripeIntent,
-            """
-              [
-                {
-                    "type": "sofort",
-                    "async": false,
-                    "fields": []
-                  }
-             ]
-            """.trimIndent()
-        )
+        lpmRepository.update(updateParams)
         assertThat(
             lpmRepository.fromCode("sofort")?.requirement?.piRequirements
         ).contains(Delayed)
@@ -272,14 +282,16 @@ class LpmRepositoryTest {
     @Test
     fun `Verify that us_bank_account is supported when financial connections sdk available`() {
         lpmRepository.update(
-            PaymentIntentFactory.create(paymentMethodTypes = emptyList()),
-            """
-              [
-                {
-                  "type": "us_bank_account"
-                }
-              ]
-            """.trimIndent()
+            LpmUpdateParamsFactory.create(
+                paymentMethodTypes = emptyList(),
+                serverLpmSpecs = """
+                    [
+                        {
+                            "type": "us_bank_account"
+                        }
+                    ]
+                """.trimIndent(),
+            ),
         )
 
         assertThat(lpmRepository.fromCode("us_bank_account")).isNotNull()
@@ -296,14 +308,17 @@ class LpmRepositoryTest {
         )
 
         lpmRepository.update(
-            PaymentIntentFactory.create(paymentMethodTypes = emptyList()),
-            """
-              [
-                {
-                  "type": "us_bank_account"
-                }
-              ]
-            """.trimIndent()
+            LpmUpdateParamsFactory.create(
+                paymentMethodTypes = emptyList(),
+                serverLpmSpecs = """
+                    [
+                        {
+                            "type": "us_bank_account"
+                        }
+                    
+                    ]
+                """.trimIndent(),
+            ),
         )
 
         assertThat(lpmRepository.fromCode("us_bank_account")).isNull()
@@ -320,8 +335,10 @@ class LpmRepositoryTest {
         )
 
         lpmRepository.update(
-            stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("upi")),
-            serverLpmSpecs = "[]" // UPI doesn't come from the backend; we rely on the local specs
+            params = LpmUpdateParamsFactory.create(
+                paymentMethodTypes = listOf("upi"),
+                serverLpmSpecs = "[]" // UPI doesn't come from the backend; we rely on the local specs
+            ),
         )
 
         assertThat(lpmRepository.fromCode("upi")).isNotNull()
@@ -351,8 +368,10 @@ class LpmRepositoryTest {
         advanceTimeBy(1)
 
         lpmRepository.update(
-            stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("upi")),
-            serverLpmSpecs = "[]"
+            params = LpmUpdateParamsFactory.create(
+                paymentMethodTypes = listOf("upi"),
+                serverLpmSpecs = "[]" // UPI doesn't come from the backend; we rely on the local specs
+            ),
         )
 
         assertThat(lpmRepository.isLoaded()).isTrue()

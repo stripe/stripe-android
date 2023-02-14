@@ -9,6 +9,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
@@ -31,6 +32,8 @@ import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.paymentsheet.forms.UpiRequirement
+import com.stripe.android.ui.core.PaymentSheetMode
+import com.stripe.android.ui.core.PaymentSheetSetupFutureUse
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
@@ -41,6 +44,8 @@ import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.ui.core.elements.transform
+import com.stripe.android.ui.core.mode
+import com.stripe.android.ui.core.setupFutureUse
 import java.io.InputStream
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -113,11 +118,8 @@ class LpmRepository constructor(
      * so it is important that the json on disk is successful.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun update(
-        stripeIntent: StripeIntent,
-        serverLpmSpecs: String?,
-    ) {
-        val expectedLpms = stripeIntent.paymentMethodTypes
+    fun update(params: UpdateParams) {
+        val serverLpmSpecs = params.serverLpmSpecs
 
         serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
         if (!serverLpmSpecs.isNullOrEmpty()) {
@@ -126,12 +128,12 @@ class LpmRepository constructor(
             if (serverLpmObjects.isNotEmpty()) {
                 serverSpecLoadingState = ServerSpecState.ServerParsed(serverLpmSpecs)
             }
-            update(stripeIntent, serverLpmObjects)
+            update(params, serverLpmObjects)
         }
 
         // If the server does not return specs, or they are not parsed successfully
         // we will use the LPM on disk if found
-        val lpmsNotParsedFromServerSpec = expectedLpms
+        val lpmsNotParsedFromServerSpec = params.expectedLpms
             .filter { !lpmInitialFormData.containsKey(it) }
             .filter { supportsPaymentMethod(it) }
 
@@ -139,11 +141,17 @@ class LpmRepository constructor(
             val mapFromDisk: Map<String, SharedDataSpec>? =
                 readFromDisk()
                     ?.associateBy { it.type }
-                    ?.filterKeys { expectedLpms.contains(it) }
+                    ?.filterKeys { params.expectedLpms.contains(it) }
             lpmInitialFormData.putAll(
                 lpmsNotParsedFromServerSpec
                     .mapNotNull { mapFromDisk?.get(it) }
-                    .mapNotNull { convertToSupportedPaymentMethod(stripeIntent, it) }
+                    .mapNotNull {
+                        convertToSupportedPaymentMethod(
+                            mode = params.mode,
+                            setupFutureUse = params.setupFutureUse,
+                            sharedDataSpec = it,
+                        )
+                    }
                     .associateBy { it.code }
             )
             mapFromDisk
@@ -159,13 +167,16 @@ class LpmRepository constructor(
     }
 
     @VisibleForTesting
-    fun updateFromDisk(stripeIntent: StripeIntent) {
-        update(stripeIntent, readFromDisk())
+    fun updateFromDisk(params: UpdateParams) {
+        update(params, readFromDisk())
     }
 
     private fun readFromDisk() = parseLpms(arguments.resources?.assets?.open("lpms.json"))
 
-    private fun update(stripeIntent: StripeIntent, lpms: List<SharedDataSpec>?) {
+    private fun update(
+        params: UpdateParams,
+        lpms: List<SharedDataSpec>?,
+    ) {
         val parsedSharedData = lpms
             ?.filter { supportsPaymentMethod(it.type) }
             ?.filterNot {
@@ -175,7 +186,13 @@ class LpmRepository constructor(
 
         // By mapNotNull we will not accept any LPMs that are not known by the platform.
         parsedSharedData
-            ?.mapNotNull { convertToSupportedPaymentMethod(stripeIntent, it) }
+            ?.mapNotNull {
+                convertToSupportedPaymentMethod(
+                    mode = params.mode,
+                    setupFutureUse = params.setupFutureUse,
+                    sharedDataSpec = it,
+                )
+            }
             ?.toMutableList()
             ?.let {
                 lpmInitialFormData.putAll(
@@ -206,7 +223,8 @@ class LpmRepository constructor(
         inputStream?.bufferedReader().use { it?.readText() }
 
     private fun convertToSupportedPaymentMethod(
-        @Suppress("UNUSED_PARAMETER") stripeIntent: StripeIntent,
+        @Suppress("UNUSED_PARAMETER") mode: PaymentSheetMode,
+        @Suppress("UNUSED_PARAMETER") setupFutureUse: PaymentSheetSetupFutureUse?,
         sharedDataSpec: SharedDataSpec,
     ) = when (sharedDataSpec.type) {
         PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
@@ -530,5 +548,28 @@ class LpmRepository constructor(
         val resources: Resources?,
         val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
             DefaultIsFinancialConnectionsAvailable(),
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class UpdateParams(
+        val mode: PaymentSheetMode,
+        val setupFutureUse: PaymentSheetSetupFutureUse?,
+        val expectedLpms: List<String>,
+        val serverLpmSpecs: String?,
+    )
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PaymentMethodPreference.toUpdateParams(): LpmRepository.UpdateParams {
+    return intent.toUpdateParams(formUI)
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun StripeIntent.toUpdateParams(formUI: String? = null): LpmRepository.UpdateParams {
+    return LpmRepository.UpdateParams(
+        mode = mode(),
+        setupFutureUse = setupFutureUse(),
+        expectedLpms = paymentMethodTypes,
+        serverLpmSpecs = formUI,
     )
 }

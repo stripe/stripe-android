@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.ui.core.forms.resources.toUpdateParams
 import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -255,7 +256,8 @@ internal abstract class BaseSheetViewModel(
                     // the lpm repository
                     stripeIntent.value?.let { intent ->
                         lpmResourceRepository.getRepository().apply {
-                            update(intent, lpmServerSpec)
+                            val params = intent.toUpdateParams(lpmServerSpec)
+                            update(params)
                         }
                     }
 

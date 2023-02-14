@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.ui.core.forms.resources.toUpdateParams
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -227,10 +228,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val paymentMethodPreference = stripeIntentRepository.get(clientSecret)
         val lpmRepository = lpmResourceRepository.getRepository()
 
-        lpmRepository.update(
-            stripeIntent = paymentMethodPreference.intent,
-            serverLpmSpecs = paymentMethodPreference.formUI,
-        )
+        val updateParams = paymentMethodPreference.toUpdateParams()
+        lpmRepository.update(updateParams)
 
         if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
             eventReporter.onLpmSpecFailure()
