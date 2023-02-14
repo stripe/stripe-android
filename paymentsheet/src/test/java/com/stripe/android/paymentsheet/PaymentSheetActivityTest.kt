@@ -580,7 +580,6 @@ internal class PaymentSheetActivityTest {
                 finishProcessingCalled = true
             }
 
-            idleLooper()
             composeTestRule.waitForIdle()
 
             testDispatcher.scheduler.apply {
@@ -597,14 +596,14 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel(isGooglePayAvailable = true)
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
-            idleLooper()
 
             composeTestRule
                 .onNodeWithTag(GooglePayButton.TEST_TAG)
                 .performClick()
-            idleLooper()
+
+            composeTestRule.waitForIdle()
 
             assertThat(viewModel.contentVisible.value).isEqualTo(false)
 

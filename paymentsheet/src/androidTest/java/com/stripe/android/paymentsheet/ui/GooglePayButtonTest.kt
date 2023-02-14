@@ -17,7 +17,7 @@ class GooglePayButtonTest {
 
     @Test
     fun handlesPressWhenEnabled() {
-        val testTag = "google-pay-button"
+        val testTag = GooglePayButton.TEST_TAG
         var didCallOnPressed = false
 
         composeTestRule.setContent {
@@ -40,7 +40,7 @@ class GooglePayButtonTest {
 
     @Test
     fun ignoresPressWhenDisabled() {
-        val testTag = "google-pay-button"
+        val testTag = GooglePayButton.TEST_TAG
         var didCallOnPressed = false
 
         composeTestRule.setContent {
