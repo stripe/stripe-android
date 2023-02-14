@@ -206,12 +206,13 @@ internal fun NetworkingLinkVerificationScreenPreview() {
             state = NetworkingLinkVerificationState(
                 payload = Success(
                     Payload(
-                        phoneNumber = "12345678",
                         email = "12345678",
+                        phoneNumber = "12345678",
                         otpElement = OTPElement(
                             IdentifierSpec.Generic("otp"),
                             OTPController()
-                        )
+                        ),
+                        consumerSessionClientSecret = "12345678"
                     )
                 )
             ),

@@ -11,8 +11,9 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.ConfirmVerification
-import com.stripe.android.financialconnections.domain.GetConsumerSession
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.domain.StartVerification
@@ -29,7 +30,8 @@ import javax.inject.Inject
 internal class NetworkingLinkVerificationViewModel @Inject constructor(
     initialState: NetworkingLinkVerificationState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val getConsumerSession: GetConsumerSession,
+    private val getManifest: GetManifest,
+    private val lookupAccount: LookupAccount,
     private val startVerification: StartVerification,
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
@@ -41,13 +43,15 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     init {
         logErrors()
         suspend {
-            val consumerSession = requireNotNull(getConsumerSession())
+            val email = requireNotNull(getManifest().accountholderCustomerEmailAddress)
+            val consumerSession = requireNotNull(lookupAccount(email).consumerSession)
             val startVerification = startVerification(consumerSession.clientSecret)
             logger.debug(startVerification.verificationSessions.first().toString())
             eventTracker.track(PaneLoaded(Pane.NETWORKING_LINK_VERIFICATION))
             NetworkingLinkVerificationState.Payload(
                 email = consumerSession.emailAddress,
                 phoneNumber = consumerSession.redactedPhoneNumber,
+                consumerSessionClientSecret = consumerSession.clientSecret,
                 otpElement = OTPElement(
                     IdentifierSpec.Generic("otp"),
                     OTPController()
@@ -77,13 +81,13 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     }
 
     private fun onOTPEntered(otp: String) = suspend {
-        val consumerSession = requireNotNull(getConsumerSession())
+        val payload = requireNotNull(awaitState().payload())
         confirmVerification(
-            consumerSessionClientSecret = consumerSession.clientSecret,
+            consumerSessionClientSecret = payload.consumerSessionClientSecret,
             verificationCode = otp
         )
         val updatedManifest = markLinkVerified()
-        val pollResult = runCatching { pollNetworkedAccounts(consumerSession.clientSecret) }
+        val pollResult = runCatching { pollNetworkedAccounts(payload.consumerSessionClientSecret) }
         pollResult.fold(
             onSuccess = { accounts ->
                 if (accounts.data.isEmpty()) {
@@ -98,7 +102,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             },
             onFailure = {
                 // Error fetching accounts
-                logger.error("Error fetching networked accounts")
+                logger.error("Error fetching networked accounts", it)
                 eventTracker.track(Error(Pane.NETWORKING_LINK_VERIFICATION, it))
                 goNext(updatedManifest.nextPane)
                 Unit
@@ -132,6 +136,7 @@ internal data class NetworkingLinkVerificationState(
     data class Payload(
         val email: String,
         val phoneNumber: String,
-        val otpElement: OTPElement
+        val otpElement: OTPElement,
+        val consumerSessionClientSecret: String
     )
 }
