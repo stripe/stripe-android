@@ -171,8 +171,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         config: PaymentSheet.Configuration?,
         customerConfig: PaymentSheet.CustomerConfiguration
     ): List<PaymentMethod> {
+        val paymentSheetData = stripeIntent.toPaymentSheetData()
+
         val paymentMethodTypes = getSupportedSavedCustomerPMs(
-            stripeIntent,
+            paymentSheetData,
             config,
             lpmResourceRepository.getRepository()
         ).mapNotNull {
@@ -301,7 +303,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 }
 
-private fun PaymentMethodPreference.toUpdateParams(): LpmRepository.UpdateParams {
+internal fun PaymentMethodPreference.toUpdateParams(): LpmRepository.UpdateParams {
     return intent.toUpdateParams(formUI)
 }
 
@@ -314,14 +316,14 @@ internal fun StripeIntent.toUpdateParams(formUI: String? = null): LpmRepository.
     )
 }
 
-private fun StripeIntent.mode(): PaymentSheetMode {
+internal fun StripeIntent.mode(): PaymentSheetMode {
     return when (this) {
         is PaymentIntent -> PaymentSheetMode.Payment
         is SetupIntent -> PaymentSheetMode.Setup
     }
 }
 
-private fun StripeIntent.setupFutureUse(): PaymentSheetSetupFutureUse? {
+internal fun StripeIntent.setupFutureUse(): PaymentSheetSetupFutureUse? {
     return when (this) {
         is PaymentIntent -> {
             when (setupFutureUsage) {

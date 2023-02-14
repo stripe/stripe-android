@@ -208,21 +208,9 @@ constructor(
         return status === StripeIntent.Status.RequiresConfirmation
     }
 
-    /**
-     * SetupFutureUsage is considered to be set if it is on or off session.
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    private fun isTopLevelSetupFutureUsageSet() =
-        when (setupFutureUsage) {
-            StripeIntent.Usage.OnSession -> true
-            StripeIntent.Usage.OffSession -> true
-            StripeIntent.Usage.OneTime -> false
-            null -> false
-        }
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
-        return isTopLevelSetupFutureUsageSet() || paymentMethodOptionsJsonString?.let {
+        return paymentMethodOptionsJsonString?.let {
             JSONObject(paymentMethodOptionsJsonString)
                 .optJSONObject(code)
                 ?.optString("setup_future_usage")?.let {

@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPay
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
+import com.stripe.android.paymentsheet.state.toPaymentSheetData
 import com.stripe.android.paymentsheet.state.toUpdateParams
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
@@ -331,8 +332,11 @@ internal abstract class BaseSheetViewModel(
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
         _stripeIntent.value = stripeIntent
 
-        val pmsToAdd = getPMsToAdd(stripeIntent, config, lpmResourceRepository.getRepository())
-        supportedPaymentMethods = pmsToAdd
+        if (stripeIntent != null) {
+            val data = stripeIntent.toPaymentSheetData()
+            val pmsToAdd = getPMsToAdd(data, config, lpmResourceRepository.getRepository())
+            supportedPaymentMethods = pmsToAdd
+        }
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(
@@ -496,7 +500,7 @@ internal abstract class BaseSheetViewModel(
         showLinkInlineSignup: Boolean
     ): FormArguments = FormArgumentsFactory.create(
         paymentMethod = selectedItem,
-        stripeIntent = requireNotNull(stripeIntent.value),
+        data = requireNotNull(stripeIntent.value).toPaymentSheetData(),
         config = config,
         merchantName = merchantName,
         amount = amount.value,
