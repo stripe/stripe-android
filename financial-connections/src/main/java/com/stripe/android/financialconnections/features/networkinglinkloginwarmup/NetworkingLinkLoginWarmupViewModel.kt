@@ -62,11 +62,9 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         goNext(Pane.NETWORKING_LINK_VERIFICATION)
     }
 
-    fun onClickableTextClick(text: String) {
-        when (ClickableText.values().firstOrNull { text == it.value }) {
-            ClickableText.SKIP_LOGIN -> onSkipClicked()
-            null -> logger.error("Unknown clicked text $text")
-        }
+    fun onClickableTextClick(text: String) = when (text) {
+        CLICKABLE_TEXT_SKIP_LOGIN -> onSkipClicked()
+        else -> logger.error("Unknown clicked text $text")
     }
 
     private fun onSkipClicked() {
@@ -93,9 +91,7 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
     }
 }
 
-private enum class ClickableText(val value: String) {
-    SKIP_LOGIN("skip_login"),
-}
+private const val CLICKABLE_TEXT_SKIP_LOGIN = "skip_login"
 
 internal data class NetworkingLinkLoginWarmupState(
     val payload: Async<Payload> = Uninitialized,
