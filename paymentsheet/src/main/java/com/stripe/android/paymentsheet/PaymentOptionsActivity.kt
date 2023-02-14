@@ -58,10 +58,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 PaymentOptionsScreen(viewModel)
             }
         }
-
-        viewModel.selection.launchAndCollectIn(this) {
-            viewModel.clearErrorMessages()
-        }
     }
 
     private fun initializeStarterArgs(): PaymentOptionContract.Args? {
