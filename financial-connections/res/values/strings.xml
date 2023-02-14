@@ -116,7 +116,7 @@
     <string name="stripe_networking_signup_title">Save your account to Link</string>
     <string name="stripe_networking_link_login_warmup_email_label">Continue as</string>
     <string name="stripe_networking_link_login_warmup_skip">Not you? <annotation clickable="skip_login">Continue without signing in</annotation></string>
-    <string name="stripe_networking_link_login_warmup_description">It looks like you have a Link with Stripe account. Signing in will let you quickly access your saved bank accounts.</string>
+    <string name="stripe_networking_link_login_warmup_description">It looks like you have a Link account. Signing in will let you quickly access your saved bank accounts.</string>
     <string name="stripe_networking_link_login_warmup_title">Sign in to Link</string>
     <plurals name="stripe_success_desc">
         <item quantity="zero" />
