@@ -15,6 +15,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetOrigin
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
@@ -47,7 +48,7 @@ import kotlin.coroutines.CoroutineContext
 internal interface PaymentSheetLoader {
 
     suspend fun load(
-        clientSecret: ClientSecret,
+        origin: PaymentSheetOrigin,
         paymentSheetConfiguration: PaymentSheet.Configuration? = null
     ): Result
 
@@ -73,16 +74,26 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 ) : PaymentSheetLoader {
 
     override suspend fun load(
+        origin: PaymentSheetOrigin,
+        paymentSheetConfiguration: PaymentSheet.Configuration?
+    ): PaymentSheetLoader.Result = withContext(workContext) {
+        when (origin) {
+            is PaymentSheetOrigin.Intent -> {
+                loadWithClientSecret(origin.clientSecret, paymentSheetConfiguration)
+            }
+        }
+    }
+
+    private suspend fun loadWithClientSecret(
         clientSecret: ClientSecret,
         paymentSheetConfiguration: PaymentSheet.Configuration?
-    ) = withContext(workContext) {
+    ): PaymentSheetLoader.Result {
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
-        runCatching {
+        return runCatching {
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
                 create(
-                    clientSecret = clientSecret,
                     stripeIntent = stripeIntent,
                     customerConfig = paymentSheetConfiguration?.customer,
                     config = paymentSheetConfiguration,
@@ -112,7 +123,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private suspend fun create(
-        clientSecret: ClientSecret,
         stripeIntent: StripeIntent,
         customerConfig: PaymentSheet.CustomerConfiguration?,
         config: PaymentSheet.Configuration?,
@@ -123,10 +133,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val isLinkAvailable = stripeIntent.paymentMethodTypes.contains(Link.code) &&
             stripeIntent.linkFundingSources.intersect(supportedFundingSources).isNotEmpty()
 
+        val paymentSheetData = stripeIntent.toPaymentSheetData()
+
         val paymentMethods = async {
             if (customerConfig != null) {
                 retrieveCustomerPaymentMethods(
-                    stripeIntent,
+                    paymentSheetData,
                     config,
                     customerConfig
                 )
@@ -155,8 +167,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return@coroutineScope PaymentSheetLoader.Result.Success(
             PaymentSheetState.Full(
                 config = config,
-                clientSecret = clientSecret,
-                stripeIntent = stripeIntent,
+                data = paymentSheetData,
                 customerPaymentMethods = paymentMethods.await(),
                 savedSelection = savedSelection.await(),
                 isGooglePayReady = isGooglePayReady,
@@ -167,12 +178,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private suspend fun retrieveCustomerPaymentMethods(
-        stripeIntent: StripeIntent,
+        paymentSheetData: PaymentSheetData,
         config: PaymentSheet.Configuration?,
         customerConfig: PaymentSheet.CustomerConfiguration
     ): List<PaymentMethod> {
-        val paymentSheetData = stripeIntent.toPaymentSheetData()
-
         val paymentMethodTypes = getSupportedSavedCustomerPMs(
             paymentSheetData,
             config,
@@ -318,8 +327,11 @@ internal fun StripeIntent.toUpdateParams(formUI: String? = null): LpmRepository.
 
 internal fun StripeIntent.mode(): PaymentSheetMode {
     return when (this) {
-        is PaymentIntent -> PaymentSheetMode.Payment
-        is SetupIntent -> PaymentSheetMode.Setup
+        is PaymentIntent -> PaymentSheetMode.Payment(
+            amount = requireNotNull(amount),
+            currency = requireNotNull(currency),
+        )
+        is SetupIntent -> PaymentSheetMode.Setup(currency = null)
     }
 }
 

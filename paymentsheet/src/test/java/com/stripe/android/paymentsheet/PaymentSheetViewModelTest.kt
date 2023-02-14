@@ -498,7 +498,7 @@ internal class PaymentSheetViewModelTest {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(selection)
 
-        viewModel.stripeIntent.test {
+        viewModel.paymentSheetData.test {
             viewModel.onPaymentResult(PaymentResult.Failed(Throwable()))
             verify(eventReporter)
                 .onPaymentFailure(

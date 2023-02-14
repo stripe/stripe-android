@@ -36,16 +36,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.NameAndEmailCollection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -111,11 +107,7 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     private val clientSecret by lazy {
-        when (val intent = sheetViewModel?.stripeIntent?.value) {
-            is PaymentIntent -> PaymentIntentClientSecret(intent.clientSecret!!)
-            is SetupIntent -> SetupIntentClientSecret(intent.clientSecret!!)
-            else -> null
-        }
+        sheetViewModel?.paymentSheetData?.value?.clientSecret
     }
 
     private val viewModel by activityViewModels<USBankAccountFormViewModel> {

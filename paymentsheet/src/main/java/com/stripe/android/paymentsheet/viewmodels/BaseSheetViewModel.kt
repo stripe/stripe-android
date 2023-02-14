@@ -10,11 +10,9 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -27,7 +25,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
@@ -35,12 +32,12 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPay
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
-import com.stripe.android.paymentsheet.state.toPaymentSheetData
-import com.stripe.android.paymentsheet.state.toUpdateParams
+import com.stripe.android.paymentsheet.state.PaymentSheetData
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.PaymentSheetMode
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
@@ -104,8 +101,8 @@ internal abstract class BaseSheetViewModel(
     private val _isResourceRepositoryReady = MutableStateFlow(false)
     internal val isResourceRepositoryReady: StateFlow<Boolean> = _isResourceRepositoryReady
 
-    private val _stripeIntent = MutableStateFlow<StripeIntent?>(null)
-    internal val stripeIntent: StateFlow<StripeIntent?> = _stripeIntent
+    private val _paymentSheetData = MutableStateFlow<PaymentSheetData?>(null)
+    internal val paymentSheetData: StateFlow<PaymentSheetData?> = _paymentSheetData
 
     internal var supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod> = emptyList()
         set(value) {
@@ -153,7 +150,7 @@ internal abstract class BaseSheetViewModel(
         currentScreen,
         linkHandler.isLinkEnabled.filterNotNull(),
         googlePayState,
-        stripeIntent.filterNotNull(),
+        paymentSheetData.filterNotNull(),
     ) { screen, isLinkAvailable, googlePay, intent ->
         mapToHeaderTextResource(screen, isLinkAvailable, googlePay, intent)
     }
@@ -255,9 +252,14 @@ internal abstract class BaseSheetViewModel(
                 CoroutineScope(workContext).launch {
                     // If we have been killed and are being restored then we need to re-populate
                     // the lpm repository
-                    stripeIntent.value?.let { intent ->
+                    paymentSheetData.value?.let { data ->
                         lpmResourceRepository.getRepository().apply {
-                            val params = intent.toUpdateParams(lpmServerSpec)
+                            val params = LpmRepository.UpdateParams(
+                                mode = data.mode,
+                                setupFutureUse = data.setupFutureUse,
+                                expectedLpms = data.paymentMethodTypes,
+                                serverLpmSpecs = lpmServerSpec,
+                            )
                             update(params)
                         }
                     }
@@ -315,7 +317,7 @@ internal abstract class BaseSheetViewModel(
                 eventReporter.onShowExistingPaymentOptions(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
                     activeLinkSession = linkHandler.activeLinkSession.value,
-                    currency = stripeIntent.value?.currency
+                    currency = paymentSheetData.value?.currency
                 )
             }
             AddFirstPaymentMethod,
@@ -323,26 +325,25 @@ internal abstract class BaseSheetViewModel(
                 eventReporter.onShowNewPaymentOptionForm(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
                     activeLinkSession = linkHandler.activeLinkSession.value,
-                    currency = stripeIntent.value?.currency
+                    currency = paymentSheetData.value?.currency
                 )
             }
         }
     }
 
-    protected fun setStripeIntent(stripeIntent: StripeIntent?) {
-        _stripeIntent.value = stripeIntent
+    protected fun setPaymentSheetData(data: PaymentSheetData?) {
+        _paymentSheetData.value = data
 
-        if (stripeIntent != null) {
-            val data = stripeIntent.toPaymentSheetData()
+        if (data != null) {
             val pmsToAdd = getPMsToAdd(data, config, lpmResourceRepository.getRepository())
             supportedPaymentMethods = pmsToAdd
         }
 
-        if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
+        if (data != null && supportedPaymentMethods.isEmpty()) {
             onFatal(
                 IllegalArgumentException(
                     "None of the requested payment methods" +
-                        " (${stripeIntent.paymentMethodTypes})" +
+                        " (${data.paymentMethodTypes})" +
                         " match the supported payment types" +
                         " (${
                         lpmResourceRepository.getRepository().values()
@@ -352,11 +353,13 @@ internal abstract class BaseSheetViewModel(
             )
         }
 
-        if (stripeIntent is PaymentIntent) {
+        val mode = data?.mode
+
+        if (mode is PaymentSheetMode.Payment) {
             runCatching {
                 _amount.value = Amount(
-                    requireNotNull(stripeIntent.amount),
-                    requireNotNull(stripeIntent.currency)
+                    requireNotNull(mode.amount),
+                    requireNotNull(mode.currency)
                 )
                 // Reset the primary button state to display the amount
                 _primaryButtonUIState.value = null
@@ -367,8 +370,8 @@ internal abstract class BaseSheetViewModel(
             }
         }
 
-        if (stripeIntent != null) {
-            warnUnactivatedIfNeeded(stripeIntent.unactivatedPaymentMethods)
+        if (data != null) {
+            warnUnactivatedIfNeeded(data.unactivatedPaymentMethods)
         }
     }
 
@@ -468,14 +471,14 @@ internal abstract class BaseSheetViewModel(
         screen: PaymentSheetScreen?,
         isLinkAvailable: Boolean,
         googlePayState: GooglePayState,
-        stripeIntent: StripeIntent,
+        data: PaymentSheetData,
     ): Int? {
         return if (screen != null) {
             headerTextFactory.create(
                 screen = screen,
                 isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
-                isPaymentIntent = stripeIntent is PaymentIntent,
-                types = stripeIntent.paymentMethodTypes,
+                isPaymentIntent = data.mode is PaymentSheetMode.Payment,
+                types = data.paymentMethodTypes,
             )
         } else {
             null
@@ -500,7 +503,7 @@ internal abstract class BaseSheetViewModel(
         showLinkInlineSignup: Boolean
     ): FormArguments = FormArgumentsFactory.create(
         paymentMethod = selectedItem,
-        data = requireNotNull(stripeIntent.value).toPaymentSheetData(),
+        data = requireNotNull(paymentSheetData.value),
         config = config,
         merchantName = merchantName,
         amount = amount.value,

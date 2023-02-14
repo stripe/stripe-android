@@ -11,7 +11,10 @@ internal object PaymentSheetDataFactory {
         unactivatedPaymentMethods: List<String> = emptyList(),
     ): PaymentSheetData {
         return PaymentSheetData(
-            mode = PaymentSheetMode.Payment,
+            mode = PaymentSheetMode.Payment(
+                amount = 1_000L,
+                currency = "usd",
+            ),
             setupFutureUse = null,
             paymentMethodTypes = paymentMethodTypes,
             unactivatedPaymentMethods = unactivatedPaymentMethods,

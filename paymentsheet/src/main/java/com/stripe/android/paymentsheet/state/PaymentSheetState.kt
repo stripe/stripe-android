@@ -2,9 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.parcelize.Parcelize
@@ -15,10 +13,9 @@ internal sealed interface PaymentSheetState : Parcelable {
     object Loading : PaymentSheetState
 
     @Parcelize
-    data class Full(
+    data class Full constructor(
         val config: PaymentSheet.Configuration?,
-        val clientSecret: ClientSecret,
-        val stripeIntent: StripeIntent,
+        val data: PaymentSheetData,
         val customerPaymentMethods: List<PaymentMethod>,
         val savedSelection: SavedSelection,
         val isGooglePayReady: Boolean,

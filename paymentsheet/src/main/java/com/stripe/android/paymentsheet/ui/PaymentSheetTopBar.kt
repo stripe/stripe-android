@@ -42,7 +42,7 @@ internal fun PaymentSheetTopBar(
     elevation: Dp = 0.dp,
 ) {
     val screen by viewModel.currentScreen.collectAsState()
-    val stripeIntent by viewModel.stripeIntent.collectAsState()
+    val paymentSheetData by viewModel.paymentSheetData.collectAsState()
     val isProcessing by viewModel.processing.collectAsState()
     val isEditing by viewModel.editing.collectAsState()
     val paymentMethods by viewModel.paymentMethods.collectAsState()
@@ -50,7 +50,7 @@ internal fun PaymentSheetTopBar(
     val state = rememberPaymentSheetTopBarState(
         screen = screen,
         paymentMethods = paymentMethods,
-        isLiveMode = stripeIntent?.isLiveMode ?: true,
+        isLiveMode = paymentSheetData?.isLiveMode ?: true,
         isProcessing = isProcessing,
         isEditing = isEditing,
     )

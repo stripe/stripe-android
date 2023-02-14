@@ -9,7 +9,10 @@ internal object LpmUpdateParamsFactory {
         paymentMethodTypes: List<String> = listOf("card"),
         serverLpmSpecs: String? = null,
     ): LpmRepository.UpdateParams = LpmRepository.UpdateParams(
-        mode = PaymentSheetMode.Payment,
+        mode = PaymentSheetMode.Payment(
+            amount = 1_000L,
+            currency = "usd",
+        ),
         setupFutureUse = null,
         expectedLpms = paymentMethodTypes,
         serverLpmSpecs = serverLpmSpecs,

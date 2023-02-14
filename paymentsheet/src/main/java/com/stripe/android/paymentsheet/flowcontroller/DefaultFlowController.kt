@@ -25,7 +25,6 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -36,6 +35,7 @@ import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetOrigin
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -53,7 +53,6 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.validate
@@ -222,8 +221,8 @@ internal class DefaultFlowController @Inject internal constructor(
 
         lifecycleScope.launch {
             val result = paymentSheetLoader.load(
-                clientSecret,
-                configuration
+                origin = PaymentSheetOrigin.Intent(clientSecret),
+                paymentSheetConfiguration = configuration,
             )
 
             // Wait until all required resources are loaded before completing initialization.
@@ -291,11 +290,16 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
     ) {
-        val confirmParamsFactory =
-            ConfirmStripeIntentParamsFactory.createFactory(
-                state.clientSecret,
-                state.config?.shippingDetails?.toConfirmPaymentIntentShipping()
-            )
+        val clientSecret = when (val origin = state.data.origin) {
+            is PaymentSheetOrigin.Intent -> {
+                origin.clientSecret
+            }
+        }
+
+        val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
+            clientSecret,
+            state.config?.shippingDetails?.toConfirmPaymentIntentShipping()
+        )
 
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
@@ -341,7 +345,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     onFailure = {
                         eventReporter.onPaymentFailure(
                             PaymentSelection.GooglePay,
-                            viewModel.state?.stripeIntent?.currency
+                            viewModel.state?.data?.currency
                         )
                         paymentResultCallback.onPaymentSheetResult(
                             PaymentSheetResult.Failed(it)
@@ -352,7 +356,7 @@ internal class DefaultFlowController @Inject internal constructor(
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 eventReporter.onPaymentFailure(
                     PaymentSelection.GooglePay,
-                    viewModel.state?.stripeIntent?.currency
+                    viewModel.state?.data?.currency
                 )
                 paymentResultCallback.onPaymentSheetResult(
                     PaymentSheetResult.Failed(
@@ -443,13 +447,13 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentResult.Completed -> {
                 eventReporter.onPaymentSuccess(
                     paymentSelection = viewModel.paymentSelection,
-                    currency = viewModel.state?.stripeIntent?.currency,
+                    currency = viewModel.state?.data?.currency,
                 )
             }
             is PaymentResult.Failed -> {
                 eventReporter.onPaymentFailure(
                     paymentSelection = viewModel.paymentSelection,
-                    currency = viewModel.state?.stripeIntent?.currency,
+                    currency = viewModel.state?.data?.currency,
                 )
             }
             else -> {
@@ -509,10 +513,9 @@ internal class DefaultFlowController @Inject internal constructor(
             activityResultLauncher = googlePayActivityLauncher,
             skipReadyCheck = true
         ).present(
-            currencyCode = (state.stripeIntent as? PaymentIntent)?.currency
-                ?: googlePayConfig.currencyCode.orEmpty(),
-            amount = (state.stripeIntent as? PaymentIntent)?.amount?.toInt() ?: 0,
-            transactionId = state.stripeIntent.id
+            currencyCode = state.data.currency ?: googlePayConfig.currencyCode.orEmpty(),
+            amount = state.data.amount?.toInt() ?: 0,
+            transactionId = state.data.id,
         )
     }
 
