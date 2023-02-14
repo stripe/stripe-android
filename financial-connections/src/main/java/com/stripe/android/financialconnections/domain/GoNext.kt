@@ -40,10 +40,10 @@ internal fun Pane.toNavigationCommand(
     Pane.ATTACH_LINKED_PAYMENT_ACCOUNT -> NavigationDirections.attachLinkedPaymentAccount
     Pane.RESET -> NavigationDirections.reset
     Pane.NETWORKING_LINK_SIGNUP_PANE -> NavigationDirections.networkingLinkSignup
+    Pane.NETWORKING_LINK_LOGIN_WARMUP -> NavigationDirections.networkingLinkLoginWarmup
     Pane.AUTH_OPTIONS,
     Pane.LINK_CONSENT,
     Pane.LINK_LOGIN,
-    Pane.NETWORKING_LINK_LOGIN_WARMUP,
     Pane.NETWORKING_LINK_VERIFICATION,
     Pane.UNEXPECTED_ERROR -> {
         TODO("Unimplemented navigation command: ${this.value}")

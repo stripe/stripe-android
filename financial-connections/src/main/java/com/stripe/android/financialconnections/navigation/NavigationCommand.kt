@@ -58,6 +58,11 @@ internal object NavigationDirections {
         override val destination = "networking_link_signup_pane"
     }
 
+    val networkingLinkLoginWarmup = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "networking_link_login_warmup"
+    }
+
     val reset = object : NavigationCommand {
         override val arguments = emptyList<NamedNavArgument>()
         override val destination = "reset"
