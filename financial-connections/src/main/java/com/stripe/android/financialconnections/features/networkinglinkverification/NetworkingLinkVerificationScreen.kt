@@ -47,7 +47,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
-import com.stripe.android.model.ConsumerSession
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -101,7 +100,7 @@ private fun NetworkingLinkVerificationContent(
 @Suppress("LongMethod")
 @OptIn(ExperimentalComposeUiApi::class)
 private fun NetworkingLinkVerificationLoaded(
-    confirmVerificationAsync: Async<ConsumerSession>,
+    confirmVerificationAsync: Async<Unit>,
     scrollState: ScrollState,
     payload: Payload,
 ) {

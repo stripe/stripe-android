@@ -12,10 +12,10 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetConsumerSession
+import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import com.stripe.android.model.ConsumerSession
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -30,6 +30,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     private val getConsumerSession: GetConsumerSession,
     private val startVerification: StartVerification,
     private val confirmVerification: ConfirmVerification,
+    private val markLinkVerified: MarkLinkVerified,
     private val logger: Logger
 ) : MavericksViewModel<NetworkingLinkVerificationState>(initialState) {
 
@@ -77,10 +78,9 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             confirmVerification(
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 verificationCode = otp
-            ).also {
-                // TODO@carlosmuvi poll for networked accounts and navigate accordingly.
-                logger.debug("Confirmed! ${it.verificationSessions}")
-            }
+            )
+            val markLinkVerified = markLinkVerified()
+            logger.debug("Navigating to next pane: ${markLinkVerified.nextPane}")
         }.execute { copy(confirmVerification = it) }
     }
 
@@ -104,7 +104,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
 
 internal data class NetworkingLinkVerificationState(
     val payload: Async<Payload> = Uninitialized,
-    val confirmVerification: Async<ConsumerSession> = Uninitialized
+    val confirmVerification: Async<Unit> = Uninitialized
 ) : MavericksState {
 
     data class Payload(
