@@ -77,7 +77,10 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             confirmVerification(
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 verificationCode = otp
-            )
+            ).also {
+                // TODO@carlosmuvi poll for networked accounts and navigate accordingly.
+                logger.debug("Confirmed! ${it.verificationSessions}")
+            }
         }.execute { copy(confirmVerification = it) }
     }
 

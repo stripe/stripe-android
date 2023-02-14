@@ -9,7 +9,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.Locale
 
-interface FinancialConnectionsConsumerSessionRepository {
+internal interface FinancialConnectionsConsumerSessionRepository {
 
     suspend fun getCachedConsumerSession(): ConsumerSession?
     suspend fun lookupConsumerSession(email: String?): ConsumerSessionLookup

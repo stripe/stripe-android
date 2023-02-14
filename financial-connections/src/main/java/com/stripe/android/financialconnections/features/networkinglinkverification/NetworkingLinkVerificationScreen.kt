@@ -1,6 +1,9 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.financialconnections.features.networkinglinkverification
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
