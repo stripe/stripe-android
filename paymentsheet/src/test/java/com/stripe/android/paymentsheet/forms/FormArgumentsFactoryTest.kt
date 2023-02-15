@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -14,10 +13,9 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.LpmUpdateParamsFactory
+import com.stripe.android.utils.PaymentSheetDataFactory
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -42,9 +40,9 @@ class FormArgumentsFactoryTest {
 
     @Test
     fun `Create correct FormArguments for new generic payment method with customer requested save`() {
-        val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
-        }
+        val paymentSheetData = PaymentSheetDataFactory.create(
+            paymentMethodTypes = listOf("card", "bancontact"),
+        )
 
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
             code = "bancontact",
@@ -58,7 +56,7 @@ class FormArgumentsFactoryTest {
 
         val actualArgs = FormArgumentsFactory.create(
             paymentMethod = lpmRepository.fromCode("bancontact")!!,
-            stripeIntent = paymentIntent,
+            data = paymentSheetData,
             config = PaymentSheetFixtures.CONFIG_MINIMUM,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             amount = Amount(50, "USD"),
@@ -98,9 +96,9 @@ class FormArgumentsFactoryTest {
     private fun testCardFormArguments(
         customerReuse: PaymentSelection.CustomerRequestedSave,
     ): FormArguments {
-        val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
-        }
+        val paymentSheetData = PaymentSheetDataFactory.create(
+            paymentMethodTypes = listOf("card", "bancontact"),
+        )
 
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
             code = "card",
@@ -123,7 +121,7 @@ class FormArgumentsFactoryTest {
 
         val actualArgs = FormArgumentsFactory.create(
             paymentMethod = LpmRepository.HardcodedCard,
-            stripeIntent = paymentIntent,
+            data = paymentSheetData,
             config = PaymentSheetFixtures.CONFIG_MINIMUM,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             amount = Amount(50, "USD"),
