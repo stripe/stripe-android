@@ -36,6 +36,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
+import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -44,7 +45,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageFixtures
-import com.stripe.android.model.PaymentMethodPreferenceFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.SourceFixtures
@@ -1584,7 +1584,7 @@ internal class StripeApiRepositoryTest {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
-                PaymentMethodPreferenceFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
+                ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
                 emptyMap()
             )
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
@@ -1614,7 +1614,7 @@ internal class StripeApiRepositoryTest {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
-                PaymentMethodPreferenceFixtures.EXPANDED_SETUP_INTENT_JSON.toString(),
+                ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON.toString(),
                 emptyMap()
             )
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
