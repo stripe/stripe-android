@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentOptionsPrimaryButtonBinding
 import com.stripe.android.paymentsheet.navigation.Content
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
 
@@ -61,14 +60,12 @@ internal fun PaymentOptionsScreenContent(
         }
 
         headerText?.let { text ->
-            StripeTheme {
-                H4Text(
-                    text = stringResource(text),
-                    modifier = Modifier
-                        .padding(bottom = 2.dp)
-                        .padding(horizontal = 20.dp),
-                )
-            }
+            H4Text(
+                text = stringResource(text),
+                modifier = Modifier
+                    .padding(bottom = 2.dp)
+                    .padding(horizontal = 20.dp),
+            )
         }
 
         currentScreen.Content(viewModel)
