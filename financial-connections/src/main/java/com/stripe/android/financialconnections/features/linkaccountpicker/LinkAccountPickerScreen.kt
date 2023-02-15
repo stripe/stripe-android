@@ -4,18 +4,27 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,11 +36,10 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
-import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.common.AccountItem
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.Payload
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -52,7 +60,8 @@ internal fun LinkAccountPickerScreen() {
         state = state.value,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
-        onLearnMoreAboutDataAccessClick = { viewModel.onLearnMoreAboutDataAccessClick() }
+        onLearnMoreAboutDataAccessClick = { viewModel.onLearnMoreAboutDataAccessClick() },
+        onNewBankAccountClick = { viewModel.onNewBankAccountClick() }
     )
 }
 
@@ -61,7 +70,8 @@ private fun LinkAccountPickerContent(
     state: LinkAccountPickerState,
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
-    onLearnMoreAboutDataAccessClick: () -> Unit
+    onLearnMoreAboutDataAccessClick: () -> Unit,
+    onNewBankAccountClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
@@ -77,7 +87,8 @@ private fun LinkAccountPickerContent(
             is Success -> LinkAccountPickerLoaded(
                 scrollState = scrollState,
                 payload = payload(),
-                onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick
+                onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick,
+                onNewBankAccountClick = onNewBankAccountClick
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -89,11 +100,11 @@ private fun LinkAccountPickerContent(
 }
 
 @Composable
-@OptIn(ExperimentalComposeUiApi::class)
 private fun LinkAccountPickerLoaded(
     scrollState: ScrollState,
     payload: Payload,
-    onLearnMoreAboutDataAccessClick: () -> Unit
+    onLearnMoreAboutDataAccessClick: () -> Unit,
+    onNewBankAccountClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -107,14 +118,24 @@ private fun LinkAccountPickerLoaded(
             )
     ) {
         Spacer(modifier = Modifier.size(16.dp))
-        Title()
+        Title(merchantName = payload.businessName)
         Spacer(modifier = Modifier.size(24.dp))
         payload.accounts.forEach {
-            Text(text = it.name)
+            AccountItem(
+                selected = false,
+                onAccountClicked = {},
+                account = it
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+                    contentDescription = "Bank logo"
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
         }
-        Text(text = "new bank account")
+        SelectNewAccount(onClick = onNewBankAccountClick)
         AccessibleDataCallout(
-            model = payload.accessibleDataCalloutModel,
+            model = payload.accessibleData,
             onLearnMoreClick = onLearnMoreAboutDataAccessClick
         )
         Spacer(modifier = Modifier.size(24.dp))
@@ -123,10 +144,38 @@ private fun LinkAccountPickerLoaded(
 }
 
 @Composable
-private fun Title() {
+private fun SelectNewAccount(
+    onClick: () -> Unit
+) {
+    val shape = remember { RoundedCornerShape(8.dp) }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .border(
+                width = 2.dp,
+                color = FinancialConnectionsTheme.colors.borderDefault,
+                shape = shape
+            )
+            .clickable { onClick() }
+            .padding(vertical = 10.dp, horizontal = 12.dp)
+    ) {
+        Row {
+
+        }
+    }
+}
+
+@Composable
+private fun Title(
+    merchantName: String
+) {
     AnnotatedText(
         text = TextResource.Text(
-            stringResource(R.string.stripe_networking_verification_title)
+            stringResource(
+                R.string.stripe_link_account_picker_title,
+                merchantName
+            )
         ),
         defaultStyle = FinancialConnectionsTheme.typography.subtitle,
         annotationStyles = emptyMap(),
@@ -135,31 +184,15 @@ private fun Title() {
 }
 
 @Composable
-@Preview(group = "LinkAccountPicker Pane", name = "Cannonical")
+@Preview(group = "LinkAccountPicker Pane", name = "Canonical")
 internal fun LinkAccountPickerScreenPreview() {
     FinancialConnectionsPreview {
         LinkAccountPickerContent(
-            state = LinkAccountPickerState(
-                payload = Success(
-                    Payload(
-                        accounts = listOf(),
-                        accessibleDataCalloutModel = AccessibleDataCalloutModel(
-                            businessName = "My business",
-                            permissions = listOf(
-                                FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
-                                FinancialConnectionsAccount.Permissions.BALANCES,
-                                FinancialConnectionsAccount.Permissions.OWNERSHIP,
-                                FinancialConnectionsAccount.Permissions.TRANSACTIONS
-                            ),
-                            isStripeDirect = true,
-                            dataPolicyUrl = ""
-                        )
-                    )
-                )
-            ),
+            state = LinkedAccountPickerStates.canonical(),
             onCloseClick = {},
             onCloseFromErrorClick = {},
-            onLearnMoreAboutDataAccessClick = {}
+            onLearnMoreAboutDataAccessClick = {},
+            onNewBankAccountClick = {}
         )
     }
 }

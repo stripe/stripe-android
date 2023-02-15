@@ -12,9 +12,9 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -26,21 +26,23 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val getConsumerSession: GetConsumerSession,
     private val pollNetworkedAccounts: PollNetworkedAccounts,
     private val getManifest: GetManifest,
-    private val goNext: GoNext,
     private val logger: Logger
 ) : MavericksViewModel<LinkAccountPickerState>(initialState) {
 
     init {
         logErrors()
         suspend {
-            val accessibleData = AccessibleDataCalloutModel.fromManifest(getManifest())
-            val accounts = pollNetworkedAccounts(
-                getConsumerSession().clientSecret
-            )
+            val manifest = getManifest()
+            val accessibleData = AccessibleDataCalloutModel.fromManifest(manifest)
+            val consumerSessionClientSecret = getConsumerSession().clientSecret
+            val accounts = pollNetworkedAccounts(consumerSessionClientSecret)
+                .data
+                .sortedBy { it.allowSelection.not() }
             eventTracker.track(PaneLoaded(Pane.LINK_ACCOUNT_PICKER))
             LinkAccountPickerState.Payload(
-                accounts = accounts.data,
-                accessibleDataCalloutModel = accessibleData
+                businessName = ConsentTextBuilder.getBusinessName(manifest) ?: "",
+                accounts = accounts,
+                accessibleData = accessibleData
             )
         }.execute { copy(payload = it) }
     }
@@ -56,6 +58,10 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     }
 
     fun onLearnMoreAboutDataAccessClick() {
+        TODO("Not yet implemented")
+    }
+
+    fun onNewBankAccountClick() {
         TODO("Not yet implemented")
     }
 
@@ -83,6 +89,7 @@ internal data class LinkAccountPickerState(
 
     data class Payload(
         val accounts: List<PartnerAccount>,
-        val accessibleDataCalloutModel: AccessibleDataCalloutModel
+        val accessibleData: AccessibleDataCalloutModel,
+        val businessName: String
     )
 }

@@ -121,6 +121,7 @@
     <string name="stripe_networking_verification_title">Save your account to Link</string>
     <string name="stripe_networking_verification_desc">Enter the code sent to %1$s</string>
     <string name="stripe_networking_verification_email">Signing in as %1$s</string>
+    <string name="stripe_link_account_picker_title">Select an account to connect to %1$s</string>
     <plurals name="stripe_success_desc">
         <item quantity="zero" />
         <item quantity="one">Your account was successfully linked to %1$s through Stripe.</item>
