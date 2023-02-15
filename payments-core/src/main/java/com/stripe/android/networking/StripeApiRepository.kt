@@ -53,6 +53,8 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -74,15 +76,13 @@ import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
+import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.FinancialConnectionsSessionJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.IssuingCardPinJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.PaymentMethodMessageJsonParser
-import com.stripe.android.model.parsers.PaymentMethodPreferenceForPaymentIntentJsonParser
-import com.stripe.android.model.parsers.PaymentMethodPreferenceForSetupIntentJsonParser
-import com.stripe.android.model.parsers.PaymentMethodPreferenceJsonParser
 import com.stripe.android.model.parsers.PaymentMethodsListJsonParser
 import com.stripe.android.model.parsers.RadarSessionJsonParser
 import com.stripe.android.model.parsers.SetupIntentJsonParser
@@ -355,13 +355,28 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale
-    ): PaymentMethodPreference? = retrieveStripeIntentWithOrderedPaymentMethods(
-        clientSecret,
-        options,
-        locale,
-        parser = PaymentMethodPreferenceForPaymentIntentJsonParser(),
-        analyticsEvent = PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered
-    )
+    ): PaymentMethodPreference? {
+        val type = ElementsSessionParams.Type.PaymentIntent
+        val elementsSession = retrieveElementsSession(
+            params = ElementsSessionParams(
+                type = type,
+                clientSecret = clientSecret,
+                locale = locale.toLanguageTag(),
+            ),
+            expandFields = listOf(
+                "payment_method_preference.${type.value}.payment_method"
+            ),
+            options = options,
+            analyticsEvent = PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered
+        )
+
+        return elementsSession?.stripeIntent?.let {
+            PaymentMethodPreference(
+                intent = elementsSession.stripeIntent,
+                formUI = elementsSession.paymentMethodSpecs // formUI string
+            )
+        }
+    }
 
     /**
      * Analytics event: [PaymentAnalyticsEvent.PaymentIntentCancelSource]
@@ -494,13 +509,28 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale
-    ): PaymentMethodPreference? = retrieveStripeIntentWithOrderedPaymentMethods(
-        clientSecret,
-        options,
-        locale,
-        parser = PaymentMethodPreferenceForSetupIntentJsonParser(),
-        analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieveOrdered
-    )
+    ): PaymentMethodPreference? {
+        val type = ElementsSessionParams.Type.SetupIntent
+        val elementsSession = retrieveElementsSession(
+            params = ElementsSessionParams(
+                type = type,
+                clientSecret = clientSecret,
+                locale = locale.toLanguageTag(),
+            ),
+            expandFields = listOf(
+                "payment_method_preference.${type.value}.payment_method"
+            ),
+            options = options,
+            analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieveOrdered
+        )
+
+        return elementsSession?.stripeIntent?.let {
+            PaymentMethodPreference(
+                intent = elementsSession.stripeIntent,
+                formUI = elementsSession.paymentMethodSpecs // formUI string
+            )
+        }
+    }
 
     /**
      * Analytics event: [PaymentAnalyticsEvent.SetupIntentCancelSource]
@@ -1632,37 +1662,37 @@ class StripeApiRepository @JvmOverloads internal constructor(
         return getApiUrl("payment_methods/%s/detach", paymentMethodId)
     }
 
-    private suspend fun <T : StripeIntent> retrieveStripeIntentWithOrderedPaymentMethods(
-        clientSecret: String,
+    private suspend fun retrieveElementsSession(
+        params: ElementsSessionParams,
+        expandFields: List<String> = emptyList(),
         options: ApiRequest.Options,
-        locale: Locale,
-        parser: PaymentMethodPreferenceJsonParser<T>,
-        analyticsEvent: PaymentAnalyticsEvent
-    ): PaymentMethodPreference? {
+        analyticsEvent: PaymentAnalyticsEvent?
+    ): ElementsSession? {
         // Unsupported for user key sessions.
         if (options.apiKeyIsUserKey) return null
 
         fireFraudDetectionDataRequest()
 
-        val params = createClientSecretParam(
-            clientSecret,
-            listOf("payment_method_preference.${parser.stripeIntentFieldName}.payment_method")
-        ).plus(
-            mapOf(
-                "type" to parser.stripeIntentFieldName,
-                "locale" to locale.toLanguageTag()
-            )
-        )
+        val parser = ElementsSessionJsonParser(params.type)
+
+        val requestParams = mutableMapOf<String, Any>()
+
+        requestParams["type"] = params.type.value
+        params.clientSecret?.let { requestParams["client_secret"] = it }
+        params.locale?.let { requestParams["locale"] = it }
+        params.deferredIntent?.let { requestParams["deferred_intent"] = it }
 
         return fetchStripeModel(
             apiRequestFactory.createGet(
                 getApiUrl("elements/sessions"),
                 options,
-                params
+                requestParams.plus(createExpandParam(expandFields))
             ),
             parser
         ) {
-            fireAnalyticsRequest(paymentAnalyticsRequestFactory.createRequest(analyticsEvent))
+            analyticsEvent?.let {
+                fireAnalyticsRequest(paymentAnalyticsRequestFactory.createRequest(analyticsEvent))
+            }
         }
     }
 
