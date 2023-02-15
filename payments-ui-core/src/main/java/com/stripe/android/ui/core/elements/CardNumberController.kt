@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 
-sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
+internal sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
     abstract val cardBrandFlow: Flow<CardBrand>
 
     abstract val cardScanEnabled: Boolean

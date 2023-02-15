@@ -31,7 +31,7 @@ class AddressTextFieldController(
         config.visualTransformation ?: VisualTransformation.None
     override val showOptionalLabel: Boolean = false
 
-    override val label: Flow<Int> = MutableStateFlow(config.label)
+    override val label = MutableStateFlow(config.label)
     override val debugLabel = config.debugLabel
 
     /** This is all the information that can be observed on the element */
