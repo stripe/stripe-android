@@ -10,7 +10,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 internal class ElementsSessionJsonParser(
-    val type: ElementsSessionParams.Type
+    private val type: ElementsSessionParams.Type,
 ) : ModelJsonParser<ElementsSession> {
     override fun parse(json: JSONObject): ElementsSession? {
         val paymentMethodPreference = StripeJsonUtils.mapToJsonObject(
@@ -45,7 +45,7 @@ internal class ElementsSessionJsonParser(
             linkSettings = ElementsSession.LinkSettings(
                 linkFundingSources = jsonArrayToList(linkFundingSources)
             ),
-            paymentMethodPreference = jsonArrayToList(orderedPaymentMethodTypes),
+            paymentMethodTypes = jsonArrayToList(orderedPaymentMethodTypes),
             unactivatedPaymentMethodTypes = unactivatedPaymentMethodTypes,
             paymentMethodSpecs = paymentMethodSpecs,
             stripeIntent = stripeIntent

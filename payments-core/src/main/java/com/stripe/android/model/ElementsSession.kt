@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class ElementsSession(
     val linkSettings: LinkSettings?,
-    val paymentMethodPreference: List<String>,
+    val paymentMethodTypes: List<String>,
     val unactivatedPaymentMethodTypes: List<String>,
     val paymentMethodSpecs: String?,
     val stripeIntent: StripeIntent?

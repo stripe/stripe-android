@@ -54,13 +54,13 @@ class ElementsSessionJsonParserTest {
 
     @Test
     fun parsePaymentIntent_shouldCreateObjectLinkFundingSources() {
-        val eleme = ElementsSessionJsonParser(
+        val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.Type.PaymentIntent
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
         )!!
 
-        assertThat(eleme.stripeIntent?.linkFundingSources)
+        assertThat(elementsSession.stripeIntent?.linkFundingSources)
             .containsExactly("card", "bank_account")
     }
 

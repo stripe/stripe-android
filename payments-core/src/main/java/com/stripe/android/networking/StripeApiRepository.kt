@@ -370,10 +370,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
             analyticsEvent = PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered
         )
 
-        return elementsSession?.stripeIntent?.let {
+        return elementsSession?.stripeIntent?.let { intent ->
             PaymentMethodPreference(
-                intent = elementsSession.stripeIntent,
-                formUI = elementsSession.paymentMethodSpecs // formUI string
+                intent = intent,
+                formUI = elementsSession.paymentMethodSpecs,
             )
         }
     }
@@ -524,10 +524,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
             analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieveOrdered
         )
 
-        return elementsSession?.stripeIntent?.let {
+        return elementsSession?.stripeIntent?.let { intent ->
             PaymentMethodPreference(
-                intent = elementsSession.stripeIntent,
-                formUI = elementsSession.paymentMethodSpecs // formUI string
+                intent = intent,
+                formUI = elementsSession.paymentMethodSpecs,
             )
         }
     }
@@ -1675,12 +1675,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         val parser = ElementsSessionJsonParser(params.type)
 
-        val requestParams = mutableMapOf<String, Any>()
-
-        requestParams["type"] = params.type.value
-        params.clientSecret?.let { requestParams["client_secret"] = it }
-        params.locale?.let { requestParams["locale"] = it }
-        params.deferredIntent?.let { requestParams["deferred_intent"] = it }
+        val requestParams = buildMap {
+            this["type"] = params.type.value
+            params.clientSecret?.let { this["client_secret"] = it }
+            params.locale?.let { this["locale"] = it }
+            params.deferredIntent?.let { this["deferred_intent"] = it }
+        }
 
         return fetchStripeModel(
             apiRequestFactory.createGet(

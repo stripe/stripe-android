@@ -5,16 +5,16 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class DeferredIntent(
-    val mode: Type,
+    val mode: Mode,
     val amount: Long? = null,
     val currency: String? = null,
     val setupFutureUsage: SetupFutureUsage? = null,
     val captureMethod: CaptureMethod? = null,
     val customer: String? = null,
     val onBehalfOf: String? = null,
-    val paymentMethodTypes: Set<String> = setOf()
+    val paymentMethodTypes: Set<String> = emptySet()
 ) : StripeModel {
-    enum class Type {
+    enum class Mode {
         Payment,
         Setup
     }
