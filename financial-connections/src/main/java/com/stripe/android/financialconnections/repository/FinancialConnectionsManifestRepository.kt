@@ -143,6 +143,18 @@ internal interface FinancialConnectionsManifestRepository {
         disabledReason: String?
     ): FinancialConnectionsSessionManifest
 
+    /**
+     * Mark when the user has verified (logged in) via SMS OTP to their Link account in the networking auth flow
+     *
+     * When the user verifies via SMS OTP and logs in to their Link account in
+     * the networking auth flow, mark it on the link account session so we don't ask them to log in again.
+     *
+     * @return [FinancialConnectionsSessionManifest]
+     */
+    suspend fun postMarkLinkVerified(
+        clientSecret: String,
+    ): FinancialConnectionsSessionManifest
+
     fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     )
@@ -402,6 +414,25 @@ private class FinancialConnectionsManifestRepositoryImpl(
         }
     }
 
+    override suspend fun postMarkLinkVerified(
+        clientSecret: String
+    ): FinancialConnectionsSessionManifest {
+        val request = apiRequestFactory.createPost(
+            url = linkVerifiedUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "expand" to listOf("active_auth_session"),
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsSessionManifest.serializer()
+        ).also {
+            updateCachedManifest("postMarkLinkVerified", it)
+        }
+    }
+
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     ) {
@@ -467,6 +498,9 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal val saveAccountToLinkUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/save_accounts_to_link"
+
+        internal val linkVerifiedUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/link_verified"
 
         internal val disableNetworking: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"

@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.model.VisualUpdate
+import com.stripe.android.model.ConsumerSession
 
 internal object ApiKeyFixtures {
     const val DEFAULT_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
@@ -98,5 +99,14 @@ internal object ApiKeyFixtures {
         category = FinancialConnectionsAccount.Category.INVESTMENT,
         subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
         supportedPaymentMethodTypes = listOf(FinancialConnectionsAccount.SupportedPaymentMethodTypes.US_BANK_ACCOUNT)
+    )
+
+    fun consumerSession() = ConsumerSession(
+        clientSecret = "clientSecret",
+        emailAddress = "test@test.com",
+        redactedPhoneNumber = "+1***123",
+        verificationSessions = emptyList(),
+        authSessionClientSecret = null,
+        publishableKey = null
     )
 }

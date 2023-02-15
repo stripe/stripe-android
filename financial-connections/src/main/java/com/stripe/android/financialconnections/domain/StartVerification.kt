@@ -1,18 +1,18 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
-import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSession
 import javax.inject.Inject
 
-internal class LookupAccount @Inject constructor(
+internal class StartVerification @Inject constructor(
     private val consumerSessionRepository: FinancialConnectionsConsumerSessionRepository
 ) {
 
     suspend operator fun invoke(
-        email: String
-    ): ConsumerSessionLookup = requireNotNull(
-        consumerSessionRepository.lookupConsumerSession(
-            email = email,
+        consumerSessionClientSecret: String
+    ): ConsumerSession = requireNotNull(
+        consumerSessionRepository.startConsumerVerification(
+            consumerSessionClientSecret = consumerSessionClientSecret,
         )
     )
 }
