@@ -65,6 +65,10 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         TODO("Not yet implemented")
     }
 
+    fun onSelectAccountClick() {
+        TODO("Not yet implemented")
+    }
+
     companion object :
         MavericksViewModelFactory<LinkAccountPickerViewModel, LinkAccountPickerState> {
 
