@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetOrigin
@@ -24,7 +23,6 @@ internal data class PaymentSheetData(
     val isLiveMode: Boolean,
     val linkFundingSources: List<String>,
     val shippingDetails: PaymentIntent.Shipping?,
-    val isLpmLevelSetupFutureUsageSet: (code: PaymentMethodCode) -> Boolean,
 ) : Parcelable {
 
     val clientSecret: ClientSecret?
@@ -59,8 +57,5 @@ internal fun StripeIntent.toPaymentSheetData(): PaymentSheetData {
         isLiveMode = isLiveMode,
         linkFundingSources = linkFundingSources,
         shippingDetails = (this as? PaymentIntent)?.shipping,
-        isLpmLevelSetupFutureUsageSet = { code ->
-            (this as? PaymentIntent)?.isLpmLevelSetupFutureUsageSet(code) ?: false
-        },
     )
 }

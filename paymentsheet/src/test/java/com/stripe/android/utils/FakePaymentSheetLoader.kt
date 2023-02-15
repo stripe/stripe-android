@@ -4,11 +4,12 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.model.ClientSecret
+import com.stripe.android.paymentsheet.PaymentSheetOrigin
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.state.toPaymentSheetData
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
@@ -27,7 +28,7 @@ internal class FakePaymentSheetLoader(
     }
 
     override suspend fun load(
-        clientSecret: ClientSecret,
+        origin: PaymentSheetOrigin,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ): PaymentSheetLoader.Result {
         delay(delay)
@@ -37,8 +38,7 @@ internal class FakePaymentSheetLoader(
             PaymentSheetLoader.Result.Success(
                 state = PaymentSheetState.Full(
                     config = paymentSheetConfiguration,
-                    clientSecret = clientSecret,
-                    stripeIntent = stripeIntent,
+                    data = stripeIntent.toPaymentSheetData(),
                     customerPaymentMethods = customerPaymentMethods,
                     savedSelection = savedSelection,
                     isGooglePayReady = isGooglePayAvailable,

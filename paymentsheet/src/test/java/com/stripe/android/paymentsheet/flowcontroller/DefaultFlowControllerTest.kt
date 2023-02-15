@@ -44,7 +44,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -52,6 +51,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.state.toPaymentSheetData
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.view.ActivityScenarioFactory
@@ -438,8 +438,7 @@ internal class DefaultFlowControllerTest {
 
         val expectedArgs = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                clientSecret = PaymentIntentClientSecret("client_secret"),
+                data = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.toPaymentSheetData(),
                 customerPaymentMethods = emptyList(),
                 config = null,
                 isGooglePayReady = false,
@@ -609,9 +608,10 @@ internal class DefaultFlowControllerTest {
             flowController.confirmPaymentSelection(
                 NEW_CARD_PAYMENT_SELECTION,
                 PaymentSheetState.Full(
-                    PaymentSheetFixtures.CONFIG_CUSTOMER,
-                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-                    PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                    data = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                        clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                    ).toPaymentSheetData(),
                     customerPaymentMethods = PAYMENT_METHODS,
                     savedSelection = SavedSelection.PaymentMethod(
                         id = "pm_123456789"
@@ -634,9 +634,10 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             GENERIC_PAYMENT_SELECTION,
             PaymentSheetState.Full(
-                PaymentSheetFixtures.CONFIG_CUSTOMER,
-                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                config = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                data = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ).toPaymentSheetData(),
                 customerPaymentMethods = PAYMENT_METHODS,
                 savedSelection = SavedSelection.PaymentMethod(
                     id = "pm_123456789"
@@ -662,9 +663,10 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             paymentSelection,
             PaymentSheetState.Full(
-                PaymentSheetFixtures.CONFIG_CUSTOMER,
-                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                config = PaymentSheetFixtures.CONFIG_CUSTOMER,
+                data = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ).toPaymentSheetData(),
                 customerPaymentMethods = PAYMENT_METHODS,
                 savedSelection = SavedSelection.PaymentMethod(
                     id = "pm_123456789"

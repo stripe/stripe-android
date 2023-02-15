@@ -6,15 +6,15 @@ import androidx.core.graphics.toColorInt
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentSheetData
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.state.toPaymentSheetData
 import org.mockito.kotlin.mock
 
 internal object PaymentSheetFixtures {
@@ -88,8 +88,9 @@ internal object PaymentSheetFixtures {
 
     internal val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
         state = PaymentSheetState.Full(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            clientSecret = PaymentIntentClientSecret("pssst… this is a secret"),
+            data = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                clientSecret = "pssst… this is a secret",
+            ).toPaymentSheetData(),
             customerPaymentMethods = emptyList(),
             config = CONFIG_GOOGLEPAY,
             isGooglePayReady = false,
@@ -106,20 +107,18 @@ internal object PaymentSheetFixtures {
     internal fun PaymentOptionContract.Args.updateState(
         paymentMethods: List<PaymentMethod> = state.customerPaymentMethods,
         isGooglePayReady: Boolean = state.isGooglePayReady,
-        stripeIntent: StripeIntent = state.stripeIntent,
+        data: PaymentSheetData = state.data,
         config: PaymentSheet.Configuration? = state.config,
         newPaymentSelection: PaymentSelection.New? = state.newPaymentSelection,
-        clientSecret: ClientSecret = state.clientSecret,
         linkState: LinkState? = state.linkState,
     ): PaymentOptionContract.Args {
         return copy(
             state = state.copy(
                 customerPaymentMethods = paymentMethods,
                 isGooglePayReady = isGooglePayReady,
-                stripeIntent = stripeIntent,
+                data = data,
                 config = config,
                 newPaymentSelection = newPaymentSelection,
-                clientSecret = clientSecret,
                 linkState = linkState,
             ),
         )
@@ -127,30 +126,38 @@ internal object PaymentSheetFixtures {
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         get() = PaymentSheetContract.Args(
-            SetupIntentClientSecret(CLIENT_SECRET),
-            CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            STATUS_BAR_COLOR
+            origin = PaymentSheetOrigin.Intent(
+                clientSecret = SetupIntentClientSecret(CLIENT_SECRET),
+            ),
+            config = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            statusBarColor = STATUS_BAR_COLOR,
         )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY
         get() = PaymentSheetContract.Args(
-            PAYMENT_INTENT_CLIENT_SECRET,
-            CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            STATUS_BAR_COLOR
+            origin = PaymentSheetOrigin.Intent(
+                clientSecret = PAYMENT_INTENT_CLIENT_SECRET,
+            ),
+            config = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            statusBarColor = STATUS_BAR_COLOR,
         )
 
     internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY
         get() = PaymentSheetContract.Args(
-            PAYMENT_INTENT_CLIENT_SECRET,
-            CONFIG_CUSTOMER,
-            STATUS_BAR_COLOR
+            origin = PaymentSheetOrigin.Intent(
+                clientSecret = PAYMENT_INTENT_CLIENT_SECRET,
+            ),
+            config = CONFIG_CUSTOMER,
+            statusBarColor = STATUS_BAR_COLOR,
         )
 
     internal val ARGS_WITHOUT_CONFIG
         get() = PaymentSheetContract.Args(
-            PAYMENT_INTENT_CLIENT_SECRET,
+            origin = PaymentSheetOrigin.Intent(
+                clientSecret = PAYMENT_INTENT_CLIENT_SECRET,
+            ),
             config = null,
-            STATUS_BAR_COLOR
+            statusBarColor = STATUS_BAR_COLOR,
         )
 
     internal val ARGS_WITHOUT_CUSTOMER

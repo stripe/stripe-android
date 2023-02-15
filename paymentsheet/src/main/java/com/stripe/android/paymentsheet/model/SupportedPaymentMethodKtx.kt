@@ -65,10 +65,7 @@ internal fun SupportedPaymentMethod.getSpecWithFulfilledRequirements(
 
     return when (data.mode) {
         is PaymentSheetMode.Payment -> {
-            val isSetupForFutureUse =
-                data.setupFutureUse != null || data.isLpmLevelSetupFutureUsageSet(code)
-
-            if (isSetupForFutureUse) {
+            if (data.setupFutureUse != null) {
                 if (supportsPaymentIntentSfuSet(data.shippingDetails, config)) {
                     merchantRequestedSave
                 } else {

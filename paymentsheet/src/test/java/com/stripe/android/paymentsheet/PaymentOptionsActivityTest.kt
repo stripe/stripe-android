@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.state.toPaymentSheetData
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -196,14 +197,14 @@ internal class PaymentOptionsActivityTest {
         val scenario = activityScenario(
             createViewModel(
                 args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
+                    data = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.toPaymentSheetData()
                 )
             )
         )
         scenario.launch(
             createIntent(
                 args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
+                    data = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.toPaymentSheetData()
                 )
             )
         ).use {
@@ -407,14 +408,14 @@ internal class PaymentOptionsActivityTest {
         val scenario = activityScenario(
             createViewModel(
                 args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
+                    data = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.toPaymentSheetData()
                 )
             )
         )
         scenario.launch(
             createIntent(
                 args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                    data = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.toPaymentSheetData(),
                     config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
                         appearance = PaymentSheet.Appearance(
                             primaryButton = PaymentSheet.PrimaryButton(

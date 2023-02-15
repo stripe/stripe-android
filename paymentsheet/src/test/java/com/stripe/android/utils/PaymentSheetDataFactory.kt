@@ -1,5 +1,7 @@
 package com.stripe.android.utils
 
+import com.stripe.android.paymentsheet.PaymentSheetOrigin
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.state.PaymentSheetData
 import com.stripe.android.ui.core.PaymentSheetMode
 
@@ -11,6 +13,7 @@ internal object PaymentSheetDataFactory {
         unactivatedPaymentMethods: List<String> = emptyList(),
     ): PaymentSheetData {
         return PaymentSheetData(
+            id = null,
             mode = PaymentSheetMode.Payment(
                 amount = 1_000L,
                 currency = "usd",
@@ -21,7 +24,9 @@ internal object PaymentSheetDataFactory {
             isLiveMode = isLiveMode,
             linkFundingSources = emptyList(),
             shippingDetails = null,
-            isLpmLevelSetupFutureUsageSet = { false },
+            origin = PaymentSheetOrigin.Intent(
+                clientSecret = PaymentIntentClientSecret("secret"),
+            )
         )
     }
 }
