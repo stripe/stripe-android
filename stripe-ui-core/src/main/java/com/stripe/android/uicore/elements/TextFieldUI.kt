@@ -108,6 +108,7 @@ fun TextField(
     val shouldShowError by textFieldController.visibleError.collectAsState(false)
     val loading by textFieldController.loading.collectAsState(false)
     val contentDescription by textFieldController.contentDescription.collectAsState("")
+    val placeHolder by textFieldController.placeHolder.collectAsState(null)
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
     val colors = TextFieldColors(shouldShowError)
@@ -160,17 +161,22 @@ fun TextField(
                 this.editableText = AnnotatedString("")
             },
         enabled = enabled && textFieldController.enabled,
-        label = {
-            FormLabel(
-                text = if (textFieldController.showOptionalLabel) {
-                    stringResource(
-                        R.string.form_label_optional,
-                        label?.let { stringResource(it) } ?: ""
-                    )
-                } else {
-                    label?.let { stringResource(it) } ?: ""
-                }
-            )
+        label = label?.let {
+            {
+                FormLabel(
+                    text = if (textFieldController.showOptionalLabel) {
+                        stringResource(
+                            R.string.form_label_optional,
+                            stringResource(it)
+                        )
+                    } else {
+                        stringResource(it)
+                    }
+                )
+            }
+        },
+        placeholder = placeHolder?.let {
+            { Placeholder(text = it) }
         },
         trailingIcon = trailingIcon?.let {
             {
