@@ -9,7 +9,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
@@ -44,8 +43,6 @@ import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.ui.core.elements.transform
-import com.stripe.android.ui.core.mode
-import com.stripe.android.ui.core.setupFutureUse
 import java.io.InputStream
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -556,20 +553,5 @@ class LpmRepository constructor(
         val setupFutureUse: PaymentSheetSetupFutureUse?,
         val expectedLpms: List<String>,
         val serverLpmSpecs: String?,
-    )
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PaymentMethodPreference.toUpdateParams(): LpmRepository.UpdateParams {
-    return intent.toUpdateParams(formUI)
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun StripeIntent.toUpdateParams(formUI: String? = null): LpmRepository.UpdateParams {
-    return LpmRepository.UpdateParams(
-        mode = mode(),
-        setupFutureUse = setupFutureUse(),
-        expectedLpms = paymentMethodTypes,
-        serverLpmSpecs = formUI,
     )
 }

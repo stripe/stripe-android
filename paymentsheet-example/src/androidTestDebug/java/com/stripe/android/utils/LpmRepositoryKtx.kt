@@ -8,12 +8,11 @@ internal fun initializedLpmRepository(context: Context): LpmRepository {
         LpmRepository.LpmRepositoryArguments(context.resources)
     )
 
-    repository.update(
-        stripeIntent = PaymentIntentFactory.create(
-            paymentMethodTypes = repository.supportedPaymentMethods,
-        ),
-        serverLpmSpecs = null,
+    val updateParams = LpmUpdateParamsFactory.create(
+        paymentMethodTypes = repository.supportedPaymentMethods,
     )
+
+    repository.update(updateParams)
 
     return repository
 }

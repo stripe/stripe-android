@@ -7,8 +7,11 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentLauncher.Companion.supportedFundingSources
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
+import com.stripe.android.model.PaymentMethodPreference
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -23,10 +26,11 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.ui.core.PaymentSheetMode
+import com.stripe.android.ui.core.PaymentSheetSetupFutureUse
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.ui.core.forms.resources.toUpdateParams
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -294,5 +298,38 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             customerBillingCountryCode = config?.defaultBillingDetails?.address?.country,
             shippingValues = shippingAddress
         )
+    }
+}
+
+private fun PaymentMethodPreference.toUpdateParams(): LpmRepository.UpdateParams {
+    return intent.toUpdateParams(formUI)
+}
+
+internal fun StripeIntent.toUpdateParams(formUI: String? = null): LpmRepository.UpdateParams {
+    return LpmRepository.UpdateParams(
+        mode = mode(),
+        setupFutureUse = setupFutureUse(),
+        expectedLpms = paymentMethodTypes,
+        serverLpmSpecs = formUI,
+    )
+}
+
+private fun StripeIntent.mode(): PaymentSheetMode {
+    return when (this) {
+        is PaymentIntent -> PaymentSheetMode.Payment
+        is SetupIntent -> PaymentSheetMode.Setup
+    }
+}
+
+private fun StripeIntent.setupFutureUse(): PaymentSheetSetupFutureUse? {
+    return when (this) {
+        is PaymentIntent -> {
+            when (setupFutureUsage) {
+                StripeIntent.Usage.OnSession -> PaymentSheetSetupFutureUse.OnSession
+                StripeIntent.Usage.OffSession -> PaymentSheetSetupFutureUse.OffSession
+                StripeIntent.Usage.OneTime, null -> null
+            }
+        }
+        is SetupIntent -> PaymentSheetSetupFutureUse.OffSession
     }
 }
