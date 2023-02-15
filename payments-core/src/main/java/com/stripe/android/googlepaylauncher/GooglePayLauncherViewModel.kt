@@ -23,6 +23,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
@@ -130,18 +131,27 @@ internal class GooglePayLauncherViewModel(
         stripeIntent: StripeIntent,
         currencyCode: String
     ): GooglePayJsonFactory.TransactionInfo {
-        return when (stripeIntent) {
-            is PaymentIntent -> {
+        val mode = when (stripeIntent) {
+            is PaymentIntent -> DeferredIntent.Mode.Payment(
+                amount = stripeIntent.amount!!,
+                currency = stripeIntent.currency!!,
+            )
+            is SetupIntent -> DeferredIntent.Mode.Setup(currency = null)
+            is DeferredIntent -> stripeIntent.mode
+        }
+
+        return when (mode) {
+            is DeferredIntent.Mode.Payment -> {
                 GooglePayJsonFactory.TransactionInfo(
                     currencyCode = currencyCode,
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
                     countryCode = args.config.merchantCountryCode,
                     transactionId = stripeIntent.id,
-                    totalPrice = stripeIntent.amount?.toInt(),
+                    totalPrice = mode.amount.toInt(),
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase
                 )
             }
-            is SetupIntent -> {
+            is DeferredIntent.Mode.Setup -> {
                 GooglePayJsonFactory.TransactionInfo(
                     currencyCode = currencyCode,
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,

@@ -53,6 +53,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
+import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
@@ -356,15 +357,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         locale: Locale
     ): PaymentMethodPreference? {
-        val type = ElementsSessionParams.Type.PaymentIntent
+        val params = ElementsSessionParams.PaymentIntentType(
+            clientSecret = clientSecret,
+            locale = locale.toLanguageTag(),
+        )
         val elementsSession = retrieveElementsSession(
-            params = ElementsSessionParams(
-                type = type,
-                clientSecret = clientSecret,
-                locale = locale.toLanguageTag(),
-            ),
+            params = params,
             expandFields = listOf(
-                "payment_method_preference.${type.value}.payment_method"
+                "payment_method_preference.${params.type}.payment_method"
             ),
             options = options,
             analyticsEvent = PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered
@@ -510,15 +510,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         locale: Locale
     ): PaymentMethodPreference? {
-        val type = ElementsSessionParams.Type.SetupIntent
+        val params = ElementsSessionParams.SetupIntentType(
+            clientSecret = clientSecret,
+            locale = locale.toLanguageTag(),
+        )
         val elementsSession = retrieveElementsSession(
-            params = ElementsSessionParams(
-                type = type,
-                clientSecret = clientSecret,
-                locale = locale.toLanguageTag(),
-            ),
+            params = params,
             expandFields = listOf(
-                "payment_method_preference.${type.value}.payment_method"
+                "payment_method_preference.${params.type}.payment_method"
             ),
             options = options,
             analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieveOrdered
@@ -1654,6 +1653,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override suspend fun retrieveDeferredIntent(
+        elementsSessionParams: ElementsSessionParams,
+        requestOptions: ApiRequest.Options
+    ): DeferredIntent? {
+        return retrieveElementsSession(
+            params = elementsSessionParams,
+            options = requestOptions,
+            analyticsEvent = null
+        )?.stripeIntent as? DeferredIntent
+    }
+
     /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
@@ -1673,13 +1683,18 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         fireFraudDetectionDataRequest()
 
-        val parser = ElementsSessionJsonParser(params.type)
+        val parser = ElementsSessionJsonParser(
+            params = params,
+            apiKey = options.apiKey
+        )
 
         val requestParams = buildMap {
-            this["type"] = params.type.value
+            this["type"] = params.type
             params.clientSecret?.let { this["client_secret"] = it }
-            params.locale?.let { this["locale"] = it }
-            params.deferredIntent?.let { this["deferred_intent"] = it }
+            params.locale.let { this["locale"] = it }
+            (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
+                this["deferred_intent"] = type.deferredIntentParams
+            }
         }
 
         return fetchStripeModel(

@@ -10,8 +10,10 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 internal class ElementsSessionJsonParser(
-    private val type: ElementsSessionParams.Type,
+    private val params: ElementsSessionParams,
+    private val apiKey: String
 ) : ModelJsonParser<ElementsSession> {
+
     override fun parse(json: JSONObject): ElementsSession? {
         val paymentMethodPreference = StripeJsonUtils.mapToJsonObject(
             StripeJsonUtils.optMap(json, FIELD_PAYMENT_METHOD_PREFERENCE)
@@ -59,9 +61,7 @@ internal class ElementsSessionJsonParser(
         linkFundingSources: JSONArray?,
         countryCode: String
     ): StripeIntent? {
-        return paymentMethodPreference?.optJSONObject(
-            type.value
-        )?.let { stripeIntentJsonObject ->
+        return paymentMethodPreference?.optJSONObject(params.type)?.let { stripeIntentJsonObject ->
             orderedPaymentMethodTypes?.let {
                 stripeIntentJsonObject.put(
                     FIELD_PAYMENT_METHOD_TYPES,
@@ -81,12 +81,19 @@ internal class ElementsSessionJsonParser(
                 countryCode
             )
 
-            when (type) {
-                ElementsSessionParams.Type.PaymentIntent ->
+            when (params) {
+                is ElementsSessionParams.PaymentIntentType -> {
                     PaymentIntentJsonParser().parse(stripeIntentJsonObject)
-                ElementsSessionParams.Type.SetupIntent ->
+                }
+                is ElementsSessionParams.SetupIntentType -> {
                     SetupIntentJsonParser().parse(stripeIntentJsonObject)
-                ElementsSessionParams.Type.DeferredIntent -> null
+                }
+                is ElementsSessionParams.DeferredIntentType -> {
+                    DeferredIntentJsonParser(
+                        params = params.deferredIntentParams,
+                        apiKey = apiKey
+                    ).parse(stripeIntentJsonObject)
+                }
             }
         }
     }

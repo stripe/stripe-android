@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet.model
 
+import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.paymentsheet.forms.PIRequirement
 import com.stripe.android.paymentsheet.forms.SIRequirement
@@ -29,7 +31,7 @@ internal fun SupportedPaymentMethod.getPMAddForm(
 ) = requireNotNull(getSpecWithFullfilledRequirements(stripeIntent, config))
 
 /**
- * This function will determine if there is a valid for the payment method
+ * This function will determine if there is a valid spec for the payment method
  * given the [PaymentSheet.Configuration] and the [StripeIntent]
  */
 internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
@@ -57,10 +59,26 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
         return null
     }
 
-    return when (stripeIntent) {
-        is PaymentIntent -> {
+    val mode = when (stripeIntent) {
+        is PaymentIntent -> DeferredIntent.Mode.Payment(
+            amount = stripeIntent.amount!!,
+            currency = stripeIntent.currency!!,
+        )
+        is SetupIntent -> DeferredIntent.Mode.Setup(currency = null)
+        is DeferredIntent -> stripeIntent.mode
+    }
+
+    val containsValidShippingInfo = when (stripeIntent) {
+        is PaymentIntent -> stripeIntent.containsValidShippingInfo
+        is SetupIntent -> false
+        is DeferredIntent -> config?.shippingDetails?.containsValidShippingInfo == true
+    }
+
+    return when (mode) {
+        is DeferredIntent.Mode.Payment -> {
+
             if (stripeIntent.isLpmLevelSetupFutureUsageSet(code)) {
-                if (supportsPaymentIntentSfuSet(stripeIntent, config)) {
+                if (supportsPaymentIntentSfuSet(containsValidShippingInfo, config)) {
                     merchantRequestedSave
                 } else {
                     null
@@ -68,25 +86,39 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
             } else {
                 when {
                     supportsPaymentIntentSfuSettable(
-                        stripeIntent,
+                        containsValidShippingInfo,
                         config
                     )
                     -> userSelectableSave
                     supportsPaymentIntentSfuNotSettable(
-                        stripeIntent,
+                        containsValidShippingInfo,
                         config
                     ) -> oneTimeUse
                     else -> null
                 }
             }
         }
-        is SetupIntent -> {
+        is DeferredIntent.Mode.Setup -> {
             when {
                 supportsSetupIntent(
                     config
                 ) -> merchantRequestedSave
                 else -> null
             }
+        }
+    }
+}
+
+fun StripeIntent.isLpmLevelSetupFutureUsageSet(code: String): Boolean {
+    return when (this) {
+        is DeferredIntent -> {
+            isLpmLevelSetupFutureUsageSet(code)
+        }
+        is PaymentIntent -> {
+            isLpmLevelSetupFutureUsageSet(code)
+        }
+        is SetupIntent -> {
+            false
         }
     }
 }
@@ -106,20 +138,20 @@ private fun SupportedPaymentMethod.supportsSetupIntent(
  * a consistent user experience.
  */
 private fun SupportedPaymentMethod.supportsPaymentIntentSfuSet(
-    paymentIntent: PaymentIntent,
+    containsValidShippingInfo: Boolean,
     config: PaymentSheet.Configuration?
 ) = requirement.getConfirmPMFromCustomer(code) &&
     checkSetupIntentRequirements(requirement.siRequirements, config) &&
-    checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config)
+    checkPaymentIntentRequirements(requirement.piRequirements, containsValidShippingInfo, config)
 
 /**
  * This detects if there is support with using this PM with the PI
  * where SFU is not settable by the user.
  */
 private fun SupportedPaymentMethod.supportsPaymentIntentSfuNotSettable(
-    paymentIntent: PaymentIntent,
+    containsValidShippingInfo: Boolean,
     config: PaymentSheet.Configuration?
-) = checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config)
+) = checkPaymentIntentRequirements(requirement.piRequirements, containsValidShippingInfo, config)
 
 /**
  * This checks to see if this PM is supported with the given
@@ -132,11 +164,11 @@ private fun SupportedPaymentMethod.supportsPaymentIntentSfuNotSettable(
  * and seeing the saved PMs associate with their customer object.
  */
 private fun SupportedPaymentMethod.supportsPaymentIntentSfuSettable(
-    paymentIntent: PaymentIntent,
+    containsValidShippingInfo: Boolean,
     config: PaymentSheet.Configuration?
 ) = config?.customer != null &&
     requirement.getConfirmPMFromCustomer(code) &&
-    checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config) &&
+    checkPaymentIntentRequirements(requirement.piRequirements, containsValidShippingInfo, config) &&
     checkSetupIntentRequirements(requirement.siRequirements, config)
 
 /**
@@ -158,7 +190,7 @@ private fun checkSetupIntentRequirements(
  */
 private fun checkPaymentIntentRequirements(
     requirements: Set<PIRequirement>?,
-    paymentIntent: PaymentIntent,
+    containsValidShippingInfo: Boolean,
     config: PaymentSheet.Configuration?
 ): Boolean {
     return requirements?.map { requirement ->
@@ -168,7 +200,7 @@ private fun checkPaymentIntentRequirements(
             }
             ShippingAddress -> {
                 val forceAllow = config?.allowsPaymentMethodsRequiringShippingAddress == true
-                paymentIntent.containsValidShippingInfo || forceAllow
+                containsValidShippingInfo || forceAllow
             }
         }
     }?.contains(false) == false
@@ -179,6 +211,12 @@ private val PaymentIntent.containsValidShippingInfo: Boolean
         shipping?.address?.line1 != null &&
         shipping?.address?.country != null &&
         shipping?.address?.postalCode != null
+
+private val AddressDetails.containsValidShippingInfo: Boolean
+    get() = name != null &&
+        address?.line1 != null &&
+        address.country != null &&
+        address.postalCode != null
 
 /**
  * Get the LPMS that are supported when used as a Customer Saved LPM given

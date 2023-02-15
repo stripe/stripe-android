@@ -2,6 +2,7 @@ package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
@@ -13,7 +14,8 @@ class ElementsSessionJsonParserTest {
     @Test
     fun parsePaymentIntent_shouldCreateObjectWithOrderedPaymentMethods() {
         val elementsSession = ElementsSessionJsonParser(
-            ElementsSessionParams.Type.PaymentIntent
+            ElementsSessionParams.PaymentIntentType("secret"),
+            "test"
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
         )
@@ -34,7 +36,8 @@ class ElementsSessionJsonParserTest {
     @Test
     fun parseSetupIntent_shouldCreateObjectWithOrderedPaymentMethods() {
         val elementsSession = ElementsSessionJsonParser(
-            ElementsSessionParams.Type.SetupIntent
+            ElementsSessionParams.SetupIntentType("secret"),
+            "test"
         ).parse(
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON
         )
@@ -55,7 +58,8 @@ class ElementsSessionJsonParserTest {
     @Test
     fun parsePaymentIntent_shouldCreateObjectLinkFundingSources() {
         val elementsSession = ElementsSessionJsonParser(
-            ElementsSessionParams.Type.PaymentIntent
+            ElementsSessionParams.PaymentIntentType("secret"),
+            "test"
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
         )!!
@@ -67,7 +71,8 @@ class ElementsSessionJsonParserTest {
     @Test
     fun parseSetupIntent_shouldCreateObjectLinkFundingSources() {
         val elementsSession = ElementsSessionJsonParser(
-            ElementsSessionParams.Type.SetupIntent
+            ElementsSessionParams.SetupIntentType("secret"),
+            "test"
         ).parse(
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
         )!!
@@ -79,7 +84,8 @@ class ElementsSessionJsonParserTest {
     @Test
     fun `Test ordered payment methods returned in PI payment_method_type variable`() {
         val parsedData = ElementsSessionJsonParser(
-            ElementsSessionParams.Type.PaymentIntent
+            ElementsSessionParams.PaymentIntentType("secret"),
+            "test"
         ).parse(
             JSONObject(
                 ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS
@@ -97,7 +103,8 @@ class ElementsSessionJsonParserTest {
     @Test
     fun `Test ordered payment methods not required in response`() {
         val parsedData = ElementsSessionJsonParser(
-            ElementsSessionParams.Type.PaymentIntent
+            ElementsSessionParams.PaymentIntentType("secret"),
+            "test"
         ).parse(
             JSONObject(
                 ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS_NO_ORDERED_LPMS
@@ -116,7 +123,8 @@ class ElementsSessionJsonParserTest {
     @Test
     fun `Test ordered payment methods is not required`() {
         val parsedData = ElementsSessionJsonParser(
-            ElementsSessionParams.Type.PaymentIntent
+            ElementsSessionParams.PaymentIntentType("secret"),
+            "test"
         ).parse(
             JSONObject(
                 """
@@ -136,7 +144,8 @@ class ElementsSessionJsonParserTest {
     @Test
     fun `Test fail to parse the payment intent`() {
         val parsedData = ElementsSessionJsonParser(
-            ElementsSessionParams.Type.PaymentIntent
+            ElementsSessionParams.PaymentIntentType("secret"),
+            "test"
         ).parse(
             JSONObject(
                 """
@@ -156,7 +165,8 @@ class ElementsSessionJsonParserTest {
     @Test
     fun `Test fail to find the payment intent`() {
         val parsedData = ElementsSessionJsonParser(
-            ElementsSessionParams.Type.PaymentIntent
+            ElementsSessionParams.PaymentIntentType("secret"),
+            "test"
         ).parse(
             JSONObject(
                 """
@@ -174,7 +184,8 @@ class ElementsSessionJsonParserTest {
     @Test
     fun `Test PI with country code`() {
         val parsedData = ElementsSessionJsonParser(
-            ElementsSessionParams.Type.PaymentIntent
+            ElementsSessionParams.PaymentIntentType("secret"),
+            "test"
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
         )
@@ -182,6 +193,7 @@ class ElementsSessionJsonParserTest {
         val countryCode = when (val intent = parsedData?.stripeIntent) {
             is PaymentIntent -> intent.countryCode
             is SetupIntent -> intent.countryCode
+            is DeferredIntent -> intent.countryCode
             null -> null
         }
 
@@ -191,7 +203,8 @@ class ElementsSessionJsonParserTest {
     @Test
     fun `Test SI with country code`() {
         val parsedData = ElementsSessionJsonParser(
-            ElementsSessionParams.Type.SetupIntent
+            ElementsSessionParams.SetupIntentType("secret"),
+            "test"
         ).parse(
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON
         )
@@ -199,6 +212,7 @@ class ElementsSessionJsonParserTest {
         val countryCode = when (val intent = parsedData?.stripeIntent) {
             is PaymentIntent -> intent.countryCode
             is SetupIntent -> intent.countryCode
+            is DeferredIntent -> intent.countryCode
             null -> null
         }
 
