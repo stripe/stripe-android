@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.BinFixtures
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -431,6 +432,10 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         logoColor: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethodMessage? {
+        return null
+    }
+
+    override suspend fun retrievePossibleBrands(cardNumber: String): Set<CardBrand>? {
         return null
     }
 }

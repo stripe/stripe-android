@@ -13,6 +13,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -532,4 +533,9 @@ abstract class StripeRepository {
         logoColor: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethodMessage?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun retrievePossibleBrands(
+        cardNumber: String
+    ): Set<CardBrand>?
 }

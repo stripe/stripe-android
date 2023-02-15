@@ -7,6 +7,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
@@ -679,6 +680,25 @@ internal class StripeKtxTest {
             options = isA(),
             expandFields = eq(expandFields),
         )
+    }
+
+    @Test
+    fun `Possible brands contains Visa`() = runTest {
+        whenever(
+            mockApiRepository.retrievePossibleBrands(any())
+        ).thenReturn(setOf(CardBrand.Visa))
+        assertThat(stripe.retrievePossibleBrands("424242424242"))
+            .containsExactly(CardBrand.Visa)
+    }
+
+    @Test
+    fun `Possible brands throws error`() = runTest {
+        assertFailsWith<Exception> {
+            whenever(
+                mockApiRepository.retrievePossibleBrands(any())
+            ).thenThrow(Exception("test"))
+            stripe.retrievePossibleBrands("424242424242")
+        }
     }
 
     private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>

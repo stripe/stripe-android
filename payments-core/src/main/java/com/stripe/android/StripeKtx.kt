@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.content.Intent
 import androidx.annotation.Size
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
@@ -14,6 +15,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccountTokenParams
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -968,4 +970,13 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
             stripeAccount = stripeAccountId
         )
     )
+}
+
+/**
+ * Returns available brands for the provided card number
+ * @param cardNumber the card number to retrieve possible brands
+ * @return a set of possible [CardBrand]
+ */
+suspend fun Stripe.retrievePossibleBrands(cardNumber: String): Set<CardBrand> {
+    return stripeRepository.retrievePossibleBrands(cardNumber) ?: setOf()
 }
