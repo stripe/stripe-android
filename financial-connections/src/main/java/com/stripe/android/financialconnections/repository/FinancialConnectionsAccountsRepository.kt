@@ -35,7 +35,7 @@ internal interface FinancialConnectionsAccountsRepository {
      *
      * This method is called after the account holder has been verified as an existing Link consumer.
      */
-    suspend fun postNetworkedAccounts(
+    suspend fun getNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String,
     ): PartnerAccountsList
@@ -113,11 +113,11 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         }
     }
 
-    override suspend fun postNetworkedAccounts(
+    override suspend fun getNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String
     ): PartnerAccountsList {
-        val request = apiRequestFactory.createPost(
+        val request = apiRequestFactory.createGet(
             url = networkedAccountsUrl,
             options = apiOptions,
             params = mapOf(

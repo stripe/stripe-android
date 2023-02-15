@@ -26,7 +26,7 @@ internal class PollNetworkedAccounts @Inject constructor(
         delayMilliseconds = POLLING_TIME_MS,
         retryCondition = { exception -> exception.shouldRetry }
     ) {
-        repository.postNetworkedAccounts(
+        repository.getNetworkedAccounts(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
             consumerSessionClientSecret = consumerSessionClientSecret
         )
