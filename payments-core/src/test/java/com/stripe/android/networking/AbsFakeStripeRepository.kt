@@ -434,8 +434,4 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     ): PaymentMethodMessage? {
         return null
     }
-
-    override suspend fun retrievePossibleBrands(cardNumber: String): Set<CardBrand>? {
-        return null
-    }
 }

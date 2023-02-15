@@ -5,7 +5,6 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
-import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory;
 import com.stripe.android.core.AppInfo;
 import com.stripe.android.core.exception.AuthenticationException;
 import com.stripe.android.core.exception.InvalidRequestException;
@@ -42,16 +41,11 @@ import com.stripe.android.networking.StripeApiRepository;
 import com.stripe.android.networking.StripeRepository;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -63,7 +57,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
-import kotlin.Unit;
 import kotlin.coroutines.CoroutineContext;
 import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.test.TestCoroutineDispatcher;
@@ -1266,34 +1259,6 @@ public class StripeTest {
         assertTrue(url.startsWith("https://files.stripe.com/v1/files/file_"));
     }
 
-    @Test
-    public void possibleCardBrandContainsVisa() {
-        final Stripe stripe = createStripe(
-                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-        );
-
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-
-        Set<CardBrand> actualBrands = new HashSet<>();
-        List<Throwable> actualError = new ArrayList<>();
-        stripe.retrievePossibleBrands(
-                "424242",
-                (brands) -> {
-                    actualBrands.addAll(brands);
-                    countDownLatch.countDown();
-                    return Unit.INSTANCE;
-                },
-                (error) -> {
-                    actualError.add(error);
-                    countDownLatch.countDown();
-                    return Unit.INSTANCE;
-                }
-        );
-
-        assertThat(actualBrands).containsExactly(CardBrand.Visa);
-        assertThat(actualError).isEmpty();
-    }
-
     @NonNull
     private Source createSource() throws StripeException {
         final Stripe stripe = defaultStripe;
@@ -1404,7 +1369,6 @@ public class StripeTest {
                 emptySet(),
                 new DefaultStripeNetworkClient(workDispatcher),
                 analyticsRequestExecutor,
-                new DefaultCardAccountRangeRepositoryFactory(context).create(),
                 fraudDetectionDataRepository
         );
     }

@@ -91,6 +91,8 @@ class CardNumberEditText internal constructor(
             }
         }
 
+    internal var possibleBrandsCallback: (Set<CardBrand>) -> Unit = {}
+
     @JvmSynthetic
     internal var brandChangeCallback: (CardBrand) -> Unit = {}
         set(callback) {
@@ -137,6 +139,10 @@ class CardNumberEditText internal constructor(
             override fun onAccountRangeResult(newAccountRange: AccountRange?) {
                 updateLengthFilter()
                 cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
+            }
+
+            override fun onPossibleBrands(possibleBrands: Set<CardBrand>) {
+                possibleBrandsCallback(possibleBrands)
             }
         }
     )

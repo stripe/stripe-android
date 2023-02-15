@@ -84,6 +84,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     )
 
     private var cardInputListener: CardInputListener? = null
+    private var possibleBrandsListener: PossibleBrandsListener? = null
     private var cardValidCallback: CardValidCallback? = null
     private val cardValidTextWatcher = object : StripeTextWatcher() {
         override fun afterTextChanged(s: Editable?) {
@@ -355,6 +356,10 @@ class CardMultilineWidget @JvmOverloads constructor(
             updateBrandUi()
         }
 
+        cardNumberEditText.possibleBrandsCallback = {
+            possibleBrandsListener?.invoke(it)
+        }
+
         expiryDateEditText.completionCallback = {
             cvcEditText.requestFocus()
             cardInputListener?.onExpirationComplete()
@@ -428,6 +433,10 @@ class CardMultilineWidget @JvmOverloads constructor(
      */
     override fun setCardInputListener(listener: CardInputListener?) {
         this.cardInputListener = listener
+    }
+
+    override fun setPossibleBrandsListener(listener: PossibleBrandsListener?) {
+        this.possibleBrandsListener = listener
     }
 
     override fun setCardValidCallback(callback: CardValidCallback?) {

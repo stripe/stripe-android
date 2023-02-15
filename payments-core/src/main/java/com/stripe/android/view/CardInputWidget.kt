@@ -87,6 +87,7 @@ class CardInputWidget @JvmOverloads constructor(
     internal val postalCodeEditText = viewBinding.postalCodeEditText
 
     private var cardInputListener: CardInputListener? = null
+    private var possibleBrandsListener: PossibleBrandsListener? = null
     private var cardValidCallback: CardValidCallback? = null
     private val cardValidTextWatcher = object : StripeTextWatcher() {
         override fun afterTextChanged(s: Editable?) {
@@ -406,6 +407,10 @@ class CardInputWidget @JvmOverloads constructor(
      */
     override fun setCardInputListener(listener: CardInputListener?) {
         cardInputListener = listener
+    }
+
+    override fun setPossibleBrandsListener(listener: PossibleBrandsListener?) {
+        possibleBrandsListener = listener
     }
 
     /**
@@ -772,6 +777,10 @@ class CardInputWidget @JvmOverloads constructor(
             cardBrandView.brand = brand
             hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
             updateCvc()
+        }
+
+        cardNumberEditText.possibleBrandsCallback = {
+            possibleBrandsListener?.invoke(it)
         }
 
         expiryDateEditText.completionCallback = {

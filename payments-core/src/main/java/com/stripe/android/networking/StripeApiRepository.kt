@@ -9,9 +9,6 @@ import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.Bin
-import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.cards.CardNumber
-import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.Logger
@@ -44,7 +41,6 @@ import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -125,8 +121,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         DefaultAnalyticsRequestExecutor(logger, workContext),
-    private val cardAccountRangeRepository: CardAccountRangeRepository =
-        DefaultCardAccountRangeRepositoryFactory(context, analyticsRequestExecutor).create(),
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(context, workContext),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
@@ -1628,15 +1622,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         ) {
             // no-op
         }
-    }
-
-    override suspend fun retrievePossibleBrands(cardNumber: String): Set<CardBrand> {
-        val ranges = cardAccountRangeRepository.getAccountRanges(
-            CardNumber.Unvalidated(cardNumber)
-        )
-        return ranges?.map {
-            it.brand
-        }?.toSet() ?: setOf()
     }
 
     /**

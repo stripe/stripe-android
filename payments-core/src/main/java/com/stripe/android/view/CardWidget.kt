@@ -2,8 +2,11 @@ package com.stripe.android.view
 
 import android.text.TextWatcher
 import androidx.annotation.IntRange
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethodCreateParams
+
+typealias PossibleBrandsListener = (Set<CardBrand>) -> Unit
 
 internal interface CardWidget {
     /**
@@ -27,6 +30,8 @@ internal interface CardWidget {
     fun setCardValidCallback(callback: CardValidCallback?)
 
     fun setCardInputListener(listener: CardInputListener?)
+
+    fun setPossibleBrandsListener(listener: PossibleBrandsListener?)
 
     /**
      * Set a `TextWatcher` to receive card number changes.

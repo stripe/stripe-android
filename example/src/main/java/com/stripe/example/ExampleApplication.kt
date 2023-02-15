@@ -14,8 +14,8 @@ class ExampleApplication : Application() {
 
         StrictMode.setThreadPolicy(
             StrictMode.ThreadPolicy.Builder()
-                .detectDiskReads()
-                .detectDiskWrites()
+//                .detectDiskReads()
+//                .detectDiskWrites()
                 .detectAll()
                 .penaltyLog()
                 .also {

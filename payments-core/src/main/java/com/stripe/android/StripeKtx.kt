@@ -971,12 +971,3 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
         )
     )
 }
-
-/**
- * Returns available brands for the provided card number
- * @param cardNumber the card number to retrieve possible brands
- * @return a set of possible [CardBrand]
- */
-suspend fun Stripe.retrievePossibleBrands(cardNumber: String): Set<CardBrand> {
-    return stripeRepository.retrievePossibleBrands(cardNumber) ?: setOf()
-}

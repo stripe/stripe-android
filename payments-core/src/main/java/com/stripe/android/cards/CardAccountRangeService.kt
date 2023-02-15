@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.toBrands
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -29,20 +30,19 @@ class CardAccountRangeService constructor(
     var accountRangeRepositoryJob: Job? = null
 
     fun onCardNumberChanged(cardNumber: CardNumber.Unvalidated) {
-        val staticAccountRange = staticCardAccountRanges.filter(cardNumber)
-            .let { accountRanges ->
-                if (accountRanges.size == 1) {
-                    accountRanges.first()
-                } else {
-                    null
-                }
-            }
-        if (staticAccountRange == null || shouldQueryRepository(staticAccountRange)) {
+        val staticAccountRange = staticCardAccountRanges
+            .filter(cardNumber)
+            .toSet()
+            .getCardBrandChoiceOrFirstOrNull()
+        if (staticAccountRange == null ||
+            staticAccountRange.brand == CardBrand.Visa ||
+            staticAccountRange.brand == CardBrand.MasterCard ||
+            shouldQueryRepository(staticAccountRange)) {
             // query for AccountRange data
             queryAccountRangeRepository(cardNumber)
         } else {
             // use static AccountRange data
-            updateAccountRangeResult(staticAccountRange)
+            updateAccountRangeResult(setOf(staticAccountRange))
         }
     }
 
@@ -57,14 +57,14 @@ class CardAccountRangeService constructor(
 
             accountRangeRepositoryJob = CoroutineScope(workContext).launch {
                 val bin = cardNumber.bin
-                val accountRange = if (bin != null) {
-                    cardAccountRangeRepository.getAccountRange(cardNumber)
+                val accountRanges = if (bin != null) {
+                    cardAccountRangeRepository.getAccountRanges(cardNumber)
                 } else {
                     null
                 }
 
                 withContext(Dispatchers.Main) {
-                    updateAccountRangeResult(accountRange)
+                    updateAccountRangeResult(accountRanges)
                 }
             }
         }
@@ -77,10 +77,15 @@ class CardAccountRangeService constructor(
 
     @JvmSynthetic
     fun updateAccountRangeResult(
-        newAccountRange: AccountRange?
+        newAccountRanges: Set<AccountRange>?
     ) {
-        accountRange = newAccountRange
+        val accountRange = newAccountRanges?.getCardBrandChoiceOrFirstOrNull()
         accountRangeResultListener.onAccountRangeResult(accountRange)
+        accountRangeResultListener.onPossibleBrands(newAccountRanges.toBrands())
+    }
+
+    private fun Set<AccountRange>.getCardBrandChoiceOrFirstOrNull(): AccountRange? {
+        return find { it.brand == CardBrand.CartesBancaires } ?: firstOrNull()
     }
 
     private fun shouldQueryRepository(
@@ -99,5 +104,7 @@ class CardAccountRangeService constructor(
 
     interface AccountRangeResultListener {
         fun onAccountRangeResult(newAccountRange: AccountRange?)
+
+        fun onPossibleBrands(possibleBrands: Set<CardBrand>) { }
     }
 }

@@ -1795,28 +1795,6 @@ class Stripe internal constructor(
         }
     }
 
-    /**
-     * Returns available brands for the provided card number
-     * @param cardNumber the card number to retrieve possible brands
-     * @param onSuccess the callback called when the possible brands are retrieved
-     * @param onFailure the callback called when an exception has happened
-     * @return a set of possible [CardBrand]
-     */
-    fun retrievePossibleBrands(
-        cardNumber: String,
-        onSuccess: (Set<CardBrand>) -> Unit,
-        onFailure: (Throwable) -> Unit
-    ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val ranges = stripeRepository.retrievePossibleBrands(cardNumber)
-                onSuccess(ranges ?: setOf())
-            } catch (ex: Exception) {
-                onFailure(ex)
-            }
-        }
-    }
-
     private fun <T : StripeModel> executeAsync(
         callback: ApiResultCallback<T>,
         apiMethod: suspend () -> T?

@@ -2,6 +2,8 @@ package com.stripe.example.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
@@ -16,6 +18,7 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
+import com.stripe.android.view.CardInputListener
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.adapter.SourcesAdapter
@@ -64,6 +67,10 @@ class CreateCardSourceActivity : AppCompatActivity() {
             } else {
                 Log.e("STRIPE", "Validity: $isValid, invalidField: $invalidFields")
             }
+        }
+
+        viewBinding.cardWidget.setPossibleBrandsListener {
+            println("james possible brands: $it")
         }
 
         viewBinding.recyclerView.setHasFixedSize(true)
