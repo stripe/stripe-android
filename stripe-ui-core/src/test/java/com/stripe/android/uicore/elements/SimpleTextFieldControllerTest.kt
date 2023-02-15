@@ -239,6 +239,7 @@ internal class SimpleTextFieldControllerTest {
         assertThat(controller.placeHolder.value).isNull()
     }
 
+    @Test
     fun `Verify non-null placeHolder`() {
         val controller = createControllerWithState(nullPlaceHolder = false)
         assertThat(controller.placeHolder.value).isNotNull()
