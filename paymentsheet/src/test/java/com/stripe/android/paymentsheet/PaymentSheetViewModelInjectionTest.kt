@@ -10,7 +10,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
-import com.stripe.android.utils.PaymentIntentFactory
+import com.stripe.android.utils.LpmUpdateParamsFactory
 import com.stripe.android.utils.fakeCreationExtras
 import org.junit.After
 import org.junit.Test
@@ -79,16 +79,15 @@ internal class PaymentSheetViewModelInjectionTest : BasePaymentSheetViewModelInj
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
             ),
         ).apply {
-            this.update(
-                PaymentIntentFactory.create(
+            update(
+                LpmUpdateParamsFactory.create(
                     paymentMethodTypes = listOf(
                         PaymentMethod.Type.Card.code,
                         PaymentMethod.Type.USBankAccount.code,
                         PaymentMethod.Type.SepaDebit.code,
                         PaymentMethod.Type.Bancontact.code
-                    )
-                ),
-                null
+                    ),
+                )
             )
         }
     }

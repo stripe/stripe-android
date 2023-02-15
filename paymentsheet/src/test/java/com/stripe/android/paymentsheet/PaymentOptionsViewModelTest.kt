@@ -9,7 +9,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
@@ -30,6 +29,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.LpmUpdateParamsFactory
 import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -425,14 +425,14 @@ internal class PaymentOptionsViewModelTest {
     }
 
     private fun createLpmResourceRepository(
-        paymentIntent: PaymentIntent = PAYMENT_INTENT
+        updateParams: LpmRepository.UpdateParams = LpmUpdateParamsFactory.create(),
     ) = StaticLpmResourceRepository(
         LpmRepository(
             LpmRepository.LpmRepositoryArguments(
                 ApplicationProvider.getApplicationContext<Application>().resources
             )
         ).apply {
-            this.update(paymentIntent, null)
+            update(updateParams)
         }
     )
 

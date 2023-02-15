@@ -13,7 +13,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
-import com.stripe.android.utils.PaymentIntentFactory
+import com.stripe.android.utils.LpmUpdateParamsFactory
 import kotlinx.serialization.Serializable
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,9 +28,10 @@ class SupportedPaymentMethodTest {
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
         )
     ).apply {
-        this.update(
-            PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethods),
-            null
+        update(
+            LpmUpdateParamsFactory.create(
+                paymentMethodTypes = supportedPaymentMethods,
+            )
         )
     }
     private val card = LpmRepository.HardcodedCard

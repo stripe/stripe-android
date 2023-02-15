@@ -52,7 +52,7 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
-import com.stripe.android.utils.PaymentIntentFactory
+import com.stripe.android.utils.LpmUpdateParamsFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
@@ -88,8 +88,8 @@ internal class PaymentSheetViewModelTest {
     private val lpmRepository = LpmRepository(
         arguments = LpmRepository.LpmRepositoryArguments(application.resources),
     ).apply {
-        this.update(
-            PaymentIntentFactory.create(
+        update(
+            LpmUpdateParamsFactory.create(
                 paymentMethodTypes = listOf(
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.USBankAccount.code,
@@ -98,9 +98,8 @@ internal class PaymentSheetViewModelTest {
                     PaymentMethod.Type.Sofort.code,
                     PaymentMethod.Type.Affirm.code,
                     PaymentMethod.Type.AfterpayClearpay.code,
-                )
-            ),
-            null
+                ),
+            )
         )
     }
 

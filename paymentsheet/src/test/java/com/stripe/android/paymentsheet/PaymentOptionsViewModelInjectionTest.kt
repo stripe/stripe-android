@@ -14,7 +14,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeAndroidKeyStore
-import com.stripe.android.utils.PaymentIntentFactory
+import com.stripe.android.utils.LpmUpdateParamsFactory
 import com.stripe.android.utils.fakeCreationExtras
 import org.junit.After
 import org.junit.Before
@@ -28,9 +28,8 @@ internal class PaymentOptionsViewModelInjectionTest : BasePaymentOptionsViewMode
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
-    private val paymentIntent = PaymentIntentFactory.create()
     private val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(context.resources)).apply {
-        this.update(paymentIntent, null)
+        update(LpmUpdateParamsFactory.create())
     }
 
     @Before

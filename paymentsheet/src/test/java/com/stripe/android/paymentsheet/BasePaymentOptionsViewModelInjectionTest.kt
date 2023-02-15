@@ -24,7 +24,7 @@ import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepositor
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
-import com.stripe.android.utils.PaymentIntentFactory
+import com.stripe.android.utils.LpmUpdateParamsFactory
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -66,13 +66,12 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
             ),
         )
         lpmRepository.update(
-            PaymentIntentFactory.create(
+            LpmUpdateParamsFactory.create(
                 paymentMethodTypes = listOf(
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.USBankAccount.code
                 )
-            ),
-            null
+            )
         )
         TestViewModelFactory.create(
             linkLauncher = mock<LinkPaymentLauncher>().apply {
