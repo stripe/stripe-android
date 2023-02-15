@@ -31,8 +31,6 @@ import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.paymentsheet.forms.UpiRequirement
-import com.stripe.android.ui.core.PaymentSheetMode
-import com.stripe.android.ui.core.PaymentSheetSetupFutureUse
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
@@ -115,8 +113,11 @@ class LpmRepository constructor(
      * so it is important that the json on disk is successful.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun update(params: UpdateParams) {
-        val serverLpmSpecs = params.serverLpmSpecs
+    fun update(
+        stripeIntent: StripeIntent,
+        serverLpmSpecs: String?,
+    ) {
+        val expectedLpms = stripeIntent.paymentMethodTypes
 
         serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
         if (!serverLpmSpecs.isNullOrEmpty()) {
@@ -125,12 +126,12 @@ class LpmRepository constructor(
             if (serverLpmObjects.isNotEmpty()) {
                 serverSpecLoadingState = ServerSpecState.ServerParsed(serverLpmSpecs)
             }
-            update(params, serverLpmObjects)
+            update(stripeIntent, serverLpmObjects)
         }
 
         // If the server does not return specs, or they are not parsed successfully
         // we will use the LPM on disk if found
-        val lpmsNotParsedFromServerSpec = params.expectedLpms
+        val lpmsNotParsedFromServerSpec = expectedLpms
             .filter { !lpmInitialFormData.containsKey(it) }
             .filter { supportsPaymentMethod(it) }
 
@@ -138,16 +139,12 @@ class LpmRepository constructor(
             val mapFromDisk: Map<String, SharedDataSpec>? =
                 readFromDisk()
                     ?.associateBy { it.type }
-                    ?.filterKeys { params.expectedLpms.contains(it) }
+                    ?.filterKeys { expectedLpms.contains(it) }
             lpmInitialFormData.putAll(
                 lpmsNotParsedFromServerSpec
                     .mapNotNull { mapFromDisk?.get(it) }
                     .mapNotNull {
-                        convertToSupportedPaymentMethod(
-                            mode = params.mode,
-                            setupFutureUse = params.setupFutureUse,
-                            sharedDataSpec = it,
-                        )
+                        convertToSupportedPaymentMethod(stripeIntent, it)
                     }
                     .associateBy { it.code }
             )
@@ -164,14 +161,14 @@ class LpmRepository constructor(
     }
 
     @VisibleForTesting
-    fun updateFromDisk(params: UpdateParams) {
-        update(params, readFromDisk())
+    fun updateFromDisk(stripeIntent: StripeIntent) {
+        update(stripeIntent, readFromDisk())
     }
 
     private fun readFromDisk() = parseLpms(arguments.resources?.assets?.open("lpms.json"))
 
     private fun update(
-        params: UpdateParams,
+        stripeIntent: StripeIntent,
         lpms: List<SharedDataSpec>?,
     ) {
         val parsedSharedData = lpms
@@ -185,8 +182,7 @@ class LpmRepository constructor(
         parsedSharedData
             ?.mapNotNull {
                 convertToSupportedPaymentMethod(
-                    mode = params.mode,
-                    setupFutureUse = params.setupFutureUse,
+                    stripeIntent = stripeIntent,
                     sharedDataSpec = it,
                 )
             }
@@ -220,8 +216,7 @@ class LpmRepository constructor(
         inputStream?.bufferedReader().use { it?.readText() }
 
     private fun convertToSupportedPaymentMethod(
-        @Suppress("UNUSED_PARAMETER") mode: PaymentSheetMode,
-        @Suppress("UNUSED_PARAMETER") setupFutureUse: PaymentSheetSetupFutureUse?,
+        stripeIntent: StripeIntent,
         sharedDataSpec: SharedDataSpec,
     ) = when (sharedDataSpec.type) {
         PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
@@ -547,11 +542,11 @@ class LpmRepository constructor(
             DefaultIsFinancialConnectionsAvailable(),
     )
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class UpdateParams(
-        val mode: PaymentSheetMode,
-        val setupFutureUse: PaymentSheetSetupFutureUse?,
-        val expectedLpms: List<String>,
-        val serverLpmSpecs: String?,
-    )
+//    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+//    data class UpdateParams(
+//        val mode: PaymentSheetMode,
+//        val setupFutureUse: PaymentSheetSetupFutureUse?,
+//        val expectedLpms: List<String>,
+//        val serverLpmSpecs: String?,
+//    )
 }

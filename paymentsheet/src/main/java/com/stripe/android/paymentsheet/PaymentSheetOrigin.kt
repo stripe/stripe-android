@@ -15,6 +15,14 @@ internal sealed interface PaymentSheetOrigin : Parcelable {
             clientSecret.validate()
         }
     }
+
+    @Parcelize
+    data class DeferredIntent(val options: com.stripe.android.model.DeferredIntent) : PaymentSheetOrigin {
+
+        override fun validate() {
+            // Nothing to do here
+        }
+    }
 }
 
 internal val PaymentSheetOrigin.clientSecret: ClientSecret?

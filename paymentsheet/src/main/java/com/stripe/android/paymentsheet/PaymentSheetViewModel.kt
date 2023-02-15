@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -413,11 +414,25 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         linkHandler.unregisterFromActivity()
     }
 
+    private fun callingMerchantCode(): Pair<ClientSecret, Boolean> {
+        return PaymentIntentClientSecret("") to true
+    }
+
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
-        val clientSecret = when (val origin = args.origin) {
+        val (clientSecret, confirmed) = when (val origin = args.origin) {
             is PaymentSheetOrigin.Intent -> {
-                origin.clientSecret
+                origin.clientSecret to false
             }
+            is PaymentSheetOrigin.DeferredIntent -> {
+                callingMerchantCode()
+            }
+        }
+
+        // if merchant already confirmed, then don't confirm again
+        
+        if (confirmed) {
+            onPaymentResult(PaymentResult.Completed)
+            return
         }
 
         val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(

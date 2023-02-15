@@ -7,6 +7,8 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentLauncher.Companion.supportedFundingSources
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.model.DeferredIntent
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
@@ -36,6 +38,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -81,7 +84,33 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             is PaymentSheetOrigin.Intent -> {
                 loadWithClientSecret(origin.clientSecret, paymentSheetConfiguration)
             }
+            is PaymentSheetOrigin.DeferredIntent -> {
+                loadWithDeferredIntent(origin.options, paymentSheetConfiguration)
+            }
         }
+    }
+
+    private suspend fun loadWithDeferredIntent(
+        deferredIntent: DeferredIntent,
+        paymentSheetConfiguration: PaymentSheet.Configuration?
+    ): PaymentSheetLoader.Result {
+        val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
+        return runCatching {
+            retrieveStripeIntent(deferredIntent)
+        }.fold(
+            onSuccess = { stripeIntent ->
+                create(
+                    stripeIntent = stripeIntent,
+                    customerConfig = paymentSheetConfiguration?.customer,
+                    config = paymentSheetConfiguration,
+                    isGooglePayReady = isGooglePayReady,
+                )
+            },
+            onFailure = {
+                logger.error("Failure initializing FlowController", it)
+                PaymentSheetLoader.Result.Failure(it)
+            }
+        )
     }
 
     private suspend fun loadWithClientSecret(
@@ -167,7 +196,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return@coroutineScope PaymentSheetLoader.Result.Success(
             PaymentSheetState.Full(
                 config = config,
-                data = paymentSheetData,
+//                data = paymentSheetData,
+                stripeIntent = stripeIntent,
                 customerPaymentMethods = paymentMethods.await(),
                 savedSelection = savedSelection.await(),
                 isGooglePayReady = isGooglePayReady,
@@ -242,15 +272,36 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     ): StripeIntent {
         val paymentMethodPreference = stripeIntentRepository.get(clientSecret)
         val lpmRepository = lpmResourceRepository.getRepository()
-
-        val updateParams = paymentMethodPreference.toUpdateParams()
-        lpmRepository.update(updateParams)
+        lpmRepository.update(paymentMethodPreference.intent, paymentMethodPreference.formUI)
 
         if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
             eventReporter.onLpmSpecFailure()
         }
 
         return stripeIntentValidator.requireValid(paymentMethodPreference.intent)
+    }
+
+    private suspend fun retrieveStripeIntent(
+        deferredIntent: DeferredIntent,
+    ): StripeIntent {
+        val params = ElementsSessionParams(
+            type = ElementsSessionParams.Type.DeferredIntent,
+            clientSecret = null,
+            locale = Locale.getDefault().toLanguageTag(),
+            deferredIntent = deferredIntent,
+        )
+
+        val elementsSession = stripeIntentRepository.get(params)
+        val stripeIntent = elementsSession.stripeIntent!!
+
+        val lpmRepository = lpmResourceRepository.getRepository()
+        lpmRepository.update(stripeIntent, elementsSession.paymentMethodSpecs)
+
+        if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
+            eventReporter.onLpmSpecFailure()
+        }
+
+        return stripeIntentValidator.requireValid(stripeIntent)
     }
 
     private suspend fun loadLinkState(
@@ -312,18 +363,18 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 }
 
-internal fun PaymentMethodPreference.toUpdateParams(): LpmRepository.UpdateParams {
-    return intent.toUpdateParams(formUI)
-}
-
-internal fun StripeIntent.toUpdateParams(formUI: String? = null): LpmRepository.UpdateParams {
-    return LpmRepository.UpdateParams(
-        mode = mode(),
-        setupFutureUse = setupFutureUse(),
-        expectedLpms = paymentMethodTypes,
-        serverLpmSpecs = formUI,
-    )
-}
+//internal fun PaymentMethodPreference.toUpdateParams(): LpmRepository.UpdateParams {
+//    return intent.toUpdateParams(formUI)
+//}
+//
+//internal fun StripeIntent.toUpdateParams(formUI: String? = null): LpmRepository.UpdateParams {
+//    return LpmRepository.UpdateParams(
+//        mode = mode(),
+//        setupFutureUse = setupFutureUse(),
+//        expectedLpms = paymentMethodTypes,
+//        serverLpmSpecs = formUI,
+//    )
+//}
 
 internal fun StripeIntent.mode(): PaymentSheetMode {
     return when (this) {

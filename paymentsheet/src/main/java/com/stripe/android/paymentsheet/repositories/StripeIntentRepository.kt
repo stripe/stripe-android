@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.repositories
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -16,6 +18,9 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal sealed class StripeIntentRepository {
+
+    abstract suspend fun get(params: ElementsSessionParams): ElementsSession
+
     abstract suspend fun get(
         clientSecret: ClientSecret
     ): PaymentMethodPreference
@@ -26,8 +31,17 @@ internal sealed class StripeIntentRepository {
     class Static(
         private val stripeIntent: StripeIntent
     ) : StripeIntentRepository() {
-        override suspend fun get(clientSecret: ClientSecret) =
-            PaymentMethodPreference(stripeIntent)
+        override suspend fun get(params: ElementsSessionParams): ElementsSession {
+            return ElementsSession(
+                linkSettings = null,
+                paymentMethodTypes = emptyList(),
+                unactivatedPaymentMethodTypes = emptyList(),
+                paymentMethodSpecs = null,
+                stripeIntent = null,
+            )
+        }
+
+        override suspend fun get(clientSecret: ClientSecret) = PaymentMethodPreference(stripeIntent)
     }
 
     /**
@@ -39,6 +53,7 @@ internal sealed class StripeIntentRepository {
         @IOContext private val workContext: CoroutineContext,
         private val locale: Locale?
     ) : StripeIntentRepository() {
+
         // The PaymentConfiguration can change after initialization, so this needs to get a new
         // request options each time requested.
         private val requestOptions
@@ -46,6 +61,10 @@ internal sealed class StripeIntentRepository {
                 lazyPaymentConfig.get().publishableKey,
                 lazyPaymentConfig.get().stripeAccountId
             )
+
+        override suspend fun get(params: ElementsSessionParams): ElementsSession {
+
+        }
 
         /**
          * Tries to retrieve the StripeIntent with ordered Payment Methods, falling back to

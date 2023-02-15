@@ -3,6 +3,7 @@ package com.stripe.android.model.parsers
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
+import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.StripeIntent
@@ -11,7 +12,12 @@ import org.json.JSONObject
 
 internal class ElementsSessionJsonParser(
     private val type: ElementsSessionParams.Type,
+    private val mode: DeferredIntent.Mode? = null,
+    private val amount: Long? = null,
+    private val captureMethod: DeferredIntent.CaptureMethod? = null, // TODO Move to StripeIntent?
+//    private val apiKey: String? = null,
 ) : ModelJsonParser<ElementsSession> {
+
     override fun parse(json: JSONObject): ElementsSession? {
         val paymentMethodPreference = StripeJsonUtils.mapToJsonObject(
             StripeJsonUtils.optMap(json, FIELD_PAYMENT_METHOD_PREFERENCE)
@@ -82,11 +88,19 @@ internal class ElementsSessionJsonParser(
             )
 
             when (type) {
-                ElementsSessionParams.Type.PaymentIntent ->
+                ElementsSessionParams.Type.PaymentIntent -> {
                     PaymentIntentJsonParser().parse(stripeIntentJsonObject)
-                ElementsSessionParams.Type.SetupIntent ->
+                }
+                ElementsSessionParams.Type.SetupIntent -> {
                     SetupIntentJsonParser().parse(stripeIntentJsonObject)
-                ElementsSessionParams.Type.DeferredIntent -> null
+                }
+                ElementsSessionParams.Type.DeferredIntent -> {
+                    DeferredIntentJsonParser(
+                        mode = mode!!,
+                        amount = amount,
+                        captureMethod = captureMethod,
+                    ).parse(stripeIntentJsonObject)
+                }
             }
         }
     }

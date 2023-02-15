@@ -1654,6 +1654,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override suspend fun retrieveElementsSession(
+        elementsSessionParams: ElementsSessionParams,
+        requestOptions: ApiRequest.Options
+    ): ElementsSession? {
+        return retrieveElementsSession(
+            params = elementsSessionParams,
+            options = requestOptions,
+            analyticsEvent = null
+        )
+    }
+
     /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
@@ -1673,7 +1684,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         fireFraudDetectionDataRequest()
 
-        val parser = ElementsSessionJsonParser(params.type)
+        val parser = ElementsSessionJsonParser(
+            type = params.type,
+            mode = params.deferredIntent?.mode,
+            amount = params.deferredIntent?.amount,
+            captureMethod = params.deferredIntent?.captureMethod,
+        )
 
         val requestParams = buildMap {
             this["type"] = params.type.value
