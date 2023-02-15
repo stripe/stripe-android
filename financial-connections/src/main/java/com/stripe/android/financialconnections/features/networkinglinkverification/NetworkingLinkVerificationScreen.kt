@@ -8,12 +8,10 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -41,7 +39,6 @@ import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
@@ -112,56 +109,29 @@ private fun NetworkingLinkVerificationLoaded(
             keyboardController?.hide()
         }
     }
-
     Column(
-        Modifier.fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(scrollState)
-                .padding(
-                    top = 0.dp,
-                    start = 24.dp,
-                    end = 24.dp,
-                    bottom = 24.dp
-                )
-        ) {
-            Spacer(modifier = Modifier.size(16.dp))
-            Title()
-            Spacer(modifier = Modifier.size(8.dp))
-            Description(payload.phoneNumber)
-            Spacer(modifier = Modifier.size(24.dp))
-            ExistingEmailSection(
-                focusRequester = focusRequester,
-                otpElement = payload.otpElement,
-                enabled = confirmVerificationAsync !is Loading
-            )
-            Spacer(modifier = Modifier.size(24.dp))
-            EmailSubtext(payload.email)
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        Column(
-            modifier = Modifier.padding(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(
+                top = 0.dp,
                 start = 24.dp,
                 end = 24.dp,
-                top = 16.dp,
                 bottom = 24.dp
             )
-        ) {
-            SkipButton()
-        }
-    }
-}
-
-@Composable
-private fun SkipButton() {
-    FinancialConnectionsButton(
-        type = FinancialConnectionsButton.Type.Secondary,
-        onClick = { },
-        modifier = Modifier
-            .fillMaxWidth()
     ) {
-        Text(text = stringResource(R.string.stripe_networking_signup_cta_negative))
+        Spacer(modifier = Modifier.size(16.dp))
+        Title()
+        Spacer(modifier = Modifier.size(8.dp))
+        Description(payload.phoneNumber)
+        Spacer(modifier = Modifier.size(24.dp))
+        ExistingEmailSection(
+            focusRequester = focusRequester,
+            otpElement = payload.otpElement,
+            enabled = confirmVerificationAsync !is Loading
+        )
+        Spacer(modifier = Modifier.size(24.dp))
+        EmailSubtext(payload.email)
     }
 }
 
