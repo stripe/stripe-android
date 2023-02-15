@@ -23,6 +23,7 @@ internal data class PaymentSheetData(
     val isLiveMode: Boolean,
     val linkFundingSources: List<String>,
     val shippingDetails: PaymentIntent.Shipping?,
+    private val paymentMethodsWithSetupFutureUse: Set<String>,
 ) : Parcelable {
 
     val clientSecret: ClientSecret?
@@ -39,12 +40,23 @@ internal data class PaymentSheetData(
             is PaymentSheetMode.Payment -> mode.currency
             is PaymentSheetMode.Setup -> mode.currency
         }
+
+    fun isLpmLevelSetupFutureUsageSet(code: String): Boolean {
+        return paymentMethodsWithSetupFutureUse.contains(code)
+    }
 }
 
 internal fun StripeIntent.toPaymentSheetData(): PaymentSheetData {
     val clientSecret = when (this) {
         is PaymentIntent -> PaymentIntentClientSecret(this.clientSecret!!)
         is SetupIntent -> SetupIntentClientSecret(this.clientSecret!!)
+    }
+
+    val paymentMethodOptions = (this as? PaymentIntent)?.getPaymentMethodOptions().orEmpty()
+
+    val paymentMethodsWithSetupFutureUse = paymentMethodTypes.filter { paymentMethod ->
+        val optionsForPaymentMethod = paymentMethodOptions[paymentMethod] as? Map<*, *>
+        optionsForPaymentMethod?.containsKey("setup_future_usage") ?: false
     }
 
     return PaymentSheetData(
@@ -57,5 +69,6 @@ internal fun StripeIntent.toPaymentSheetData(): PaymentSheetData {
         isLiveMode = isLiveMode,
         linkFundingSources = linkFundingSources,
         shippingDetails = (this as? PaymentIntent)?.shipping,
+        paymentMethodsWithSetupFutureUse = paymentMethodsWithSetupFutureUse.toSet(),
     )
 }

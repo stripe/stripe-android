@@ -208,17 +208,6 @@ constructor(
         return status === StripeIntent.Status.RequiresConfirmation
     }
 
-//    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-//    fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
-//        return paymentMethodOptionsJsonString?.let {
-//            JSONObject(paymentMethodOptionsJsonString)
-//                .optJSONObject(code)
-//                ?.optString("setup_future_usage")?.let {
-//                    true
-//                } ?: false
-//        } ?: false
-//    }
-
     /**
      * The payment error encountered in the previous [PaymentIntent] confirmation.
      *

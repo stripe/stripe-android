@@ -26,7 +26,8 @@ internal object PaymentSheetDataFactory {
             shippingDetails = null,
             origin = PaymentSheetOrigin.Intent(
                 clientSecret = PaymentIntentClientSecret("secret"),
-            )
+            ),
+            paymentMethodsWithSetupFutureUse = emptySet(),
         )
     }
 }
