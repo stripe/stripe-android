@@ -25,6 +25,7 @@ internal class LinkedAccountPickerStates : PreviewParameterProvider<LinkAccountP
                     accessibleData = accessibleCallout(),
                     businessName = "Random business",
                     consumerSessionClientSecret = "secret",
+                    stepUpAuthenticationRequired = null,
                 )
             ),
         )
@@ -37,6 +38,7 @@ internal class LinkedAccountPickerStates : PreviewParameterProvider<LinkAccountP
                     accessibleData = accessibleCallout(),
                     businessName = "Random business",
                     consumerSessionClientSecret = "secret",
+                    stepUpAuthenticationRequired = null,
                 )
             ),
         )
@@ -48,6 +50,7 @@ internal class LinkedAccountPickerStates : PreviewParameterProvider<LinkAccountP
                 id = "id1",
                 name = "With balance",
                 balanceAmount = 1000,
+                status = FinancialConnectionsAccount.Status.ACTIVE,
                 displayableAccountNumbers = "1234",
                 currency = "USD",
                 _allowSelection = true,

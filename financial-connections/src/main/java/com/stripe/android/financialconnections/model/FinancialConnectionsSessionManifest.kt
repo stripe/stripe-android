@@ -237,6 +237,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "link_account_picker")
         LINK_ACCOUNT_PICKER("link_account_picker"),
 
+        @SerialName(value = "link_step_up_verification")
+        LINK_STEP_UP_VERIFICATION("link_step_up_verification"),
+
         @SerialName(value = "reset")
         RESET("reset");
 

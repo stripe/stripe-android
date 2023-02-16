@@ -26,6 +26,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
 class LinkAccountPickerViewModelTest {
@@ -80,7 +81,7 @@ class LinkAccountPickerViewModelTest {
     }
 
     @Test
-    fun `onSelectAccountClick - updates local accounts and navigates`() = runTest {
+    fun `onSelectAccountClick - if valid account updates local accounts and navigates`() = runTest {
         val accounts = twoAccounts()
         val selectedAccount = accounts.data.first()
         whenever(getManifest()).thenReturn(sessionManifest())
@@ -103,6 +104,31 @@ class LinkAccountPickerViewModelTest {
             assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
         }
         verify(goNext).invoke(Pane.SUCCESS)
+    }
+
+    @Test
+    fun `onSelectAccountClick - if step up required, navigates to it`() = runTest {
+        val accounts = twoAccounts()
+        val selectedAccount = accounts.data.first()
+        whenever(getManifest()).thenReturn(sessionManifest().copy(stepUpAuthenticationRequired = true))
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+        whenever(pollNetworkedAccounts(any())).thenReturn(accounts)
+        whenever(
+            selectNetworkedAccount(
+                consumerSessionClientSecret = any(),
+                selectedAccountId = any()
+            )
+        ).thenReturn(InstitutionResponse(listOf(institution())))
+
+        val viewModel = buildViewModel(LinkAccountPickerState())
+
+        viewModel.onAccountClick(selectedAccount)
+        viewModel.onSelectAccountClick()
+
+        verifyNoInteractions(updateCachedAccounts)
+        verifyNoInteractions(updateLocalManifest)
+        verifyNoInteractions(selectNetworkedAccount)
+        verify(goNext).invoke(Pane.LINK_STEP_UP_VERIFICATION)
     }
 
     private fun twoAccounts() = partnerAccountList().copy(
