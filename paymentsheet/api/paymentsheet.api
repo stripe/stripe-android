@@ -5,13 +5,6 @@ public final class com/stripe/android/paymentsheet/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/paymentsheet/ComposableSingletons$PaymentOptionsActivityKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ComposableSingletons$PaymentOptionsActivityKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class com/stripe/android/paymentsheet/ComposableSingletons$PaymentSheetActivityKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ComposableSingletons$PaymentSheetActivityKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -961,17 +954,8 @@ public final class com/stripe/android/paymentsheet/addresselement/ComposableSing
 
 public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentOptionsBinding : androidx/viewbinding/ViewBinding {
 	public final field bottomSheet Landroid/widget/LinearLayout;
-	public final field bottomSpacer Landroid/view/View;
-	public final field buttonContainer Landroidx/compose/ui/platform/ComposeView;
-	public final field contentContainer Landroidx/compose/ui/platform/ComposeView;
+	public final field content Landroidx/compose/ui/platform/ComposeView;
 	public final field coordinator Landroidx/coordinatorlayout/widget/CoordinatorLayout;
-	public final field fragmentContainerParent Landroid/widget/LinearLayout;
-	public final field header Landroidx/compose/ui/platform/ComposeView;
-	public final field linkAuth Landroidx/compose/ui/platform/ComposeView;
-	public final field message Landroidx/compose/ui/platform/ComposeView;
-	public final field notes Landroidx/compose/ui/platform/ComposeView;
-	public final field scrollView Landroid/widget/ScrollView;
-	public final field topBar Landroidx/compose/ui/platform/ComposeView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentOptionsBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroidx/coordinatorlayout/widget/CoordinatorLayout;

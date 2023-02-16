@@ -13,7 +13,7 @@
     <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
     <ID>LargeClass:PaymentSheetActivityTest.kt$PaymentSheetActivityTest</ID>
     <ID>LargeClass:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest</ID>
-    <ID>LongMethod:AddPaymentMethod.kt$@Composable internal fun AddPaymentMethod( sheetViewModel: BaseSheetViewModel, )</ID>
+    <ID>LongMethod:AddPaymentMethod.kt$@Composable internal fun AddPaymentMethod( sheetViewModel: BaseSheetViewModel, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:AddressElementActivity.kt$AddressElementActivity$@OptIn(ExperimentalAnimationApi::class) override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel)</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>

@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @Composable
 internal fun AddPaymentMethod(
     sheetViewModel: BaseSheetViewModel,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val linkHandler = sheetViewModel.linkHandler
@@ -97,7 +98,7 @@ internal fun AddPaymentMethod(
             }
         }
 
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = modifier.fillMaxWidth()) {
             PaymentElement(
                 sheetViewModel = sheetViewModel,
                 enabled = !processing,

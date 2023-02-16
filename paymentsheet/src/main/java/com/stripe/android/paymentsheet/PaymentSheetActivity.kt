@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.animation.LayoutTransition
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -10,17 +11,21 @@ import android.widget.ScrollView
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentSheetPrimaryButtonBinding
 import com.stripe.android.paymentsheet.state.WalletsContainerState
@@ -31,7 +36,10 @@ import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.convert
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
+import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import java.security.InvalidParameterException
@@ -55,12 +63,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
-    override val linkAuthView: ComposeView by lazy { viewBinding.linkAuth }
-    override val scrollView: ScrollView by lazy { viewBinding.scrollView }
-    override val header: ComposeView by lazy { viewBinding.header }
-    override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
-    override val notesView: ComposeView by lazy { viewBinding.notes }
-    override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
+
+    private val linkAuthView: ComposeView by lazy { viewBinding.linkAuth }
+    private val scrollView: ScrollView by lazy { viewBinding.scrollView }
+    private val header: ComposeView by lazy { viewBinding.header }
+    private val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
+    private val notesView: ComposeView by lazy { viewBinding.notes }
+    private val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
     private val topContainer by lazy { viewBinding.topContainer }
     private val linkButton by lazy { viewBinding.linkButton }
@@ -91,6 +100,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
         setContentView(viewBinding.root)
 
+        fragmentContainerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+
         val elevation = resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
         scrollView.viewTreeObserver.addOnScrollChangedListener {
             viewBinding.topBar.elevation = if (scrollView.scrollY > 0) {
@@ -109,7 +120,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
+        setupHeader()
         setupTopContainer()
+        setupNotes()
 
         linkButton.apply {
             onClick = { config ->
@@ -134,7 +147,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewBinding.contentContainer.setContent {
             StripeTheme {
                 val currentScreen by viewModel.currentScreen.collectAsState()
-                currentScreen.Content(viewModel)
+                currentScreen.Content(
+                    viewModel = viewModel,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
             }
         }
 
@@ -169,9 +185,28 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             linkButton.isEnabled = enabled
         }
 
-        viewModel.selection.launchAndCollectIn(this) {
-            viewModel.clearErrorMessages()
+        viewModel.linkHandler.showLinkVerificationDialog.launchAndCollectIn(this) { show ->
+            linkAuthView.setContent {
+                if (show) {
+                    LinkVerificationDialog(
+                        linkLauncher = linkLauncher,
+                        onResult = linkHandler::handleLinkVerificationResult,
+                    )
+                }
+            }
         }
+
+        viewModel.contentVisible.launchAndCollectIn(this) {
+            scrollView.isVisible = it
+        }
+
+        viewModel.primaryButtonUIState.launchAndCollectIn(this) { state ->
+            state?.let {
+                bottomSpacer.isVisible = state.visible
+            }
+        }
+
+        bottomSpacer.isVisible = true
     }
 
     private fun initializeArgs(): Result<PaymentSheetContract.Args?> {
@@ -213,6 +248,43 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     GooglePayDividerUi(text)
                 }
             }
+        }
+    }
+
+    private fun setupHeader() {
+        header.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                val text = viewModel.headerText.collectAsState(null)
+                text.value?.let {
+                    StripeTheme {
+                        H4Text(
+                            text = stringResource(it),
+                            modifier = Modifier.padding(bottom = 2.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setupNotes() {
+        viewModel.notesText.launchAndCollectIn(this) { text ->
+            val showNotes = text != null
+            text?.let {
+                notesView.setContent {
+                    StripeTheme {
+                        Html(
+                            html = text,
+                            color = MaterialTheme.stripeColors.subtitle,
+                            style = MaterialTheme.typography.body1.copy(
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                    }
+                }
+            }
+            notesView.isVisible = showNotes
         }
     }
 
