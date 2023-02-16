@@ -10,13 +10,13 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.domain.GetConsumerSession
+import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
+import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
-import com.stripe.android.financialconnections.domain.UpdateSelectedAccounts
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -27,11 +27,11 @@ import javax.inject.Inject
 internal class LinkAccountPickerViewModel @Inject constructor(
     initialState: LinkAccountPickerState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val getConsumerSession: GetConsumerSession,
+    private val getCachedConsumerSession: GetCachedConsumerSession,
     private val pollNetworkedAccounts: PollNetworkedAccounts,
     private val selectNetworkedAccount: SelectNetworkedAccount,
     private val updateLocalManifest: UpdateLocalManifest,
-    private val updateLocalSelectedAccounts: UpdateSelectedAccounts,
+    private val updateCachedAccounts: UpdateCachedAccounts,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
     private val logger: Logger
@@ -42,7 +42,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         suspend {
             val manifest = getManifest()
             val accessibleData = AccessibleDataCalloutModel.fromManifest(manifest)
-            val consumerSessionClientSecret = getConsumerSession().clientSecret
+            val consumerSessionClientSecret = getCachedConsumerSession().clientSecret
             val accounts = pollNetworkedAccounts(consumerSessionClientSecret)
                 .data
                 .sortedBy { it.allowSelection.not() }
@@ -94,8 +94,8 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             )
             // Updates manifest active institution after account networked.
             updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
-            // Updates sele
-            updateLocalSelectedAccounts(listOf(selectedAccount))
+            // Updates cached accounts with the one selected.
+            updateCachedAccounts { listOf(selectedAccount) }
             goNext(Pane.SUCCESS)
             Unit
         }.execute {

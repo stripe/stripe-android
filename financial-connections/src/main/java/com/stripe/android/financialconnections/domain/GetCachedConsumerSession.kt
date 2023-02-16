@@ -5,7 +5,7 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsCo
 import com.stripe.android.model.ConsumerSession
 import javax.inject.Inject
 
-internal class GetConsumerSession @Inject constructor(
+internal class GetCachedConsumerSession @Inject constructor(
     val repository: FinancialConnectionsConsumerSessionRepository,
     val configuration: FinancialConnectionsSheet.Configuration,
 ) {

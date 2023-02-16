@@ -8,7 +8,7 @@ import javax.inject.Inject
 /**
  * Gets cached partner accounts.
  */
-internal class GetSelectedAccounts @Inject constructor(
+internal class GetCachedAccounts @Inject constructor(
     val repository: FinancialConnectionsAccountsRepository,
     val configuration: FinancialConnectionsSheet.Configuration
 ) {

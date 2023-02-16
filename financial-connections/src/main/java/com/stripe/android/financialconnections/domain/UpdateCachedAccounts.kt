@@ -7,13 +7,14 @@ import javax.inject.Inject
 /**
  * Use case to update the local cached selected accounts with new data.
  */
-internal class UpdateSelectedAccounts @Inject constructor(
+internal class UpdateCachedAccounts @Inject constructor(
     val repository: FinancialConnectionsAccountsRepository
 ) {
 
     suspend operator fun invoke(
-        selectedAccounts: List<PartnerAccount>
+        block: (List<PartnerAccount>?) -> List<PartnerAccount>?
     ) {
-        repository.updateCachedAccounts(selectedAccounts)
+        val updatedAccounts = block(repository.getCachedAccounts())
+        repository.updateCachedAccounts(updatedAccounts)
     }
 }

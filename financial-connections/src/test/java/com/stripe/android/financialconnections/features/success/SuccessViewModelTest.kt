@@ -8,8 +8,8 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
+import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GetSelectedAccounts
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Finish
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
@@ -39,7 +39,7 @@ internal class SuccessViewModelTest {
     private val navigationManager = mock<NavigationManager>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
-    private val getSelectedAccounts = mock<GetSelectedAccounts>()
+    private val getCachedAccounts = mock<GetCachedAccounts>()
     private val completeFinancialConnectionsSession = mock<CompleteFinancialConnectionsSession>()
 
     private fun buildViewModel(
@@ -51,7 +51,7 @@ internal class SuccessViewModelTest {
         eventTracker = eventTracker,
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-        getSelectedAccounts = getSelectedAccounts,
+        getCachedAccounts = getCachedAccounts,
         completeFinancialConnectionsSession = completeFinancialConnectionsSession
     )
 
@@ -64,7 +64,7 @@ internal class SuccessViewModelTest {
             activeAuthSession = ApiKeyFixtures.authorizationSession(),
             activeInstitution = ApiKeyFixtures.institution()
         )
-        whenever(getSelectedAccounts()).thenReturn(accounts)
+        whenever(getCachedAccounts()).thenReturn(accounts)
         whenever(getManifest()).thenReturn(manifest)
         whenever(completeFinancialConnectionsSession()).thenReturn(session)
 
@@ -92,7 +92,7 @@ internal class SuccessViewModelTest {
             activeAuthSession = ApiKeyFixtures.authorizationSession(),
             activeInstitution = ApiKeyFixtures.institution()
         )
-        whenever(getSelectedAccounts()).thenReturn(accounts.data)
+        whenever(getCachedAccounts()).thenReturn(accounts.data)
         whenever(getManifest()).thenReturn(manifest)
         whenever(completeFinancialConnectionsSession()).thenReturn(session)
 

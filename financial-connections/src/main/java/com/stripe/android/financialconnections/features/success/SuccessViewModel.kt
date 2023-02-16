@@ -15,8 +15,8 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
+import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GetSelectedAccounts
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
@@ -36,7 +36,7 @@ import javax.inject.Inject
 @Suppress("LongParameterList")
 internal class SuccessViewModel @Inject constructor(
     initialState: SuccessState,
-    getSelectedAccounts: GetSelectedAccounts,
+    getCachedAccounts: GetCachedAccounts,
     getManifest: GetManifest,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
@@ -52,7 +52,7 @@ internal class SuccessViewModel @Inject constructor(
             SuccessState.Payload(
                 skipSuccessPane = manifest.skipSuccessPane ?: false,
                 accessibleData = AccessibleDataCalloutModel.fromManifest(manifest),
-                accounts = getSelectedAccounts(),
+                accounts = getCachedAccounts(),
                 institution = manifest.activeInstitution!!,
                 businessName = manifest.businessName,
                 disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest),

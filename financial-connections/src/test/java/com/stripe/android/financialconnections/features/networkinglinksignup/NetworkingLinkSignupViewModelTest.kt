@@ -5,8 +5,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GetSelectedAccounts
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
@@ -27,7 +27,7 @@ class NetworkingLinkSignupViewModelTest {
 
     private val getManifest = mock<GetManifest>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
-    private val getAuthorizationSessionAccounts = mock<GetSelectedAccounts>()
+    private val getAuthorizationSessionAccounts = mock<GetCachedAccounts>()
     private val goNext = mock<GoNext>()
     private val lookupAccount = mock<LookupAccount>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
@@ -40,7 +40,7 @@ class NetworkingLinkSignupViewModelTest {
         eventTracker = eventTracker,
         initialState = state,
         goNext = goNext,
-        getSelectedAccounts = getAuthorizationSessionAccounts,
+        getCachedAccounts = getAuthorizationSessionAccounts,
         lookupAccount = lookupAccount,
         saveAccountToLink = saveAccountToLink
     )
