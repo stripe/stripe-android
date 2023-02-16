@@ -53,8 +53,6 @@ internal class ElementsSessionJsonParser(
             linkSettings = ElementsSession.LinkSettings(
                 linkFundingSources = jsonArrayToList(linkFundingSources)
             ),
-            paymentMethodTypes = jsonArrayToList(orderedPaymentMethodTypes),
-            unactivatedPaymentMethodTypes = unactivatedPaymentMethodTypes,
             paymentMethodSpecs = paymentMethodSpecs,
             stripeIntent = stripeIntent
         )

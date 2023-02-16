@@ -8,8 +8,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class ElementsSession(
     val linkSettings: LinkSettings?,
-    val paymentMethodTypes: List<String>,
-    val unactivatedPaymentMethodTypes: List<String>,
     val paymentMethodSpecs: String?,
     val stripeIntent: StripeIntent?
 ) : StripeModel {
