@@ -5,7 +5,9 @@ package com.stripe.android.financialconnections.features.linkstepupverification
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -21,6 +23,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
@@ -152,19 +155,29 @@ private fun ExistingEmailSection(
 
 @Composable
 private fun EmailSubtext(email: String) {
-    AnnotatedText(
-        text = TextResource.Text(
-            stringResource(
-                R.string.stripe_networking_verification_email,
-                email
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(
+            TextResource.Text(email) to 1f,
+            TextResource.Text("•") to null,
+            TextResource.StringId(R.string.stripe_link_stepup_verification_resend_code) to null
+        ).forEach { (text, weight) ->
+            AnnotatedText(
+                modifier = if (weight != null) Modifier.weight(weight) else Modifier,
+                text = text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+                    color = FinancialConnectionsTheme.colors.textSecondary,
+                ),
+                annotationStyles = mapOf(
+                    StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                        .toSpanStyle()
+                        .copy(color = FinancialConnectionsTheme.colors.textBrand),
+                ),
+                onClickableTextClick = {},
             )
-        ),
-        defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-            color = FinancialConnectionsTheme.colors.textDisabled
-        ),
-        annotationStyles = emptyMap(),
-        onClickableTextClick = {},
-    )
+        }
+    }
 }
 
 @Composable
@@ -172,7 +185,7 @@ private fun Description(phoneNumber: String) {
     AnnotatedText(
         text = TextResource.Text(
             stringResource(
-                R.string.stripe_networking_verification_desc,
+                R.string.stripe_link_stepup_verification_desc,
                 phoneNumber
             )
         ),
@@ -192,7 +205,7 @@ private fun Description(phoneNumber: String) {
 private fun Title() {
     AnnotatedText(
         text = TextResource.Text(
-            stringResource(R.string.stripe_networking_verification_title)
+            stringResource(R.string.stripe_link_stepup_verification_title)
         ),
         defaultStyle = FinancialConnectionsTheme.typography.subtitle,
         annotationStyles = emptyMap(),
@@ -208,7 +221,7 @@ internal fun LinkStepUpVerificationScreenPreview() {
             state = LinkStepUpVerificationState(
                 payload = Success(
                     Payload(
-                        email = "12345678",
+                        email = "theLargestEmailYoulleverseeThatCouldBreakALayout@email.com",
                         phoneNumber = "12345678",
                         otpElement = OTPElement(
                             IdentifierSpec.Generic("otp"),

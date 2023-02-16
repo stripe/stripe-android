@@ -14,12 +14,8 @@ import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
-import com.stripe.android.financialconnections.domain.MarkLinkVerified
-import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.domain.StartVerification
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
@@ -36,8 +32,6 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     private val lookupAccount: LookupAccount,
     private val startVerification: StartVerification,
     private val confirmVerification: ConfirmVerification,
-    private val markLinkVerified: MarkLinkVerified,
-    private val pollNetworkedAccounts: PollNetworkedAccounts,
     private val goNext: GoNext,
     private val logger: Logger
 ) : MavericksViewModel<LinkStepUpVerificationState>(initialState) {
@@ -48,7 +42,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
             val email = requireNotNull(getManifest().accountholderCustomerEmailAddress)
             val consumerSession = requireNotNull(lookupAccount(email).consumerSession)
             startVerification(consumerSession.clientSecret)
-            eventTracker.track(PaneLoaded(Pane.NETWORKING_LINK_VERIFICATION))
+            eventTracker.track(PaneLoaded(Pane.LINK_STEP_UP_VERIFICATION))
             LinkStepUpVerificationState.Payload(
                 email = consumerSession.emailAddress,
                 phoneNumber = consumerSession.redactedPhoneNumber,
@@ -87,35 +81,10 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
             verificationCode = otp
         )
-        val updatedManifest = markLinkVerified()
-        runCatching { pollNetworkedAccounts(payload.consumerSessionClientSecret) }
-            .fold(
-                onSuccess = { onNetworkedAccountsSuccess(it, updatedManifest) },
-                onFailure = { onNetworkedAccountsFailed(it, updatedManifest) }
-            )
+        goNext(Pane.SUCCESS)
+        //TODO select accounts!
+        Unit
     }.execute { copy(confirmVerification = it) }
-
-    private suspend fun onNetworkedAccountsFailed(
-        error: Throwable,
-        updatedManifest: FinancialConnectionsSessionManifest
-    ) {
-        logger.error("Error fetching networked accounts", error)
-        eventTracker.track(Error(Pane.NETWORKING_LINK_VERIFICATION, error))
-        goNext(updatedManifest.nextPane)
-    }
-
-    private fun onNetworkedAccountsSuccess(
-        accounts: PartnerAccountsList,
-        updatedManifest: FinancialConnectionsSessionManifest
-    ) {
-        if (accounts.data.isEmpty()) {
-            // Networked user has no accounts
-            goNext(updatedManifest.nextPane)
-        } else {
-            // Networked user has linked accounts
-            goNext(Pane.LINK_ACCOUNT_PICKER)
-        }
-    }
 
     companion object :
         MavericksViewModelFactory<LinkStepUpVerificationViewModel, LinkStepUpVerificationState> {
