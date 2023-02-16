@@ -8,8 +8,8 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
-import com.stripe.android.financialconnections.domain.GetSelectedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetSelectedAccounts
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Finish
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
@@ -22,7 +22,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
@@ -40,7 +39,7 @@ internal class SuccessViewModelTest {
     private val navigationManager = mock<NavigationManager>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
-    private val getAuthorizationSessionAccounts = mock<GetSelectedAccounts>()
+    private val getSelectedAccounts = mock<GetSelectedAccounts>()
     private val completeFinancialConnectionsSession = mock<CompleteFinancialConnectionsSession>()
 
     private fun buildViewModel(
@@ -52,20 +51,20 @@ internal class SuccessViewModelTest {
         eventTracker = eventTracker,
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-        getAuthorizationSessionAccounts = getAuthorizationSessionAccounts,
+        getSelectedAccounts = getSelectedAccounts,
         completeFinancialConnectionsSession = completeFinancialConnectionsSession
     )
 
     @Test
     fun `init - when skipSuccessPane is true, complete session and emit Finish`() = runTest {
         val session = ApiKeyFixtures.financialConnectionsSessionNoAccounts()
-        val accounts = ApiKeyFixtures.partnerAccountList()
+        val accounts = ApiKeyFixtures.partnerAccountList().data
         val manifest = ApiKeyFixtures.sessionManifest().copy(
             skipSuccessPane = true,
             activeAuthSession = ApiKeyFixtures.authorizationSession(),
             activeInstitution = ApiKeyFixtures.institution()
         )
-        whenever(getAuthorizationSessionAccounts(any())).thenReturn(accounts)
+        whenever(getSelectedAccounts()).thenReturn(accounts)
         whenever(getManifest()).thenReturn(manifest)
         whenever(completeFinancialConnectionsSession()).thenReturn(session)
 
@@ -93,7 +92,7 @@ internal class SuccessViewModelTest {
             activeAuthSession = ApiKeyFixtures.authorizationSession(),
             activeInstitution = ApiKeyFixtures.institution()
         )
-        whenever(getAuthorizationSessionAccounts(any())).thenReturn(accounts)
+        whenever(getSelectedAccounts()).thenReturn(accounts.data)
         whenever(getManifest()).thenReturn(manifest)
         whenever(completeFinancialConnectionsSession()).thenReturn(session)
 
