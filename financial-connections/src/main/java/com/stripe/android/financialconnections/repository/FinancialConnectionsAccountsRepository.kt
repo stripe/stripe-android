@@ -5,6 +5,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
+import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
@@ -21,7 +22,9 @@ import kotlinx.coroutines.sync.withLock
  */
 internal interface FinancialConnectionsAccountsRepository {
 
-    suspend fun getCachedAccounts(): PartnerAccountsList?
+    suspend fun getCachedAccounts(): List<PartnerAccount>?
+
+    suspend fun updateCachedAccounts(partnerAccountsList: List<PartnerAccount>?)
 
     suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
@@ -71,8 +74,6 @@ internal interface FinancialConnectionsAccountsRepository {
                 logger
             )
     }
-
-    suspend fun updateCachedAccounts(partnerAccountsList: PartnerAccountsList)
 }
 
 private class FinancialConnectionsAccountsRepositoryImpl(
@@ -87,12 +88,12 @@ private class FinancialConnectionsAccountsRepositoryImpl(
      * current writes are running.
      */
     val mutex = Mutex()
-    private var cachedAccounts: PartnerAccountsList? = null
+    private var cachedAccounts: List<PartnerAccount>? = null
 
-    override suspend fun getCachedAccounts(): PartnerAccountsList? =
+    override suspend fun getCachedAccounts(): List<PartnerAccount>? =
         mutex.withLock { cachedAccounts }
 
-    override suspend fun updateCachedAccounts(partnerAccountsList: PartnerAccountsList) =
+    override suspend fun updateCachedAccounts(partnerAccountsList: List<PartnerAccount>?) =
         mutex.withLock { cachedAccounts = partnerAccountsList }
 
     override suspend fun postAuthorizationSessionAccounts(
@@ -111,7 +112,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             request,
             PartnerAccountsList.serializer()
         ).also {
-            updateCachedAccounts("getOrFetchAccounts", it)
+            updateCachedAccounts("getOrFetchAccounts", it.data)
         }
     }
 
@@ -131,7 +132,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             request,
             PartnerAccountsList.serializer()
         ).also {
-            updateCachedAccounts("getNetworkedAccounts", it)
+            updateCachedAccounts("getNetworkedAccounts", it.data)
         }
     }
 
@@ -193,14 +194,14 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         ).also {
             if (updateLocalCache) updateCachedAccounts(
                 "postAuthorizationSessionSelectedAccounts",
-                it
+                it.data
             )
         }
     }
 
     private fun updateCachedAccounts(
         source: String,
-        accounts: PartnerAccountsList
+        accounts: List<PartnerAccount>
     ) {
         logger.debug("updating local partner accounts from $source")
         cachedAccounts = accounts

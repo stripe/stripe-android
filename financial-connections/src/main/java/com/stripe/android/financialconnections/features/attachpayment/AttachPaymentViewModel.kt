@@ -42,14 +42,14 @@ internal class AttachPaymentViewModel @Inject constructor(
             val manifest = getManifest()
             AttachPaymentState.Payload(
                 businessName = manifest.businessName,
-                accountsCount = getSelectedAccounts().data.size
+                accountsCount = getSelectedAccounts().size
             )
         }.execute { copy(payload = it) }
         suspend {
             val manifest = getManifest()
             val authSession = requireNotNull(manifest.activeAuthSession)
             val activeInstitution = requireNotNull(manifest.activeInstitution)
-            val accounts = getSelectedAccounts().data
+            val accounts = getSelectedAccounts()
             require(accounts.size == 1)
             val id = accounts.first().linkedAccountId
             val (result, millis) = measureTimeMillis {
