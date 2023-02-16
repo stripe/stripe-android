@@ -5,6 +5,7 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -16,7 +17,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -51,6 +54,7 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
+import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -80,10 +84,12 @@ private fun LinkAccountPickerContent(
     onSelectAccountClick: () -> Unit,
     onAccountClick: (PartnerAccount) -> Unit
 ) {
+    val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
                 showBack = false,
+                elevation = scrollState.elevation,
                 onCloseClick = onCloseClick
             )
         }
@@ -91,6 +97,7 @@ private fun LinkAccountPickerContent(
         when (val payload = state.payload) {
             Uninitialized, is Loading -> LoadingContent()
             is Success -> LinkAccountPickerLoaded(
+                scrollState = scrollState,
                 payload = payload(),
                 selectedAccountId = state.selectedAccountId,
                 selectNetworkedAccountAsync = state.selectNetworkedAccountAsync,
@@ -116,20 +123,19 @@ private fun LinkAccountPickerLoaded(
     onLearnMoreAboutDataAccessClick: () -> Unit,
     onSelectAccountClick: () -> Unit,
     onNewBankAccountClick: () -> Unit,
-    onAccountClick: (PartnerAccount) -> Unit
+    onAccountClick: (PartnerAccount) -> Unit,
+    scrollState: ScrollState
 ) {
     Column(
         Modifier
             .fillMaxSize()
             .padding(
-                top = 16.dp,
-                start = 24.dp,
-                end = 24.dp,
-                bottom = 24.dp
+                horizontal = 24.dp,
             )
     ) {
         Column(
             modifier = Modifier
+                .verticalScroll(scrollState)
                 .weight(1f)
         ) {
             Spacer(modifier = Modifier.size(16.dp))
@@ -146,6 +152,7 @@ private fun LinkAccountPickerLoaded(
                 Spacer(modifier = Modifier.height(12.dp))
             }
             SelectNewAccount(onClick = onNewBankAccountClick)
+            Spacer(modifier = Modifier.size(16.dp))
         }
         AccessibleDataCallout(
             payload.accessibleData,
@@ -161,6 +168,7 @@ private fun LinkAccountPickerLoaded(
         ) {
             Text(text = stringResource(R.string.stripe_link_account_picker_cta))
         }
+        Spacer(modifier = Modifier.size(24.dp))
     }
 }
 

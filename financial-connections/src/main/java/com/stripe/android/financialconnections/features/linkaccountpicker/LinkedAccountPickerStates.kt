@@ -49,7 +49,7 @@ internal class LinkedAccountPickerStates : PreviewParameterProvider<LinkAccountP
                 name = "With balance",
                 balanceAmount = 1000,
                 displayableAccountNumbers = "1234",
-                currency = "$",
+                currency = "USD",
                 _allowSelection = true,
                 allowSelectionMessage = "",
                 subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,

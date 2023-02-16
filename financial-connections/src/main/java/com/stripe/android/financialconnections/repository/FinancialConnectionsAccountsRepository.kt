@@ -192,10 +192,12 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             request,
             PartnerAccountsList.serializer()
         ).also {
-            if (updateLocalCache) updateCachedAccounts(
-                "postAuthorizationSessionSelectedAccounts",
-                it.data
-            )
+            if (updateLocalCache) {
+                updateCachedAccounts(
+                    "postAuthorizationSessionSelectedAccounts",
+                    it.data
+                )
+            }
         }
     }
 
