@@ -43,6 +43,19 @@
             android:layout_height="wrap_content"/>
 
         <Button
+            android:id="@+id/get_possible_brands_button"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Get Possible Brands"/>
+
+        <TextView
+            android:id="@+id/stripe_possible_brands"
+            android:text="Possible brands: []"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <Button
             android:id="@+id/create_button"
             android:layout_width="160dp"
             android:layout_height="wrap_content"

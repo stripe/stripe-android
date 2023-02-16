@@ -29,6 +29,7 @@ import com.stripe.android.model.BankAccount
 import com.stripe.android.model.BankAccountTokenParams
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -1412,6 +1413,38 @@ class Stripe internal constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
+                )
+            )
+        }
+    }
+
+    /**
+     * Retrieve a set of possible brands for the given card
+     *
+     * @param cardNumber the card number
+     * @param onSuccess the callback invoked when the Card Metadata service has produced a result
+     * @param onError the callback invoked when there is a problem with the request
+     */
+    @UiThread
+    @JvmOverloads
+    fun retrievePossibleBrands(
+        cardNumber: String,
+        onSuccess: (Set<CardBrand>) -> Unit,
+        onError: (Throwable) -> Unit
+    ) {
+        executeAsync(object: ApiResultCallback<CardMetadata> {
+            override fun onSuccess(result: CardMetadata) {
+                onSuccess(result.accountRanges.map { it.brand }.toSet())
+            }
+            override fun onError(e: Exception) {
+                onError(e)
+            }
+        }) {
+            stripeRepository.retrievePossibleBrands(
+                cardNumber = cardNumber,
+                requestOptions = ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
                 )
             )
         }

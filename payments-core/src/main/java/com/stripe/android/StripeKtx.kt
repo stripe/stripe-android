@@ -16,6 +16,7 @@ import com.stripe.android.exception.CardException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccountTokenParams
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -970,4 +971,29 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
             stripeAccount = stripeAccountId
         )
     )
+}
+
+/**
+ * Retrieve a set of possible brands for the given card
+ *
+ * @param cardNumber the card number
+ *
+ * @return a set of possible [CardBrand] for the given card number, null if the bin is invalid
+ */
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class
+)
+suspend fun Stripe.retrievePossibleBrands(
+    cardNumber: String
+): Set<CardBrand>? = runApiRequest {
+    return stripeRepository.retrievePossibleBrands(
+        cardNumber = cardNumber,
+        requestOptions = ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId
+        )
+    )?.accountRanges?.map { it.brand }?.toSet()
 }

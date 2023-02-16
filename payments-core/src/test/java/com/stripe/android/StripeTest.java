@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory;
 import com.stripe.android.core.AppInfo;
 import com.stripe.android.core.exception.AuthenticationException;
 import com.stripe.android.core.exception.InvalidRequestException;
@@ -1369,6 +1370,7 @@ public class StripeTest {
                 emptySet(),
                 new DefaultStripeNetworkClient(workDispatcher),
                 analyticsRequestExecutor,
+                new DefaultCardAccountRangeRepositoryFactory(context).create(),
                 fraudDetectionDataRepository
         );
     }

@@ -2348,7 +2348,7 @@ internal class StripeApiRepositoryTest {
                 assertEquals("en-US", this["locale"])
                 assertEquals("color", this["logo_color"])
             }
-        }
+        }z
 
     /**
      * Helper DSL to validate nested params.

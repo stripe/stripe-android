@@ -44,7 +44,7 @@ class FragmentExamplesFragment : Fragment() {
         PaymentSession(
             fragment = this,
             config = PaymentSessionConfig.Builder()
-                .setShippingMethodsRequired(false)
+                .setShippingMethodsRequired(true)
                 .setHiddenShippingInfoFields(
                     ShippingInfoWidget.CustomizableShippingField.Phone,
                     ShippingInfoWidget.CustomizableShippingField.City

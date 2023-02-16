@@ -114,10 +114,10 @@ class PaymentSessionActivity : AppCompatActivity() {
         return PaymentSession(
             activity = this,
             config = PaymentSessionConfig.Builder()
+                .setShippingInfoRequired(true)
                 .setPaymentMethodsFooter(R.layout.add_payment_method_footer)
                 .setAddPaymentMethodFooter(R.layout.add_payment_method_footer)
                 .setPrepopulatedShippingInfo(EXAMPLE_SHIPPING_INFO)
-                .setHiddenShippingInfoFields()
                 // Optionally specify the `PaymentMethod.Type` values to use.
                 // Defaults to `PaymentMethod.Type.Card`
                 .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card))
@@ -126,7 +126,7 @@ class PaymentSessionActivity : AppCompatActivity() {
                 .setShippingInformationValidator(ShippingInformationValidator())
                 .setShippingMethodsFactory(ShippingMethodsFactory())
                 .setWindowFlags(WindowManager.LayoutParams.FLAG_SECURE)
-                .setBillingAddressFields(BillingAddressFields.PostalCode)
+                .setBillingAddressFields(BillingAddressFields.Full)
                 .setShouldPrefetchCustomer(shouldPrefetchCustomer)
                 .setCanDeletePaymentMethods(true)
                 .build()

@@ -9,6 +9,7 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.stripe.android.ApiResultCallback
@@ -18,11 +19,13 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
+import com.stripe.android.retrievePossibleBrands
 import com.stripe.android.view.CardInputListener
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.adapter.SourcesAdapter
 import com.stripe.example.databinding.CreateCardSourceActivityBinding
+import kotlinx.coroutines.launch
 
 /**
  * Activity that lets you redirect for a 3DS source verification.
@@ -69,8 +72,27 @@ class CreateCardSourceActivity : AppCompatActivity() {
             }
         }
 
+        var cardNumber = ""
+
+        viewBinding.cardWidget.setCardNumberTextWatcher(object : TextWatcher{
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                cardNumber = s.toString()
+            }
+
+            override fun afterTextChanged(s: Editable?) { }
+        })
+
         viewBinding.cardWidget.setPossibleBrandsListener {
             viewBinding.possibleBrands.text = "Possible brands: $it"
+        }
+
+        viewBinding.getPossibleBrandsButton.setOnClickListener {
+            this@CreateCardSourceActivity.lifecycleScope.launch {
+                val possibleBrands = stripe.retrievePossibleBrands(cardNumber)
+                viewBinding.stripePossibleBrands.text = possibleBrands?.toString()
+            }
         }
 
         viewBinding.recyclerView.setHasFixedSize(true)

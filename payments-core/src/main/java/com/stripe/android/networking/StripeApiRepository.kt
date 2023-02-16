@@ -9,6 +9,9 @@ import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.Bin
+import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardNumber
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.Logger
@@ -121,6 +124,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         DefaultAnalyticsRequestExecutor(logger, workContext),
+    private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
+        DefaultCardAccountRangeRepositoryFactory(context, analyticsRequestExecutor),
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(context, workContext),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
@@ -159,8 +164,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private val fraudDetectionData: FraudDetectionData?
         get() = fraudDetectionDataRepository.getCached()
 
+    private val cardAccountRangeRepository: CardAccountRangeRepository
+
     init {
         fireFraudDetectionDataRequest()
+
+        cardAccountRangeRepository =
+            cardAccountRangeRepositoryFactory.createWithStripeRepository(
+                stripeRepository = this,
+                publishableKey = publishableKeyProvider()
+            )
 
         CoroutineScope(workContext).launch {
             val httpCacheDir = File(context.cacheDir, "stripe_api_repository_cache")
@@ -1622,6 +1635,24 @@ class StripeApiRepository @JvmOverloads internal constructor(
         ) {
             // no-op
         }
+    }
+
+    override suspend fun retrievePossibleBrands(
+        cardNumber: String,
+        requestOptions: ApiRequest.Options
+    ): CardMetadata? {
+        val unvalidatedNumber = CardNumber.Unvalidated(cardNumber)
+
+        val bin = unvalidatedNumber.bin ?: return null
+
+        val accountRanges = cardAccountRangeRepository.getAccountRanges(
+            cardNumber = unvalidatedNumber
+        )?.toList() ?: listOf()
+
+        return CardMetadata(
+            bin = bin,
+            accountRanges = accountRanges
+        )
     }
 
     /**

@@ -2,11 +2,13 @@ package com.stripe.android
 
 import android.content.Intent
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.cards.Bin
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
@@ -678,6 +680,16 @@ internal class StripeKtxTest {
             clientSecret = eq("seti_123_secret_123"),
             options = isA(),
             expandFields = eq(expandFields),
+        )
+    }
+
+    @Test
+    fun `Verify retrievePossibleCardBrands passes card number on to repository`() = runTest {
+        stripe.retrievePossibleBrands("4242 42")
+
+        verify(mockApiRepository).retrievePossibleBrands(
+            cardNumber = eq("4242 42"),
+            requestOptions = isA()
         )
     }
 

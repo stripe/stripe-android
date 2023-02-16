@@ -533,4 +533,10 @@ abstract class StripeRepository {
         logoColor: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethodMessage?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun retrievePossibleBrands(
+        cardNumber: String,
+        requestOptions: ApiRequest.Options
+    ): CardMetadata?
 }
