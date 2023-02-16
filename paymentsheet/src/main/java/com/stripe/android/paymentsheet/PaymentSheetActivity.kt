@@ -125,9 +125,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupNotes()
 
         linkButton.apply {
-            onClick = { config ->
-                linkHandler.launchLink(config, launchedDirectly = false)
-            }
+            onClick = viewModel::handleLinkPressed
             linkPaymentLauncher = linkLauncher
         }
 

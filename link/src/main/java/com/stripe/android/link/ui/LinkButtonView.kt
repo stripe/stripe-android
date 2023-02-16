@@ -55,27 +55,8 @@ private fun LinkButton() {
 
 @Composable
 private fun LinkButton(
-    linkPaymentLauncher: LinkPaymentLauncher,
-    enabled: Boolean,
-    onClick: (LinkPaymentLauncher.Configuration) -> Unit
-) {
-    linkPaymentLauncher.component?.let { component ->
-        val account = component.linkAccountManager.linkAccount.collectAsState()
-
-        LinkButton(
-            enabled = enabled,
-            email = account.value?.email,
-            onClick = {
-                onClick(component.configuration)
-            }
-        )
-    }
-}
-
-@Composable
-private fun LinkButton(
-    enabled: Boolean,
     email: String?,
+    enabled: Boolean,
     onClick: () -> Unit
 ) {
     CompositionLocalProvider(
@@ -152,7 +133,7 @@ class LinkButtonView @JvmOverloads constructor(
         private set
 
     var linkPaymentLauncher: LinkPaymentLauncher? = null
-    var onClick by mutableStateOf<(LinkPaymentLauncher.Configuration) -> Unit>({})
+    var onClick by mutableStateOf({})
     private var isEnabledState by mutableStateOf(isEnabled)
 
     override fun setEnabled(enabled: Boolean) {
@@ -162,11 +143,12 @@ class LinkButtonView @JvmOverloads constructor(
 
     @Composable
     override fun Content() {
-        linkPaymentLauncher?.let {
+        linkPaymentLauncher?.let { launcher ->
+            val email by launcher.emailFlow.collectAsState(initial = null)
             LinkButton(
-                it,
-                isEnabledState,
-                onClick
+                email = email,
+                enabled = isEnabledState,
+                onClick = onClick,
             )
         }
     }
