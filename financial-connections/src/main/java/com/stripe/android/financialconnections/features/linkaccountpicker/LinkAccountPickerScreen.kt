@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -27,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
@@ -58,11 +61,12 @@ internal fun LinkAccountPickerScreen() {
     BackHandler(enabled = true) {}
     LinkAccountPickerContent(
         state = state.value,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.LINK_ACCOUNT_PICKER) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
-        onLearnMoreAboutDataAccessClick = { viewModel.onLearnMoreAboutDataAccessClick() },
-        onNewBankAccountClick = { viewModel.onNewBankAccountClick() },
-        onSelectAccountClick = { viewModel.onSelectAccountClick() }
+        onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
+        onNewBankAccountClick = viewModel::onNewBankAccountClick,
+        onSelectAccountClick = viewModel::onSelectAccountClick,
+        onAccountClick = viewModel::onAccountClick
     )
 }
 
@@ -73,7 +77,8 @@ private fun LinkAccountPickerContent(
     onCloseFromErrorClick: (Throwable) -> Unit,
     onLearnMoreAboutDataAccessClick: () -> Unit,
     onNewBankAccountClick: () -> Unit,
-    onSelectAccountClick: () -> Unit
+    onSelectAccountClick: () -> Unit,
+    onAccountClick: (PartnerAccount) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
@@ -87,9 +92,12 @@ private fun LinkAccountPickerContent(
             Uninitialized, is Loading -> LoadingContent()
             is Success -> LinkAccountPickerLoaded(
                 payload = payload(),
+                selectedAccountId = state.selectedAccountId,
+                selectNetworkedAccountAsync = state.selectNetworkedAccountAsync,
                 onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick,
-                onNewBankAccountClick = onNewBankAccountClick,
                 onSelectAccountClick = onSelectAccountClick,
+                onNewBankAccountClick = onNewBankAccountClick,
+                onAccountClick = onAccountClick
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -102,10 +110,13 @@ private fun LinkAccountPickerContent(
 
 @Composable
 private fun LinkAccountPickerLoaded(
+    selectedAccountId: String?,
+    selectNetworkedAccountAsync: Async<Unit>,
     payload: Payload,
     onLearnMoreAboutDataAccessClick: () -> Unit,
     onSelectAccountClick: () -> Unit,
-    onNewBankAccountClick: () -> Unit
+    onNewBankAccountClick: () -> Unit,
+    onAccountClick: (PartnerAccount) -> Unit
 ) {
     Column(
         Modifier
@@ -125,7 +136,13 @@ private fun LinkAccountPickerLoaded(
             Title(merchantName = payload.businessName)
             Spacer(modifier = Modifier.size(24.dp))
             payload.accounts.forEach {
-                NetworkedAccountItem(it)
+                NetworkedAccountItem(
+                    selected = it.id == selectedAccountId,
+                    account = it,
+                    onAccountClicked = { selected ->
+                        if (selectNetworkedAccountAsync !is Loading) onAccountClick(selected)
+                    }
+                )
                 Spacer(modifier = Modifier.height(12.dp))
             }
             SelectNewAccount(onClick = onNewBankAccountClick)
@@ -136,8 +153,8 @@ private fun LinkAccountPickerLoaded(
         )
         Spacer(modifier = Modifier.size(12.dp))
         FinancialConnectionsButton(
-            enabled = true,
-            loading = false,
+            enabled = selectedAccountId != null,
+            loading = selectNetworkedAccountAsync is Loading,
             onClick = onSelectAccountClick,
             modifier = Modifier
                 .fillMaxWidth()
@@ -148,11 +165,15 @@ private fun LinkAccountPickerLoaded(
 }
 
 @Composable
-private fun NetworkedAccountItem(it: PartnerAccount) {
+private fun NetworkedAccountItem(
+    account: PartnerAccount,
+    onAccountClicked: (PartnerAccount) -> Unit,
+    selected: Boolean
+) {
     AccountItem(
-        selected = false,
-        onAccountClicked = {},
-        account = it
+        selected = selected,
+        onAccountClicked = onAccountClicked,
+        account = account
     ) {
         Image(
             painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
@@ -183,12 +204,12 @@ private fun SelectNewAccount(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
-                contentDescription = "Bank logo"
+                imageVector = Icons.Filled.Add,
+                contentDescription = stringResource(id = R.string.stripe_link_account_picker_new_account)
             )
             Spacer(modifier = Modifier.size(16.dp))
             Text(
-                text = "Select New Account",
+                text = stringResource(id = R.string.stripe_link_account_picker_new_account),
                 style = FinancialConnectionsTheme.typography.body,
                 color = FinancialConnectionsTheme.colors.textBrand
             )
@@ -223,7 +244,8 @@ internal fun LinkAccountPickerScreenPreview() {
             onCloseFromErrorClick = {},
             onLearnMoreAboutDataAccessClick = {},
             onNewBankAccountClick = {},
-            onSelectAccountClick = {}
+            onSelectAccountClick = {},
+            onAccountClick = {}
         )
     }
 }

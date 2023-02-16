@@ -12,11 +12,15 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
+import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
+import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
@@ -25,7 +29,10 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getConsumerSession: GetConsumerSession,
     private val pollNetworkedAccounts: PollNetworkedAccounts,
+    private val selectNetworkedAccount: SelectNetworkedAccount,
+    private val updateLocalManifest: UpdateLocalManifest,
     private val getManifest: GetManifest,
+    private val goNext: GoNext,
     private val logger: Logger
 ) : MavericksViewModel<LinkAccountPickerState>(initialState) {
 
@@ -40,6 +47,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 .sortedBy { it.allowSelection.not() }
             eventTracker.track(PaneLoaded(Pane.LINK_ACCOUNT_PICKER))
             LinkAccountPickerState.Payload(
+                consumerSessionClientSecret = consumerSessionClientSecret,
                 businessName = ConsentTextBuilder.getBusinessName(manifest) ?: "",
                 accounts = accounts,
                 accessibleData = accessibleData
@@ -55,6 +63,13 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 eventTracker.track(Error(Pane.LINK_ACCOUNT_PICKER, error))
             },
         )
+        onAsync(
+            LinkAccountPickerState::selectNetworkedAccountAsync,
+            onFail = { error ->
+                logger.error("Error selecting networked account", error)
+                eventTracker.track(Error(Pane.LINK_ACCOUNT_PICKER, error))
+            },
+        )
     }
 
     fun onLearnMoreAboutDataAccessClick() {
@@ -62,11 +77,28 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     }
 
     fun onNewBankAccountClick() {
-        TODO("Not yet implemented")
+        goNext(Pane.INSTITUTION_PICKER)
     }
 
     fun onSelectAccountClick() {
-        TODO("Not yet implemented")
+        suspend {
+            val state = awaitState()
+            val payload = requireNotNull(state.payload())
+            val selectedAccountId = requireNotNull(state.selectedAccountId)
+            val activeInstitution = selectNetworkedAccount(
+                consumerSessionClientSecret = payload.consumerSessionClientSecret,
+                selectedAccountId = selectedAccountId
+            )
+            updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
+            goNext(Pane.SUCCESS)
+            Unit
+        }.execute {
+            copy(selectNetworkedAccountAsync = it)
+        }
+    }
+
+    fun onAccountClick(partnerAccount: PartnerAccount) {
+        setState { copy(selectedAccountId = partnerAccount.id) }
     }
 
     companion object :
@@ -89,11 +121,14 @@ internal class LinkAccountPickerViewModel @Inject constructor(
 
 internal data class LinkAccountPickerState(
     val payload: Async<Payload> = Uninitialized,
+    val selectNetworkedAccountAsync: Async<Unit> = Uninitialized,
+    val selectedAccountId: String? = null,
 ) : MavericksState {
 
     data class Payload(
         val accounts: List<PartnerAccount>,
         val accessibleData: AccessibleDataCalloutModel,
-        val businessName: String
+        val businessName: String,
+        val consumerSessionClientSecret: String
     )
 }

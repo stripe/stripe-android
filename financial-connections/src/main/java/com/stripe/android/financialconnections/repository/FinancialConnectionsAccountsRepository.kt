@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.repository
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.PaymentAccountParams
@@ -52,6 +53,12 @@ internal interface FinancialConnectionsAccountsRepository {
         selectAccounts: List<String>,
         updateLocalCache: Boolean
     ): PartnerAccountsList
+
+    suspend fun postShareNetworkedAccount(
+        clientSecret: String,
+        consumerSessionClientSecret: String,
+        selectedAccountId: String
+    ): InstitutionResponse
 
     companion object {
         operator fun invoke(
@@ -131,6 +138,26 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         )
     }
 
+    override suspend fun postShareNetworkedAccount(
+        clientSecret: String,
+        consumerSessionClientSecret: String,
+        selectedAccountId: String
+    ): InstitutionResponse {
+        val request = apiRequestFactory.createPost(
+            url = shareNetworkedAccountsUrl,
+            options = apiOptions,
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to clientSecret,
+                PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
+                "$PARAM_SELECTED_ACCOUNTS[0]" to selectedAccountId,
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            InstitutionResponse.serializer()
+        )
+    }
+
     override suspend fun postLinkAccountSessionPaymentAccount(
         clientSecret: String,
         paymentAccount: PaymentAccountParams,
@@ -185,6 +212,9 @@ private class FinancialConnectionsAccountsRepositoryImpl(
 
         internal val networkedAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/networked_accounts"
+
+        internal val shareNetworkedAccountsUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/share_networked_account"
 
         internal val attachPaymentAccountUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/attach_payment_account"

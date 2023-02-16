@@ -24,6 +24,7 @@ internal class LinkedAccountPickerStates : PreviewParameterProvider<LinkAccountP
                     accounts = partnerAccountList(),
                     accessibleData = accessibleCallout(),
                     businessName = "Random business",
+                    consumerSessionClientSecret = "secret",
                 )
             ),
         )
