@@ -1,11 +1,9 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import android.os.SystemClock
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.DeferredIntent.CaptureMethod
 import kotlinx.parcelize.Parcelize
-import org.json.JSONObject
 
 /**
  * A [DeferredIntent] is a set of intent params for the deferred PaymentSheet flow.
@@ -24,19 +22,13 @@ constructor(
      * The list of payment method types (e.g. card) that this [DeferredIntent] is allowed to
      * use.
      */
-    override val paymentMethodTypes: List<String> = emptyList(),
+    override val paymentMethodTypes: List<String>,
 
     /**
      * Controls when the funds will be captured from the customer’s account.
      * See [CaptureMethod].
      */
     val captureMethod: CaptureMethod?,
-
-    /**
-     * The [DeferredIntent] does not have a client secret, it will be retrieved from the merchants
-     * server.
-     */
-    override val clientSecret: String? = null,
 
     /**
      * Country code of the user.
@@ -49,28 +41,10 @@ constructor(
     override val created: Long,
 
     /**
-     * An arbitrary string attached to the object. Often useful for displaying to users.
-     */
-    override val description: String? = null,
-
-    /**
      * Has the value `true` if the object exists in live mode or the value
      * `false` if the object exists in test mode.
      */
     override val isLiveMode: Boolean,
-
-    override val paymentMethod: PaymentMethod? = null,
-
-    /**
-     * ID of the payment method (a PaymentMethod, Card, BankAccount, or saved Source object)
-     * to attach to this [DeferredIntent].
-     */
-    override val paymentMethodId: String? = null,
-
-    /**
-     * Status of this [DeferredIntent].
-     */
-    override val status: StripeIntent.Status? = null,
 
     val setupFutureUsage: StripeIntent.Usage?,
 
@@ -82,13 +56,30 @@ constructor(
     /**
      * Payment types that are accepted when paying with Link.
      */
-    override val linkFundingSources: List<String> = emptyList(),
-
-    override val nextActionData: StripeIntent.NextActionData? = null,
-
-    private val paymentMethodOptionsJsonString: String? = null
-
+    override val linkFundingSources: List<String>,
 ) : StripeIntent {
+
+    /**
+     * The [DeferredIntent] does not have a client secret, it will be retrieved from the merchants
+     * server.
+     */
+    override val clientSecret: String?
+        get() = null
+
+    override val paymentMethod: PaymentMethod?
+        get() = null
+
+    override val paymentMethodId: String?
+        get() = null
+
+    override val nextActionData: StripeIntent.NextActionData?
+        get() = null
+
+    override val status: StripeIntent.Status?
+        get() = null
+
+    override val description: String?
+        get() = null
 
     @Parcelize
     sealed interface Mode : Parcelable{
@@ -135,12 +126,6 @@ constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
-        return isTopLevelSetupFutureUsageSet() || paymentMethodOptionsJsonString?.let {
-            JSONObject(paymentMethodOptionsJsonString)
-                .optJSONObject(code)
-                ?.optString("setup_future_usage")?.let {
-                    true
-                } ?: false
-        } ?: false
+        return isTopLevelSetupFutureUsageSet()
     }
 }

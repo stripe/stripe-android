@@ -3,10 +3,12 @@ package com.stripe.android.model.parsers
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.DeferredIntent
+import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 import org.junit.Test
 
@@ -217,5 +219,44 @@ class ElementsSessionJsonParserTest {
         }
 
         assertThat(countryCode).isEqualTo("US")
+    }
+
+    @Test
+    fun `Test DeferredIntent`() {
+        val data = ElementsSessionJsonParser(
+            ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntent.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd"
+                    )
+                )
+            ),
+            apiKey = "test",
+            timeProvider = { 1 }
+        ).parse(
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON
+        )
+
+        val deferredIntent = data?.stripeIntent as? DeferredIntent
+
+        assertThat(deferredIntent).isNotNull()
+        assertThat(deferredIntent).isEqualTo(
+            DeferredIntent(
+                id = "elements_session_1t6ejApXCS5",
+                captureMethod = null,
+                countryCode = "CA",
+                created = 1,
+                isLiveMode = false,
+                mode = DeferredIntent.Mode.Payment(
+                    amount = 2000,
+                    currency = "usd"
+                ),
+                setupFutureUsage = null,
+                unactivatedPaymentMethods = listOf(),
+                paymentMethodTypes = listOf("card", "link", "cashapp"),
+                linkFundingSources = listOf("card")
+            )
+        )
     }
 }

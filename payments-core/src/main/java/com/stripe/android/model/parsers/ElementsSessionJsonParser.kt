@@ -11,7 +11,10 @@ import org.json.JSONObject
 
 internal class ElementsSessionJsonParser(
     private val params: ElementsSessionParams,
-    private val apiKey: String
+    private val apiKey: String,
+    private val timeProvider: () -> Long = {
+        System.currentTimeMillis()
+    }
 ) : ModelJsonParser<ElementsSession> {
 
     override fun parse(json: JSONObject): ElementsSession? {
@@ -35,7 +38,10 @@ internal class ElementsSessionJsonParser(
         val orderedPaymentMethodTypes =
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
+        val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID)
+
         val stripeIntent = parseStripeIntent(
+            elementsSessionId = elementsSessionId,
             paymentMethodPreference = paymentMethodPreference,
             orderedPaymentMethodTypes = orderedPaymentMethodTypes,
             unactivatedPaymentMethodTypes = unactivatedPaymentMethodTypes,
@@ -55,13 +61,16 @@ internal class ElementsSessionJsonParser(
     }
 
     private fun parseStripeIntent(
+        elementsSessionId: String?,
         paymentMethodPreference: JSONObject?,
         orderedPaymentMethodTypes: JSONArray?,
         unactivatedPaymentMethodTypes: List<String>,
         linkFundingSources: JSONArray?,
         countryCode: String
     ): StripeIntent? {
-        return paymentMethodPreference?.optJSONObject(params.type)?.let { stripeIntentJsonObject ->
+        return (
+            paymentMethodPreference?.optJSONObject(params.type) ?: JSONObject()
+        ).let { stripeIntentJsonObject ->
             orderedPaymentMethodTypes?.let {
                 stripeIntentJsonObject.put(
                     FIELD_PAYMENT_METHOD_TYPES,
@@ -90,8 +99,10 @@ internal class ElementsSessionJsonParser(
                 }
                 is ElementsSessionParams.DeferredIntentType -> {
                     DeferredIntentJsonParser(
+                        elementsSessionId = elementsSessionId,
                         params = params.deferredIntentParams,
-                        apiKey = apiKey
+                        apiKey = apiKey,
+                        timeProvider = timeProvider
                     ).parse(stripeIntentJsonObject)
                 }
             }
@@ -100,6 +111,7 @@ internal class ElementsSessionJsonParser(
 
     private companion object {
         private const val FIELD_OBJECT = "object"
+        private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
         private const val FIELD_COUNTRY_CODE = "country_code"
         private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
         private const val FIELD_ORDERED_PAYMENT_METHOD_TYPES = "ordered_payment_method_types"
