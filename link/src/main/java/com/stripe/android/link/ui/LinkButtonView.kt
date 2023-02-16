@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AbstractComposeView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,11 +54,13 @@ private fun LinkButton() {
     )
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-private fun LinkButton(
+fun LinkButton(
     email: String?,
     enabled: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     CompositionLocalProvider(
         LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
@@ -65,7 +68,9 @@ private fun LinkButton(
         DefaultLinkTheme {
             Button(
                 onClick = onClick,
-                modifier = Modifier.clip(LinkButtonShape),
+                modifier = modifier
+                    .clip(LinkButtonShape)
+                    .testTag("link-button"),
                 enabled = enabled,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = LinkButtonShape,
