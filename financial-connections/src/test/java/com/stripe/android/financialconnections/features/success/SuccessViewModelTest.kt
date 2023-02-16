@@ -8,7 +8,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
-import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
+import com.stripe.android.financialconnections.domain.GetSelectedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Finish
@@ -40,7 +40,7 @@ internal class SuccessViewModelTest {
     private val navigationManager = mock<NavigationManager>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
-    private val getAuthorizationSessionAccounts = mock<GetAuthorizationSessionAccounts>()
+    private val getAuthorizationSessionAccounts = mock<GetSelectedAccounts>()
     private val completeFinancialConnectionsSession = mock<CompleteFinancialConnectionsSession>()
 
     private fun buildViewModel(

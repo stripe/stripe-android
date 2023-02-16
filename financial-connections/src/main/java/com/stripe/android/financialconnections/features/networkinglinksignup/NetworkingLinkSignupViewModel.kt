@@ -10,7 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
-import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
+import com.stripe.android.financialconnections.domain.GetSelectedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
@@ -38,7 +38,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     initialState: NetworkingLinkSignupState,
     private val saveAccountToLink: SaveAccountToLink,
     private val lookupAccount: LookupAccount,
-    private val getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
+    private val getSelectedAccounts: GetSelectedAccounts,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
@@ -123,8 +123,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     fun onSaveAccount() {
         suspend {
             val state = awaitState()
-            val authSessionId = getManifest().activeAuthSession!!.id
-            val selectedAccounts = getAuthorizationSessionAccounts(authSessionId)
+            val selectedAccounts = getSelectedAccounts()
             val phoneController = state.payload()!!.phoneController
             require(state.valid()) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
             saveAccountToLink(

@@ -21,10 +21,7 @@ import kotlinx.coroutines.sync.withLock
  */
 internal interface FinancialConnectionsAccountsRepository {
 
-    suspend fun getOrFetchAccounts(
-        clientSecret: String,
-        sessionId: String
-    ): PartnerAccountsList
+    suspend fun getCachedAccounts(): PartnerAccountsList?
 
     suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
@@ -74,6 +71,8 @@ internal interface FinancialConnectionsAccountsRepository {
                 logger
             )
     }
+
+    suspend fun updateCachedAccounts(partnerAccountsList: PartnerAccountsList)
 }
 
 private class FinancialConnectionsAccountsRepositoryImpl(
@@ -84,21 +83,17 @@ private class FinancialConnectionsAccountsRepositoryImpl(
 ) : FinancialConnectionsAccountsRepository {
 
     /**
-     * Ensures that manifest accesses via [getOrFetchAccounts] suspend until
+     * Ensures that [cachedAccounts] accesses via [getCachedAccounts] suspend until
      * current writes are running.
      */
     val mutex = Mutex()
     private var cachedAccounts: PartnerAccountsList? = null
 
-    override suspend fun getOrFetchAccounts(
-        clientSecret: String,
-        sessionId: String
-    ): PartnerAccountsList =
-        mutex.withLock {
-            cachedAccounts ?: run {
-                postAuthorizationSessionAccounts(clientSecret, sessionId)
-            }
-        }
+    override suspend fun getCachedAccounts(): PartnerAccountsList? =
+        mutex.withLock { cachedAccounts }
+
+    override suspend fun updateCachedAccounts(partnerAccountsList: PartnerAccountsList) =
+        mutex.withLock { cachedAccounts = partnerAccountsList }
 
     override suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
@@ -135,7 +130,9 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         return requestExecutor.execute(
             request,
             PartnerAccountsList.serializer()
-        )
+        ).also {
+            updateCachedAccounts("getNetworkedAccounts", it)
+        }
     }
 
     override suspend fun postShareNetworkedAccount(
@@ -194,7 +191,10 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             request,
             PartnerAccountsList.serializer()
         ).also {
-            if (updateLocalCache) updateCachedAccounts("postAuthorizationSessionSelectedAccounts", it)
+            if (updateLocalCache) updateCachedAccounts(
+                "postAuthorizationSessionSelectedAccounts",
+                it
+            )
         }
     }
 

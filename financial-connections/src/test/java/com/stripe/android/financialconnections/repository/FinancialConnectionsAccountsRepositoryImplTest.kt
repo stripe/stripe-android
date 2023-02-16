@@ -44,15 +44,9 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
         givenRequestReturnsAccounts(expectedAccounts)
 
         // first call calls backend and caches.
-        repository.getOrFetchAccounts(
-            configuration.financialConnectionsSessionClientSecret,
-            authSessionId
-        )
+        repository.getCachedAccounts()
         // second call reads from cache
-        val accounts = repository.getOrFetchAccounts(
-            configuration.financialConnectionsSessionClientSecret,
-            authSessionId
-        )
+        val accounts = repository.getCachedAccounts()
         verify(
             mockRequestExecutor,
             times(1)

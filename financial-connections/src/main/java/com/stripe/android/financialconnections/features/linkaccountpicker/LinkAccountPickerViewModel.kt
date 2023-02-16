@@ -16,11 +16,11 @@ import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
+import com.stripe.android.financialconnections.domain.UpdateSelectedAccounts
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
-import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
@@ -31,6 +31,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val pollNetworkedAccounts: PollNetworkedAccounts,
     private val selectNetworkedAccount: SelectNetworkedAccount,
     private val updateLocalManifest: UpdateLocalManifest,
+    private val updateLocalSelectedAccounts: UpdateSelectedAccounts,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
     private val logger: Logger
@@ -84,12 +85,17 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         suspend {
             val state = awaitState()
             val payload = requireNotNull(state.payload())
-            val selectedAccountId = requireNotNull(state.selectedAccountId)
+            val selectedAccount = requireNotNull(
+                payload.accounts.first { it.id == state.selectedAccountId }
+            )
             val activeInstitution = selectNetworkedAccount(
                 consumerSessionClientSecret = payload.consumerSessionClientSecret,
-                selectedAccountId = selectedAccountId
+                selectedAccountId = selectedAccount.id
             )
+            // Updates manifest active institution after account networked.
             updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
+            // Updates sele
+            updateLocalSelectedAccounts(listOf(selectedAccount))
             goNext(Pane.SUCCESS)
             Unit
         }.execute {
