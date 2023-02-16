@@ -29,6 +29,18 @@ internal class LinkedAccountPickerStates : PreviewParameterProvider<LinkAccountP
             ),
         )
 
+        fun accountSelected() = LinkAccountPickerState(
+            selectedAccountId = partnerAccountList().first().id,
+            payload = Success(
+                LinkAccountPickerState.Payload(
+                    accounts = partnerAccountList(),
+                    accessibleData = accessibleCallout(),
+                    businessName = "Random business",
+                    consumerSessionClientSecret = "secret",
+                )
+            ),
+        )
+
         private fun partnerAccountList() = listOf(
             PartnerAccount(
                 authorization = "Authorization",

@@ -114,14 +114,13 @@ private fun getAccountTexts(
 private fun PartnerAccount.getFormattedBalance(): String? {
     val locale = getLocales(LocalConfiguration.current).get(0) ?: Locale.getDefault()
     val debugMode = LocalInspectionMode.current
+    if (balanceAmount == null || currency == null) return null
     return when {
-        debugMode -> balanceAmount.toString() + (currency ?: "")
-        balanceAmount != null && currency != null -> CurrencyFormatter
-            .format(
-                amount = balanceAmount.toLong(),
-                amountCurrencyCode = currency,
-                targetLocale = locale
-            )
-        else -> null
+        debugMode -> ("$currency$balanceAmount")
+        else -> CurrencyFormatter.format(
+            amount = balanceAmount.toLong(),
+            amountCurrencyCode = currency,
+            targetLocale = locale
+        )
     }
 }

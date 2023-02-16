@@ -182,7 +182,6 @@ private fun NetworkedAccountItem(
     }
 }
 
-
 @Composable
 private fun SelectNewAccount(
     onClick: () -> Unit
@@ -235,11 +234,27 @@ private fun Title(
 }
 
 @Composable
-@Preview(group = "LinkAccountPicker Pane", name = "Canonical")
+@Preview(group = "LinkAccountPicker Pane", name = "No account selected")
 internal fun LinkAccountPickerScreenPreview() {
     FinancialConnectionsPreview {
         LinkAccountPickerContent(
             state = LinkedAccountPickerStates.canonical(),
+            onCloseClick = {},
+            onCloseFromErrorClick = {},
+            onLearnMoreAboutDataAccessClick = {},
+            onNewBankAccountClick = {},
+            onSelectAccountClick = {},
+            onAccountClick = {}
+        )
+    }
+}
+
+@Composable
+@Preview(group = "LinkAccountPicker Pane", name = "No account selected")
+internal fun LinkAccountPickerScreenAccountSelectedPreview() {
+    FinancialConnectionsPreview {
+        LinkAccountPickerContent(
+            state = LinkedAccountPickerStates.accountSelected(),
             onCloseClick = {},
             onCloseFromErrorClick = {},
             onLearnMoreAboutDataAccessClick = {},

@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.model.InstitutionResponse
-import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import javax.inject.Inject
 
