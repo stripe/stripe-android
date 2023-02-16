@@ -70,7 +70,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
         }
 
         viewBinding.cardWidget.setPossibleBrandsListener {
-            println("james possible brands: $it")
+            viewBinding.possibleBrands.text = "Possible brands: $it"
         }
 
         viewBinding.recyclerView.setHasFixedSize(true)

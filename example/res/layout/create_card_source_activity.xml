@@ -36,6 +36,12 @@
             stripe:cardHintText="@string/sample_card_requiring_3ds"
             />
 
+        <TextView
+            android:id="@+id/possible_brands"
+            android:text="Possible brands: []"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
         <Button
             android:id="@+id/create_button"
             android:layout_width="160dp"
