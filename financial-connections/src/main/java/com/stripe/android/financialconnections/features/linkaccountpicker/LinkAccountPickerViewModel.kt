@@ -42,13 +42,13 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         suspend {
             val manifest = getManifest()
             val accessibleData = AccessibleDataCalloutModel.fromManifest(manifest)
-            val consumerSessionClientSecret = getCachedConsumerSession().clientSecret
-            val accounts = pollNetworkedAccounts(consumerSessionClientSecret)
+            val consumerSession = requireNotNull(getCachedConsumerSession())
+            val accounts = pollNetworkedAccounts(consumerSession.clientSecret)
                 .data
                 .sortedBy { it.allowSelection.not() }
             eventTracker.track(PaneLoaded(Pane.LINK_ACCOUNT_PICKER))
             LinkAccountPickerState.Payload(
-                consumerSessionClientSecret = consumerSessionClientSecret,
+                consumerSessionClientSecret = consumerSession.clientSecret,
                 businessName = ConsentTextBuilder.getBusinessName(manifest) ?: "",
                 accounts = accounts,
                 accessibleData = accessibleData

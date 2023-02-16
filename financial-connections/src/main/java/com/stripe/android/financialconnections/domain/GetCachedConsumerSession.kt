@@ -10,7 +10,7 @@ internal class GetCachedConsumerSession @Inject constructor(
     val configuration: FinancialConnectionsSheet.Configuration,
 ) {
 
-    suspend operator fun invoke(): ConsumerSession {
-        return requireNotNull(repository.getCachedConsumerSession())
+    suspend operator fun invoke(): ConsumerSession? {
+        return repository.getCachedConsumerSession()
     }
 }
