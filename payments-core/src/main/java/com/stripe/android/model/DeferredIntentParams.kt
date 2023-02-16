@@ -11,4 +11,18 @@ data class DeferredIntentParams(
     val customer: String? = null,
     val onBehalfOf: String? = null,
     val paymentMethodTypes: Set<String> = emptySet()
-) : StripeModel
+) : StripeModel {
+    fun toQueryParams(): Map<String, Any?> {
+        return mapOf(
+            "deferred_intent[mode]" to mode.code,
+            "deferred_intent[amount]" to (mode as? DeferredIntent.Mode.Payment)?.amount,
+            "deferred_intent[currency]" to (mode as? DeferredIntent.Mode.Payment)?.currency,
+            "deferred_intent[setup_future_usage]" to setupFutureUsage?.code,
+            "deferred_intent[capture_method]" to captureMethod?.code,
+            "deferred_intent[customer]" to customer,
+            "deferred_intent[on_behalf_of]" to onBehalfOf
+        ) + paymentMethodTypes.mapIndexed { index, paymentMethodType ->
+            "deferred_intent[payment_method_types][$index]" to paymentMethodType
+        }
+    }
+}

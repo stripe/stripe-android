@@ -82,17 +82,26 @@ constructor(
         get() = null
 
     @Parcelize
-    sealed interface Mode : Parcelable{
-        @Parcelize
-        data class Payment(val amount: Long, val currency: String) : Mode
+    sealed interface Mode : Parcelable {
+        val code: String
 
         @Parcelize
-        data class Setup(val currency: String?) : Mode
+        data class Payment(
+            override val code: String = "payment",
+            val amount: Long,
+            val currency: String
+        ) : Mode
+
+        @Parcelize
+        data class Setup(
+            override val code: String = "setup",
+            val currency: String?
+        ) : Mode
     }
 
-    enum class CaptureMethod {
-        Manual,
-        Automatic
+    enum class CaptureMethod(val code: String) {
+        Manual("manual"),
+        Automatic("automatic")
     }
 
     override val nextActionType: StripeIntent.NextActionType?

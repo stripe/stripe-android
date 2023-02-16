@@ -1693,7 +1693,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             params.clientSecret?.let { this["client_secret"] = it }
             params.locale.let { this["locale"] = it }
             (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
-                this["deferred_intent"] = type.deferredIntentParams
+                this.putAll(type.deferredIntentParams.toQueryParams())
             }
         }
 

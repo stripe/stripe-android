@@ -36,7 +36,10 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
+import com.stripe.android.model.DeferredIntent
+import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSessionFixtures
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -2349,6 +2352,54 @@ internal class StripeApiRepositoryTest {
                 assertEquals("color", this["logo_color"])
             }
         }
+
+    @Test
+    fun `Verify that the elements session endpoint has the right query params`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        create().retrieveDeferredIntent(
+            elementsSessionParams = ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntent.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd"
+                    ),
+                    paymentMethodTypes = setOf("card", "link")
+                )
+            ),
+            requestOptions = DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertEquals(
+            "https://api.stripe.com/v1/elements/sessions",
+            request.baseUrl
+        )
+
+        with(params) {
+            assertEquals("deferred_intent", this["type"])
+            assertEquals("en-US", this["locale"])
+            assertEquals("payment", this["deferred_intent[mode]"])
+            assertEquals(2000L, this["deferred_intent[amount]"])
+            assertEquals("usd", this["deferred_intent[currency]"])
+            assertEquals(null, this["deferred_intent[setup_future_usage]"])
+            assertEquals(null, this["deferred_intent[capture_method]"])
+            assertEquals(null, this["deferred_intent[customer]"])
+            assertEquals(null, this["deferred_intent[on_behalf_of]"])
+            assertEquals("card", this["deferred_intent[payment_method_types][0]"])
+            assertEquals("link", this["deferred_intent[payment_method_types][1]"])
+        }
+    }
 
     /**
      * Helper DSL to validate nested params.
