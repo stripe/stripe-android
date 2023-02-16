@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
+import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationSubcomponent
 import com.stripe.android.financialconnections.features.manualentry.ManualEntrySubcomponent
 import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessSubcomponent
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupSubcomponent
@@ -52,6 +53,7 @@ internal interface FinancialConnectionsSheetNativeComponent {
     val networkingLinkSignupSubcomponent: NetworkingLinkSignupSubcomponent.Builder
     val networkingLinkLoginWarmupSubcomponent: NetworkingLinkLoginWarmupSubcomponent.Builder
     val networkingLinkVerificationSubcomponent: NetworkingLinkVerificationSubcomponent.Builder
+    val linkStepUpVerificationSubcomponent: LinkStepUpVerificationSubcomponent.Builder
 
     @Component.Builder
     interface Builder {
