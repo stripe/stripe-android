@@ -28,6 +28,7 @@ jobs:
           name: instrumentation-test-report
           path: |
             **/build/reports/androidTests/
+            **/build/tmp/shot/screenshot/
 
       - name: Notify failure endpoint
         id: notifyFailureEndpoint

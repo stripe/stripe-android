@@ -405,6 +405,7 @@ internal abstract class BaseSheetViewModel(
         savedStateHandle[SAVE_SELECTION] = selection
 
         updateBelowButtonText(null)
+        clearErrorMessages()
     }
 
     fun toggleEditing() {

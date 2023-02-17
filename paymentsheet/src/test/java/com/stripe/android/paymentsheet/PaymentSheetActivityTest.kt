@@ -59,6 +59,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherP
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
@@ -291,7 +292,8 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Errors are cleared when checking out with Link`() {
-        val scenario = activityScenario()
+        val viewModel = createViewModel(isLinkAvailable = true)
+        val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
             val error = "some error"
@@ -305,7 +307,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertExists()
 
-            activity.viewBinding.linkButton.onClick(mock())
+            activity.viewBinding.linkButton.onClick()
 
             composeTestRule
                 .onNodeWithText(error)
@@ -997,6 +999,7 @@ internal class PaymentSheetActivityTest {
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
         loadDelay: Duration = Duration.ZERO,
         isGooglePayAvailable: Boolean = false,
+        isLinkAvailable: Boolean = false,
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = mock<LpmRepository>()
         whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
@@ -1004,6 +1007,7 @@ internal class PaymentSheetActivityTest {
 
         val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
             onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
+            on { emailFlow } doReturn flowOf("email@email.com")
         }
 
         registerFormViewModelInjector()
@@ -1023,6 +1027,10 @@ internal class PaymentSheetActivityTest {
                     customerPaymentMethods = paymentMethods,
                     isGooglePayAvailable = isGooglePayAvailable,
                     delay = loadDelay,
+                    linkState = LinkState(
+                        configuration = mock(),
+                        loginState = LinkState.LoginState.LoggedOut,
+                    ).takeIf { isLinkAvailable },
                 ),
                 FakeCustomerRepository(paymentMethods),
                 FakePrefsRepository(),
