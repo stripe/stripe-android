@@ -68,6 +68,12 @@ dependencies {
 }
 ```
 
+## R8 / Proguard
+
+The Stripe Android SDKs are fully compatible with R8 out of the box and don't require adding any extra rules.
+
+If you use Proguard, you may need to add rules for [Coroutines](https://github.com/Kotlin/kotlinx.coroutines/blob/master/kotlinx-coroutines-core/jvm/resources/META-INF/proguard/coroutines.pro).
+
 ## Getting Started
 
 ### Integration
