@@ -199,6 +199,7 @@ class LinkApiRepositoryTest {
             authSessionCookie = eq(cookie),
             requestSurface = eq(CONSUMER_SURFACE),
             type = eq(VerificationType.SMS),
+            customEmailType = null,
             requestOptions = eq(ApiRequest.Options(consumerKey)),
         )
     }
@@ -215,6 +216,7 @@ class LinkApiRepositoryTest {
             authSessionCookie = eq(cookie),
             requestSurface = eq(CONSUMER_SURFACE),
             type = eq(VerificationType.SMS),
+            customEmailType = null,
             requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
         )
     }
@@ -229,6 +231,7 @@ class LinkApiRepositoryTest {
                 authSessionCookie = anyOrNull(),
                 requestSurface = any(),
                 type = any(),
+                customEmailType = anyOrNull(),
                 requestOptions = any(),
             )
         )
@@ -249,6 +252,7 @@ class LinkApiRepositoryTest {
                 authSessionCookie = anyOrNull(),
                 requestSurface = any(),
                 type = any(),
+                customEmailType = anyOrNull(),
                 requestOptions = any(),
             )
         )

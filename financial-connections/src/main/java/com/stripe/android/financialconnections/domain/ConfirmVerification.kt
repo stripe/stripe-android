@@ -9,15 +9,25 @@ internal class ConfirmVerification @Inject constructor(
     private val consumerSessionRepository: FinancialConnectionsConsumerSessionRepository
 ) {
 
-    suspend operator fun invoke(
+    suspend fun sms(
         consumerSessionClientSecret: String,
         verificationCode: String,
-        type: VerificationType
     ): ConsumerSession = requireNotNull(
         consumerSessionRepository.confirmConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             verificationCode = verificationCode,
-            type = type
+            type = VerificationType.SMS
+        )
+    )
+
+    suspend fun email(
+        consumerSessionClientSecret: String,
+        verificationCode: String,
+    ): ConsumerSession = requireNotNull(
+        consumerSessionRepository.confirmConsumerVerification(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            verificationCode = verificationCode,
+            type = VerificationType.EMAIL
         )
     )
 }

@@ -21,7 +21,6 @@ import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -50,10 +49,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
         suspend {
             val email = requireNotNull(getManifest().accountholderCustomerEmailAddress)
             val consumerSession = requireNotNull(lookupAccount(email).consumerSession)
-            startVerification(
-                consumerSessionClientSecret = consumerSession.clientSecret,
-                type = VerificationType.EMAIL
-            )
+            startVerification.email(consumerSessionClientSecret = consumerSession.clientSecret)
             eventTracker.track(PaneLoaded(Pane.LINK_STEP_UP_VERIFICATION))
             LinkStepUpVerificationState.Payload(
                 email = consumerSession.emailAddress,
@@ -89,9 +85,8 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
 
     private fun onOTPEntered(otp: String) = suspend {
         val payload = requireNotNull(awaitState().payload())
-        confirmVerification(
+        confirmVerification.email(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
-            type = VerificationType.EMAIL,
             verificationCode = otp
         )
         val selectedAccount = getCachedAccounts().first()
@@ -117,10 +112,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     private fun onResendOtp() = suspend {
         val email = requireNotNull(getManifest().accountholderCustomerEmailAddress)
         val consumerSession = requireNotNull(lookupAccount(email).consumerSession)
-        startVerification(
-            consumerSessionClientSecret = consumerSession.clientSecret,
-            type = VerificationType.EMAIL
-        )
+        startVerification.email(consumerSessionClientSecret = consumerSession.clientSecret)
         Unit
     }.execute {
         copy(resendOtp = it)

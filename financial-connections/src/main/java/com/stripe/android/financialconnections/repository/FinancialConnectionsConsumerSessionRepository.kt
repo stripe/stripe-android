@@ -4,6 +4,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.sync.Mutex
@@ -16,7 +17,8 @@ internal interface FinancialConnectionsConsumerSessionRepository {
     suspend fun lookupConsumerSession(email: String?): ConsumerSessionLookup
     suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
-        type: VerificationType
+        type: VerificationType,
+        customEmailType: CustomEmailType?
     ): ConsumerSession
 
     suspend fun confirmConsumerVerification(
@@ -65,14 +67,16 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     override suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         type: VerificationType,
+        customEmailType: CustomEmailType?,
     ): ConsumerSession = mutex.withLock {
         consumersApiService.startConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             locale = locale ?: Locale.getDefault(),
             authSessionCookie = null,
             requestSurface = CONSUMER_SURFACE,
-            requestOptions = apiOptions,
-            type = type
+            type = type,
+            customEmailType = customEmailType,
+            requestOptions = apiOptions
         ).also { session ->
             updateCachedConsumerSession("startConsumerVerification", session)
         }

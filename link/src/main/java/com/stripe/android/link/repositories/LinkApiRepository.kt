@@ -98,6 +98,7 @@ internal class LinkApiRepository @Inject constructor(
                     authSessionCookie = authSessionCookie,
                     requestSurface = REQUEST_SURFACE,
                     type = VerificationType.SMS,
+                    customEmailType = null,
                     requestOptions = consumerPublishableKey?.let {
                         ApiRequest.Options(it)
                     } ?: ApiRequest.Options(

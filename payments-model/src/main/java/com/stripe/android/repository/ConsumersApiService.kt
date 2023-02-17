@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.executeRequestWithModelJsonParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.VerificationType
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
@@ -30,6 +31,7 @@ interface ConsumersApiService {
         authSessionCookie: String?,
         requestSurface: String,
         type: VerificationType,
+        customEmailType: CustomEmailType?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession
 
@@ -104,6 +106,7 @@ class ConsumersApiServiceImpl(
         authSessionCookie: String?,
         requestSurface: String,
         type: VerificationType,
+        customEmailType: CustomEmailType?,
         requestOptions: ApiRequest.Options,
     ): ConsumerSession {
         return executeRequestWithModelJsonParser(
@@ -118,15 +121,18 @@ class ConsumersApiServiceImpl(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                     "type" to type.value,
+                    "custom_email_type" to customEmailType?.value,
                     "locale" to locale.toLanguageTag()
-                ).plus(
-                    authSessionCookie?.let {
-                        mapOf(
-                            "cookies" to
-                                mapOf("verification_session_client_secrets" to listOf(it))
-                        )
-                    } ?: emptyMap()
                 )
+                    .filterValues { it != null }
+                    .plus(
+                        authSessionCookie?.let {
+                            mapOf(
+                                "cookies" to
+                                    mapOf("verification_session_client_secrets" to listOf(it))
+                            )
+                        } ?: emptyMap()
+                    )
             ),
             responseJsonParser = ConsumerSessionJsonParser()
         )
