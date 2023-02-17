@@ -2,24 +2,13 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ScrollView
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentOptionsPrimaryButtonBinding
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
-import com.stripe.android.paymentsheet.ui.ErrorMessage
-import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.ui.PaymentOptionsScreen
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.uicore.StripeTheme
 
@@ -45,12 +34,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
-    override val linkAuthView: ComposeView by lazy { viewBinding.linkAuth }
-    override val scrollView: ScrollView by lazy { viewBinding.scrollView }
-    override val header: ComposeView by lazy { viewBinding.header }
-    override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
-    override val notesView: ComposeView by lazy { viewBinding.notes }
-    override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val starterArgs = initializeStarterArgs()
@@ -70,52 +53,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             closeSheet(it)
         }
 
-        val elevation = resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
-        scrollView.viewTreeObserver.addOnScrollChangedListener {
-            viewBinding.topBar.elevation = if (scrollView.scrollY > 0) {
-                elevation
-            } else {
-                0f
-            }
-        }
-
-        // This is temporary until we embed the top bar in a Scaffold
-        viewBinding.topBar.clipToPadding = false
-
-        viewBinding.topBar.setContent {
+        viewBinding.content.setContent {
             StripeTheme {
-                PaymentSheetTopBar(viewModel)
+                PaymentOptionsScreen(viewModel)
             }
-        }
-
-        viewBinding.contentContainer.setContent {
-            StripeTheme {
-                val currentScreen by viewModel.currentScreen.collectAsState()
-                currentScreen.Content(viewModel)
-            }
-        }
-
-        viewBinding.message.setContent {
-            StripeTheme {
-                val errorMessage by viewModel.error.collectAsState(initial = null)
-
-                errorMessage?.let { error ->
-                    ErrorMessage(
-                        error = error,
-                        modifier = Modifier.padding(vertical = 2.dp, horizontal = 20.dp),
-                    )
-                }
-            }
-        }
-
-        viewBinding.buttonContainer.setContent {
-            AndroidViewBinding(
-                factory = FragmentPaymentOptionsPrimaryButtonBinding::inflate,
-            )
-        }
-
-        viewModel.selection.launchAndCollectIn(this) {
-            viewModel.clearErrorMessages()
         }
     }
 
@@ -128,8 +69,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override fun setActivityResult(result: PaymentOptionResult) {
         setResult(
             result.resultCode,
-            Intent()
-                .putExtras(result.toBundle())
+            Intent().putExtras(result.toBundle()),
         )
     }
 

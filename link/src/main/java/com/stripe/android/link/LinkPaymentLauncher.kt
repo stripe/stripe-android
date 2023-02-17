@@ -34,6 +34,12 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.map
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
@@ -76,11 +82,21 @@ class LinkPaymentLauncher @Inject internal constructor(
         requireNotNull(LinkPaymentLauncher::class.simpleName)
     )
 
+    private val componentFlow = MutableStateFlow<LinkPaymentLauncherComponent?>(null)
+
+    @OptIn(FlowPreview::class)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val emailFlow: Flow<String?> = componentFlow
+        .filterNotNull()
+        .flatMapMerge { it.linkAccountManager.linkAccount }
+        .map { it?.email }
+
     /**
      * The dependency injector Component for all injectable classes in Link while in an embedded
      * environment.
      */
-    internal var component: LinkPaymentLauncherComponent? = null
+    internal val component: LinkPaymentLauncherComponent?
+        get() = componentFlow.value
 
     /**
      * Fetch the customer's account status, initializing the dependencies if they haven't been
@@ -169,7 +185,7 @@ class LinkPaymentLauncher @Inject internal constructor(
                 .configuration(configuration)
                 .build()
                 .also {
-                    component = it
+                    componentFlow.value = it
                 }
 
     /**
