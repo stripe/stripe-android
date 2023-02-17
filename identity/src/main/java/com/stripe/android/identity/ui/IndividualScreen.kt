@@ -1,6 +1,5 @@
 package com.stripe.android.identity.ui
 
-import android.os.Parcelable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -202,15 +201,6 @@ internal data class IndividualCollectedStates(
 }
 
 // Disable submit button if there is still status loading or error
-private fun updateSubmitButtonState(requirements: List<Resource<Parcelable>>) =
-    requirements.firstOrNull {
-        it.status == Status.LOADING || it.status == Status.ERROR
-    }?.let {
-        LoadingButtonState.Disabled
-    } ?: run {
-        LoadingButtonState.Idle
-    }
-
 private fun updateSubmitButtonState(collectedStates: IndividualCollectedStates) =
     collectedStates.allStates().firstOrNull {
         it.status == Status.LOADING || it.status == Status.ERROR
