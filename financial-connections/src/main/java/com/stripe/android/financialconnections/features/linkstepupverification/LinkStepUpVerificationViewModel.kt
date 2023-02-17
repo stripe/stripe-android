@@ -11,10 +11,14 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.ConfirmVerification
+import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
+import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.StartVerification
+import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
+import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -32,6 +36,10 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     private val lookupAccount: LookupAccount,
     private val startVerification: StartVerification,
     private val confirmVerification: ConfirmVerification,
+    private val selectNetworkedAccount: SelectNetworkedAccount,
+    private val getCachedAccounts: GetCachedAccounts,
+    private val updateLocalManifest: UpdateLocalManifest,
+    private val updateCachedAccounts: UpdateCachedAccounts,
     private val goNext: GoNext,
     private val logger: Logger
 ) : MavericksViewModel<LinkStepUpVerificationState>(initialState) {
@@ -81,8 +89,16 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
             verificationCode = otp
         )
+        val selectedAccount = getCachedAccounts().first()
+        val activeInstitution = selectNetworkedAccount(
+            consumerSessionClientSecret = payload.consumerSessionClientSecret,
+            selectedAccountId = selectedAccount.id
+        )
+        // Updates manifest active institution after account networked.
+        updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
+        // Updates cached accounts with the one selected.
+        updateCachedAccounts { listOf(selectedAccount) }
         goNext(Pane.SUCCESS)
-        //TODO select accounts!
         Unit
     }.execute { copy(confirmVerification = it) }
 

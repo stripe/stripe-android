@@ -162,7 +162,7 @@ private fun EmailSubtext(email: String) {
             TextResource.StringId(R.string.stripe_link_stepup_verification_resend_code) to null
         ).forEach { (text, weight) ->
             AnnotatedText(
-                modifier = if (weight != null) Modifier.weight(weight) else Modifier,
+                modifier = if (weight != null) Modifier.weight(weight, fill = false) else Modifier,
                 text = text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

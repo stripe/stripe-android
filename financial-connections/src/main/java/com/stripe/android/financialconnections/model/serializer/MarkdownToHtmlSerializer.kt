@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.model.serializer
 
-import com.stripe.android.financialconnections.features.MarkdownParser
+import com.stripe.android.financialconnections.utils.MarkdownParser
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
