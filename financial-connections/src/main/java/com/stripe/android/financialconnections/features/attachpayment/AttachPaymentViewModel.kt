@@ -11,7 +11,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAttachPaymentsSucceeded
-import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
+import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
@@ -29,7 +29,7 @@ internal class AttachPaymentViewModel @Inject constructor(
     initialState: AttachPaymentState,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
+    private val getCachedAccounts: GetCachedAccounts,
     private val navigationManager: NavigationManager,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
@@ -40,17 +40,16 @@ internal class AttachPaymentViewModel @Inject constructor(
         logErrors()
         suspend {
             val manifest = getManifest()
-            val authSession = requireNotNull(manifest.activeAuthSession)
             AttachPaymentState.Payload(
                 businessName = manifest.businessName,
-                accountsCount = getAuthorizationSessionAccounts(authSession.id).data.size
+                accountsCount = getCachedAccounts().size
             )
         }.execute { copy(payload = it) }
         suspend {
             val manifest = getManifest()
             val authSession = requireNotNull(manifest.activeAuthSession)
             val activeInstitution = requireNotNull(manifest.activeInstitution)
-            val accounts = getAuthorizationSessionAccounts(authSession.id).data
+            val accounts = getCachedAccounts()
             require(accounts.size == 1)
             val id = accounts.first().linkedAccountId
             val (result, millis) = measureTimeMillis {

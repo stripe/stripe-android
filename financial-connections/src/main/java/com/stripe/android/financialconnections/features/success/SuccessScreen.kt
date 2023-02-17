@@ -53,7 +53,7 @@ internal fun SuccessScreen() {
         SuccessContent(
             accessibleDataModel = payload.accessibleData,
             disconnectUrl = payload.disconnectUrl,
-            accounts = payload.accounts.data,
+            accounts = payload.accounts,
             institution = payload.institution,
             businessName = payload.businessName,
             loading = state.value.completeSession is Loading,

@@ -68,6 +68,11 @@ internal object NavigationDirections {
         override val destination = "networking_link_verification_pane"
     }
 
+    val linkAccountPicker = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "linkaccount_picker"
+    }
+
     val linkStepUpVerification = object : NavigationCommand {
         override val arguments = emptyList<NamedNavArgument>()
         override val destination = "link_step_up_verification"

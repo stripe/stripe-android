@@ -1,6 +1,6 @@
 @file:Suppress("LongMethod")
 
-package com.stripe.android.financialconnections.features.accountpicker
+package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.airbnb.mvrx.Success
@@ -8,10 +8,9 @@ import com.stripe.android.financialconnections.features.common.AccessibleDataCal
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 
-internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState> {
+internal class LinkedAccountPickerStates : PreviewParameterProvider<LinkAccountPickerState> {
     override val values = sequenceOf(
-        multiSelect(),
-        singleSelect(),
+        canonical(),
     )
 
     override val count: Int
@@ -19,36 +18,29 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
 
     // TODO@carlosmuvi migrate to PreviewParameterProvider when showkase adds support.
     companion object {
-        fun multiSelect() = AccountPickerState(
+        fun canonical() = LinkAccountPickerState(
             payload = Success(
-                AccountPickerState.Payload(
-                    skipAccountSelection = false,
+                LinkAccountPickerState.Payload(
                     accounts = partnerAccountList(),
-                    selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
                     accessibleData = accessibleCallout(),
-                    singleAccount = false,
-                    userSelectedSingleAccountInInstitution = false,
                     businessName = "Random business",
-                    stripeDirect = false,
+                    consumerSessionClientSecret = "secret",
+                    stepUpAuthenticationRequired = null,
                 )
             ),
-            selectedIds = setOf("id1"),
         )
 
-        fun singleSelect() = AccountPickerState(
+        fun accountSelected() = LinkAccountPickerState(
+            selectedAccountId = partnerAccountList().first().id,
             payload = Success(
-                AccountPickerState.Payload(
-                    skipAccountSelection = false,
+                LinkAccountPickerState.Payload(
                     accounts = partnerAccountList(),
-                    selectionMode = AccountPickerState.SelectionMode.RADIO,
                     accessibleData = accessibleCallout(),
-                    singleAccount = true,
-                    userSelectedSingleAccountInInstitution = false,
                     businessName = "Random business",
-                    stripeDirect = false,
+                    consumerSessionClientSecret = "secret",
+                    stepUpAuthenticationRequired = null,
                 )
             ),
-            selectedIds = setOf("id1"),
         )
 
         private fun partnerAccountList() = listOf(
@@ -58,6 +50,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                 id = "id1",
                 name = "With balance",
                 balanceAmount = 1000,
+                status = FinancialConnectionsAccount.Status.ACTIVE,
                 displayableAccountNumbers = "1234",
                 currency = "USD",
                 _allowSelection = true,
@@ -65,7 +58,6 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                 subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                 supportedPaymentMethodTypes = emptyList()
             ),
-
             PartnerAccount(
                 authorization = "Authorization",
                 category = FinancialConnectionsAccount.Category.CASH,
@@ -77,7 +69,6 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                 subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                 supportedPaymentMethodTypes = emptyList()
             ),
-
             PartnerAccount(
                 authorization = "Authorization",
                 category = FinancialConnectionsAccount.Category.CASH,
@@ -89,7 +80,6 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                 allowSelectionMessage = "Cannot be selected",
                 supportedPaymentMethodTypes = emptyList()
             ),
-
             PartnerAccount(
                 authorization = "Authorization",
                 category = FinancialConnectionsAccount.Category.CASH,
@@ -101,7 +91,6 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                 allowSelectionMessage = "Cannot be selected",
                 supportedPaymentMethodTypes = emptyList()
             ),
-
             PartnerAccount(
                 authorization = "Authorization",
                 category = FinancialConnectionsAccount.Category.CASH,
