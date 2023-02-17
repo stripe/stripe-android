@@ -53,12 +53,9 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
 
     return getLayoutFormDescription(
         isPaymentFlow,
-        this,
         stripeIntent,
-        supportsPaymentIntentSfuSet(containsValidShippingInfo, config),
-        supportsPaymentIntentSfuSettable(containsValidShippingInfo, config),
-        supportsPaymentIntentSfuNotSettable(containsValidShippingInfo, config),
-        supportsSetupIntent(config)
+        containsValidShippingInfo,
+        config
     )
 }
 
@@ -70,48 +67,47 @@ private fun StripeIntent.isLpmLevelSetupFutureUsageSet(code: String): Boolean {
     }
 }
 
-private fun getLayoutFormDescription(
+private fun SupportedPaymentMethod.getLayoutFormDescription(
     isPaymentFlow: Boolean,
-    supportedPaymentMethod: SupportedPaymentMethod,
     stripeIntent: StripeIntent,
-    supportsPaymentIntentSfuSet: Boolean,
-    supportsPaymentIntentSfuSettable: Boolean,
-    supportsPaymentIntentSfuNotSettable: Boolean,
-    supportsSetupIntent: Boolean
+    containsValidShippingInfo: Boolean,
+    config: PaymentSheet.Configuration?
 ): LayoutFormDescriptor? {
     val oneTimeUse = LayoutFormDescriptor(
-        supportedPaymentMethod.formSpec,
+        formSpec,
         showCheckbox = false,
         showCheckboxControlledFields = false
     )
     val merchantRequestedSave = LayoutFormDescriptor(
-        supportedPaymentMethod.formSpec,
+        formSpec,
         showCheckbox = false,
         showCheckboxControlledFields = true
     )
     val userSelectableSave = LayoutFormDescriptor(
-        supportedPaymentMethod.formSpec,
+        formSpec,
         showCheckbox = true,
         showCheckboxControlledFields = false
     )
 
     return if (isPaymentFlow) {
-        if (stripeIntent.isLpmLevelSetupFutureUsageSet(supportedPaymentMethod.code)) {
-            if (supportsPaymentIntentSfuSet) {
+        if (stripeIntent.isLpmLevelSetupFutureUsageSet(code)) {
+            if (supportsPaymentIntentSfuSet(containsValidShippingInfo, config)) {
                 merchantRequestedSave
             } else {
                 null
             }
         } else {
             when {
-                supportsPaymentIntentSfuSettable -> userSelectableSave
-                supportsPaymentIntentSfuNotSettable -> oneTimeUse
+                supportsPaymentIntentSfuSettable(containsValidShippingInfo, config) ->
+                    userSelectableSave
+                supportsPaymentIntentSfuNotSettable(containsValidShippingInfo, config) ->
+                    oneTimeUse
                 else -> null
             }
         }
     } else {
         when {
-            supportsSetupIntent -> merchantRequestedSave
+            supportsSetupIntent(config) -> merchantRequestedSave
             else -> null
         }
     }

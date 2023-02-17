@@ -12,6 +12,7 @@ sealed interface ElementsSessionParams : Parcelable {
     val clientSecret: String?
     val locale: String?
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class PaymentIntentType(
         override val clientSecret: String?,
@@ -19,6 +20,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val locale: String? = Locale.getDefault().toLanguageTag(),
     ) : ElementsSessionParams
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class SetupIntentType(
         override val clientSecret: String?,
@@ -26,6 +28,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val locale: String? = Locale.getDefault().toLanguageTag(),
     ) : ElementsSessionParams
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class DeferredIntentType(
         override val clientSecret: String? = null,

@@ -12,6 +12,7 @@ data class ElementsSession(
     val stripeIntent: StripeIntent?
 ) : StripeModel {
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
         val linkFundingSources: List<String>

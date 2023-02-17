@@ -9,9 +9,8 @@ import kotlinx.parcelize.Parcelize
  * A [DeferredIntent] is a set of intent params for the deferred PaymentSheet flow.
  */
 @Parcelize
-data class DeferredIntent
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-constructor(
+data class DeferredIntent(
     /**
      * The mode of the [DeferredIntent] one of payment or setup
      */
@@ -89,10 +88,12 @@ constructor(
     override val description: String?
         get() = null
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     sealed interface Mode : Parcelable {
         val code: String
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Payment(
             override val code: String = "payment",
@@ -100,6 +101,7 @@ constructor(
             val currency: String
         ) : Mode
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Setup(
             override val code: String = "setup",
@@ -107,6 +109,7 @@ constructor(
         ) : Mode
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class CaptureMethod(val code: String) {
         Manual("manual"),
         Automatic("automatic")
