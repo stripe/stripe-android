@@ -34,6 +34,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.FormErrorText
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationState.Payload
@@ -133,6 +134,10 @@ private fun LinkStepUpVerificationLoaded(
             otpElement = payload.otpElement,
             enabled = confirmVerificationAsync !is Loading
         )
+        if (confirmVerificationAsync is Fail) {
+            Spacer(modifier = Modifier.size(4.dp))
+            FormErrorText(confirmVerificationAsync.error)
+        }
         Spacer(modifier = Modifier.size(24.dp))
         EmailSubtext(payload.email)
     }
