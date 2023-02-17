@@ -23,7 +23,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
@@ -150,28 +149,6 @@ internal class GooglePayLauncherViewModel(
                     transactionId = stripeIntent.id,
                     totalPrice = 0,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
-                )
-            }
-            is DeferredIntent -> {
-                GooglePayJsonFactory.TransactionInfo(
-                    currencyCode = currencyCode,
-                    totalPriceStatus = if (stripeIntent.mode is DeferredIntent.Mode.Payment) {
-                        GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final
-                    } else {
-                        GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated
-                    },
-                    countryCode = args.config.merchantCountryCode,
-                    transactionId = stripeIntent.id,
-                    totalPrice = if (stripeIntent.mode is DeferredIntent.Mode.Payment) {
-                        stripeIntent.mode.amount.toInt()
-                    } else {
-                        0
-                    },
-                    checkoutOption = if (stripeIntent.mode is DeferredIntent.Mode.Payment) {
-                        GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase
-                    } else {
-                        GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
-                    }
                 )
             }
         }

@@ -154,7 +154,10 @@ constructor(
 
     override val nextActionData: StripeIntent.NextActionData? = null,
 
-    private val paymentMethodOptionsJsonString: String? = null
+    private val paymentMethodOptionsJsonString: String? = null,
+
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override val deferred: Boolean = false
 
 ) : StripeIntent {
 

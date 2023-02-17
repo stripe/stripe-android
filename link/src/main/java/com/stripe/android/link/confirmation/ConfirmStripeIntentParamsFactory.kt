@@ -4,7 +4,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
@@ -35,7 +34,6 @@ internal sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeInte
             when (stripeIntent) {
                 is PaymentIntent -> ConfirmPaymentIntentParamsFactory(stripeIntent, shipping)
                 is SetupIntent -> ConfirmSetupIntentParamsFactory(stripeIntent)
-                is DeferredIntent -> throw IllegalStateException("DeferredIntent cannot be confirmed")
             }
     }
 }

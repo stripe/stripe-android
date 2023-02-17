@@ -3,6 +3,7 @@ package com.stripe.android.model.parsers
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
+import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.StripeIntent
@@ -94,12 +95,24 @@ internal class ElementsSessionJsonParser(
                     SetupIntentJsonParser().parse(json)
                 }
                 is ElementsSessionParams.DeferredIntentType -> {
-                    DeferredIntentJsonParser(
-                        elementsSessionId = elementsSessionId,
-                        params = params.deferredIntentParams,
-                        apiKey = apiKey,
-                        timeProvider = timeProvider
-                    ).parse(json)
+                    when (params.deferredIntentParams.mode) {
+                        is DeferredIntentParams.Mode.Payment -> {
+                            DeferredPaymentIntentJsonParser(
+                                elementsSessionId = elementsSessionId,
+                                params = params.deferredIntentParams,
+                                apiKey = apiKey,
+                                timeProvider = timeProvider
+                            ).parse(json)
+                        }
+                        is DeferredIntentParams.Mode.Setup -> {
+                            DeferredSetupIntentJsonParser(
+                                elementsSessionId = elementsSessionId,
+                                params = params.deferredIntentParams,
+                                apiKey = apiKey,
+                                timeProvider = timeProvider
+                            ).parse(json)
+                        }
+                    }
                 }
             }
         }

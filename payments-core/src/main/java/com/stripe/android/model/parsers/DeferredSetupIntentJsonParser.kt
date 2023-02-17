@@ -4,18 +4,18 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
-import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.DeferredIntentParams
+import com.stripe.android.model.SetupIntent
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DeferredIntentJsonParser(
+class DeferredSetupIntentJsonParser(
     private val elementsSessionId: String?,
     private val params: DeferredIntentParams,
     private val apiKey: String,
     private val timeProvider: () -> Long
-) : ModelJsonParser<DeferredIntent> {
-    override fun parse(json: JSONObject): DeferredIntent {
+) : ModelJsonParser<SetupIntent> {
+    override fun parse(json: JSONObject): SetupIntent {
         val paymentMethodTypes = jsonArrayToList(
             json.optJSONArray(FIELD_PAYMENT_METHOD_TYPES)
         )
@@ -29,17 +29,22 @@ class DeferredIntentJsonParser(
 
         val countryCode = optString(json, FIELD_COUNTRY_CODE)
 
-        return DeferredIntent(
+        return SetupIntent(
             id = elementsSessionId,
-            mode = params.mode,
+            cancellationReason = null,
+            description = null,
+            clientSecret = null,
             paymentMethodTypes = paymentMethodTypes,
-            captureMethod = params.captureMethod,
             countryCode = countryCode,
             linkFundingSources = linkFundingSources,
             unactivatedPaymentMethods = unactivatedPaymentMethods,
             isLiveMode = apiKey.contains("live"),
+            nextActionData = null,
+            paymentMethodId = null,
             created = timeProvider(),
-            setupFutureUsage = params.setupFutureUsage
+            status = null,
+            usage = params.setupFutureUsage,
+            deferred = true,
         )
     }
 

@@ -3,7 +3,6 @@ package com.stripe.android.payments
 import android.content.Context
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -30,9 +29,6 @@ internal class PaymentFlowFailureMessageFactory(
                 }
                 is SetupIntent -> {
                     createForSetupIntent(intent)
-                }
-                is DeferredIntent -> {
-                    throw IllegalStateException("DeferredIntent should never reach this state")
                 }
             }
         }

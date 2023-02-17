@@ -2,7 +2,6 @@ package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.parsers.ModelJsonParser
-import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.ElementsSessionParams
@@ -214,7 +213,6 @@ class ElementsSessionJsonParserTest {
         val countryCode = when (val intent = parsedData?.stripeIntent) {
             is PaymentIntent -> intent.countryCode
             is SetupIntent -> intent.countryCode
-            is DeferredIntent -> intent.countryCode
             null -> null
         }
 
@@ -235,7 +233,6 @@ class ElementsSessionJsonParserTest {
         val countryCode = when (val intent = parsedData?.stripeIntent) {
             is PaymentIntent -> intent.countryCode
             is SetupIntent -> intent.countryCode
-            is DeferredIntent -> intent.countryCode
             null -> null
         }
 
@@ -243,11 +240,11 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Test DeferredIntent`() {
+    fun `Test deferred PaymentIntent`() {
         val data = ElementsSessionJsonParser(
             ElementsSessionParams.DeferredIntentType(
                 deferredIntentParams = DeferredIntentParams(
-                    mode = DeferredIntent.Mode.Payment(
+                    mode = DeferredIntentParams.Mode.Payment(
                         amount = 2000,
                         currency = "usd"
                     )
@@ -259,21 +256,62 @@ class ElementsSessionJsonParserTest {
             ElementsSessionFixtures.DEFERRED_INTENT_JSON
         )
 
-        val deferredIntent = data?.stripeIntent as? DeferredIntent
+        val deferredIntent = data?.stripeIntent
 
         assertThat(deferredIntent).isNotNull()
         assertThat(deferredIntent).isEqualTo(
-            DeferredIntent(
+            PaymentIntent(
                 id = "elements_session_1t6ejApXCS5",
-                captureMethod = null,
+                clientSecret = null,
+                amount = 2000L,
+                currency = "usd",
+                captureMethod = PaymentIntent.CaptureMethod.Automatic,
                 countryCode = "CA",
                 created = 1,
                 isLiveMode = false,
-                mode = DeferredIntent.Mode.Payment(
-                    amount = 2000,
-                    currency = "usd"
-                ),
+                deferred = true,
                 setupFutureUsage = null,
+                unactivatedPaymentMethods = listOf(),
+                paymentMethodTypes = listOf("card", "link", "cashapp"),
+                linkFundingSources = listOf("card")
+            )
+        )
+    }
+
+    @Test
+    fun `Test deferred SetupIntent`() {
+        val data = ElementsSessionJsonParser(
+            ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Setup(
+                        currency = "usd"
+                    )
+                )
+            ),
+            apiKey = "test",
+            timeProvider = { 1 }
+        ).parse(
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON
+        )
+
+        val deferredIntent = data?.stripeIntent
+
+        assertThat(deferredIntent).isNotNull()
+        assertThat(deferredIntent).isEqualTo(
+            SetupIntent(
+                id = "elements_session_1t6ejApXCS5",
+                clientSecret = null,
+                cancellationReason = null,
+                description = null,
+                nextActionData = null,
+                paymentMethodId = null,
+                paymentMethod = null,
+                status = null,
+                countryCode = "CA",
+                created = 1,
+                isLiveMode = false,
+                deferred = true,
+                usage = null,
                 unactivatedPaymentMethods = listOf(),
                 paymentMethodTypes = listOf("card", "link", "cashapp"),
                 linkFundingSources = listOf("card")

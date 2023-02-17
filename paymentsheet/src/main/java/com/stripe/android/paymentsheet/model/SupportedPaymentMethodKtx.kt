@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.model
 
-import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -45,11 +44,9 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
     val containsValidShippingInfo = when (stripeIntent) {
         is PaymentIntent -> stripeIntent.containsValidShippingInfo
         is SetupIntent -> false
-        is DeferredIntent -> config?.shippingDetails?.containsValidShippingInfo == true
     }
 
-    val isPaymentFlow = stripeIntent is PaymentIntent ||
-        (stripeIntent as? DeferredIntent)?.mode is DeferredIntent.Mode.Payment
+    val isPaymentFlow = stripeIntent is PaymentIntent
 
     return getLayoutFormDescription(
         isPaymentFlow,
@@ -61,7 +58,6 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
 
 private fun StripeIntent.isLpmLevelSetupFutureUsageSet(code: String): Boolean {
     return when (this) {
-        is DeferredIntent -> isTopLevelSetupFutureUsageSet()
         is PaymentIntent -> isLpmLevelSetupFutureUsageSet(code)
         is SetupIntent -> false
     }

@@ -105,7 +105,10 @@ data class SetupIntent internal constructor(
      */
     override val linkFundingSources: List<String>,
 
-    override val nextActionData: StripeIntent.NextActionData?
+    override val nextActionData: StripeIntent.NextActionData?,
+
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override val deferred: Boolean = false
 ) : StripeIntent {
 
     override val nextActionType: StripeIntent.NextActionType?

@@ -33,7 +33,6 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
-import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -71,19 +70,6 @@ internal fun completePaymentButtonLabel(
         requireNotNull(stripeIntent.currency)
     ).buildPayButtonLabel(resources)
     is SetupIntent -> resources.getString(R.string.stripe_setup_button_label)
-    is DeferredIntent -> {
-        when (val mode = stripeIntent.mode) {
-            is DeferredIntent.Mode.Payment -> {
-                Amount(
-                    mode.amount,
-                    mode.currency
-                ).buildPayButtonLabel(resources)
-            }
-            is DeferredIntent.Mode.Setup -> {
-                resources.getString(R.string.stripe_setup_button_label)
-            }
-        }
-    }
 }
 
 @Composable

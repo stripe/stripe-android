@@ -36,7 +36,6 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
-import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.ElementsSessionParams
@@ -2366,7 +2365,7 @@ internal class StripeApiRepositoryTest {
         create().retrieveDeferredIntent(
             elementsSessionParams = ElementsSessionParams.DeferredIntentType(
                 deferredIntentParams = DeferredIntentParams(
-                    mode = DeferredIntent.Mode.Payment(
+                    mode = DeferredIntentParams.Mode.Payment(
                         amount = 2000,
                         currency = "usd"
                     ),

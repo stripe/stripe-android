@@ -53,7 +53,6 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
-import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
@@ -1656,12 +1655,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun retrieveDeferredIntent(
         elementsSessionParams: ElementsSessionParams,
         requestOptions: ApiRequest.Options
-    ): DeferredIntent? {
+    ): StripeIntent? {
         return retrieveElementsSession(
             params = elementsSessionParams,
             options = requestOptions,
             analyticsEvent = null
-        )?.stripeIntent as? DeferredIntent
+        )?.stripeIntent
     }
 
     /**

@@ -70,6 +70,12 @@ sealed interface StripeIntent : StripeModel {
      */
     val linkFundingSources: List<String>
 
+    /**
+     * Whether this intent is in the deferred flow
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val deferred: Boolean
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean

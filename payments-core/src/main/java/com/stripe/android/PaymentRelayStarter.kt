@@ -4,7 +4,6 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
@@ -131,9 +130,6 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
                     }
                     is SetupIntent -> {
                         SetupIntentArgs(stripeIntent, stripeAccountId)
-                    }
-                    is DeferredIntent -> {
-                        throw IllegalStateException("DeferredIntent does not support PaymentRelayStarter")
                     }
                 }
             }

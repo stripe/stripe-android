@@ -16,7 +16,6 @@ import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.ConsumerSignUpConsentAction
-import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.ui.core.elements.NameConfig
@@ -89,7 +88,6 @@ internal class SignUpViewModel @Inject constructor(
             val countryCode = when (val stripeIntent = args.stripeIntent) {
                 is PaymentIntent -> stripeIntent.countryCode
                 is SetupIntent -> stripeIntent.countryCode
-                is DeferredIntent -> stripeIntent.countryCode
             }
             return countryCode != CountryCode.US.value
         }
