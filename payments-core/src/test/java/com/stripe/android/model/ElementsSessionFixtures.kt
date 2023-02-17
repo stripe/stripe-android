@@ -573,15 +573,6 @@ internal object ElementsSessionFixtures {
                 {
                   "async": false,
                   "fields": [],
-                  "selector_icon": {
-                    "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-alipay.png",
-                    "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/alipay-22c167d415e209c71b2ac68b7fbc9f43.svg"
-                  },
-                  "type": "alipay"
-                },
-                {
-                  "async": false,
-                  "fields": [],
                   "type": "card"
                 },
                 {
@@ -592,31 +583,6 @@ internal object ElementsSessionFixtures {
                     "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-cashapp-981164a833e417d28a8ac2684fda2324.svg"
                   },
                   "type": "cashapp"
-                },
-                {
-                  "async": false,
-                  "fields": [
-                    {
-                      "type": "klarna_header"
-                    },
-                    {
-                      "api_path": {
-                        "v1": "billing_details[email]"
-                      },
-                      "type": "email"
-                    },
-                    {
-                      "api_path": {
-                        "v1": "billing_details[address][country]"
-                      },
-                      "type": "klarna_country"
-                    }
-                  ],
-                  "selector_icon": {
-                    "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-klarna@3x-d8624aa9a5662d719a44d16b9fcca0be.png",
-                    "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-klarna-bb91aa8f173a3c72931696b0f752ec73.svg"
-                  },
-                  "type": "klarna"
                 },
                 {
                   "async": false,

@@ -12,7 +12,11 @@ import kotlinx.parcelize.Parcelize
 data class DeferredIntent
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
+    /**
+     * The mode of the [DeferredIntent] one of payment or setup
+     */
     val mode: Mode,
+
     /**
      * Unique identifier for the object.
      */
@@ -46,6 +50,14 @@ constructor(
      */
     override val isLiveMode: Boolean,
 
+    /**
+     * Indicates how the payment method is intended to be used in the future.
+     *
+     * Use [StripeIntent.Usage.OnSession] if you intend to only reuse the payment method when the
+     * customer is in your checkout flow. Use [StripeIntent.Usage.OffSession] if your customer may
+     * or may not be in your checkout flow. If not provided, this value defaults to
+     * [StripeIntent.Usage.OffSession].
+     */
     val setupFutureUsage: StripeIntent.Usage?,
 
     /**
@@ -59,10 +71,6 @@ constructor(
     override val linkFundingSources: List<String>,
 ) : StripeIntent {
 
-    /**
-     * The [DeferredIntent] does not have a client secret, it will be retrieved from the merchants
-     * server.
-     */
     override val clientSecret: String?
         get() = null
 
@@ -125,16 +133,11 @@ constructor(
      * SetupFutureUsage is considered to be set if it is on or off session.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    private fun isTopLevelSetupFutureUsageSet() =
+    fun isTopLevelSetupFutureUsageSet() =
         when (setupFutureUsage) {
             StripeIntent.Usage.OnSession -> true
             StripeIntent.Usage.OffSession -> true
             StripeIntent.Usage.OneTime -> false
             null -> false
         }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
-        return isTopLevelSetupFutureUsageSet()
-    }
 }

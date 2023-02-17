@@ -32,7 +32,7 @@ internal class PaymentFlowFailureMessageFactory(
                     createForSetupIntent(intent)
                 }
                 is DeferredIntent -> {
-                    null
+                    throw IllegalStateException("DeferredIntent should never reach this state")
                 }
             }
         }

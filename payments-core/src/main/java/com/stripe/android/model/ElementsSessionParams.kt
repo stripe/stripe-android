@@ -7,10 +7,11 @@ import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-sealed interface ElementsSessionParams: Parcelable {
+sealed interface ElementsSessionParams : Parcelable {
     val type: String
     val clientSecret: String?
     val locale: String?
+
     @Parcelize
     class PaymentIntentType(
         override val clientSecret: String?,

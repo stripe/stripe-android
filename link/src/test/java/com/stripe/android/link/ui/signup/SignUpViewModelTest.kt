@@ -20,6 +20,7 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.signup.SignUpViewModel.Companion.LOOKUP_DEBOUNCE_MS
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.DeferredIntent
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import kotlinx.coroutines.Dispatchers
@@ -358,6 +359,7 @@ class SignUpViewModelTest {
                 stripeIntent = when (val intent = args.stripeIntent) {
                     is PaymentIntent -> intent.copy(countryCode = countryCode.value)
                     is SetupIntent -> intent.copy(countryCode = countryCode.value)
+                    is DeferredIntent -> intent.copy(countryCode = countryCode.value)
                 },
                 customerEmail = prefilledEmail,
             )

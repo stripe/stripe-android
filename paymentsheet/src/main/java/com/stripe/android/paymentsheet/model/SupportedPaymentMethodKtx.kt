@@ -38,34 +38,8 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
     stripeIntent: StripeIntent,
     config: PaymentSheet.Configuration?
 ): LayoutFormDescriptor? {
-    val formSpec = formSpec
-    val oneTimeUse = LayoutFormDescriptor(
-        formSpec,
-        showCheckbox = false,
-        showCheckboxControlledFields = false
-    )
-    val merchantRequestedSave = LayoutFormDescriptor(
-        formSpec,
-        showCheckbox = false,
-        showCheckboxControlledFields = true
-    )
-    val userSelectableSave = LayoutFormDescriptor(
-        formSpec,
-        showCheckbox = true,
-        showCheckboxControlledFields = false
-    )
-
     if (!stripeIntent.paymentMethodTypes.contains(code)) {
         return null
-    }
-
-    val mode = when (stripeIntent) {
-        is PaymentIntent -> DeferredIntent.Mode.Payment(
-            amount = stripeIntent.amount!!,
-            currency = stripeIntent.currency!!,
-        )
-        is SetupIntent -> DeferredIntent.Mode.Setup(currency = null)
-        is DeferredIntent -> stripeIntent.mode
     }
 
     val containsValidShippingInfo = when (stripeIntent) {
@@ -74,51 +48,71 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
         is DeferredIntent -> config?.shippingDetails?.containsValidShippingInfo == true
     }
 
-    return when (mode) {
-        is DeferredIntent.Mode.Payment -> {
+    val isPaymentFlow = stripeIntent is PaymentIntent ||
+        (stripeIntent as? DeferredIntent)?.mode is DeferredIntent.Mode.Payment
 
-            if (stripeIntent.isLpmLevelSetupFutureUsageSet(code)) {
-                if (supportsPaymentIntentSfuSet(containsValidShippingInfo, config)) {
-                    merchantRequestedSave
-                } else {
-                    null
-                }
-            } else {
-                when {
-                    supportsPaymentIntentSfuSettable(
-                        containsValidShippingInfo,
-                        config
-                    )
-                    -> userSelectableSave
-                    supportsPaymentIntentSfuNotSettable(
-                        containsValidShippingInfo,
-                        config
-                    ) -> oneTimeUse
-                    else -> null
-                }
-            }
-        }
-        is DeferredIntent.Mode.Setup -> {
-            when {
-                supportsSetupIntent(
-                    config
-                ) -> merchantRequestedSave
-                else -> null
-            }
-        }
+    return getLayoutFormDescription(
+        isPaymentFlow,
+        this,
+        stripeIntent,
+        supportsPaymentIntentSfuSet(containsValidShippingInfo, config),
+        supportsPaymentIntentSfuSettable(containsValidShippingInfo, config),
+        supportsPaymentIntentSfuNotSettable(containsValidShippingInfo, config),
+        supportsSetupIntent(config)
+    )
+}
+
+private fun StripeIntent.isLpmLevelSetupFutureUsageSet(code: String): Boolean {
+    return when (this) {
+        is DeferredIntent -> isTopLevelSetupFutureUsageSet()
+        is PaymentIntent -> isLpmLevelSetupFutureUsageSet(code)
+        is SetupIntent -> false
     }
 }
 
-fun StripeIntent.isLpmLevelSetupFutureUsageSet(code: String): Boolean {
-    return when (this) {
-        is DeferredIntent -> {
-            isLpmLevelSetupFutureUsageSet(code)
+private fun getLayoutFormDescription(
+    isPaymentFlow: Boolean,
+    supportedPaymentMethod: SupportedPaymentMethod,
+    stripeIntent: StripeIntent,
+    supportsPaymentIntentSfuSet: Boolean,
+    supportsPaymentIntentSfuSettable: Boolean,
+    supportsPaymentIntentSfuNotSettable: Boolean,
+    supportsSetupIntent: Boolean
+): LayoutFormDescriptor? {
+    val oneTimeUse = LayoutFormDescriptor(
+        supportedPaymentMethod.formSpec,
+        showCheckbox = false,
+        showCheckboxControlledFields = false
+    )
+    val merchantRequestedSave = LayoutFormDescriptor(
+        supportedPaymentMethod.formSpec,
+        showCheckbox = false,
+        showCheckboxControlledFields = true
+    )
+    val userSelectableSave = LayoutFormDescriptor(
+        supportedPaymentMethod.formSpec,
+        showCheckbox = true,
+        showCheckboxControlledFields = false
+    )
+
+    return if (isPaymentFlow) {
+        if (stripeIntent.isLpmLevelSetupFutureUsageSet(supportedPaymentMethod.code)) {
+            if (supportsPaymentIntentSfuSet) {
+                merchantRequestedSave
+            } else {
+                null
+            }
+        } else {
+            when {
+                supportsPaymentIntentSfuSettable -> userSelectableSave
+                supportsPaymentIntentSfuNotSettable -> oneTimeUse
+                else -> null
+            }
         }
-        is PaymentIntent -> {
-            isLpmLevelSetupFutureUsageSet(code)
-        }
-        is SetupIntent -> {
-            false
+    } else {
+        when {
+            supportsSetupIntent -> merchantRequestedSave
+            else -> null
         }
     }
 }

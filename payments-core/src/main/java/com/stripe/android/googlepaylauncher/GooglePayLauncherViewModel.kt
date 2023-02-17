@@ -131,27 +131,18 @@ internal class GooglePayLauncherViewModel(
         stripeIntent: StripeIntent,
         currencyCode: String
     ): GooglePayJsonFactory.TransactionInfo {
-        val mode = when (stripeIntent) {
-            is PaymentIntent -> DeferredIntent.Mode.Payment(
-                amount = stripeIntent.amount!!,
-                currency = stripeIntent.currency!!,
-            )
-            is SetupIntent -> DeferredIntent.Mode.Setup(currency = null)
-            is DeferredIntent -> stripeIntent.mode
-        }
-
-        return when (mode) {
-            is DeferredIntent.Mode.Payment -> {
+        return when (stripeIntent) {
+            is PaymentIntent -> {
                 GooglePayJsonFactory.TransactionInfo(
                     currencyCode = currencyCode,
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
                     countryCode = args.config.merchantCountryCode,
                     transactionId = stripeIntent.id,
-                    totalPrice = mode.amount.toInt(),
+                    totalPrice = stripeIntent.amount?.toInt(),
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase
                 )
             }
-            is DeferredIntent.Mode.Setup -> {
+            is SetupIntent -> {
                 GooglePayJsonFactory.TransactionInfo(
                     currencyCode = currencyCode,
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
@@ -159,6 +150,28 @@ internal class GooglePayLauncherViewModel(
                     transactionId = stripeIntent.id,
                     totalPrice = 0,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                )
+            }
+            is DeferredIntent -> {
+                GooglePayJsonFactory.TransactionInfo(
+                    currencyCode = currencyCode,
+                    totalPriceStatus = if (stripeIntent.mode is DeferredIntent.Mode.Payment) {
+                        GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final
+                    } else {
+                        GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated
+                    },
+                    countryCode = args.config.merchantCountryCode,
+                    transactionId = stripeIntent.id,
+                    totalPrice = if (stripeIntent.mode is DeferredIntent.Mode.Payment) {
+                        stripeIntent.mode.amount.toInt()
+                    } else {
+                        0
+                    },
+                    checkoutOption = if (stripeIntent.mode is DeferredIntent.Mode.Payment) {
+                        GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase
+                    } else {
+                        GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                    }
                 )
             }
         }

@@ -66,34 +66,32 @@ internal class ElementsSessionJsonParser(
         linkFundingSources: JSONArray?,
         countryCode: String
     ): StripeIntent? {
-        return (
-            paymentMethodPreference?.optJSONObject(params.type) ?: JSONObject()
-        ).let { stripeIntentJsonObject ->
+        return (paymentMethodPreference?.optJSONObject(params.type) ?: JSONObject()).let { json ->
             orderedPaymentMethodTypes?.let {
-                stripeIntentJsonObject.put(
+                json.put(
                     FIELD_PAYMENT_METHOD_TYPES,
                     orderedPaymentMethodTypes
                 )
             }
-            stripeIntentJsonObject.put(
+            json.put(
                 FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES,
                 unactivatedPaymentMethodTypes
             )
-            stripeIntentJsonObject.put(
+            json.put(
                 FIELD_LINK_FUNDING_SOURCES,
                 linkFundingSources
             )
-            stripeIntentJsonObject.put(
+            json.put(
                 FIELD_COUNTRY_CODE,
                 countryCode
             )
 
             when (params) {
                 is ElementsSessionParams.PaymentIntentType -> {
-                    PaymentIntentJsonParser().parse(stripeIntentJsonObject)
+                    PaymentIntentJsonParser().parse(json)
                 }
                 is ElementsSessionParams.SetupIntentType -> {
-                    SetupIntentJsonParser().parse(stripeIntentJsonObject)
+                    SetupIntentJsonParser().parse(json)
                 }
                 is ElementsSessionParams.DeferredIntentType -> {
                     DeferredIntentJsonParser(
@@ -101,7 +99,7 @@ internal class ElementsSessionJsonParser(
                         params = params.deferredIntentParams,
                         apiKey = apiKey,
                         timeProvider = timeProvider
-                    ).parse(stripeIntentJsonObject)
+                    ).parse(json)
                 }
             }
         }

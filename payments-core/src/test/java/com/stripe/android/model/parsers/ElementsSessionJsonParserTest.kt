@@ -8,7 +8,6 @@ import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 import org.junit.Test
 
