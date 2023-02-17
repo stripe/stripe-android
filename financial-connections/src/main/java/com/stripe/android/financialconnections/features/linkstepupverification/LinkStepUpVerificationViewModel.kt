@@ -102,6 +102,22 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
         Unit
     }.execute { copy(confirmVerification = it) }
 
+    fun onClickableTextClick(text: String) {
+        when (text) {
+            CLICKABLE_TEXT_RESEND_CODE -> onResendOtp()
+            else -> logger.error("Unknown clicked text $text")
+        }
+    }
+
+    private fun onResendOtp() = suspend {
+        val email = requireNotNull(getManifest().accountholderCustomerEmailAddress)
+        val consumerSession = requireNotNull(lookupAccount(email).consumerSession)
+        startVerification(consumerSession.clientSecret)
+        Unit
+    }.execute {
+        copy(resendOtp = it)
+    }
+
     companion object :
         MavericksViewModelFactory<LinkStepUpVerificationViewModel, LinkStepUpVerificationState> {
 
@@ -117,12 +133,15 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
                 .build()
                 .viewModel
         }
+
+        private const val CLICKABLE_TEXT_RESEND_CODE = "resend_code"
     }
 }
 
 internal data class LinkStepUpVerificationState(
     val payload: Async<Payload> = Uninitialized,
-    val confirmVerification: Async<Unit> = Uninitialized
+    val confirmVerification: Async<Unit> = Uninitialized,
+    val resendOtp: Async<Unit> = Uninitialized
 ) : MavericksState {
 
     data class Payload(

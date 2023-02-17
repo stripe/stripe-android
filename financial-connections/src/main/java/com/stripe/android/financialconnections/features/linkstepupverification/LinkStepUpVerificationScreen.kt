@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -47,6 +49,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
@@ -63,6 +66,7 @@ internal fun LinkStepUpVerificationScreen() {
         state = state.value,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
+        onClickableTextClick = viewModel::onClickableTextClick
     )
 }
 
@@ -71,6 +75,7 @@ private fun LinkStepUpVerificationContent(
     state: LinkStepUpVerificationState,
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
+    onClickableTextClick: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
@@ -83,15 +88,16 @@ private fun LinkStepUpVerificationContent(
     ) {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> LoadingContent()
-            is Success -> LinkStepUpVerificationLoaded(
-                scrollState = scrollState,
-                payload = payload(),
-                confirmVerificationAsync = state.confirmVerification
-            )
-
             is Fail -> UnclassifiedErrorContent(
                 error = payload.error,
                 onCloseFromErrorClick = onCloseFromErrorClick
+            )
+            is Success -> LinkStepUpVerificationLoaded(
+                scrollState = scrollState,
+                payload = payload(),
+                confirmVerificationAsync = state.confirmVerification,
+                resendOtpAsync = state.resendOtp,
+                onClickableTextClick = onClickableTextClick
             )
         }
     }
@@ -101,8 +107,10 @@ private fun LinkStepUpVerificationContent(
 @OptIn(ExperimentalComposeUiApi::class)
 private fun LinkStepUpVerificationLoaded(
     confirmVerificationAsync: Async<Unit>,
+    resendOtpAsync: Async<Unit>,
     scrollState: ScrollState,
     payload: Payload,
+    onClickableTextClick: (String) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     val focusRequester: FocusRequester = remember { FocusRequester() }
@@ -139,7 +147,11 @@ private fun LinkStepUpVerificationLoaded(
             FormErrorText(confirmVerificationAsync.error)
         }
         Spacer(modifier = Modifier.size(24.dp))
-        EmailSubtext(payload.email)
+        EmailSubtext(
+            email = payload.email,
+            isLoading = resendOtpAsync is Loading,
+            onClickableTextClick = onClickableTextClick
+        )
     }
 }
 
@@ -159,8 +171,15 @@ private fun ExistingEmailSection(
 }
 
 @Composable
-private fun EmailSubtext(email: String) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun EmailSubtext(
+    email: String,
+    isLoading: Boolean,
+    onClickableTextClick: (String) -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         listOf(
             TextResource.Text(email) to 1f,
             TextResource.Text("•") to null,
@@ -172,14 +191,21 @@ private fun EmailSubtext(email: String) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                    color = FinancialConnectionsTheme.colors.textSecondary,
+                    color = colors.textSecondary,
                 ),
                 annotationStyles = mapOf(
                     StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
                         .toSpanStyle()
-                        .copy(color = FinancialConnectionsTheme.colors.textBrand),
+                        .copy(color = if (isLoading) colors.textSecondary else colors.textBrand),
                 ),
-                onClickableTextClick = {},
+                onClickableTextClick = onClickableTextClick,
+            )
+        }
+        if (isLoading) {
+            CircularProgressIndicator(
+                Modifier.size(12.dp),
+                strokeWidth = 1.dp,
+                color = colors.textSecondary
             )
         }
     }
@@ -195,12 +221,12 @@ private fun Description(phoneNumber: String) {
             )
         ),
         defaultStyle = FinancialConnectionsTheme.typography.body.copy(
-            color = FinancialConnectionsTheme.colors.textSecondary
+            color = colors.textSecondary
         ),
         annotationStyles = mapOf(
             StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized
                 .toSpanStyle()
-                .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                .copy(color = colors.textSecondary),
         ),
         onClickableTextClick = {},
     )
@@ -219,7 +245,7 @@ private fun Title() {
 }
 
 @Composable
-@Preview(group = "LinkStepUpVerification Pane", name = "Entering email")
+@Preview(group = "LinkStepUpVerification Pane", name = "Canonical")
 internal fun LinkStepUpVerificationScreenPreview() {
     FinancialConnectionsPreview {
         LinkStepUpVerificationContent(
@@ -237,7 +263,34 @@ internal fun LinkStepUpVerificationScreenPreview() {
                 )
             ),
             onCloseClick = {},
-            onCloseFromErrorClick = {}
+            onCloseFromErrorClick = {},
+            onClickableTextClick = {}
+        )
+    }
+}
+
+@Composable
+@Preview(group = "LinkStepUpVerification Pane", name = "Resending code")
+internal fun LinkStepUpVerificationScreenResendingCodePreview() {
+    FinancialConnectionsPreview {
+        LinkStepUpVerificationContent(
+            state = LinkStepUpVerificationState(
+                resendOtp = Loading(),
+                payload = Success(
+                    Payload(
+                        email = "shortEmail@email.com",
+                        phoneNumber = "12345678",
+                        otpElement = OTPElement(
+                            IdentifierSpec.Generic("otp"),
+                            OTPController()
+                        ),
+                        consumerSessionClientSecret = "12345678"
+                    )
+                )
+            ),
+            onCloseClick = {},
+            onCloseFromErrorClick = {},
+            onClickableTextClick = {}
         )
     }
 }
