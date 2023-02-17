@@ -14,7 +14,7 @@ jobs:
   end-to-end-tests:
     name: End-to-end tests
     runs-on:
-      label: ubuntu-latest-4-cores
+      labels: ubuntu-latest-4-cores
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v3
@@ -30,7 +30,7 @@ jobs:
   build-paymentsheet-example-project:
     name: Build paymentsheet example project
     runs-on:
-      label: ubuntu-latest-4-cores
+      labels: ubuntu-latest-4-cores
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v3
