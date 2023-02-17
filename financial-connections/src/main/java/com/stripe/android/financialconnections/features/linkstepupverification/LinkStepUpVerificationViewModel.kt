@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
+import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
@@ -39,6 +40,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     private val selectNetworkedAccount: SelectNetworkedAccount,
     private val getCachedAccounts: GetCachedAccounts,
     private val updateLocalManifest: UpdateLocalManifest,
+    private val markLinkStepUpVerified: MarkLinkStepUpVerified,
     private val updateCachedAccounts: UpdateCachedAccounts,
     private val goNext: GoNext,
     private val logger: Logger
@@ -85,15 +87,22 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
 
     private fun onOTPEntered(otp: String) = suspend {
         val payload = requireNotNull(awaitState().payload())
+        // Confirm email.
         confirmVerification.email(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
             verificationCode = otp
         )
         val selectedAccount = getCachedAccounts().first()
+
+        // Mark session as verified.
+        markLinkStepUpVerified()
+
+        // Mark networked account as selected.
         val activeInstitution = selectNetworkedAccount(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
             selectedAccountId = selectedAccount.id
         )
+
         // Updates manifest active institution after account networked.
         updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
         // Updates cached accounts with the one selected.

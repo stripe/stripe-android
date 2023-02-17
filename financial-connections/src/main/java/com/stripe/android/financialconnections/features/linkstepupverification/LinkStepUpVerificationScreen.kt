@@ -135,7 +135,7 @@ private fun LinkStepUpVerificationLoaded(
         Spacer(modifier = Modifier.size(16.dp))
         Title()
         Spacer(modifier = Modifier.size(8.dp))
-        Description(payload.phoneNumber)
+        Description(payload.email)
         Spacer(modifier = Modifier.size(24.dp))
         ExistingEmailSection(
             focusRequester = focusRequester,
