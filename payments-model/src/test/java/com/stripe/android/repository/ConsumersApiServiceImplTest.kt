@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.VerificationType
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.header
@@ -115,6 +116,7 @@ class ConsumersApiServiceImplTest {
             locale,
             cookie,
             "android_payment_element",
+            VerificationType.SMS,
             DEFAULT_OPTIONS
         )
 
@@ -152,6 +154,7 @@ class ConsumersApiServiceImplTest {
             verificationCode = verificationCode,
             authSessionCookie = cookie,
             requestSurface = "android_payment_element",
+            type = VerificationType.SMS,
             requestOptions = DEFAULT_OPTIONS
         )
 

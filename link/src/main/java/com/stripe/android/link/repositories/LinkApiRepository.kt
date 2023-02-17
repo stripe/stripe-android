@@ -16,6 +16,7 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.VerificationType
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.withContext
@@ -96,6 +97,7 @@ internal class LinkApiRepository @Inject constructor(
                     locale = locale ?: Locale.US,
                     authSessionCookie = authSessionCookie,
                     requestSurface = REQUEST_SURFACE,
+                    type = VerificationType.SMS,
                     requestOptions = consumerPublishableKey?.let {
                         ApiRequest.Options(it)
                     } ?: ApiRequest.Options(
@@ -120,6 +122,7 @@ internal class LinkApiRepository @Inject constructor(
                     verificationCode = verificationCode,
                     authSessionCookie = authSessionCookie,
                     requestSurface = REQUEST_SURFACE,
+                    type = VerificationType.SMS,
                     requestOptions = consumerPublishableKey?.let {
                         ApiRequest.Options(it)
                     } ?: ApiRequest.Options(

@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.VerificationType
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -60,7 +61,7 @@ class NetworkingLinkVerificationViewModelTest {
     )
 
     @Test
-    fun `init - starts verification with consumer session secret`() = runTest {
+    fun `init - starts SMS verification with consumer session secret`() = runTest {
         val email = "test@test.com"
         val consumerSession = consumerSession()
         getManifestReturnsManifestWithEmail(email)
@@ -69,7 +70,7 @@ class NetworkingLinkVerificationViewModelTest {
         val viewModel = buildViewModel()
 
         val state = viewModel.awaitState()
-        verify(startVerification).invoke(consumerSession.clientSecret)
+        verify(startVerification).invoke(consumerSession.clientSecret, VerificationType.SMS)
         assertThat(state.payload()!!.consumerSessionClientSecret)
             .isEqualTo(consumerSession.clientSecret)
     }
@@ -95,7 +96,7 @@ class NetworkingLinkVerificationViewModelTest {
                 otpController.onValueChanged(i, "1")
             }
 
-            verify(confirmVerification).invoke(any(), eq("111111"))
+            verify(confirmVerification).invoke(any(), eq("111111"), eq(VerificationType.SMS))
             verify(goNext).invoke(linkVerifiedManifest.nextPane)
         }
 
@@ -120,7 +121,7 @@ class NetworkingLinkVerificationViewModelTest {
                 otpController.onValueChanged(i, "1")
             }
 
-            verify(confirmVerification).invoke(any(), eq("111111"))
+            verify(confirmVerification).invoke(any(), eq("111111"), eq(VerificationType.SMS))
             verify(goNext).invoke(LINK_ACCOUNT_PICKER)
         }
 

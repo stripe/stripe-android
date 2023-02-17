@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -47,7 +48,10 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         suspend {
             val email = requireNotNull(getManifest().accountholderCustomerEmailAddress)
             val consumerSession = requireNotNull(lookupAccount(email).consumerSession)
-            startVerification(consumerSession.clientSecret)
+            startVerification(
+                consumerSessionClientSecret = consumerSession.clientSecret,
+                type = VerificationType.SMS
+            )
             eventTracker.track(PaneLoaded(Pane.NETWORKING_LINK_VERIFICATION))
             NetworkingLinkVerificationState.Payload(
                 email = consumerSession.emailAddress,
@@ -85,6 +89,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         val payload = requireNotNull(awaitState().payload())
         confirmVerification(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
+            type = VerificationType.SMS,
             verificationCode = otp
         )
         val updatedManifest = markLinkVerified()

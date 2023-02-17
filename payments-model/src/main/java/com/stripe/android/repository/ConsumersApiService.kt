@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.executeRequestWithModelJsonParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.VerificationType
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import java.util.Locale
@@ -28,6 +29,7 @@ interface ConsumersApiService {
         locale: Locale,
         authSessionCookie: String?,
         requestSurface: String,
+        type: VerificationType,
         requestOptions: ApiRequest.Options
     ): ConsumerSession
 
@@ -36,6 +38,7 @@ interface ConsumersApiService {
         verificationCode: String,
         authSessionCookie: String?,
         requestSurface: String,
+        type: VerificationType,
         requestOptions: ApiRequest.Options
     ): ConsumerSession
 }
@@ -93,14 +96,15 @@ class ConsumersApiServiceImpl(
     }
 
     /**
-     * Triggers an SMS verification for the consumer corresponding to the given client secret.
+     * Triggers a verification for the consumer corresponding to the given client secret.
      */
     override suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         locale: Locale,
         authSessionCookie: String?,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        type: VerificationType,
+        requestOptions: ApiRequest.Options,
     ): ConsumerSession {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -113,7 +117,7 @@ class ConsumersApiServiceImpl(
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
-                    "type" to "SMS",
+                    "type" to type.value,
                     "locale" to locale.toLanguageTag()
                 ).plus(
                     authSessionCookie?.let {
@@ -136,6 +140,7 @@ class ConsumersApiServiceImpl(
         verificationCode: String,
         authSessionCookie: String?,
         requestSurface: String,
+        type: VerificationType,
         requestOptions: ApiRequest.Options
     ): ConsumerSession = executeRequestWithModelJsonParser(
         stripeErrorJsonParser = stripeErrorJsonParser,
@@ -148,7 +153,7 @@ class ConsumersApiServiceImpl(
                 "credentials" to mapOf(
                     "consumer_session_client_secret" to consumerSessionClientSecret
                 ),
-                "type" to "SMS",
+                "type" to type.value,
                 "code" to verificationCode
             ).plus(
                 authSessionCookie?.let {

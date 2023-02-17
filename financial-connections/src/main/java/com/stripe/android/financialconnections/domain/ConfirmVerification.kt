@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.VerificationType
 import javax.inject.Inject
 
 internal class ConfirmVerification @Inject constructor(
@@ -10,11 +11,13 @@ internal class ConfirmVerification @Inject constructor(
 
     suspend operator fun invoke(
         consumerSessionClientSecret: String,
-        verificationCode: String
+        verificationCode: String,
+        type: VerificationType
     ): ConsumerSession = requireNotNull(
         consumerSessionRepository.confirmConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
-            verificationCode = verificationCode
+            verificationCode = verificationCode,
+            type = type
         )
     )
 }
