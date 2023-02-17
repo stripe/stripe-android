@@ -46,7 +46,6 @@ class DeferredPaymentIntentJsonParser(
             isLiveMode = apiKey.contains("live"),
             created = timeProvider(),
             setupFutureUsage = params.setupFutureUsage,
-            deferred = true,
             amount = (params.mode as DeferredIntentParams.Mode.Payment).amount,
             currency = params.mode.currency
         )

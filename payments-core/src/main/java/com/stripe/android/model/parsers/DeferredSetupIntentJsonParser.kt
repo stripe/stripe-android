@@ -44,7 +44,6 @@ class DeferredSetupIntentJsonParser(
             created = timeProvider(),
             status = null,
             usage = params.setupFutureUsage,
-            deferred = true,
         )
     }
 
