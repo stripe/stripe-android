@@ -13,7 +13,7 @@ env:
 jobs:
   end-to-end-tests:
     name: End-to-end tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v3
@@ -28,7 +28,7 @@ jobs:
 
   build-paymentsheet-example-project:
     name: Build paymentsheet example project
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v3
