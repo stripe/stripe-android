@@ -21,8 +21,6 @@ import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAc
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
-import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
-import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -31,9 +29,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.measureTimeMillis
-import com.stripe.android.uicore.format.CurrencyFormatter
 import kotlinx.coroutines.launch
-import java.util.Locale
 import javax.inject.Inject
 
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -43,7 +39,6 @@ internal class AccountPickerViewModel @Inject constructor(
     private val selectAccounts: SelectAccounts,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
-    private val locale: Locale?,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
@@ -59,7 +54,6 @@ internal class AccountPickerViewModel @Inject constructor(
         suspend {
             val state = awaitState()
             val manifest = getManifest()
-            val activeInstitution = manifest.activeInstitution
             val activeAuthSession = requireNotNull(manifest.activeAuthSession)
             val (partnerAccountList, millis) = measureTimeMillis {
                 pollAuthorizationSessionAccounts(
@@ -75,35 +69,14 @@ internal class AccountPickerViewModel @Inject constructor(
                     )
                 )
             }
-            val accounts = partnerAccountList.data.map { account ->
-                AccountPickerState.PartnerAccountUI(
-                    account = account,
-                    institutionIcon = activeInstitution?.icon?.default,
-                    formattedBalance =
-                    if (account.balanceAmount != null && account.currency != null) {
-                        CurrencyFormatter
-                            .format(
-                                amount = account.balanceAmount.toLong(),
-                                amountCurrencyCode = account.currency,
-                                targetLocale = locale ?: Locale.getDefault()
-                            )
-                    } else {
-                        null
-                    }
-                )
-            }.sortedBy { it.account.allowSelection.not() }
+            val accounts = partnerAccountList.data.sortedBy { it.allowSelection.not() }
 
             AccountPickerState.Payload(
                 skipAccountSelection = partnerAccountList.skipAccountSelection == true ||
                     activeAuthSession.skipAccountSelection == true,
                 accounts = accounts,
                 selectionMode = if (manifest.singleAccount) SelectionMode.RADIO else SelectionMode.CHECKBOXES,
-                accessibleData = AccessibleDataCalloutModel(
-                    businessName = ConsentTextBuilder.getBusinessName(manifest),
-                    permissions = manifest.permissions,
-                    isStripeDirect = manifest.isStripeDirect ?: false,
-                    dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
-                ),
+                accessibleData = AccessibleDataCalloutModel.fromManifest(manifest),
                 singleAccount = manifest.singleAccount,
                 userSelectedSingleAccountInInstitution = manifest.singleAccount &&
                     activeAuthSession.institutionSkipAccountSelection == true &&
@@ -121,14 +94,14 @@ internal class AccountPickerViewModel @Inject constructor(
             when {
                 // If account selection has to be skipped, submit all selectable accounts.
                 payload.skipAccountSelection -> submitAccounts(
-                    selectedIds = payload.selectableAccounts.map { it.account.id }.toSet(),
+                    selectedIds = payload.selectableAccounts.map { it.id }.toSet(),
                     updateLocalCache = false
                 )
                 // the user saw an OAuth account selection screen and selected
                 // just one to send back in a single-account context. treat these as if
                 // we had done account selection, and submit.
                 payload.userSelectedSingleAccountInInstitution -> submitAccounts(
-                    selectedIds = setOf(payload.accounts.first().account.id),
+                    selectedIds = setOf(payload.accounts.first().id),
                     updateLocalCache = true
                 )
             }
@@ -225,7 +198,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 } else {
                     // select all accounts
                     setState {
-                        val ids = payload.selectableAccounts.map { it.account.id }.toSet()
+                        val ids = payload.selectableAccounts.map { it.id }.toSet()
                         copy(selectedIds = ids)
                     }
                 }
@@ -277,7 +250,7 @@ internal data class AccountPickerState(
 
     data class Payload(
         val skipAccountSelection: Boolean,
-        val accounts: List<PartnerAccountUI>,
+        val accounts: List<PartnerAccount>,
         val selectionMode: SelectionMode,
         val accessibleData: AccessibleDataCalloutModel,
         val singleAccount: Boolean,
@@ -287,7 +260,7 @@ internal data class AccountPickerState(
     ) {
 
         val selectableAccounts
-            get() = accounts.filter { it.account.allowSelection }
+            get() = accounts.filter { it.allowSelection }
 
         val shouldSkipPane: Boolean
             get() = skipAccountSelection || userSelectedSingleAccountInInstitution
@@ -309,12 +282,6 @@ internal data class AccountPickerState(
                 )
             }
     }
-
-    data class PartnerAccountUI(
-        val account: PartnerAccount,
-        val institutionIcon: String?,
-        val formattedBalance: String?,
-    )
 
     enum class SelectionMode {
         RADIO, CHECKBOXES

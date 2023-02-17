@@ -42,10 +42,11 @@ internal fun Pane.toNavigationCommand(
     Pane.NETWORKING_LINK_SIGNUP_PANE -> NavigationDirections.networkingLinkSignup
     Pane.NETWORKING_LINK_LOGIN_WARMUP -> NavigationDirections.networkingLinkLoginWarmup
     Pane.NETWORKING_LINK_VERIFICATION -> NavigationDirections.networkingLinkVerification
+    Pane.LINK_ACCOUNT_PICKER -> NavigationDirections.linkAccountPicker
     Pane.AUTH_OPTIONS,
     Pane.LINK_CONSENT,
+    Pane.LINK_STEP_UP_VERIFICATION,
     Pane.LINK_LOGIN,
-    Pane.LINK_ACCOUNT_PICKER,
     Pane.UNEXPECTED_ERROR -> {
         TODO("Unimplemented navigation command: ${this.value}")
     }
