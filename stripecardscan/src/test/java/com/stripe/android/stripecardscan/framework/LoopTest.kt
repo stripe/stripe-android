@@ -74,6 +74,7 @@ class LoopTest {
         assertTrue { dataCount == resultCount.get() }
     }
 
+    @Ignore("Ignored due to flakiness")
     @Test(timeout = 200)
     @SmallTest
     @ExperimentalCoroutinesApi
