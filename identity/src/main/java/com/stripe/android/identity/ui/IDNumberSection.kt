@@ -48,82 +48,52 @@ internal fun IDNumberSection(
 ) {
     val controller = remember {
         DropdownFieldController(
-            CountryConfig(
-                onlyShowCountryCodes = idNumberCountries.map { it.code.value }
-                    .toSet()
-            )
+            CountryConfig(onlyShowCountryCodes = idNumberCountries.map { it.code.value }.toSet())
         )
     }
-    val countryElement = remember {
-        CountryElement(
-            IdentifierSpec.Country,
-            controller
-        )
-    }
+    val countryElement = remember { CountryElement(IdentifierSpec.Country, controller) }
     val usElement = remember {
         SimpleTextElement(
             identifier = US_SPEC,
-            controller = SimpleTextFieldController(
-                textFieldConfig = USIDConfig
-            )
+            controller = SimpleTextFieldController(textFieldConfig = USIDConfig)
         )
     }
-
     val usId by usElement.controller.fieldValue.collectAsState("")
-
     val sgElement = remember {
         SimpleTextElement(
             identifier = SINGAPORE_SPEC,
-            controller = SimpleTextFieldController(
-                textFieldConfig = SGIDConfig
-            )
+            controller = SimpleTextFieldController(textFieldConfig = SGIDConfig)
         )
     }
-
     val sgId by sgElement.controller.fieldValue.collectAsState("")
-
     val brElement = remember {
         SimpleTextElement(
             identifier = BRAZIL_SPEC,
-            controller = SimpleTextFieldController(
-                textFieldConfig = BRIDConfig
-            )
+            controller = SimpleTextFieldController(textFieldConfig = BRIDConfig)
         )
     }
-
     val brId by brElement.controller.fieldValue.collectAsState("")
-
     val selectedCountryCode by controller.rawFieldValue.collectAsState(idNumberCountries[0].code.value)
-
     val idNumberParam: IdNumberParam? by remember(usId, sgId, brId) {
         derivedStateOf {
             when (selectedCountryCode) {
                 US_CODE -> {
                     if (usId.length == 4) {
-                        IdNumberParam(
-                            country = US_CODE,
-                            partialValue = usId
-                        )
+                        IdNumberParam(country = US_CODE, partialValue = usId)
                     } else {
                         null
                     }
                 }
                 SINGAPORE_CODE -> {
                     if (sgId.isNotBlank()) {
-                        IdNumberParam(
-                            country = SINGAPORE_CODE,
-                            value = sgId
-                        )
+                        IdNumberParam(country = SINGAPORE_CODE, value = sgId)
                     } else {
                         null
                     }
                 }
                 BRAZIL_CODE -> {
                     if (brId.length == 11) {
-                        IdNumberParam(
-                            country = BRAZIL_CODE,
-                            value = brId
-                        )
+                        IdNumberParam(country = BRAZIL_CODE, value = brId)
                     } else {
                         null
                     }
@@ -134,7 +104,33 @@ internal fun IDNumberSection(
             }
         }
     }
+    IDNumberContent(
+        navController = navController,
+        countryElement = countryElement,
+        usElement = usElement,
+        sgElement = sgElement,
+        brElement = brElement,
+        idNumberParam = idNumberParam,
+        selectedCountryCode = selectedCountryCode,
+        isStandalone = isStandalone,
+        countryNotListedText = countryNotListedText,
+        onIdNumberCollected = onIdNumberCollected
+    )
+}
 
+@Composable
+private fun IDNumberContent(
+    navController: NavController,
+    countryElement: CountryElement,
+    usElement: SimpleTextElement,
+    sgElement: SimpleTextElement,
+    brElement: SimpleTextElement,
+    idNumberParam: IdNumberParam?,
+    selectedCountryCode: String?,
+    isStandalone: Boolean,
+    countryNotListedText: String,
+    onIdNumberCollected: (Resource<IdNumberParam>) -> Unit
+) {
     val idNumberSectionElement = remember(selectedCountryCode) {
         SectionElement.wrap(
             sectionFieldElements = listOf(
@@ -151,7 +147,6 @@ internal fun IDNumberSection(
             label = R.string.country_of_id_number
         )
     }
-
     LaunchedEffect(idNumberParam) {
         onIdNumberCollected(
             idNumberParam?.let {

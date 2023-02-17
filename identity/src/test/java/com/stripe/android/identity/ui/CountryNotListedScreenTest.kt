@@ -125,7 +125,7 @@ class CountryNotListedScreenTest {
                     ADDRESS_FROM_OTHER_COUNTRY_TEXT_BUTTON_TEXT
                 }
             )
-            onNodeWithTag(COUNTRY_NOT_LISTED_CANCEL_BUTTON_TAG).assertTextEquals(CANCEL_BUTTON_TEXT)
+            onNodeWithTag(COUNTRY_NOT_LISTED_CANCEL_BUTTON_TAG).assertTextEquals(CANCEL_BUTTON_TEXT.uppercase())
 
             with(composeTestRule, clickAction)
         }

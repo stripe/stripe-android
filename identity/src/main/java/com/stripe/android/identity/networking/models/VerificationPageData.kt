@@ -60,19 +60,8 @@ internal data class VerificationPageData(
         fun VerificationPageData.isMissingSelfie() =
             requirements.missings?.contains(Requirement.FACE) == true
 
-        private fun VerificationPageData.isMissingIdNumber() =
-            requirements.missings?.contains(Requirement.IDNUMBER) == true
-
-        private fun VerificationPageData.isMissingDob() =
-            requirements.missings?.contains(Requirement.DOB) == true
-
-        private fun VerificationPageData.isMissingName() =
-            requirements.missings?.contains(Requirement.NAME) == true
-
-        private fun VerificationPageData.isMissingAddress() =
-            requirements.missings?.contains(Requirement.ADDRESS) == true
-
-        fun VerificationPageData.isMissingIndividualRequirements() = isMissingName() ||
-            isMissingDob() || isMissingAddress() || isMissingIdNumber()
+        fun VerificationPageData.isMissingIndividualRequirements() = requirements.missings?.intersect(
+            listOf(Requirement.IDNUMBER, Requirement.DOB, Requirement.NAME, Requirement.ADDRESS)
+        )?.isNotEmpty() == true
     }
 }

@@ -22,6 +22,7 @@ import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
+import com.stripe.android.uicore.forms.FormFieldEntry
 
 /**
  * Section to collect User's Address.
@@ -50,23 +51,19 @@ internal fun AddressSection(
     val currentAddress: RequiredInternationalAddress? by remember {
         derivedStateOf {
             val addressMap = formFieldValue.toMap()
-            addressMap[IdentifierSpec.Line1]?.value?.takeIf { it.isNotEmpty() }?.let { line1 ->
-                addressMap[IdentifierSpec.Country]?.value?.takeIf { it.isNotEmpty() }
-                    ?.let { country ->
-                        RequiredInternationalAddress(
-                            line1 = line1,
-                            line2 = addressMap[IdentifierSpec.Line2]?.value.takeIf {
-                                it?.isNotEmpty() == true
-                            },
-                            city = addressMap[IdentifierSpec.City]?.value.takeIf {
-                                it?.isNotEmpty() == true
-                            },
-                            postalCode = addressMap[IdentifierSpec.PostalCode]?.value.takeIf {
-                                it?.isNotEmpty() == true
-                            },
-                            country = country,
-                        )
-                    }
+            if (isValidAddress(addressMap)) {
+                RequiredInternationalAddress(
+                    line1 = addressMap[IdentifierSpec.Line1]?.value!!,
+                    line2 = addressMap[IdentifierSpec.Line2]?.value.takeIf {
+                        it?.isNotEmpty() == true
+                    },
+                    city = addressMap[IdentifierSpec.City]?.value!!,
+                    postalCode = addressMap[IdentifierSpec.PostalCode]?.value!!,
+                    state = addressMap[IdentifierSpec.State]?.value!!,
+                    country = addressMap[IdentifierSpec.Country]?.value!!,
+                )
+            } else {
+                null
             }
         }
     }
@@ -80,6 +77,33 @@ internal fun AddressSection(
             }
         )
     }
+    AddressSectionContent(
+        navController = navController,
+        isStandalone = isStandalone,
+        addressElement = addressElement,
+        addressNotListedText = addressNotListedText
+    )
+}
+
+private fun isValidAddress(addressMap: Map<IdentifierSpec, FormFieldEntry>): Boolean {
+    return listOf(
+        IdentifierSpec.Line1,
+        IdentifierSpec.City,
+        IdentifierSpec.PostalCode,
+        IdentifierSpec.State,
+        IdentifierSpec.Country
+    ).firstOrNull {
+        addressMap[it]?.value.isNullOrBlank()
+    } == null
+}
+
+@Composable
+private fun AddressSectionContent(
+    navController: NavController,
+    isStandalone: Boolean,
+    addressElement: AddressElement,
+    addressNotListedText: String
+) {
     SectionElementUI(
         enabled = true,
         element = SectionElement.wrap(addressElement, label = R.string.address_label_address),

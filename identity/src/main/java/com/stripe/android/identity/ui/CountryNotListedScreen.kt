@@ -31,6 +31,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.navigateTo
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentCountryNotListedPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 @Composable
@@ -59,59 +60,12 @@ internal fun CountryNotListedScreen(
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
             ) {
-                Box(
-                    modifier = Modifier
-                        .width(32.dp)
-                        .height(32.dp)
-                        .clip(RoundedCornerShape(10.dp)),
-                    contentAlignment = Alignment.Center
-
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_exclamation),
-                        modifier = Modifier
-                            .width(26.dp)
-                            .height(26.dp),
-                        contentDescription = stringResource(id = R.string.description_plus)
-                    )
-                }
-                Text(
-                    text = countryNotListedPage.title,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            vertical = dimensionResource(id = R.dimen.item_vertical_margin)
-                        )
-                        .testTag(COUNTRY_NOT_LISTED_TITLE_TAG),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                BodyContent(
+                    navController = navController,
+                    countryNotListedPage = countryNotListedPage,
+                    isMissingID = isMissingID,
+                    isFromStandaloneIndividual = isFromStandaloneIndividual
                 )
-
-                Text(
-                    text = countryNotListedPage.body,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            vertical = dimensionResource(id = R.dimen.item_vertical_margin)
-                        )
-                        .testTag(COUNTRY_NOT_LISTED_BODY_TAG),
-                )
-                TextButton(
-                    modifier = Modifier.testTag(COUNTRY_NOT_LISTED_OTHER_COUNTRY_TAG),
-                    onClick = {
-                        navController.navigateTo(IndividualDestination(isFromStandaloneIndividual))
-                    }
-                ) {
-                    Text(
-                        text = if (isMissingID) {
-                            countryNotListedPage
-                                .idFromOtherCountryTextButtonText
-                        } else {
-                            countryNotListedPage
-                                .addressFromOtherCountryTextButtonText
-                        }
-                    )
-                }
             }
             Button(
                 onClick = {
@@ -123,9 +77,71 @@ internal fun CountryNotListedScreen(
                     .fillMaxWidth()
                     .testTag(COUNTRY_NOT_LISTED_CANCEL_BUTTON_TAG)
             ) {
-                Text(text = countryNotListedPage.cancelButtonText)
+                Text(text = countryNotListedPage.cancelButtonText.uppercase())
             }
         }
+    }
+}
+
+@Composable
+private fun BodyContent(
+    navController: NavController,
+    countryNotListedPage: VerificationPageStaticContentCountryNotListedPage,
+    isMissingID: Boolean,
+    isFromStandaloneIndividual: Boolean
+) {
+    Box(
+        modifier = Modifier
+            .width(32.dp)
+            .height(32.dp)
+            .clip(RoundedCornerShape(10.dp)),
+        contentAlignment = Alignment.Center
+
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.ic_exclamation),
+            modifier = Modifier
+                .width(26.dp)
+                .height(26.dp),
+            contentDescription = stringResource(id = R.string.description_plus)
+        )
+    }
+    Text(
+        text = countryNotListedPage.title,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+            )
+            .testTag(COUNTRY_NOT_LISTED_TITLE_TAG),
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold
+    )
+
+    Text(
+        text = countryNotListedPage.body,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+            )
+            .testTag(COUNTRY_NOT_LISTED_BODY_TAG),
+    )
+    TextButton(
+        modifier = Modifier.testTag(COUNTRY_NOT_LISTED_OTHER_COUNTRY_TAG),
+        onClick = {
+            navController.navigateTo(IndividualDestination(isFromStandaloneIndividual))
+        }
+    ) {
+        Text(
+            text = if (isMissingID) {
+                countryNotListedPage
+                    .idFromOtherCountryTextButtonText
+            } else {
+                countryNotListedPage
+                    .addressFromOtherCountryTextButtonText
+            }
+        )
     }
 }
 

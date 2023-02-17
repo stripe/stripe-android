@@ -65,12 +65,8 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.clearData
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.collectedRequirements
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.mergeWith
-import com.stripe.android.identity.networking.models.DobParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
-import com.stripe.android.identity.networking.models.IdNumberParam
-import com.stripe.android.identity.networking.models.NameParam
-import com.stripe.android.identity.networking.models.RequiredInternationalAddress
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.Requirement.Companion.INDIVIDUAL_REQUIREMENT_SET
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -87,6 +83,7 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
 import com.stripe.android.uicore.address.AddressRepository
@@ -1274,20 +1271,22 @@ internal class IdentityViewModel constructor(
     }
 
     suspend fun postVerificationPageDataForIndividual(
-        collectedName: Resource<NameParam>,
-        collectedDob: Resource<DobParam>,
-        collectedIdNumber: Resource<IdNumberParam>,
-        collectedAddress: Resource<RequiredInternationalAddress>,
+//        collectedName: Resource<NameParam>,
+//        collectedDob: Resource<DobParam>,
+//        collectedIdNumber: Resource<IdNumberParam>,
+//        collectedAddress: Resource<RequiredInternationalAddress>,
+        individualCollectedStates: IndividualCollectedStates,
         navController: NavController
     ) {
         postVerificationPageDataAndMaybeNavigate(
             navController,
-            CollectedDataParam(
-                name = if (collectedName.status == Status.SUCCESS) collectedName.data else null,
-                dob = if (collectedDob.status == Status.SUCCESS) collectedDob.data else null,
-                idNumber = if (collectedIdNumber.status == Status.SUCCESS) collectedIdNumber.data else null,
-                address = if (collectedAddress.status == Status.SUCCESS) collectedAddress.data else null,
-            ),
+            individualCollectedStates.toCollectedDataParam(),
+//            CollectedDataParam(
+//                name = if (collectedName.status == Status.SUCCESS) collectedName.data else null,
+//                dob = if (collectedDob.status == Status.SUCCESS) collectedDob.data else null,
+//                idNumber = if (collectedIdNumber.status == Status.SUCCESS) collectedIdNumber.data else null,
+//                address = if (collectedAddress.status == Status.SUCCESS) collectedAddress.data else null,
+//            ),
             fromRoute = IndividualDestination.ROUTE.route,
         ) {
             submitAndNavigate(

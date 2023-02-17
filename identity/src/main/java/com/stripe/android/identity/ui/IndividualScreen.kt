@@ -9,27 +9,26 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.stripe.android.identity.R
-import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DobParam
 import com.stripe.android.identity.networking.models.IdNumberParam
 import com.stripe.android.identity.networking.models.NameParam
 import com.stripe.android.identity.networking.models.RequiredInternationalAddress
 import com.stripe.android.identity.networking.models.Requirement
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentIndividualPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
 
@@ -49,45 +48,25 @@ internal fun IndividualScreen(
     isStandalone: Boolean,
     identityViewModel: IdentityViewModel
 ) {
-    val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
-    val context = LocalContext.current
     CheckVerificationPageAndCompose(
-        verificationPageResource = verificationPageState,
-        onError = {
-            identityViewModel.errorCause.postValue(it)
-            navController.navigateToErrorScreenWithDefaultValues(context)
-        }
+        identityViewModel = identityViewModel,
+        navController = navController
     ) { verificationPage ->
         val missing by remember {
             mutableStateOf(identityViewModel.missingRequirements.value)
         }
         val individualPage = requireNotNull(verificationPage.individual)
         val coroutineScope = rememberCoroutineScope()
-
-        var collectedName: Resource<NameParam> by remember {
+        val collectedStates: IndividualCollectedStates by remember {
             mutableStateOf(
-                requirementResource(missing, Requirement.NAME)
+                IndividualCollectedStates(
+                    name = requirementResource(missing, Requirement.NAME),
+                    dob = requirementResource(missing, Requirement.DOB),
+                    idNumber = requirementResource(missing, Requirement.IDNUMBER),
+                    address = requirementResource(missing, Requirement.ADDRESS)
+                )
             )
         }
-
-        var collectedDob: Resource<DobParam> by remember {
-            mutableStateOf(
-                requirementResource(missing, Requirement.DOB)
-            )
-        }
-
-        var collectedIdNumber: Resource<IdNumberParam> by remember {
-            mutableStateOf(
-                requirementResource(missing, Requirement.IDNUMBER)
-            )
-        }
-
-        var collectedAddress: Resource<RequiredInternationalAddress> by remember {
-            mutableStateOf(
-                requirementResource(missing, Requirement.ADDRESS)
-            )
-        }
-
         var submitButtonState: LoadingButtonState by remember {
             mutableStateOf(LoadingButtonState.Disabled)
         }
@@ -107,75 +86,15 @@ internal fun IndividualScreen(
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
             ) {
-                Text(
-                    text = individualPage.title,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.testTag(INDIVIDUAL_TITLE_TAG)
-                )
-                if (missing.contains(Requirement.NAME)) {
-                    NameSection {
-                        collectedName = it
-                        submitButtonState = updateSubmitButtonState(
-                            listOf(
-                                collectedDob,
-                                collectedAddress,
-                                collectedName,
-                                collectedIdNumber
-                            )
-                        )
-                    }
-                }
-                if (missing.contains(Requirement.DOB)) {
-                    DOBSection {
-                        collectedDob = it
-                        submitButtonState = updateSubmitButtonState(
-                            listOf(
-                                collectedDob,
-                                collectedAddress,
-                                collectedName,
-                                collectedIdNumber
-                            )
-                        )
-                    }
-                }
-                if (missing.contains(Requirement.IDNUMBER)) {
-                    IDNumberSection(
-                        individualPage.idNumberCountries,
-                        individualPage.idNumberCountryNotListedTextButtonText,
-                        isStandalone,
-                        navController
-                    ) {
-                        collectedIdNumber = it
-
-                        submitButtonState = updateSubmitButtonState(
-                            listOf(
-                                collectedDob,
-                                collectedAddress,
-                                collectedName,
-                                collectedIdNumber
-                            )
-                        )
-                    }
-                }
-                if (missing.contains(Requirement.ADDRESS)) {
-                    AddressSection(
-                        identityViewModel,
-                        individualPage.addressCountries,
-                        individualPage.addressCountryNotListedTextButtonText,
-                        isStandalone,
-                        navController
-                    ) {
-                        collectedAddress = it
-                        submitButtonState = updateSubmitButtonState(
-                            listOf(
-                                collectedDob,
-                                collectedAddress,
-                                collectedName,
-                                collectedIdNumber
-                            )
-                        )
-                    }
+                IndividualScreenBodyContent(
+                    isStandalone = isStandalone,
+                    navController = navController,
+                    identityViewModel = identityViewModel,
+                    individualPage = individualPage,
+                    missing = missing,
+                    collectedStates = collectedStates,
+                ) { newLoadingButtonState ->
+                    submitButtonState = newLoadingButtonState
                 }
             }
 
@@ -189,10 +108,7 @@ internal fun IndividualScreen(
                 // for all states that's not Idle
                 coroutineScope.launch {
                     identityViewModel.postVerificationPageDataForIndividual(
-                        collectedName,
-                        collectedDob,
-                        collectedIdNumber,
-                        collectedAddress,
+                        collectedStates,
                         navController
                     )
                 }
@@ -201,9 +117,102 @@ internal fun IndividualScreen(
     }
 }
 
+@Composable
+private fun IndividualScreenBodyContent(
+    isStandalone: Boolean,
+    navController: NavController,
+    identityViewModel: IdentityViewModel,
+    individualPage: VerificationPageStaticContentIndividualPage,
+    missing: Set<Requirement>,
+    collectedStates: IndividualCollectedStates,
+    onUpdateLoadingButtonState: (LoadingButtonState) -> Unit
+) {
+    Text(
+        text = individualPage.title,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.testTag(INDIVIDUAL_TITLE_TAG)
+    )
+    if (missing.contains(Requirement.NAME)) {
+        NameSection {
+            collectedStates.name = it
+            onUpdateLoadingButtonState(
+                updateSubmitButtonState(
+                    collectedStates
+                )
+            )
+        }
+    }
+    if (missing.contains(Requirement.DOB)) {
+        DOBSection {
+            collectedStates.dob = it
+            onUpdateLoadingButtonState(
+                updateSubmitButtonState(
+                    collectedStates
+                )
+            )
+        }
+    }
+    if (missing.contains(Requirement.IDNUMBER)) {
+        IDNumberSection(
+            individualPage.idNumberCountries,
+            individualPage.idNumberCountryNotListedTextButtonText,
+            isStandalone,
+            navController
+        ) {
+            collectedStates.idNumber = it
+            onUpdateLoadingButtonState(
+                updateSubmitButtonState(
+                    collectedStates
+                )
+            )
+        }
+    }
+    if (missing.contains(Requirement.ADDRESS)) {
+        AddressSection(
+            identityViewModel,
+            individualPage.addressCountries,
+            individualPage.addressCountryNotListedTextButtonText,
+            isStandalone,
+            navController
+        ) {
+            collectedStates.address = it
+            onUpdateLoadingButtonState(
+                updateSubmitButtonState(
+                    collectedStates
+                )
+            )
+        }
+    }
+}
+
+internal data class IndividualCollectedStates(
+    var name: Resource<NameParam>,
+    var dob: Resource<DobParam>,
+    var idNumber: Resource<IdNumberParam>,
+    var address: Resource<RequiredInternationalAddress>
+) {
+    fun allStates() = listOf(name, dob, idNumber, address)
+    fun toCollectedDataParam() = CollectedDataParam(
+        name = if (name.status == Status.SUCCESS) name.data else null,
+        dob = if (dob.status == Status.SUCCESS) dob.data else null,
+        idNumber = if (idNumber.status == Status.SUCCESS) idNumber.data else null,
+        address = if (address.status == Status.SUCCESS) address.data else null
+    )
+}
+
 // Disable submit button if there is still status loading or error
 private fun updateSubmitButtonState(requirements: List<Resource<Parcelable>>) =
     requirements.firstOrNull {
+        it.status == Status.LOADING || it.status == Status.ERROR
+    }?.let {
+        LoadingButtonState.Disabled
+    } ?: run {
+        LoadingButtonState.Idle
+    }
+
+private fun updateSubmitButtonState(collectedStates: IndividualCollectedStates) =
+    collectedStates.allStates().firstOrNull {
         it.status == Status.LOADING || it.status == Status.ERROR
     }?.let {
         LoadingButtonState.Disabled

@@ -30,6 +30,7 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_INDIVIDUAL
 import com.stripe.android.identity.injection.DaggerIdentityActivityFallbackComponent
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
 import com.stripe.android.identity.navigation.ConfirmationDestination
@@ -329,16 +330,10 @@ internal class IdentityActivity :
             }
             when (destination?.route) {
                 ConsentDestination.ROUTE.route -> {
-                    identityViewModel.sendAnalyticsRequest(
-                        identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
-                            isFromFallbackUrl = false,
-                            lastScreenName = SCREEN_NAME_CONSENT,
-                            requireSelfie =
-                            identityViewModel.verificationPage.value?.data?.requireSelfie()
-                        )
-                    )
-                    verificationFlowFinishable.finishWithResult(
-                        VerificationFlowResult.Canceled
+                    finishWithCancelResult(
+                        identityViewModel,
+                        verificationFlowFinishable,
+                        SCREEN_NAME_CONSENT
                     )
                 }
                 ConfirmationDestination.ROUTE.route -> {
@@ -372,15 +367,10 @@ internal class IdentityActivity :
                 }
                 IndividualDestination.ROUTE.route -> {
                     if (args?.getBoolean(ARG_STANDALONE, false) == true) {
-                        identityViewModel.sendAnalyticsRequest(
-                            identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
-                                isFromFallbackUrl = false,
-                                lastScreenName = SCREEN_NAME_CONSENT,
-                                requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
-                            )
-                        )
-                        verificationFlowFinishable.finishWithResult(
-                            VerificationFlowResult.Canceled
+                        finishWithCancelResult(
+                            identityViewModel,
+                            verificationFlowFinishable,
+                            SCREEN_NAME_INDIVIDUAL
                         )
                     } else {
                         navController.clearDataAndNavigateUp(identityViewModel)
@@ -390,6 +380,23 @@ internal class IdentityActivity :
                     navController.clearDataAndNavigateUp(identityViewModel)
                 }
             }
+        }
+
+        private fun finishWithCancelResult(
+            identityViewModel: IdentityViewModel,
+            verificationFlowFinishable: VerificationFlowFinishable,
+            lastScreeName: String
+        ) {
+            identityViewModel.sendAnalyticsRequest(
+                identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
+                    isFromFallbackUrl = false,
+                    lastScreenName = lastScreeName,
+                    requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
+                )
+            )
+            verificationFlowFinishable.finishWithResult(
+                VerificationFlowResult.Canceled
+            )
         }
     }
 }
