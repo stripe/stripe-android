@@ -46,6 +46,9 @@ private val LinkButtonHorizontalPadding = 10.dp
 private val LinkButtonShape = RoundedCornerShape(22.dp)
 private val LinkButtonEmailShape = RoundedCornerShape(16.dp) // Button corner radius - padding
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val LinkButtonTestTag = "LinkButtonTestTag"
+
 @Preview
 @Composable
 private fun LinkButton() {
@@ -72,7 +75,7 @@ fun LinkButton(
                 onClick = onClick,
                 modifier = modifier
                     .clip(LinkButtonShape)
-                    .testTag("link-button"),
+                    .testTag(LinkButtonTestTag),
                 enabled = enabled,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = LinkButtonShape,

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.animation.LayoutTransition
 import android.content.Context
 import android.os.Build
 import android.view.Gravity
@@ -36,6 +37,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -222,13 +224,13 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity {
             composeTestRule
-                .onNodeWithTag("link-button")
+                .onNodeWithTag(LinkButtonTestTag)
                 .assertIsEnabled()
 
             viewModel.toggleEditing()
 
             composeTestRule
-                .onNodeWithTag("link-button")
+                .onNodeWithTag(LinkButtonTestTag)
                 .assertIsNotEnabled()
         }
     }
@@ -240,13 +242,13 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity { activity ->
             composeTestRule
-                .onNodeWithTag("link-button")
+                .onNodeWithTag(LinkButtonTestTag)
                 .assertIsEnabled()
 
             activity.viewBinding.buyButton.callOnClick()
 
             composeTestRule
-                .onNodeWithTag("link-button")
+                .onNodeWithTag(LinkButtonTestTag)
                 .assertIsNotEnabled()
         }
     }
@@ -309,7 +311,7 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel(isLinkAvailable = true)
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             val error = "some error"
             composeTestRule
                 .onNodeWithText(error)
@@ -322,7 +324,7 @@ internal class PaymentSheetActivityTest {
                 .assertExists()
 
             composeTestRule
-                .onNodeWithTag("link-button")
+                .onNodeWithTag(LinkButtonTestTag)
                 .performClick()
 
             composeTestRule
@@ -835,14 +837,11 @@ internal class PaymentSheetActivityTest {
     fun `notes visibility is visible`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
-            viewModel.updateBelowButtonText(
-                context.getString(
-                    R.string.stripe_paymentsheet_payment_method_us_bank_account
-                )
-            )
+            val text = context.getString(R.string.stripe_paymentsheet_payment_method_us_bank_account)
+            viewModel.updateBelowButtonText(text)
 
             composeTestRule
-                .onNodeWithTag("notes")
+                .onNodeWithText(text)
                 .assertIsDisplayed()
         }
     }
@@ -851,32 +850,33 @@ internal class PaymentSheetActivityTest {
     fun `notes visibility is gone`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity {
+            val text = "some text"
+
+            viewModel.updateBelowButtonText(text)
+
+            composeTestRule
+                .onNodeWithText(text)
+                .assertIsDisplayed()
+
             viewModel.updateBelowButtonText(null)
 
             composeTestRule
-                .onNodeWithTag("notes")
+                .onNodeWithText(text)
                 .assertDoesNotExist()
         }
     }
 
-//    @Test
-//    fun `verify animation is enabled for layout transition changes`() {
-//        val scenario = activityScenario()
-//        scenario.launch(intent).onActivity { activity ->
-//            assertThat(
-//                activity.viewBinding.bottomSheet.layoutTransition.isTransitionTypeEnabled(
-//                    LayoutTransition.CHANGING
-//                )
-//            ).isTrue()
-//
-//            assertThat(
-//                activity.viewBinding.fragmentContainerParent.layoutTransition
-//                    .isTransitionTypeEnabled(
-//                        LayoutTransition.CHANGING
-//                    )
-//            ).isTrue()
-//        }
-//    }
+    @Test
+    fun `verify animation is enabled for layout transition changes`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            assertThat(
+                activity.viewBinding.bottomSheet.layoutTransition.isTransitionTypeEnabled(
+                    LayoutTransition.CHANGING
+                )
+            ).isTrue()
+        }
+    }
 
     @Test
     fun `Handles missing arguments correctly`() {

@@ -18,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -34,19 +33,6 @@ import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-private fun DismissKeyboardOnProcessing(viewModel: PaymentSheetViewModel) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-
-    val processing by viewModel.processing.collectAsState()
-    if (processing) {
-        LaunchedEffect(Unit) {
-            keyboardController?.hide()
-        }
-    }
-}
 
 @Composable
 internal fun PaymentSheetScreen(
@@ -82,6 +68,19 @@ internal fun PaymentSheetScreen(
                 viewModel = viewModel,
                 modifier = modifier.verticalScroll(scrollState),
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun DismissKeyboardOnProcessing(viewModel: PaymentSheetViewModel) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    val processing by viewModel.processing.collectAsState()
+    if (processing) {
+        LaunchedEffect(Unit) {
+            keyboardController?.hide()
         }
     }
 }
@@ -147,7 +146,6 @@ internal fun PaymentSheetScreenContent(
                 html = text,
                 color = MaterialTheme.stripeColors.subtitle,
                 style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
-                modifier = Modifier.testTag("notes"),
             )
         }
     }
