@@ -47,13 +47,21 @@ internal data class VerificationPageData(
         fun VerificationPageData.hasError() = requirements.errors.isNotEmpty()
         fun VerificationPageData.isMissingConsent() =
             requirements.missings?.contains(Requirement.BIOMETRICCONSENT) == true
+
         fun VerificationPageData.isMissingDocType() =
             requirements.missings?.contains(Requirement.IDDOCUMENTTYPE) == true
+
         fun VerificationPageData.isMissingFront() =
             requirements.missings?.contains(Requirement.IDDOCUMENTFRONT) == true
+
         fun VerificationPageData.isMissingBack() =
             requirements.missings?.contains(Requirement.IDDOCUMENTBACK) == true
+
         fun VerificationPageData.isMissingSelfie() =
             requirements.missings?.contains(Requirement.FACE) == true
+
+        fun VerificationPageData.isMissingIndividualRequirements() = requirements.missings?.intersect(
+            listOf(Requirement.IDNUMBER, Requirement.DOB, Requirement.NAME, Requirement.ADDRESS)
+        )?.isNotEmpty() == true
     }
 }

@@ -89,6 +89,7 @@ internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityVie
         if (DOCUMENT_UPLOAD_ROUTES.contains(currentEntryRoute)) {
             identityViewModel.clearUploadedData()
         }
+
         currentEntryRoute.routeToRequirement().forEach(identityViewModel::clearCollectedData)
     }
 

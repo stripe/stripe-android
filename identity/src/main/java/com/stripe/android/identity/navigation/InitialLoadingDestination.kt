@@ -1,11 +1,10 @@
 package com.stripe.android.identity.navigation
 
-internal object ConsentDestination : IdentityTopLevelDestination() {
-    const val CONSENT = "Consent"
+internal object InitialLoadingDestination : IdentityTopLevelDestination() {
+    private const val LOADING = "Loading"
     val ROUTE = object : DestinationRoute() {
-        override val routeBase = CONSENT
+        override val routeBase = LOADING
     }
-
     override val destinationRoute = ROUTE
     override val routeWithArgs = destinationRoute.route
 }
