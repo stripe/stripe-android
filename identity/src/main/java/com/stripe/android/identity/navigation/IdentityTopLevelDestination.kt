@@ -35,10 +35,15 @@ internal abstract class IdentityTopLevelDestination(
     abstract val destinationRoute: DestinationRoute
 
     /**
-     * Route with arguments, filled with actual toString value of arguments as follows:
+     * Route with arguments,
+     * default value should be a string without any arguments:
+     *   routeBase
+     * overridden value should fill with actual toString value of arguments as follows:
      *   routeBase?argName1=arg1StringValue&argName2=arg2StringValue
+     *
      */
-    abstract val routeWithArgs: String
+    open val routeWithArgs: String
+        get() = destinationRoute.route
 }
 
 internal fun String.toRouteBase() = substringBefore('?')

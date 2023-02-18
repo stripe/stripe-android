@@ -37,7 +37,6 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 @Composable
 internal fun CountryNotListedScreen(
     isMissingID: Boolean,
-    isFromStandaloneIndividual: Boolean,
     navController: NavController,
     identityViewModel: IdentityViewModel,
     verificationFlowFinishable: VerificationFlowFinishable
@@ -63,8 +62,7 @@ internal fun CountryNotListedScreen(
                 BodyContent(
                     navController = navController,
                     countryNotListedPage = countryNotListedPage,
-                    isMissingID = isMissingID,
-                    isFromStandaloneIndividual = isFromStandaloneIndividual
+                    isMissingID = isMissingID
                 )
             }
             Button(
@@ -87,8 +85,7 @@ internal fun CountryNotListedScreen(
 private fun BodyContent(
     navController: NavController,
     countryNotListedPage: VerificationPageStaticContentCountryNotListedPage,
-    isMissingID: Boolean,
-    isFromStandaloneIndividual: Boolean
+    isMissingID: Boolean
 ) {
     Box(
         modifier = Modifier
@@ -130,7 +127,7 @@ private fun BodyContent(
     TextButton(
         modifier = Modifier.testTag(COUNTRY_NOT_LISTED_OTHER_COUNTRY_TAG),
         onClick = {
-            navController.navigateTo(IndividualDestination(isFromStandaloneIndividual))
+            navController.navigateTo(IndividualDestination)
         }
     ) {
         Text(

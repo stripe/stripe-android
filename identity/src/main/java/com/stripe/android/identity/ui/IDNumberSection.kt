@@ -42,7 +42,6 @@ import com.stripe.android.uicore.elements.TextFieldState
 internal fun IDNumberSection(
     idNumberCountries: List<Country>,
     countryNotListedText: String,
-    isStandalone: Boolean,
     navController: NavController,
     onIdNumberCollected: (Resource<IdNumberParam>) -> Unit
 ) {
@@ -112,7 +111,6 @@ internal fun IDNumberSection(
         brElement = brElement,
         idNumberParam = idNumberParam,
         selectedCountryCode = selectedCountryCode,
-        isStandalone = isStandalone,
         countryNotListedText = countryNotListedText,
         onIdNumberCollected = onIdNumberCollected
     )
@@ -127,7 +125,6 @@ private fun IDNumberContent(
     brElement: SimpleTextElement,
     idNumberParam: IdNumberParam?,
     selectedCountryCode: String?,
-    isStandalone: Boolean,
     countryNotListedText: String,
     onIdNumberCollected: (Resource<IdNumberParam>) -> Unit
 ) {
@@ -169,8 +166,7 @@ private fun IDNumberContent(
         onClick = {
             navController.navigateTo(
                 CountryNotListedDestination(
-                    isMissingId = true,
-                    isFromStandaloneIndividual = isStandalone
+                    isMissingId = true
                 )
             )
         }

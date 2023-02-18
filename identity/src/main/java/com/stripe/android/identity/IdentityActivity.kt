@@ -30,7 +30,7 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_INDIVIDUAL
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_INDIVIDUAL_WELCOME
 import com.stripe.android.identity.injection.DaggerIdentityActivityFallbackComponent
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
 import com.stripe.android.identity.navigation.ConfirmationDestination
@@ -38,8 +38,7 @@ import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
 import com.stripe.android.identity.navigation.IdentityNavGraph
-import com.stripe.android.identity.navigation.IndividualDestination
-import com.stripe.android.identity.navigation.IndividualDestination.Companion.ARG_STANDALONE
+import com.stripe.android.identity.navigation.IndividualWelcomeDestination
 import com.stripe.android.identity.navigation.clearDataAndNavigateUp
 import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
@@ -182,7 +181,7 @@ internal class IdentityActivity :
 
         setContent {
             var topBarState by remember {
-                mutableStateOf(IdentityTopBarState.DEFAULT)
+                mutableStateOf(IdentityTopBarState.GO_BACK)
             }
             MdcTheme {
                 IdentityNavGraph(
@@ -253,27 +252,23 @@ internal class IdentityActivity :
         // Toggle the navigation button UI
         when (destination.route) {
             ConsentDestination.ROUTE.route -> {
-                IdentityTopBarState.CONSENT
+                IdentityTopBarState.CLOSE
             }
             ConfirmationDestination.ROUTE.route -> {
-                IdentityTopBarState.CONFIRMATION
+                IdentityTopBarState.CLOSE
             }
             ErrorDestination.ROUTE.route -> {
                 if (args?.getBoolean(ARG_SHOULD_FAIL, false) == true) {
-                    IdentityTopBarState.ERROR_SHOULD_FAIL
+                    IdentityTopBarState.CLOSE
                 } else {
-                    IdentityTopBarState.DEFAULT
+                    IdentityTopBarState.GO_BACK
                 }
             }
-            IndividualDestination.ROUTE.route -> {
-                if (args?.getBoolean(ARG_STANDALONE, false) == true) {
-                    IdentityTopBarState.INDIVIDUAL_STANDALONE
-                } else {
-                    IdentityTopBarState.DEFAULT
-                }
+            IndividualWelcomeDestination.ROUTE.route -> {
+                IdentityTopBarState.CLOSE
             }
             else -> {
-                IdentityTopBarState.DEFAULT
+                IdentityTopBarState.GO_BACK
             }
         }
 
@@ -365,16 +360,12 @@ internal class IdentityActivity :
                         navController.clearDataAndNavigateUp(identityViewModel)
                     }
                 }
-                IndividualDestination.ROUTE.route -> {
-                    if (args?.getBoolean(ARG_STANDALONE, false) == true) {
-                        finishWithCancelResult(
-                            identityViewModel,
-                            verificationFlowFinishable,
-                            SCREEN_NAME_INDIVIDUAL
-                        )
-                    } else {
-                        navController.clearDataAndNavigateUp(identityViewModel)
-                    }
+                IndividualWelcomeDestination.ROUTE.route -> {
+                    finishWithCancelResult(
+                        identityViewModel,
+                        verificationFlowFinishable,
+                        SCREEN_NAME_INDIVIDUAL_WELCOME
+                    )
                 }
                 else -> {
                     navController.clearDataAndNavigateUp(identityViewModel)

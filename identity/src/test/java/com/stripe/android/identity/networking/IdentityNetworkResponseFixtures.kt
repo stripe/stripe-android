@@ -111,6 +111,13 @@ internal val VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         "id_number_country_not_listed_text_button_text": "My country is not listed",
         "title": "Provide personal information"
       },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+      },
       "livemode": false,
       "requirements": {
         "missing": [
@@ -222,6 +229,13 @@ internal val VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         },
         "id_number_country_not_listed_text_button_text": "My country is not listed",
         "title": "Provide personal information"
+      },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
       },
       "livemode": false,
       "requirements": {
@@ -339,6 +353,13 @@ internal val VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING = """
         },
         "id_number_country_not_listed_text_button_text": "My country is not listed",
         "title": "Provide personal information"
+      },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
       },
       "livemode": true,
       "requirements": {
@@ -508,6 +529,13 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING = """
         "id_number_country_not_listed_text_button_text": "My country is not listed",
         "title": "Provide personal information"
       },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+      },
       "livemode": false,
       "requirements": {
         "missing": [
@@ -628,6 +656,13 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING = """
         "id_number_country_not_listed_text_button_text": "My country is not listed",
         "title": "Provide personal information"
       },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+      },
       "livemode": true,
       "requirements": {
         "missing": [
@@ -746,6 +781,13 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_
         },
         "id_number_country_not_listed_text_button_text": "My country is not listed",
         "title": "Provide personal information"
+      },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
       },
       "livemode": false,
       "requirements": {
@@ -867,6 +909,13 @@ internal val VERIFICATION_PAGE_TYPE_ID_NUMBER_JSON_STRING = """
         "id_number_country_not_listed_text_button_text": "My country is not listed",
         "title": "Provide personal information"
       },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+      },
       "livemode": false,
       "requirements": {
         "missing": [
@@ -983,6 +1032,13 @@ internal val VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING = """
         },
         "id_number_country_not_listed_text_button_text": "My country is not listed",
         "title": "Provide personal information"
+      },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
       },
       "livemode": false,
       "requirements": {
