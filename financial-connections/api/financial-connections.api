@@ -395,6 +395,15 @@ public final class com/stripe/android/financialconnections/features/linkaccountp
 	public final fun getLambda-4$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/financialconnections/features/linkstepupverification/ComposableSingletons$LinkStepUpVerificationScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/linkstepupverification/ComposableSingletons$LinkStepUpVerificationScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/financialconnections/features/manualentry/ComposableSingletons$ManualEntryScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/manualentry/ComposableSingletons$ManualEntryScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
@@ -444,8 +453,10 @@ public final class com/stripe/android/financialconnections/features/networkingli
 public final class com/stripe/android/financialconnections/features/networkinglinkverification/ComposableSingletons$NetworkingLinkVerificationScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/networkinglinkverification/ComposableSingletons$NetworkingLinkVerificationScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/financialconnections/features/partnerauth/ComposableSingletons$PartnerAuthScreenKt {
