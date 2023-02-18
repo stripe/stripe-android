@@ -181,7 +181,6 @@ internal object SelfieDestination : IdentityTopLevelDestination() {
     }
 
     override val destinationRoute = ROUTE
-    override val routeWithArgs = destinationRoute.route
 }
 
 internal const val ARG_SHOULD_START_FROM_BACK = "startFromBack"

@@ -108,7 +108,6 @@ class CountryNotListedScreenTest {
         composeTestRule.setContent {
             CountryNotListedScreen(
                 isMissingID = isMissingID,
-                isFromStandaloneIndividual = true,
                 navController = mockNavController,
                 identityViewModel = mockIdentityViewModel,
                 verificationFlowFinishable = mockVerificationFlowFinishable

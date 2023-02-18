@@ -7,5 +7,4 @@ internal object ConfirmationDestination : IdentityTopLevelDestination() {
     }
 
     override val destinationRoute = ROUTE
-    override val routeWithArgs = destinationRoute.route
 }

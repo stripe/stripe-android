@@ -44,7 +44,6 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun IndividualScreen(
     navController: NavController,
-    isStandalone: Boolean,
     identityViewModel: IdentityViewModel
 ) {
     CheckVerificationPageAndCompose(
@@ -86,7 +85,6 @@ internal fun IndividualScreen(
                     .verticalScroll(rememberScrollState())
             ) {
                 IndividualScreenBodyContent(
-                    isStandalone = isStandalone,
                     navController = navController,
                     identityViewModel = identityViewModel,
                     individualPage = individualPage,
@@ -118,7 +116,6 @@ internal fun IndividualScreen(
 
 @Composable
 private fun IndividualScreenBodyContent(
-    isStandalone: Boolean,
     navController: NavController,
     identityViewModel: IdentityViewModel,
     individualPage: VerificationPageStaticContentIndividualPage,
@@ -156,7 +153,6 @@ private fun IndividualScreenBodyContent(
         IDNumberSection(
             individualPage.idNumberCountries,
             individualPage.idNumberCountryNotListedTextButtonText,
-            isStandalone,
             navController
         ) {
             collectedStates.idNumber = it
@@ -172,7 +168,6 @@ private fun IndividualScreenBodyContent(
             identityViewModel,
             individualPage.addressCountries,
             individualPage.addressCountryNotListedTextButtonText,
-            isStandalone,
             navController
         ) {
             collectedStates.address = it

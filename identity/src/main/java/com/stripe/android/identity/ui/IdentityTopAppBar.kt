@@ -10,6 +10,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.stripe.android.identity.R
+import com.stripe.android.identity.ui.IdentityTopBarState.CLOSE
+import com.stripe.android.identity.ui.IdentityTopBarState.GO_BACK
 
 @Composable
 internal fun IdentityTopAppBar(
@@ -31,19 +33,12 @@ internal fun IdentityTopAppBar(
             }) {
                 Icon(
                     painter = when (topBarState) {
-                        IdentityTopBarState.CONSENT -> painterResource(id = R.drawable.ic_baseline_close_24)
-                        IdentityTopBarState.CONFIRMATION -> painterResource(id = R.drawable.ic_baseline_close_24)
-                        IdentityTopBarState.ERROR_SHOULD_FAIL -> painterResource(id = R.drawable.ic_baseline_close_24)
-                        IdentityTopBarState.DEFAULT -> painterResource(id = R.drawable.ic_baseline_arrow_back_24)
-                        IdentityTopBarState.INDIVIDUAL_STANDALONE ->
-                            painterResource(id = R.drawable.ic_baseline_close_24)
+                        GO_BACK -> painterResource(id = R.drawable.ic_baseline_arrow_back_24)
+                        CLOSE -> painterResource(id = R.drawable.ic_baseline_close_24)
                     },
                     contentDescription = when (topBarState) {
-                        IdentityTopBarState.CONSENT -> stringResource(id = R.string.description_close)
-                        IdentityTopBarState.CONFIRMATION -> stringResource(id = R.string.description_close)
-                        IdentityTopBarState.ERROR_SHOULD_FAIL -> stringResource(id = R.string.description_close)
-                        IdentityTopBarState.DEFAULT -> stringResource(id = R.string.description_go_back)
-                        IdentityTopBarState.INDIVIDUAL_STANDALONE -> stringResource(id = R.string.description_close)
+                        GO_BACK -> stringResource(id = R.string.description_go_back)
+                        CLOSE -> stringResource(id = R.string.description_close)
                     }
                 )
             }
@@ -51,7 +46,10 @@ internal fun IdentityTopAppBar(
     )
 }
 
-// TODO(ccen) - change this to just two state -> go back/close
+/**
+ * [GO_BACK]: Clicking home button goes to previous screen.
+ * [CLOSE]: Clicking home button closes the verification session.
+ */
 internal enum class IdentityTopBarState {
-    CONSENT, CONFIRMATION, ERROR_SHOULD_FAIL, DEFAULT, INDIVIDUAL_STANDALONE
+    GO_BACK, CLOSE
 }

@@ -118,8 +118,7 @@ class IndividualScreenTest {
         composeTestRule.setContent {
             IndividualScreen(
                 navController = mockNavController,
-                identityViewModel = mockIdentityViewModel,
-                isStandalone = true
+                identityViewModel = mockIdentityViewModel
             )
         }
 
