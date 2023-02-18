@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
+import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.IndividualDestination
@@ -20,6 +21,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -31,6 +33,13 @@ import org.robolectric.annotation.Config
 class InitialLoadingScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    private val mockFallbackUrlLauncher = mock<FallbackUrlLauncher>()
+
+    private val verificationPageUnsupported = mock<VerificationPage>().also {
+        whenever(it.unsupportedClient).thenReturn(true)
+        whenever(it.fallbackUrl).thenReturn(FALLBACK_URL)
+    }
 
     private val verificationPageForDocType = mock<VerificationPage>().also {
         whenever(it.requirements).thenReturn(
@@ -67,6 +76,12 @@ class InitialLoadingScreenTest {
         on { verificationPage } doReturn verificationPageData
     }
     private val mockNavController = mock<NavController>()
+
+    fun testUnsupportedClientOpensFallback() {
+        setComposeTestRuleWith(verificationPageUnsupported) {
+            verify(mockFallbackUrlLauncher).launchFallbackUrl(eq(FALLBACK_URL))
+        }
+    }
 
     @Test
     fun testDocTypeNavigatesToConsent() {
@@ -113,9 +128,14 @@ class InitialLoadingScreenTest {
             InitialLoadingScreen(
                 navController = mockNavController,
                 identityViewModel = mockIdentityViewModel,
+                fallbackUrlLauncher = mockFallbackUrlLauncher
             )
         }
 
         with(composeTestRule, testBlock)
+    }
+
+    private companion object {
+        const val FALLBACK_URL = "https://fallback/url"
     }
 }

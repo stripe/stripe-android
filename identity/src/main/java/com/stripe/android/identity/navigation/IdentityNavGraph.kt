@@ -40,6 +40,7 @@ import com.stripe.android.identity.ui.ErrorScreenButton
 import com.stripe.android.identity.ui.IdentityTopAppBar
 import com.stripe.android.identity.ui.IdentityTopBarState
 import com.stripe.android.identity.ui.IndividualScreen
+import com.stripe.android.identity.ui.IndividualWelcomeScreen
 import com.stripe.android.identity.ui.InitialLoadingScreen
 import com.stripe.android.identity.ui.SelfieScanScreen
 import com.stripe.android.identity.ui.UploadScreen
@@ -76,14 +77,20 @@ internal fun IdentityNavGraph(
             screen(InitialLoadingDestination.ROUTE) {
                 InitialLoadingScreen(
                     navController = navController,
+                    identityViewModel = identityViewModel,
+                    fallbackUrlLauncher = fallbackUrlLauncher
+                )
+            }
+            screen(IndividualWelcomeDestination.ROUTE) {
+                IndividualWelcomeScreen(
+                    navController = navController,
                     identityViewModel = identityViewModel
                 )
             }
             screen(ConsentDestination.ROUTE) {
                 ConsentScreen(
                     navController = navController,
-                    identityViewModel = identityViewModel,
-                    fallbackUrlLauncher = fallbackUrlLauncher
+                    identityViewModel = identityViewModel
                 )
             }
             screen(DocSelectionDestination.ROUTE) {
@@ -197,7 +204,6 @@ internal fun IdentityNavGraph(
             screen(IndividualDestination.ROUTE) {
                 IndividualScreen(
                     navController = navController,
-                    isStandalone = IndividualDestination.isStandAlone(it),
                     identityViewModel = identityViewModel
                 )
             }
@@ -211,8 +217,6 @@ internal fun IdentityNavGraph(
             screen(CountryNotListedDestination.ROUTE) {
                 CountryNotListedScreen(
                     isMissingID = CountryNotListedDestination.isMissingId(it),
-                    isFromStandaloneIndividual =
-                    CountryNotListedDestination.isFromStandaloneIndividual(it),
                     navController = navController,
                     identityViewModel = identityViewModel,
                     verificationFlowFinishable = verificationFlowFinishable

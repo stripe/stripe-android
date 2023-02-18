@@ -32,7 +32,6 @@ internal fun AddressSection(
     identityViewModel: IdentityViewModel,
     addressCountries: List<Country>,
     addressNotListedText: String,
-    isStandalone: Boolean,
     navController: NavController,
     onAddressCollected: (Resource<RequiredInternationalAddress>) -> Unit
 ) {
@@ -79,7 +78,6 @@ internal fun AddressSection(
     }
     AddressSectionContent(
         navController = navController,
-        isStandalone = isStandalone,
         addressElement = addressElement,
         addressNotListedText = addressNotListedText
     )
@@ -100,7 +98,6 @@ private fun isValidAddress(addressMap: Map<IdentifierSpec, FormFieldEntry>): Boo
 @Composable
 private fun AddressSectionContent(
     navController: NavController,
-    isStandalone: Boolean,
     addressElement: AddressElement,
     addressNotListedText: String
 ) {
@@ -115,8 +112,7 @@ private fun AddressSectionContent(
         onClick = {
             navController.navigateTo(
                 CountryNotListedDestination(
-                    isMissingId = false,
-                    isFromStandaloneIndividual = isStandalone
+                    isMissingId = false
                 )
             )
         }

@@ -977,7 +977,7 @@ internal class IdentityViewModel constructor(
             } else if (verificationPageData.isMissingSelfie()) {
                 navController.navigateTo(SelfieDestination)
             } else if (verificationPageData.isMissingIndividualRequirements()) {
-                navController.navigateTo(IndividualDestination(false))
+                navController.navigateTo(IndividualDestination)
             } else {
                 onReadyToSubmit()
             }
@@ -1271,22 +1271,12 @@ internal class IdentityViewModel constructor(
     }
 
     suspend fun postVerificationPageDataForIndividual(
-//        collectedName: Resource<NameParam>,
-//        collectedDob: Resource<DobParam>,
-//        collectedIdNumber: Resource<IdNumberParam>,
-//        collectedAddress: Resource<RequiredInternationalAddress>,
         individualCollectedStates: IndividualCollectedStates,
         navController: NavController
     ) {
         postVerificationPageDataAndMaybeNavigate(
             navController,
             individualCollectedStates.toCollectedDataParam(),
-//            CollectedDataParam(
-//                name = if (collectedName.status == Status.SUCCESS) collectedName.data else null,
-//                dob = if (collectedDob.status == Status.SUCCESS) collectedDob.data else null,
-//                idNumber = if (collectedIdNumber.status == Status.SUCCESS) collectedIdNumber.data else null,
-//                address = if (collectedAddress.status == Status.SUCCESS) collectedAddress.data else null,
-//            ),
             fromRoute = IndividualDestination.ROUTE.route,
         ) {
             submitAndNavigate(

@@ -10,7 +10,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
-import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.navigation.ConsentDestination
@@ -53,7 +52,6 @@ class ConsentScreenTest {
     }
 
     private val mockNavController = mock<NavController>()
-    private val mockFallbackUrlLauncher = mock<FallbackUrlLauncher>()
 
     private val verificationPageWithTimeAndPolicy = mock<VerificationPage>().also {
         whenever(it.biometricConsent).thenReturn(
@@ -91,11 +89,6 @@ class ConsentScreenTest {
                 missing = listOf(Requirement.BIOMETRICCONSENT)
             )
         )
-    }
-
-    private val verificationPageWithUnsupportedClient = mock<VerificationPage>().also {
-        whenever(it.unsupportedClient).thenReturn(true)
-        whenever(it.fallbackUrl).thenReturn(CONSENT_FALLBACK_URL)
     }
 
     @Test
@@ -166,12 +159,6 @@ class ConsentScreenTest {
     }
 
     @Test
-    fun `when VerificationPage is unsupported, fallbackUrl is launched`() {
-        setComposeTestRuleWith(Resource.success(verificationPageWithUnsupportedClient))
-        verify(mockFallbackUrlLauncher).launchFallbackUrl(CONSENT_FALLBACK_URL)
-    }
-
-    @Test
     fun `when VerificationPage is Loading UI is bound correctly`() {
         setComposeTestRuleWith(Resource.loading()) {
             onNodeWithTag(LOADING_SCREEN_TAG).assertExists()
@@ -186,8 +173,7 @@ class ConsentScreenTest {
         composeTestRule.setContent {
             ConsentScreen(
                 mockNavController,
-                mockIdentityViewModel,
-                mockFallbackUrlLauncher
+                mockIdentityViewModel
             )
         }
 
@@ -202,6 +188,5 @@ class ConsentScreenTest {
         const val CONSENT_ACCEPT_TEXT = "yes"
         const val CONSENT_DECLINE_TEXT = "no"
         const val SCROLL_TO_CONTINUE_TEXT = "scroll to continue"
-        const val CONSENT_FALLBACK_URL = "path/to/fallback"
     }
 }

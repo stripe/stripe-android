@@ -6,5 +6,4 @@ internal object InitialLoadingDestination : IdentityTopLevelDestination() {
         override val routeBase = LOADING
     }
     override val destinationRoute = ROUTE
-    override val routeWithArgs = destinationRoute.route
 }
