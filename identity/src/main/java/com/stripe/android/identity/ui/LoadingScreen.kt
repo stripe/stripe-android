@@ -8,17 +8,23 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.stripe.android.identity.R
+import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 @Composable
 internal fun LoadingScreen() {
@@ -34,6 +40,28 @@ internal fun LoadingScreen() {
         CircularProgressIndicator(modifier = Modifier.padding(bottom = 32.dp))
         Text(text = stringResource(id = R.string.loading), fontSize = 24.sp)
     }
+}
+
+/**
+ * Ensures [IdentityViewModel.verificationPage] is valid and compose.
+ * Otherwise navigate to default error.
+ */
+@Composable
+internal fun CheckVerificationPageAndCompose(
+    identityViewModel: IdentityViewModel,
+    navController: NavController,
+    onSuccess: @Composable (VerificationPage) -> Unit
+) {
+    val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
+    val context = LocalContext.current
+    CheckVerificationPageAndCompose(
+        verificationPageResource = verificationPageState,
+        onError = {
+            identityViewModel.errorCause.postValue(it)
+            navController.navigateToErrorScreenWithDefaultValues(context)
+        },
+        onSuccess = onSuccess
+    )
 }
 
 @Composable

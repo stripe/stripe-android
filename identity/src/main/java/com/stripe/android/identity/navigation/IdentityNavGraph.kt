@@ -30,6 +30,7 @@ import com.stripe.android.identity.states.IdentityScanState.Companion.toScanDest
 import com.stripe.android.identity.states.IdentityScanState.Companion.toUploadDestination
 import com.stripe.android.identity.ui.ConfirmationScreen
 import com.stripe.android.identity.ui.ConsentScreen
+import com.stripe.android.identity.ui.CountryNotListedScreen
 import com.stripe.android.identity.ui.DocSelectionScreen
 import com.stripe.android.identity.ui.DocumentScanMessageRes
 import com.stripe.android.identity.ui.DocumentScanScreen
@@ -38,6 +39,8 @@ import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
 import com.stripe.android.identity.ui.IdentityTopAppBar
 import com.stripe.android.identity.ui.IdentityTopBarState
+import com.stripe.android.identity.ui.IndividualScreen
+import com.stripe.android.identity.ui.InitialLoadingScreen
 import com.stripe.android.identity.ui.SelfieScanScreen
 import com.stripe.android.identity.ui.UploadScreen
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
@@ -68,8 +71,14 @@ internal fun IdentityNavGraph(
         NavHost(
             navController = navController,
             modifier = Modifier.padding(contentPadding),
-            startDestination = ConsentDestination.destinationRoute.route
+            startDestination = InitialLoadingDestination.destinationRoute.route
         ) {
+            screen(InitialLoadingDestination.ROUTE) {
+                InitialLoadingScreen(
+                    navController = navController,
+                    identityViewModel = identityViewModel
+                )
+            }
             screen(ConsentDestination.ROUTE) {
                 ConsentScreen(
                     navController = navController,
@@ -185,8 +194,25 @@ internal fun IdentityNavGraph(
                     hasBack = false
                 )
             }
+            screen(IndividualDestination.ROUTE) {
+                IndividualScreen(
+                    navController = navController,
+                    isStandalone = IndividualDestination.isStandAlone(it),
+                    identityViewModel = identityViewModel
+                )
+            }
             screen(ConfirmationDestination.ROUTE) {
                 ConfirmationScreen(
+                    navController = navController,
+                    identityViewModel = identityViewModel,
+                    verificationFlowFinishable = verificationFlowFinishable
+                )
+            }
+            screen(CountryNotListedDestination.ROUTE) {
+                CountryNotListedScreen(
+                    isMissingID = CountryNotListedDestination.isMissingId(it),
+                    isFromStandaloneIndividual =
+                    CountryNotListedDestination.isFromStandaloneIndividual(it),
                     navController = navController,
                     identityViewModel = identityViewModel,
                     verificationFlowFinishable = verificationFlowFinishable
@@ -230,7 +256,8 @@ internal fun IdentityNavGraph(
                         buttonText = stringResource(id = R.string.app_settings)
                     ) {
                         appSettingsOpenable.openAppSettings()
-                        // navigate back to DocSelection, so that when user is back to the app from settings
+                        // navigate back to DocSelection, so that when user is back to the app
+                        // from settings
                         // the camera permission check can be triggered again from there.
                         navController.navigateTo(DocSelectionDestination)
                     }
@@ -307,7 +334,8 @@ internal fun IdentityNavGraph(
                                 var shouldContinueNavigateUp = true
                                 while (
                                     shouldContinueNavigateUp &&
-                                    navController.currentDestination?.route?.toRouteBase() != destination
+                                    navController.currentDestination?.route?.toRouteBase() !=
+                                    destination
                                 ) {
                                     shouldContinueNavigateUp =
                                         navController.clearDataAndNavigateUp(identityViewModel)

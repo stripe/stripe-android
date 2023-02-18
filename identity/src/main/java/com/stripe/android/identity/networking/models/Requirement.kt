@@ -6,6 +6,7 @@ import com.stripe.android.identity.navigation.DriverLicenseScanDestination
 import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
 import com.stripe.android.identity.navigation.IDScanDestination
 import com.stripe.android.identity.navigation.IDUploadDestination
+import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.PassportScanDestination
 import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.navigation.SelfieDestination
@@ -51,6 +52,13 @@ internal enum class Requirement {
             PassportScanDestination.ROUTE
         )
 
+        val INDIVIDUAL_REQUIREMENT_SET = setOf(
+            NAME,
+            DOB,
+            ADDRESS,
+            IDNUMBER
+        )
+
         /**
          * Checks whether the Requirement matches the route the error occurred from.
          */
@@ -75,8 +83,8 @@ internal enum class Requirement {
                 FACE -> {
                     fromRoute == SelfieDestination.ROUTE.route
                 }
-                else -> {
-                    false
+                DOB, NAME, IDNUMBER, ADDRESS -> {
+                    fromRoute == IndividualDestination.ROUTE.route
                 }
             }
     }
