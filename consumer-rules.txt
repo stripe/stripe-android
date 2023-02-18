@@ -1,0 +1,4 @@
+# Keep all public API classes and methods
+-keep public class com.stripe.android.** {
+    public *;
+}
