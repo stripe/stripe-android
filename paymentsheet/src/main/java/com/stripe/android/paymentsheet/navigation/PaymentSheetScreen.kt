@@ -20,7 +20,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            PaymentSheetLoading()
+            PaymentSheetLoading(modifier)
         }
     }
 
@@ -30,10 +30,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            PaymentOptions(
-                viewModel = viewModel,
-                modifier = modifier,
-            )
+            PaymentOptions(viewModel, modifier)
         }
     }
 
