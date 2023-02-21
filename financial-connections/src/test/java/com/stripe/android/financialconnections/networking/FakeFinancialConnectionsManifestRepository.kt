@@ -63,9 +63,11 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
 
     override suspend fun postSaveAccountsToLink(
         clientSecret: String,
-        email: String,
-        country: String,
-        phoneNumber: String,
+        email: String?,
+        country: String?,
+        locale: String?,
+        phoneNumber: String?,
+        consumerSessionClientSecret: String?,
         selectedAccounts: List<String>
     ): FinancialConnectionsSessionManifest {
         TODO("Not yet implemented")

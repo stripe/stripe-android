@@ -39,6 +39,7 @@ import com.stripe.android.financialconnections.features.manualentrysuccess.Manua
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupScreen
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupScreen
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationScreen
+import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationScreen
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
@@ -218,6 +219,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     LaunchedPane(Pane.NETWORKING_LINK_VERIFICATION)
                     BackHandler(navController, Pane.NETWORKING_LINK_VERIFICATION)
                     NetworkingLinkVerificationScreen()
+                }
+                composable(NavigationDirections.networkingSaveToLinkVerification.destination) {
+                    LaunchedPane(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION)
+                    BackHandler(navController, Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION)
+                    NetworkingSaveToLinkVerificationScreen()
                 }
                 composable(NavigationDirections.linkAccountPicker.destination) {
                     LaunchedPane(Pane.LINK_ACCOUNT_PICKER)
