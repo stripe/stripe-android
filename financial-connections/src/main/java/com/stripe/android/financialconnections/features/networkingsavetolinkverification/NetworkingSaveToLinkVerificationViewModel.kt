@@ -44,7 +44,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
         logErrors()
         suspend {
             val consumerSession = requireNotNull(getCachedConsumerSession())
-            startVerification(consumerSession.clientSecret)
+            startVerification.sms(consumerSession.clientSecret)
             eventTracker.track(PaneLoaded(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION))
             NetworkingSaveToLinkVerificationState.Payload(
                 email = consumerSession.emailAddress,
@@ -87,7 +87,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
 
     private fun onOTPEntered(otp: String) = suspend {
         val payload = requireNotNull(awaitState().payload())
-        confirmVerification(
+        confirmVerification.sms(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
             verificationCode = otp
         )

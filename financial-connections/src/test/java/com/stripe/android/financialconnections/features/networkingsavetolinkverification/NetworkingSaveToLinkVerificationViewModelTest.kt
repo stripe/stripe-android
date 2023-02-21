@@ -19,7 +19,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -62,7 +61,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         val viewModel = buildViewModel()
 
         val state = viewModel.awaitState()
-        verify(startVerification).invoke(consumerSession.clientSecret)
+        verify(startVerification).sms(consumerSession.clientSecret)
         assertThat(state.payload()!!.consumerSessionClientSecret)
             .isEqualTo(consumerSession.clientSecret)
     }
@@ -91,7 +90,10 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 eq(state.payload()!!.consumerSessionClientSecret),
                 eq(listOf(selectedAccount.id))
             )
-            verify(confirmVerification).invoke(any(), eq("111111"))
+            verify(confirmVerification).sms(
+                consumerSessionClientSecret = consumerSession.clientSecret,
+                verificationCode = "111111"
+            )
             verify(goNext).invoke(SUCCESS)
         }
 }
