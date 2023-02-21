@@ -713,6 +713,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `GPay button error message is displayed`() {
+        val viewModel = createViewModel(isGooglePayAvailable = true)
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             val errorMessage = "Error message"
@@ -733,8 +734,9 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `when checkout starts then error message is cleared`() {
+        val viewModel = createViewModel(isGooglePayAvailable = true)
         val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             val errorMessage = "Error message"
 
             composeTestRule
