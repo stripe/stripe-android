@@ -82,6 +82,10 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         TODO("Not yet implemented")
     }
 
+    override suspend fun postMarkLinkStepUpVerified(clientSecret: String): FinancialConnectionsSessionManifest {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun synchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String

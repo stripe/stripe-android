@@ -73,6 +73,11 @@ internal object NavigationDirections {
         override val destination = "linkaccount_picker"
     }
 
+    val linkStepUpVerification = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "link_step_up_verification"
+    }
+
     val reset = object : NavigationCommand {
         override val arguments = emptyList<NamedNavArgument>()
         override val destination = "reset"

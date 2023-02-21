@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.features.networkinglinkverification
+package com.stripe.android.financialconnections.features.linkstepupverification
 
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
@@ -11,15 +11,16 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.ConfirmVerification
+import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
-import com.stripe.android.financialconnections.domain.MarkLinkVerified
-import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
+import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
+import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.StartVerification
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
+import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
@@ -29,27 +30,30 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-internal class NetworkingLinkVerificationViewModel @Inject constructor(
-    initialState: NetworkingLinkVerificationState,
+internal class LinkStepUpVerificationViewModel @Inject constructor(
+    initialState: LinkStepUpVerificationState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
     private val lookupAccount: LookupAccount,
     private val startVerification: StartVerification,
     private val confirmVerification: ConfirmVerification,
-    private val markLinkVerified: MarkLinkVerified,
-    private val pollNetworkedAccounts: PollNetworkedAccounts,
+    private val selectNetworkedAccount: SelectNetworkedAccount,
+    private val getCachedAccounts: GetCachedAccounts,
+    private val updateLocalManifest: UpdateLocalManifest,
+    private val markLinkStepUpVerified: MarkLinkStepUpVerified,
+    private val updateCachedAccounts: UpdateCachedAccounts,
     private val goNext: GoNext,
     private val logger: Logger
-) : MavericksViewModel<NetworkingLinkVerificationState>(initialState) {
+) : MavericksViewModel<LinkStepUpVerificationState>(initialState) {
 
     init {
         logErrors()
         suspend {
             val email = requireNotNull(getManifest().accountholderCustomerEmailAddress)
             val consumerSession = requireNotNull(lookupAccount(email).consumerSession)
-            startVerification.sms(consumerSessionClientSecret = consumerSession.clientSecret,)
-            eventTracker.track(PaneLoaded(Pane.NETWORKING_LINK_VERIFICATION))
-            NetworkingLinkVerificationState.Payload(
+            startVerification.email(consumerSessionClientSecret = consumerSession.clientSecret)
+            eventTracker.track(PaneLoaded(Pane.LINK_STEP_UP_VERIFICATION))
+            LinkStepUpVerificationState.Payload(
                 email = consumerSession.emailAddress,
                 phoneNumber = consumerSession.redactedPhoneNumber,
                 consumerSessionClientSecret = consumerSession.clientSecret,
@@ -63,7 +67,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
 
     private fun logErrors() {
         onAsync(
-            NetworkingLinkVerificationState::payload,
+            LinkStepUpVerificationState::payload,
             onSuccess = {
                 viewModelScope.launch {
                     it.otpElement.getFormFieldValueFlow()
@@ -83,61 +87,70 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
 
     private fun onOTPEntered(otp: String) = suspend {
         val payload = requireNotNull(awaitState().payload())
-        confirmVerification.sms(
+        // Confirm email.
+        confirmVerification.email(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
             verificationCode = otp
         )
-        val updatedManifest = markLinkVerified()
-        runCatching { pollNetworkedAccounts(payload.consumerSessionClientSecret) }
-            .fold(
-                onSuccess = { onNetworkedAccountsSuccess(it, updatedManifest) },
-                onFailure = { onNetworkedAccountsFailed(it, updatedManifest) }
-            )
+        val selectedAccount = getCachedAccounts().first()
+
+        // Mark session as verified.
+        markLinkStepUpVerified()
+
+        // Mark networked account as selected.
+        val activeInstitution = selectNetworkedAccount(
+            consumerSessionClientSecret = payload.consumerSessionClientSecret,
+            selectedAccountId = selectedAccount.id
+        )
+
+        // Updates manifest active institution after account networked.
+        updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
+        // Updates cached accounts with the one selected.
+        updateCachedAccounts { listOf(selectedAccount) }
+        goNext(Pane.SUCCESS)
+        Unit
     }.execute { copy(confirmVerification = it) }
 
-    private suspend fun onNetworkedAccountsFailed(
-        error: Throwable,
-        updatedManifest: FinancialConnectionsSessionManifest
-    ) {
-        logger.error("Error fetching networked accounts", error)
-        eventTracker.track(Error(Pane.NETWORKING_LINK_VERIFICATION, error))
-        goNext(updatedManifest.nextPane)
-    }
-
-    private fun onNetworkedAccountsSuccess(
-        accounts: PartnerAccountsList,
-        updatedManifest: FinancialConnectionsSessionManifest
-    ) {
-        if (accounts.data.isEmpty()) {
-            // Networked user has no accounts
-            goNext(updatedManifest.nextPane)
-        } else {
-            // Networked user has linked accounts
-            goNext(Pane.LINK_ACCOUNT_PICKER)
+    fun onClickableTextClick(text: String) {
+        when (text) {
+            CLICKABLE_TEXT_RESEND_CODE -> onResendOtp()
+            else -> logger.error("Unknown clicked text $text")
         }
     }
 
+    private fun onResendOtp() = suspend {
+        val email = requireNotNull(getManifest().accountholderCustomerEmailAddress)
+        val consumerSession = requireNotNull(lookupAccount(email).consumerSession)
+        startVerification.email(consumerSessionClientSecret = consumerSession.clientSecret)
+        Unit
+    }.execute {
+        copy(resendOtp = it)
+    }
+
     companion object :
-        MavericksViewModelFactory<NetworkingLinkVerificationViewModel, NetworkingLinkVerificationState> {
+        MavericksViewModelFactory<LinkStepUpVerificationViewModel, LinkStepUpVerificationState> {
 
         override fun create(
             viewModelContext: ViewModelContext,
-            state: NetworkingLinkVerificationState
-        ): NetworkingLinkVerificationViewModel {
+            state: LinkStepUpVerificationState
+        ): LinkStepUpVerificationViewModel {
             return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
                 .viewModel
                 .activityRetainedComponent
-                .networkingLinkVerificationSubcomponent
+                .linkStepUpVerificationSubcomponent
                 .initialState(state)
                 .build()
                 .viewModel
         }
+
+        private const val CLICKABLE_TEXT_RESEND_CODE = "resend_code"
     }
 }
 
-internal data class NetworkingLinkVerificationState(
+internal data class LinkStepUpVerificationState(
     val payload: Async<Payload> = Uninitialized,
-    val confirmVerification: Async<Unit> = Uninitialized
+    val confirmVerification: Async<Unit> = Uninitialized,
+    val resendOtp: Async<Unit> = Uninitialized
 ) : MavericksState {
 
     data class Payload(

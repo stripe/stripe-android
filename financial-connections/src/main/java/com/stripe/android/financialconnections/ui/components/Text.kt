@@ -36,7 +36,9 @@ internal fun AnnotatedText(
         StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.bodyEmphasized
             .toSpanStyle()
             .copy(color = FinancialConnectionsTheme.colors.textBrand)
-    )
+    ),
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
 ) {
     val pressedColor = FinancialConnectionsTheme.colors.textPrimary
     var pressedAnnotation: String? by remember { mutableStateOf(null) }
@@ -77,8 +79,8 @@ internal fun AnnotatedText(
         modifier = modifier.then(pressIndicator),
         style = defaultStyle,
         softWrap = true,
-        overflow = TextOverflow.Clip,
-        maxLines = Int.MAX_VALUE,
+        overflow = overflow,
+        maxLines = maxLines,
         onTextLayout = {
             layoutResult = it
         }

@@ -1,26 +1,31 @@
 @file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 
-package com.stripe.android.financialconnections.features.networkinglinkverification
+package com.stripe.android.financialconnections.features.linkstepupverification
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
@@ -34,7 +39,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.FormErrorText
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
+import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -44,6 +49,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
@@ -51,23 +57,25 @@ import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementUI
 
 @Composable
-internal fun NetworkingLinkVerificationScreen() {
-    val viewModel: NetworkingLinkVerificationViewModel = mavericksViewModel()
+internal fun LinkStepUpVerificationScreen() {
+    val viewModel: LinkStepUpVerificationViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
     BackHandler(enabled = true) {}
-    NetworkingLinkVerificationContent(
+    LinkStepUpVerificationContent(
         state = state.value,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
+        onClickableTextClick = viewModel::onClickableTextClick
     )
 }
 
 @Composable
-private fun NetworkingLinkVerificationContent(
-    state: NetworkingLinkVerificationState,
+private fun LinkStepUpVerificationContent(
+    state: LinkStepUpVerificationState,
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
+    onClickableTextClick: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
@@ -80,15 +88,16 @@ private fun NetworkingLinkVerificationContent(
     ) {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> LoadingContent()
-            is Success -> NetworkingLinkVerificationLoaded(
-                scrollState = scrollState,
-                payload = payload(),
-                confirmVerificationAsync = state.confirmVerification
-            )
-
             is Fail -> UnclassifiedErrorContent(
                 error = payload.error,
                 onCloseFromErrorClick = onCloseFromErrorClick
+            )
+            is Success -> LinkStepUpVerificationLoaded(
+                scrollState = scrollState,
+                payload = payload(),
+                confirmVerificationAsync = state.confirmVerification,
+                resendOtpAsync = state.resendOtp,
+                onClickableTextClick = onClickableTextClick
             )
         }
     }
@@ -96,10 +105,12 @@ private fun NetworkingLinkVerificationContent(
 
 @Composable
 @OptIn(ExperimentalComposeUiApi::class)
-private fun NetworkingLinkVerificationLoaded(
+private fun LinkStepUpVerificationLoaded(
     confirmVerificationAsync: Async<Unit>,
+    resendOtpAsync: Async<Unit>,
     scrollState: ScrollState,
     payload: Payload,
+    onClickableTextClick: (String) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     val focusRequester: FocusRequester = remember { FocusRequester() }
@@ -124,9 +135,7 @@ private fun NetworkingLinkVerificationLoaded(
         Spacer(modifier = Modifier.size(16.dp))
         Title()
         Spacer(modifier = Modifier.size(8.dp))
-        Description(
-            phoneNumber = payload.phoneNumber
-        )
+        Description(email = payload.email)
         Spacer(modifier = Modifier.size(24.dp))
         ExistingEmailSection(
             focusRequester = focusRequester,
@@ -138,7 +147,11 @@ private fun NetworkingLinkVerificationLoaded(
             FormErrorText(confirmVerificationAsync.error)
         }
         Spacer(modifier = Modifier.size(24.dp))
-        EmailSubtext(payload.email)
+        EmailSubtext(
+            email = payload.email,
+            isLoading = resendOtpAsync is Loading,
+            onClickableTextClick = onClickableTextClick
+        )
     }
 }
 
@@ -158,38 +171,62 @@ private fun ExistingEmailSection(
 }
 
 @Composable
-private fun EmailSubtext(email: String) {
-    AnnotatedText(
-        text = TextResource.Text(
-            stringResource(
-                R.string.stripe_networking_verification_email,
-                email
+private fun EmailSubtext(
+    email: String,
+    isLoading: Boolean,
+    onClickableTextClick: (String) -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        listOf(
+            TextResource.Text(email) to 1f,
+            TextResource.Text("•") to null,
+            TextResource.StringId(R.string.stripe_link_stepup_verification_resend_code) to null
+        ).forEach { (text, weight) ->
+            AnnotatedText(
+                modifier = if (weight != null) Modifier.weight(weight, fill = false) else Modifier,
+                text = text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+                    color = colors.textSecondary,
+                ),
+                annotationStyles = mapOf(
+                    StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                        .toSpanStyle()
+                        .copy(color = if (isLoading) colors.textSecondary else colors.textBrand),
+                ),
+                onClickableTextClick = onClickableTextClick,
             )
-        ),
-        defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-            color = FinancialConnectionsTheme.colors.textDisabled
-        ),
-        annotationStyles = emptyMap(),
-        onClickableTextClick = {},
-    )
+        }
+        if (isLoading) {
+            CircularProgressIndicator(
+                Modifier.size(12.dp),
+                strokeWidth = 1.dp,
+                color = colors.textSecondary
+            )
+        }
+    }
 }
 
 @Composable
-private fun Description(phoneNumber: String) {
+private fun Description(email: String) {
     AnnotatedText(
         text = TextResource.Text(
             stringResource(
-                R.string.stripe_networking_verification_desc,
-                phoneNumber
+                R.string.stripe_link_stepup_verification_desc,
+                email
             )
         ),
         defaultStyle = FinancialConnectionsTheme.typography.body.copy(
-            color = FinancialConnectionsTheme.colors.textSecondary
+            color = colors.textSecondary
         ),
         annotationStyles = mapOf(
             StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized
                 .toSpanStyle()
-                .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                .copy(color = colors.textSecondary),
         ),
         onClickableTextClick = {},
     )
@@ -199,7 +236,7 @@ private fun Description(phoneNumber: String) {
 private fun Title() {
     AnnotatedText(
         text = TextResource.Text(
-            stringResource(R.string.stripe_networking_verification_title)
+            stringResource(R.string.stripe_link_stepup_verification_title)
         ),
         defaultStyle = FinancialConnectionsTheme.typography.subtitle,
         annotationStyles = emptyMap(),
@@ -208,14 +245,14 @@ private fun Title() {
 }
 
 @Composable
-@Preview(group = "NetworkingLinkVerification Pane", name = "Entering OTP")
-internal fun NetworkingLinkVerificationScreenPreview() {
+@Preview(group = "LinkStepUpVerification Pane", name = "Canonical")
+internal fun LinkStepUpVerificationScreenPreview() {
     FinancialConnectionsPreview {
-        NetworkingLinkVerificationContent(
-            state = NetworkingLinkVerificationState(
+        LinkStepUpVerificationContent(
+            state = LinkStepUpVerificationState(
                 payload = Success(
                     Payload(
-                        email = "email@gmail.com",
+                        email = "theLargestEmailYoulleverseeThatCouldBreakALayout@email.com",
                         phoneNumber = "12345678",
                         otpElement = OTPElement(
                             IdentifierSpec.Generic("otp"),
@@ -226,25 +263,22 @@ internal fun NetworkingLinkVerificationScreenPreview() {
                 )
             ),
             onCloseClick = {},
-            onCloseFromErrorClick = {}
+            onCloseFromErrorClick = {},
+            onClickableTextClick = {}
         )
     }
 }
 
 @Composable
-@Preview(group = "NetworkingLinkVerification Pane", name = "Error")
-internal fun NetworkingLinkVerificationScreenWithErrorPreview() {
+@Preview(group = "LinkStepUpVerification Pane", name = "Resending code")
+internal fun LinkStepUpVerificationScreenResendingCodePreview() {
     FinancialConnectionsPreview {
-        NetworkingLinkVerificationContent(
-            state = NetworkingLinkVerificationState(
-                confirmVerification = Fail<Unit>(
-                    Exception(
-                        "The provided 2FA is not valid."
-                    )
-                ),
+        LinkStepUpVerificationContent(
+            state = LinkStepUpVerificationState(
+                resendOtp = Loading(),
                 payload = Success(
                     Payload(
-                        email = "email@gmail.com",
+                        email = "shortEmail@email.com",
                         phoneNumber = "12345678",
                         otpElement = OTPElement(
                             IdentifierSpec.Generic("otp"),
@@ -255,7 +289,8 @@ internal fun NetworkingLinkVerificationScreenWithErrorPreview() {
                 )
             ),
             onCloseClick = {},
-            onCloseFromErrorClick = {}
+            onCloseFromErrorClick = {},
+            onClickableTextClick = {}
         )
     }
 }

@@ -34,6 +34,7 @@ import com.stripe.android.financialconnections.features.common.CloseDialog
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerScreen
+import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationScreen
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
 import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessScreen
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupScreen
@@ -223,6 +224,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     LaunchedPane(Pane.LINK_ACCOUNT_PICKER)
                     BackHandler(navController, Pane.LINK_ACCOUNT_PICKER)
                     LinkAccountPickerScreen()
+                }
+                composable(NavigationDirections.linkStepUpVerification.destination) {
+                    LaunchedPane(Pane.LINK_STEP_UP_VERIFICATION)
+                    BackHandler(navController, Pane.LINK_STEP_UP_VERIFICATION)
+                    LinkStepUpVerificationScreen()
                 }
             }
         }

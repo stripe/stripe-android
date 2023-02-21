@@ -13,6 +13,7 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.VerificationType
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
@@ -193,11 +194,13 @@ class LinkApiRepositoryTest {
         linkRepository.startVerification(secret, consumerKey, cookie)
 
         verify(consumersApiService).startConsumerVerification(
-            eq(secret),
-            eq(Locale.US),
-            eq(cookie),
-            eq(CONSUMER_SURFACE),
-            eq(ApiRequest.Options(consumerKey))
+            consumerSessionClientSecret = secret,
+            locale = Locale.US,
+            authSessionCookie = cookie,
+            requestSurface = CONSUMER_SURFACE,
+            type = VerificationType.SMS,
+            customEmailType = null,
+            requestOptions = ApiRequest.Options(consumerKey),
         )
     }
 
@@ -208,11 +211,13 @@ class LinkApiRepositoryTest {
         linkRepository.startVerification(secret, null, cookie)
 
         verify(consumersApiService).startConsumerVerification(
-            eq(secret),
-            eq(Locale.US),
-            eq(cookie),
-            eq(CONSUMER_SURFACE),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+            consumerSessionClientSecret = secret,
+            locale = Locale.US,
+            authSessionCookie = cookie,
+            requestSurface = CONSUMER_SURFACE,
+            type = VerificationType.SMS,
+            customEmailType = null,
+            requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID),
         )
     }
 
@@ -221,11 +226,13 @@ class LinkApiRepositoryTest {
         val consumerSession = mock<ConsumerSession>()
         whenever(
             consumersApiService.startConsumerVerification(
-                any(),
-                any(),
-                anyOrNull(),
-                any(),
-                any()
+                consumerSessionClientSecret = any(),
+                locale = any(),
+                authSessionCookie = anyOrNull(),
+                requestSurface = any(),
+                type = any(),
+                customEmailType = anyOrNull(),
+                requestOptions = any(),
             )
         )
             .thenReturn(consumerSession)
@@ -240,11 +247,13 @@ class LinkApiRepositoryTest {
     fun `startVerification catches exception and returns failure`() = runTest {
         whenever(
             consumersApiService.startConsumerVerification(
-                any(),
-                any(),
-                anyOrNull(),
-                any(),
-                any()
+                consumerSessionClientSecret = any(),
+                locale = any(),
+                authSessionCookie = anyOrNull(),
+                requestSurface = any(),
+                type = any(),
+                customEmailType = anyOrNull(),
+                requestOptions = any(),
             )
         )
             .thenThrow(RuntimeException("error"))
@@ -267,6 +276,7 @@ class LinkApiRepositoryTest {
             verificationCode = eq(code),
             authSessionCookie = eq(cookie),
             requestSurface = eq(CONSUMER_SURFACE),
+            type = eq(VerificationType.SMS),
             requestOptions = eq(ApiRequest.Options(consumerKey))
         )
     }
@@ -283,6 +293,7 @@ class LinkApiRepositoryTest {
             verificationCode = eq(code),
             authSessionCookie = eq(cookie),
             requestSurface = eq(CONSUMER_SURFACE),
+            type = eq(VerificationType.SMS),
             requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
@@ -296,6 +307,7 @@ class LinkApiRepositoryTest {
                 verificationCode = any(),
                 authSessionCookie = anyOrNull(),
                 requestSurface = any(),
+                type = any(),
                 requestOptions = any()
             )
         )
@@ -320,7 +332,8 @@ class LinkApiRepositoryTest {
                 verificationCode = any(),
                 authSessionCookie = anyOrNull(),
                 requestSurface = any(),
-                requestOptions = any()
+                requestOptions = any(),
+                type = any()
             )
         )
             .thenThrow(RuntimeException("error"))
