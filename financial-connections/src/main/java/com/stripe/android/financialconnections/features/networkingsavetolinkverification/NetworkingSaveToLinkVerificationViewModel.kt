@@ -43,7 +43,6 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     init {
         logErrors()
         suspend {
-            //
             val consumerSession = requireNotNull(getCachedConsumerSession())
             startVerification(consumerSession.clientSecret)
             eventTracker.track(PaneLoaded(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION))
