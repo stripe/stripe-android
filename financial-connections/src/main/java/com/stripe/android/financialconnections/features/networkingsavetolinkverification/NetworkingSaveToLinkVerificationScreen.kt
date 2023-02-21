@@ -62,6 +62,7 @@ internal fun NetworkingSaveToLinkVerificationScreen() {
         state = state.value,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
+        onSkipClick = { viewModel.onSkipClick() }
     )
 }
 
@@ -69,6 +70,7 @@ internal fun NetworkingSaveToLinkVerificationScreen() {
 private fun NetworkingSaveToLinkVerificationContent(
     state: NetworkingSaveToLinkVerificationState,
     onCloseClick: () -> Unit,
+    onSkipClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -85,7 +87,8 @@ private fun NetworkingSaveToLinkVerificationContent(
             is Success -> NetworkingSaveToLinkVerificationLoaded(
                 scrollState = scrollState,
                 payload = payload(),
-                confirmVerificationAsync = state.confirmVerification
+                confirmVerificationAsync = state.confirmVerification,
+                onSkipClick = onSkipClick
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -102,6 +105,7 @@ private fun NetworkingSaveToLinkVerificationLoaded(
     confirmVerificationAsync: Async<Unit>,
     scrollState: ScrollState,
     payload: Payload,
+    onSkipClick: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     val focusRequester: FocusRequester = remember { FocusRequester() }
@@ -138,7 +142,7 @@ private fun NetworkingSaveToLinkVerificationLoaded(
         Spacer(modifier = Modifier.weight(1f))
         FinancialConnectionsButton(
             type = FinancialConnectionsButton.Type.Secondary,
-            onClick = { },
+            onClick = onSkipClick,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -231,7 +235,8 @@ internal fun NetworkingSaveToLinkVerificationScreenPreview() {
                 )
             ),
             onCloseClick = {},
-            onCloseFromErrorClick = {}
+            onCloseFromErrorClick = {},
+            onSkipClick = {}
         )
     }
 }

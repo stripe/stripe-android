@@ -103,6 +103,10 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
         Unit
     }.execute { copy(confirmVerification = it) }
 
+    fun onSkipClick() {
+        goNext(Pane.SUCCESS)
+    }
+
     companion object :
         MavericksViewModelFactory<NetworkingSaveToLinkVerificationViewModel, NetworkingSaveToLinkVerificationState> {
 

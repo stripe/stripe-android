@@ -22,6 +22,7 @@ import org.junit.Test
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
 class NetworkingSaveToLinkVerificationViewModelTest {
@@ -96,4 +97,22 @@ class NetworkingSaveToLinkVerificationViewModelTest {
             )
             verify(goNext).invoke(SUCCESS)
         }
+
+    @Test
+    fun `onSkipClick - navigates to success without networking accounts`() = runTest {
+        val consumerSession = consumerSession()
+        val selectedAccount = partnerAccount()
+        val linkVerifiedManifest = sessionManifest()
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession)
+        whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
+        whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
+
+        val viewModel = buildViewModel()
+
+        viewModel.onSkipClick()
+
+        verifyNoInteractions(confirmVerification)
+        verifyNoInteractions(saveAccountToLink)
+        verify(goNext).invoke(SUCCESS)
+    }
 }
