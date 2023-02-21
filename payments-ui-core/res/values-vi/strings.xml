@@ -23,6 +23,8 @@
   <string name="klarna_pay_later">Thanh toán sau bằng Klarna.</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="p24_bank">Ngân hàng Przelewy24</string>
+  <!-- PayPal mandate text -->
+  <string name="paypal_mandate">Bằng cách xác nhận thanh toán của quý vị với PayPal, quý vị cho phép %s tính phí tài khoản PayPal của quý vị cho các khoản thanh toán trong tương lai theo các điều khoản của họ.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Lưu để thanh toán %s sau này</string>
   <!-- Button title to open camera to scan credit/debit card -->
