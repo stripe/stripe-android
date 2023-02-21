@@ -3,6 +3,7 @@ package com.stripe.android.model.parsers
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
+import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.StripeIntent
@@ -10,8 +11,13 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 internal class ElementsSessionJsonParser(
-    private val type: ElementsSessionParams.Type,
+    private val params: ElementsSessionParams,
+    private val apiKey: String,
+    private val timeProvider: () -> Long = {
+        System.currentTimeMillis()
+    }
 ) : ModelJsonParser<ElementsSession> {
+
     override fun parse(json: JSONObject): ElementsSession? {
         val paymentMethodPreference = StripeJsonUtils.mapToJsonObject(
             StripeJsonUtils.optMap(json, FIELD_PAYMENT_METHOD_PREFERENCE)
@@ -33,7 +39,10 @@ internal class ElementsSessionJsonParser(
         val orderedPaymentMethodTypes =
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
+        val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID)
+
         val stripeIntent = parseStripeIntent(
+            elementsSessionId = elementsSessionId,
             paymentMethodPreference = paymentMethodPreference,
             orderedPaymentMethodTypes = orderedPaymentMethodTypes,
             unactivatedPaymentMethodTypes = unactivatedPaymentMethodTypes,
@@ -45,54 +54,73 @@ internal class ElementsSessionJsonParser(
             linkSettings = ElementsSession.LinkSettings(
                 linkFundingSources = jsonArrayToList(linkFundingSources)
             ),
-            paymentMethodTypes = jsonArrayToList(orderedPaymentMethodTypes),
-            unactivatedPaymentMethodTypes = unactivatedPaymentMethodTypes,
             paymentMethodSpecs = paymentMethodSpecs,
             stripeIntent = stripeIntent
         )
     }
 
     private fun parseStripeIntent(
+        elementsSessionId: String?,
         paymentMethodPreference: JSONObject?,
         orderedPaymentMethodTypes: JSONArray?,
         unactivatedPaymentMethodTypes: List<String>,
         linkFundingSources: JSONArray?,
         countryCode: String
     ): StripeIntent? {
-        return paymentMethodPreference?.optJSONObject(
-            type.value
-        )?.let { stripeIntentJsonObject ->
+        return (paymentMethodPreference?.optJSONObject(params.type) ?: JSONObject()).let { json ->
             orderedPaymentMethodTypes?.let {
-                stripeIntentJsonObject.put(
+                json.put(
                     FIELD_PAYMENT_METHOD_TYPES,
                     orderedPaymentMethodTypes
                 )
             }
-            stripeIntentJsonObject.put(
+            json.put(
                 FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES,
                 unactivatedPaymentMethodTypes
             )
-            stripeIntentJsonObject.put(
+            json.put(
                 FIELD_LINK_FUNDING_SOURCES,
                 linkFundingSources
             )
-            stripeIntentJsonObject.put(
+            json.put(
                 FIELD_COUNTRY_CODE,
                 countryCode
             )
 
-            when (type) {
-                ElementsSessionParams.Type.PaymentIntent ->
-                    PaymentIntentJsonParser().parse(stripeIntentJsonObject)
-                ElementsSessionParams.Type.SetupIntent ->
-                    SetupIntentJsonParser().parse(stripeIntentJsonObject)
-                ElementsSessionParams.Type.DeferredIntent -> null
+            when (params) {
+                is ElementsSessionParams.PaymentIntentType -> {
+                    PaymentIntentJsonParser().parse(json)
+                }
+                is ElementsSessionParams.SetupIntentType -> {
+                    SetupIntentJsonParser().parse(json)
+                }
+                is ElementsSessionParams.DeferredIntentType -> {
+                    when (params.deferredIntentParams.mode) {
+                        is DeferredIntentParams.Mode.Payment -> {
+                            DeferredPaymentIntentJsonParser(
+                                elementsSessionId = elementsSessionId,
+                                params = params.deferredIntentParams,
+                                apiKey = apiKey,
+                                timeProvider = timeProvider
+                            ).parse(json)
+                        }
+                        is DeferredIntentParams.Mode.Setup -> {
+                            DeferredSetupIntentJsonParser(
+                                elementsSessionId = elementsSessionId,
+                                params = params.deferredIntentParams,
+                                apiKey = apiKey,
+                                timeProvider = timeProvider
+                            ).parse(json)
+                        }
+                    }
+                }
             }
         }
     }
 
     private companion object {
         private const val FIELD_OBJECT = "object"
+        private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
         private const val FIELD_COUNTRY_CODE = "country_code"
         private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
         private const val FIELD_ORDERED_PAYMENT_METHOD_TYPES = "ordered_payment_method_types"
