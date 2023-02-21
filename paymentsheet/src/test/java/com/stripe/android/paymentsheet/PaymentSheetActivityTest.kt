@@ -7,6 +7,9 @@ import android.view.Gravity
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -34,6 +37,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -215,25 +219,37 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `link button should not be enabled when editing`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.linkButton.isEnabled).isTrue()
+        val viewModel = createViewModel(isLinkAvailable = true)
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(intent).onActivity {
+            composeTestRule
+                .onNodeWithTag(LinkButtonTestTag)
+                .assertIsEnabled()
 
             viewModel.toggleEditing()
 
-            assertThat(activity.viewBinding.linkButton.isEnabled).isFalse()
+            composeTestRule
+                .onNodeWithTag(LinkButtonTestTag)
+                .assertIsNotEnabled()
         }
     }
 
     @Test
     fun `link button should not be enabled when processing`() {
-        val scenario = activityScenario()
+        val viewModel = createViewModel(isLinkAvailable = true)
+        val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.linkButton.isEnabled).isTrue()
+            composeTestRule
+                .onNodeWithTag(LinkButtonTestTag)
+                .assertIsEnabled()
 
             activity.viewBinding.buyButton.callOnClick()
 
-            assertThat(activity.viewBinding.linkButton.isEnabled).isFalse()
+            composeTestRule
+                .onNodeWithTag(LinkButtonTestTag)
+                .assertIsNotEnabled()
         }
     }
 
@@ -295,7 +311,7 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel(isLinkAvailable = true)
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             val error = "some error"
             composeTestRule
                 .onNodeWithText(error)
@@ -307,7 +323,9 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertExists()
 
-            activity.viewBinding.linkButton.onClick()
+            composeTestRule
+                .onNodeWithTag(LinkButtonTestTag)
+                .performClick()
 
             composeTestRule
                 .onNodeWithText(error)
@@ -695,6 +713,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `GPay button error message is displayed`() {
+        val viewModel = createViewModel(isGooglePayAvailable = true)
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             val errorMessage = "Error message"
@@ -715,8 +734,9 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `when checkout starts then error message is cleared`() {
+        val viewModel = createViewModel(isGooglePayAvailable = true)
         val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             val errorMessage = "Error message"
 
             composeTestRule
@@ -819,21 +839,32 @@ internal class PaymentSheetActivityTest {
     fun `notes visibility is visible`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
-            viewModel.updateBelowButtonText(
-                context.getString(
-                    R.string.stripe_paymentsheet_payment_method_us_bank_account
-                )
-            )
-            assertThat(activity.viewBinding.notes.isVisible).isTrue()
+            val text = context.getString(R.string.stripe_paymentsheet_payment_method_us_bank_account)
+            viewModel.updateBelowButtonText(text)
+
+            composeTestRule
+                .onNodeWithText(text)
+                .assertIsDisplayed()
         }
     }
 
     @Test
     fun `notes visibility is gone`() {
         val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
+            val text = "some text"
+
+            viewModel.updateBelowButtonText(text)
+
+            composeTestRule
+                .onNodeWithText(text)
+                .assertIsDisplayed()
+
             viewModel.updateBelowButtonText(null)
-            assertThat(activity.viewBinding.notes.isVisible).isFalse()
+
+            composeTestRule
+                .onNodeWithText(text)
+                .assertDoesNotExist()
         }
     }
 
@@ -845,13 +876,6 @@ internal class PaymentSheetActivityTest {
                 activity.viewBinding.bottomSheet.layoutTransition.isTransitionTypeEnabled(
                     LayoutTransition.CHANGING
                 )
-            ).isTrue()
-
-            assertThat(
-                activity.viewBinding.fragmentContainerParent.layoutTransition
-                    .isTransitionTypeEnabled(
-                        LayoutTransition.CHANGING
-                    )
             ).isTrue()
         }
     }
@@ -1026,11 +1050,11 @@ internal class PaymentSheetActivityTest {
                     stripeIntent = paymentIntent,
                     customerPaymentMethods = paymentMethods,
                     isGooglePayAvailable = isGooglePayAvailable,
-                    delay = loadDelay,
                     linkState = LinkState(
                         configuration = mock(),
                         loginState = LinkState.LoginState.LoggedOut,
                     ).takeIf { isLinkAvailable },
+                    delay = loadDelay,
                 ),
                 FakeCustomerRepository(paymentMethods),
                 FakePrefsRepository(),

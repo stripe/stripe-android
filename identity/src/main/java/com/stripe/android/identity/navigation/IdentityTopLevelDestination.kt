@@ -35,10 +35,15 @@ internal abstract class IdentityTopLevelDestination(
     abstract val destinationRoute: DestinationRoute
 
     /**
-     * Route with arguments, filled with actual toString value of arguments as follows:
+     * Route with arguments,
+     * default value should be a string without any arguments:
+     *   routeBase
+     * overridden value should fill with actual toString value of arguments as follows:
      *   routeBase?argName1=arg1StringValue&argName2=arg2StringValue
+     *
      */
-    abstract val routeWithArgs: String
+    open val routeWithArgs: String
+        get() = destinationRoute.route
 }
 
 internal fun String.toRouteBase() = substringBefore('?')
@@ -103,6 +108,10 @@ internal fun String.routeToScreenName(): String = when (this) {
         IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
     CouldNotCaptureDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
+    IndividualDestination.ROUTE.route ->
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_INDIVIDUAL
+    CountryNotListedDestination.ROUTE.route ->
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_COUNTRY_NOT_LISTED
     else ->
         throw IllegalArgumentException("Invalid route: $this")
 }
@@ -126,6 +135,8 @@ internal fun String.routeToRequirement(): List<Requirement> = when (this) {
         listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
     SelfieDestination.ROUTE.route ->
         listOf(Requirement.FACE)
+    IndividualDestination.ROUTE.route ->
+        listOf(Requirement.NAME, Requirement.DOB, Requirement.ADDRESS, Requirement.IDNUMBER)
     else ->
         emptyList()
 }

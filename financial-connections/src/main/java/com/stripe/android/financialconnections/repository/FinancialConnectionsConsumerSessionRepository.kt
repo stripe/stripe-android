@@ -4,6 +4,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.CustomEmailType
+import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -13,10 +15,16 @@ internal interface FinancialConnectionsConsumerSessionRepository {
 
     suspend fun getCachedConsumerSession(): ConsumerSession?
     suspend fun lookupConsumerSession(email: String?): ConsumerSessionLookup
-    suspend fun startConsumerVerification(consumerSessionClientSecret: String): ConsumerSession
+    suspend fun startConsumerVerification(
+        consumerSessionClientSecret: String,
+        type: VerificationType,
+        customEmailType: CustomEmailType?
+    ): ConsumerSession
+
     suspend fun confirmConsumerVerification(
         consumerSessionClientSecret: String,
         verificationCode: String,
+        type: VerificationType,
     ): ConsumerSession
 
     companion object {
@@ -58,12 +66,16 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
 
     override suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
+        type: VerificationType,
+        customEmailType: CustomEmailType?,
     ): ConsumerSession = mutex.withLock {
         consumersApiService.startConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             locale = locale ?: Locale.getDefault(),
             authSessionCookie = null,
             requestSurface = CONSUMER_SURFACE,
+            type = type,
+            customEmailType = customEmailType,
             requestOptions = apiOptions
         ).also { session ->
             updateCachedConsumerSession("startConsumerVerification", session)
@@ -72,12 +84,14 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
 
     override suspend fun confirmConsumerVerification(
         consumerSessionClientSecret: String,
-        verificationCode: String
+        verificationCode: String,
+        type: VerificationType
     ): ConsumerSession {
         return consumersApiService.confirmConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             authSessionCookie = null,
             verificationCode = verificationCode,
+            type = type,
             requestSurface = CONSUMER_SURFACE,
             requestOptions = apiOptions
         ).also { session ->

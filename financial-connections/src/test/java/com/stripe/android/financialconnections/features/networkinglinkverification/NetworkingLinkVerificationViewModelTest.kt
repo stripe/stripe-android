@@ -60,7 +60,7 @@ class NetworkingLinkVerificationViewModelTest {
     )
 
     @Test
-    fun `init - starts verification with consumer session secret`() = runTest {
+    fun `init - starts SMS verification with consumer session secret`() = runTest {
         val email = "test@test.com"
         val consumerSession = consumerSession()
         getManifestReturnsManifestWithEmail(email)
@@ -69,7 +69,7 @@ class NetworkingLinkVerificationViewModelTest {
         val viewModel = buildViewModel()
 
         val state = viewModel.awaitState()
-        verify(startVerification).invoke(consumerSession.clientSecret)
+        verify(startVerification).sms(consumerSession.clientSecret)
         assertThat(state.payload()!!.consumerSessionClientSecret)
             .isEqualTo(consumerSession.clientSecret)
     }
@@ -95,7 +95,7 @@ class NetworkingLinkVerificationViewModelTest {
                 otpController.onValueChanged(i, "1")
             }
 
-            verify(confirmVerification).invoke(any(), eq("111111"))
+            verify(confirmVerification).sms(any(), eq("111111"))
             verify(goNext).invoke(linkVerifiedManifest.nextPane)
         }
 
@@ -120,7 +120,7 @@ class NetworkingLinkVerificationViewModelTest {
                 otpController.onValueChanged(i, "1")
             }
 
-            verify(confirmVerification).invoke(any(), eq("111111"))
+            verify(confirmVerification).sms(any(), eq("111111"))
             verify(goNext).invoke(LINK_ACCOUNT_PICKER)
         }
 

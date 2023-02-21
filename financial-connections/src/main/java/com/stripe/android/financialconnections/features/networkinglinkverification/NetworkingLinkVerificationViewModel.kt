@@ -47,7 +47,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         suspend {
             val email = requireNotNull(getManifest().accountholderCustomerEmailAddress)
             val consumerSession = requireNotNull(lookupAccount(email).consumerSession)
-            startVerification(consumerSession.clientSecret)
+            startVerification.sms(consumerSessionClientSecret = consumerSession.clientSecret,)
             eventTracker.track(PaneLoaded(Pane.NETWORKING_LINK_VERIFICATION))
             NetworkingLinkVerificationState.Payload(
                 email = consumerSession.emailAddress,
@@ -83,7 +83,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
 
     private fun onOTPEntered(otp: String) = suspend {
         val payload = requireNotNull(awaitState().payload())
-        confirmVerification(
+        confirmVerification.sms(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
             verificationCode = otp
         )

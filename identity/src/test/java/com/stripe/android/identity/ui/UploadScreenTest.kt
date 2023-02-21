@@ -49,7 +49,7 @@ class UploadScreenTest {
     private val documentBackUploadState = MutableStateFlow(IDLE_STATE)
     private val collectedData = MutableStateFlow(CollectedDataParam())
     private val missingRequirements =
-        MutableStateFlow(listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK))
+        MutableStateFlow(setOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK))
 
     private val mockImageHandler = mock<IdentityImageHandler>()
     private val mockIdentityViewModel = mock<IdentityViewModel> {
@@ -77,7 +77,7 @@ class UploadScreenTest {
             it.copy(idDocumentFront = mock())
         }
         missingRequirements.update {
-            listOf()
+            setOf()
         }
         testUploadScreen {
             onNodeWithTag(FRONT_ROW_TAG).assertExists()
@@ -93,7 +93,7 @@ class UploadScreenTest {
             it.copy(idDocumentFront = mock())
         }
         missingRequirements.update {
-            listOf(Requirement.IDDOCUMENTBACK)
+            setOf(Requirement.IDDOCUMENTBACK)
         }
         testUploadScreen {
             onNodeWithTag(FRONT_ROW_TAG).assertExists()
@@ -109,7 +109,7 @@ class UploadScreenTest {
             it.copy(idDocumentFront = mock(), idDocumentBack = mock())
         }
         missingRequirements.update {
-            listOf()
+            setOf()
         }
         testUploadScreen {
             onNodeWithTag(FRONT_ROW_TAG).assertExists()

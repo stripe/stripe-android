@@ -124,7 +124,7 @@ internal class IdentityViewModelTest {
     private val mockOnMissingBack = mock<() -> Unit>()
     private val mockOnReadyToSubmit = mock<() -> Unit>()
 
-    val viewModel = IdentityViewModel(
+    private val viewModel = IdentityViewModel(
         ApplicationProvider.getApplicationContext(),
         IdentityVerificationSheetContract.Args(
             verificationSessionId = VERIFICATION_SESSION_ID,
@@ -139,6 +139,7 @@ internal class IdentityViewModelTest {
         mockIdentityAnalyticsRequestFactory,
         mock(),
         mockScreenTracker,
+        mock(),
         mock(),
         mockSavedStateHandle,
         mock(),
@@ -275,7 +276,7 @@ internal class IdentityViewModelTest {
             )
 
             assertThat(viewModel.missingRequirements.value).isEqualTo(
-                REQUIREMENTS_NO_MISSING.missing
+                REQUIREMENTS_NO_MISSING.missing.toSet()
             )
 
             verify(mockIdentityModelFetcher).fetchIdentityModel(
@@ -556,7 +557,7 @@ internal class IdentityViewModelTest {
         assertThat(viewModel.verificationPageData.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
         assertThat(viewModel.collectedData.value).isEqualTo(collectedDataParam)
         assertThat(viewModel.missingRequirements.value).isEqualTo(
-            verificationPageData.requirements.missings
+            verificationPageData.requirements.missings!!.toSet()
         )
         verify(mockController).navigate(
             eq(targetTopLevelDestination.routeWithArgs),
@@ -598,7 +599,7 @@ internal class IdentityViewModelTest {
         assertThat(viewModel.verificationPageData.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
         assertThat(viewModel.collectedData.value).isEqualTo(collectedDataParam)
         assertThat(viewModel.missingRequirements.value).isEqualTo(
-            verificationPageData.requirements.missings
+            verificationPageData.requirements.missings!!.toSet()
         )
         callback()
     }

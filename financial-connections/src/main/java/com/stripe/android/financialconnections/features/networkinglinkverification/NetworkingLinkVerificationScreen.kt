@@ -31,6 +31,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.FormErrorText
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
@@ -123,13 +124,19 @@ private fun NetworkingLinkVerificationLoaded(
         Spacer(modifier = Modifier.size(16.dp))
         Title()
         Spacer(modifier = Modifier.size(8.dp))
-        Description(payload.phoneNumber)
+        Description(
+            phoneNumber = payload.phoneNumber
+        )
         Spacer(modifier = Modifier.size(24.dp))
         ExistingEmailSection(
             focusRequester = focusRequester,
             otpElement = payload.otpElement,
             enabled = confirmVerificationAsync !is Loading
         )
+        if (confirmVerificationAsync is Fail) {
+            Spacer(modifier = Modifier.size(4.dp))
+            FormErrorText(confirmVerificationAsync.error)
+        }
         Spacer(modifier = Modifier.size(24.dp))
         EmailSubtext(payload.email)
     }
@@ -201,14 +208,43 @@ private fun Title() {
 }
 
 @Composable
-@Preview(group = "NetworkingLinkVerification Pane", name = "Entering email")
+@Preview(group = "NetworkingLinkVerification Pane", name = "Entering OTP")
 internal fun NetworkingLinkVerificationScreenPreview() {
     FinancialConnectionsPreview {
         NetworkingLinkVerificationContent(
             state = NetworkingLinkVerificationState(
                 payload = Success(
                     Payload(
-                        email = "12345678",
+                        email = "email@gmail.com",
+                        phoneNumber = "12345678",
+                        otpElement = OTPElement(
+                            IdentifierSpec.Generic("otp"),
+                            OTPController()
+                        ),
+                        consumerSessionClientSecret = "12345678"
+                    )
+                )
+            ),
+            onCloseClick = {},
+            onCloseFromErrorClick = {}
+        )
+    }
+}
+
+@Composable
+@Preview(group = "NetworkingLinkVerification Pane", name = "Error")
+internal fun NetworkingLinkVerificationScreenWithErrorPreview() {
+    FinancialConnectionsPreview {
+        NetworkingLinkVerificationContent(
+            state = NetworkingLinkVerificationState(
+                confirmVerification = Fail<Unit>(
+                    Exception(
+                        "The provided 2FA is not valid."
+                    )
+                ),
+                payload = Success(
+                    Payload(
+                        email = "email@gmail.com",
                         phoneNumber = "12345678",
                         otpElement = OTPElement(
                             IdentifierSpec.Generic("otp"),
