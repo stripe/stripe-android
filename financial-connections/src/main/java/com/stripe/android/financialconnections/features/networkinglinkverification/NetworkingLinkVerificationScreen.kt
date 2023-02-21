@@ -124,7 +124,9 @@ private fun NetworkingLinkVerificationLoaded(
         Spacer(modifier = Modifier.size(16.dp))
         Title()
         Spacer(modifier = Modifier.size(8.dp))
-        Description(payload.phoneNumber)
+        Description(
+            phoneNumber = payload.phoneNumber
+        )
         Spacer(modifier = Modifier.size(24.dp))
         ExistingEmailSection(
             focusRequester = focusRequester,
@@ -213,7 +215,7 @@ internal fun NetworkingLinkVerificationScreenPreview() {
             state = NetworkingLinkVerificationState(
                 payload = Success(
                     Payload(
-                        email = "12345678",
+                        email = "email@gmail.com",
                         phoneNumber = "12345678",
                         otpElement = OTPElement(
                             IdentifierSpec.Generic("otp"),
@@ -242,7 +244,7 @@ internal fun NetworkingLinkVerificationScreenWithErrorPreview() {
                 ),
                 payload = Success(
                     Payload(
-                        email = "12345678",
+                        email = "email@gmail.com",
                         phoneNumber = "12345678",
                         otpElement = OTPElement(
                             IdentifierSpec.Generic("otp"),

@@ -135,7 +135,7 @@ private fun LinkStepUpVerificationLoaded(
         Spacer(modifier = Modifier.size(16.dp))
         Title()
         Spacer(modifier = Modifier.size(8.dp))
-        Description(payload.email)
+        Description(email = payload.email)
         Spacer(modifier = Modifier.size(24.dp))
         ExistingEmailSection(
             focusRequester = focusRequester,
@@ -212,12 +212,12 @@ private fun EmailSubtext(
 }
 
 @Composable
-private fun Description(phoneNumber: String) {
+private fun Description(email: String) {
     AnnotatedText(
         text = TextResource.Text(
             stringResource(
                 R.string.stripe_link_stepup_verification_desc,
-                phoneNumber
+                email
             )
         ),
         defaultStyle = FinancialConnectionsTheme.typography.body.copy(
