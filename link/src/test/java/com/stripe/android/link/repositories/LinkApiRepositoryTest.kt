@@ -194,13 +194,13 @@ class LinkApiRepositoryTest {
         linkRepository.startVerification(secret, consumerKey, cookie)
 
         verify(consumersApiService).startConsumerVerification(
-            consumerSessionClientSecret = eq(secret),
-            locale = eq(Locale.US),
-            authSessionCookie = eq(cookie),
-            requestSurface = eq(CONSUMER_SURFACE),
-            type = eq(VerificationType.SMS),
+            consumerSessionClientSecret = secret,
+            locale = Locale.US,
+            authSessionCookie = cookie,
+            requestSurface = CONSUMER_SURFACE,
+            type = VerificationType.SMS,
             customEmailType = null,
-            requestOptions = eq(ApiRequest.Options(consumerKey)),
+            requestOptions = ApiRequest.Options(consumerKey),
         )
     }
 
@@ -211,13 +211,13 @@ class LinkApiRepositoryTest {
         linkRepository.startVerification(secret, null, cookie)
 
         verify(consumersApiService).startConsumerVerification(
-            consumerSessionClientSecret = eq(secret),
-            locale = eq(Locale.US),
-            authSessionCookie = eq(cookie),
-            requestSurface = eq(CONSUMER_SURFACE),
-            type = eq(VerificationType.SMS),
+            consumerSessionClientSecret = secret,
+            locale = Locale.US,
+            authSessionCookie = cookie,
+            requestSurface = CONSUMER_SURFACE,
+            type = VerificationType.SMS,
             customEmailType = null,
-            requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+            requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID),
         )
     }
 
