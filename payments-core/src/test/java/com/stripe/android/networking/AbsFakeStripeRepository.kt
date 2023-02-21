@@ -18,6 +18,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -431,6 +432,13 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         logoColor: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethodMessage? {
+        return null
+    }
+
+    override suspend fun retrieveDeferredIntent(
+        elementsSessionParams: ElementsSessionParams,
+        requestOptions: ApiRequest.Options
+    ): StripeIntent? {
         return null
     }
 }

@@ -23,6 +23,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -532,4 +533,10 @@ abstract class StripeRepository {
         logoColor: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethodMessage?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun retrieveDeferredIntent(
+        elementsSessionParams: ElementsSessionParams,
+        requestOptions: ApiRequest.Options
+    ): StripeIntent?
 }
