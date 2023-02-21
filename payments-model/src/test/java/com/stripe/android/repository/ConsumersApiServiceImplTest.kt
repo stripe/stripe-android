@@ -112,12 +112,13 @@ class ConsumersApiServiceImplTest {
         }
 
         val consumerSession = consumersApiService.startConsumerVerification(
-            clientSecret,
-            locale,
-            cookie,
-            "android_payment_element",
-            VerificationType.SMS,
-            DEFAULT_OPTIONS
+            consumerSessionClientSecret = clientSecret,
+            locale = locale,
+            authSessionCookie = cookie,
+            requestSurface = "android_payment_element",
+            type = VerificationType.SMS,
+            customEmailType = null,
+            requestOptions = DEFAULT_OPTIONS
         )
 
         assertThat(consumerSession.redactedPhoneNumber).isEqualTo("+1********56")
