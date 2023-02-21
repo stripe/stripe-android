@@ -23,6 +23,8 @@
   <string name="klarna_pay_later">Klarna での後払いにします。</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="p24_bank">Przelewy24 銀行</string>
+  <!-- PayPal mandate text -->
+  <string name="paypal_mandate">PayPal による支払いを確定すると、%s が規約に従って今後の支払いをお客様の PayPal アカウントに請求することを許可することになります。</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">今後の %s の支払いのために保存する</string>
   <!-- Button title to open camera to scan credit/debit card -->

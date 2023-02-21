@@ -23,6 +23,8 @@
   <string name="klarna_pay_later">จ่ายทีหลังด้วย Klarna</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="p24_bank">ธนาคาร Przelewy24</string>
+  <!-- PayPal mandate text -->
+  <string name="paypal_mandate">การยืนยันการการชำระเงินด้วย PayPal หมายความว่าคุณอนุญาตให้ %s เรียกเก็บเงินจากบัญชี PayPal ของคุณสำหรับการชำระเงินในอนาคตตามเงื่อนไขของผู้ค้ารายดังกล่าว</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">บันทึกไว้เพื่อชำระเงินด้วย %s ในอนาคต</string>
   <!-- Button title to open camera to scan credit/debit card -->
