@@ -23,6 +23,8 @@
   <string name="klarna_pay_later">Zaplaťte později pomocí Klarna.</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="p24_bank">Przelewy24 Bank</string>
+  <!-- PayPal mandate text -->
+  <string name="paypal_mandate">Potvrzením platby prostřednictvím služby PayPal povolujete, aby společnost %s účtovala z vašeho účtu PayPal budoucí platby v souladu s jejich podmínkami.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Uložit pro budoucí platby %s</string>
   <!-- Button title to open camera to scan credit/debit card -->
