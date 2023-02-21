@@ -15,25 +15,28 @@ sealed interface ElementsSessionParams : Parcelable {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class PaymentIntentType(
-        override val clientSecret: String?,
-        override val type: String = "payment_intent",
+        override val clientSecret: String,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
-    ) : ElementsSessionParams
+    ) : ElementsSessionParams {
+        override val type: String get() = "payment_intent"
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class SetupIntentType(
-        override val clientSecret: String?,
-        override val type: String = "setup_intent",
+        override val clientSecret: String,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
-    ) : ElementsSessionParams
+    ) : ElementsSessionParams {
+        override val type: String get() = "setup_intent"
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class DeferredIntentType(
         override val clientSecret: String? = null,
-        override val type: String = "deferred_intent",
         override val locale: String? = Locale.getDefault().toLanguageTag(),
         val deferredIntentParams: DeferredIntentParams
-    ) : ElementsSessionParams
+    ) : ElementsSessionParams {
+        override val type: String get() = "deferred_intent"
+    }
 }

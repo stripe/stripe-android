@@ -24,17 +24,19 @@ data class DeferredIntentParams(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Payment(
-            override val code: String = "payment",
             val amount: Long,
             val currency: String
-        ) : Mode
+        ) : Mode {
+            override val code: String get() = "payment"
+        }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Setup(
-            override val code: String = "setup",
             val currency: String?
-        ) : Mode
+        ) : Mode {
+            override val code: String get() = "setup"
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

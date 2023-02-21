@@ -155,6 +155,7 @@ constructor(
     override val nextActionData: StripeIntent.NextActionData? = null,
 
     private val paymentMethodOptionsJsonString: String? = null
+
 ) : StripeIntent {
 
     fun getPaymentMethodOptions() = paymentMethodOptionsJsonString?.let {
