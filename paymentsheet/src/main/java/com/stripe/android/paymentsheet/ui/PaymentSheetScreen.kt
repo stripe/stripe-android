@@ -33,8 +33,9 @@ internal fun PaymentSheetScreen(
     modifier: Modifier = Modifier,
 ) {
     val contentVisible by viewModel.contentVisible.collectAsState()
+    val processing by viewModel.processing.collectAsState()
 
-    DismissKeyboardOnProcessing(viewModel)
+    DismissKeyboardOnProcessing(processing)
 
     PaymentSheetScaffold(
         topBar = { PaymentSheetTopBar(viewModel) },
@@ -52,10 +53,9 @@ internal fun PaymentSheetScreen(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun DismissKeyboardOnProcessing(viewModel: PaymentSheetViewModel) {
+private fun DismissKeyboardOnProcessing(processing: Boolean) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    val processing by viewModel.processing.collectAsState()
     if (processing) {
         LaunchedEffect(Unit) {
             keyboardController?.hide()
@@ -144,38 +144,36 @@ internal fun Wallet(
 
     val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    Column(
-        modifier = modifier.padding(horizontal = padding),
-    ) {
-        if (containerState.showGooglePay) {
-            GooglePayButton(
-                state = googlePayButtonState?.convert(),
-                isEnabled = buttonsEnabled,
-                onPressed = viewModel::checkoutWithGooglePay,
-                modifier = Modifier.padding(top = 7.dp),
-            )
-        }
+    if (containerState.shouldShow) {
+        Column(modifier = modifier.padding(horizontal = padding)) {
+            if (containerState.showGooglePay) {
+                GooglePayButton(
+                    state = googlePayButtonState?.convert(),
+                    isEnabled = buttonsEnabled,
+                    onPressed = viewModel::checkoutWithGooglePay,
+                    modifier = Modifier.padding(top = 7.dp),
+                )
+            }
 
-        if (containerState.showLink) {
-            LinkButton(
-                email = email,
-                enabled = buttonsEnabled,
-                onClick = viewModel::handleLinkPressed,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 6.dp)
-                    .requiredHeight(48.dp),
-            )
-        }
+            if (containerState.showLink) {
+                LinkButton(
+                    email = email,
+                    enabled = buttonsEnabled,
+                    onClick = viewModel::handleLinkPressed,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 6.dp)
+                        .requiredHeight(48.dp),
+                )
+            }
 
-        googlePayButtonState?.errorMessage?.let { error ->
-            ErrorMessage(
-                error = error.message,
-                modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
-            )
-        }
+            googlePayButtonState?.errorMessage?.let { error ->
+                ErrorMessage(
+                    error = error.message,
+                    modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
+                )
+            }
 
-        if (containerState.shouldShow) {
             val text = stringResource(containerState.dividerTextResource)
             GooglePayDividerUi(text)
         }
