@@ -15,6 +15,7 @@ import kotlinx.parcelize.Parcelize
 /**
  * [ActivityResultContract] to start [PaymentLauncherConfirmationActivity] and return a [PaymentResult].
  */
+// TODO: Why is this publicly accessible?
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentLauncherContract :
     ActivityResultContract<PaymentLauncherContract.Args, PaymentResult>() {
@@ -30,6 +31,9 @@ class PaymentLauncherContract :
         return PaymentResult.fromIntent(intent)
     }
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     sealed class Args(
         @InjectorKey open val injectorKey: String,
         open val publishableKey: String,
@@ -40,6 +44,9 @@ class PaymentLauncherContract :
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release.",
+        )
         @Parcelize
         data class IntentConfirmationArgs internal constructor(
             @InjectorKey override val injectorKey: String,
@@ -58,6 +65,9 @@ class PaymentLauncherContract :
             statusBarColor
         )
 
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release.",
+        )
         @Parcelize
         data class PaymentIntentNextActionArgs internal constructor(
             @InjectorKey override val injectorKey: String,
@@ -76,6 +86,9 @@ class PaymentLauncherContract :
             statusBarColor
         )
 
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release.",
+        )
         @Parcelize
         data class SetupIntentNextActionArgs internal constructor(
             @InjectorKey override val injectorKey: String,
