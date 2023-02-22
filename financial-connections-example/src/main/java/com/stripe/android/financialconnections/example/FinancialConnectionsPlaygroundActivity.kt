@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
@@ -129,10 +130,11 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     @Composable
     private fun FinancialConnectionsContent(
         state: FinancialConnectionsPlaygroundState,
-        onButtonClick: (Mode, Flow) -> Unit
+        onButtonClick: (Mode, Flow, String) -> Unit
     ) {
         val (selectedMode, onModeSelected) = remember { mutableStateOf(Mode.values()[0]) }
         val (selectedFlow, onFlowSelected) = remember { mutableStateOf(Flow.values()[0]) }
+        val (email, onEmailChange) = remember { mutableStateOf("") }
 
         Scaffold(
             topBar = { TopAppBar(title = { Text("Connections Playground") }) },
@@ -145,11 +147,13 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     NativeOverrideSection()
                     ModeSection(selectedMode, onModeSelected)
                     FlowSection(selectedFlow, onFlowSelected)
+                    EmailInputSection(email, onEmailChange)
                     if (state.loading) {
                         LinearProgressIndicator(
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
+                    Divider(Modifier.padding(vertical = 16.dp))
                     Text(
                         text = "Backend url: ${state.backendUrl}",
                         color = Color.Gray
@@ -158,7 +162,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                         onClick = {
                             onButtonClick(
                                 selectedMode,
-                                selectedFlow
+                                selectedFlow,
+                                email
                             )
                         },
                     ) {
@@ -182,6 +187,20 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             }
         )
 
+    }
+
+    @Composable
+    private fun EmailInputSection(
+        email: String,
+        onEmailChange: (String) -> Unit
+    ) {
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = email,
+            onValueChange = onEmailChange,
+            label = { Text("Customer email (optional)") }
+        )
     }
 
     @Composable
@@ -308,7 +327,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 publishableKey = "pk",
                 status = listOf("Result: Pending")
             ),
-            onButtonClick = { _, _ -> }
+            onButtonClick = { _, _, _ -> }
         )
     }
 }

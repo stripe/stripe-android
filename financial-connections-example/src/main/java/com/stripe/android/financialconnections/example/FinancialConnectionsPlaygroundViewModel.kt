@@ -38,21 +38,28 @@ class FinancialConnectionsPlaygroundViewModel(
 
     fun startFinancialConnectionsSession(
         mode: Mode,
-        flow: Flow
+        flow: Flow,
+        email: String
     ) {
         _state.update { it.copy(status = emptyList()) }
         when (flow) {
-            Flow.Data -> startForData(mode)
-            Flow.Token -> startForToken(mode)
-            Flow.PaymentIntent -> startWithPaymentIntent(mode)
+            Flow.Data -> startForData(mode, email.takeIf { it.isNotEmpty() })
+            Flow.Token -> startForToken(mode, email.takeIf { it.isNotEmpty() })
+            Flow.PaymentIntent -> startWithPaymentIntent(mode, email.takeIf { it.isNotEmpty() })
         }
     }
 
 
-    private fun startWithPaymentIntent(mode: Mode) {
+    private fun startWithPaymentIntent(mode: Mode, email: String?) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
-            kotlin.runCatching { repository.createPaymentIntent("US", mode.flow) }
+            kotlin.runCatching {
+                repository.createPaymentIntent(
+                    country = "US",
+                    flow = mode.flow,
+                    customerEmail = email
+                )
+            }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
                     _state.update { current ->
@@ -74,10 +81,15 @@ class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForData(mode: Mode) {
+    private fun startForData(mode: Mode, email: String?) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
-            kotlin.runCatching { repository.createLinkAccountSession(mode.flow) }
+            kotlin.runCatching {
+                repository.createLinkAccountSession(
+                    flow = mode.flow,
+                    customerEmail = email
+                )
+            }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
                     showLoadingWithMessage("Session created, opening FinancialConnectionsSheet.")
@@ -96,10 +108,15 @@ class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForToken(mode: Mode) {
+    private fun startForToken(mode: Mode, email: String?) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
-            kotlin.runCatching { repository.createLinkAccountSessionForToken(mode.flow) }
+            kotlin.runCatching {
+                repository.createLinkAccountSessionForToken(
+                    flow = mode.flow,
+                    customerEmail = email
+                )
+            }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
                     showLoadingWithMessage("Session created, opening FinancialConnectionsSheet.")

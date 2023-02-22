@@ -7,26 +7,28 @@ class BackendRepository(
 ) {
     private val backendService: BackendApiService = BackendApiFactory(settings).create()
 
-    suspend fun createLinkAccountSession(flow: String? = null) =
+    suspend fun createLinkAccountSession(flow: String? = null, customerEmail: String? = null) =
         backendService.createLinkAccountSession(
-            LinkAccountSessionBody(flow)
+            LinkAccountSessionBody(flow, customerEmail)
         )
 
-    suspend fun createLinkAccountSessionForToken(flow: String? = null) =
+    suspend fun createLinkAccountSessionForToken(flow: String? = null, customerEmail: String? = null) =
         backendService.createLinkAccountSessionForToken(
-            LinkAccountSessionBody(flow)
+            LinkAccountSessionBody(flow, customerEmail)
         )
 
     suspend fun createPaymentIntent(
         country: String,
         flow: String? = null,
         customerId: String? = null,
-        supportedPaymentMethods: String? = null
+        supportedPaymentMethods: String? = null,
+        customerEmail: String? = null
     ): CreateIntentResponse = backendService.createPaymentIntent(
         PaymentIntentBody(
             flow = flow,
             country = country,
             customerId = customerId,
+            customerEmail = customerEmail,
             supportedPaymentMethods = supportedPaymentMethods
         )
     )
