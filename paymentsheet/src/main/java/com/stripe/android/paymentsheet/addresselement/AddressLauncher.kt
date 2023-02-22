@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
 import kotlinx.parcelize.Parcelize
+import java.util.Objects
 
 /**
  * A drop-in class that presents a bottom sheet to collect a customer's address.
@@ -72,7 +74,7 @@ class AddressLauncher internal constructor(
 
     /** Configuration for [AddressLauncher] **/
     @Parcelize
-    data class Configuration @JvmOverloads constructor(
+    class Configuration @JvmOverloads constructor(
         /**
          * Configuration for the look and feel of the UI
          */
@@ -121,6 +123,106 @@ class AddressLauncher internal constructor(
             "PL", "RU", "SE", "TR", "US", "ZA"
         )
     ) : Parcelable {
+
+        fun copy(
+            appearance: PaymentSheet.Appearance = this.appearance,
+            address: AddressDetails? = this.address,
+            allowedCountries: Set<String> = this.allowedCountries,
+            buttonTitle: String? = this.buttonTitle,
+            additionalFields: AdditionalFieldsConfiguration? = this.additionalFields,
+            title: String? = this.title,
+            googlePlacesApiKey: String? = this.googlePlacesApiKey,
+            autocompleteCountries: Set<String> = this.autocompleteCountries,
+        ): Configuration {
+            return Configuration(
+                appearance = appearance,
+                address = address,
+                allowedCountries = allowedCountries,
+                buttonTitle = buttonTitle,
+                additionalFields = additionalFields,
+                title = title,
+                googlePlacesApiKey = googlePlacesApiKey,
+                autocompleteCountries = autocompleteCountries
+            )
+        }
+
+        override fun hashCode(): Int {
+            return Objects.hash(
+                appearance,
+                address,
+                allowedCountries,
+                buttonTitle,
+                additionalFields,
+                title,
+                googlePlacesApiKey,
+                autocompleteCountries,
+            )
+        }
+
+        override fun equals(other: Any?): Boolean {
+            return other is Configuration &&
+                appearance == other.appearance &&
+                address == other.address &&
+                allowedCountries == other.allowedCountries &&
+                buttonTitle == other.buttonTitle &&
+                additionalFields == other.additionalFields &&
+                title == other.title &&
+                googlePlacesApiKey == other.googlePlacesApiKey &&
+                autocompleteCountries == other.autocompleteCountries
+        }
+
+        override fun toString(): String {
+            return "AddressLauncher.Configuration(" +
+                "appearance=$appearance, " +
+                "address=$address, " +
+                "allowedCountries=$allowedCountries, " +
+                "buttonTitle=$buttonTitle, " +
+                "additionalFields=$additionalFields, " +
+                "title=$title, " +
+                "googlePlacesApiKey=$googlePlacesApiKey, " +
+                "autocompleteCountries=$autocompleteCountries)"
+        }
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component1(): PaymentSheet.Appearance = appearance
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component2(): AddressDetails? = address
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component3(): Set<String> = allowedCountries
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component4(): String? = buttonTitle
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component5(): AdditionalFieldsConfiguration? = additionalFields
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component6(): String? = title
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component7(): String? = googlePlacesApiKey
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component8(): Set<String> = autocompleteCountries
+
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
@@ -177,10 +279,44 @@ class AddressLauncher internal constructor(
      * checkbox is not displayed. Defaults to null
      */
     @Parcelize
-    data class AdditionalFieldsConfiguration @JvmOverloads constructor(
+    class AdditionalFieldsConfiguration @JvmOverloads constructor(
         val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
         val checkboxLabel: String? = null
     ) : Parcelable {
+
+        fun copy(
+            phone: FieldConfiguration = this.phone,
+            checkboxLabel: String? = this.checkboxLabel,
+        ): AdditionalFieldsConfiguration {
+            return AdditionalFieldsConfiguration(phone, checkboxLabel)
+        }
+
+        override fun hashCode(): Int {
+            return Objects.hash(phone, checkboxLabel)
+        }
+
+        override fun equals(other: Any?): Boolean {
+            return other is AdditionalFieldsConfiguration &&
+                phone == other.phone &&
+                checkboxLabel == other.checkboxLabel
+        }
+
+        override fun toString(): String {
+            return "PaymentSheet.AdditionalFieldsConfiguration(" +
+                "phone=$phone, " +
+                "checkboxLabel=$checkboxLabel)"
+        }
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component1(): FieldConfiguration = phone
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component2(): String? = checkboxLabel
+
         @Parcelize
         enum class FieldConfiguration : Parcelable {
             /**
