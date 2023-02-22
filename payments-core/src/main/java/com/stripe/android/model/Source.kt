@@ -413,6 +413,9 @@ data class Source internal constructor(
         val customPaymentMethods: Set<String>
     ) : StripeModel
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     companion object {
         internal const val EURO: String = "eur"
         internal const val USD: String = "usd"

@@ -998,6 +998,9 @@ constructor(
         ) : StripeModel
     }
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     companion object {
         @JvmStatic
         fun fromJson(paymentMethod: JSONObject?): PaymentMethod? {

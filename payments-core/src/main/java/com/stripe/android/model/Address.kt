@@ -88,6 +88,9 @@ data class Address @VisibleForTesting constructor(
         }
     }
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     companion object {
         private const val PARAM_CITY = "city"
 
