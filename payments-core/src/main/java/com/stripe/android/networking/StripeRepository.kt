@@ -23,6 +23,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -30,7 +31,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
-import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -92,7 +92,7 @@ abstract class StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale
-    ): PaymentMethodPreference?
+    ): ElementsSession?
 
     @Throws(
         AuthenticationException::class,
@@ -154,7 +154,7 @@ abstract class StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale
-    ): PaymentMethodPreference?
+    ): ElementsSession?
 
     @Throws(
         AuthenticationException::class,
@@ -535,8 +535,8 @@ abstract class StripeRepository {
     ): PaymentMethodMessage?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    abstract suspend fun retrieveDeferredIntent(
-        elementsSessionParams: ElementsSessionParams,
-        requestOptions: ApiRequest.Options
-    ): StripeIntent?
+    abstract suspend fun retrieveElementsSession(
+        params: ElementsSessionParams,
+        options: ApiRequest.Options,
+    ): ElementsSession?
 }

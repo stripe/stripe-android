@@ -61,7 +61,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
-import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -355,26 +354,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale
-    ): PaymentMethodPreference? {
+    ): ElementsSession? {
         val params = ElementsSessionParams.PaymentIntentType(
             clientSecret = clientSecret,
             locale = locale.toLanguageTag(),
         )
-        val elementsSession = retrieveElementsSession(
+        
+        return retrieveElementsSession(
             params = params,
-            expandFields = listOf(
-                "payment_method_preference.${params.type}.payment_method"
-            ),
             options = options,
             analyticsEvent = PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered
         )
-
-        return elementsSession?.stripeIntent?.let { intent ->
-            PaymentMethodPreference(
-                intent = intent,
-                formUI = elementsSession.paymentMethodSpecs,
-            )
-        }
     }
 
     /**
@@ -508,26 +498,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale
-    ): PaymentMethodPreference? {
+    ): ElementsSession? {
         val params = ElementsSessionParams.SetupIntentType(
             clientSecret = clientSecret,
             locale = locale.toLanguageTag(),
         )
-        val elementsSession = retrieveElementsSession(
+
+        return retrieveElementsSession(
             params = params,
-            expandFields = listOf(
-                "payment_method_preference.${params.type}.payment_method"
-            ),
             options = options,
             analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieveOrdered
         )
-
-        return elementsSession?.stripeIntent?.let { intent ->
-            PaymentMethodPreference(
-                intent = intent,
-                formUI = elementsSession.paymentMethodSpecs,
-            )
-        }
     }
 
     /**
@@ -1652,23 +1633,24 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    override suspend fun retrieveDeferredIntent(
-        elementsSessionParams: ElementsSessionParams,
-        requestOptions: ApiRequest.Options
-    ): StripeIntent? {
-        return retrieveElementsSession(
-            params = elementsSessionParams,
-            options = requestOptions,
-            analyticsEvent = null
-        )?.stripeIntent
-    }
-
     /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
     @VisibleForTesting
     internal fun getDetachPaymentMethodUrl(paymentMethodId: String): String {
         return getApiUrl("payment_methods/%s/detach", paymentMethodId)
+    }
+
+    override suspend fun retrieveElementsSession(
+        params: ElementsSessionParams,
+        options: ApiRequest.Options,
+    ): ElementsSession? {
+        return retrieveElementsSession(
+            params = params,
+            expandFields = params.expandFields(),
+            options = options,
+            analyticsEvent = null,
+        )
     }
 
     private suspend fun retrieveElementsSession(
@@ -2216,6 +2198,18 @@ class StripeApiRepository @JvmOverloads internal constructor(
             return expandFields.takeIf { it.isNotEmpty() }?.let {
                 mapOf("expand" to it)
             }.orEmpty()
+        }
+    }
+}
+
+private fun ElementsSessionParams.expandFields(): List<String> {
+    return when (this) {
+        is ElementsSessionParams.PaymentIntentType,
+        is ElementsSessionParams.SetupIntentType -> {
+            listOf("payment_method_preference.${type}.payment_method")
+        }
+        is ElementsSessionParams.DeferredIntentType -> {
+            emptyList()
         }
     }
 }

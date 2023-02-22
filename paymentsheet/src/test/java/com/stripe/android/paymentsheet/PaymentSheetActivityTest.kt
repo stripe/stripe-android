@@ -62,7 +62,7 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -1044,7 +1044,7 @@ internal class PaymentSheetActivityTest {
                 PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
                 eventReporter,
                 { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-                StripeIntentRepository.Static(paymentIntent),
+                ElementsSessionRepository.Static(paymentIntent),
                 StripeIntentValidator(),
                 FakePaymentSheetLoader(
                     stripeIntent = paymentIntent,

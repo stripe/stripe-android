@@ -16,7 +16,7 @@ import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentSheetLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
@@ -41,8 +41,8 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsStripeIntentRepository(
-        repository: StripeIntentRepository.Api
-    ): StripeIntentRepository
+        repository: ElementsSessionRepository.Api
+    ): ElementsSessionRepository
 
     @Binds
     abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentSheetLoader): PaymentSheetLoader

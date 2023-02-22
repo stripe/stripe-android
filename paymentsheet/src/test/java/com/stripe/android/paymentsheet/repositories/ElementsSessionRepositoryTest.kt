@@ -23,7 +23,7 @@ import java.util.Locale
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-internal class StripeIntentRepositoryTest {
+internal class ElementsSessionRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val stripeRepository = mock<StripeRepository>()
 
@@ -113,7 +113,7 @@ internal class StripeIntentRepositoryTest {
                     .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
             ).thenReturn(PaymentMethodPreference(PaymentIntentFixtures.PI_WITH_SHIPPING))
 
-            val paymentMethodPreference = StripeIntentRepository.Api(
+            val paymentMethodPreference = ElementsSessionRepository.Api(
                 stripeRepository,
                 { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
                 testDispatcher,
@@ -135,7 +135,7 @@ internal class StripeIntentRepositoryTest {
             assertThat(localeArgumentCaptor.firstValue).isEqualTo(defaultLocale)
         }
 
-    private fun createRepository(locale: Locale? = null) = StripeIntentRepository.Api(
+    private fun createRepository(locale: Locale? = null) = ElementsSessionRepository.Api(
         stripeRepository,
         { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
         testDispatcher,
