@@ -127,6 +127,8 @@
     <string name="stripe_link_stepup_verification_title">Check your email to confirm your identity</string>
     <string name="stripe_link_stepup_verification_desc">To keep your Link account safe, we periodically need to confirm you\'re you. Enter the code sent to your email %1$s.</string>
     <string name="stripe_link_stepup_verification_resend_code"><annotation clickable="resend_code">Resend code</annotation></string>
+    <string name="stripe_networking_save_to_link_verification_title">Sign in to Link</string>
+    <string name="stripe_networking_save_to_link_verification_cta_negative">Not now</string>
     <plurals name="stripe_success_desc">
         <item quantity="zero" />
         <item quantity="one">Your account was successfully linked to %1$s through Stripe.</item>

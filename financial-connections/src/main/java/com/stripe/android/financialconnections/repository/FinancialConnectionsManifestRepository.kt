@@ -125,9 +125,11 @@ internal interface FinancialConnectionsManifestRepository {
      */
     suspend fun postSaveAccountsToLink(
         clientSecret: String,
-        email: String,
-        country: String,
-        phoneNumber: String,
+        email: String?,
+        country: String?,
+        locale: String?,
+        phoneNumber: String?,
+        consumerSessionClientSecret: String?,
         selectedAccounts: List<String>
     ): FinancialConnectionsSessionManifest
 
@@ -379,9 +381,11 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     override suspend fun postSaveAccountsToLink(
         clientSecret: String,
-        email: String,
-        country: String,
-        phoneNumber: String,
+        email: String?,
+        country: String?,
+        locale: String?,
+        phoneNumber: String?,
+        consumerSessionClientSecret: String?,
         selectedAccounts: List<String>,
     ): FinancialConnectionsSessionManifest {
         val request = apiRequestFactory.createPost(
@@ -389,12 +393,13 @@ private class FinancialConnectionsManifestRepositoryImpl(
             options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                NetworkConstants.PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
                 "expand" to listOf("active_auth_session"),
                 "country" to country,
-                "locale" to locale.toLanguageTag(),
+                "locale" to locale,
                 "email_address" to email,
                 "phone_number" to phoneNumber
-            ) + selectedAccounts.mapIndexed { index, account ->
+            ).filterNotNullValues() + selectedAccounts.mapIndexed { index, account ->
                 "${NetworkConstants.PARAM_SELECTED_ACCOUNTS}[$index]" to account
             }
         )

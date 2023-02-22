@@ -93,7 +93,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         onAsync(
             NetworkingLinkSignupState::lookupAccount,
             onSuccess = {
-                if (it.exists) goNext(Pane.NETWORKING_LINK_VERIFICATION)
+                if (it.exists) goNext(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION)
             },
             onFail = { error ->
                 logger.error("Error looking up account", error)
@@ -126,7 +126,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             val selectedAccounts = getCachedAccounts()
             val phoneController = state.payload()!!.phoneController
             require(state.valid()) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
-            saveAccountToLink(
+            saveAccountToLink.new(
                 country = phoneController.getCountryCode(),
                 email = state.validEmail!!,
                 phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),

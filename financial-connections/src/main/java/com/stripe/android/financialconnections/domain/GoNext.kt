@@ -44,6 +44,7 @@ internal fun Pane.toNavigationCommand(
     Pane.NETWORKING_LINK_VERIFICATION -> NavigationDirections.networkingLinkVerification
     Pane.LINK_STEP_UP_VERIFICATION -> NavigationDirections.linkStepUpVerification
     Pane.LINK_ACCOUNT_PICKER -> NavigationDirections.linkAccountPicker
+    Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION -> NavigationDirections.networkingSaveToLinkVerification
     Pane.AUTH_OPTIONS,
     Pane.LINK_CONSENT,
     Pane.LINK_LOGIN,
