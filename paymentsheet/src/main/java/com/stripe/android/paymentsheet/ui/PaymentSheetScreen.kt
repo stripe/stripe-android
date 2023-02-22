@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -117,6 +118,7 @@ internal fun PaymentSheetScreenContent(
 
         AndroidViewBinding(
             factory = FragmentPaymentSheetPrimaryButtonBinding::inflate,
+            modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
         )
 
         notes?.let { text ->
@@ -179,3 +181,5 @@ internal fun Wallet(
         }
     }
 }
+
+internal const val PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON"
