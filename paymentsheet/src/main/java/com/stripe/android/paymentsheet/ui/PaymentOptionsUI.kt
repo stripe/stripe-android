@@ -3,8 +3,10 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -57,11 +59,13 @@ internal fun PaymentOptions(
     onItemSelected: (PaymentSelection?) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
+    scrollState: LazyListState = rememberLazyListState(),
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
         val width = rememberItemWidth(maxWidth)
 
         LazyRow(
+            state = scrollState,
             userScrollEnabled = !isProcessing,
             contentPadding = PaddingValues(horizontal = 17.dp),
         ) {
@@ -86,12 +90,12 @@ internal fun PaymentOptions(
 }
 
 @Composable
-internal fun rememberItemWidth(maxWidth: Dp): Dp {
+internal fun rememberItemWidth(maxWidth: Dp): Dp = remember(maxWidth) {
     val targetWidth = maxWidth - 17.dp * 2
     val minItemWidth = 100.dp + (6.dp * 2)
     // numVisibleItems is incremented in steps of 0.5 items (1, 1.5, 2, 2.5, 3, ...)
     val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
-    return (targetWidth / numVisibleItems)
+    (targetWidth / numVisibleItems)
 }
 
 @Composable
