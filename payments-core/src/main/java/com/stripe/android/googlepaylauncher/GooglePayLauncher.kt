@@ -27,6 +27,53 @@ import kotlinx.parcelize.Parcelize
 import java.util.Locale
 
 /**
+ * Creates a [GooglePayLauncher] that is remembered across compositions.
+ *
+ * This *must* be called unconditionally, as part of the initialization path.
+ */
+@Composable
+fun rememberGooglePayLauncher(
+    config: GooglePayLauncher.Config,
+    readyCallback: GooglePayLauncher.ReadyCallback,
+    resultCallback: GooglePayLauncher.ResultCallback,
+): GooglePayLauncher {
+    val currentReadyCallback by rememberUpdatedState(readyCallback)
+
+    val context = LocalContext.current
+    val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        GooglePayLauncherContract(),
+        resultCallback::onResult
+    )
+
+    return remember(config) {
+        GooglePayLauncher(
+            lifecycleScope = lifecycleScope,
+            config = config,
+            readyCallback = {
+                currentReadyCallback.onReady(it)
+            },
+            activityResultLauncher = activityResultLauncher,
+            googlePayRepositoryFactory = {
+                DefaultGooglePayRepository(
+                    context = context,
+                    environment = config.environment,
+                    billingAddressParameters = config.billingAddressConfig.convert(),
+                    existingPaymentMethodRequired = config.existingPaymentMethodRequired,
+                    allowCreditCards = config.allowCreditCards
+                )
+            },
+            PaymentAnalyticsRequestFactory(
+                context,
+                PaymentConfiguration.getInstance(context).publishableKey,
+                setOf(GooglePayLauncher.PRODUCT_USAGE)
+            ),
+            DefaultAnalyticsRequestExecutor()
+        )
+    }
+}
+
+/**
  * A drop-in class that presents a Google Pay sheet to collect customer payment details and use it
  * to confirm a [PaymentIntent] or [SetupIntent]. When successful, will return [Result.Completed].
  *
@@ -295,46 +342,17 @@ class GooglePayLauncher internal constructor(
          * The GooglePayLauncher created is remembered across recompositions. Recomposition will
          * always return the value produced by composition.
          */
+        @Deprecated(
+            message = "Use the top-level rememberGooglePayLauncher() method instead",
+            replaceWith = ReplaceWith("rememberGooglePayLauncher(config, readyCallback, resultCallback)"),
+        )
         @Composable
         fun rememberLauncher(
             config: Config,
             readyCallback: ReadyCallback,
             resultCallback: ResultCallback
         ): GooglePayLauncher {
-            val currentReadyCallback by rememberUpdatedState(readyCallback)
-
-            val context = LocalContext.current
-            val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
-            val activityResultLauncher = rememberLauncherForActivityResult(
-                GooglePayLauncherContract(),
-                resultCallback::onResult
-            )
-
-            return remember(config) {
-                GooglePayLauncher(
-                    lifecycleScope = lifecycleScope,
-                    config = config,
-                    readyCallback = {
-                        currentReadyCallback.onReady(it)
-                    },
-                    activityResultLauncher = activityResultLauncher,
-                    googlePayRepositoryFactory = {
-                        DefaultGooglePayRepository(
-                            context = context,
-                            environment = config.environment,
-                            billingAddressParameters = config.billingAddressConfig.convert(),
-                            existingPaymentMethodRequired = config.existingPaymentMethodRequired,
-                            allowCreditCards = config.allowCreditCards
-                        )
-                    },
-                    PaymentAnalyticsRequestFactory(
-                        context,
-                        PaymentConfiguration.getInstance(context).publishableKey,
-                        setOf(PRODUCT_USAGE)
-                    ),
-                    DefaultAnalyticsRequestExecutor()
-                )
-            }
+            return rememberGooglePayLauncher(config, readyCallback, resultCallback)
         }
     }
 }

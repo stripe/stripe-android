@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -40,6 +41,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
 import kotlinx.parcelize.Parcelize
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -106,6 +108,17 @@ class LinkPaymentLauncher @Inject internal constructor(
 
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
+
+    fun register(
+        activityResultRegistry: ActivityResultRegistry,
+        callback: (LinkActivityResult) -> Unit,
+    ) {
+        linkActivityResultLauncher = activityResultRegistry.register(
+            "LinkHandler_${UUID.randomUUID()}",
+            LinkActivityContract(),
+            callback,
+        )
+    }
 
     fun register(
         activityResultCaller: ActivityResultCaller,

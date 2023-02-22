@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
@@ -19,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.rememberGooglePayPaymentMethodLauncher
 import kotlinx.coroutines.launch
 
 class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
@@ -48,7 +50,7 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
         val scope = rememberCoroutineScope()
         var enabled by remember { mutableStateOf(false) }
 
-        val googlePayLauncher = GooglePayPaymentMethodLauncher.rememberLauncher(
+        val googlePayLauncher = rememberGooglePayPaymentMethodLauncher(
             config = googlePayConfig,
             readyCallback = { ready ->
                 if (ready) {
@@ -97,13 +99,14 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
         enabled: Boolean,
         onLaunchGooglePay: () -> Unit
     ) {
-        Scaffold(scaffoldState = scaffoldState) {
+        Scaffold(scaffoldState = scaffoldState) { paddingValues ->
             AndroidView(
                 factory = { context ->
                     GooglePayButton(context)
                 },
                 modifier = Modifier
                     .wrapContentWidth()
+                    .padding(paddingValues)
                     .clickable(
                         enabled = enabled,
                         onClick = onLaunchGooglePay

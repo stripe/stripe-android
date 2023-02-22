@@ -776,6 +776,10 @@ public final class com/stripe/android/paymentsheet/PaymentSheetContractV2$Result
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheetKt {
+	public static final fun rememberPaymentSheet (Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
+}
+
 public abstract class com/stripe/android/paymentsheet/PaymentSheetResult : android/os/Parcelable {
 	public static final field $stable I
 }
@@ -1195,6 +1199,10 @@ public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowCon
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController$Args;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerKt {
+	public static final fun rememberPaymentSheetFlowController (Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 }
 
 public final class com/stripe/android/paymentsheet/model/PaymentIntentClientSecret$Creator : android/os/Parcelable$Creator {

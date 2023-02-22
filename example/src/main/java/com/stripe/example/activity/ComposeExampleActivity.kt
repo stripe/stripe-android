@@ -15,9 +15,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.Address
@@ -25,6 +23,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.rememberPaymentLauncher
 import com.stripe.example.R
 import com.stripe.example.Settings
 import com.stripe.example.module.StripeIntentViewModel
@@ -37,16 +36,29 @@ class ComposeExampleActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val settings = Settings(this)
+
         setContent {
-            ComposeScreen()
+            ComposeScreen(
+                settings = settings,
+                onPaymentResult = this::onPaymentResult,
+            )
         }
     }
 
     @Composable
-    fun ComposeScreen() {
+    private fun ComposeScreen(
+        settings: Settings,
+        onPaymentResult: (PaymentResult) -> Unit,
+    ) {
         val inProgress by viewModel.inProgress.observeAsState(false)
         val status by viewModel.status.observeAsState("")
-        val paymentLauncher = rememberPaymentLauncher()
+
+        val paymentLauncher = rememberPaymentLauncher(
+            publishableKey = settings.publishableKey,
+            stripeAccountId = settings.stripeAccountId,
+            callback = onPaymentResult,
+        )
 
         ComposeScreen(
             inProgress = inProgress,
@@ -86,20 +98,6 @@ class ComposeExampleActivity : AppCompatActivity() {
             Divider(modifier = Modifier.padding(vertical = 5.dp))
             Text(text = status)
         }
-    }
-
-    /**
-     * Create [PaymentLauncher] in a [Composable]
-     */
-    @Composable
-    private fun rememberPaymentLauncher(): PaymentLauncher {
-        val context = LocalContext.current
-        val settings = remember { Settings(context) }
-        return PaymentLauncher.rememberLauncher(
-            publishableKey = settings.publishableKey,
-            stripeAccountId = settings.stripeAccountId,
-            callback = ::onPaymentResult
-        )
     }
 
     private fun onPaymentResult(paymentResult: PaymentResult) {

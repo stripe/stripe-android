@@ -47,6 +47,39 @@ import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 /**
+ * Creates a [GooglePayPaymentMethodLauncher] that is remembered across compositions.
+ *
+ * This *must* be called unconditionally, as part of the initialization path.
+ */
+@Composable
+fun rememberGooglePayPaymentMethodLauncher(
+    config: GooglePayPaymentMethodLauncher.Config,
+    readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
+    resultCallback: GooglePayPaymentMethodLauncher.ResultCallback
+): GooglePayPaymentMethodLauncher {
+    val currentReadyCallback by rememberUpdatedState(readyCallback)
+
+    val context = LocalContext.current
+    val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        GooglePayPaymentMethodLauncherContract(),
+        resultCallback::onResult
+    )
+
+    return remember(config) {
+        GooglePayPaymentMethodLauncher(
+            context = context,
+            lifecycleScope = lifecycleScope,
+            activityResultLauncher = activityResultLauncher,
+            config = config,
+            readyCallback = {
+                currentReadyCallback.onReady(it)
+            }
+        )
+    }
+}
+
+/**
  * A drop-in class that presents a Google Pay sheet to collect a customer's payment details.
  * When successful, will return a [PaymentMethod] via [Result.Completed.paymentMethod].
  *
@@ -172,7 +205,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         readyCallback
     )
 
-    private constructor (
+    internal constructor (
         context: Context,
         lifecycleScope: CoroutineScope,
         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
@@ -393,32 +426,17 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          * The GooglePayPaymentMethodLauncher created is remembered across recompositions.
          * Recomposition will always return the value produced by composition.
          */
+        @Deprecated(
+            message = "Use the top-level rememberGooglePayPaymentMethodLauncher() method instead",
+            replaceWith = ReplaceWith("rememberGooglePayPaymentMethodLauncher(config, readyCallback, resultCallback)"),
+        )
         @Composable
         fun rememberLauncher(
             config: Config,
             readyCallback: ReadyCallback,
             resultCallback: ResultCallback
         ): GooglePayPaymentMethodLauncher {
-            val currentReadyCallback by rememberUpdatedState(readyCallback)
-
-            val context = LocalContext.current
-            val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
-            val activityResultLauncher = rememberLauncherForActivityResult(
-                GooglePayPaymentMethodLauncherContract(),
-                resultCallback::onResult
-            )
-
-            return remember(config) {
-                GooglePayPaymentMethodLauncher(
-                    context = context,
-                    lifecycleScope = lifecycleScope,
-                    activityResultLauncher = activityResultLauncher,
-                    config = config,
-                    readyCallback = {
-                        currentReadyCallback.onReady(it)
-                    }
-                )
-            }
+            return rememberGooglePayPaymentMethodLauncher(config, readyCallback, resultCallback)
         }
     }
 }

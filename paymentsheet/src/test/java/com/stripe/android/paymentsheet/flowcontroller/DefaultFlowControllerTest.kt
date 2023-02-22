@@ -2,8 +2,9 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import android.graphics.Color
-import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -58,6 +59,7 @@ import com.stripe.android.testing.FakeIntentConfirmationInterceptor
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.RelayingPaymentSheetLoader
+import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
@@ -119,7 +121,13 @@ internal class DefaultFlowControllerTest {
     private val testScope = TestScope(testDispatcher)
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val activityResultCaller = mock<ActivityResultCaller>()
+
+    private val activityResultRegistry: ActivityResultRegistry = mock()
+
+    private val activityResultRegistryOwner = object : ActivityResultRegistryOwner {
+        override val activityResultRegistry: ActivityResultRegistry
+            get() = this@DefaultFlowControllerTest.activityResultRegistry
+    }
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
@@ -129,35 +137,40 @@ internal class DefaultFlowControllerTest {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         whenever(
-            activityResultCaller.registerForActivityResult(
+            activityResultRegistry.register(
+                any(),
                 any<PaymentOptionContract>(),
                 any()
             )
         ).thenReturn(paymentOptionActivityLauncher)
 
         whenever(
-            activityResultCaller.registerForActivityResult(
+            activityResultRegistry.register(
+                any(),
                 any<AddressElementActivityContract>(),
                 any()
             )
         ).thenReturn(addressElementActivityLauncher)
 
         whenever(
-            activityResultCaller.registerForActivityResult(
+            activityResultRegistry.register(
+                any(),
                 any<GooglePayPaymentMethodLauncherContract>(),
                 any()
             )
         ).thenReturn(googlePayActivityLauncher)
 
         whenever(
-            activityResultCaller.registerForActivityResult(
+            activityResultRegistry.register(
+                any(),
                 any<LinkActivityContract>(),
                 any()
             )
         ).thenReturn(linkActivityResultLauncher)
 
         whenever(
-            activityResultCaller.registerForActivityResult(
+            activityResultRegistry.register(
+                any(),
                 any<PaymentLauncherContract>(),
                 any()
             )
@@ -1173,6 +1186,7 @@ internal class DefaultFlowControllerTest {
     ) = DefaultFlowController(
         viewModelScope = testScope,
         lifecycleOwner = lifeCycleOwner,
+        activityResultRegistryOwner = activityResultRegistryOwner,
         statusBarColor = { STATUS_BAR_COLOR },
         paymentOptionFactory = PaymentOptionFactory(
             resources = context.resources,
@@ -1180,7 +1194,6 @@ internal class DefaultFlowControllerTest {
         ),
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
-        activityResultCaller = activityResultCaller,
         injectorKey = INJECTOR_KEY,
         eventReporter = eventReporter,
         viewModel = viewModel,

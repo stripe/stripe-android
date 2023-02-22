@@ -13,6 +13,31 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 
 /**
+ * Creates a [PaymentLauncher] that is remembered across compositions.
+ *
+ * This *must* be called unconditionally, as part of the initialization path.
+ */
+@Composable
+fun rememberPaymentLauncher(
+    publishableKey: String,
+    stripeAccountId: String? = null,
+    callback: PaymentLauncher.PaymentResultCallback
+): PaymentLauncher {
+    val context = LocalContext.current
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        PaymentLauncherContract(),
+        callback::onPaymentResult
+    )
+
+    return remember(publishableKey, stripeAccountId) {
+        PaymentLauncherFactory(
+            context,
+            activityResultLauncher
+        ).create(publishableKey, stripeAccountId)
+    }
+}
+
+/**
  * API to confirm and handle next actions for [PaymentIntent] and [SetupIntent].
  */
 interface PaymentLauncher {
@@ -84,9 +109,10 @@ interface PaymentLauncher {
          * recompositions.
          */
         @Deprecated(
-            "This method creates a new PaymentLauncher object every time it is called, even" +
-                "during recompositions.",
-            replaceWith = ReplaceWith("PaymentLauncher.rememberLauncher(publishableKey, stripeAccountId, callback)")
+            message = "This method creates a new PaymentLauncher object every time it is called, " +
+                "even during recompositions.",
+            replaceWith = ReplaceWith("PaymentLauncher.rememberLauncher(publishableKey, stripeAccountId, callback)"),
+            level = DeprecationLevel.ERROR,
         )
         @Composable
         fun createForCompose(
@@ -110,24 +136,17 @@ interface PaymentLauncher {
          * The PaymentLauncher created is remembered across recompositions. Recomposition will
          * always return the value produced by composition.
          */
+        @Deprecated(
+            message = "Use the top-level rememberPaymentLauncher() method instead",
+            replaceWith = ReplaceWith("rememberPaymentLauncher(publishableKey, stripeAccountId, callback)"),
+        )
         @Composable
         fun rememberLauncher(
             publishableKey: String,
             stripeAccountId: String? = null,
             callback: PaymentResultCallback
         ): PaymentLauncher {
-            val context = LocalContext.current
-            val activityResultLauncher = rememberLauncherForActivityResult(
-                PaymentLauncherContract(),
-                callback::onPaymentResult
-            )
-
-            return remember(publishableKey, stripeAccountId) {
-                PaymentLauncherFactory(
-                    context,
-                    activityResultLauncher
-                ).create(publishableKey, stripeAccountId)
-            }
+            return rememberPaymentLauncher(publishableKey, stripeAccountId, callback)
         }
     }
 }
