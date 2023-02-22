@@ -1,44 +1,18 @@
-plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-    id 'org.jetbrains.kotlin.plugin.serialization'
-}
+apply from: configs.androidApplication
+
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
 assemble.dependsOn('lint')
-check.dependsOn('checkstyle')
 
 configurations {
     ktlint
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
     defaultConfig {
         applicationId "com.stripe.android.identity.example"
-        minSdk 21
-        targetSdk rootProject.ext.compileSdkVersion
-        versionCode 8
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
     }
 
     buildFeatures {
