@@ -79,6 +79,9 @@ class CollectBankAccountContract :
             attachToIntent = attachToIntent
         )
 
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release.",
+        )
         companion object {
             fun fromIntent(intent: Intent): Args? {
                 return intent.getParcelableExtra(EXTRA_ARGS)

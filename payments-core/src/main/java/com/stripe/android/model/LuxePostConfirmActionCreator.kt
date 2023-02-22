@@ -4,6 +4,9 @@ import android.net.Uri
 import androidx.annotation.RestrictTo
 import org.json.JSONObject
 
+@Deprecated(
+    message = "This isn't meant for public usage and will be removed in a future release.",
+)
 sealed class LuxePostConfirmActionCreator {
     internal fun create(stripeIntentJsonString: String) =
         create(JSONObject(stripeIntentJsonString))

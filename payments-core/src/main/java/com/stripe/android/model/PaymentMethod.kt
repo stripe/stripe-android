@@ -372,6 +372,9 @@ constructor(
             return code
         }
 
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release.",
+        )
         companion object {
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             // For paymentsheet

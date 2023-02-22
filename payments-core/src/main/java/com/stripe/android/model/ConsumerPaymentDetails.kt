@@ -19,6 +19,9 @@ data class ConsumerPaymentDetails internal constructor(
         open val type: String
     ) : Parcelable
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     @Parcelize
     data class Card(
         override val id: String,
@@ -40,6 +43,9 @@ data class ConsumerPaymentDetails internal constructor(
                 expiryYear = expiryYear
             )
 
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release.",
+        )
         companion object {
             const val type = "card"
 
@@ -66,6 +72,9 @@ data class ConsumerPaymentDetails internal constructor(
         }
     }
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     @Parcelize
     data class BankAccount(
         override val id: String,
@@ -74,11 +83,18 @@ data class ConsumerPaymentDetails internal constructor(
         val bankName: String,
         val last4: String
     ) : PaymentDetails(id, isDefault, Companion.type) {
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release.",
+        )
         companion object {
             const val type = "bank_account"
         }
     }
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     @Parcelize
     data class BillingAddress(
         val countryCode: CountryCode?,

@@ -51,6 +51,9 @@ class LuxeNextActionRepository {
     private fun getActionCreator(lpmCode: PaymentMethodCode?, status: StripeIntent.Status?) =
         codeToNextActionSpec[lpmCode]?.postConfirmStatusNextStatus.takeIf { it?.status == status }
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     companion object {
         val Instance: LuxeNextActionRepository = LuxeNextActionRepository()
     }

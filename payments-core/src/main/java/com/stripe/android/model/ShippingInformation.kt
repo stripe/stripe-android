@@ -3,6 +3,10 @@ package com.stripe.android.model
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
+private const val PARAM_ADDRESS = "address"
+private const val PARAM_NAME = "name"
+private const val PARAM_PHONE = "phone"
+
 /**
  * Model representing a shipping address object
  */
@@ -21,11 +25,5 @@ data class ShippingInformation constructor(
         )
             .mapNotNull { (first, second) -> second?.let { Pair(first, it) } }
             .toMap()
-    }
-
-    companion object {
-        private const val PARAM_ADDRESS = "address"
-        private const val PARAM_NAME = "name"
-        private const val PARAM_PHONE = "phone"
     }
 }

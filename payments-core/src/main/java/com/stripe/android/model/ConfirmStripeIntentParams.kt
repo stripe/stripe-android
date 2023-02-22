@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 
 /**
  * Interface for params for confirming a [PaymentIntent] or [SetupIntent].
@@ -17,6 +18,7 @@ sealed interface ConfirmStripeIntentParams : StripeParamsModel, Parcelable {
 
     fun withShouldUseStripeSdk(shouldUseStripeSdk: Boolean): ConfirmStripeIntentParams
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         internal const val PARAM_CLIENT_SECRET: String = "client_secret"
         internal const val PARAM_RETURN_URL: String = "return_url"

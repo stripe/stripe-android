@@ -2373,9 +2373,6 @@ public abstract interface class com/stripe/android/model/ConfirmStripeIntentPara
 	public abstract fun withShouldUseStripeSdk (Z)Lcom/stripe/android/model/ConfirmStripeIntentParams;
 }
 
-public final class com/stripe/android/model/ConfirmStripeIntentParams$Companion {
-}
-
 public final class com/stripe/android/model/ConsumerPaymentDetails$BankAccount : com/stripe/android/model/ConsumerPaymentDetails$PaymentDetails {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -4932,7 +4929,6 @@ public final class com/stripe/android/model/SetupIntent$Error$Type : java/lang/E
 public final class com/stripe/android/model/ShippingInformation : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripeParamsModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/model/ShippingInformation$Companion;
 	public fun <init> ()V
 	public fun <init> (Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -4950,9 +4946,6 @@ public final class com/stripe/android/model/ShippingInformation : com/stripe/and
 	public fun toParamMap ()Ljava/util/Map;
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/model/ShippingInformation$Companion {
 }
 
 public final class com/stripe/android/model/ShippingInformation$Creator : android/os/Parcelable$Creator {
@@ -6894,12 +6887,8 @@ public abstract interface class com/stripe/android/view/ActivityStarter$Args : a
 	public static final field Companion Lcom/stripe/android/view/ActivityStarter$Args$Companion;
 }
 
-public final class com/stripe/android/view/ActivityStarter$Args$Companion {
-}
-
 public abstract interface class com/stripe/android/view/ActivityStarter$Result : android/os/Parcelable {
 	public static final field Companion Lcom/stripe/android/view/ActivityStarter$Result$Companion;
-	public static final field EXTRA Ljava/lang/String;
 	public abstract fun toBundle ()Landroid/os/Bundle;
 }
 

@@ -55,6 +55,9 @@ class LuxePostConfirmActionRepository {
             ?.map { it.value }
             ?.firstOrNull()
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     companion object {
         val Instance: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository()
     }

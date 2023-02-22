@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 
 /**
@@ -66,9 +65,11 @@ abstract class ActivityStarter<TargetActivityType : Activity, ArgsType : Activit
     }
 
     interface Args : Parcelable {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
+
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @VisibleForTesting
             const val EXTRA: String = "extra_activity_args"
         }
     }
@@ -78,6 +79,8 @@ abstract class ActivityStarter<TargetActivityType : Activity, ArgsType : Activit
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         companion object {
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             const val EXTRA: String = "extra_activity_result"
         }
     }
