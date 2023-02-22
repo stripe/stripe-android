@@ -16,6 +16,11 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
+@Deprecated(
+    message = "This isn't meant for public usage and will be removed in a future " +
+        "release. If you're looking to integrate with PaymentSheet in Compose, " +
+        "use rememberPaymentSheet() instead.",
+)
 class PaymentSheetContract :
     ActivityResultContract<PaymentSheetContract.Args, PaymentSheetResult>() {
     override fun createIntent(
@@ -38,6 +43,11 @@ class PaymentSheetContract :
         )
     }
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future " +
+            "release. If you're looking to integrate with PaymentSheet in Compose, " +
+            "use rememberPaymentSheet() instead.",
+    )
     @Parcelize
     data class Args internal constructor(
         internal val clientSecret: ClientSecret,
@@ -70,6 +80,11 @@ class PaymentSheetContract :
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
 
+            @Deprecated(
+                message = "This isn't meant for public usage and will be removed in a future " +
+                    "release. If you're looking to integrate with PaymentSheet in Compose, " +
+                    "use rememberPaymentSheet() instead.",
+            )
             fun createPaymentIntentArgs(
                 clientSecret: String,
                 config: PaymentSheet.Configuration? = null
@@ -78,6 +93,11 @@ class PaymentSheetContract :
                 config = config,
             )
 
+            @Deprecated(
+                message = "This isn't meant for public usage and will be removed in a future " +
+                    "release. If you're looking to integrate with PaymentSheet in Compose, " +
+                    "use rememberPaymentSheet() instead.",
+            )
             fun createSetupIntentArgs(
                 clientSecret: String,
                 config: PaymentSheet.Configuration? = null

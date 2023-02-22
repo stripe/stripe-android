@@ -1,5 +1,9 @@
 # Migration Guide
 
+## Migrating from versions < 20.20.0
+- Changes to `PaymentSheetContract`:
+  * `PaymentSheetContract` and `PaymentSheetContract.Args` are now deprecated and will be removed in a future release. To create and open a `PaymentSheet`, use the constructor or the new `rememberPaymentSheet()` method.
+
 ## Migrating from versions < 20.5.0
 - Changes to `PaymentSheet.Configuration`
   * `primaryButtonColor` is now deprecated. Please use the new `Appearance` parameter instead:
