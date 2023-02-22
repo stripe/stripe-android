@@ -42,6 +42,9 @@ import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 
+@Deprecated(
+    message = "This isn't meant for public usage and will be removed in a future release.",
+)
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 const val PAYMENT_OPTION_CARD_TEST_TAG = "PAYMENT_OPTION_CARD_TEST_TAG"
 

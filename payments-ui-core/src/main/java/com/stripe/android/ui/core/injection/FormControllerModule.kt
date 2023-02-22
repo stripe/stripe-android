@@ -19,6 +19,9 @@ import javax.inject.Named
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 abstract class FormControllerModule {
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     companion object {
 
         @Provides

@@ -30,6 +30,10 @@ data class AddressDetails(
      */
     val isCheckboxSelected: Boolean? = null
 ) : Parcelable {
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     companion object {
         const val KEY = "AddressDetails"
     }

@@ -768,9 +768,19 @@ class PaymentSheet internal constructor(
          */
         fun confirm()
 
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release.",
+        )
         sealed class Result {
+
+            @Deprecated(
+                message = "This isn't meant for public usage and will be removed in a future release.",
+            )
             object Success : Result()
 
+            @Deprecated(
+                message = "This isn't meant for public usage and will be removed in a future release.",
+            )
             class Failure(
                 val error: Throwable
             ) : Result()

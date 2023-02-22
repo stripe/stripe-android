@@ -50,6 +50,9 @@ data class AfterpayClearpayHeaderElement(
             )
     }
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     companion object {
         const val url = "https://static.afterpay.com/modal/%s.html"
         const val NO_BREAK_SPACE = "\u00A0"

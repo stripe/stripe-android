@@ -34,6 +34,9 @@ class LinkActivityContract :
      * @param injectionParams Parameters needed to perform dependency injection.
      *                        If null, a new dependency graph will be created.
      */
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     @Parcelize
     data class Args internal constructor(
         internal val configuration: LinkPaymentLauncher.Configuration,
@@ -58,6 +61,9 @@ class LinkActivityContract :
         @IgnoredOnParcel
         internal val shippingValues = configuration.shippingValues
 
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release.",
+        )
         companion object {
             internal fun fromIntent(intent: Intent): Args? {
                 return intent.getParcelableExtra(EXTRA_ARGS)
@@ -74,6 +80,9 @@ class LinkActivityContract :
         ) : Parcelable
     }
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     @Parcelize
     data class Result(
         val linkResult: LinkActivityResult
@@ -81,6 +90,9 @@ class LinkActivityContract :
         override fun toBundle() = bundleOf(EXTRA_RESULT to this)
     }
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     companion object {
         const val EXTRA_ARGS =
             "com.stripe.android.link.LinkActivityContract.extra_args"

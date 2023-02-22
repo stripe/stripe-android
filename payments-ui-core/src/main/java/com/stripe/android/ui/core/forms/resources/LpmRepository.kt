@@ -484,6 +484,9 @@ class LpmRepository constructor(
         fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
     }
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     class LpmInitialFormData {
 
@@ -506,7 +509,11 @@ class LpmRepository constructor(
         }
     }
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     companion object {
+
         @Volatile
         private var INSTANCE: LpmRepository? = null
         fun getInstance(args: LpmRepositoryArguments): LpmRepository =
@@ -530,9 +537,25 @@ class LpmRepository constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class ServerSpecState(val serverLpmSpecs: String?) {
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release.",
+        )
         object Uninitialized : ServerSpecState(null)
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release.",
+        )
         class NoServerSpec(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release.",
+        )
         class ServerParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release.",
+        )
         class ServerNotParsed(serverLpmSpecs: String?) : ServerSpecState(serverLpmSpecs)
     }
 

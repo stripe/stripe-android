@@ -24,6 +24,9 @@ sealed class LinkPaymentDetails(
     /**
      * A [ConsumerPaymentDetails.PaymentDetails] that is already saved to the consumer's account.
      */
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     @Parcelize
     internal class Saved(
         override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
@@ -35,6 +38,9 @@ sealed class LinkPaymentDetails(
      * Must hold the original [PaymentMethodCreateParams] too in case we need to populate the form
      * fields with the user-entered values.
      */
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     @Parcelize
     class New(
         override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,

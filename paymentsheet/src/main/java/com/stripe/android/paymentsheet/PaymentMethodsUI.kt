@@ -46,6 +46,9 @@ private object Spacing {
     val iconSize = 28.dp
 }
 
+@Deprecated(
+    message = "This isn't meant for public usage and will be removed in a future release.",
+)
 @VisibleForTesting
 const val TEST_TAG_LIST = "PaymentMethodsUITestTag"
 

@@ -78,4 +78,7 @@ internal class Navigator @Inject constructor() {
 
 // The Loading screen is always at the bottom of the stack, so a size of 2 means the current
 // screen is at the bottom of the navigation stack.
+@Deprecated(
+    message = "This isn't meant for public usage and will be removed in a future release.",
+)
 fun NavHostController.isOnRootScreen() = backQueue.size <= 2

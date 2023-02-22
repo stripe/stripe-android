@@ -12,6 +12,9 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
+@Deprecated(
+    message = "This isn't meant for public usage and will be removed in a future release.",
+)
 @Module
 abstract class ResourceRepositoryModule {
     @Binds
@@ -22,6 +25,9 @@ abstract class ResourceRepositoryModule {
     abstract fun bindsAddressRepository(address: AsyncAddressResourceRepository):
         ResourceRepository<AddressRepository>
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     companion object {
         @Provides
         @Singleton

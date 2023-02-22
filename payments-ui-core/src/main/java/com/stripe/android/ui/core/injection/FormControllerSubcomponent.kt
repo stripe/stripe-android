@@ -22,6 +22,9 @@ import javax.inject.Named
 interface FormControllerSubcomponent {
     val formController: FormController
 
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release.",
+    )
     @Subcomponent.Builder
     interface Builder {
 
