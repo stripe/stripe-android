@@ -68,9 +68,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 viewModelScope.launch {
                     payload.emailController
                         .validFormFieldState()
-                        .collectLatest {
-                            onEmailEntered(it)
-                        }
+                        .collectLatest(::onEmailEntered)
                 }
                 viewModelScope.launch {
                     payload.phoneController.validFormFieldState().collectLatest {
@@ -118,6 +116,10 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         } else {
             setState { copy(lookupAccount = Uninitialized) }
         }
+    }
+
+    fun onSkipClick() {
+        goNext(Pane.SUCCESS)
     }
 
     fun onSaveAccount() {

@@ -69,7 +69,8 @@ internal fun NetworkingLinkSignupScreen() {
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
-        onSaveToLink = viewModel::onSaveAccount
+        onSaveToLink = viewModel::onSaveAccount,
+        onSkipClick = viewModel::onSkipClick
     )
 }
 
@@ -79,7 +80,8 @@ private fun NetworkingLinkSignupContent(
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onClickableTextClick: (String) -> Unit,
-    onSaveToLink: () -> Unit
+    onSaveToLink: () -> Unit,
+    onSkipClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
@@ -101,6 +103,7 @@ private fun NetworkingLinkSignupContent(
                 showFullForm = state.showFullForm,
                 onSaveToLink = onSaveToLink,
                 onClickableTextClick = onClickableTextClick,
+                onSkipClick = onSkipClick
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -121,7 +124,8 @@ private fun NetworkingLinkSignupLoaded(
     lookupAccountSync: Async<ConsumerSessionLookup>,
     showFullForm: Boolean,
     onClickableTextClick: (String) -> Unit,
-    onSaveToLink: () -> Unit
+    onSaveToLink: () -> Unit,
+    onSkipClick: () -> Unit
 ) {
     Column(
         Modifier.fillMaxSize()
@@ -255,7 +259,7 @@ private fun NetworkingLinkSignupLoaded(
             Spacer(modifier = Modifier.size(12.dp))
             FinancialConnectionsButton(
                 type = FinancialConnectionsButton.Type.Secondary,
-                onClick = { },
+                onClick = onSkipClick,
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
@@ -331,7 +335,8 @@ internal fun NetworkingLinkSignupScreenEnteringEmailPreview() {
             onCloseClick = {},
             onSaveToLink = {},
             onClickableTextClick = {},
-            onCloseFromErrorClick = {}
+            onCloseFromErrorClick = {},
+            onSkipClick = {}
         )
     }
 }
@@ -366,7 +371,8 @@ internal fun NetworkingLinkSignupScreenEnteringPhonePreview() {
             onCloseClick = {},
             onSaveToLink = {},
             onClickableTextClick = {},
-            onCloseFromErrorClick = {}
+            onCloseFromErrorClick = {},
+            onSkipClick = {}
         )
     }
 }
