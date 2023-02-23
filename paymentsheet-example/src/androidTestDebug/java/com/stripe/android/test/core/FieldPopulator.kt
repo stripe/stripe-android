@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsToggleable
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
 import com.stripe.android.test.core.ui.Selectors
@@ -210,17 +211,29 @@ class FieldPopulator(
                 is AddressSpec -> {
                     if (testParameters.billing == Billing.Off) {
                         // TODO: This will not work when other countries are selected or defaulted
-                        selectors.getLine1().apply {
-                            performClick()
-                            performTextInput(values.line1)
-                        }
-                        selectors.getCity()
+                        selectors
+                            .getLine1()
+                            .performScrollTo()
+                            .performClick()
+                            .performTextInput(values.line1)
+
+                        selectors
+                            .getCity()
+                            .performScrollTo()
+                            .performClick()
                             .performTextInput(values.city)
-                        selectors.getZip()
+
+                        selectors
+                            .getZip()
+                            .performScrollTo()
+                            .performClick()
                             .performTextInput(values.zip)
-                        selectors.getState().apply {
-                            performClick()
-                        }
+
+                        selectors
+                            .getState()
+                            .performScrollTo()
+                            .performClick()
+
                         selectors.selectState(values.state)
                     }
                 }
