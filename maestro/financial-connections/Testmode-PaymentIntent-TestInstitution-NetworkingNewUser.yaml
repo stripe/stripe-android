@@ -7,9 +7,11 @@ appId: com.stripe.android.financialconnections.example
     id: "Native_checkbox"
 - tapOn: "Mode_Dropdown_Icon"
 - tapOn:
-    id: "Test_checkbox"
+    id: "NetworkingTestMode_checkbox"
 - tapOn:
     id: "PaymentIntent_checkbox"
+- tapOn: Customer email (optional)
+- inputRandomEmail
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
@@ -30,6 +32,11 @@ appId: com.stripe.android.financialconnections.example
     timeout: 60000
 - tapOn: "Success"
 - tapOn: "Confirm"
+# ENTER PHONE FOR NEW NETWORKED USER
+- tapOn: "Phone number"
+- inputRandomNumber:
+    length: 10
+- tapOn: "Save to Link"
 # CONFIRM AND COMPLETE
 - tapOn: "Done"
 - assertVisible: ".*Intent Confirmed!.*"
