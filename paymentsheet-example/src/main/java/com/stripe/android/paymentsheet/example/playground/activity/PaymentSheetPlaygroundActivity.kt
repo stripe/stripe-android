@@ -393,20 +393,31 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     }
 
     private fun startCompleteCheckout() {
-        val clientSecret = viewModel.clientSecret.value ?: return
-        viewBinding.customLabelTextField.clearFocus()
+        paymentSheet.present(
+            mode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 12345,
+                        currency = "usd",
+                    )
+                )
+            )
+        )
 
-        if (viewModel.checkoutMode == CheckoutMode.Setup) {
-            paymentSheet.presentWithSetupIntent(
-                clientSecret,
-                makeConfiguration()
-            )
-        } else {
-            paymentSheet.presentWithPaymentIntent(
-                clientSecret,
-                makeConfiguration()
-            )
-        }
+//        val clientSecret = viewModel.clientSecret.value ?: return
+//        viewBinding.customLabelTextField.clearFocus()
+//
+//        if (viewModel.checkoutMode == CheckoutMode.Setup) {
+//            paymentSheet.presentWithSetupIntent(
+//                clientSecret,
+//                makeConfiguration()
+//            )
+//        } else {
+//            paymentSheet.presentWithPaymentIntent(
+//                clientSecret,
+//                makeConfiguration()
+//            )
+//        }
     }
 
     private fun startShippingAddressCollection() {

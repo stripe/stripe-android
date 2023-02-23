@@ -393,17 +393,24 @@ class LpmRepository constructor(
             requirement = AuBecsDebitRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
-        PaymentMethod.Type.USBankAccount.code -> SupportedPaymentMethod(
-            code = "us_bank_account",
-            requiresMandate = true,
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = true,
-            requirement = USBankAccountRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields)
-        )
+        PaymentMethod.Type.USBankAccount.code -> {
+            if (stripeIntent.clientSecret != null) {
+                SupportedPaymentMethod(
+                    code = "us_bank_account",
+                    requiresMandate = true,
+                    displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
+                    iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
+                    lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+                    darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+                    tintIconOnSelection = true,
+                    requirement = USBankAccountRequirement,
+                    formSpec = LayoutSpec(sharedDataSpec.fields)
+                )
+            } else {
+                // A deferred intent without a client secret doesn't support this
+                null
+            }
+        }
         PaymentMethod.Type.Upi.code -> SupportedPaymentMethod(
             code = "upi",
             requiresMandate = false,
