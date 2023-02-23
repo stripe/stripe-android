@@ -65,6 +65,13 @@ sealed class CheckoutCustomer(val value: String) {
     object Returning : CheckoutCustomer("returning")
     object Snapshot : CheckoutCustomer("snapshot")
     data class WithId(val customerId: String) : CheckoutCustomer(customerId)
+
+    companion object {
+        fun valueOf(value: String): CheckoutCustomer {
+            val possibleValues = listOf(Guest, New, Returning, Snapshot)
+            return possibleValues.firstOrNull { it.value == value } ?: WithId(value)
+        }
+    }
 }
 
 @Serializable

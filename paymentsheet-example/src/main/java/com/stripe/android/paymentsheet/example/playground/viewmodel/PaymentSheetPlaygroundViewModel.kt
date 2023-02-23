@@ -4,15 +4,17 @@ import android.app.Application
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.asFlow
+import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
@@ -20,38 +22,215 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.InitializationType
 import com.stripe.android.paymentsheet.example.playground.model.SavedToggles
+import com.stripe.android.paymentsheet.example.playground.model.Shipping
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
+import com.stripe.android.paymentsheet.model.PaymentOption
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.util.Locale
 
 class PaymentSheetPlaygroundViewModel(
-    application: Application
+    application: Application,
 ) : AndroidViewModel(application) {
-    val inProgress = MutableLiveData<Boolean>()
-    val status = MutableLiveData<String>()
 
-    val customerConfig = MutableLiveData<PaymentSheet.CustomerConfiguration?>()
-    val clientSecret = MutableLiveData<String?>()
+    private val settings = Settings(application)
 
-    val initializationType = MutableStateFlow(InitializationType.Normal)
-    val paymentMethodTypes = MutableStateFlow<List<String>>(emptyList())
+    private val _viewState = MutableStateFlow<PaymentSheetPlaygroundViewState?>(null)
+    val viewState: StateFlow<PaymentSheetPlaygroundViewState?> = _viewState
 
-    val readyToCheckout = combine(
-        initializationType,
-        clientSecret.asFlow(),
-    ) { type, secret ->
-        when (type) {
-            InitializationType.Normal -> secret != null
-            InitializationType.Deferred -> true
-        }
-    }
-
-    var checkoutMode: CheckoutMode = CheckoutMode.Payment
     var temporaryCustomerId: String? = null
 
     private val sharedPreferencesName = "playgroundToggles"
 
-    fun storeToggleState(
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            val savedToggles = getSavedToggleState()
+            val viewState = savedToggles.toViewState()
+            render(viewState)
+        }
+    }
+
+    private fun render(viewState: PaymentSheetPlaygroundViewState) {
+        _viewState.value = viewState
+    }
+
+    fun updateInitializationType(type: InitializationType) {
+        _viewState.update {
+            it?.copy(initializationType = type)
+        }
+    }
+
+    fun updateCheckoutMode(checkoutMode: CheckoutMode) {
+        _viewState.update {
+            it?.copy(checkoutMode = checkoutMode)
+        }
+    }
+
+    fun updateLinkEnabled(isEnabled: Boolean) {
+        _viewState.update {
+            it?.copy(linkEnabled = isEnabled)
+        }
+    }
+
+    fun updateGooglePayEnabled(isEnabled: Boolean) {
+        _viewState.update {
+            it?.copy(googlePayEnabled = isEnabled)
+        }
+    }
+
+    fun reset() {
+        PaymentSheet.resetCustomer(getApplication())
+
+        val defaultViewState = PaymentSheetPlaygroundViewState()
+        _viewState.value = defaultViewState
+
+        storeToggleState(defaultViewState)
+    }
+
+    fun onConfigured(
+        paymentOption: PaymentOption?,
+        error: Throwable?,
+    ) {
+        _viewState.update {
+            it?.copy(
+                status = error?.let { e ->
+                    "Failed to configure PaymentSheetFlowController: ${e.message}"
+                },
+                isConfigured = error == null,
+            )
+        }
+
+        if (error == null) {
+            onPaymentOption(paymentOption)
+        }
+    }
+
+    fun onPaymentOption(paymentOption: PaymentOption?) {
+        _viewState.update {
+            it?.copy(paymentOption = paymentOption)
+        }
+    }
+
+    fun onPaymentSheetResult(paymentResult: PaymentSheetResult) {
+        _viewState.update {
+            it?.copy(
+                paymentResult = paymentResult,
+                status = when (paymentResult) {
+                    is PaymentSheetResult.Completed -> "Payment completed!"
+                    is PaymentSheetResult.Canceled -> "Payment canceled…"
+                    is PaymentSheetResult.Failed -> "Payment failed: ${paymentResult.error.message}"
+                },
+            )
+        }
+    }
+
+    fun statusDisplayed() {
+        _viewState.update {
+            it?.copy(status = null)
+        }
+    }
+
+    fun updateCustomer(customer: CheckoutCustomer) {
+        _viewState.update {
+            it?.copy(customer = customer)
+        }
+    }
+
+    fun updateShipping(shipping: Shipping) {
+        _viewState.update {
+            it?.copy(shipping = shipping)
+        }
+    }
+
+    fun updateSetDefaultBillingAddress(setDefaultBillingAddress: Boolean) {
+        _viewState.update {
+            it?.copy(setDefaultBillingAddress = setDefaultBillingAddress)
+        }
+    }
+
+    fun updateAutomaticPaymentMethods(automaticPaymentMethods: Boolean) {
+        _viewState.update {
+            it?.copy(setAutomaticPaymentMethods = automaticPaymentMethods)
+        }
+    }
+
+    fun updateAllowDelayedPaymentMethods(allowDelayedPaymentMethods: Boolean) {
+        _viewState.update {
+            it?.copy(setDelayedPaymentMethods = allowDelayedPaymentMethods)
+        }
+    }
+
+    fun updateCurrency(position: Int) {
+        val currency = CheckoutCurrency(stripeSupportedCurrencies[position])
+        _viewState.update {
+            it?.copy(currency = currency)
+        }
+    }
+
+    fun updateMerchantCountry(position: Int) {
+        val (country, currency) = countryCurrencyPairs[position]
+
+        _viewState.update {
+            it?.copy(
+                merchantCountry = country.code,
+                currency = CheckoutCurrency(currency),
+            )
+        }
+
+        // when the merchant changes, so the new customer id
+        // created might not match the previous new customer
+        temporaryCustomerId = null
+    }
+
+    fun updateCustomLabel(customLabel: String?) {
+        _viewState.update {
+            it?.copy(
+                customLabel = customLabel,
+            )
+        }
+    }
+
+    fun reload(
+        supportedPaymentMethods: List<String>?,
+    ) {
+        val viewState = viewState.value ?: return
+
+        storeToggleState(viewState)
+
+        prepareCheckout(
+            initializationType = viewState.initializationType,
+            customer = viewState.customer,
+            currency = viewState.currency,
+            merchantCountry = viewState.merchantCountry,
+            mode = viewState.checkoutMode,
+            linkEnabled = viewState.linkEnabled,
+            setShippingAddress = viewState.setDefaultShippingAddress,
+            setAutomaticPaymentMethod = viewState.setAutomaticPaymentMethods,
+            backendUrl = settings.playgroundBackendUrl,
+            supportedPaymentMethods = supportedPaymentMethods,
+        )
+    }
+
+    private fun storeToggleState(viewState: PaymentSheetPlaygroundViewState) {
+        storeToggleState(
+            initializationType = viewState.initializationType.value,
+            customer = viewState.customer.value,
+            link = viewState.linkEnabled,
+            googlePay = viewState.googlePayEnabled,
+            currency = viewState.currency.value,
+            merchantCountryCode = viewState.merchantCountry.value,
+            mode = viewState.checkoutMode.value,
+            shipping = viewState.shipping.value,
+            setDefaultBillingAddress = viewState.setDefaultBillingAddress,
+            setAutomaticPaymentMethods = viewState.setAutomaticPaymentMethods,
+            setDelayedPaymentMethods = viewState.setDelayedPaymentMethods,
+        )
+    }
+
+    private fun storeToggleState(
         initializationType: String,
         customer: String,
         link: Boolean,
@@ -84,7 +263,7 @@ class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    fun getSavedToggleState(): SavedToggles {
+    private fun getSavedToggleState(): SavedToggles {
         val sharedPreferences = getApplication<Application>().getSharedPreferences(
             sharedPreferencesName,
             AppCompatActivity.MODE_PRIVATE
@@ -155,7 +334,7 @@ class PaymentSheetPlaygroundViewModel(
      * Calls the backend to prepare for checkout. The server creates a new Payment or Setup Intent
      * that will be confirmed on the client using Payment Sheet.
      */
-    fun prepareCheckout(
+    private fun prepareCheckout(
         initializationType: InitializationType,
         customer: CheckoutCustomer,
         currency: CheckoutCurrency,
@@ -167,10 +346,14 @@ class PaymentSheetPlaygroundViewModel(
         backendUrl: String,
         supportedPaymentMethods: List<String>?
     ) {
-        customerConfig.value = null
-        clientSecret.value = null
-
-        inProgress.postValue(true)
+        _viewState.update {
+            it?.copy(
+                isLoading = true,
+                customerConfig = null,
+                clientSecret = null,
+                isConfigured = false,
+            )
+        }
 
         val requestBody = CheckoutRequest(
             initialization = initializationType.value,
@@ -189,16 +372,30 @@ class PaymentSheetPlaygroundViewModel(
             .responseString { _, _, result ->
                 when (result) {
                     is Result.Failure -> {
-                        status.postValue(
-                            "Preparing checkout failed:\n${result.getException().message}"
-                        )
+                        _viewState.update {
+                            it?.copy(
+                                isLoading = false,
+                                status = "Preparing checkout failed:\n${result.getException().message}",
+                            )
+                        }
                     }
                     is Result.Success -> {
                         val checkoutResponse = Gson().fromJson(
                             result.get(),
                             CheckoutResponse::class.java
                         )
-                        checkoutMode = mode
+
+                        _viewState.update {
+                            it?.copy(
+                                isLoading = false,
+                                checkoutMode = mode,
+                                customerConfig = checkoutResponse.makeCustomerConfig(),
+                                clientSecret = checkoutResponse.intentClientSecret,
+                                paymentMethodTypes = checkoutResponse.paymentMethodTypes.orEmpty(),
+                            )
+                        }
+
+                        // TODO Move to ViewState
                         temporaryCustomerId = if (customer == CheckoutCustomer.New) {
                             checkoutResponse.customerId
                         } else {
@@ -208,13 +405,47 @@ class PaymentSheetPlaygroundViewModel(
                         // Init PaymentConfiguration with the publishable key returned from the backend,
                         // which will be used on all Stripe API calls
                         PaymentConfiguration.init(getApplication(), checkoutResponse.publishableKey)
-
-                        customerConfig.value = checkoutResponse.makeCustomerConfig()
-                        clientSecret.value = checkoutResponse.intentClientSecret
-                        paymentMethodTypes.value = checkoutResponse.paymentMethodTypes.orEmpty()
                     }
                 }
-                inProgress.postValue(false)
+            }
+    }
+
+    companion object {
+
+        val stripeSupportedCurrencies = listOf("AUD", "EUR", "GBP", "USD", "INR")
+
+        val countryCurrencyPairs = CountryUtils
+            .getOrderedCountries(Locale.getDefault())
+            .filter { country ->
+                /**
+                 * Modify this list if you want to change the countries displayed in the playground.
+                 */
+                country.code.value in setOf("US", "GB", "AU", "FR", "IN")
+            }.map { country ->
+                /**
+                 * Modify this statement to change the default currency associated with each
+                 * country.  The currency values should match the stripeSupportedCurrencies.
+                 */
+                when (country.code.value) {
+                    "GB" -> {
+                        country to "GBP"
+                    }
+                    "FR" -> {
+                        country to "EUR"
+                    }
+                    "AU" -> {
+                        country to "AUD"
+                    }
+                    "US" -> {
+                        country to "USD"
+                    }
+                    "IN" -> {
+                        country to "INR"
+                    }
+                    else -> {
+                        country to "USD"
+                    }
+                }
             }
     }
 }
