@@ -5,42 +5,6 @@ on:
     # every 12 hours
     - cron: '0 */12 * * *'
 jobs:
-  instrumentation-tests:
-    name: Instrumentation tests
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/stripe_setup
-      - name: Instrumentation tests
-        uses: reactivecircus/android-emulator-runner@v2.22.0
-        with:
-          api-level: 29
-          arch: x86
-          disable-animations: true
-          script: bash ./scripts/execute_instrumentation_tests.sh
-        env:
-          STRIPE_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_EXAMPLE_BACKEND_URL }}
-          STRIPE_EXAMPLE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_EXAMPLE_PUBLISHABLE_KEY }}
-
-      - uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: instrumentation-test-report
-          path: |
-            **/build/reports/androidTests/
-            **/build/tmp/shot/screenshot/
-
-      - name: Notify failure endpoint
-        id: notifyFailureEndpoint
-        if: failure()
-        run: |
-          ./scripts/notify_failure_endpoint.rb \
-          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
-          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
-          ${{ github.run_id }} \
-          RUN_MOBILESDK
-
   # This should be updated to use the browserstack github actions when supported
   browserstack-instrumentation-tests:
     name: Browserstack Instrumentation tests

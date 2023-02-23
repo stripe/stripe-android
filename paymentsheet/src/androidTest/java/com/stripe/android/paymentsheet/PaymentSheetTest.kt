@@ -341,7 +341,7 @@ internal class PaymentSheetTest {
     }
 
     private fun fillOutCard() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule.onAllNodes(hasText("Card number"))
                 .fetchSemanticsNodes().isNotEmpty()
         }

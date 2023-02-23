@@ -21,6 +21,7 @@ stages:
     workflows:
       - check: {}
       - test: {}
+      - run-instrumentation-tests: {}
 
 workflows:
   check:
@@ -75,6 +76,22 @@ workflows:
             - test_name: Maestro tests
       - deploy-to-bitrise-io@2: {}
       - cache-push@2: {}
+  run-instrumentation-tests:
+    steps:
+      - avd-manager@1: { }
+      - activate-ssh-key@4:
+          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+      - git-clone@7.0: { }
+      - cache-pull@2: { }
+      - script@1:
+          inputs:
+            - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
+      - wait-for-android-emulator@1: { }
+      - script-runner@0:
+          title: Execute instrumentation tests
+          inputs:
+            - file_path: ./scripts/execute_instrumentation_tests.sh
+      - cache-push@2: { }
 meta:
   bitrise.io:
     stack: linux-docker-android-20.04
