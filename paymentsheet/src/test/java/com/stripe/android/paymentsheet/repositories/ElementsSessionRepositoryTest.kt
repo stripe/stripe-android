@@ -4,8 +4,9 @@ import androidx.core.os.LocaleListCompat
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -28,117 +29,122 @@ internal class ElementsSessionRepositoryTest {
     private val stripeRepository = mock<StripeRepository>()
 
     @Test
-    fun `get with locale should retrieve with ordered payment methods`() =
-        runTest {
-            whenever(
-                stripeRepository
-                    .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
-            ).thenReturn(PaymentMethodPreference(PaymentIntentFixtures.PI_WITH_SHIPPING))
+    fun `get with locale should retrieve with element session`() = runTest {
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(
+            ElementsSession(
+                linkSettings = null,
+                paymentMethodSpecs = null,
+                stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+            )
+        )
 
-            val locale = Locale.GERMANY
-            val paymentMethodPreference =
-                createRepository(locale).get(PaymentIntentClientSecret("client_secret"))
-
-            val localeArgumentCaptor: KArgumentCaptor<Locale> = argumentCaptor()
-
-            verify(stripeRepository)
-                .retrievePaymentIntentWithOrderedPaymentMethods(
-                    any(),
-                    any(),
-                    localeArgumentCaptor.capture()
-                )
-            verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
-            assertThat(paymentMethodPreference.intent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
-            assertThat(localeArgumentCaptor.firstValue).isEqualTo(locale)
+        val locale = Locale.GERMANY
+        val session = withLocale(locale) {
+            createRepository().get(PaymentIntentClientSecret("client_secret"))
         }
 
+        val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
+
+        verify(stripeRepository).retrieveElementsSession(argumentCaptor.capture(), any())
+        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
+        assertThat(session.stripeIntent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
+        assertThat(argumentCaptor.firstValue.locale).isEqualTo(locale.toLanguageTag())
+    }
+
     @Test
-    fun `get with locale when ordered payment methods fails should fallback to retrievePaymentIntent()`() =
+    fun `get with locale when element session fails should fallback to retrievePaymentIntent()`() =
         runTest {
             whenever(
-                stripeRepository
-                    .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
+                stripeRepository.retrieveElementsSession(any(), any())
             ).thenReturn(null)
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
-            val paymentMethodPreference =
-                createRepository(Locale.ITALY).get(PaymentIntentClientSecret("client_secret"))
+            val session = withLocale(Locale.ITALY) {
+                createRepository().get(PaymentIntentClientSecret("client_secret"))
+            }
 
-            verify(stripeRepository)
-                .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
+            verify(stripeRepository).retrieveElementsSession(any(), any())
             verify(stripeRepository).retrievePaymentIntent(any(), any(), any())
-            assertThat(paymentMethodPreference.intent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
+            assertThat(session.stripeIntent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
         }
 
     @Test
-    fun `get with locale when ordered payment methods fails with exception should fallback to retrievePaymentIntent()`() =
+    fun `get with locale when element session fails with exception should fallback to retrievePaymentIntent()`() =
         runTest {
             whenever(
-                stripeRepository
-                    .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
+                stripeRepository.retrieveElementsSession(any(), any())
             ).thenThrow(RuntimeException())
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
-            val paymentMethodPreference =
-                createRepository(Locale.ITALY).get(PaymentIntentClientSecret("client_secret"))
+            val session = withLocale(Locale.ITALY) {
+                createRepository().get(PaymentIntentClientSecret("client_secret"))
+            }
 
-            verify(stripeRepository)
-                .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
+            verify(stripeRepository).retrieveElementsSession(any(), any())
             verify(stripeRepository).retrievePaymentIntent(any(), any(), any())
-            assertThat(paymentMethodPreference.intent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
+            assertThat(session.stripeIntent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
         }
 
     @Test
-    fun `get with null locale should call retrievePaymentIntent()`() =
-        runTest {
-            whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
-                .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
+    fun `get with null locale should call retrievePaymentIntent()`() = runTest {
+        whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
+            .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
-            createRepository().get(PaymentIntentClientSecret("client_secret"))
+        createRepository().get(PaymentIntentClientSecret("client_secret"))
 
-            verify(stripeRepository, never())
-                .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
-            verify(stripeRepository).retrievePaymentIntent(any(), any(), any())
-        }
+        verify(stripeRepository, never()).retrievePaymentIntentWithOrderedPaymentMethods(
+            any(),
+            any(),
+            any()
+        )
+        verify(stripeRepository).retrievePaymentIntent(any(), any(), any())
+    }
 
     @Test
-    fun `get without locale should retrieve ordered payment methods in default locale`() =
-        runTest {
-            whenever(
-                stripeRepository
-                    .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
-            ).thenReturn(PaymentMethodPreference(PaymentIntentFixtures.PI_WITH_SHIPPING))
+    fun `get without locale should retrieve ordered payment methods in default locale`() = runTest {
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(
+            ElementsSession(
+                linkSettings = null,
+                paymentMethodSpecs = null,
+                stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+            )
+        )
 
-            val paymentMethodPreference = ElementsSessionRepository.Api(
-                stripeRepository,
-                { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
-                testDispatcher,
-                Locale.US
-            ).get(PaymentIntentClientSecret("client_secret"))
+        val session = ElementsSessionRepository.Api(
+            stripeRepository,
+            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            testDispatcher,
+        ).get(PaymentIntentClientSecret("client_secret"))
 
-            val localeArgumentCaptor: KArgumentCaptor<Locale> = argumentCaptor()
+        val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
 
-            verify(stripeRepository)
-                .retrievePaymentIntentWithOrderedPaymentMethods(
-                    any(),
-                    any(),
-                    localeArgumentCaptor.capture()
-                )
-            verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
-            assertThat(paymentMethodPreference.intent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
+        verify(stripeRepository).retrieveElementsSession(argumentCaptor.capture(), any())
+        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
+        assertThat(session.stripeIntent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
-            val defaultLocale = LocaleListCompat.getAdjustedDefault()[0]
-            assertThat(localeArgumentCaptor.firstValue).isEqualTo(defaultLocale)
-        }
+        val defaultLocale = LocaleListCompat.getAdjustedDefault()[0]?.toLanguageTag()
+        assertThat(argumentCaptor.firstValue.locale).isEqualTo(defaultLocale)
+    }
 
-    private fun createRepository(locale: Locale? = null) = ElementsSessionRepository.Api(
+    private fun createRepository() = ElementsSessionRepository.Api(
         stripeRepository,
         { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
         testDispatcher,
-        locale
     )
+
+    private inline fun <T> withLocale(locale: Locale, block: () -> T): T {
+        val original = Locale.getDefault()
+        Locale.setDefault(locale)
+        val result = block()
+        Locale.setDefault(original)
+        return result
+    }
 }

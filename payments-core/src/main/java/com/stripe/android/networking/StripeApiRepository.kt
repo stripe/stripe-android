@@ -359,7 +359,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             clientSecret = clientSecret,
             locale = locale.toLanguageTag(),
         )
-        
+
         return retrieveElementsSession(
             params = params,
             options = options,
@@ -507,7 +507,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         return retrieveElementsSession(
             params = params,
             options = options,
-            analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieveOrdered
+            analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieveOrdered,
         )
     }
 
@@ -1647,7 +1647,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): ElementsSession? {
         return retrieveElementsSession(
             params = params,
-            expandFields = params.expandFields(),
             options = options,
             analyticsEvent = null,
         )
@@ -1655,9 +1654,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     private suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
-        expandFields: List<String> = emptyList(),
         options: ApiRequest.Options,
-        analyticsEvent: PaymentAnalyticsEvent?
+        analyticsEvent: PaymentAnalyticsEvent?,
     ): ElementsSession? {
         // Unsupported for user key sessions.
         if (options.apiKeyIsUserKey) return null
@@ -1682,7 +1680,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createGet(
                 getApiUrl("elements/sessions"),
                 options,
-                requestParams.plus(createExpandParam(expandFields))
+                requestParams + createExpandParam(params.expandFields)
             ),
             parser
         ) {
@@ -2206,7 +2204,7 @@ private fun ElementsSessionParams.expandFields(): List<String> {
     return when (this) {
         is ElementsSessionParams.PaymentIntentType,
         is ElementsSessionParams.SetupIntentType -> {
-            listOf("payment_method_preference.${type}.payment_method")
+            listOf("payment_method_preference.$type.payment_method")
         }
         is ElementsSessionParams.DeferredIntentType -> {
             emptyList()

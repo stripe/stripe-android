@@ -2362,8 +2362,8 @@ internal class StripeApiRepositoryTest {
         whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
             .thenReturn(stripeResponse)
 
-        create().retrieveDeferredIntent(
-            elementsSessionParams = ElementsSessionParams.DeferredIntentType(
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.DeferredIntentType(
                 deferredIntentParams = DeferredIntentParams(
                     mode = DeferredIntentParams.Mode.Payment(
                         amount = 2000,
@@ -2372,7 +2372,7 @@ internal class StripeApiRepositoryTest {
                     paymentMethodTypes = setOf("card", "link")
                 )
             ),
-            requestOptions = DEFAULT_OPTIONS
+            options = DEFAULT_OPTIONS,
         )
 
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())

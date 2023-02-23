@@ -435,10 +435,10 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return null
     }
 
-    override suspend fun retrieveDeferredIntent(
-        elementsSessionParams: ElementsSessionParams,
-        requestOptions: ApiRequest.Options
-    ): StripeIntent? {
+    override suspend fun retrieveElementsSession(
+        params: ElementsSessionParams,
+        options: ApiRequest.Options
+    ): ElementsSession? {
         return null
     }
 }
