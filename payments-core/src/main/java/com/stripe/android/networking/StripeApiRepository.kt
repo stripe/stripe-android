@@ -2199,15 +2199,3 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 }
-
-private fun ElementsSessionParams.expandFields(): List<String> {
-    return when (this) {
-        is ElementsSessionParams.PaymentIntentType,
-        is ElementsSessionParams.SetupIntentType -> {
-            listOf("payment_method_preference.$type.payment_method")
-        }
-        is ElementsSessionParams.DeferredIntentType -> {
-            emptyList()
-        }
-    }
-}
