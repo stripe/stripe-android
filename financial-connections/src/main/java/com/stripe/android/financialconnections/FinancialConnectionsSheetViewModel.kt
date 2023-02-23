@@ -371,13 +371,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 result = Failed(Exception("Intent url received from web flow is null"))
             )
         } else {
-
-        }
-        setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
-        when (state.initialArgs) {
-            is ForData -> fetchFinancialConnectionsSession(state)
-            is ForToken -> fetchFinancialConnectionsSessionForToken(state)
-            is ForLink -> onSuccessFromLinkFlow(receivedUrl)
+            setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
+            when (state.initialArgs) {
+                is ForData -> fetchFinancialConnectionsSession(state)
+                is ForToken -> fetchFinancialConnectionsSessionForToken(state)
+                is ForLink -> onSuccessFromLinkFlow(receivedUrl)
+            }
         }
     }
 
