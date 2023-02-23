@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
@@ -42,7 +41,7 @@ import kotlin.coroutines.CoroutineContext
 internal interface PaymentSheetLoader {
 
     suspend fun load(
-        clientSecret: ClientSecret,
+        initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration? = null
     ): Result
 
@@ -68,17 +67,16 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 ) : PaymentSheetLoader {
 
     override suspend fun load(
-        clientSecret: ClientSecret,
+        initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ): PaymentSheetLoader.Result = withContext(workContext) {
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
 
         runCatching {
-            retrieveElementsSession(clientSecret)
+            retrieveElementsSession(initializationMode)
         }.fold(
             onSuccess = { stripeIntent ->
                 create(
-                    clientSecret = clientSecret,
                     stripeIntent = stripeIntent,
                     customerConfig = paymentSheetConfiguration?.customer,
                     config = paymentSheetConfiguration,
@@ -108,7 +106,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private suspend fun create(
-        clientSecret: ClientSecret,
         stripeIntent: StripeIntent,
         customerConfig: PaymentSheet.CustomerConfiguration?,
         config: PaymentSheet.Configuration?,
@@ -151,7 +148,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return@coroutineScope PaymentSheetLoader.Result.Success(
             PaymentSheetState.Full(
                 config = config,
-                clientSecret = clientSecret,
                 stripeIntent = stripeIntent,
                 customerPaymentMethods = paymentMethods.await(),
                 savedSelection = savedSelection.await(),
@@ -225,9 +221,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private suspend fun retrieveElementsSession(
-        clientSecret: ClientSecret,
+        initializationMode: PaymentSheet.InitializationMode,
     ): StripeIntent {
-        val elementsSession = elementsSessionRepository.get(clientSecret)
+        val elementsSession = elementsSessionRepository.get(initializationMode)
         val lpmRepository = lpmResourceRepository.getRepository()
 
         lpmRepository.update(

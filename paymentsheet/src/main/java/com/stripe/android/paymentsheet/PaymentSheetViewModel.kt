@@ -46,6 +46,7 @@ import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -80,7 +81,7 @@ import kotlin.coroutines.CoroutineContext
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     application: Application,
-    internal val args: PaymentSheetContract.Args,
+    internal val args: PaymentSheetContractV2.Args,
     eventReporter: EventReporter,
     // Properties provided through injection
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
@@ -113,10 +114,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = true),
 ) {
-    private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-        args.clientSecret,
-        args.config?.shippingDetails?.toConfirmPaymentIntentShipping()
-    )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
     internal val paymentSheetResult: SharedFlow<PaymentSheetResult> = _paymentSheetResult
@@ -135,7 +132,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     internal val isProcessingPaymentIntent
-        get() = args.clientSecret is PaymentIntentClientSecret
+        get() = args.initializationMode.isProcessingPayment
 
     override var newPaymentSelection: PaymentSelection.New? = null
 
@@ -245,7 +242,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private suspend fun loadPaymentSheetState() {
         val result = withContext(workContext) {
-            paymentSheetLoader.load(args.clientSecret, args.config)
+            paymentSheetLoader.load(args.initializationMode, args.config)
         }
 
         when (result) {
@@ -420,6 +417,20 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
+        val clientSecret = when (val mode = args.initializationMode) {
+            is PaymentSheet.InitializationMode.PaymentIntent -> {
+                PaymentIntentClientSecret(mode.clientSecret)
+            }
+            is PaymentSheet.InitializationMode.SetupIntent -> {
+                SetupIntentClientSecret(mode.clientSecret)
+            }
+        }
+
+        val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
+            clientSecret = clientSecret,
+            shipping = args.config?.shippingDetails?.toConfirmPaymentIntentShipping()
+        )
+
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
                 confirmParamsFactory.create(paymentSelection)
@@ -436,7 +447,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
             runCatching {
-                elementsSessionRepository.get(args.clientSecret)
+                elementsSessionRepository.get(args.initializationMode)
             }.fold(
                 onSuccess = { session ->
                     processPayment(session.stripeIntent, paymentResult)
@@ -549,7 +560,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     internal class Factory(
-        private val starterArgsSupplier: () -> PaymentSheetContract.Args,
+        private val starterArgsSupplier: () -> PaymentSheetContractV2.Args,
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
 
         internal data class FallbackInitializeParam(val application: Application)
@@ -599,3 +610,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         None
     }
 }
+
+private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
+    get() = when (this) {
+        is PaymentSheet.InitializationMode.PaymentIntent -> true
+        is PaymentSheet.InitializationMode.SetupIntent -> false
+    }

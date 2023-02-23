@@ -7,9 +7,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
@@ -18,7 +16,7 @@ import kotlin.coroutines.CoroutineContext
 internal sealed class ElementsSessionRepository {
 
     abstract suspend fun get(
-        clientSecret: ClientSecret
+        initializationMode: PaymentSheet.InitializationMode
     ): ElementsSession
 
     /**
@@ -27,7 +25,9 @@ internal sealed class ElementsSessionRepository {
     class Static(
         private val stripeIntent: StripeIntent
     ) : ElementsSessionRepository() {
-        override suspend fun get(clientSecret: ClientSecret): ElementsSession {
+        override suspend fun get(
+            initializationMode: PaymentSheet.InitializationMode,
+        ): ElementsSession {
             return ElementsSession(
                 linkSettings = null,
                 paymentMethodSpecs = null,
@@ -53,15 +53,10 @@ internal sealed class ElementsSessionRepository {
                 stripeAccount = lazyPaymentConfig.get().stripeAccountId,
             )
 
-        override suspend fun get(clientSecret: ClientSecret): ElementsSession {
-            val params = when (clientSecret) {
-                is PaymentIntentClientSecret -> {
-                    ElementsSessionParams.PaymentIntentType(clientSecret.value)
-                }
-                is SetupIntentClientSecret -> {
-                    ElementsSessionParams.SetupIntentType(clientSecret.value)
-                }
-            }
+        override suspend fun get(
+            initializationMode: PaymentSheet.InitializationMode,
+        ): ElementsSession {
+            val params = initializationMode.toElementsSessionParams()
 
             val elementsSession = runCatching {
                 stripeRepository.retrieveElementsSession(
@@ -70,16 +65,16 @@ internal sealed class ElementsSessionRepository {
                 )
             }.getOrNull()
 
-            return elementsSession ?: requireNotNull(fallback(clientSecret))
+            return elementsSession ?: requireNotNull(fallback(params))
         }
 
         private suspend fun fallback(
-            clientSecret: ClientSecret
+            params: ElementsSessionParams,
         ): ElementsSession? = withContext(workContext) {
-            when (clientSecret) {
-                is PaymentIntentClientSecret -> {
+            when (params) {
+                is ElementsSessionParams.PaymentIntentType -> {
                     stripeRepository.retrievePaymentIntent(
-                        clientSecret = clientSecret.value,
+                        clientSecret = params.clientSecret,
                         options = requestOptions,
                         expandFields = listOf("payment_method")
                     )?.let {
@@ -90,9 +85,9 @@ internal sealed class ElementsSessionRepository {
                         )
                     }
                 }
-                is SetupIntentClientSecret -> {
+                is ElementsSessionParams.SetupIntentType -> {
                     stripeRepository.retrieveSetupIntent(
-                        clientSecret = clientSecret.value,
+                        clientSecret = params.clientSecret,
                         options = requestOptions,
                         expandFields = listOf("payment_method")
                     )?.let {
@@ -102,8 +97,23 @@ internal sealed class ElementsSessionRepository {
                             stripeIntent = it,
                         )
                     }
+                }
+                is ElementsSessionParams.DeferredIntentType -> {
+                    // We don't have a fallback endpoint for the deferred intent flow
+                    null
                 }
             }
+        }
+    }
+}
+
+private fun PaymentSheet.InitializationMode.toElementsSessionParams(): ElementsSessionParams {
+    return when (this) {
+        is PaymentSheet.InitializationMode.PaymentIntent -> {
+            ElementsSessionParams.PaymentIntentType(clientSecret = clientSecret)
+        }
+        is PaymentSheet.InitializationMode.SetupIntent -> {
+            ElementsSessionParams.SetupIntentType(clientSecret = clientSecret)
         }
     }
 }
