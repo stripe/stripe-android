@@ -1,3 +1,5 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
@@ -183,5 +185,4 @@ internal fun Wallet(
     }
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON"
