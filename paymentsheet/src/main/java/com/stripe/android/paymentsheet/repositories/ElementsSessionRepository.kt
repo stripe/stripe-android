@@ -135,12 +135,8 @@ private fun PaymentSheet.InitializationMode.toElementsSessionParams(): ElementsS
 
 private fun PaymentSheet.IntentConfiguration.Mode.toElementsSessionParam(): Mode {
     return when (this) {
-        is PaymentSheet.IntentConfiguration.Mode.Payment -> {
-            Mode.Payment(amount, currency)
-        }
-        is PaymentSheet.IntentConfiguration.Mode.Setup -> {
-            Mode.Setup(currency)
-        }
+        is PaymentSheet.IntentConfiguration.Mode.Payment -> Mode.Payment(amount, currency)
+        is PaymentSheet.IntentConfiguration.Mode.Setup -> Mode.Setup(currency)
     }
 }
 
