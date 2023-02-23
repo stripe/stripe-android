@@ -88,19 +88,6 @@ abstract class StripeRepository {
         APIException::class
     )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    abstract suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        locale: Locale
-    ): ElementsSession?
-
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     internal abstract suspend fun refreshPaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options
@@ -142,19 +129,6 @@ abstract class StripeRepository {
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
     ): SetupIntent?
-
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    abstract suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        locale: Locale
-    ): ElementsSession?
 
     @Throws(
         AuthenticationException::class,

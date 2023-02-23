@@ -92,21 +92,6 @@ internal class ElementsSessionRepositoryTest {
         }
 
     @Test
-    fun `get with null locale should call retrievePaymentIntent()`() = runTest {
-        whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
-            .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
-
-        createRepository().get(PaymentIntentClientSecret("client_secret"))
-
-        verify(stripeRepository, never()).retrievePaymentIntentWithOrderedPaymentMethods(
-            any(),
-            any(),
-            any()
-        )
-        verify(stripeRepository).retrievePaymentIntent(any(), any(), any())
-    }
-
-    @Test
     fun `get without locale should retrieve ordered payment methods in default locale`() = runTest {
         whenever(
             stripeRepository.retrieveElementsSession(any(), any())

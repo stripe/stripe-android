@@ -336,38 +336,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Retrieve a [PaymentIntent] using its client_secret, with the accepted payment method types
-     * ordered according to the [locale] provided.
-     *
-     * Analytics event: [PaymentAnalyticsEvent.PaymentIntentRetrieve]
-     *
-     * @param clientSecret client_secret of the PaymentIntent to retrieve
-     * @param locale locale used to determine the order of the payment method types
-     */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    override suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        locale: Locale
-    ): ElementsSession? {
-        val params = ElementsSessionParams.PaymentIntentType(
-            clientSecret = clientSecret,
-            locale = locale.toLanguageTag(),
-        )
-
-        return retrieveElementsSession(
-            params = params,
-            options = options,
-            analyticsEvent = PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered
-        )
-    }
-
-    /**
      * Analytics event: [PaymentAnalyticsEvent.PaymentIntentCancelSource]
      */
     @Throws(
@@ -477,38 +445,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.SetupIntentRetrieve)
             )
         }
-    }
-
-    /**
-     * Retrieve a [SetupIntent] using its client_secret, with the accepted payment method types
-     * ordered according to the [locale] provided.
-     *
-     * Analytics event: [PaymentAnalyticsEvent.SetupIntentRetrieve]
-     *
-     * @param clientSecret client_secret of the SetupIntent to retrieve
-     * @param locale locale used to determine the order of the payment method types
-     */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    override suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        locale: Locale
-    ): ElementsSession? {
-        val params = ElementsSessionParams.SetupIntentType(
-            clientSecret = clientSecret,
-            locale = locale.toLanguageTag(),
-        )
-
-        return retrieveElementsSession(
-            params = params,
-            options = options,
-            analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieveOrdered,
-        )
     }
 
     /**
