@@ -2293,7 +2293,71 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `Verify that the elements session endpoint has the right query params`() = runTest {
+    fun `Verify that the elements session endpoint has the right query params for payment intents`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.PaymentIntentType(clientSecret = "client_secret"),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertEquals(
+            "https://api.stripe.com/v1/elements/sessions",
+            request.baseUrl
+        )
+
+        with(params) {
+            assertEquals("payment_intent", this["type"])
+            assertEquals("en-US", this["locale"])
+            assertEquals("client_secret", this["client_secret"])
+        }
+    }
+
+    @Test
+    fun `Verify that the elements session endpoint has the right query params for setup intents`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.SetupIntentType(clientSecret = "client_secret"),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertEquals(
+            "https://api.stripe.com/v1/elements/sessions",
+            request.baseUrl
+        )
+
+        with(params) {
+            assertEquals("setup_intent", this["type"])
+            assertEquals("en-US", this["locale"])
+            assertEquals("client_secret", this["client_secret"])
+        }
+    }
+
+    @Test
+    fun `Verify that the elements session endpoint has the right query params for deferred intents`() = runTest {
         val stripeResponse = StripeResponse(
             200,
             ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
