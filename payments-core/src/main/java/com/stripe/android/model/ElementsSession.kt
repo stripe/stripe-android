@@ -9,7 +9,7 @@ import kotlinx.parcelize.Parcelize
 data class ElementsSession(
     val linkSettings: LinkSettings?,
     val paymentMethodSpecs: String?,
-    val stripeIntent: StripeIntent?
+    val stripeIntent: StripeIntent,
 ) : StripeModel {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

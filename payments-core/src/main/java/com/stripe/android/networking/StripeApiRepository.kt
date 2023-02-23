@@ -61,7 +61,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
-import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -337,47 +336,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Retrieve a [PaymentIntent] using its client_secret, with the accepted payment method types
-     * ordered according to the [locale] provided.
-     *
-     * Analytics event: [PaymentAnalyticsEvent.PaymentIntentRetrieve]
-     *
-     * @param clientSecret client_secret of the PaymentIntent to retrieve
-     * @param locale locale used to determine the order of the payment method types
-     */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    override suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        locale: Locale
-    ): PaymentMethodPreference? {
-        val params = ElementsSessionParams.PaymentIntentType(
-            clientSecret = clientSecret,
-            locale = locale.toLanguageTag(),
-        )
-        val elementsSession = retrieveElementsSession(
-            params = params,
-            expandFields = listOf(
-                "payment_method_preference.${params.type}.payment_method"
-            ),
-            options = options,
-            analyticsEvent = PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered
-        )
-
-        return elementsSession?.stripeIntent?.let { intent ->
-            PaymentMethodPreference(
-                intent = intent,
-                formUI = elementsSession.paymentMethodSpecs,
-            )
-        }
-    }
-
-    /**
      * Analytics event: [PaymentAnalyticsEvent.PaymentIntentCancelSource]
      */
     @Throws(
@@ -485,47 +443,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.SetupIntentRetrieve)
-            )
-        }
-    }
-
-    /**
-     * Retrieve a [SetupIntent] using its client_secret, with the accepted payment method types
-     * ordered according to the [locale] provided.
-     *
-     * Analytics event: [PaymentAnalyticsEvent.SetupIntentRetrieve]
-     *
-     * @param clientSecret client_secret of the SetupIntent to retrieve
-     * @param locale locale used to determine the order of the payment method types
-     */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    override suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        locale: Locale
-    ): PaymentMethodPreference? {
-        val params = ElementsSessionParams.SetupIntentType(
-            clientSecret = clientSecret,
-            locale = locale.toLanguageTag(),
-        )
-        val elementsSession = retrieveElementsSession(
-            params = params,
-            expandFields = listOf(
-                "payment_method_preference.${params.type}.payment_method"
-            ),
-            options = options,
-            analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieveOrdered
-        )
-
-        return elementsSession?.stripeIntent?.let { intent ->
-            PaymentMethodPreference(
-                intent = intent,
-                formUI = elementsSession.paymentMethodSpecs,
             )
         }
     }
@@ -1652,17 +1569,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    override suspend fun retrieveDeferredIntent(
-        elementsSessionParams: ElementsSessionParams,
-        requestOptions: ApiRequest.Options
-    ): StripeIntent? {
-        return retrieveElementsSession(
-            params = elementsSessionParams,
-            options = requestOptions,
-            analyticsEvent = null
-        )?.stripeIntent
-    }
-
     /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
@@ -1671,11 +1577,21 @@ class StripeApiRepository @JvmOverloads internal constructor(
         return getApiUrl("payment_methods/%s/detach", paymentMethodId)
     }
 
+    override suspend fun retrieveElementsSession(
+        params: ElementsSessionParams,
+        options: ApiRequest.Options,
+    ): ElementsSession? {
+        return retrieveElementsSession(
+            params = params,
+            options = options,
+            analyticsEvent = null,
+        )
+    }
+
     private suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
-        expandFields: List<String> = emptyList(),
         options: ApiRequest.Options,
-        analyticsEvent: PaymentAnalyticsEvent?
+        analyticsEvent: PaymentAnalyticsEvent?,
     ): ElementsSession? {
         // Unsupported for user key sessions.
         if (options.apiKeyIsUserKey) return null
@@ -1700,7 +1616,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createGet(
                 getApiUrl("elements/sessions"),
                 options,
-                requestParams.plus(createExpandParam(expandFields))
+                requestParams + createExpandParam(params.expandFields)
             ),
             parser
         ) {
