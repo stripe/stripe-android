@@ -55,7 +55,6 @@ import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
@@ -141,12 +140,14 @@ internal class PaymentSheetActivityTest {
 
     private lateinit var viewModel: PaymentSheetViewModel
 
-    private val contract = PaymentSheetContract()
+    private val contract = PaymentSheetContractV2()
 
     private val intent = contract.createIntent(
         context,
-        PaymentSheetContract.Args(
-            PaymentIntentClientSecret("client_secret"),
+        PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
             PaymentSheetFixtures.CONFIG_CUSTOMER,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
         )
@@ -677,14 +678,15 @@ internal class PaymentSheetActivityTest {
 
             val intent = contract.createIntent(
                 activity,
-                PaymentSheetContract.Args(
-                    PaymentIntentClientSecret("client_secret"),
+                PaymentSheetContractV2.Args(
+                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                        clientSecret = "client_secret",
+                    ),
                     PaymentSheetFixtures.CONFIG_CUSTOMER
                 )
             )
 
-            val args =
-                intent.extras?.get(PaymentSheetContract.EXTRA_ARGS) as PaymentSheetContract.Args
+            val args = intent.extras?.get(PaymentSheetContractV2.EXTRA_ARGS) as PaymentSheetContractV2.Args
             assertThat(args.statusBarColor)
                 .isEqualTo(PaymentSheetFixtures.STATUS_BAR_COLOR)
         }
@@ -900,8 +902,10 @@ internal class PaymentSheetActivityTest {
             ephemeralKeySecret = "",
         )
 
-        val args = PaymentSheetContract.Args(
-            clientSecret = PaymentIntentClientSecret("abc"),
+        val args = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = "abc",
+            ),
             config = PaymentSheet.Configuration(
                 merchantDisplayName = "Some name",
                 customer = invalidCustomerConfig,
@@ -923,8 +927,8 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Handles invalid client secret correctly`() {
-        val args = PaymentSheetContract.Args(
-            clientSecret = PaymentIntentClientSecret(""),
+        val args = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = ""),
             config = null,
         )
 

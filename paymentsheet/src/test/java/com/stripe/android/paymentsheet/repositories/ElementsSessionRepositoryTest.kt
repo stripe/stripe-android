@@ -8,7 +8,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -42,7 +42,11 @@ internal class ElementsSessionRepositoryTest {
 
         val locale = Locale.GERMANY
         val session = withLocale(locale) {
-            createRepository().get(PaymentIntentClientSecret("client_secret"))
+            createRepository().get(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret",
+                )
+            )
         }
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
@@ -64,7 +68,11 @@ internal class ElementsSessionRepositoryTest {
                 .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
             val session = withLocale(Locale.ITALY) {
-                createRepository().get(PaymentIntentClientSecret("client_secret"))
+                createRepository().get(
+                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                        clientSecret = "client_secret",
+                    )
+                )
             }
 
             verify(stripeRepository).retrieveElementsSession(any(), any())
@@ -83,7 +91,11 @@ internal class ElementsSessionRepositoryTest {
                 .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
             val session = withLocale(Locale.ITALY) {
-                createRepository().get(PaymentIntentClientSecret("client_secret"))
+                createRepository().get(
+                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                        clientSecret = "client_secret",
+                    )
+                )
             }
 
             verify(stripeRepository).retrieveElementsSession(any(), any())
@@ -107,7 +119,11 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
-        ).get(PaymentIntentClientSecret("client_secret"))
+        ).get(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            )
+        )
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
 
