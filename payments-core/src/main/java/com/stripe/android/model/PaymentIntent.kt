@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentIntent.ConfirmationMethod
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import java.util.Objects
 import java.util.regex.Pattern
 
 /**
@@ -19,7 +20,7 @@ import java.util.regex.Pattern
  */
 @OptIn(StripeCashAppPayBetaApi::class)
 @Parcelize
-data class PaymentIntent
+class PaymentIntent
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     /**
@@ -230,6 +231,263 @@ constructor(
                 } ?: false
         } ?: false
     }
+
+    override fun hashCode(): Int {
+        return Objects.hash(
+            id,
+            paymentMethodTypes,
+            amount,
+            canceledAt,
+            cancellationReason,
+            captureMethod,
+            clientSecret,
+            confirmationMethod,
+            countryCode,
+            created,
+            currency,
+            description,
+            isLiveMode,
+            paymentMethod,
+            paymentMethodId,
+            receiptEmail,
+            status,
+            setupFutureUsage,
+            lastPaymentError,
+            shipping,
+            unactivatedPaymentMethods,
+            linkFundingSources,
+            nextActionData,
+            paymentMethodOptionsJsonString,
+        )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is PaymentIntent &&
+            id == other.id &&
+            paymentMethodTypes == other.paymentMethodTypes &&
+            amount == other.amount &&
+            canceledAt == other.canceledAt &&
+            cancellationReason == other.cancellationReason &&
+            captureMethod == other.captureMethod &&
+            clientSecret == other.clientSecret &&
+            confirmationMethod == other.confirmationMethod &&
+            countryCode == other.countryCode &&
+            created == other.created &&
+            currency == other.currency &&
+            description == other.description &&
+            isLiveMode == other.isLiveMode &&
+            paymentMethod == other.paymentMethod &&
+            paymentMethodId == other.paymentMethodId &&
+            receiptEmail == other.receiptEmail &&
+            status == other.status &&
+            setupFutureUsage == other.setupFutureUsage &&
+            lastPaymentError == other.lastPaymentError &&
+            shipping == other.shipping &&
+            unactivatedPaymentMethods == other.unactivatedPaymentMethods &&
+            linkFundingSources == other.linkFundingSources &&
+            nextActionData == other.nextActionData &&
+            paymentMethodOptionsJsonString == other.paymentMethodOptionsJsonString
+    }
+
+    override fun toString(): String {
+        return "PaymentIntent(" +
+            "id=$id, " +
+            "paymentMethodTypes=$paymentMethodTypes, " +
+            "amount=$amount, " +
+            "canceledAt=$canceledAt, " +
+            "cancellationReason=$cancellationReason, " +
+            "captureMethod=$captureMethod, " +
+            "clientSecret=$clientSecret, " +
+            "confirmationMethod=$confirmationMethod, " +
+            "countryCode=$countryCode, " +
+            "created=$created, " +
+            "currency=$currency, " +
+            "description=$description, " +
+            "isLiveMode=$isLiveMode, " +
+            "paymentMethod=$paymentMethod, " +
+            "paymentMethodId=$paymentMethodId, " +
+            "receiptEmail=$receiptEmail, " +
+            "status=$status, " +
+            "setupFutureUsage=$setupFutureUsage, " +
+            "lastPaymentError=$lastPaymentError, " +
+            "shipping=$shipping, " +
+            "unactivatedPaymentMethods=$unactivatedPaymentMethods, " +
+            "linkFundingSources=$linkFundingSources, " +
+            "nextActionData=$nextActionData, " +
+            "paymentMethodOptionsJsonString=$paymentMethodOptionsJsonString)"
+    }
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun copy(
+        id: String? = this.id,
+        paymentMethodTypes: List<String> = this.paymentMethodTypes,
+        amount: Long? = this.amount,
+        canceledAt: Long = this.canceledAt,
+        cancellationReason: CancellationReason? = this.cancellationReason,
+        captureMethod: CaptureMethod = this.captureMethod,
+        clientSecret: String? = this.clientSecret,
+        confirmationMethod: ConfirmationMethod = this.confirmationMethod,
+        countryCode: String? = this.countryCode,
+        created: Long = this.created,
+        currency: String? = this.currency,
+        description: String? = this.description,
+        isLiveMode: Boolean = this.isLiveMode,
+        paymentMethod: PaymentMethod? = this.paymentMethod,
+        paymentMethodId: String? = this.paymentMethodId,
+        receiptEmail: String? = this.receiptEmail,
+        status: StripeIntent.Status? = this.status,
+        setupFutureUsage: StripeIntent.Usage? = this.setupFutureUsage,
+        lastPaymentError: Error? = this.lastPaymentError,
+        shipping: Shipping? = this.shipping,
+        unactivatedPaymentMethods: List<String> = this.unactivatedPaymentMethods,
+        linkFundingSources: List<String> = this.linkFundingSources,
+        nextActionData: StripeIntent.NextActionData? = this.nextActionData,
+        paymentMethodOptionsJsonString: String? = this.paymentMethodOptionsJsonString,
+    ): PaymentIntent {
+        return PaymentIntent(
+            id = id,
+            paymentMethodTypes = paymentMethodTypes,
+            amount = amount,
+            canceledAt = canceledAt,
+            cancellationReason = cancellationReason,
+            captureMethod = captureMethod,
+            clientSecret = clientSecret,
+            confirmationMethod = confirmationMethod,
+            countryCode = countryCode,
+            created = created,
+            currency = currency,
+            description = description,
+            isLiveMode = isLiveMode,
+            paymentMethod = paymentMethod,
+            paymentMethodId = paymentMethodId,
+            receiptEmail = receiptEmail,
+            status = status,
+            setupFutureUsage = setupFutureUsage,
+            lastPaymentError = lastPaymentError,
+            shipping = shipping,
+            unactivatedPaymentMethods = unactivatedPaymentMethods,
+            linkFundingSources = linkFundingSources,
+            nextActionData = nextActionData,
+            paymentMethodOptionsJsonString = paymentMethodOptionsJsonString,
+        )
+    }
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component1(): String? = id
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component2(): List<String> = paymentMethodTypes
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component3(): Long? = amount
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component4(): Long = canceledAt
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component5(): CancellationReason? = cancellationReason
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component6(): CaptureMethod = captureMethod
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component7(): String? = clientSecret
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component8(): ConfirmationMethod = confirmationMethod
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component9(): String? = countryCode
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component10(): Long = created
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component11(): String? = currency
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component12(): String? = description
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component13(): Boolean = isLiveMode
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component14(): PaymentMethod? = paymentMethod
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component15(): String? = paymentMethodId
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component16(): String? = receiptEmail
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component17(): StripeIntent.Status? = status
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component18(): StripeIntent.Usage? = setupFutureUsage
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component19(): PaymentIntent.Error? = lastPaymentError
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component20(): Shipping? = shipping
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component21(): List<String> = unactivatedPaymentMethods
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component22(): List<String> = linkFundingSources
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component23(): StripeIntent.NextActionData? = nextActionData
 
     /**
      * The payment error encountered in the previous [PaymentIntent] confirmation.
