@@ -485,7 +485,7 @@ internal class EndToEndTest {
             Request.CreateSetupIntentParams(
                 createParams = Request.CreateParams(
                     paymentMethodTypes = listOf("cashapp"),
-                    customer = "cus_LO3hhHz7XpE7Ty",
+                    customer = "cus_NPaWWxhQLIw2jW",
                 ),
             )
         )
