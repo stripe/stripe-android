@@ -25,17 +25,18 @@ internal class CardScanActivity : AppCompatActivity() {
             PaymentConfiguration.getInstance(this).publishableKey,
             this::onScanFinished
         )
+        stripeCardScanProxy.present()
     }
 
-    override fun onStart() {
-        super.onStart()
-        stripeCardScanProxy.attachCardScanFragment(
-            this,
-            supportFragmentManager,
-            R.id.fragment_container,
-            this::onScanFinished
-        )
-    }
+//    override fun onStart() {
+//        super.onStart()
+//        stripeCardScanProxy.attachCardScanFragment(
+//            this,
+//            supportFragmentManager,
+//            R.id.fragment_container,
+//            this::onScanFinished
+//        )
+//    }
 
     private fun onScanFinished(result: CardScanSheetResult) {
         val intent = Intent()
@@ -47,10 +48,10 @@ internal class CardScanActivity : AppCompatActivity() {
         finish()
     }
 
-    override fun onStop() {
-        StripeCardScanProxy.removeCardScanFragment(supportFragmentManager)
-        super.onStop()
-    }
+//    override fun onStop() {
+//        StripeCardScanProxy.removeCardScanFragment(supportFragmentManager)
+//        super.onStop()
+//    }
 
     companion object {
         const val CARD_SCAN_PARCELABLE_NAME = "CardScanActivityResult"
