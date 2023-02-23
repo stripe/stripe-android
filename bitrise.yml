@@ -7,8 +7,6 @@ trigger_map:
     pipeline: main-trigger-pipeline
   - pull_request_source_branch: '*'
     pipeline: main-trigger-pipeline
-  - push_branch: '*'
-    pipeline: run-instrumentation-tests
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -23,6 +21,7 @@ stages:
     workflows:
       - check: {}
       - test: {}
+      - run-instrumentation-tests: {}
 
 workflows:
   check:
