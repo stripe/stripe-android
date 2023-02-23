@@ -6,6 +6,7 @@ import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import java.util.Objects
 import java.util.regex.Pattern
 
 /**
@@ -17,7 +18,7 @@ import java.util.regex.Pattern
  */
 @OptIn(StripeCashAppPayBetaApi::class)
 @Parcelize
-data class SetupIntent internal constructor(
+class SetupIntent internal constructor(
     /**
      * Unique identifier for the object.
      */
@@ -105,7 +106,7 @@ data class SetupIntent internal constructor(
      */
     override val linkFundingSources: List<String>,
 
-    override val nextActionData: StripeIntent.NextActionData?
+    override val nextActionData: StripeIntent.NextActionData?,
 ) : StripeIntent {
 
     override val nextActionType: StripeIntent.NextActionType?
@@ -150,6 +151,188 @@ data class SetupIntent internal constructor(
     override fun requiresConfirmation(): Boolean {
         return status === StripeIntent.Status.RequiresConfirmation
     }
+
+    override fun hashCode(): Int {
+        return Objects.hash(
+            id,
+            cancellationReason,
+            created,
+            countryCode,
+            clientSecret,
+            description,
+            isLiveMode,
+            paymentMethod,
+            paymentMethodId,
+            paymentMethodTypes,
+            status,
+            usage,
+            lastSetupError,
+            unactivatedPaymentMethods,
+            linkFundingSources,
+            nextActionData,
+        )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is SetupIntent &&
+            id == other.id &&
+            cancellationReason == other.cancellationReason &&
+            created == other.created &&
+            countryCode == other.countryCode &&
+            clientSecret == other.clientSecret &&
+            description == other.description &&
+            isLiveMode == other.isLiveMode &&
+            paymentMethod == other.paymentMethod &&
+            paymentMethodId == other.paymentMethodId &&
+            paymentMethodTypes == other.paymentMethodTypes &&
+            status == other.status &&
+            usage == other.usage &&
+            lastSetupError == other.lastSetupError &&
+            unactivatedPaymentMethods == other.unactivatedPaymentMethods &&
+            linkFundingSources == other.linkFundingSources &&
+            nextActionData == other.nextActionData
+    }
+
+    override fun toString(): String {
+        return "SetupIntent(" +
+            "id=$id, " +
+            "cancellationReason=$cancellationReason, " +
+            "created=$created, " +
+            "countryCode=$countryCode, " +
+            "clientSecret=$clientSecret, " +
+            "description=$description, " +
+            "isLiveMode=$isLiveMode, " +
+            "paymentMethod=$paymentMethod, " +
+            "paymentMethodId=$paymentMethodId, " +
+            "paymentMethodTypes=$paymentMethodTypes, " +
+            "status=$status, " +
+            "usage=$usage, " +
+            "lastSetupError=$lastSetupError, " +
+            "unactivatedPaymentMethods=$unactivatedPaymentMethods, " +
+            "linkFundingSources=$linkFundingSources, " +
+            "nextActionData=$nextActionData)"
+    }
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun copy(
+        id: String? = this.id,
+        cancellationReason: CancellationReason? = this.cancellationReason,
+        created: Long = this.created,
+        countryCode: String? = this.countryCode,
+        clientSecret: String? = this.clientSecret,
+        description: String? = this.description,
+        isLiveMode: Boolean = this.isLiveMode,
+        paymentMethod: PaymentMethod? = this.paymentMethod,
+        paymentMethodId: String? = this.paymentMethodId,
+        paymentMethodTypes: List<String> = this.paymentMethodTypes,
+        status: StripeIntent.Status? = this.status,
+        usage: StripeIntent.Usage? = this.usage,
+        lastSetupError: Error? = this.lastSetupError,
+        unactivatedPaymentMethods: List<String> = this.unactivatedPaymentMethods,
+        linkFundingSources: List<String> = this.linkFundingSources,
+        nextActionData: StripeIntent.NextActionData? = this.nextActionData,
+    ): SetupIntent {
+        return SetupIntent(
+            id = id,
+            cancellationReason = cancellationReason,
+            created = created,
+            countryCode = countryCode,
+            clientSecret = clientSecret,
+            description = description,
+            isLiveMode = isLiveMode,
+            paymentMethod = paymentMethod,
+            paymentMethodId = paymentMethodId,
+            paymentMethodTypes = paymentMethodTypes,
+            status = status,
+            usage = usage,
+            lastSetupError = lastSetupError,
+            unactivatedPaymentMethods = unactivatedPaymentMethods,
+            linkFundingSources = linkFundingSources,
+            nextActionData = nextActionData,
+        )
+    }
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component1(): String? = id
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component2(): CancellationReason? = cancellationReason
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component3(): Long = created
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component4(): String? = countryCode
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component5(): String? = clientSecret
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component6(): String? = description
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component7(): Boolean = isLiveMode
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component8(): PaymentMethod? = paymentMethod
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component9(): String? = paymentMethodId
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component10(): List<String> = paymentMethodTypes
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component11(): StripeIntent.Status? = status
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component12(): StripeIntent.Usage? = usage
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component13(): SetupIntent.Error? = lastSetupError
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component14(): List<String> = unactivatedPaymentMethods
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component15(): List<String> = linkFundingSources
+
+    @Deprecated(
+        message = "This isn't meant for public usage and will be removed in a future release",
+    )
+    fun component16(): StripeIntent.NextActionData? = nextActionData
 
     /**
      * The error encountered in the previous [SetupIntent] confirmation.
