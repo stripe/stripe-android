@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_C
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_CONSUMER_CLIENT_SECRET
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_ID
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAM_SELECTED_ACCOUNTS
+import com.stripe.android.financialconnections.utils.filterNotNullValues
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -44,7 +45,7 @@ internal interface FinancialConnectionsAccountsRepository {
     suspend fun postLinkAccountSessionPaymentAccount(
         clientSecret: String,
         paymentAccount: PaymentAccountParams,
-        consumerSessionClientSecret: String? = null
+        consumerSessionClientSecret: String?
     ): LinkAccountSessionPaymentAccount
 
     suspend fun postAuthorizationSessionSelectedAccounts(
@@ -165,8 +166,9 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             url = attachPaymentAccountUrl,
             options = apiOptions,
             params = mapOf(
+                PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
                 PARAMS_CLIENT_SECRET to clientSecret
-            ) + paymentAccount.toParamMap()
+            ).filterNotNullValues() + paymentAccount.toParamMap()
         )
         return requestExecutor.execute(
             request,
