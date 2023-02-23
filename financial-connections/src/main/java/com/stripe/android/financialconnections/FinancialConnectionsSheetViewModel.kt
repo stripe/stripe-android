@@ -393,9 +393,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * Link flows do not need to fetch the FC session, since the linked account id is
      * appended to the web success url.
      */
-    private fun onSuccessFromLinkFlow(url: Uri?) {
+    private fun onSuccessFromLinkFlow(url: Uri) {
         kotlin.runCatching {
-            requireNotNull(url?.getQueryParameter(QUERY_PARAM_LINKED_ACCOUNT))
+            requireNotNull(url.getQueryParameter(QUERY_PARAM_LINKED_ACCOUNT))
         }.onSuccess { linkedAccountId ->
             withState {
                 finishWithResult(
