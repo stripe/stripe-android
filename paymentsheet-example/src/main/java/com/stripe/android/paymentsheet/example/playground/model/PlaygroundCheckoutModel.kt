@@ -5,6 +5,11 @@ import com.google.gson.annotations.SerializedName
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.serialization.Serializable
 
+enum class InitializationType(val value: String) {
+    Normal("normal"),
+    Deferred("deferred"),
+}
+
 enum class CheckoutMode(val value: String) {
     Setup("setup"),
     Payment("payment"),
@@ -27,6 +32,7 @@ data class CheckoutCurrency(val value: String) {
 }
 
 data class SavedToggles(
+    val initialization: String,
     val customer: String,
     val googlePay: Boolean,
     val currency: String,
@@ -40,6 +46,7 @@ data class SavedToggles(
 )
 
 enum class Toggle(val key: String, val default: Any) {
+    Initialization("initialization", InitializationType.Normal.value),
     Customer("customer", CheckoutCustomer.Guest.value),
     Link("link", true),
     GooglePay("googlePayConfig", true),
@@ -63,6 +70,8 @@ sealed class CheckoutCustomer(val value: String) {
 @Serializable
 @Keep
 data class CheckoutRequest(
+    @SerializedName("initialization")
+    val initialization: String,
     @SerializedName("customer")
     val customer: String,
     @SerializedName("currency")
@@ -91,7 +100,9 @@ data class CheckoutResponse(
     @SerializedName("customerId")
     val customerId: String? = null,
     @SerializedName("customerEphemeralKeySecret")
-    val customerEphemeralKeySecret: String? = null
+    val customerEphemeralKeySecret: String? = null,
+    @SerializedName("paymentMethodTypes")
+    val paymentMethodTypes: List<String>? = null,
 ) {
     fun makeCustomerConfig() =
         if (customerId != null && customerEphemeralKeySecret != null) {
