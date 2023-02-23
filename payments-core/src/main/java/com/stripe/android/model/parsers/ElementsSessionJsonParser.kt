@@ -50,13 +50,17 @@ internal class ElementsSessionJsonParser(
             countryCode = countryCode
         )
 
-        return ElementsSession(
-            linkSettings = ElementsSession.LinkSettings(
-                linkFundingSources = jsonArrayToList(linkFundingSources)
-            ),
-            paymentMethodSpecs = paymentMethodSpecs,
-            stripeIntent = stripeIntent
-        )
+        return if (stripeIntent != null) {
+            ElementsSession(
+                linkSettings = ElementsSession.LinkSettings(
+                    linkFundingSources = jsonArrayToList(linkFundingSources),
+                ),
+                paymentMethodSpecs = paymentMethodSpecs,
+                stripeIntent = stripeIntent,
+            )
+        } else {
+            null
+        }
     }
 
     private fun parseStripeIntent(

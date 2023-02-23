@@ -22,7 +22,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
@@ -57,7 +57,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     @Named(APP_NAME) private val appName: String,
     private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
-    private val stripeIntentRepository: StripeIntentRepository,
+    private val elementsSessionRepository: ElementsSessionRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
     private val lpmResourceRepository: ResourceRepository<LpmRepository>,
@@ -70,10 +70,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     override suspend fun load(
         clientSecret: ClientSecret,
         paymentSheetConfiguration: PaymentSheet.Configuration?
-    ) = withContext(workContext) {
+    ): PaymentSheetLoader.Result = withContext(workContext) {
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
+
         runCatching {
-            retrieveStripeIntent(clientSecret)
+            retrieveElementsSession(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
                 create(
@@ -223,22 +224,22 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
     }
 
-    private suspend fun retrieveStripeIntent(
-        clientSecret: ClientSecret
+    private suspend fun retrieveElementsSession(
+        clientSecret: ClientSecret,
     ): StripeIntent {
-        val paymentMethodPreference = stripeIntentRepository.get(clientSecret)
+        val elementsSession = elementsSessionRepository.get(clientSecret)
         val lpmRepository = lpmResourceRepository.getRepository()
 
         lpmRepository.update(
-            stripeIntent = paymentMethodPreference.intent,
-            serverLpmSpecs = paymentMethodPreference.formUI,
+            stripeIntent = elementsSession.stripeIntent,
+            serverLpmSpecs = elementsSession.paymentMethodSpecs,
         )
 
         if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
             eventReporter.onLpmSpecFailure()
         }
 
-        return stripeIntentValidator.requireValid(paymentMethodPreference.intent)
+        return stripeIntentValidator.requireValid(elementsSession.stripeIntent)
     }
 
     private suspend fun loadLinkState(

@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.StripeCardScanProxy
 import com.stripe.android.ui.core.databinding.ActivityCardScanBinding
 
@@ -25,16 +24,7 @@ internal class CardScanActivity : AppCompatActivity() {
             PaymentConfiguration.getInstance(this).publishableKey,
             this::onScanFinished
         )
-    }
-
-    override fun onStart() {
-        super.onStart()
-        stripeCardScanProxy.attachCardScanFragment(
-            this,
-            supportFragmentManager,
-            R.id.fragment_container,
-            this::onScanFinished
-        )
+        stripeCardScanProxy.present()
     }
 
     private fun onScanFinished(result: CardScanSheetResult) {
@@ -45,11 +35,6 @@ internal class CardScanActivity : AppCompatActivity() {
             )
         setResult(RESULT_OK, intent)
         finish()
-    }
-
-    override fun onStop() {
-        StripeCardScanProxy.removeCardScanFragment(supportFragmentManager)
-        super.onStop()
     }
 
     companion object {

@@ -1,9 +1,7 @@
-plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-    id 'org.jetbrains.kotlin.plugin.serialization'
-    id 'shot'
-}
+apply from: configs.androidApplication
+
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'shot'
 
 // Read values from gradle.properties or system environment variable
 def getBackendUrl() {
@@ -109,23 +107,9 @@ shot {
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-
     defaultConfig {
         applicationId "com.stripe.android.paymentsheet.example"
-        minSdkVersion 21
-        targetSdkVersion rootProject.ext.compileSdkVersion
         versionCode 11
-        versionName VERSION_NAME
 
         testInstrumentationRunner "com.karumi.shot.ShotTestRunner"
 
@@ -134,23 +118,11 @@ android {
                 GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey()
         ]
     }
-
-    buildTypes {
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
     buildFeatures {
         viewBinding true
         compose true
     }
     composeOptions {
         kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
-    }
-
-    testOptions {
-        // Make sure animations are off when we run espresso tests
-        animationsDisabled = true
     }
 }
