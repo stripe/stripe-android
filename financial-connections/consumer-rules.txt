@@ -2,3 +2,12 @@
 -keep @kotlinx.serialization.Serializable enum com.stripe.android.financialconnections.** {
     *;
 }
+
+# Without this, MavericksViewModel implementations were missing the MemberClass dalvik annotation
+# which preventedMavericks from finding its companion object which has its factory.
+-keep,allowobfuscation class ** extends com.airbnb.mvrx.MavericksViewModel {
+    <clinit>();
+}
+
+# MavericksViewModel companion object factories
+-keep,allowobfuscation class ** implements com.airbnb.mvrx.MavericksViewModelFactory
