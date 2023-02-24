@@ -47,7 +47,10 @@ internal fun IDNumberSection(
 ) {
     val controller = remember {
         DropdownFieldController(
-            CountryConfig(onlyShowCountryCodes = idNumberCountries.map { it.code.value }.toSet())
+            CountryConfig(
+                onlyShowCountryCodes = idNumberCountries.map { it.code.value }.toSet(),
+                disableDropdownWithSingleElement = true
+            )
         )
     }
     val countryElement = remember { CountryElement(IdentifierSpec.Country, controller) }

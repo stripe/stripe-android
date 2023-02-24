@@ -22,6 +22,7 @@ class DropdownFieldController(
     initialValue: String? = null
 ) : InputController, SectionFieldErrorController, SectionFieldComposable {
     val displayItems: List<String> = config.displayItems
+    val disableDropdownWithSingleElement = config.disableDropdownWithSingleElement
     private val _selectedIndex = MutableStateFlow(0)
     val selectedIndex: StateFlow<Int> = _selectedIndex
     override val label: Flow<Int> = MutableStateFlow(config.label)
