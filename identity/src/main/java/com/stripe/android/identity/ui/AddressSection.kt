@@ -20,6 +20,7 @@ import com.stripe.android.identity.networking.models.RequiredInternationalAddres
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.PostalCodeConfig
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -84,15 +85,28 @@ internal fun AddressSection(
 }
 
 private fun isValidAddress(addressMap: Map<IdentifierSpec, FormFieldEntry>): Boolean {
-    return listOf(
-        IdentifierSpec.Line1,
-        IdentifierSpec.City,
-        IdentifierSpec.PostalCode,
-        IdentifierSpec.State,
-        IdentifierSpec.Country
-    ).firstOrNull {
-        addressMap[it]?.value.isNullOrBlank()
-    } == null
+    if (listOf(
+            IdentifierSpec.Line1,
+            IdentifierSpec.City,
+            IdentifierSpec.PostalCode,
+            IdentifierSpec.State,
+            IdentifierSpec.Country
+        ).firstOrNull {
+            addressMap[it]?.value.isNullOrBlank()
+        } != null
+    ) {
+        return false
+    }
+
+    val country = requireNotNull(addressMap[IdentifierSpec.Country]?.value)
+    val postal = requireNotNull(addressMap[IdentifierSpec.PostalCode]?.value)
+    return when (val format = PostalCodeConfig.CountryPostalFormat.forCountry(country)) {
+        is PostalCodeConfig.CountryPostalFormat.Other -> postal.isNotBlank()
+        else -> {
+            postal.length in format.minimumLength..format.maximumLength &&
+                postal.matches(format.regexPattern)
+        }
+    }
 }
 
 @Composable
