@@ -12,7 +12,7 @@ import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.VerificationFlowFinishable
-import com.stripe.android.identity.navigation.IndividualDestination
+import com.stripe.android.identity.navigation.INDIVIDUAL
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentCountryNotListedPage
@@ -83,7 +83,7 @@ class CountryNotListedScreenTest {
             onNodeWithTag(COUNTRY_NOT_LISTED_OTHER_COUNTRY_TAG).performClick()
             verify(mockNavController).navigate(
                 argWhere {
-                    it.startsWith(IndividualDestination.INDIVIDUAL)
+                    it.startsWith(INDIVIDUAL)
                 },
                 any<NavOptionsBuilder.() -> Unit>()
             )
