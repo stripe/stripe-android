@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.viewmodel
 
 import android.app.Application
+import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
@@ -10,6 +11,7 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -23,6 +25,9 @@ import com.stripe.android.paymentsheet.example.playground.model.SavedToggles
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.serialization.Serializable
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class PaymentSheetPlaygroundViewModel(
     application: Application
@@ -35,6 +40,8 @@ class PaymentSheetPlaygroundViewModel(
 
     val initializationType = MutableStateFlow(InitializationType.Normal)
     val paymentMethodTypes = MutableStateFlow<List<String>>(emptyList())
+
+    val intentConfigurationMode = MutableStateFlow<PaymentSheet.IntentConfiguration.Mode?>(null)
 
     val readyToCheckout = combine(
         initializationType,
@@ -215,4 +222,50 @@ class PaymentSheetPlaygroundViewModel(
                 inProgress.postValue(false)
             }
     }
+
+    suspend fun createPaymentIntent(
+        paymentMethodId: String?,
+        shouldSavePaymentMethod: Boolean?,
+        amount: Long?,
+        currency: String?,
+        confirm: Boolean
+    ): ConfirmResponse {
+        return suspendCoroutine { continuation ->
+            /**
+             * The amount and currency should be set on the server side to avoid malicious behavior
+             */
+            Fuel.post("https://tills-playground-for-decoupling.glitch.me/create_payment_intent")
+                .jsonBody("""
+                {
+                    "payment_method_id": "$paymentMethodId",
+                    "should_save_payment_method": $shouldSavePaymentMethod,
+                    "amount": $amount,
+                    "currency": "$currency",
+                    "confirm": $confirm
+                }
+            """.trimIndent())
+                .responseString { _, _, result ->
+                    when (result) {
+                        is Result.Failure -> {
+                            status.postValue(
+                                "Preparing checkout failed:\n${result.getException().message}"
+                            )
+                        }
+                        is Result.Success -> {
+                            val response = Gson().fromJson(result.get(), ConfirmResponse::class.java)
+                            continuation.resume(response)
+                        }
+                    }
+                }
+        }
+    }
+
+    @Serializable
+    @Keep
+    data class ConfirmResponse(
+        @SerializedName("client_secret")
+        val clientSecret: String,
+        @SerializedName("confirmed")
+        val confirmed: Boolean
+    )
 }

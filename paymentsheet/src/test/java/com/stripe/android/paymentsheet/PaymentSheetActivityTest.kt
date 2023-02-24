@@ -1070,7 +1070,8 @@ internal class PaymentSheetActivityTest {
                 testDispatcher,
                 DUMMY_INJECTOR_KEY,
                 savedStateHandle = savedStateHandle,
-                linkHandler = linkHandler
+                linkHandler = linkHandler,
+                mock()
             ).also {
                 it.injector = injector
             }

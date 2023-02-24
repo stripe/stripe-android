@@ -35,7 +35,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -52,6 +51,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeDeferredIntentRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.Dispatchers
@@ -60,6 +60,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
@@ -68,6 +69,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
@@ -84,6 +86,7 @@ internal class PaymentSheetViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
+    private val deferredIntentRepository = FakeDeferredIntentRepository()
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
     private val lpmRepository = LpmRepository(
@@ -121,6 +124,7 @@ internal class PaymentSheetViewModelTest {
 
     @BeforeTest
     fun setup() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
         MockitoAnnotations.openMocks(this)
     }
 
@@ -259,6 +263,113 @@ internal class PaymentSheetViewModelTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `checkout() with a deferred payment intent confirms client side`() = runTest(
+        UnconfinedTestDispatcher()
+    ) {
+        val viewModel = spy(
+            createViewModel(
+                args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                    initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                        intentConfiguration = PaymentSheet.IntentConfiguration(
+                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                                amount = 12345,
+                                currency = "usd"
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        val viewStateTurbine = viewModel.viewState.testIn(this)
+
+        assertThat(viewStateTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.Reset(null))
+
+        val paymentSelection = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        viewModel.updateSelection(paymentSelection)
+        viewModel.checkout()
+
+        assertThat(viewStateTurbine.awaitItem())
+            .isInstanceOf(PaymentSheetViewState.StartProcessing::class.java)
+
+        deferredIntentRepository.emitResult(
+            DeferredIntentRepository.Result.Success(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                isConfirmed = false
+            )
+        )
+
+        verify(viewModel).confirmStripeIntent(any())
+
+        viewStateTurbine.ensureAllEventsConsumed()
+
+        viewStateTurbine.cancel()
+    }
+
+    @Test
+    fun `checkout() with a deferred payment intent confirms server side`() = runTest {
+        val viewModel = spy(
+            createViewModel(
+                args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                    initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                        intentConfiguration = PaymentSheet.IntentConfiguration(
+                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                                amount = 12345,
+                                currency = "usd"
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        val viewStateTurbine = viewModel.viewState.testIn(this)
+        val resultTurbine = viewModel.paymentSheetResult.testIn(this)
+
+        assertThat(viewStateTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.Reset(null))
+
+        val paymentSelection = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        viewModel.updateSelection(paymentSelection)
+        viewModel.checkout()
+
+        assertThat(viewStateTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.StartProcessing)
+
+        deferredIntentRepository.emitResult(
+            DeferredIntentRepository.Result.Success(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                isConfirmed = true
+            )
+        )
+
+        verify(viewModel, never()).confirmStripeIntent(any())
+
+        val viewState = viewStateTurbine.awaitItem()
+        assertThat(viewState)
+            .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+
+        (viewState as PaymentSheetViewState.FinishProcessing).onComplete()
+
+        assertThat(resultTurbine.awaitItem())
+            .isEqualTo(PaymentSheetResult.Completed)
+
+        viewStateTurbine.cancel()
+        resultTurbine.cancel()
     }
 
     @Test
@@ -1286,7 +1397,7 @@ internal class PaymentSheetViewModelTest {
                 eventReporter,
                 { paymentConfiguration },
                 ElementsSessionRepository.Static(stripeIntent),
-                StripeIntentValidator(),
+                mock(),
                 FakePaymentSheetLoader(
                     stripeIntent = stripeIntent,
                     shouldFail = shouldFailLoad,
@@ -1305,7 +1416,8 @@ internal class PaymentSheetViewModelTest {
                 testDispatcher,
                 DUMMY_INJECTOR_KEY,
                 savedStateHandle = savedStateHandle,
-                linkHandler
+                linkHandler,
+                deferredIntentRepository
             )
         }
     }

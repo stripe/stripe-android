@@ -34,6 +34,8 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.DeferredIntentRepository
+import com.stripe.android.paymentsheet.DeferredIntentRepositoryTest
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -52,6 +54,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.utils.FakeDeferredIntentRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
@@ -63,10 +66,12 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
@@ -113,6 +118,8 @@ internal class DefaultFlowControllerTest {
     }
 
     private val lifeCycleOwner = mock<LifecycleOwner>()
+
+    private val deferredIntentRepository = FakeDeferredIntentRepository()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -757,10 +764,99 @@ internal class DefaultFlowControllerTest {
         assertThat(paramsCaptor.firstValue.toParamMap()["shipping"]).isNull()
     }
 
+    @Test
+    fun `confirmPaymentSelection() with deferred payment intent and client side confirmation`() = runTest {
+        flowController.configure(
+            mode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 12345,
+                        currency = "usd"
+                    )
+                )
+            ),
+            callback = { _, _ -> },
+        )
+
+        flowController.confirmPaymentSelection(
+            NEW_CARD_PAYMENT_SELECTION,
+            PaymentSheetState.Full(
+                PaymentSheetFixtures.CONFIG_CUSTOMER,
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                customerPaymentMethods = PAYMENT_METHODS,
+                savedSelection = SavedSelection.PaymentMethod(
+                    id = "pm_123456789"
+                ),
+                isGooglePayReady = false,
+                linkState = null,
+                newPaymentSelection = null,
+            )
+        )
+
+        deferredIntentRepository.emitResult(
+            DeferredIntentRepository.Result.Success(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                isConfirmed = false
+            )
+        )
+
+        verifyPaymentSelection(
+            PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            expectedPaymentMethodOptions = PaymentMethodOptionsParams.Card(),
+            verifyCalled = true
+        )
+    }
+
+    @Test
+    fun `confirmPaymentSelection() with deferred payment intent and server side confirmation`() = runTest {
+        flowController.configure(
+            mode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 12345,
+                        currency = "usd"
+                    )
+                )
+            ),
+            callback = { _, _ -> },
+        )
+
+        flowController.confirmPaymentSelection(
+            NEW_CARD_PAYMENT_SELECTION,
+            PaymentSheetState.Full(
+                PaymentSheetFixtures.CONFIG_CUSTOMER,
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                customerPaymentMethods = PAYMENT_METHODS,
+                savedSelection = SavedSelection.PaymentMethod(
+                    id = "pm_123456789"
+                ),
+                isGooglePayReady = false,
+                linkState = null,
+                newPaymentSelection = null,
+            )
+        )
+
+        deferredIntentRepository.emitResult(
+            DeferredIntentRepository.Result.Success(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                isConfirmed = true
+            )
+        )
+
+        verifyPaymentSelection(
+            PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            expectedPaymentMethodOptions = PaymentMethodOptionsParams.Card(),
+            verifyCalled = false
+        )
+    }
+
     private fun verifyPaymentSelection(
         clientSecret: String,
         paymentMethodCreateParams: PaymentMethodCreateParams,
-        expectedPaymentMethodOptions: PaymentMethodOptionsParams? = PaymentMethodOptionsParams.Card()
+        expectedPaymentMethodOptions: PaymentMethodOptionsParams? = PaymentMethodOptionsParams.Card(),
+        verifyCalled: Boolean = true
     ) = runTest {
         val confirmPaymentIntentParams =
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -774,7 +870,12 @@ internal class DefaultFlowControllerTest {
                 paymentMethodOptions = expectedPaymentMethodOptions
             )
 
-        verify(paymentLauncher).confirm(
+        val verificationMode = if (verifyCalled) {
+            atLeastOnce()
+        } else {
+            never()
+        }
+        verify(paymentLauncher, verificationMode).confirm(
             eq(confirmPaymentIntentParams)
         )
     }
@@ -950,6 +1051,7 @@ internal class DefaultFlowControllerTest {
         eventReporter = eventReporter,
         viewModel = viewModel,
         paymentLauncherFactory = paymentLauncherAssistedFactory,
+        deferredIntentRepository = deferredIntentRepository,
         lazyPaymentConfiguration = { PaymentConfiguration.getInstance(activity) },
         enableLogging = ENABLE_LOGGING,
         productUsage = PRODUCT_USAGE,

@@ -122,6 +122,7 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                 injectorKey,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
+                mock()
             )
         }
     }
@@ -156,7 +157,7 @@ internal open class BasePaymentSheetViewModelInjectionTest {
 
                     whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
                     whenever(mockBuilder.savedStateHandle(any())).thenReturn(mockBuilder)
-                    whenever(mockBuilder.paymentSheetViewModelModule(any())).thenReturn(mockBuilder)
+                    whenever(mockBuilder.args(any())).thenReturn(mockBuilder)
                     whenever(mockSubcomponent.viewModel).thenReturn(viewModel)
                     whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider

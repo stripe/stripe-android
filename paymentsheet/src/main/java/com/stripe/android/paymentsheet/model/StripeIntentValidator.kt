@@ -56,4 +56,17 @@ internal class StripeIntentValidator @Inject constructor() {
 
         return stripeIntent
     }
+
+    @JvmSynthetic
+    fun isConfirmed(stripeIntent: StripeIntent): Boolean {
+        return when (stripeIntent) {
+            is PaymentIntent -> {
+                stripeIntent.status == StripeIntent.Status.Succeeded ||
+                    stripeIntent.status == StripeIntent.Status.RequiresCapture
+            }
+            is SetupIntent -> {
+                stripeIntent.status == StripeIntent.Status.Succeeded
+            }
+        }
+    }
 }

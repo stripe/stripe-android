@@ -10,22 +10,20 @@ import dagger.Provides
 import kotlin.coroutines.CoroutineContext
 
 @Module
-internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheetContractV2.Args) {
+internal interface PaymentSheetViewModelModule {
 
-    @Provides
-    fun provideArgs(): PaymentSheetContractV2.Args {
-        return starterArgs
-    }
-
-    @Provides
-    fun providePrefsRepository(
-        appContext: Context,
-        @IOContext workContext: CoroutineContext
-    ): PrefsRepository {
-        return DefaultPrefsRepository(
-            appContext,
-            customerId = starterArgs.config?.customer?.id,
-            workContext = workContext
-        )
+    companion object {
+        @Provides
+        fun providePrefsRepository(
+            starterArgs: PaymentSheetContractV2.Args,
+            appContext: Context,
+            @IOContext workContext: CoroutineContext
+        ): PrefsRepository {
+            return DefaultPrefsRepository(
+                appContext,
+                customerId = starterArgs.config?.customer?.id,
+                workContext = workContext
+            )
+        }
     }
 }

@@ -55,6 +55,46 @@ class PaymentSheet internal constructor(
     )
 
     /**
+     * 🚧 Under construction 🚧
+     * Constructor to be used when launching payment sheet with the deferred intent flow.
+     *
+     * @param activity  the Activity that is presenting the payment sheet.
+     * @param callback  called with the result of the payment after the payment sheet is dismissed.
+     * @param confirmCallback  called with the payment method id which should be
+     * retrieved from your server
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        activity: ComponentActivity,
+        callback: PaymentSheetResultCallback,
+        confirmCallback: ConfirmCallback
+    ) : this(
+        DefaultPaymentSheetLauncher(activity, callback)
+    ) {
+        PaymentSheet.confirmCallback = confirmCallback
+    }
+
+    /**
+     * 🚧 Under construction 🚧
+     * Constructor to be used when launching payment sheet with the deferred intent flow.
+     *
+     * @param fragment the Fragment that is presenting the payment sheet.
+     * @param callback  called with the result of the payment after the payment sheet is dismissed.
+     * @param retrieveConfirmCallback  called with the payment method id which should be
+     * retrieved from your server
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        fragment: Fragment,
+        callback: PaymentSheetResultCallback,
+        confirmCallback: ConfirmCallback
+    ) : this(
+        DefaultPaymentSheetLauncher(fragment, callback)
+    ) {
+        PaymentSheet.confirmCallback = confirmCallback
+    }
+
+    /**
      * Present the payment sheet to process a [PaymentIntent].
      * If the [PaymentIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
      * with [PaymentSheetResult.Completed].
@@ -143,6 +183,16 @@ class PaymentSheet internal constructor(
                 // Nothing to do here
             }
         }
+
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val isProcessingPayment: Boolean
+            get() = when (this) {
+                is PaymentIntent -> true
+                is SetupIntent -> false
+                is DeferredIntent -> {
+                    intentConfiguration.mode is IntentConfiguration.Mode.Payment
+                }
+            }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -913,6 +963,7 @@ class PaymentSheet internal constructor(
         }
 
         companion object {
+            internal var confirmCallback: ConfirmCallback? = null
 
             /**
              * Create the FlowController when launching the payment sheet from an Activity.
@@ -954,10 +1005,66 @@ class PaymentSheet internal constructor(
                     paymentResultCallback
                 ).create()
             }
+
+            /**
+             * 🚧 Under construction 🚧
+             * Constructor to be used when launching payment sheet with the deferred intent flow.
+             * Create the FlowController when launching the payment sheet from an Activity.
+             *
+             * @param activity  the Activity that is presenting the payment sheet.
+             * @param paymentOptionCallback called when the customer's desired payment method
+             *      changes.  Called in response to the [PaymentSheet#presentPaymentOptions()]
+             * @param paymentResultCallback called when a [PaymentSheetResult] is available.
+             * @param confirmCallback  called with the payment method id which should be
+             * retrieved from your server
+             */
+            @JvmStatic
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun create(
+                activity: ComponentActivity,
+                paymentOptionCallback: PaymentOptionCallback,
+                paymentResultCallback: PaymentSheetResultCallback,
+                confirmCallback: ConfirmCallback
+            ): FlowController {
+                FlowController.confirmCallback = confirmCallback
+                return FlowControllerFactory(
+                    activity,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
+            }
+
+            /**
+             * 🚧 Under construction 🚧
+             * Constructor to be used when launching payment sheet with the deferred intent flow.
+             * Create the FlowController when launching the payment sheet from a Fragment.
+             *
+             * @param fragment the Fragment that is presenting the payment sheet.
+             * @param paymentOptionCallback called when the customer's [PaymentOption] selection changes.
+             * @param confirmCallback  called with the payment method id which should be
+             * retrieved from your server
+             */
+            @JvmStatic
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun create(
+                fragment: Fragment,
+                paymentOptionCallback: PaymentOptionCallback,
+                paymentResultCallback: PaymentSheetResultCallback,
+                confirmCallback: ConfirmCallback
+            ): FlowController {
+                FlowController.confirmCallback = confirmCallback
+                return FlowControllerFactory(
+                    fragment,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
+            }
         }
     }
 
     companion object {
+        internal var confirmCallback: ConfirmCallback? = null
+
         /**
          * Deletes all persisted authentication state associated with a customer.
          *

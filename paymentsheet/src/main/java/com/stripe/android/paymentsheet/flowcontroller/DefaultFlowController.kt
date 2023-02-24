@@ -31,6 +31,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.DeferredIntentRepository
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -77,6 +78,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
+    private val deferredIntentRepository: DeferredIntentRepository,
     /**
      * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
      * stripeAccountId after creating a [DefaultFlowController].
@@ -265,35 +267,55 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
     ) {
-        val mode = viewModel.initializationMode ?: return
+        lifecycleScope.launch {
+            val mode = viewModel.initializationMode ?: return@launch
 
-        val clientSecret = when (mode) {
-            is PaymentSheet.InitializationMode.PaymentIntent -> {
-                PaymentIntentClientSecret(mode.clientSecret)
+            val clientSecret = when (mode) {
+                is PaymentSheet.InitializationMode.PaymentIntent -> {
+                    PaymentIntentClientSecret(mode.clientSecret)
+                }
+                is PaymentSheet.InitializationMode.SetupIntent -> {
+                    SetupIntentClientSecret(mode.clientSecret)
+                }
+                is PaymentSheet.InitializationMode.DeferredIntent -> {
+                    when (
+                        val result = deferredIntentRepository.get(
+                            paymentSelection = paymentSelection,
+                            initializationMode = mode,
+                            confirmCallback = PaymentSheet.FlowController.confirmCallback
+                        )
+                    ) {
+                        is DeferredIntentRepository.Result.Error -> {
+                            onPaymentResult(
+                                PaymentResult.Failed(IllegalStateException(result.error))
+                            )
+                            return@launch
+                        }
+                        is DeferredIntentRepository.Result.Success -> {
+                            if (result.isConfirmed) {
+                                onPaymentResult(PaymentResult.Completed)
+                                return@launch
+                            }
+                            result.clientSecret
+                        }
+                    }
+                }
             }
-            is PaymentSheet.InitializationMode.SetupIntent -> {
-                SetupIntentClientSecret(mode.clientSecret)
-            }
-            is PaymentSheet.InitializationMode.DeferredIntent -> {
-                TODO("Not implemented yet")
-            }
-        }
 
-        val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-            clientSecret = clientSecret.value,
-            shipping = state.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
-        )
+            val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
+                clientSecret = clientSecret.value,
+                shipping = state.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
+            )
 
-        when (paymentSelection) {
-            is PaymentSelection.Saved -> {
-                confirmParamsFactory.create(paymentSelection)
-            }
-            is PaymentSelection.New -> {
-                confirmParamsFactory.create(paymentSelection)
-            }
-            else -> null
-        }?.let { confirmParams ->
-            lifecycleScope.launch {
+            when (paymentSelection) {
+                is PaymentSelection.Saved -> {
+                    confirmParamsFactory.create(paymentSelection)
+                }
+                is PaymentSelection.New -> {
+                    confirmParamsFactory.create(paymentSelection)
+                }
+                else -> null
+            }?.let { confirmParams ->
                 when (confirmParams) {
                     is ConfirmPaymentIntentParams -> {
                         paymentLauncher?.confirm(confirmParams)

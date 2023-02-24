@@ -1,20 +1,25 @@
 package com.stripe.android.paymentsheet.injection
 
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.paymentsheet.PaymentSheetContractV2
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
 
 @Subcomponent(
-    modules = [PaymentSheetViewModelModule::class]
+    modules = [
+        PaymentSheetViewModelModule::class
+    ]
 )
 internal interface PaymentSheetViewModelSubcomponent {
     val viewModel: PaymentSheetViewModel
 
     @Subcomponent.Builder
     interface Builder {
-        fun paymentSheetViewModelModule(
-            paymentSheetViewModelModule: PaymentSheetViewModelModule
+
+        @BindsInstance
+        fun args(
+            args: PaymentSheetContractV2.Args
         ): Builder
 
         @BindsInstance

@@ -9,7 +9,9 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.DefaultDeferredIntentRepository
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
+import com.stripe.android.paymentsheet.DeferredIntentRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -43,6 +45,11 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsStripeIntentRepository(
         repository: ElementsSessionRepository.Api
     ): ElementsSessionRepository
+
+    @Binds
+    abstract fun bindsDeferredIntentRepository(
+        impl: DefaultDeferredIntentRepository
+    ): DeferredIntentRepository
 
     @Binds
     abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentSheetLoader): PaymentSheetLoader

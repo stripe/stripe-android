@@ -25,6 +25,9 @@ import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.paymentsheet.ConfirmCallback
+import com.stripe.android.paymentsheet.ConfirmCallbackForClientSideConfirmation
+import com.stripe.android.paymentsheet.ConfirmCallbackForServerSideConfirmation
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -161,11 +164,41 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
+        paymentSheet = PaymentSheet(
+            activity = this,
+            callback = ::onPaymentSheetResult,
+            confirmCallback = ConfirmCallbackForServerSideConfirmation { paymentMethodId, shouldSavePaymentMethod ->
+                val response = viewModel.createPaymentIntent(
+                    paymentMethodId = paymentMethodId,
+                    shouldSavePaymentMethod = shouldSavePaymentMethod,
+                    amount = (viewModel.intentConfigurationMode.value as? PaymentSheet.IntentConfiguration.Mode.Payment)?.amount,
+                    currency = currency.value,
+                    confirm = true
+                )
+
+                ConfirmCallback.Result.Success(
+                    clientSecret = response.clientSecret
+                )
+            }
+        )
+
         flowController = PaymentSheet.FlowController.create(
-            this,
-            ::onPaymentOption,
-            ::onPaymentSheetResult
+            activity = this,
+            paymentOptionCallback = ::onPaymentOption,
+            paymentResultCallback = ::onPaymentSheetResult,
+            confirmCallback = ConfirmCallbackForClientSideConfirmation { paymentMethodId ->
+                val response = viewModel.createPaymentIntent(
+                    paymentMethodId = paymentMethodId,
+                    shouldSavePaymentMethod = null,
+                    amount = (viewModel.intentConfigurationMode.value as? PaymentSheet.IntentConfiguration.Mode.Payment)?.amount,
+                    currency = currency.value,
+                    confirm = false
+                )
+
+                ConfirmCallback.Result.Success(
+                    clientSecret = response.clientSecret
+                )
+            }
         )
         addressLauncher = AddressLauncher(this, ::onAddressLauncherResult)
 
@@ -467,6 +500,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     )
                 }
             }
+
+            viewModel.intentConfigurationMode.value = mode
 
             paymentSheet.presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
