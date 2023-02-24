@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -110,7 +109,7 @@ internal fun List<PaymentOptionsItem>.findInitialSelectedPosition(
 
         // the first payment method
         indexOfFirst { it is PaymentOptionsItem.SavedPaymentMethod }.takeIf { it != -1 }
-    ).firstOrNull() ?: RecyclerView.NO_POSITION
+    ).firstOrNull() ?: -1
 }
 
 /**
