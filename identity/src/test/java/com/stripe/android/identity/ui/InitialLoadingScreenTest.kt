@@ -9,7 +9,7 @@ import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.navigation.ConsentDestination
-import com.stripe.android.identity.navigation.IndividualDestination
+import com.stripe.android.identity.navigation.INDIVIDUAL
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -100,7 +100,7 @@ class InitialLoadingScreenTest {
         setComposeTestRuleWith(verificationPageForIdNumberType) {
             verify(mockNavController).navigate(
                 argWhere {
-                    it.startsWith(IndividualDestination.INDIVIDUAL)
+                    it.startsWith(INDIVIDUAL)
                 },
                 any<NavOptionsBuilder.() -> Unit>()
             )
@@ -112,7 +112,7 @@ class InitialLoadingScreenTest {
         setComposeTestRuleWith(verificationPageForAddressType) {
             verify(mockNavController).navigate(
                 argWhere {
-                    it.startsWith(IndividualDestination.INDIVIDUAL)
+                    it.startsWith(INDIVIDUAL)
                 },
                 any<NavOptionsBuilder.() -> Unit>()
             )
