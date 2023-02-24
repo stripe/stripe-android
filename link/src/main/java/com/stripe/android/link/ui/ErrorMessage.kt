@@ -2,6 +2,7 @@ package com.stripe.android.link.ui
 
 import android.content.res.Resources
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.link.R
@@ -22,6 +23,7 @@ internal sealed class ErrorMessage : Parcelable {
     abstract fun getMessage(resources: Resources): String
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class FromResources(
         @StringRes val stringResId: Int
     ) : ErrorMessage() {
@@ -30,6 +32,7 @@ internal sealed class ErrorMessage : Parcelable {
     }
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Raw(
         val errorMessage: String
     ) : ErrorMessage() {

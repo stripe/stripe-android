@@ -3,7 +3,7 @@ package com.stripe.android
 import androidx.annotation.IntDef
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.model.LuxeNextActionRepository
+import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.StripeIntent
 
 /**
@@ -19,8 +19,8 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     abstract val failureMessage: String?
 
     @VisibleForTesting
-    internal var luxeNextActionRepository: LuxeNextActionRepository =
-        LuxeNextActionRepository.Instance
+    internal var luxePostConfirmActionRepository: LuxePostConfirmActionRepository =
+        LuxePostConfirmActionRepository.Instance
 
     @Outcome
     @get:Outcome
@@ -40,7 +40,7 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     }
 
     private fun getOutcome(stripeIntent: StripeIntent): Int {
-        return luxeNextActionRepository.getPostAuthorizeIntentOutcome(
+        return luxePostConfirmActionRepository.getPostAuthorizeIntentOutcome(
             stripeIntent
         ) ?: run {
             when (stripeIntent.status) {
@@ -91,10 +91,12 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
             StripeIntent.NextActionType.AlipayRedirect,
             StripeIntent.NextActionType.BlikAuthorize,
             StripeIntent.NextActionType.WeChatPayRedirect,
+            StripeIntent.NextActionType.CashAppRedirect,
             null -> {
                 false
             }
             StripeIntent.NextActionType.DisplayOxxoDetails,
+            StripeIntent.NextActionType.UpiAwaitNotification,
             StripeIntent.NextActionType.VerifyWithMicrodeposits -> {
                 true
             }

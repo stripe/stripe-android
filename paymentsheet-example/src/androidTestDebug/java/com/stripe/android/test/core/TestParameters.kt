@@ -1,5 +1,6 @@
 package com.stripe.android.test.core
 
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 
@@ -9,6 +10,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPayment
 data class TestParameters(
     val paymentMethod: SupportedPaymentMethod,
     val customer: Customer,
+    val linkState: LinkState = LinkState.Off,
     val googlePayState: GooglePayState,
     val currency: Currency,
     val intentType: IntentType,
@@ -24,7 +26,9 @@ data class TestParameters(
     val forceDarkMode: Boolean? = null,
     val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
     val snapshotReturningCustomer: Boolean = false,
-    val merchantCountryCode: String
+    val merchantCountryCode: String,
+    val supportedPaymentMethods: List<PaymentMethodCode> = listOf(),
+    val customPrimaryButtonLabel: String? = null,
 )
 
 /**
@@ -58,6 +62,7 @@ enum class Billing {
  */
 enum class Shipping {
     On,
+    OnWithDefaults,
     Off
 }
 
@@ -73,14 +78,23 @@ enum class Browser {
  * Indicate the payment method for this test expects authorization and how the authorization
  * should be handled: complete, fail, cancel
  */
-enum class AuthorizeAction(
-    val text: String,
-) {
-    // These do not get localized.
-    Authorize("AUTHORIZE TEST PAYMENT"),
-    Fail("FAIL TEST PAYMENT"),
-    Cancel("")
+sealed interface AuthorizeAction {
+
+    abstract val text: String
+
+    object Authorize : AuthorizeAction {
+        override val text: String = "AUTHORIZE TEST PAYMENT"
+    }
+
+    data class Fail(val expectedError: String) : AuthorizeAction {
+        override val text: String = "FAIL TEST PAYMENT"
+    }
+
+    object Cancel : AuthorizeAction {
+        override val text: String = ""
+    }
 }
+
 
 /**
  * Indicates how the payment intent should be set: PaymentIntent, PaymentIntent with
@@ -99,7 +113,16 @@ enum class Currency {
     USD,
     EUR,
     AUD,
-    GBP
+    GBP,
+    INR,
+}
+
+/**
+ * Indicates the state of Link in the PaymentSheet Configuration
+ */
+enum class LinkState {
+    On,
+    Off
 }
 
 /**

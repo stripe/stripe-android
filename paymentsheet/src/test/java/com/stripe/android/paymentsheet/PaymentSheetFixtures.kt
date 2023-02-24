@@ -6,9 +6,13 @@ import androidx.core.graphics.toColorInt
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentSheetState
 import org.mockito.kotlin.mock
 
 internal object PaymentSheetFixtures {
@@ -81,41 +85,71 @@ internal object PaymentSheetFixtures {
         )
 
     internal val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
-        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        paymentMethods = emptyList(),
-        config = CONFIG_GOOGLEPAY,
-        isGooglePayReady = false,
-        newLpm = null,
+        state = PaymentSheetState.Full(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            customerPaymentMethods = emptyList(),
+            config = CONFIG_GOOGLEPAY,
+            isGooglePayReady = false,
+            newPaymentSelection = null,
+            linkState = null,
+            savedSelection = SavedSelection.None,
+        ),
         statusBarColor = STATUS_BAR_COLOR,
         injectorKey = DUMMY_INJECTOR_KEY,
         enableLogging = false,
         productUsage = mock()
     )
 
+    internal fun PaymentOptionContract.Args.updateState(
+        paymentMethods: List<PaymentMethod> = state.customerPaymentMethods,
+        isGooglePayReady: Boolean = state.isGooglePayReady,
+        stripeIntent: StripeIntent = state.stripeIntent,
+        config: PaymentSheet.Configuration? = state.config,
+        newPaymentSelection: PaymentSelection.New? = state.newPaymentSelection,
+        linkState: LinkState? = state.linkState,
+    ): PaymentOptionContract.Args {
+        return copy(
+            state = state.copy(
+                customerPaymentMethods = paymentMethods,
+                isGooglePayReady = isGooglePayReady,
+                stripeIntent = stripeIntent,
+                config = config,
+                newPaymentSelection = newPaymentSelection,
+                linkState = linkState,
+            ),
+        )
+    }
+
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
-        get() = PaymentSheetContract.Args(
-            SetupIntentClientSecret(CLIENT_SECRET),
+        get() = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.SetupIntent(CLIENT_SECRET),
             CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             STATUS_BAR_COLOR
         )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY
-        get() = PaymentSheetContract.Args(
-            PAYMENT_INTENT_CLIENT_SECRET,
+        get() = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
             CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             STATUS_BAR_COLOR
         )
 
     internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY
-        get() = PaymentSheetContract.Args(
-            PAYMENT_INTENT_CLIENT_SECRET,
+        get() = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
             CONFIG_CUSTOMER,
             STATUS_BAR_COLOR
         )
 
     internal val ARGS_WITHOUT_CONFIG
-        get() = PaymentSheetContract.Args(
-            PAYMENT_INTENT_CLIENT_SECRET,
+        get() = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
             config = null,
             STATUS_BAR_COLOR
         )
@@ -128,7 +162,7 @@ internal object PaymentSheetFixtures {
         )
 
     internal val COMPOSE_FRAGMENT_ARGS
-        get() = FormFragmentArguments(
+        get() = FormArguments(
             PaymentMethod.Type.Bancontact.code,
             showCheckbox = true,
             showCheckboxControlledFields = true,
@@ -145,7 +179,6 @@ internal object PaymentSheetFixtures {
                 email = "email",
                 name = "Jenny Rosen",
                 phone = "+18008675309"
-            ),
-            injectorKey = DUMMY_INJECTOR_KEY
+            )
         )
 }

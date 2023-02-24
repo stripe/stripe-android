@@ -13,6 +13,7 @@ import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState
+import com.stripe.android.stripecardscan.framework.util.AcceptedImageConfigs
 import com.stripe.android.stripecardscan.payment.ml.CardDetect
 import com.stripe.android.stripecardscan.payment.ml.CardDetectModelManager
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
@@ -38,13 +39,6 @@ internal abstract class CardImageVerificationFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener
 ) : ScanFlow<CardVerificationFlowParameters?, CameraPreviewImage<Bitmap>>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
-
-    companion object {
-        /**
-         * The maximum number of frames to process
-         */
-        const val MAX_COMPLETION_LOOP_FRAMES = 5
-    }
 
     /**
      * If this is true, do not start the flow.
@@ -109,7 +103,8 @@ internal abstract class CardImageVerificationFlow(
             mainLoop = ProcessBoundAnalyzerLoop(
                 analyzerPool = analyzerPool,
                 resultHandler = mainLoopOcrAggregator,
-                analyzerLoopErrorListener = scanErrorListener
+                analyzerLoopErrorListener = scanErrorListener,
+                statsName = "main_loop_images_processed"
             ).apply {
                 mainLoopJob = subscribeTo(
                     imageStream.map {
@@ -151,7 +146,8 @@ internal abstract class CardImageVerificationFlow(
      * Select which frames to use in the completion loop.
      */
     fun <SavedFrame> selectCompletionLoopFrames(
-        frames: Map<SavedFrameType, List<SavedFrame>>
+        frames: Map<SavedFrameType, List<SavedFrame>>,
+        imageConfigs: AcceptedImageConfigs
     ): Collection<SavedFrame> {
         fun getFrames(frameType: SavedFrameType) = frames[frameType] ?: emptyList()
 
@@ -159,6 +155,6 @@ internal abstract class CardImageVerificationFlow(
         val pan = getFrames(SavedFrameType(hasCard = false, hasOcr = true))
         val card = getFrames(SavedFrameType(hasCard = true, hasOcr = false))
 
-        return (cardAndPan + pan + card).take(MAX_COMPLETION_LOOP_FRAMES)
+        return (cardAndPan + pan + card).take(imageConfigs.getImageSettings().second.imageCount)
     }
 }

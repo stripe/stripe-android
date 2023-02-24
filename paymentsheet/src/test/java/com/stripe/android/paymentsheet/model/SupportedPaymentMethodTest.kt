@@ -8,12 +8,12 @@ import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
+import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.serialization.Serializable
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,11 +24,14 @@ import java.io.File
 @RunWith(AndroidJUnit4::class)
 class SupportedPaymentMethodTest {
     private val lpmRepository = LpmRepository(
-        LpmRepository.LpmRepositoryArguments(
-            ApplicationProvider.getApplicationContext<Application>().resources
+        arguments = LpmRepository.LpmRepositoryArguments(
+            resources = ApplicationProvider.getApplicationContext<Application>().resources,
         )
     ).apply {
-        this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.Eps.code), null)
+        this.update(
+            PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethods),
+            null
+        )
     }
     private val card = LpmRepository.HardcodedCard
     private val eps = lpmRepository.fromCode("eps")!!
@@ -50,57 +53,47 @@ class SupportedPaymentMethodTest {
      */
     @Test
     fun `Test supported payment method baseline`() {
-        lpmRepository.values()
-            .forEach { lpm ->
-                val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.code}-support.csv").file)
-                val baseline = resource.readText()
-                val baselineLines = baseline.split("\n")
+        for (lpm in lpmRepository.values()) {
+            val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.code}-support.csv").file)
+            val baseline = resource.readText()
+            val baselineLines = baseline.split("\n")
 
-                val csvOutput = StringBuilder()
-                csvOutput.append(
-                    "lpm, ${PaymentIntentTestInput.toCsvHeader()}, ${TestOutput.toCsvHeader()}\n"
+            val csvOutput = StringBuilder()
+            csvOutput.append(
+                "lpm, ${PaymentIntentTestInput.toCsvHeader()}, ${TestOutput.toCsvHeader()}\n"
+            )
+
+            generatePaymentIntentScenarios().mapIndexed { index, testInput ->
+                val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
+                val testOutput = TestOutput.create(
+                    supportCustomerSavedCard = getSupportedSavedCustomerPMs(
+                        testInput.getIntent(lpm),
+                        testInput.getConfig(),
+                        lpmRepository
+                    ).contains(lpm),
+                    formExists = formDescriptor != null,
+                    formShowsSaveCheckbox = formDescriptor?.showCheckbox,
+                    formShowsCheckboxControlledFields = formDescriptor?.showCheckboxControlledFields,
+                    supportsAdding = getPMsToAdd(
+                        testInput.getIntent(lpm),
+                        testInput.getConfig(),
+                        lpmRepository
+                    ).contains(lpm)
                 )
-                generatePaymentIntentScenarios()
-                    .mapIndexed { index, testInput ->
 
-                        val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
-                        val testOutput = TestOutput.create(
-                            supportCustomerSavedCard = getSupportedSavedCustomerPMs(
-                                testInput.getIntent(lpm),
-                                testInput.getConfig(),
-                                lpmRepository
-                            ).contains(lpm),
-                            formExists = formDescriptor != null,
-                            formShowsSaveCheckbox = formDescriptor?.showCheckbox,
-                            formShowsCheckboxControlledFields = formDescriptor?.showCheckboxControlledFields,
-                            supportsAdding = getPMsToAdd(
-                                testInput.getIntent(lpm),
-                                testInput.getConfig(),
-                                lpmRepository
-                            ).contains(lpm)
-                        )
-                        val actualLine = "${lpm.code}, ${
-                        testInput.copy(
-                            intentPMs = testInput.intentPMs.plus(lpm.code)
-                        ).toCsv()
-                        }, ${testOutput.toCsv()}\n"
+                val input = testInput.copy(intentPMs = testInput.intentPMs.plus(lpm.code))
+                val line = "${lpm.code}, ${input.toCsv()}, ${testOutput.toCsv()}\n"
+                csvOutput.append(line)
 
-                        csvOutput.append(actualLine)
-
-                        PaymentIntentTestCase(
-                            testInput,
-                            testOutput
-                        )
-
-                        assertWithMessage("Line: ${index + 2}")
-                            .that(actualLine.trim())
-                            .isEqualTo(baselineLines[index + 1])
-                    }
-
-                if (baseline != csvOutput.toString()) {
-                    println(csvOutput.toString())
-                }
+                assertWithMessage("Line: ${index + 2}")
+                    .that(line.trim())
+                    .isEqualTo(baselineLines[index + 1])
             }
+
+            if (baseline != csvOutput.toString()) {
+                println(csvOutput.toString())
+            }
+        }
     }
 
     @Test
@@ -203,12 +196,6 @@ class SupportedPaymentMethodTest {
     internal data class SetupIntentTestInput(
         val lpmTypeFormCode: String,
         val intentLpms: List<String>
-    )
-
-    @Serializable
-    internal data class PaymentIntentTestCase(
-        val testInput: PaymentIntentTestInput,
-        val testOutput: TestOutput
     )
 
     @Serializable

@@ -12,10 +12,10 @@ if [ ! -d "$ANDROID_HOME/cmdline-tools" ]; then
 fi
 
 echo "download system image, if not already downloaded"
-"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "--install" "system-images;android-28;google_apis;x86_64"
+"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "--install" "system-images;android-29;google_apis;arm64-v8a"
 
 echo "creating emulator"
-"$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" "--verbose" "create" "avd" "--force" "--name" "screenshot_test_local" "--device" "Nexus 6" "--package" "system-images;android-28;google_apis;x86_64" "--tag" "google_apis" "--abi" "x86_64" "--sdcard" "512M"
+"$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" "--verbose" "create" "avd" "--force" "--name" "screenshot_test_local" "--device" "Nexus 6" "--package" "system-images;android-29;google_apis;arm64-v8a" "--tag" "google_apis" "--abi" "arm64-v8a" "--sdcard" "512M"
 
 echo "starting emulator"
 "$ANDROID_HOME/emulator/emulator" "@screenshot_test_local" "-verbose" "-netdelay" "none" "-gpu" "swiftshader_indirect"

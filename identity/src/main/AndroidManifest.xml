@@ -15,13 +15,13 @@
             android:exported="false" />
 
         <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
+            android:name="com.stripe.android.identity.IdentityFileProvider"
+            android:authorities="${applicationId}.StripeIdentityFileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
+                android:resource="@xml/stripe_identity_file_paths" />
         </provider>
     </application>
 

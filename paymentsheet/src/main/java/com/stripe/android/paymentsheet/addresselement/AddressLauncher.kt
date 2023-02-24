@@ -2,7 +2,10 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.fragment.app.Fragment
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -12,7 +15,7 @@ import kotlinx.parcelize.Parcelize
 /**
  * A drop-in class that presents a bottom sheet to collect a customer's address.
  */
-internal class AddressLauncher internal constructor(
+class AddressLauncher internal constructor(
     private val activityResultLauncher: ActivityResultLauncher<AddressElementActivityContract.Args>
 ) {
     @InjectorKey
@@ -69,7 +72,7 @@ internal class AddressLauncher internal constructor(
 
     /** Configuration for [AddressLauncher] **/
     @Parcelize
-    internal data class Configuration @JvmOverloads constructor(
+    data class Configuration @JvmOverloads constructor(
         /**
          * Configuration for the look and feel of the UI
          */
@@ -78,7 +81,7 @@ internal class AddressLauncher internal constructor(
         /**
          * The values to pre-populate shipping address fields with.
          */
-        val defaultValues: DefaultAddressDetails? = null,
+        val address: AddressDetails? = null,
 
         /**
          * A list of two-letter country codes representing countries the customers can select.
@@ -93,10 +96,9 @@ internal class AddressLauncher internal constructor(
         val buttonTitle: String? = null,
 
         /**
-         * Configuration for the field that collects a phone number.
-         * Defaults to HIDDEN
+         * Configuration for fields to collect in addition to the physical shipping address
          */
-        val phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.OPTIONAL,
+        val additionalFields: AdditionalFieldsConfiguration? = null,
 
         /**
          * Configuration for the title displayed at the top of the screen.
@@ -111,29 +113,32 @@ internal class AddressLauncher internal constructor(
         val googlePlacesApiKey: String? = null,
 
         /**
-         * The label of a checkbox displayed below other fields. If null, the checkbox is not displayed.
-         * Defaults to null
+         * A list of two-letter country codes that support autocomplete. Defaults to a list of
+         * countries that Stripe has audited to ensure a good autocomplete experience.
          */
-        val checkboxLabel: String? = null
+        val autocompleteCountries: Set<String> = setOf(
+            "AU", "BE", "BR", "CA", "CH", "DE", "ES", "FR", "GB", "IE", "IT", "MX", "NO", "NL",
+            "PL", "RU", "SE", "TR", "US", "ZA"
+        )
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
         class Builder {
-            var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
-            var defaultValues: DefaultAddressDetails? = null
-            var allowedCountries: Set<String> = emptySet()
-            var buttonTitle: String? = null
-            var phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.OPTIONAL
-            var title: String? = null
-            var googlePlacesApiKey: String? = null
-            var checkboxLabel: String? = null
+            private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
+            private var address: AddressDetails? = null
+            private var allowedCountries: Set<String> = emptySet()
+            private var buttonTitle: String? = null
+            private var additionalFields: AdditionalFieldsConfiguration? = null
+            private var title: String? = null
+            private var googlePlacesApiKey: String? = null
+            private var autocompleteCountries: Set<String>? = null
 
             fun appearance(appearance: PaymentSheet.Appearance) =
                 apply { this.appearance = appearance }
 
-            fun defaultValues(defaultValues: DefaultAddressDetails?) =
-                apply { this.defaultValues = defaultValues }
+            fun address(address: AddressDetails?) =
+                apply { this.address = address }
 
             fun allowedCountries(allowedCountries: Set<String>) =
                 apply { this.allowedCountries = allowedCountries }
@@ -141,8 +146,8 @@ internal class AddressLauncher internal constructor(
             fun buttonTitle(buttonTitle: String?) =
                 apply { this.buttonTitle = buttonTitle }
 
-            fun phone(phone: AdditionalFieldsConfiguration) =
-                apply { this.phone = phone }
+            fun additionalFields(additionalFields: AdditionalFieldsConfiguration) =
+                apply { this.additionalFields = additionalFields }
 
             fun title(title: String?) =
                 apply { this.title = title }
@@ -150,61 +155,66 @@ internal class AddressLauncher internal constructor(
             fun googlePlacesApiKey(googlePlacesApiKey: String?) =
                 apply { this.googlePlacesApiKey = googlePlacesApiKey }
 
-            fun checkBoxLabel(checkboxLabel: String?) =
-                apply { this.checkboxLabel = checkboxLabel }
+            fun autocompleteCountries(autocompleteCountries: Set<String>) =
+                apply { this.autocompleteCountries = autocompleteCountries }
 
             fun build() = Configuration(
                 appearance,
-                defaultValues,
+                address,
                 allowedCountries,
                 buttonTitle,
-                phone,
+                additionalFields,
                 title,
-                googlePlacesApiKey,
-                checkboxLabel
+                googlePlacesApiKey
             )
         }
     }
 
+    /**
+     * @param phone Configuration for the field that collects a phone number. Defaults to
+     * [FieldConfiguration.HIDDEN]
+     * @param checkboxLabel The label of a checkbox displayed below other fields. If null, the
+     * checkbox is not displayed. Defaults to null
+     */
     @Parcelize
-    enum class AdditionalFieldsConfiguration : Parcelable {
-        /**
-         * The field is not displayed.
-         */
-        HIDDEN,
+    data class AdditionalFieldsConfiguration @JvmOverloads constructor(
+        val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
+        val checkboxLabel: String? = null
+    ) : Parcelable {
+        @Parcelize
+        enum class FieldConfiguration : Parcelable {
+            /**
+             * The field is not displayed.
+             */
+            HIDDEN,
 
-        /**
-         * The field is displayed but the customer can leave it blank.
-         */
-        OPTIONAL,
+            /**
+             * The field is displayed but the customer can leave it blank.
+             */
+            OPTIONAL,
 
-        /**
-         * The field is displayed and the customer is required to fill it in.
-         */
-        REQUIRED
+            /**
+             * The field is displayed and the customer is required to fill it in.
+             */
+            REQUIRED
+        }
     }
+}
 
-    @Parcelize
-    data class DefaultAddressDetails(
-        /**
-         * The customer's full name
-         */
-        val name: String? = null,
+/**
+ * Creates an [AddressLauncher] that is remembered across compositions.
+ * This *must* be called unconditionally, as part of the initialization path.
+ */
+@Composable
+fun rememberAddressLauncher(
+    callback: AddressLauncherResultCallback
+): AddressLauncher {
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        contract = AddressElementActivityContract(),
+        onResult = callback::onAddressLauncherResult
+    )
 
-        /**
-         * The customer's address
-         */
-        val address: PaymentSheet.Address? = null,
-
-        /**
-         * The customer's phone number, without formatting e.g. "5551234567"
-         */
-        val phoneNumber: String? = null,
-
-        /**
-         * Whether or not your custom checkbox is intially selected.
-         * Note: The checkbox is displayed below the other fields when AdditionalFieldsConfiguration.checkboxLabel is set.
-         */
-        val isCheckboxSelected: Boolean? = null
-    ) : Parcelable
+    return remember {
+        AddressLauncher(activityResultLauncher)
+    }
 }

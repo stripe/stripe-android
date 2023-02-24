@@ -3,7 +3,9 @@ package com.stripe.android.ui.core.elements
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.forms.FormFieldEntry
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

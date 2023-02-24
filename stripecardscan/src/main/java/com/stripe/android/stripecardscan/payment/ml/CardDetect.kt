@@ -70,7 +70,7 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
         enum class Side {
             NO_CARD,
             NO_PAN,
-            PAN,
+            PAN
         }
     }
 
@@ -104,8 +104,6 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
         tfInterpreter.run(data, mlOutput)
         return mlOutput
     }
-
-    override val statsName: String? = null
 
     /**
      * A factory for creating instances of this analyzer.

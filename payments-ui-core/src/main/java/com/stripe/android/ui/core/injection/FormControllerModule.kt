@@ -2,15 +2,18 @@ package com.stripe.android.ui.core.injection
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.injection.INITIAL_VALUES
+import com.stripe.android.core.injection.SHIPPING_VALUES
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.address.AddressRepository
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.uicore.elements.IdentifierSpec
 import dagger.Module
 import dagger.Provides
+import javax.inject.Named
 
 @Module
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -24,11 +27,13 @@ abstract class FormControllerModule {
             context: Context,
             merchantName: String,
             stripeIntent: StripeIntent?,
-            initialValues: Map<IdentifierSpec, String?>,
+            @Named(INITIAL_VALUES) initialValues: Map<IdentifierSpec, String?>,
+            @Named(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?,
             viewOnlyFields: Set<IdentifierSpec>
         ) = TransformSpecToElements(
             addressResourceRepository = addressResourceRepository,
             initialValues = initialValues,
+            shippingValues = shippingValues,
             amount = (stripeIntent as? PaymentIntent)?.let {
                 val amount = it.amount
                 val currency = it.currency

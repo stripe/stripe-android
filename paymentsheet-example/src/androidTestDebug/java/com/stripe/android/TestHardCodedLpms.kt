@@ -12,15 +12,18 @@ import com.stripe.android.test.core.Billing
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
+import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.initializedLpmRepository
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
@@ -39,6 +42,9 @@ class TestHardCodedLpms {
     @get:Rule
     val testWatcher = TestWatcher()
 
+    @get:Rule
+    val disableAnimations = DisableAnimationsRule()
+
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
 
@@ -47,13 +53,9 @@ class TestHardCodedLpms {
         // their files in the same directory.
         private val screenshotProcessor = MyScreenCaptureProcessor()
 
-        private val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
-                InstrumentationRegistry.getInstrumentation().targetContext.resources
-            )
-        ).apply {
-            forceUpdate(LpmRepository.exposedPaymentMethods, null)
-        }
+        private val lpmRepository = initializedLpmRepository(
+            context = InstrumentationRegistry.getInstrumentation().targetContext,
+        )
     }
 
     @Before
@@ -65,13 +67,14 @@ class TestHardCodedLpms {
     private val newUser = TestParameters(
         lpmRepository.fromCode("bancontact")!!,
         Customer.New,
+        LinkState.Off,
         GooglePayState.On,
         Currency.EUR,
         IntentType.Pay,
         Billing.On,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
-        automatic = Automatic.On,
+        automatic = Automatic.Off,
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = null,
@@ -170,7 +173,7 @@ class TestHardCodedLpms {
                 authorizationAction = AuthorizeAction.Authorize,
                 merchantCountryCode = "US",
                 currency = Currency.USD,
-                shipping = Shipping.On
+                shipping = Shipping.OnWithDefaults
             )
         )
     }
@@ -240,6 +243,67 @@ class TestHardCodedLpms {
                 merchantCountryCode = "GB",
                 automatic = Automatic.Off
             )
+        )
+    }
+
+    @Test
+    fun testUpi() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = newUser.copy(
+                paymentMethod = lpmRepository.fromCode("upi")!!,
+                currency = Currency.INR,
+                merchantCountryCode = "IN",
+                automatic = Automatic.Off,
+                authorizationAction = null,
+            ),
+            populateCustomLpmFields = {
+                composeTestRule.onNodeWithText("UPI ID").apply {
+                    performTextInput(
+                        "payment.success@stripeupi"
+                    )
+                }
+            }
+        )
+    }
+
+    @Test
+    fun testCashAppPay_Success() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = newUser.copy(
+                paymentMethod = lpmRepository.fromCode("cashapp")!!,
+                currency = Currency.USD,
+                merchantCountryCode = "US",
+                authorizationAction = AuthorizeAction.Authorize,
+                supportedPaymentMethods = listOf("card", "cashapp"),
+            ),
+        )
+    }
+
+    @Test
+    fun testCashAppPay_Fail() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = newUser.copy(
+                paymentMethod = lpmRepository.fromCode("cashapp")!!,
+                currency = Currency.USD,
+                merchantCountryCode = "US",
+                authorizationAction = AuthorizeAction.Fail(
+                    expectedError = "The customer declined this payment.",
+                ),
+                supportedPaymentMethods = listOf("card", "cashapp"),
+            ),
+        )
+    }
+
+    @Test
+    fun testCashAppPay_Cancel() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = newUser.copy(
+                paymentMethod = lpmRepository.fromCode("cashapp")!!,
+                currency = Currency.USD,
+                merchantCountryCode = "US",
+                authorizationAction = AuthorizeAction.Cancel,
+                supportedPaymentMethods = listOf("card", "cashapp"),
+            ),
         )
     }
 }

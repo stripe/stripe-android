@@ -59,7 +59,8 @@ interface AnalyzerLoopErrorListener {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class AnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
-    private val analyzerLoopErrorListener: AnalyzerLoopErrorListener
+    private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
+    private val statsName: String? = null
 ) : ResultHandler<DataFrame, Output, Boolean> {
     private val started = AtomicBoolean(false)
     protected var startedAt: ClockMark? = null
@@ -115,7 +116,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         analyzer: Analyzer<DataFrame, in State, Output>
     ) {
         flow.collect { frame ->
-            val stat = analyzer.statsName?.let { Stats.trackRepeatingTask(it) }
+            val stat = statsName?.let { Stats.trackRepeatingTask(it) }
             try {
                 val analyzerResult = analyzer.analyze(frame, getState())
 
@@ -173,10 +174,12 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
 class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val resultHandler: StatefulResultHandler<DataFrame, out State, Output, Boolean>,
-    analyzerLoopErrorListener: AnalyzerLoopErrorListener
+    analyzerLoopErrorListener: AnalyzerLoopErrorListener,
+    statsName: String? = null
 ) : AnalyzerLoop<DataFrame, State, Output>(
     analyzerPool,
-    analyzerLoopErrorListener
+    analyzerLoopErrorListener,
+    statsName
 ) {
     /**
      * Subscribe to a flow. Loops can only subscribe to a single flow at a time.
@@ -211,10 +214,12 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val resultHandler: TerminatingResultHandler<DataFrame, out State, Output>,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener,
-    private val timeLimit: Duration = Duration.INFINITE
+    private val timeLimit: Duration = Duration.INFINITE,
+    statsName: String? = null
 ) : AnalyzerLoop<DataFrame, State, Output>(
     analyzerPool,
-    analyzerLoopErrorListener
+    analyzerLoopErrorListener,
+    statsName
 ) {
     private val framesProcessed: AtomicInteger = AtomicInteger(0)
     private var framesToProcess = 0

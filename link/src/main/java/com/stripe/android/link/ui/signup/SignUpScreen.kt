@@ -13,9 +13,12 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -26,9 +29,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.PaymentsThemeForLink
+import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
@@ -37,12 +41,12 @@ import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.progressIndicatorTestTag
-import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
-import com.stripe.android.ui.core.elements.PhoneNumberController
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldController
-import com.stripe.android.ui.core.elements.TextFieldSection
-import com.stripe.android.ui.core.injection.NonFallbackInjector
+import com.stripe.android.ui.core.elements.NameConfig
+import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
+import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.elements.TextFieldSection
 
 @Preview
 @Composable
@@ -51,10 +55,12 @@ private fun SignUpBodyPreview() {
         Surface {
             SignUpBody(
                 merchantName = "Example, Inc.",
-                emailController = SimpleTextFieldController.createEmailSectionController("email"),
+                emailController = EmailConfig.createController("email"),
                 phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
-                signUpState = SignUpState.InputtingPhone,
+                nameController = NameConfig.createController("My Name"),
+                signUpState = SignUpState.InputtingPhoneOrName,
                 isReadyToSignUp = false,
+                requiresNameCollection = true,
                 errorMessage = null,
                 onSignUpClick = {}
             )
@@ -65,25 +71,23 @@ private fun SignUpBodyPreview() {
 @Composable
 internal fun SignUpBody(
     injector: NonFallbackInjector,
-    email: String?
 ) {
     val signUpViewModel: SignUpViewModel = viewModel(
-        factory = SignUpViewModel.Factory(
-            injector,
-            email
-        )
+        factory = SignUpViewModel.Factory(injector)
     )
 
     val signUpState by signUpViewModel.signUpState.collectAsState()
-    val isReadyToSignUp by signUpViewModel.isReadyToSignUp.collectAsState(false)
+    val isReadyToSignUp by signUpViewModel.isReadyToSignUp.collectAsState()
     val errorMessage by signUpViewModel.errorMessage.collectAsState()
 
     SignUpBody(
         merchantName = signUpViewModel.merchantName,
         emailController = signUpViewModel.emailController,
         phoneNumberController = signUpViewModel.phoneController,
+        nameController = signUpViewModel.nameController,
         signUpState = signUpState,
         isReadyToSignUp = isReadyToSignUp,
+        requiresNameCollection = signUpViewModel.requiresNameCollection,
         errorMessage = errorMessage,
         onSignUpClick = signUpViewModel::onSignUpClick
     )
@@ -95,8 +99,10 @@ internal fun SignUpBody(
     merchantName: String,
     emailController: TextFieldController,
     phoneNumberController: PhoneNumberController,
+    nameController: TextFieldController,
     signUpState: SignUpState,
     isReadyToSignUp: Boolean,
+    requiresNameCollection: Boolean,
     errorMessage: ErrorMessage?,
     onSignUpClick: () -> Unit
 ) {
@@ -120,7 +126,7 @@ internal fun SignUpBody(
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSecondary
         )
-        PaymentsThemeForLink {
+        StripeThemeForLink {
             EmailCollectionSection(
                 enabled = true,
                 emailController = emailController,
@@ -128,15 +134,36 @@ internal fun SignUpBody(
             )
         }
         AnimatedVisibility(
-            visible = signUpState == SignUpState.InputtingPhone
+            visible = signUpState != SignUpState.InputtingPhoneOrName &&
+                errorMessage != null
         ) {
+            ErrorText(
+                text = errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        AnimatedVisibility(visible = signUpState == SignUpState.InputtingPhoneOrName) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                PaymentsThemeForLink {
+                StripeThemeForLink {
                     PhoneNumberCollectionSection(
                         enabled = true,
                         phoneNumberController = phoneNumberController,
-                        requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty()
+                        requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
+                        imeAction = if (requiresNameCollection) {
+                            ImeAction.Next
+                        } else {
+                            ImeAction.Done
+                        }
                     )
+
+                    if (requiresNameCollection) {
+                        TextFieldSection(
+                            textFieldController = nameController,
+                            imeAction = ImeAction.Done,
+                            enabled = true
+                        )
+                    }
+
                     LinkTerms(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -144,8 +171,11 @@ internal fun SignUpBody(
                         textAlign = TextAlign.Center
                     )
                 }
-                errorMessage?.let {
-                    ErrorText(text = it.getMessage(LocalContext.current.resources))
+                AnimatedVisibility(visible = errorMessage != null) {
+                    ErrorText(
+                        text = errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
                 PrimaryButton(
                     label = stringResource(R.string.sign_up),
@@ -153,11 +183,12 @@ internal fun SignUpBody(
                         PrimaryButtonState.Enabled
                     } else {
                         PrimaryButtonState.Disabled
+                    },
+                    onButtonClick = {
+                        onSignUpClick()
+                        keyboardController?.hide()
                     }
-                ) {
-                    onSignUpClick()
-                    keyboardController?.hide()
-                }
+                )
             }
         }
     }
@@ -167,7 +198,8 @@ internal fun SignUpBody(
 internal fun EmailCollectionSection(
     enabled: Boolean,
     emailController: TextFieldController,
-    signUpState: SignUpState
+    signUpState: SignUpState,
+    focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
     Box(
         modifier = Modifier
@@ -177,12 +209,14 @@ internal fun EmailCollectionSection(
     ) {
         TextFieldSection(
             textFieldController = emailController,
-            imeAction = if (signUpState == SignUpState.InputtingPhone) {
+            imeAction = if (signUpState == SignUpState.InputtingPhoneOrName) {
                 ImeAction.Next
             } else {
                 ImeAction.Done
             },
-            enabled = enabled && signUpState != SignUpState.VerifyingEmail
+            enabled = enabled && signUpState != SignUpState.VerifyingEmail,
+            modifier = Modifier
+                .focusRequester(focusRequester)
         )
         if (signUpState == SignUpState.VerifyingEmail) {
             CircularProgressIndicator(

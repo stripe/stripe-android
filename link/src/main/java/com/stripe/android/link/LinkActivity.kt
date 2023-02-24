@@ -3,8 +3,8 @@ package com.stripe.android.link
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewTreeObserver
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
@@ -35,16 +36,19 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.isOnRootScreen
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.cardedit.CardEditBody
 import com.stripe.android.link.ui.paymentmethod.PaymentMethodBody
+import com.stripe.android.link.ui.rememberLinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpBody
 import com.stripe.android.link.ui.verification.VerificationBodyFullFlow
 import com.stripe.android.link.ui.wallet.WalletBody
@@ -55,11 +59,9 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
 internal class LinkActivity : ComponentActivity() {
     @VisibleForTesting
-    internal var viewModelFactory: ViewModelProvider.Factory =
-        LinkActivityViewModel.Factory(
-            applicationSupplier = { application },
-            starterArgsSupplier = { starterArgs }
-        )
+    internal var viewModelFactory: ViewModelProvider.Factory = LinkActivityViewModel.Factory {
+        starterArgs
+    }
 
     private val viewModel: LinkActivityViewModel by viewModels { viewModelFactory }
 
@@ -72,8 +74,7 @@ internal class LinkActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // TODO(brnunes-stripe): Migrate to androidx.compose.foundation 1.2.0 when out of beta
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        overridePendingTransition(R.anim.slide_up, 0)
 
         setContent {
             var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
@@ -98,6 +99,10 @@ internal class LinkActivity : ComponentActivity() {
                     },
                     modifier = Modifier.fillMaxHeight(),
                     sheetState = sheetState,
+                    sheetShape = MaterialTheme.linkShapes.large.copy(
+                        bottomStart = CornerSize(0.dp),
+                        bottomEnd = CornerSize(0.dp)
+                    ),
                     scrimColor = MaterialTheme.linkColors.sheetScrim
                 ) {
                     navController = rememberNavController()
@@ -107,11 +112,30 @@ internal class LinkActivity : ComponentActivity() {
                     Column(Modifier.fillMaxWidth()) {
                         val linkAccount by viewModel.linkAccount.collectAsState(null)
                         val isOnRootScreen by isRootScreenFlow().collectAsState(true)
+                        val backStackEntry by navController.currentBackStackEntryAsState()
+                        val appBarState = rememberLinkAppBarState(
+                            isRootScreen = isOnRootScreen,
+                            currentRoute = backStackEntry?.destination?.route,
+                            email = linkAccount?.email,
+                            accountStatus = linkAccount?.accountStatus
+                        )
+
+                        BackHandler(onBack = viewModel::onBackPressed)
 
                         LinkAppBar(
-                            email = linkAccount?.email,
-                            isRootScreen = isOnRootScreen,
-                            onButtonClick = { viewModel.navigator.onBack() }
+                            state = appBarState,
+                            onBackPressed = onBackPressedDispatcher::onBackPressed,
+                            onLogout = viewModel::logout,
+                            showBottomSheetContent = {
+                                if (it == null) {
+                                    coroutineScope.launch {
+                                        sheetState.hide()
+                                        bottomSheetContent = null
+                                    }
+                                } else {
+                                    bottomSheetContent = it
+                                }
+                            }
                         )
 
                         NavHost(navController, LinkScreen.Loading.route) {
@@ -126,18 +150,8 @@ internal class LinkActivity : ComponentActivity() {
                                 }
                             }
 
-                            composable(
-                                LinkScreen.SignUp.route,
-                                arguments = listOf(
-                                    navArgument(LinkScreen.SignUp.emailArg) {
-                                        type = NavType.StringType
-                                        nullable = true
-                                    }
-                                )
-                            ) { backStackEntry ->
-                                val email =
-                                    backStackEntry.arguments?.getString(LinkScreen.SignUp.emailArg)
-                                SignUpBody(viewModel.injector, email)
+                            composable(LinkScreen.SignUp.route) {
+                                SignUpBody(viewModel.injector)
                             }
 
                             composable(LinkScreen.Verification.route) {
@@ -225,8 +239,9 @@ internal class LinkActivity : ComponentActivity() {
                                 AccountStatus.NeedsVerification,
                                 AccountStatus.VerificationStarted ->
                                     LinkScreen.Verification
-                                AccountStatus.SignedOut ->
-                                    LinkScreen.SignUp(starterArgs.customerEmail)
+                                AccountStatus.SignedOut,
+                                AccountStatus.Error ->
+                                    LinkScreen.SignUp
                             },
                             clearBackStack = true
                         )
@@ -242,7 +257,12 @@ internal class LinkActivity : ComponentActivity() {
         viewModel.unregisterFromActivity()
     }
 
-    private fun dismiss(result: LinkActivityResult = LinkActivityResult.Canceled) {
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(0, R.anim.slide_down)
+    }
+
+    private fun dismiss(result: LinkActivityResult) {
         setResult(
             result.resultCode,
             Intent().putExtras(LinkActivityContract.Result(result).toBundle())

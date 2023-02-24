@@ -31,5 +31,13 @@ internal data class Resource<out T>(
         fun <T> loading(data: T? = null): Resource<T> {
             return Resource(Status.LOADING, data)
         }
+
+        fun <T> idle(): Resource<T> {
+            return Resource(Status.IDLE, null)
+        }
+
+        // Integer saved as dummy values of Resource<Int> when Resource<Unit> is needed.
+        // Resource<Unit> shouldn't be used as Unit can't be parcelized.
+        internal const val DUMMY_RESOURCE = 0
     }
 }

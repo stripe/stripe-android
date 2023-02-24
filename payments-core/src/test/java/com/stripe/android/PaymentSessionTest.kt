@@ -25,7 +25,6 @@ import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
@@ -42,7 +41,6 @@ import org.robolectric.Shadows
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentSessionTest {
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -322,8 +320,6 @@ class PaymentSessionTest {
         paymentSessionData: PaymentSessionData = PaymentSessionData(config)
     ): PaymentSession {
         return PaymentSession(
-            activity,
-            activity.application,
             activity,
             activity,
             activity,

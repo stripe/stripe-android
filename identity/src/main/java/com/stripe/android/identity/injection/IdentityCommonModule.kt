@@ -1,5 +1,7 @@
 package com.stripe.android.identity.injection
 
+import android.content.Context
+import android.content.res.Resources
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.identity.networking.DefaultIdentityModelFetcher
@@ -33,5 +35,9 @@ internal abstract class IdentityCommonModule {
         @Provides
         @Singleton
         fun provideStripeNetworkClient(): StripeNetworkClient = DefaultStripeNetworkClient()
+
+        @Provides
+        @Singleton
+        fun provideResources(context: Context): Resources = context.resources
     }
 }

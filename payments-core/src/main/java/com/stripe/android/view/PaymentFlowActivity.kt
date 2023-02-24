@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
@@ -14,6 +15,7 @@ import com.stripe.android.R
 import com.stripe.android.databinding.PaymentFlowActivityBinding
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
+import com.stripe.android.utils.argsAreInvalid
 
 /**
  * Activity containing a two-part payment flow that allows users to provide a shipping address
@@ -61,6 +63,10 @@ class PaymentFlowActivity : StripeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if (argsAreInvalid { args }) {
+            return
+        }
+
         val args = PaymentFlowActivityStarter.Args.create(intent)
         args.windowFlags?.let { window.addFlags(it) }
 
@@ -73,6 +79,11 @@ class PaymentFlowActivity : StripeActivity() {
         paymentFlowPagerAdapter.shippingInformation = shippingInformation
         paymentFlowPagerAdapter.selectedShippingMethod = viewModel.selectedShippingMethod
 
+        val onBackPressedCallback = onBackPressedDispatcher.addCallback {
+            viewModel.currentPage -= 1
+            viewPager.currentItem = viewModel.currentPage
+        }
+
         viewPager.adapter = paymentFlowPagerAdapter
         viewPager.addOnPageChangeListener(
             object : ViewPager.OnPageChangeListener {
@@ -84,6 +95,8 @@ class PaymentFlowActivity : StripeActivity() {
                         viewModel.isShippingInfoSubmitted = false
                         paymentFlowPagerAdapter.isShippingInfoSubmitted = false
                     }
+
+                    onBackPressedCallback.isEnabled = hasPreviousPage()
                 }
 
                 override fun onPageScrollStateChanged(i: Int) {
@@ -92,6 +105,8 @@ class PaymentFlowActivity : StripeActivity() {
         )
 
         viewPager.currentItem = viewModel.currentPage
+        onBackPressedCallback.isEnabled = hasPreviousPage()
+
         title = paymentFlowPagerAdapter.getPageTitle(viewPager.currentItem)
     }
 
@@ -239,15 +254,6 @@ class PaymentFlowActivity : StripeActivity() {
             Intent().putExtra(EXTRA_PAYMENT_SESSION_DATA, paymentSessionData)
         )
         finish()
-    }
-
-    override fun onBackPressed() {
-        if (hasPreviousPage()) {
-            viewModel.currentPage -= 1
-            viewPager.currentItem = viewModel.currentPage
-        } else {
-            super.onBackPressed()
-        }
     }
 
     internal companion object {

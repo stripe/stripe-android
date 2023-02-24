@@ -1,15 +1,33 @@
 package com.stripe.android.financialconnections.example.data
 
-private const val BASE_URL = "https://stripe-mobile-connections-example.glitch.me/"
+import com.stripe.android.financialconnections.example.data.model.CreateIntentResponse
 
 class BackendRepository(
-    private val backendService: BackendApiService = BackendApiFactory(BASE_URL).create()
+    settings: Settings
 ) {
+    private val backendService: BackendApiService = BackendApiFactory(settings).create()
 
-    suspend fun createLinkAccountSession() =
-        backendService.createLinkAccountSession()
+    suspend fun createLinkAccountSession(flow: String? = null) =
+        backendService.createLinkAccountSession(
+            LinkAccountSessionBody(flow)
+        )
 
-    suspend fun createLinkAccountSessionForToken() =
-        backendService.createLinkAccountSessionForToken()
+    suspend fun createLinkAccountSessionForToken(flow: String? = null) =
+        backendService.createLinkAccountSessionForToken(
+            LinkAccountSessionBody(flow)
+        )
 
+    suspend fun createPaymentIntent(
+        country: String,
+        flow: String? = null,
+        customerId: String? = null,
+        supportedPaymentMethods: String? = null
+    ): CreateIntentResponse = backendService.createPaymentIntent(
+        PaymentIntentBody(
+            flow = flow,
+            country = country,
+            customerId = customerId,
+            supportedPaymentMethods = supportedPaymentMethods
+        )
+    )
 }

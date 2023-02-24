@@ -8,7 +8,9 @@ import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.TextFieldIcon
+import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -131,6 +133,13 @@ internal class CardNumberControllerTest {
         cardNumberController.onValueChange("6216828050000000000")
         idleLooper()
         assertThat(cardNumberController.accountRangeService.accountRange!!.panLength).isEqualTo(19)
+    }
+
+    @Test
+    fun `Entering valid 16 digit UnionPay BIN returns accountRange of 16`() {
+        cardNumberController.onValueChange("6282000000000000")
+        idleLooper()
+        assertThat(cardNumberController.accountRangeService.accountRange!!.panLength).isEqualTo(16)
     }
 
     @Test

@@ -32,6 +32,7 @@
     <string name="upi_example">UPI Confirmation Example</string>
     <string name="netbanking_example">Netbanking Confirmation Example</string>
     <string name="manual_us_bank_account_example">"Manual US Bank Account Example"</string>
+    <string name="cash_app_pay_example">Cash App Pay</string>
     <string name="card_brands">Card Brands</string>
 
     <string name="select_add_card">Select or add card</string>
@@ -87,6 +88,11 @@
     <string name="confirm_affirm_button">Confirm with Affirm</string>
     <string name="confirm_with_affirm">Affirm Payment Intent Example</string>
 
+    <string name="alipay_example_intro">Tapping the button below will create a PaymentIntent and then use Alipay to confirm it</string>
+    <string name="confirm_alipay_button">Confirm with Alipay</string>
+    <string name="confirm_with_alipay_native">Alipay Payment Intent Native Example</string>
+    <string name="confirm_with_alipay_web">Alipay Payment Intent Web Example</string>
+
     <!-- SEPA Debit -->
     <string name="sepa_debit_mandate">By providing your IBAN and confirming this payment, you are authorizing EXAMPLE COMPANY NAME and Stripe, our payment service provider, to send instructions to your bank to debit your account and your bank to debit your account in accordance with those instructions. You are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited.</string>
     <string name="iban_hint">IBAN</string>
@@ -134,5 +140,6 @@
     <!--  US Bank Account  -->
     <string name="confirm_with_us_bank_account_entry_point">Connect US Bank Account Example</string>
     <string name="confirm_with_us_bank_account">Confirm with Bank Account</string>
+    <string name="setup_us_bank_account">Setup Bank Account</string>
     <string name="confirm_with_us_bank_account_intro">Click below to create payment intent and attach a bank account to payment method. Once a payment intent is created you will be redirected to enter your bank details.</string>
 </resources>

@@ -12,8 +12,8 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Afegir</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Afegir la teva informació de pagament</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Tornar</string>
+  <!-- Title shown above a carousel containing available payment methods -->
+  <string name="stripe_paymentsheet_choose_payment_method">Escull un mètode de pagament</string>
   <string name="stripe_paymentsheet_close">Tanca</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe farà un dipòsit de 0,01 USD al vostre compte d\'aquí 1 o 2 dies feiners. Després, rebreu un correu electrònic amb instruccions per completar el pagament a %s.</string>
@@ -23,6 +23,8 @@
   <string name="stripe_paymentsheet_or_pay_with_card">O pagar amb una targeta</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Pagar</string>
+  <!-- Title shown above a section containing various payment options -->
+  <string name="stripe_paymentsheet_pay_using">Paga amb</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Processant...</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->

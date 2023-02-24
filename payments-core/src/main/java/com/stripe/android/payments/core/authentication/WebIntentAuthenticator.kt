@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.authentication
 
 import com.stripe.android.PaymentBrowserAuthStarter
+import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -11,6 +12,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
@@ -32,10 +34,12 @@ internal class WebIntentAuthenticator @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
-) : PaymentAuthenticator<StripeIntent> {
+    @Named(IS_INSTANT_APP) private val isInstantApp: Boolean,
+    private val defaultReturnUrl: DefaultReturnUrl,
+) : PaymentAuthenticator<StripeIntent>() {
 
-    override suspend fun authenticate(
+    @OptIn(StripeCashAppPayBetaApi::class)
+    override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
@@ -80,6 +84,11 @@ internal class WebIntentAuthenticator @Inject constructor(
                 authUrl = nextActionData.hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
                     ?: throw IllegalArgumentException("null hostedVoucherUrl for DisplayOxxoDetails")
                 returnUrl = null
+                shouldCancelIntentOnUserNavigation = false
+            }
+            is StripeIntent.NextActionData.CashAppRedirect -> {
+                authUrl = nextActionData.mobileAuthUrl
+                returnUrl = defaultReturnUrl.value
                 shouldCancelIntentOnUserNavigation = false
             }
             else ->

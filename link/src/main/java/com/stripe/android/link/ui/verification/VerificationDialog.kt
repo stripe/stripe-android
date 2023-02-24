@@ -18,24 +18,33 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.LinkAppBar
+import com.stripe.android.link.ui.rememberLinkAppBarState
 
 /**
  * Function called when the Link verification dialog has been dismissed. The boolean returned
  * indicates whether the verification succeeded.
  * When called, [LinkPaymentLauncher.accountStatus] will contain the up to date account status.
  */
+@Deprecated(
+    level = DeprecationLevel.WARNING,
+    message = "This interface isn't meant for public consumption.",
+)
 typealias LinkVerificationCallback = (success: Boolean) -> Unit
 
+@Suppress("LongMethod")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LinkVerificationDialog(
     linkLauncher: LinkPaymentLauncher,
-    verificationCallback: LinkVerificationCallback
+    onResult: (Boolean) -> Unit,
 ) {
     // Must be inside a NavController so that the VerificationViewModel scope is destroyed when the
     // dialog is dismissed, and when called again a new scope is created.
@@ -43,20 +52,22 @@ fun LinkVerificationDialog(
 
     NavHost(
         navController = navController,
-        startDestination = "dialog"
+        startDestination = LinkScreen.VerificationDialog.route
     ) {
-        composable("dialog") {
+        composable(LinkScreen.VerificationDialog.route) {
             var openDialog by remember { mutableStateOf(true) }
 
-            val injector = requireNotNull(linkLauncher.injector)
-            val linkAccount = linkLauncher.linkAccountManager.linkAccount.collectAsState()
-            val linkEventsReporter = linkLauncher.linkEventsReporter
+            val component = requireNotNull(linkLauncher.component)
+            val linkAccount = component.linkAccountManager.linkAccount.collectAsState()
+            val linkEventsReporter = component.linkEventsReporter
 
             val onDismiss = {
                 openDialog = false
                 linkEventsReporter.on2FACancel()
-                verificationCallback(false)
+                onResult(false)
             }
+
+            val backStackEntry by navController.currentBackStackEntryAsState()
 
             linkAccount.value?.let { account ->
                 if (openDialog) {
@@ -69,23 +80,36 @@ fun LinkVerificationDialog(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(16.dp),
-                                shape = MaterialTheme.shapes.medium
+                                shape = MaterialTheme.linkShapes.medium
                             ) {
                                 Column {
-                                    LinkAppBar(
-                                        email = account.email,
+                                    val appBarState = rememberLinkAppBarState(
                                         isRootScreen = true,
-                                        onButtonClick = onDismiss
+                                        currentRoute = backStackEntry?.destination?.route,
+                                        email = account.email,
+                                        accountStatus = account.accountStatus
                                     )
+
+                                    LinkAppBar(
+                                        state = appBarState,
+                                        onBackPressed = onDismiss,
+                                        onLogout = {
+                                            // This can't be invoked from the verification dialog
+                                        },
+                                        showBottomSheetContent = {
+                                            // This can't be invoked from the verification dialog
+                                        }
+                                    )
+
                                     VerificationBody(
                                         headerStringResId = R.string.verification_header_prefilled,
                                         messageStringResId = R.string.verification_message,
                                         showChangeEmailMessage = false,
                                         linkAccount = account,
-                                        injector = injector,
+                                        injector = component.injector,
                                         onVerificationCompleted = {
                                             openDialog = false
-                                            verificationCallback(true)
+                                            onResult(true)
                                         }
                                     )
                                 }

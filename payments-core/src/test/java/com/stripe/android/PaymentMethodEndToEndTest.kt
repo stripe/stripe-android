@@ -10,7 +10,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.networking.StripeApiRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -18,7 +17,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodEndToEndTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
@@ -131,6 +129,7 @@ internal class PaymentMethodEndToEndTest {
         )
     }
 
+    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun createPaymentMethod_withUSBankAccount_missingEmail_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT.copy(
@@ -145,6 +144,7 @@ internal class PaymentMethodEndToEndTest {
             .isEqualTo(PaymentMethod.Type.USBankAccount)
     }
 
+    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun createPaymentMethod_withUSBankAccount_missingName_shouldFail() {
         val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT.copy(
@@ -440,5 +440,14 @@ internal class PaymentMethodEndToEndTest {
             )
         assertThat(paymentMethod?.type)
             .isEqualTo(PaymentMethod.Type.Affirm)
+    }
+
+    @Test
+    fun createPaymentMethod_withCashAppPay_shouldCreateObject() {
+        val stripe = Stripe(context, ApiKeyFixtures.CASH_APP_PAY_PUBLISHABLE_KEY)
+        val params = PaymentMethodCreateParamsFixtures.CASH_APP_PAY
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type).isEqualTo(PaymentMethod.Type.CashAppPay)
     }
 }

@@ -336,12 +336,33 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false
         ),
+        RevolutPay(
+            "revolut_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        MobilePay(
+            "mobilepay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
         USBankAccount(
             code = "us_bank_account",
             isReusable = true,
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = true
+        ),
+        CashAppPay(
+            code = "cashapp",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
@@ -677,7 +698,7 @@ constructor(
         @JvmField val wallet: Wallet? = null,
 
         @JvmField
-        internal val networks: Networks? = null
+        val networks: Networks? = null
     ) : TypeData() {
         override val type: Type get() = Type.Card
 

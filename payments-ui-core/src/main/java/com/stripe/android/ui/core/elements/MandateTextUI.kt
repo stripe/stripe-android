@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.stripeColors
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -19,7 +19,7 @@ fun MandateTextUI(
     Text(
         text = stringResource(element.stringResId, element.merchantName ?: ""),
         style = MaterialTheme.typography.body2,
-        color = MaterialTheme.paymentsColors.subtitle,
+        color = MaterialTheme.stripeColors.subtitle,
         modifier = Modifier
             .padding(vertical = 8.dp)
             .semantics(mergeDescendants = true) {} // makes it a separate accessibile item

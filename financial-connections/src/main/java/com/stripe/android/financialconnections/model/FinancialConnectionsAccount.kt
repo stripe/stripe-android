@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -23,7 +24,6 @@ import kotlinx.serialization.Serializable
  * @param supportedPaymentMethodTypes
  * The [PaymentMethod type](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)(s)
  * that can be created from this FinancialConnectionsAccount.
- * @param accountholder
  * @param balance The most recent information about the account's balance.
  * @param balanceRefresh The state of the most recent attempt to refresh the account balance.
  * @param displayName A human-readable name that has been assigned to this account,
@@ -109,7 +109,7 @@ data class FinancialConnectionsAccount(
      *
      * Values: cash,credit,investment,other
      */
-    @Serializable
+    @Serializable(with = Category.Serializer::class)
     enum class Category(val value: String) {
         @SerialName("cash")
         CASH("cash"),
@@ -124,6 +124,9 @@ data class FinancialConnectionsAccount(
         OTHER("other"),
 
         UNKNOWN("unknown");
+
+        internal object Serializer :
+            EnumIgnoreUnknownSerializer<Category>(Category.values(), UNKNOWN)
     }
 
     /**
@@ -131,7 +134,7 @@ data class FinancialConnectionsAccount(
      *
      * Values: active,disconnected,inactive
      */
-    @Serializable
+    @Serializable(with = Status.Serializer::class)
     enum class Status(val value: String) {
         @SerialName("active")
         ACTIVE("active"),
@@ -143,6 +146,8 @@ data class FinancialConnectionsAccount(
         INACTIVE("inactive"),
 
         UNKNOWN("unknown");
+
+        internal object Serializer : EnumIgnoreUnknownSerializer<Status>(Status.values(), UNKNOWN)
     }
 
     /**
@@ -152,7 +157,7 @@ data class FinancialConnectionsAccount(
      *
      * Values: checking,creditCard,lineOfCredit,mortgage,other,savings
      */
-    @Serializable
+    @Serializable(with = Subcategory.Serializer::class)
     enum class Subcategory(val value: String) {
         @SerialName("checking")
         CHECKING("checking"),
@@ -173,6 +178,9 @@ data class FinancialConnectionsAccount(
         SAVINGS("savings"),
 
         UNKNOWN("unknown");
+
+        internal object Serializer :
+            EnumIgnoreUnknownSerializer<Subcategory>(Subcategory.values(), UNKNOWN)
     }
 
     /**
@@ -181,7 +189,7 @@ data class FinancialConnectionsAccount(
      *
      * Values: link,usBankAccount
      */
-    @Serializable
+    @Serializable(with = SupportedPaymentMethodTypes.Serializer::class)
     enum class SupportedPaymentMethodTypes(val value: String) {
         @SerialName("link")
         LINK("link"),
@@ -190,6 +198,9 @@ data class FinancialConnectionsAccount(
         US_BANK_ACCOUNT("us_bank_account"),
 
         UNKNOWN("unknown");
+
+        internal object Serializer :
+            EnumIgnoreUnknownSerializer<SupportedPaymentMethodTypes>(values(), UNKNOWN)
     }
 
     /**
@@ -197,7 +208,7 @@ data class FinancialConnectionsAccount(
      *
      * Values: balances,identity,ownership,paymentMethod,transactions
      */
-    @Serializable
+    @Serializable(with = Permissions.Serializer::class)
     enum class Permissions(val value: String) {
         @SerialName("balances")
         BALANCES("balances"),
@@ -211,7 +222,12 @@ data class FinancialConnectionsAccount(
         @SerialName("transactions")
         TRANSACTIONS("transactions"),
 
+        @SerialName("account_numbers")
+        ACCOUNT_NUMBERS("account_numbers"),
+
         UNKNOWN("unknown");
+
+        internal object Serializer : EnumIgnoreUnknownSerializer<Permissions>(values(), UNKNOWN)
     }
 
     companion object {

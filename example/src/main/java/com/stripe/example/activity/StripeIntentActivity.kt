@@ -26,6 +26,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     }
 
     private lateinit var paymentLauncher: PaymentLauncher
+    private var isPaymentIntent: Boolean = true
 
     private val keyboardController: KeyboardController by lazy {
         KeyboardController(this)
@@ -78,6 +79,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         stripeAccountId: String? = null,
         existingPaymentMethodId: String? = null,
         mandateDataParams: MandateDataParams? = null,
+        customerId: String? = null,
+        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
         onPaymentIntentCreated: (String) -> Unit = {}
     ) {
         requireNotNull(paymentMethodCreateParams ?: existingPaymentMethodId)
@@ -86,7 +89,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
         viewModel.createPaymentIntent(
             country = country,
-            supportedPaymentMethods = supportedPaymentMethods
+            supportedPaymentMethods = supportedPaymentMethods,
+            customerId = customerId,
         ).observe(
             this
         ) { result ->
@@ -98,6 +102,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                     stripeAccountId,
                     existingPaymentMethodId,
                     mandateDataParams,
+                    setupFutureUsage,
                     onPaymentIntentCreated
                 )
             }
@@ -107,12 +112,19 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     protected fun createAndConfirmSetupIntent(
         country: String,
         params: PaymentMethodCreateParams,
+        supportedPaymentMethods: String? = null,
+        mandateData: MandateDataParams? = null,
+        customerId: String? = null,
         stripeAccountId: String? = null,
         onSetupIntentCreated: (String) -> Unit = {}
     ) {
         keyboardController.hide()
 
-        viewModel.createSetupIntent(country).observe(
+        viewModel.createSetupIntent(
+            country = country,
+            supportedPaymentMethods = supportedPaymentMethods,
+            customerId = customerId,
+        ).observe(
             this
         ) { result ->
             result.onSuccess {
@@ -120,19 +132,21 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                     it,
                     params,
                     stripeAccountId,
+                    mandateData,
                     onSetupIntentCreated
                 )
             }
         }
     }
 
-    private fun handleCreatePaymentIntentResponse(
+    open fun handleCreatePaymentIntentResponse(
         responseData: JSONObject,
         params: PaymentMethodCreateParams?,
         shippingDetails: ConfirmPaymentIntentParams.Shipping?,
         stripeAccountId: String?,
         existingPaymentMethodId: String?,
         mandateDataParams: MandateDataParams?,
+        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
         onPaymentIntentCreated: (String) -> Unit = {}
     ) {
         val secret = responseData.getString("secret")
@@ -149,19 +163,24 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 paymentMethodCreateParams = requireNotNull(params),
                 clientSecret = secret,
-                shipping = shippingDetails
+                shipping = shippingDetails,
+                setupFutureUsage = setupFutureUsage,
+            ).copy(
+                mandateData = mandateDataParams,
             )
         } else {
             ConfirmPaymentIntentParams.createWithPaymentMethodId(
                 paymentMethodId = existingPaymentMethodId,
                 clientSecret = secret,
-                mandateData = mandateDataParams
+                mandateData = mandateDataParams,
+                setupFutureUsage = setupFutureUsage,
             )
         }
         confirmPaymentIntent(confirmPaymentIntentParams)
     }
 
     protected fun confirmPaymentIntent(params: ConfirmPaymentIntentParams) {
+        isPaymentIntent = true
         paymentLauncher.confirm(params)
     }
 
@@ -169,6 +188,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         responseData: JSONObject,
         params: PaymentMethodCreateParams,
         stripeAccountId: String?,
+        mandateData: MandateDataParams?,
         onSetupIntentCreated: (String) -> Unit = {}
     ) {
         val secret = responseData.getString("secret")
@@ -184,30 +204,33 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         confirmSetupIntent(
             ConfirmSetupIntentParams.create(
                 paymentMethodCreateParams = params,
-                clientSecret = secret
+                clientSecret = secret,
+                mandateData = mandateData,
             )
         )
     }
 
-    private fun confirmSetupIntent(
-        params: ConfirmSetupIntentParams
-    ) {
+    protected fun confirmSetupIntent(params: ConfirmSetupIntentParams) {
+        isPaymentIntent = false
         paymentLauncher.confirm(params)
     }
 
     protected open fun onConfirmSuccess() {
-        viewModel.status.value += "\n\nPaymentIntent confirmation succeeded\n\n"
+        viewModel.status.value +=
+            "\n\n${if (isPaymentIntent)"Payment" else "Setup"}Intent confirmation succeeded\n\n"
         viewModel.inProgress.value = false
     }
 
     protected open fun onConfirmCanceled() {
-        viewModel.status.value += "\n\nPaymentIntent confirmation cancelled\n\n"
+        viewModel.status.value +=
+            "\n\n${if (isPaymentIntent)"Payment" else "Setup"}Intent confirmation canceled\n\n"
         viewModel.inProgress.value = false
     }
 
     protected open fun onConfirmError(failedResult: PaymentResult.Failed) {
-        viewModel.status.value += "\n\nPaymentIntent confirmation failed with throwable " +
-            "${failedResult.throwable} \n\n"
+        viewModel.status.value +=
+            "\n\n${if (isPaymentIntent)"Payment" else "Setup"}Intent confirmation failed with " +
+            "throwable ${failedResult.throwable} \n\n"
         viewModel.inProgress.value = false
     }
 }

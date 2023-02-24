@@ -4,9 +4,8 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.ui.core.injection.NonFallbackInjector
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,7 +18,6 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertNotNull
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class AddressElementViewModelTest {
     private val defaultArgs = AddressElementActivityContract.Args(

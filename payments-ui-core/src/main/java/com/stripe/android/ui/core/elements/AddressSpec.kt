@@ -2,7 +2,17 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.AddressType
+import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SameAsShippingController
+import com.stripe.android.uicore.elements.SameAsShippingElement
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.supportedBillingCountries
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -11,38 +21,6 @@ import kotlinx.serialization.Transient
 enum class DisplayField {
     @SerialName("country")
     Country
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-sealed class AddressType {
-    abstract val phoneNumberState: PhoneNumberState
-
-    data class ShippingCondensed(
-        val googleApiKey: String?,
-        override val phoneNumberState: PhoneNumberState,
-        val onNavigation: () -> Unit
-    ) : AddressType()
-
-    data class ShippingExpanded(
-        override val phoneNumberState: PhoneNumberState
-    ) : AddressType()
-
-    data class Normal(
-        override val phoneNumberState: PhoneNumberState =
-            PhoneNumberState.HIDDEN
-    ) : AddressType()
-}
-
-@Serializable
-enum class PhoneNumberState {
-    @SerialName("hidden")
-    HIDDEN,
-
-    @SerialName("optional")
-    OPTIONAL,
-
-    @SerialName("required")
-    REQUIRED
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -68,25 +46,47 @@ data class AddressSpec(
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
-        addressRepository: AddressRepository
-    ) = createSectionElement(
-        if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
-            CountryElement(
-                IdentifierSpec.Generic("billing_details[address][country]"),
-                DropdownFieldController(
-                    CountryConfig(this.allowedCountryCodes),
-                    initialValue = initialValues[this.apiPath]
-                )
+        addressRepository: AddressRepository,
+        shippingValues: Map<IdentifierSpec, String?>?
+    ): SectionElement {
+        val label = if (showLabel) R.string.billing_details else null
+        return if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
+            createSectionElement(
+                sectionFieldElement = CountryElement(
+                    identifier = IdentifierSpec.Generic("billing_details[address][country]"),
+                    controller = DropdownFieldController(
+                        CountryConfig(this.allowedCountryCodes),
+                        initialValue = initialValues[this.apiPath]
+                    )
+                ),
+                label = label
             )
         } else {
-            AddressElement(
-                apiPath,
-                addressRepository,
-                initialValues,
+            val sameAsShippingElement =
+                shippingValues?.get(IdentifierSpec.SameAsShipping)
+                    ?.toBooleanStrictOrNull()
+                    ?.let {
+                        SameAsShippingElement(
+                            identifier = IdentifierSpec.SameAsShipping,
+                            controller = SameAsShippingController(it)
+                        )
+                    }
+            val addressElement = AddressElement(
+                _identifier = apiPath,
+                addressRepository = addressRepository,
+                rawValuesMap = initialValues,
                 countryCodes = allowedCountryCodes,
-                addressType = type
+                addressType = type,
+                sameAsShippingElement = sameAsShippingElement,
+                shippingValuesMap = shippingValues
             )
-        },
-        label = if (showLabel) R.string.billing_details else null
-    )
+            createSectionElement(
+                sectionFieldElements = listOfNotNull(
+                    addressElement,
+                    sameAsShippingElement
+                ),
+                label = label
+            )
+        }
+    }
 }

@@ -9,6 +9,7 @@ import android.text.util.Linkify
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +22,7 @@ import com.stripe.android.R
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.databinding.PaymentMethodsActivityBinding
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.utils.argsAreInvalid
 import com.stripe.android.view.i18n.TranslatorManager
 
 /**
@@ -77,6 +79,8 @@ class PaymentMethodsActivity : AppCompatActivity() {
         )
     }
 
+    private var earlyExitDueToIllegalState: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (customerSession.isFailure) {
@@ -86,11 +90,19 @@ class PaymentMethodsActivity : AppCompatActivity() {
             )
             return
         }
+        if (argsAreInvalid { args }) {
+            earlyExitDueToIllegalState = true
+            return
+        }
 
         setContentView(viewBinding.root)
 
         args.windowFlags?.let {
             window.addFlags(it)
+        }
+
+        onBackPressedDispatcher.addCallback {
+            finishWithResult(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
         }
 
         viewModel.snackbarData.observe(this) { snackbarText ->
@@ -206,10 +218,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
         }
     }
 
-    override fun onBackPressed() {
-        finishWithResult(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
-    }
-
     private fun fetchCustomerPaymentMethods() {
         viewModel.getPaymentMethods().observe(this) { result ->
             result.fold(
@@ -283,7 +291,9 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        viewModel.selectedPaymentMethodId = adapter.selectedPaymentMethod?.id
+        if (!earlyExitDueToIllegalState) {
+            viewModel.selectedPaymentMethodId = adapter.selectedPaymentMethod?.id
+        }
         super.onDestroy()
     }
 

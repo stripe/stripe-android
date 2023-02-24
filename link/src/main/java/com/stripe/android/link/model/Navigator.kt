@@ -3,6 +3,7 @@ package com.stripe.android.link.model
 import androidx.lifecycle.asFlow
 import androidx.navigation.NavHostController
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason.BackPressed
 import com.stripe.android.link.LinkScreen
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,7 +13,7 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class Navigator @Inject constructor() {
-    var backNavigationEnabled = true
+    var userNavigationEnabled = true
     var navigationController: NavHostController? = null
     var onDismiss: ((LinkActivityResult) -> Unit)? = null
 
@@ -41,13 +42,15 @@ internal class Navigator @Inject constructor() {
     /**
      * Behaves like a back button, popping the back stack and dismissing the Activity if this was
      * the last screen.
-     * Only performs any action if [backNavigationEnabled] is true.
+     * When [userInitiated] is true, only performs any action if [userNavigationEnabled] is true.
+     *
+     * @param userInitiated Whether the action was initiated by user interaction.
      */
-    fun onBack() {
-        if (backNavigationEnabled) {
+    fun onBack(userInitiated: Boolean) {
+        if (!userInitiated || userNavigationEnabled) {
             navigationController?.let { navController ->
                 if (!navController.popBackStack()) {
-                    dismiss()
+                    cancel(reason = BackPressed)
                 }
             }
         }
@@ -56,12 +59,21 @@ internal class Navigator @Inject constructor() {
     /**
      * Dismisses the Link Activity with the given [result].
      */
-    fun dismiss(result: LinkActivityResult = LinkActivityResult.Canceled) =
-        onDismiss?.let {
-            it(result)
-        }
+    fun dismiss(result: LinkActivityResult) = onDismiss?.invoke(result)
+
+    /**
+     * Cancels the Link Activity with the given [reason].
+     */
+    fun cancel(reason: LinkActivityResult.Canceled.Reason) {
+        dismiss(LinkActivityResult.Canceled(reason))
+    }
 
     fun isOnRootScreen() = navigationController?.isOnRootScreen()
+
+    fun unregister() {
+        onDismiss = null
+        navigationController = null
+    }
 }
 
 // The Loading screen is always at the bottom of the stack, so a size of 2 means the current

@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.networking.FakeFinancialConnectionsRepository
 import com.stripe.android.financialconnections.test.readResourceAsString
@@ -14,7 +13,7 @@ import kotlin.test.assertFailsWith
 @ExperimentalCoroutinesApi
 class FetchFinancialConnectionsSessionForTokenTest {
 
-    private val repository = FakeFinancialConnectionsRepository(ApiKeyFixtures.MANIFEST)
+    private val repository = FakeFinancialConnectionsRepository()
     private val fetchFinancialConnectionsSessionForToken = FetchFinancialConnectionsSessionForToken(repository)
     private val json = Json {
         ignoreUnknownKeys = true

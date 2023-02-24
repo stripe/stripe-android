@@ -1,5 +1,7 @@
 package com.stripe.android.identity.networking.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -7,6 +9,7 @@ import kotlinx.serialization.Serializable
  * A VerificationPage contains the static content and initial state that is required for Stripe Identity's native mobile SDKs to render the verification flow.
  */
 @Serializable
+@Parcelize
 internal data class VerificationPage(
     @SerialName("biometric_consent")
     val biometricConsent: VerificationPageStaticContentConsentPage,
@@ -14,8 +17,14 @@ internal data class VerificationPage(
     val documentCapture: VerificationPageStaticContentDocumentCapturePage,
     @SerialName("document_select")
     val documentSelect: VerificationPageStaticContentDocumentSelectPage,
+    @SerialName("individual")
+    val individual: VerificationPageStaticContentIndividualPage,
+    @SerialName("individual_welcome")
+    val individualWelcome: VerificationPageStaticContentIndividualWelcomePage,
     @SerialName("selfie")
     val selfieCapture: VerificationPageStaticContentSelfieCapturePage? = null,
+    @SerialName("country_not_listed")
+    val countryNotListedPage: VerificationPageStaticContentCountryNotListedPage,
     /* The short-lived URL that can be used in the case that the client cannot support the VerificationSession. */
     @SerialName("fallback_url")
     val fallbackUrl: String,
@@ -43,7 +52,7 @@ internal data class VerificationPage(
     val unsupportedClient: Boolean,
     @SerialName("welcome")
     val welcome: VerificationPageStaticContentTextPage? = null
-) {
+) : Parcelable {
     @Serializable
     internal enum class Status {
         @SerialName("canceled")
@@ -60,9 +69,6 @@ internal data class VerificationPage(
     }
 
     internal companion object {
-        fun VerificationPage.isMissingBiometricConsent() =
-            requirements.missing.contains(VerificationPageRequirements.Missing.BIOMETRICCONSENT)
-
         fun VerificationPage.isUnsupportedClient() = unsupportedClient
 
         fun VerificationPage.requireSelfie() = selfieCapture != null

@@ -1,6 +1,7 @@
 package com.stripe.android.stripecardscan.framework.util
 
 import androidx.test.filters.SmallTest
+import com.stripe.android.core.utils.encodeToXWWWFormUrl
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.junit.Test
@@ -19,7 +20,7 @@ class EncodeTest {
         )
 
         assertEquals(
-            expected = "field_1=aa&field_2=1&field_3=true",
+            expected = "field_3=true&field_1=aa&field_2=1",
             actual = encodeToXWWWFormUrl(
                 serializer = TestClassFlat.serializer(),
                 value = TestClassFlat("aa", 1, true)
@@ -39,7 +40,7 @@ class EncodeTest {
         )
 
         assertEquals(
-            expected = "field_1=aa&field_2=1&field_3=&field_4=true",
+            expected = "field_4=true&field_1=aa&field_2=1",
             actual = encodeToXWWWFormUrl(
                 serializer = TestClassFlat.serializer(),
                 value = TestClassFlat("aa", 1, null, true)
@@ -65,8 +66,11 @@ class EncodeTest {
         )
 
         assertEquals(
-            expected = "field_1=aa&field_2=1&field_3=true" +
-                "&field_4%5Bsub_field_1%5D=bb&field_4%5Bsub_field_2%5D=2",
+            expected = "field_3=true" +
+                "&field_4%5Bsub_field_1%5D=bb" +
+                "&field_4%5Bsub_field_2%5D=2" +
+                "&field_1=aa" +
+                "&field_2=1",
             actual = encodeToXWWWFormUrl(
                 serializer = TestClassBase.serializer(),
                 value = TestClassBase(
@@ -107,10 +111,12 @@ class EncodeTest {
         )
 
         assertEquals(
-            expected = "field_1=aa&field_2=1&field_3=true" +
-                "&field_4%5Bsub_field_1%5D=bb&field_4%5Bsub_field_2%5D=2" +
+            expected = "field_3=true" +
+                "&field_4%5Bsub_field_1%5D=bb" +
                 "&field_4%5Bsub_field_3%5D%5Bsub_sub_field_1%5D=3" +
-                "&field_4%5Bsub_field_3%5D%5Bsub_sub_field_2%5D=false",
+                "&field_4%5Bsub_field_3%5D%5Bsub_sub_field_2%5D=false" +
+                "&field_4%5Bsub_field_2%5D=2" +
+                "&field_1=aa&field_2=1",
             actual = encodeToXWWWFormUrl(
                 serializer = TestClassBase.serializer(),
                 value = TestClassBase(
@@ -155,12 +161,15 @@ class EncodeTest {
         )
 
         assertEquals(
-            expected = "field_1=aa&field_2=1&field_3=true&field_4%5Bsub_field_1%5D=bb" +
+            expected = "field_3=true" +
+                "&field_4%5Bsub_field_1%5D=bb" +
+                "&field_4%5Bsub_field_3%5D%5Bsub_sub_field_1%5D=3" +
+                "&field_4%5Bsub_field_3%5D%5Bsub_sub_field_2%5D=false" +
                 "&field_4%5Bsub_field_2%5D%5B%5D=2" +
                 "&field_4%5Bsub_field_2%5D%5B%5D=4" +
                 "&field_4%5Bsub_field_2%5D%5B%5D=6" +
-                "&field_4%5Bsub_field_3%5D%5Bsub_sub_field_1%5D=3" +
-                "&field_4%5Bsub_field_3%5D%5Bsub_sub_field_2%5D=false",
+                "&field_1=aa" +
+                "&field_2=1",
             actual = encodeToXWWWFormUrl(
                 serializer = TestClassBase.serializer(),
                 value = TestClassBase(
@@ -197,12 +206,12 @@ class EncodeTest {
         )
 
         assertEquals(
-            expected = "field_1=aa" +
-                "&field_2%5B%5D%5Bsub_field_1%5D=bb" +
-                "&field_2%5B%5D%5Bsub_field_2%5D=22" +
-                "&field_2%5B%5D%5Bsub_field_1%5D=cc" +
-                "&field_2%5B%5D%5Bsub_field_2%5D=33" +
-                "&field_3=true",
+            expected = "field_3=true" +
+                "&field_1=aa" +
+                "&field_2%5B0%5D%5Bsub_field_1%5D=bb" +
+                "&field_2%5B0%5D%5Bsub_field_2%5D=22" +
+                "&field_2%5B1%5D%5Bsub_field_1%5D=cc" +
+                "&field_2%5B1%5D%5Bsub_field_2%5D=33",
             actual = encodeToXWWWFormUrl(
                 serializer = TestClassArray.serializer(),
                 value = TestClassArray(

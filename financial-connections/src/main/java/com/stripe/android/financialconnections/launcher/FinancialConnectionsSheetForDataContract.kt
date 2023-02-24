@@ -34,9 +34,19 @@ internal class FinancialConnectionsSheetForDataContract :
     private fun FinancialConnectionsSheetActivityResult.toExposedResult(): FinancialConnectionsSheetResult =
         when (this) {
             is FinancialConnectionsSheetActivityResult.Canceled -> FinancialConnectionsSheetResult.Canceled
-            is FinancialConnectionsSheetActivityResult.Failed -> FinancialConnectionsSheetResult.Failed(error)
-            is FinancialConnectionsSheetActivityResult.Completed -> FinancialConnectionsSheetResult.Completed(
-                financialConnectionsSession = financialConnectionsSession
+            is FinancialConnectionsSheetActivityResult.Failed -> FinancialConnectionsSheetResult.Failed(
+                error
             )
+
+            is FinancialConnectionsSheetActivityResult.Completed ->
+                when (financialConnectionsSession) {
+                    null -> FinancialConnectionsSheetResult.Failed(
+                        IllegalArgumentException("financialConnectionsSession not set.")
+                    )
+
+                    else -> FinancialConnectionsSheetResult.Completed(
+                        financialConnectionsSession = financialConnectionsSession
+                    )
+                }
         }
 }

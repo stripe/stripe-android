@@ -2,6 +2,8 @@ package com.stripe.android.payments.core.authentication
 
 import android.content.Context
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleRegistry
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentBrowserAuthStarter
@@ -13,21 +15,24 @@ import com.stripe.android.model.SourceFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.view.AuthActivityStarterHost
 import com.stripe.android.view.PaymentRelayActivity
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class SourceAuthenticatorTest {
-    private val activity: ComponentActivity = mock()
+    private val activity: ComponentActivity = mock {
+        on { lifecycle } doReturn LifecycleRegistry(mock).apply {
+            currentState = Lifecycle.State.RESUMED
+        }
+    }
     private val host = AuthActivityStarterHost.create(activity)
     private val paymentBrowserAuthStarterFactory =
         mock<(AuthActivityStarterHost) -> PaymentBrowserAuthStarter>()

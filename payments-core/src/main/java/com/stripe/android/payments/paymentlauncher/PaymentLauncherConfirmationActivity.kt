@@ -4,10 +4,12 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
 
 /**
@@ -21,12 +23,9 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
     }
 
     @VisibleForTesting
-    internal var viewModelFactory: ViewModelProvider.Factory =
-        PaymentLauncherViewModel.Factory(
-            { requireNotNull(starterArgs) },
-            { application },
-            this
-        )
+    internal var viewModelFactory: ViewModelProvider.Factory = PaymentLauncherViewModel.Factory {
+        requireNotNull(starterArgs)
+    }
 
     @VisibleForTesting
     internal val viewModel: PaymentLauncherViewModel by viewModels { viewModelFactory }
@@ -35,7 +34,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        disableAnimations()
+        setFadeAnimations()
 
         val args = runCatching {
             requireNotNull(starterArgs) {
@@ -44,6 +43,10 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
         }.getOrElse {
             finishWithResult(PaymentResult.Failed(it))
             return
+        }
+
+        onBackPressedDispatcher.addCallback {
+            // Prevent back presses while confirming payment
         }
 
         args.statusBarColor?.let {
@@ -73,12 +76,11 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        disableAnimations()
+        setFadeAnimations()
     }
 
-    private fun disableAnimations() {
-        // this is a transparent Activity so we want to disable animations
-        overridePendingTransition(0, 0)
+    private fun setFadeAnimations() {
+        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 
     /**

@@ -27,22 +27,27 @@ internal sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeInte
     ): PaymentMethodCreateParams
 
     companion object {
-        fun createFactory(stripeIntent: StripeIntent) =
+        fun createFactory(
+            stripeIntent: StripeIntent,
+            shipping: ConfirmPaymentIntentParams.Shipping? = null
+        ) =
             when (stripeIntent) {
-                is PaymentIntent -> ConfirmPaymentIntentParamsFactory(stripeIntent)
+                is PaymentIntent -> ConfirmPaymentIntentParamsFactory(stripeIntent, shipping)
                 is SetupIntent -> ConfirmSetupIntentParamsFactory(stripeIntent)
             }
     }
 }
 
 internal class ConfirmPaymentIntentParamsFactory(
-    private val paymentIntent: PaymentIntent
+    private val paymentIntent: PaymentIntent,
+    private val shipping: ConfirmPaymentIntentParams.Shipping?
 ) : ConfirmStripeIntentParamsFactory<ConfirmPaymentIntentParams>() {
     override fun createConfirmStripeIntentParams(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ) = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
         paymentMethodCreateParams,
-        paymentIntent.clientSecret!!
+        paymentIntent.clientSecret!!,
+        shipping = shipping
     )
 
     override fun createPaymentMethodCreateParams(

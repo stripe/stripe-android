@@ -6,14 +6,14 @@ import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
 import com.stripe.android.model.Address
-import com.stripe.android.model.LuxeNextActionRepository
+import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentIntentJsonParser(
-    val luxeNextActionRepository: LuxeNextActionRepository = LuxeNextActionRepository.Instance
+    val luxePostConfirmActionRepository: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
 ) : ModelJsonParser<PaymentIntent> {
     override fun parse(json: JSONObject): PaymentIntent? {
         val objectType = optString(json, FIELD_OBJECT)
@@ -69,15 +69,15 @@ class PaymentIntentJsonParser(
         }
         val nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
             when (
-                val luxeNextActionResult = luxeNextActionRepository.getAction(
+                val luxeNextActionResult = luxePostConfirmActionRepository.getAction(
                     paymentMethod?.code,
                     status,
                     json
                 )
             ) {
-                is LuxeNextActionRepository.Result.Action -> luxeNextActionResult.nextActionData
-                is LuxeNextActionRepository.Result.NoAction -> null
-                is LuxeNextActionRepository.Result.NotSupported -> {
+                is LuxePostConfirmActionRepository.Result.Action -> luxeNextActionResult.postConfirmAction
+                is LuxePostConfirmActionRepository.Result.NoAction -> null
+                is LuxePostConfirmActionRepository.Result.NotSupported -> {
                     NextActionDataParser().parse(it)
                 }
             }
@@ -90,6 +90,8 @@ class PaymentIntentJsonParser(
         val linkFundingSources = jsonArrayToList(json.optJSONArray(FIELD_LINK_FUNDING_SOURCES))
             .map { it.lowercase() }
 
+        val countryCode = optString(json, FIELD_COUNTRY_CODE)
+
         return PaymentIntent(
             id = id,
             paymentMethodTypes = paymentMethodTypes,
@@ -99,6 +101,7 @@ class PaymentIntentJsonParser(
             captureMethod = captureMethod,
             clientSecret = clientSecret,
             confirmationMethod = confirmationMethod,
+            countryCode = countryCode,
             created = created,
             currency = currency,
             description = description,
@@ -181,6 +184,7 @@ class PaymentIntentJsonParser(
         private const val FIELD_CAPTURE_METHOD = "capture_method"
         private const val FIELD_CLIENT_SECRET = "client_secret"
         private const val FIELD_CONFIRMATION_METHOD = "confirmation_method"
+        private const val FIELD_COUNTRY_CODE = "country_code"
         private const val FIELD_CURRENCY = "currency"
         private const val FIELD_DESCRIPTION = "description"
         private const val FIELD_LAST_PAYMENT_ERROR = "last_payment_error"

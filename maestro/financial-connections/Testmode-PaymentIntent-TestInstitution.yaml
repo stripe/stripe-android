@@ -1,0 +1,35 @@
+appId: com.stripe.android.financialconnections.example
+---
+- launchApp
+# Android specific: Navigate to example
+- tapOn: "Playground"
+- tapOn:
+    id: "Native_checkbox"
+- tapOn: "Mode_Dropdown_Icon"
+- tapOn:
+    id: "Test_checkbox"
+- tapOn:
+    id: "PaymentIntent_checkbox"
+- tapOn: "Connect Accounts!"
+# Common: web AuthFlow - connect OAuth institution
+- extendedWaitUntil:
+    visible: "Agree"
+    timeout: 30000
+- tapOn: "Agree"
+# SELECT LEGACY INSTITUTION
+- tapOn: "Test Institution"
+####### Bypass Chrome on-boarding screen #######
+- runFlow:
+    file: ../common/subflow-skip-chrome-welcome.yaml
+    env:
+      APP_ID: com.stripe.android.financialconnections.example
+###############################################
+# SELECT ALL ACCOUNTS
+- extendedWaitUntil:
+    visible: "Success"
+    timeout: 60000
+- tapOn: "Success" # select all accounts
+- tapOn: "Confirm"
+# CONFIRM AND COMPLETE
+- tapOn: "Done"
+- assertVisible: ".*Intent Confirmed!.*"

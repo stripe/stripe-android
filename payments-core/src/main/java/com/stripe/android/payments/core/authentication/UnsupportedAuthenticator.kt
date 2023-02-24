@@ -18,8 +18,8 @@ import javax.inject.Singleton
 @JvmSuppressWildcards
 internal class UnsupportedAuthenticator @Inject constructor(
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter
-) : PaymentAuthenticator<StripeIntent> {
-    override suspend fun authenticate(
+) : PaymentAuthenticator<StripeIntent>() {
+    override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options

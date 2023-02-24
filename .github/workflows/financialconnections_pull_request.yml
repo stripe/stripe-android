@@ -1,4 +1,4 @@
-name: financial-connections-example size diff
+name: financial-connections-pr
 on:
   pull_request:
     paths:
@@ -16,10 +16,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.base_ref }}
+      - uses: ./.github/actions/stripe_setup
       - name: Build base branch
-        run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-base.apk
+        run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-base.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: apk
           path: financial-connections-example/build/outputs/apk/release/financial-connections-example-release-base.apk
@@ -29,12 +30,12 @@ jobs:
     name: Build PR
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/stripe_setup
       - name: Build PR branch
-        run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-pr.apk
+        run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-pr.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: apk
           path: financial-connections-example/build/outputs/apk/release/financial-connections-example-release-pr.apk
@@ -43,6 +44,8 @@ jobs:
   diffuse:
     needs: [ build-base, build-pr ]
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
       - name: Download APKs
@@ -77,7 +80,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload diffuse output
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: diffuse-output
           path: ${{ steps.diffuse.outputs.diff-file }}

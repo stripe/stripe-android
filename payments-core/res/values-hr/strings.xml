@@ -18,8 +18,6 @@
   <string name="address_country_invalid">Vaša država nije valjana</string>
   <!-- Error text indicating that county is required, used for UK addresses -->
   <string name="address_county_required">Unesite svoju grofoviju</string>
-  <!-- Caption for Address field on address form -->
-  <string name="address_label_address">Adresa</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Ulica i kućni broj 1 (neobavezno)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -32,8 +30,6 @@
   <string name="address_label_city_optional">Grad (neobavezno)</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Grofovija (neobavezno)</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="address_label_phone_number">Telefonski broj</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Telefonski broj (neobavezno)</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
@@ -72,10 +68,6 @@
   <string name="address_required">Unesite svoju adresu</string>
   <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Unesite svoju državu</string>
-  <!-- Error text indicating zip code is invalid, used for US addresses -->
-  <string name="address_zip_invalid">Vaš ZIP broj nije valjan.</string>
-  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
-  <string name="address_zip_postal_invalid">Vaš poštanski broj nije valjan</string>
   <!-- Pay over time with Affirm copy -->
   <string name="affirm_buy_now_pay_later">Platite u ratama koristeći &lt;img src=\"affirm\"&gt;.</string>
   <!-- Label for Name on account field on form -->
@@ -110,6 +102,8 @@
   <string name="becs_widget_name_required">Vaše ime je obavezno.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Otkaži</string>
+  <!-- Error when the card was declined by the credit card networks -->
+  <string name="card_declined">Kartica je odbijena</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s završava na %2$s</string>
   <!-- Text for close button -->
@@ -121,13 +115,19 @@
   <string name="done">Gotovo</string>
   <!-- Button title to enter editing mode -->
   <string name="edit">Uredi</string>
+  <!-- Error when the card has already expired -->
+  <string name="expired_card">Vaša kartica je istekla</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">MM/GG</string>
   <string name="expiry_label_short">Istek</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="fpx_bank_offline">%s - Izvan mreže</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="generic_decline">Vaš način plaćanja je odbijen.</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
   <string name="incomplete_expiry_date">Datum isteka vaše kartice nije kompletan.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="invalid_bank_account_iban">Uneseni IBAN nije valjan.</string>
   <string name="invalid_card_number">Broj kartice nije valjan.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Sigurnosni kod vaše kartice nije valjan.</string>
@@ -135,6 +135,8 @@
   <string name="invalid_expiry_month">Mjesec isteka kartice nije valjan.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="invalid_expiry_year">Godina isteka kartice nije valjana.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="invalid_owner_name">Vaše ime je neispravno.</string>
   <!-- Shipping form error message -->
   <string name="invalid_shipping_information">Adresa za otpremu nije valjana</string>
   <!-- Error message for when postal code in form is incomplete -->
@@ -143,6 +145,8 @@
   <string name="payment_method_add_new_fpx">Odaberite bankovni račun (FPX)...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Besplatno</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="processing_error">Došlo je do pogreške u obradi vaše kartice -- pokušajte ponovno za nekoliko sekundi</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="remove">Ukloni</string>

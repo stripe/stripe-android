@@ -2,16 +2,18 @@ package com.stripe.android.payments.core.authentication.threeds2
 
 import android.app.Application
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.instantapps.InstantApps
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -34,6 +36,7 @@ import com.stripe.android.stripe3ds2.transaction.InitChallengeRepository
 import com.stripe.android.stripe3ds2.transaction.IntentData
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.Transaction
+import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -303,10 +306,8 @@ internal sealed class NextStep {
 }
 
 internal class Stripe3ds2TransactionViewModelFactory(
-    private val applicationSupplier: () -> Application,
-    owner: SavedStateRegistryOwner,
-    private val argsSupplier: () -> Stripe3ds2TransactionContract.Args
-) : AbstractSavedStateViewModelFactory(owner, null),
+    private val argsSupplier: () -> Stripe3ds2TransactionContract.Args,
+) : ViewModelProvider.Factory,
     Injectable<Stripe3ds2TransactionViewModelFactory.FallbackInitializeParam> {
 
     internal data class FallbackInitializeParam(
@@ -323,7 +324,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
      * Fallback call to initialize dependencies when injection is not available, this might happen
      * when app process is killed by system and [WeakMapInjectorRegistry] is cleared.
      */
-    override fun fallbackInitialize(arg: FallbackInitializeParam) {
+    override fun fallbackInitialize(arg: FallbackInitializeParam): Injector? {
         DaggerStripe3ds2TransactionViewModelFactoryComponent.builder()
             .context(arg.application)
             .enableLogging(arg.enableLogging)
@@ -332,16 +333,16 @@ internal class Stripe3ds2TransactionViewModelFactory(
             .isInstantApp(InstantApps.isInstantApp(arg.application))
             .build()
             .inject(this)
+        return null
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(
-        key: String,
-        modelClass: Class<T>,
-        handle: SavedStateHandle
-    ): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
         val args = argsSupplier()
-        val application = applicationSupplier()
+
+        val application = extras.requireApplication()
+        val savedStateHandle = extras.createSavedStateHandle()
+
         injectWithFallback(
             args.injectorKey,
             FallbackInitializeParam(
@@ -354,7 +355,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
 
         return subComponentBuilder
             .args(args)
-            .savedStateHandle(handle)
+            .savedStateHandle(savedStateHandle)
             .application(application)
             .build().viewModel as T
     }

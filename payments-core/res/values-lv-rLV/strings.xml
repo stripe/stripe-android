@@ -18,8 +18,6 @@
   <string name="address_country_invalid">Ievadītā valsts nav derīga</string>
   <!-- Error text indicating that county is required, used for UK addresses -->
   <string name="address_county_required">Ievadiet apriņķi</string>
-  <!-- Caption for Address field on address form -->
-  <string name="address_label_address">Adrese</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">1. adreses rindiņa (nav obligāti)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -32,8 +30,6 @@
   <string name="address_label_city_optional">Pilsēta (nav obligāti)</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Apriņķis (nav obligāti)</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="address_label_phone_number">Tālruņa numurs</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Tālruņa numurs (nav obligāti)</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
@@ -72,10 +68,6 @@
   <string name="address_required">Ievadiet adresi</string>
   <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Ievadiet novadu/štatu</string>
-  <!-- Error text indicating zip code is invalid, used for US addresses -->
-  <string name="address_zip_invalid">Pasta indekss nav derīgs.</string>
-  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
-  <string name="address_zip_postal_invalid">Pasta indekss nav derīgs</string>
   <!-- Pay over time with Affirm copy -->
   <string name="affirm_buy_now_pay_later">Maksāt pakāpeniski ar &lt;img src=\"affirm\"&gt;.</string>
   <!-- Label for Name on account field on form -->
@@ -110,6 +102,8 @@
   <string name="becs_widget_name_required">Jānorāda vārds/nosaukums.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Atcelt</string>
+  <!-- Error when the card was declined by the credit card networks -->
+  <string name="card_declined">Karte tika noraidīta</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s, kuras numura pēdējie cipari ir %2$s</string>
   <!-- Text for close button -->
@@ -121,13 +115,19 @@
   <string name="done">Gatavs</string>
   <!-- Button title to enter editing mode -->
   <string name="edit">Rediģēt</string>
+  <!-- Error when the card has already expired -->
+  <string name="expired_card">Kartes derīguma termiņš ir beidzies</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">MM/GG</string>
   <string name="expiry_label_short">Derīguma termiņš</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="fpx_bank_offline">%s — bezsaistē</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="generic_decline">Maksājuma veids tika noraidīts.</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
   <string name="incomplete_expiry_date">Kartes derīguma termiņa datums nav pilnīgs.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="invalid_bank_account_iban">Ievadītais IBAN nav derīgs.</string>
   <string name="invalid_card_number">Kartes numurs nav derīgs.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Kartes drošības kods nav derīgs.</string>
@@ -135,6 +135,8 @@
   <string name="invalid_expiry_month">Kartes derīguma termiņa mēnesis nav derīgs.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="invalid_expiry_year">Kartes derīguma termiņa gads nav derīgs.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="invalid_owner_name">Jūsu vārds nav derīgs.</string>
   <!-- Shipping form error message -->
   <string name="invalid_shipping_information">Nederīga piegādes adrese</string>
   <!-- Error message for when postal code in form is incomplete -->
@@ -143,6 +145,8 @@
   <string name="payment_method_add_new_fpx">Atlasīt bankas kontu (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Bezmaksas</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="processing_error">Radās kļūda, apstrādājot jūsu karti — mēģiniet vēlreiz pēc dažām sekundēm</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="remove">Noņemt</string>

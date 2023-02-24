@@ -13,10 +13,23 @@ import com.stripe.android.model.PaymentMethod
 internal class ActivityScenarioFactory(
     private val context: Context
 ) {
+
     internal inline fun <reified T : Activity> create(
-        args: ActivityStarter.Args
+        args: ActivityStarter.Args? = null
     ): ActivityScenario<T> {
         return ActivityScenario.launch(
+            Intent(context, T::class.java).apply {
+                if (args != null) {
+                    putExtra(ActivityStarter.Args.EXTRA, args)
+                }
+            }
+        )
+    }
+
+    internal inline fun <reified T : Activity> createForResult(
+        args: ActivityStarter.Args
+    ): ActivityScenario<T> {
+        return ActivityScenario.launchActivityForResult(
             Intent(context, T::class.java)
                 .putExtra(ActivityStarter.Args.EXTRA, args)
         )

@@ -1,8 +1,10 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.CvcCheck
 import org.json.JSONObject
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -22,7 +24,12 @@ class ConsumerPaymentDetailsJsonParserTest {
                         expiryYear = 2023,
                         expiryMonth = 12,
                         brand = CardBrand.MasterCard,
-                        last4 = "4444"
+                        last4 = "4444",
+                        cvcCheck = CvcCheck.Pass,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            CountryCode.US,
+                            "12312"
+                        )
                     )
                 )
             )
@@ -60,7 +67,12 @@ class ConsumerPaymentDetailsJsonParserTest {
                         expiryYear = 2023,
                         expiryMonth = 12,
                         brand = CardBrand.MasterCard,
-                        last4 = "4444"
+                        last4 = "4444",
+                        cvcCheck = CvcCheck.Pass,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            CountryCode.US,
+                            "12312"
+                        )
                     ),
                     ConsumerPaymentDetails.Card(
                         id = "QAAAKIL",
@@ -68,7 +80,12 @@ class ConsumerPaymentDetailsJsonParserTest {
                         expiryYear = 2024,
                         expiryMonth = 4,
                         brand = CardBrand.Visa,
-                        last4 = "4242"
+                        last4 = "4242",
+                        cvcCheck = CvcCheck.Fail,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            CountryCode.US,
+                            "42424"
+                        )
                     ),
                     ConsumerPaymentDetails.BankAccount(
                         id = "wAAACGA",
@@ -138,7 +155,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                     "checks": {
                       "address_line1_check": "STATE_INVALID",
                       "address_postal_code_check": "PASS",
-                      "cvc_check": "PASS"
+                      "cvc_check": "FAIL"
                     },
                     "exp_month": 4,
                     "exp_year": 2024,
@@ -163,7 +180,12 @@ class ConsumerPaymentDetailsJsonParserTest {
                         expiryYear = 2023,
                         expiryMonth = 12,
                         brand = CardBrand.AmericanExpress,
-                        last4 = "4444"
+                        last4 = "4444",
+                        cvcCheck = CvcCheck.Pass,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            CountryCode.US,
+                            "12312"
+                        )
                     ),
                     ConsumerPaymentDetails.Card(
                         id = "QAAAKIL",
@@ -171,7 +193,12 @@ class ConsumerPaymentDetailsJsonParserTest {
                         expiryYear = 2024,
                         expiryMonth = 4,
                         brand = CardBrand.DinersClub,
-                        last4 = "4242"
+                        last4 = "4242",
+                        cvcCheck = CvcCheck.Fail,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            CountryCode.US,
+                            "42424"
+                        )
                     )
                 )
             )

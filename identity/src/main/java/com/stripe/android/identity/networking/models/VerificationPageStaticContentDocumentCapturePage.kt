@@ -1,9 +1,12 @@
 package com.stripe.android.identity.networking.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Parcelize
 internal data class VerificationPageStaticContentDocumentCapturePage(
     @SerialName("autocapture_timeout")
     val autocaptureTimeout: Int,
@@ -27,4 +30,4 @@ internal data class VerificationPageStaticContentDocumentCapturePage(
     val motionBlurMinDuration: Int,
     @SerialName("motion_blur_min_iou")
     val motionBlurMinIou: Float
-)
+) : Parcelable

@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.test.espresso.intent.Intents
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -11,15 +12,17 @@ import com.stripe.android.test.core.Browser
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
+import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
-import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.initializedLpmRepository
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -38,6 +41,9 @@ class TestAuthorization {
     @get:Rule
     val testWatcher = TestWatcher()
 
+    @get:Rule
+    val disableAnimations = DisableAnimationsRule()
+
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
     private val screenshotProcessor = MyScreenCaptureProcessor()
@@ -50,19 +56,20 @@ class TestAuthorization {
 
     @After
     fun after() {
-        androidx.test.espresso.intent.Intents.release()
+        Intents.release()
     }
 
     private val bancontactNewUser = TestParameters(
         lpmRepository.fromCode("bancontact")!!,
         Customer.New,
+        LinkState.Off,
         GooglePayState.On,
         Currency.EUR,
         IntentType.Pay,
         Billing.On,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
-        automatic = Automatic.On,
+        automatic = Automatic.Off,
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = Browser.Chrome,
@@ -84,7 +91,10 @@ class TestAuthorization {
         testDriver.confirmNewOrGuestComplete(
             bancontactNewUser.copy(
                 paymentMethod = lpmRepository.fromCode("ideal")!!,
-                authorizationAction = AuthorizeAction.Fail,
+                authorizationAction = AuthorizeAction.Fail(
+                    expectedError = "We are unable to authenticate your payment method. " +
+                        "Please choose a different payment method and try again.",
+                ),
             )
         )
     }
@@ -99,12 +109,8 @@ class TestAuthorization {
     }
 
     companion object {
-        private val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
-                InstrumentationRegistry.getInstrumentation().targetContext.resources
-            )
-        ).apply {
-            forceUpdate(LpmRepository.exposedPaymentMethods, null)
-        }
+        private val lpmRepository = initializedLpmRepository(
+            context = InstrumentationRegistry.getInstrumentation().targetContext,
+        )
     }
 }

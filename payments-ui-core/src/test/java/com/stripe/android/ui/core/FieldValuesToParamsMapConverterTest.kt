@@ -4,8 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter.Companion.addPath
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter.Companion.getKeys
-import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.forms.FormFieldEntry
 import org.junit.Test
 
 class FieldValuesToParamsMapConverterTest {
@@ -104,6 +104,31 @@ class FieldValuesToParamsMapConverterTest {
                 "}" +
                 "}" +
                 "}"
+        )
+    }
+
+    @Test
+    fun `test ignored fields`() {
+        val paymentMethodParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodCreateParams(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(
+                        "joe",
+                        true
+                    ),
+                    IdentifierSpec.SameAsShipping to FormFieldEntry(
+                        "true",
+                        true
+                    )
+                ),
+                "some code",
+                false
+            )
+
+        assertThat(
+            paymentMethodParams.toParamMap().toString()
+        ).isEqualTo(
+            "{type=some code, billing_details={name=joe}}"
         )
     }
 }

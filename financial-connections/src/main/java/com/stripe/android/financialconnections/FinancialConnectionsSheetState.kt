@@ -4,8 +4,8 @@ import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.PersistState
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 
 /**
  *  Class containing all of the data needed to represent the screen.
@@ -14,12 +14,37 @@ internal data class FinancialConnectionsSheetState(
     val initialArgs: FinancialConnectionsSheetActivityArgs,
     val activityRecreated: Boolean = false,
     @PersistState val manifest: FinancialConnectionsSessionManifest? = null,
-    @PersistState val authFlowActive: Boolean = false,
+    @PersistState val webAuthFlowStatus: AuthFlowStatus = AuthFlowStatus.NONE,
     val viewEffect: FinancialConnectionsSheetViewEffect? = null
 ) : MavericksState {
 
     val sessionSecret: String
         get() = initialArgs.configuration.financialConnectionsSessionClientSecret
+
+    enum class AuthFlowStatus {
+        /**
+         * AuthFlow is happening outside of the SDK (app2app, web browser, etc).
+         *
+         * If no deeplink is received an we're on this state, external activity was cancelled.
+         */
+        ON_EXTERNAL_ACTIVITY,
+
+        /**
+         * We came back from an external activity but the flow is not yet completed.
+         * - coming from browser and opening app2ap
+         * - coming from app2app and opening browser
+         *
+         * It'll be a short status until the next external activity is opened, moving again to
+         * [ON_EXTERNAL_ACTIVITY].
+         *
+         */
+        INTERMEDIATE_DEEPLINK,
+
+        /**
+         * We're in an SDK activity and lifecycle should be handled normally.
+         */
+        NONE
+    }
 
     /**
      * Constructor used by Mavericks to build the initial state.
@@ -37,6 +62,14 @@ internal data class FinancialConnectionsSheetState(
 internal sealed class FinancialConnectionsSheetViewEffect {
 
     /**
+     * Open the AuthFlow native activity.
+     */
+    data class OpenNativeAuthFlow(
+        val configuration: FinancialConnectionsSheet.Configuration,
+        val initialSyncResponse: SynchronizeSessionResponse
+    ) : FinancialConnectionsSheetViewEffect()
+
+    /**
      * Open the AuthFlow.
      */
     data class OpenAuthFlowWithUrl(
@@ -44,7 +77,7 @@ internal sealed class FinancialConnectionsSheetViewEffect {
     ) : FinancialConnectionsSheetViewEffect()
 
     /**
-     * Finish [FinancialConnectionsSheetActivity] with a given [FinancialConnectionsSheetForDataContract.Result]
+     * Finish [FinancialConnectionsSheetActivity] with a given [FinancialConnectionsSheetActivityResult]
      */
     data class FinishWithResult(
         val result: FinancialConnectionsSheetActivityResult

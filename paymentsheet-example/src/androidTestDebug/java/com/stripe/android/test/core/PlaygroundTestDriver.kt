@@ -6,20 +6,28 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
+import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.test.core.ui.BrowserUI
-import com.stripe.android.test.core.ui.EspressoText
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
 import org.junit.Assume
@@ -58,6 +66,87 @@ class PlaygroundTestDriver(
         override fun onActivityResumed(activity: Activity) {
             currentActivity[0] = activity
         }
+    }
+
+    fun testLinkCustom(
+        testParameters: TestParameters,
+        populateCustomLpmFields: () -> Unit = {},
+        verifyCustomLpmFields: () -> Unit = {}
+    ) {
+        setup(testParameters)
+        launchCustom()
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000L) {
+            selectors.addPaymentMethodButton.isDisplayed()
+        }
+
+        composeTestRule.onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add").apply {
+            assertExists()
+            performClick()
+        }
+
+        val fieldPopulator = FieldPopulator(
+            selectors,
+            testParameters,
+            populateCustomLpmFields,
+            verifyCustomLpmFields
+        )
+        fieldPopulator.populateFields()
+
+        composeTestRule.onNodeWithText("Save my info for secure 1-click checkout").apply {
+            assertExists()
+            performClick()
+        }
+
+        composeTestRule.onNodeWithText("Email").apply {
+            assertExists()
+            performTextInput("email@email.com")
+        }
+
+        closeSoftKeyboard()
+
+        runCatching {
+            // We need to wait for the built in debounce time for filling in the link email.
+            composeTestRule.waitUntil(timeoutMillis = 1100L) {
+                false
+            }
+        }
+
+        composeTestRule.waitUntil(timeoutMillis = 5000L) {
+            selectors.continueButton.checkEnabled()
+        }
+
+        composeTestRule.waitForIdle()
+
+        selectors.continueButton.click()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000L) {
+            composeTestRule.onAllNodesWithTag("OTP-0").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag("OTP-0").performTextInput("123456")
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForPlaygroundActivity()
+
+        selectors.multiStepSelect.click()
+
+        waitForNotPlaygroundActivity()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000L) {
+            composeTestRule.onAllNodesWithTag("SignedInBox").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        fieldPopulator.verifyFields()
+
+        teardown()
     }
 
     fun confirmCustom(
@@ -99,11 +188,7 @@ class PlaygroundTestDriver(
     }
 
     private fun pressContinue() {
-        selectors.continueButton.apply {
-            scrollTo()
-            click()
-        }
-
+        selectors.continueButton.click()
         waitForPlaygroundActivity()
     }
 
@@ -170,6 +255,9 @@ class PlaygroundTestDriver(
         setup(testParameters)
         launchComplete()
 
+        composeTestRule.waitForIdle()
+        device.waitForIdle()
+
         customOperations()
 
         currentActivity[0]?.let {
@@ -180,16 +268,20 @@ class PlaygroundTestDriver(
     }
 
     private fun pressBuy() {
-        selectors.buyButton.apply {
-            scrollTo()
-            click()
-        }
+        selectors.buyButton.click()
     }
 
     internal fun pressEdit() {
-        selectors.editButton.apply {
-            click()
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodesWithText("EDIT")
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
+
+        composeTestRule
+            .onNodeWithText("EDIT")
+            .performClick()
     }
 
     /**
@@ -244,6 +336,7 @@ class PlaygroundTestDriver(
     }
 
     private fun setConfiguration(selectors: Selectors) {
+        selectors.reset.click()
         // Could consider setting these preferences instead of clicking
         // if it is faster (possibly 1-2s)
         selectors.customer.click()
@@ -253,14 +346,24 @@ class PlaygroundTestDriver(
         selectors.setMerchantCountry(testParameters.merchantCountryCode)
         selectors.setCurrency(testParameters.currency)
 
+        selectors.linkState.click()
+
         selectors.checkout.click()
         selectors.delayed.click()
+        selectors.shipping.click()
 
         // billing is not saved to preferences
         selectors.billing.click()
 
+        // billing is not saved to preferences
+        selectors.shipping.click()
+
         // Can't guarantee that google pay will be on the phone
         selectors.googlePayState.click()
+
+        testParameters.customPrimaryButtonLabel?.let { customLabel ->
+            selectors.enterCustomPrimaryButtonLabel(text = customLabel)
+        }
     }
 
     internal fun launchComplete() {
@@ -284,15 +387,13 @@ class PlaygroundTestDriver(
 
     private fun doAuthorization() {
         selectors.apply {
-            if (testParameters.authorizationAction != null
-                && this.authorizeAction != null
-            ) {
+            if (testParameters.authorizationAction != null && authorizeAction != null) {
                 // If a specific browser is requested we will use it, otherwise, we will
                 // select the first browser found
                 val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
 
                 // If there are multiple browser there is a browser selector window
-                selectBrowserPrompt.wait(2000)
+                selectBrowserPrompt.wait(4000)
                 if (selectBrowserPrompt.exists()) {
                     browserIconAtPrompt(selectedBrowser).click()
                 }
@@ -301,11 +402,10 @@ class PlaygroundTestDriver(
 
                 blockUntilAuthorizationPageLoaded()
 
-                if(authorizeAction.exists()){
+                if (authorizeAction.exists()) {
                     authorizeAction.click()
-                }
+                } else if (!authorizeAction.exists()) {
                 // Buttons aren't showing the same way each time in the web page.
-                else if(!authorizeAction.exists()){
                     object : UiAutomatorText(
                         label = requireNotNull(testParameters.authorizationAction).text,
                         className = "android.widget.TextView",
@@ -314,16 +414,16 @@ class PlaygroundTestDriver(
                     Log.e("Stripe", "Fail authorization was a text view not a button this time")
                 }
 
-                when (testParameters.authorizationAction) {
-                    AuthorizeAction.Authorize -> {}
-                    AuthorizeAction.Cancel -> {
+                when (val authAction = testParameters.authorizationAction) {
+                    is AuthorizeAction.Authorize -> {}
+                    is AuthorizeAction.Cancel -> {
                         buyButton.apply {
                             waitProcessingComplete()
                             isEnabled()
                             isDisplayed()
                         }
                     }
-                    AuthorizeAction.Fail -> {
+                    is AuthorizeAction.Fail -> {
                         buyButton.apply {
                             waitProcessingComplete()
                             isEnabled()
@@ -331,11 +431,13 @@ class PlaygroundTestDriver(
                         }
 
                         // The text comes after the buy button animation is complete
-                        // TODO: This string gets localized.
-                        EspressoText(
-                            "We are unable to authenticate your payment method. Please " +
-                                "choose a different payment method and try again."
-                        ).isDisplayed()
+                        composeTestRule.waitUntil {
+                            runCatching {
+                                composeTestRule
+                                    .onNodeWithText(authAction.expectedError)
+                                    .assertIsDisplayed()
+                            }.isSuccess
+                        }
                     }
                     null -> {}
                 }
@@ -398,9 +500,13 @@ class PlaygroundTestDriver(
             PaymentSheetPlaygroundActivity.USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA,
             testParameters.snapshotReturningCustomer
         )
+        intent.putExtra(
+            PaymentSheetPlaygroundActivity.SUPPORTED_PAYMENT_METHODS_EXTRA,
+            testParameters.supportedPaymentMethods.toTypedArray()
+        )
+
         val scenario = ActivityScenario.launch<PaymentSheetPlaygroundActivity>(intent)
         scenario.onActivity { activity ->
-
             monitorCurrentActivity(activity.application)
 
             IdlingPolicies.setIdlingResourceTimeout(45, TimeUnit.SECONDS)
@@ -425,6 +531,8 @@ class PlaygroundTestDriver(
 
         launchPlayground.acquire()
         launchPlayground.release()
+
+        closeSoftKeyboard()
 
         setConfiguration(selectors)
     }

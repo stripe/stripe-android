@@ -21,7 +21,6 @@ import com.stripe.android.model.SourceTypeModel
 import com.stripe.android.model.Token
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -32,7 +31,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 internal class StripeEndToEndTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val defaultStripe = Stripe(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
@@ -198,7 +196,7 @@ internal class StripeEndToEndTest {
                 CardNumberFixtures.VISA_NO_SPACES to CardBrand.Visa,
                 CardNumberFixtures.MASTERCARD_NO_SPACES to CardBrand.MasterCard,
                 CardNumberFixtures.JCB_NO_SPACES to CardBrand.JCB,
-                CardNumberFixtures.UNIONPAY_NO_SPACES to CardBrand.UnionPay,
+                CardNumberFixtures.UNIONPAY_16_NO_SPACES to CardBrand.UnionPay,
                 CardNumberFixtures.DISCOVER_NO_SPACES to CardBrand.Discover,
                 CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to CardBrand.DinersClub
             ).all { (cardNumber, cardBrand) ->

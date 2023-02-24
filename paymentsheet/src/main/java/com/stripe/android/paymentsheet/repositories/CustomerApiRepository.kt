@@ -4,6 +4,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
@@ -29,6 +30,20 @@ internal class CustomerApiRepository @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String> = emptySet()
 ) : CustomerRepository {
+
+    override suspend fun retrieveCustomer(
+        customerId: String,
+        ephemeralKeySecret: String
+    ): Customer? {
+        return stripeRepository.retrieveCustomer(
+            customerId,
+            productUsageTokens,
+            ApiRequest.Options(
+                ephemeralKeySecret,
+                lazyPaymentConfig.get().stripeAccountId
+            )
+        )
+    }
 
     override suspend fun getPaymentMethods(
         customerConfig: PaymentSheet.CustomerConfiguration,

@@ -1,23 +1,25 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.app.Application
-import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
@@ -25,18 +27,22 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
+import com.stripe.android.ui.core.elements.NameConfig
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -56,15 +62,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val nameController: TextFieldController = SimpleTextFieldController
-        .createNameSectionController(args.formArgs.billingDetails?.name)
+    val nameController: TextFieldController = NameConfig
+        .createController(args.formArgs.billingDetails?.name)
 
     val name: StateFlow<String> = nameController.formFieldValue.map { formFieldEntry ->
         formFieldEntry.takeIf { it.isComplete }?.value ?: ""
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    val emailController: TextFieldController = SimpleTextFieldController
-        .createEmailSectionController(args.formArgs.billingDetails?.email)
+    val emailController: TextFieldController = EmailConfig
+        .createController(args.formArgs.billingDetails?.email)
 
     val email: StateFlow<String?> = emailController.formFieldValue.map { formFieldEntry ->
         formFieldEntry.takeIf { it.isComplete }?.value
@@ -72,7 +78,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private val _currentScreenState: MutableStateFlow<USBankAccountFormScreenState> =
         MutableStateFlow(
-            args.savedScreenState ?: USBankAccountFormScreenState.NameAndEmailCollection(
+            USBankAccountFormScreenState.NameAndEmailCollection(
                 name = name.value,
                 email = email.value,
                 primaryButtonText = application.getString(
@@ -99,7 +105,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     ) { validName, validEmail ->
         validName && validEmail
-    }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = false
+    )
 
     private val _processing = MutableStateFlow(false)
     val processing: StateFlow<Boolean>
@@ -239,29 +249,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     }
                 }
             }
-            else -> { /* no op */
-            }
-        }
-    }
-
-    fun generateSavedState(
-        screenState: USBankAccountFormScreenState
-    ): USBankAccountFormScreenState? {
-        return when (screenState) {
-            is USBankAccountFormScreenState.Finished -> {
-                USBankAccountFormScreenState.SavedAccount(
-                    name = name.value,
-                    email = email.value,
-                    bankName = screenState.bankName,
-                    last4 = screenState.last4,
-                    financialConnectionsSessionId = screenState.financialConnectionsSessionId,
-                    intentId = screenState.intentId,
-                    primaryButtonText = buildPrimaryButtonText(),
-                    mandateText = buildMandateText(),
-                    saveForFutureUsage = saveForFutureUse.value
-                )
-            }
-            else -> null
         }
     }
 
@@ -281,6 +268,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     fun onDestroy() {
+        // Save before we die
+        _currentScreenState.update {
+            it.updateInputs(
+                name.value,
+                email.value,
+                saveForFutureUse.value
+            )
+        }
+
         collectBankAccountLauncher = null
     }
 
@@ -340,7 +336,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                 ApiRequest.Options(
                                     apiKey = lazyPaymentConfig.get().publishableKey,
                                     stripeAccount = lazyPaymentConfig.get().stripeAccountId
-                                )
+                                ),
+                                expandFields = emptyList()
                             )
                         }
                         is SetupIntentClientSecret -> {
@@ -351,7 +348,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                 ApiRequest.Options(
                                     apiKey = lazyPaymentConfig.get().publishableKey,
                                     stripeAccount = lazyPaymentConfig.get().stripeAccountId
-                                )
+                                ),
+                                expandFields = emptyList()
                             )
                         }
                     }
@@ -389,18 +387,20 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         intentId = intentId
                     )
 
-                    if (args.completePayment) {
+                    if (args.isCompleteFlow) {
                         confirm(clientSecret, paymentSelection)
                     } else {
-                        _currentScreenState.update {
-                            USBankAccountFormScreenState.Finished(
-                                paymentSelection,
-                                linkAccountId,
-                                intentId,
-                                bankName,
-                                last4
-                            )
+                        _currentScreenState.update { screenState ->
+                            if (screenState is USBankAccountFormScreenState.SavedAccount) {
+                                screenState.copy(
+                                    bankName = bankName,
+                                    last4 = last4
+                                )
+                            } else {
+                                screenState
+                            }
                         }
+                        args.onUpdateSelectionAndFinish(paymentSelection)
                     }
                 }
             }
@@ -410,18 +410,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun confirm(clientSecret: ClientSecret, paymentSelection: PaymentSelection.New) {
         viewModelScope.launch {
             val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-                clientSecret
+                clientSecret,
+                args.shippingDetails?.toConfirmPaymentIntentShipping()
             )
             val confirmIntent = confirmParamsFactory.create(paymentSelection)
-            _currentScreenState.update {
-                USBankAccountFormScreenState.ConfirmIntent(confirmIntent)
-            }
+            args.onConfirmStripeIntent(confirmIntent)
         }
     }
 
     private fun buildPrimaryButtonText(): String? {
         return when {
-            args.completePayment -> {
+            args.isCompleteFlow -> {
                 if (args.clientSecret is PaymentIntentClientSecret) {
                     args.formArgs.amount?.buildPayButtonLabel(application.resources)
                 } else {
@@ -448,29 +447,23 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     internal class Factory(
-        private val applicationSupplier: () -> Application,
         private val argsSupplier: () -> Args,
-        owner: SavedStateRegistryOwner,
-        defaultArgs: Bundle? = null
-    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
-        Injectable<Factory.FallbackInitializeParam> {
-        internal data class FallbackInitializeParam(
-            val application: Application
-        )
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+
+        internal data class FallbackInitializeParam(val application: Application)
 
         @Inject
         lateinit var subComponentBuilderProvider:
             Provider<USBankAccountFormViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(
-            key: String,
-            modelClass: Class<T>,
-            savedStateHandle: SavedStateHandle
-        ): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val args = argsSupplier()
 
-            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
+            val application = extras.requireApplication()
+            val savedStateHandle = extras.createSavedStateHandle()
+
+            injectWithFallback(args.injectorKey, FallbackInitializeParam(application))
 
             return subComponentBuilderProvider.get()
                 .configuration(args)
@@ -478,12 +471,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 .build().viewModel as T
         }
 
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector? {
             DaggerUSBankAccountFormComponent
                 .builder()
                 .application(arg.application)
                 .injectorKey(DUMMY_INJECTOR_KEY)
                 .build().inject(this)
+            return null
         }
     }
 
@@ -491,16 +485,18 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
      * Arguments for launching [USBankAccountFormFragment]
      *
      * @param formArgs The form arguments supplied by the payment sheet
-     * @param completePayment Whether the payment should be completed, or the selected payment
+     * @param isCompleteFlow Whether the payment should be completed, or the selected payment
      *                          method should be returned as a result
      * @param clientSecret The client secret for the Stripe Intent being processed
      */
     data class Args(
-        val formArgs: FormFragmentArguments,
-        val completePayment: Boolean,
+        val formArgs: FormArguments,
+        val isCompleteFlow: Boolean,
         val clientSecret: ClientSecret?,
-        val savedScreenState: USBankAccountFormScreenState?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
+        val shippingDetails: AddressDetails?,
+        val onConfirmStripeIntent: (ConfirmStripeIntentParams) -> Unit,
+        val onUpdateSelectionAndFinish: (PaymentSelection) -> Unit,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     )
 

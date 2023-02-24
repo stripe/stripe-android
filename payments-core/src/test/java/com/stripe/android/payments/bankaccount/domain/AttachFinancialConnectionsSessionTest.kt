@@ -6,7 +6,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -16,7 +15,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import kotlin.test.assertTrue
 
-@ExperimentalCoroutinesApi
 class AttachFinancialConnectionsSessionTest {
 
     private val stripeRepository = mock<StripeRepository>()
@@ -49,7 +47,8 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId)
+                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId),
+                expandFields = listOf("payment_method")
             )
             assertThat((result)).isEqualTo(Result.success(paymentIntent))
         }
@@ -75,7 +74,8 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId)
+                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId),
+                expandFields = listOf("payment_method")
             )
             assertThat(result.exceptionOrNull()!!).isInstanceOf(InternalError::class.java)
         }
@@ -102,7 +102,8 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId)
+                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId),
+                expandFields = listOf("payment_method")
             )
             assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
         }
@@ -152,7 +153,8 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId)
+                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId),
+                expandFields = listOf("payment_method")
             )
             assertThat((result)).isEqualTo(Result.success(setupIntent))
         }
@@ -178,7 +180,8 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId)
+                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId),
+                expandFields = listOf("payment_method")
             )
             assertThat(setupIntent.exceptionOrNull()!!).isInstanceOf(InternalError::class.java)
         }
@@ -205,7 +208,8 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId)
+                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId),
+                expandFields = listOf("payment_method")
             )
             assertThat(setupIntent.exceptionOrNull()!!).isEqualTo(expectedException)
         }
@@ -240,6 +244,7 @@ class AttachFinancialConnectionsSessionTest {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         ).thenAnswer { paymentIntent() }
@@ -248,6 +253,7 @@ class AttachFinancialConnectionsSessionTest {
     private suspend fun givenAttachSetupIntentReturns(setupIntent: () -> SetupIntent?) {
         whenever(
             stripeRepository.attachFinancialConnectionsSessionToSetupIntent(
+                any(),
                 any(),
                 any(),
                 any(),

@@ -8,6 +8,11 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="com.stripe.financialconnections.example.metadata.backend_url"
+            android:value="${STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL}" />
+
         <activity
             android:name=".FinancialConnectionsLauncherActivity"
             android:exported="true">
@@ -24,6 +29,9 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name="com.stripe.android.financialconnections.example.FinancialConnectionsComposeExampleActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name="com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundActivity"
             android:theme="@style/AppTheme.NoActionBar" />
     </application>
 

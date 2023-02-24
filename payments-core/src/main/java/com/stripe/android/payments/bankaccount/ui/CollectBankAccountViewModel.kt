@@ -1,12 +1,11 @@
 package com.stripe.android.payments.bankaccount.ui
 
-import android.app.Application
-import android.os.Bundle
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -23,6 +22,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResu
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Cancelled
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Completed
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
+import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -80,7 +80,8 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     _viewEffect.emit(
                         OpenConnectionsFlow(
                             financialConnectionsSessionSecret = financialConnectionsSessionSecret,
-                            publishableKey = args.publishableKey
+                            publishableKey = args.publishableKey,
+                            stripeAccountId = args.stripeAccountId
                         )
                     )
                 }
@@ -168,21 +169,17 @@ internal class CollectBankAccountViewModel @Inject constructor(
     }
 
     class Factory(
-        private val applicationSupplier: () -> Application,
         private val argsSupplier: () -> CollectBankAccountContract.Args,
-        owner: SavedStateRegistryOwner,
-        defaultArgs: Bundle? = null
-    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
+    ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(
-            key: String,
-            modelClass: Class<T>,
-            savedStateHandle: SavedStateHandle
-        ): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            val application = extras.requireApplication()
+            val savedStateHandle = extras.createSavedStateHandle()
+
             return DaggerCollectBankAccountComponent.builder()
                 .savedStateHandle(savedStateHandle)
-                .application(applicationSupplier())
+                .application(application)
                 .viewEffect(MutableSharedFlow())
                 .configuration(argsSupplier()).build()
                 .viewModel as T

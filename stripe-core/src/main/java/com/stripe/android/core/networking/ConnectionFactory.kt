@@ -26,7 +26,11 @@ interface ConnectionFactory {
     @Throws(IOException::class, InvalidRequestException::class)
     fun createForFile(request: StripeRequest, outputFile: File): StripeConnection<File>
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object Default : ConnectionFactory {
+        @Volatile
+        var testConnectionCustomization: ((HttpURLConnection) -> Unit)? = null
+
         @Throws(IOException::class, InvalidRequestException::class)
         @JvmSynthetic
         override fun create(request: StripeRequest): StripeConnection<String> {
@@ -45,9 +49,11 @@ interface ConnectionFactory {
 
         private fun openConnectionAndApplyFields(request: StripeRequest): HttpURLConnection {
             return (URL(request.url).openConnection() as HttpURLConnection).apply {
+                testConnectionCustomization?.invoke(this)
+
                 connectTimeout = CONNECT_TIMEOUT
                 readTimeout = READ_TIMEOUT
-                useCaches = false
+                useCaches = request.shouldCache
                 requestMethod = request.method.code
 
                 request.headers.forEach { (key, value) ->

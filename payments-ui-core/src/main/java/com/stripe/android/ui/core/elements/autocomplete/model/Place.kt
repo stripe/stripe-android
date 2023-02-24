@@ -44,7 +44,7 @@ data class Place(
         SUBLOCALITY_LEVEL_1("sublocality_level_1"),
         SUBLOCALITY_LEVEL_2("sublocality_level_2"),
         SUBLOCALITY_LEVEL_3("sublocality_level_3"),
-        SUBLOCALITY_LEVEL_4("sublocality_level_4"),
+        SUBLOCALITY_LEVEL_4("sublocality_level_4")
     }
 }
 

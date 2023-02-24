@@ -17,6 +17,8 @@ import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePredic
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
+import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
+import com.stripe.android.uicore.elements.IsPlacesAvailable
 import kotlinx.coroutines.tasks.await
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -165,22 +167,5 @@ internal class UnsupportedPlacesClientProxy : PlacesClientProxy {
             throw exception
         }
         return Result.failure(exception)
-    }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface IsPlacesAvailable {
-    operator fun invoke(): Boolean
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DefaultIsPlacesAvailable : IsPlacesAvailable {
-    override fun invoke(): Boolean {
-        return try {
-            Class.forName("com.google.android.libraries.places.api.Places")
-            true
-        } catch (_: Exception) {
-            false
-        }
     }
 }

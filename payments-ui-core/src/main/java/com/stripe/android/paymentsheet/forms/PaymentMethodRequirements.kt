@@ -259,14 +259,8 @@ internal val KlarnaRequirement = PaymentMethodRequirements(
  */
 internal val PaypalRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
-
-    /**
-     * SetupIntents are not supported by this payment method. Currently, for paypal (and others see
-     * oof #5) customers are not able to set up saved payment methods for reuse. The API errors if
-     * confirming PI+SFU or SI with these methods.
-     */
-    siRequirements = null,
-    confirmPMFromCustomer = null
+    siRequirements = emptySet(),
+    confirmPMFromCustomer = true
 )
 
 /**
@@ -274,6 +268,18 @@ internal val PaypalRequirement = PaymentMethodRequirements(
  */
 internal val AffirmRequirement = PaymentMethodRequirements(
     piRequirements = setOf(ShippingAddress),
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)
+
+internal val RevolutPayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)
+
+internal val MobilePayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
     siRequirements = null,
     confirmPMFromCustomer = null
 )
@@ -294,4 +300,16 @@ internal val USBankAccountRequirement = PaymentMethodRequirements(
     piRequirements = setOf(Delayed),
     siRequirements = setOf(Delayed),
     confirmPMFromCustomer = true
+)
+
+internal val UpiRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)
+
+internal val CashAppPayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = false,
 )

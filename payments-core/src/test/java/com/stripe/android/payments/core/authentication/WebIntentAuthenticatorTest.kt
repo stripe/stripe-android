@@ -1,6 +1,8 @@
 package com.stripe.android.payments.core.authentication
 
 import android.content.Context
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -17,8 +19,8 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.view.AuthActivityStarterHost
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -27,13 +29,13 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class WebIntentAuthenticatorTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val paymentBrowserAuthStarterFactory =
@@ -45,7 +47,9 @@ class WebIntentAuthenticatorTest {
     )
 
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val host = mock<AuthActivityStarterHost>()
+    private val host = mock<AuthActivityStarterHost> {
+        on { lifecycleOwner } doReturn TestLifecycleOwner(initialState = Lifecycle.State.RESUMED)
+    }
 
     private val paymentBrowserWebStarter = mock<PaymentBrowserAuthStarter>()
 
@@ -56,14 +60,15 @@ class WebIntentAuthenticatorTest {
     private var threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
 
     private val authenticator = WebIntentAuthenticator(
-        paymentBrowserAuthStarterFactory,
-        analyticsRequestExecutor,
-        analyticsRequestFactory,
+        paymentBrowserAuthStarterFactory = paymentBrowserAuthStarterFactory,
+        analyticsRequestExecutor = analyticsRequestExecutor,
+        paymentAnalyticsRequestFactory = analyticsRequestFactory,
         enableLogging = false,
-        testDispatcher,
-        threeDs1IntentReturnUrlMap,
-        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-        false
+        uiContext = testDispatcher,
+        threeDs1IntentReturnUrlMap = threeDs1IntentReturnUrlMap,
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        isInstantApp = false,
+        defaultReturnUrl = DefaultReturnUrl("some_package_name"),
     )
 
     @Before
@@ -121,12 +126,24 @@ class WebIntentAuthenticatorTest {
     @Test
     fun authenticate_whenDisplayOxxoDetails() {
         verifyAuthenticate(
-            stripeIntent = PaymentIntentFixtures.OXXO_REQUIES_ACTION,
+            stripeIntent = PaymentIntentFixtures.OXXO_REQUIRES_ACTION,
             expectedUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb",
             expectedReturnUrl = null,
             expectedRequestCode = PAYMENT_REQUEST_CODE,
             expectedAnalyticsEvent = null,
             expectedShouldCancelIntentOnUserNavigation = false
+        )
+    }
+
+    @Test
+    fun authenticate_whenRedirectingToCashApp() {
+        verifyAuthenticate(
+            stripeIntent = PaymentIntentFixtures.CASH_APP_PAY_REQUIRES_ACTION,
+            expectedUrl = "https://pm-redirects.stripe.com/authorize/acct_1HvTI7Lu5o3P18Zp/pa_nonce_NC1mezV544wpYmFaXyJpnleeurKO3TZ",
+            expectedReturnUrl = "stripesdk://payment_return_url/some_package_name",
+            expectedRequestCode = PAYMENT_REQUEST_CODE,
+            expectedAnalyticsEvent = null,
+            expectedShouldCancelIntentOnUserNavigation = false,
         )
     }
 

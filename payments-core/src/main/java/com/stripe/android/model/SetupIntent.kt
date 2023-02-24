@@ -1,5 +1,7 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
+import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import kotlinx.parcelize.Parcelize
@@ -13,6 +15,7 @@ import java.util.regex.Pattern
  * - [Setup Intents Overview](https://stripe.com/docs/payments/setup-intents)
  * - [SetupIntents API Reference](https://stripe.com/docs/api/setup_intents)
  */
+@OptIn(StripeCashAppPayBetaApi::class)
 @Parcelize
 data class SetupIntent internal constructor(
     /**
@@ -29,6 +32,12 @@ data class SetupIntent internal constructor(
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     override val created: Long,
+
+    /**
+     * Country code of the user.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val countryCode: String?,
 
     /**
      * The client secret of this SetupIntent. Used for client-side retrieval using a
@@ -101,12 +110,28 @@ data class SetupIntent internal constructor(
 
     override val nextActionType: StripeIntent.NextActionType?
         get() = when (nextActionData) {
-            is StripeIntent.NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
-            is StripeIntent.NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
-            is StripeIntent.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
-            is StripeIntent.NextActionData.VerifyWithMicrodeposits ->
+            is StripeIntent.NextActionData.SdkData -> {
+                StripeIntent.NextActionType.UseStripeSdk
+            }
+            is StripeIntent.NextActionData.RedirectToUrl -> {
+                StripeIntent.NextActionType.RedirectToUrl
+            }
+            is StripeIntent.NextActionData.DisplayOxxoDetails -> {
+                StripeIntent.NextActionType.DisplayOxxoDetails
+            }
+            is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
-            else -> null
+            }
+            is StripeIntent.NextActionData.CashAppRedirect -> {
+                StripeIntent.NextActionType.CashAppRedirect
+            }
+            is StripeIntent.NextActionData.AlipayRedirect,
+            is StripeIntent.NextActionData.BlikAuthorize,
+            is StripeIntent.NextActionData.WeChatPayRedirect,
+            is StripeIntent.NextActionData.UpiAwaitNotification,
+            null -> {
+                null
+            }
         }
 
     override val isConfirmed: Boolean

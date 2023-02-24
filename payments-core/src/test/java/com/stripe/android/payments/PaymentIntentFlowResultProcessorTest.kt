@@ -12,7 +12,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -29,7 +28,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 internal class PaymentIntentFlowResultProcessorTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 

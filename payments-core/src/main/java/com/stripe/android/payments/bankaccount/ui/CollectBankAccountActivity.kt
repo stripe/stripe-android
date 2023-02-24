@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
@@ -23,15 +22,11 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
 
     private lateinit var financialConnectionsPaymentsProxy: FinancialConnectionsPaymentsProxy
 
-    internal var viewModelFactory: ViewModelProvider.Factory =
-        CollectBankAccountViewModel.Factory(
-            { application },
-            { requireNotNull(starterArgs) },
-            this,
-            intent?.extras
-        )
-
-    private val viewModel: CollectBankAccountViewModel by viewModels { viewModelFactory }
+    private val viewModel: CollectBankAccountViewModel by viewModels {
+        CollectBankAccountViewModel.Factory {
+            requireNotNull(starterArgs)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,8 +50,9 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
 
     private fun OpenConnectionsFlow.launch() {
         financialConnectionsPaymentsProxy.present(
-            financialConnectionsSessionSecret,
-            publishableKey
+            financialConnectionsSessionClientSecret = financialConnectionsSessionSecret,
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId
         )
     }
 

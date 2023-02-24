@@ -12,7 +12,6 @@ import com.stripe.android.link.utils.FakeAndroidKeyStore
 import com.stripe.android.link.utils.InjectableActivityScenario
 import com.stripe.android.link.utils.injectableActivityScenario
 import com.stripe.android.link.utils.viewModelFactoryFor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -28,15 +27,19 @@ import org.robolectric.RobolectricTestRunner
 
 // TODO:(brnunes-stripe) Enable these tests
 @Ignore("CircularProgressIndicator hangs tests. Need to comment it out.")
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class LinkActivityTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val args = LinkActivityContract.Args(
-        StripeIntentFixtures.PI_SUCCEEDED,
-        "Example, Inc.",
-        "email@stripe.com"
+    private val config = LinkPaymentLauncher.Configuration(
+        stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
+        merchantName = "Example, Inc.",
+        customerName = "Name",
+        customerEmail = "email@stripe.com",
+        customerPhone = null,
+        customerBillingCountryCode = null,
+        shippingValues = null,
     )
+    private val args = LinkActivityContract.Args(config)
     private val intent = LinkActivityContract().createIntent(context, args)
 
     private val linkAccountManager = mock<LinkAccountManager>().apply {

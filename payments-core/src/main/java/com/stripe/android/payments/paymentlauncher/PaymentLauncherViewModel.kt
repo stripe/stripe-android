@@ -4,15 +4,17 @@ import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.injection.injectWithFallback
@@ -34,6 +36,7 @@ import com.stripe.android.payments.core.injection.DaggerPaymentLauncherViewModel
 import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.payments.core.injection.IS_PAYMENT_INTENT
 import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
+import com.stripe.android.utils.requireApplication
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
 import kotlinx.coroutines.launch
@@ -272,32 +275,30 @@ internal class PaymentLauncherViewModel @Inject constructor(
 
     internal class Factory(
         private val argsSupplier: () -> PaymentLauncherContract.Args,
-        private val applicationSupplier: () -> Application,
-        owner: SavedStateRegistryOwner
-    ) : AbstractSavedStateViewModelFactory(owner, null),
-        Injectable<Factory.FallbackInitializeParam> {
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+
         internal data class FallbackInitializeParam(
             val application: Application,
             val enableLogging: Boolean,
             val publishableKey: String,
             val stripeAccountId: String?,
-            val productUsage: Set<String>
+            val productUsage: Set<String>,
         )
 
         @Inject
         lateinit var subComponentBuilderProvider: Provider<PaymentLauncherViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(
-            key: String,
-            modelClass: Class<T>,
-            handle: SavedStateHandle
-        ): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val arg = argsSupplier()
+
+            val application = extras.requireApplication()
+            val savedStateHandle = extras.createSavedStateHandle()
+
             injectWithFallback(
-                arg.injectorKey,
-                FallbackInitializeParam(
-                    applicationSupplier(),
+                injectorKey = arg.injectorKey,
+                fallbackInitializeParam = FallbackInitializeParam(
+                    application,
                     arg.enableLogging,
                     arg.publishableKey,
                     arg.stripeAccountId,
@@ -305,20 +306,20 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 )
             )
 
-            return subComponentBuilderProvider.get()
-                .isPaymentIntent(
-                    when (arg) {
-                        is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
-                            when (arg.confirmStripeIntentParams) {
-                                is ConfirmPaymentIntentParams -> true
-                                is ConfirmSetupIntentParams -> false
-                            }
-                        }
-                        is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> true
-                        is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> false
+            val isPaymentIntent = when (arg) {
+                is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
+                    when (arg.confirmStripeIntentParams) {
+                        is ConfirmPaymentIntentParams -> true
+                        is ConfirmSetupIntentParams -> false
                     }
-                )
-                .savedStateHandle(handle)
+                }
+                is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> true
+                is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> false
+            }
+
+            return subComponentBuilderProvider.get()
+                .isPaymentIntent(isPaymentIntent)
+                .savedStateHandle(savedStateHandle)
                 .build().viewModel as T
         }
 
@@ -326,7 +327,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
          * Fallback call to initialize dependencies when injection is not available, this might happen
          * when app process is killed by system and [WeakMapInjectorRegistry] is cleared.
          */
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector? {
             DaggerPaymentLauncherViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .enableLogging(arg.enableLogging)
@@ -334,6 +335,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 .stripeAccountIdProvider { arg.stripeAccountId }
                 .productUsage(arg.productUsage)
                 .build().inject(this)
+            return null
         }
     }
 

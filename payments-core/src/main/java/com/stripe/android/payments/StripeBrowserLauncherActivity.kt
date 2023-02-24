@@ -24,10 +24,7 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
  */
 internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     private val viewModel: StripeBrowserLauncherViewModel by viewModels {
-        StripeBrowserLauncherViewModel.Factory(
-            application,
-            this
-        )
+        StripeBrowserLauncherViewModel.Factory()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

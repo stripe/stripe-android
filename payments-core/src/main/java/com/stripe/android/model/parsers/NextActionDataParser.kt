@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import android.net.Uri
+import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
@@ -24,7 +25,9 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.BlikAuthorize -> BlikAuthorizeParser()
             StripeIntent.NextActionType.WeChatPayRedirect -> WeChatPayRedirectParser()
             StripeIntent.NextActionType.VerifyWithMicrodeposits -> VerifyWithMicrodepositsParser()
-            else -> return null
+            StripeIntent.NextActionType.UpiAwaitNotification -> UpiAwaitNotificationParser()
+            StripeIntent.NextActionType.CashAppRedirect -> CashAppRedirectParser()
+            null -> return null
         }
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
     }
@@ -211,6 +214,24 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             private const val ARRIVAL_DATE = "arrival_date"
             private const val HOSTED_VERIFICATION_URL = "hosted_verification_url"
             private const val MICRODEPOSIT_TYPE = "microdeposit_type"
+        }
+    }
+
+    internal class UpiAwaitNotificationParser :
+        ModelJsonParser<StripeIntent.NextActionData.UpiAwaitNotification> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.UpiAwaitNotification {
+            return StripeIntent.NextActionData.UpiAwaitNotification
+        }
+    }
+
+    @OptIn(StripeCashAppPayBetaApi::class)
+    internal class CashAppRedirectParser :
+        ModelJsonParser<StripeIntent.NextActionData.CashAppRedirect> {
+
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.CashAppRedirect {
+            return StripeIntent.NextActionData.CashAppRedirect(
+                mobileAuthUrl = json.optString("mobile_auth_url"),
+            )
         }
     }
 

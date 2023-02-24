@@ -12,6 +12,7 @@ import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -33,11 +34,7 @@ import org.json.JSONObject
  */
 internal class GooglePayLauncherActivity : AppCompatActivity() {
     private val viewModel: GooglePayLauncherViewModel by viewModels {
-        GooglePayLauncherViewModel.Factory(
-            application,
-            args,
-            this
-        )
+        GooglePayLauncherViewModel.Factory(args)
     }
 
     private lateinit var args: GooglePayLauncherContract.Args
@@ -46,7 +43,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        disableAnimations()
+        setFadeAnimations()
 
         args = runCatching {
             requireNotNull(GooglePayLauncherContract.Args.fromIntent(intent)) {
@@ -89,7 +86,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        disableAnimations()
+        setFadeAnimations()
     }
 
     private fun payWithGoogle(task: Task<PaymentData>) {
@@ -179,9 +176,8 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun disableAnimations() {
-        // this is a transparent Activity so we want to disable animations
-        overridePendingTransition(0, 0)
+    private fun setFadeAnimations() {
+        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 
     private companion object {

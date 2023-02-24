@@ -2,16 +2,18 @@ package com.stripe.android
 
 import android.app.Application
 import androidx.annotation.IntRange
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.utils.requireApplication
 import com.stripe.android.view.PaymentMethodsActivityStarter
 
 internal class PaymentSessionViewModel(
@@ -100,16 +102,23 @@ internal class PaymentSessionViewModel(
         onComplete: () -> Unit
     ) {
         if (isInitialFetch) {
-            fetchCustomerPaymentMethod(
-                paymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerId)
-            ) { paymentMethod ->
-                paymentMethod?.let {
+            paymentSessionPrefs.getPaymentMethod(customerId)?.let {
+                if (it is PaymentSessionPrefs.SelectedPaymentMethod.GooglePay) {
                     paymentSessionData = paymentSessionData.copy(
-                        paymentMethod = it
+                        useGooglePay = true
                     )
+                    onComplete()
+                } else {
+                    fetchCustomerPaymentMethod(it.stringValue) { paymentMethod ->
+                        paymentMethod?.let {
+                            paymentSessionData = paymentSessionData.copy(
+                                paymentMethod = it
+                            )
+                        }
+                        onComplete()
+                    }
                 }
-                onComplete()
-            }
+            } ?: onComplete()
         } else {
             onComplete()
         }
@@ -150,16 +159,19 @@ internal class PaymentSessionViewModel(
     }
 
     @JvmSynthetic
-    fun getSelectedPaymentMethodId(userSelectedPaymentMethodId: String? = null): String? {
+    fun getSelectedPaymentMethod(userSelectedPaymentMethodId: String? = null):
+        PaymentSessionPrefs.SelectedPaymentMethod? {
         return if (paymentSessionData.useGooglePay) {
             null
         } else {
-            userSelectedPaymentMethodId
+            PaymentSessionPrefs.SelectedPaymentMethod.fromString(userSelectedPaymentMethodId)
                 ?: if (paymentSessionData.paymentMethod != null) {
-                    paymentSessionData.paymentMethod?.id
+                    PaymentSessionPrefs.SelectedPaymentMethod.fromString(
+                        paymentSessionData.paymentMethod?.id
+                    )
                 } else {
                     customerSession.cachedCustomer?.id?.let { customerId ->
-                        paymentSessionPrefs.getPaymentMethodId(customerId)
+                        paymentSessionPrefs.getPaymentMethod(customerId)
                     }
                 }
         }
@@ -178,7 +190,19 @@ internal class PaymentSessionViewModel(
         useGooglePay: Boolean
     ) {
         customerSession.cachedCustomer?.id?.let { customerId ->
-            paymentSessionPrefs.savePaymentMethodId(customerId, paymentMethod?.id)
+            val selectedPaymentMethod = if (useGooglePay) {
+                PaymentSessionPrefs.SelectedPaymentMethod.GooglePay
+            } else {
+                paymentMethod?.id?.let {
+                    PaymentSessionPrefs.SelectedPaymentMethod.Saved(
+                        it
+                    )
+                }
+            }
+            paymentSessionPrefs.savePaymentMethod(
+                customerId,
+                selectedPaymentMethod
+            )
         }
         paymentSessionData = paymentSessionData.copy(
             paymentMethod = paymentMethod,
@@ -212,19 +236,15 @@ internal class PaymentSessionViewModel(
     }
 
     internal class Factory(
-        private val application: Application,
-        owner: SavedStateRegistryOwner,
         private val paymentSessionData: PaymentSessionData,
         private val customerSession: CustomerSession
-    ) : AbstractSavedStateViewModelFactory(owner, null) {
-        override fun <T : ViewModel?> create(
-            key: String,
-            modelClass: Class<T>,
-            handle: SavedStateHandle
-        ): T {
+    ) : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return PaymentSessionViewModel(
-                application,
-                handle,
+                extras.requireApplication(),
+                extras.createSavedStateHandle(),
                 paymentSessionData,
                 customerSession
             ) as T

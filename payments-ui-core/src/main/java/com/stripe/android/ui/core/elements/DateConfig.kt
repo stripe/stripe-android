@@ -1,17 +1,22 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid
+import com.stripe.android.uicore.elements.TextFieldConfig
+import com.stripe.android.uicore.elements.TextFieldIcon
+import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.elements.TextFieldStateConstants.Error
+import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.Calendar
 
-internal class DateConfig : TextFieldConfig {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DateConfig : TextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel = "date"
 
@@ -41,7 +46,7 @@ internal class DateConfig : TextFieldConfig {
                     Error.Invalid(R.string.incomplete_expiry_date)
                 }
                 else -> {
-                    return determineTextFieldState(
+                    determineTextFieldState(
                         requireNotNull(newString.take(2).toIntOrNull()),
                         requireNotNull(newString.takeLast(2).toIntOrNull()),
                         // Calendar.getInstance().get(Calendar.MONTH) is 0-based, so add 1

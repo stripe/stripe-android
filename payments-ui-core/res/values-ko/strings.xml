@@ -1,75 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">주소란 2</string>
-  <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">에미리트</string>
-  <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">교외 또는 도시</string>
-  <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">교구</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">세덱스</string>
-  <!-- Label of an address field -->
-  <string name="address_label_department">행정구/현</string>
-  <!-- Label for the district field on an address form -->
-  <string name="address_label_district">지구</string>
-  <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">지역</string>
-  <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">우편번호(Eircode)</string>
-  <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">타운랜드</string>
-  <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">우편번호(PIN)</string>
-  <!-- Used to describe part of an address -->
-  <string name="address_label_island">섬</string>
-  <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">도/현</string>
-  <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">도시</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">지역</string>
-  <!-- Label of an address field -->
-  <string name="address_label_oblast">주</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">주둔지 또는 마을</string>
-  <!-- Label of an address field -->
-  <string name="address_label_suburb">교외</string>
-  <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">마을 또는 면/리</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[<img/>로 <installment_price/>의 <num_installments/>회 무이자 결제로 대금을 지급하십시오.]]></string>
+  <!-- Text for back button -->
+  <string name="back">뒤로</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">청구 주소</string>
-  <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">이 필드는 공란으로 비워둘 수 없습니다.</string>
-  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">변경</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">이메일</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">이메일이 잘못되었습니다.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">EPS 은행</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="form_label_optional">%s(선택 사항)</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="iban_incomplete">입력한 IBAN이 불완전합니다.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">입력한 IBAN이 잘못되었습니다.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="iban_invalid_country">입력한 IBAN이 잘못되었습니다. \"%s\"은(는) 지원되는 국가 코드가 아닙니다.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">IBAN은 두 글자의 국가 코드로 시작해야 합니다.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL 은행</string>
+  <string name="invalid_email_address">잘못된 이메일 주소: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">지금 구매하거나 Klarna로 나중에 결제</string>
   <!-- Klarna pay later copy -->
   <string name="klarna_pay_later">Klarna로 나중에 결제</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="p24_bank">Przelewy24 은행</string>
+  <!-- PayPal mandate text -->
+  <string name="paypal_mandate">PayPal 결제를 확인하면 %s에서 해당 회사의 약관에 따라 향후 결제에 대해 PayPal 계정에 대금을 청구하도록 허용하는 것입니다.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">향후 %s 결제에 사용하도록 저장</string>
   <!-- Button title to open camera to scan credit/debit card -->
@@ -80,6 +35,8 @@
   <string name="stripe_continue_button_label">계속</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">%s 결제</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">은행</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">카드 정보</string>
   <!-- Payment Method type brand name. -->

@@ -8,6 +8,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.HEADER_X_STRIPE_USER_AGENT
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
@@ -290,7 +291,12 @@ class PaymentAnalyticsRequestFactoryTest {
             .isEqualTo(
                 mapOf(
                     "User-Agent" to "Stripe/v1 AndroidBindings/$sdkVersion",
-                    "Accept-Charset" to "UTF-8"
+                    "Accept-Charset" to "UTF-8",
+                    HEADER_X_STRIPE_USER_AGENT to "{\"lang\":\"kotlin\"," +
+                        "\"bindings_version\":\"${StripeSdkVersion.VERSION_NAME}\"," +
+                        "\"os_version\":\"${Build.VERSION.SDK_INT}\"," +
+                        "\"type\":\"robolectric_robolectric_robolectric\"," +
+                        "\"model\":\"robolectric\"}"
                 )
             )
         assertThat(analyticsRequest.url)

@@ -4,17 +4,21 @@ import android.content.Context
 import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.identity.IdentityVerificationSheetContract
+import com.stripe.android.identity.injection.IdentityVerificationScope
 import com.stripe.android.identity.networking.models.DocumentUploadParam
+import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import javax.inject.Inject
 
 /**
  * Factory for creating [AnalyticsRequestV2] for Identity.
  */
+@IdentityVerificationScope
 internal class IdentityAnalyticsRequestFactory @Inject constructor(
     context: Context,
     private val args: IdentityVerificationSheetContract.Args
 ) {
+    var verificationPage: VerificationPage? = null
     private val requestFactory = AnalyticsRequestV2Factory(
         context = context,
         clientId = CLIENT_ID,
@@ -24,12 +28,21 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
     private fun additionalParamWithEventMetadata(vararg pairs: Pair<String, *>) =
         mapOf(
             PARAM_VERIFICATION_SESSION to args.verificationSessionId,
-            PARAM_EVENT_META_DATA to mapOf(*pairs)
+            PARAM_EVENT_META_DATA to
+                mutableMapOf(
+                    *pairs
+                ).also {
+                    verificationPage?.let {
+                        PARAM_LIVE_MODE to it.livemode
+                    }
+                }
         )
 
     fun sheetPresented() = requestFactory.createRequest(
         EVENT_SHEET_PRESENTED,
-        additionalParams = additionalParamWithEventMetadata()
+        mapOf(
+            PARAM_VERIFICATION_SESSION to args.verificationSessionId
+        )
     )
 
     fun sheetClosed(sessionResult: String) = requestFactory.createRequest(
@@ -311,6 +324,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_ID = "id"
         const val PARAM_FILE_NAME = "file_name"
         const val PARAM_FILE_SIZE = "file_size"
+        const val PARAM_LIVE_MODE = "live_mode"
 
         const val SCREEN_NAME_CONSENT = "consent"
         const val SCREEN_NAME_DOC_SELECT = "document_select"
@@ -323,6 +337,9 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val SCREEN_NAME_SELFIE = "selfie"
         const val SCREEN_NAME_CONFIRMATION = "confirmation"
         const val SCREEN_NAME_ERROR = "error"
+        const val SCREEN_NAME_INDIVIDUAL = "individual"
+        const val SCREEN_NAME_INDIVIDUAL_WELCOME = "individual_welcome"
+        const val SCREEN_NAME_COUNTRY_NOT_LISTED = "country_not_listed"
         const val TYPE_SELFIE = "selfie"
         const val TYPE_DOCUMENT = "document"
     }

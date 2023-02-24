@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <!-- Content description for plus icon -->
+    <string name="description_plus">plus icon</string>
+    <!-- Content description for stripe logo -->
+    <string name="description_stripe_logo">stripe logo</string>
+    <!-- Content description for merchant logo -->
+    <string name="description_merchant_logo">merchant logo</string>
+    <!-- Content description for the icon for estimated time to complete verification -->
+    <string name="description_time_estimate">estimated time to complete verification icon</string>
+    <!-- Content description for the icon for privacy policy -->
+    <string name="description_privacy_policy">privacy policy icon</string>
+    <!-- Content description for exclamation icon -->
+    <string name="description_exclamation">exclamation icon</string>
+    <!-- Content description for close button -->
+    <string name="description_close">close verification page</string>
+    <!-- Content description for back button -->
+    <string name="description_go_back">go back to the previous screen</string>
+    <string name="country_of_id_number">Country of ID Number</string>
+    <string name="last_4_of_ssn">Last 4 of Social Security Number</string>
+    <string name="individual_cpf">Individual CPF</string>
+    <string name="nric_or_fin">NRIC or FIN</string>
+    <string name="dob">Date of Birth</string>
+    <string name="first_name">First</string>
+    <string name="last_name">Last</string>
+    <string name="name">Name</string>
+    <string name="invalid_dob_error">Date of birth does not look valid</string>
+    <string name="incomplete_id_number">The ID number you entered is incomplete</string>
+</resources>

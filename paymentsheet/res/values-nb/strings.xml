@@ -12,8 +12,8 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Legg til</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Legg til betalingsinformasjon</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Tilbake</string>
+  <!-- Title shown above a carousel containing available payment methods -->
+  <string name="stripe_paymentsheet_choose_payment_method">Velg en betalingsmetode</string>
   <string name="stripe_paymentsheet_close">Lukk</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe vil sette inn et innskudd på USD 0,01 på kontoen din innen 1–2 virkedager. Deretter vil du få en e-post med instruksjoner for å fullføre betalingen til %s.</string>
@@ -23,6 +23,8 @@
   <string name="stripe_paymentsheet_or_pay_with_card">Eller betal med et kort</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Betal</string>
+  <!-- Title shown above a section containing various payment options -->
+  <string name="stripe_paymentsheet_pay_using">Betal ved å bruke</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Behandler …</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->

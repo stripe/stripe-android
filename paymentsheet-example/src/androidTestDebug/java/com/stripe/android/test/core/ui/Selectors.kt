@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -29,6 +30,7 @@ import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
@@ -43,8 +45,8 @@ class Selectors(
     val composeTestRule: ComposeTestRule,
     testParameters: TestParameters
 ) {
-    val testMode = EspressoIdButton(R.id.testmode)
-    val continueButton = EspressoIdButton(R.id.continue_button)
+    val reset = EspressoIdButton(R.id.reset_button)
+    val continueButton = BuyButton(composeTestRule)
     val complete = EspressoLabelIdButton(R.string.checkout_complete)
     val reload = EspressoLabelIdButton(R.string.reload_paymentsheet)
     val multiStepSelect = EspressoIdButton(R.id.payment_method)
@@ -56,6 +58,12 @@ class Selectors(
         Customer.New -> EspressoLabelIdButton(R.string.customer_new)
         Customer.Returning -> EspressoLabelIdButton(R.string.customer_returning)
     }
+
+    val linkState = when (testParameters.linkState) {
+        LinkState.Off -> EspressoIdButton(R.id.link_off_button)
+        LinkState.On -> EspressoIdButton(R.id.link_on_button)
+    }
+
     val googlePayState = when (testParameters.googlePayState) {
         GooglePayState.Off -> EspressoIdButton(R.id.google_pay_off_button)
         GooglePayState.On -> EspressoIdButton(R.id.google_pay_on_button)
@@ -74,6 +82,7 @@ class Selectors(
     val shipping = when (testParameters.shipping) {
         Shipping.Off -> EspressoIdButton(R.id.shipping_off_button)
         Shipping.On -> EspressoIdButton(R.id.shipping_on_button)
+        Shipping.OnWithDefaults -> EspressoIdButton(R.id.shipping_on_with_defaults_button)
     }
 
     val delayed = when (testParameters.delayed) {
@@ -96,9 +105,9 @@ class Selectors(
         "-" +
         testParameters.intentType.name
 
-    val buyButton = BuyButton(device)
+    val buyButton = BuyButton(composeTestRule)
 
-    val editButton = EditButton(device)
+    val addPaymentMethodButton = AddPaymentMethodButton(device)
 
     val selectBrowserPrompt = UiAutomatorText("Verify your payment", device = device)
 
@@ -173,7 +182,7 @@ class Selectors(
         .getInstalledApplications(PackageManager.GET_META_DATA)
 
     val authorizeAction = when (testParameters.authorizationAction) {
-        AuthorizeAction.Authorize -> {
+        is AuthorizeAction.Authorize -> {
             object : UiAutomatorText(
                 label = testParameters.authorizationAction.text,
                 className = "android.widget.Button",
@@ -192,7 +201,7 @@ class Selectors(
                 }
             }
         }
-        AuthorizeAction.Cancel -> {
+        is AuthorizeAction.Cancel -> {
             object : UiAutomatorText(
                 label = testParameters.authorizationAction.text,
                 className = "android.widget.Button",
@@ -203,7 +212,7 @@ class Selectors(
                 }
             }
         }
-        AuthorizeAction.Fail -> {
+        is AuthorizeAction.Fail -> {
             object : UiAutomatorText(
                 label = testParameters.authorizationAction.text,
                 className = "android.widget.Button",
@@ -236,6 +245,13 @@ class Selectors(
     fun getState() = composeTestRule.onNodeWithText(
         getResourceString(R.string.address_label_state)
     )
+
+    fun selectState(value: String) {
+        composeTestRule.onNodeWithText(getResourceString(R.string.address_label_state))
+            .performClick()
+        composeTestRule.onNodeWithText(value)
+            .performClick()
+    }
 
     fun getZip() = composeTestRule.onNodeWithText(
         getResourceString(R.string.address_label_zip_code)
@@ -283,7 +299,10 @@ class Selectors(
         EspressoText(
             CountryUtils.getDisplayCountry(CountryCode(merchantCountryCode), Locale.getDefault())
         ).click()
+    }
 
+    fun enterCustomPrimaryButtonLabel(text: String) {
+        EspressoEditText(id = R.id.custom_label_text_field).enter(text)
     }
 
     companion object {

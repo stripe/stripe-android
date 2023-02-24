@@ -28,7 +28,7 @@ dependencies {
     implementation 'com.google.android.instantapps:instantapps:1.1.0'
     // For instructions on replacing the BouncyCastle dependency used by the 3DS2 SDK, see
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
-    implementation "com.stripe:stripe-3ds2-android:6.1.5"
+    implementation "com.stripe:stripe-3ds2-android:$stripe3ds2Version"
 
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
@@ -49,13 +49,14 @@ dependencies {
     testImplementation "com.google.truth:truth:$truthVersion"
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
+    testImplementation "androidx.lifecycle:lifecycle-runtime-testing:$androidxLifecycleVersion"
     testImplementation testLibs.turbine
 
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
 
-    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
+    androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
@@ -82,8 +83,10 @@ android {
                 maxHeapSize = "1024m"
             }
         }
-    }
-    productFlavors {
+
+        kotlinOptions {
+            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+        }
     }
 
     buildFeatures {
@@ -92,7 +95,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeVersion"
+        kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
     }
 }
 

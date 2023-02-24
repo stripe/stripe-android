@@ -17,6 +17,7 @@ sealed class Request {
     )
 
     data class CreateParams(
-        @field:Json(name = "payment_method_types") val paymentMethodTypes: List<String>
+        @field:Json(name = "payment_method_types") val paymentMethodTypes: List<String>,
+        @field:Json(name = "customer") val customer: String? = null,
     )
 }

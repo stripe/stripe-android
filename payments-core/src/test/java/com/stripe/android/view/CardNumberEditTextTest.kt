@@ -16,9 +16,9 @@ import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.JCB_NO_SPACES
 import com.stripe.android.CardNumberFixtures.JCB_WITH_SPACES
-import com.stripe.android.CardNumberFixtures.UNIONPAY_BIN
-import com.stripe.android.CardNumberFixtures.UNIONPAY_NO_SPACES
-import com.stripe.android.CardNumberFixtures.UNIONPAY_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.UNIONPAY_16_BIN
+import com.stripe.android.CardNumberFixtures.UNIONPAY_16_NO_SPACES
+import com.stripe.android.CardNumberFixtures.UNIONPAY_16_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_BIN
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
@@ -38,7 +38,6 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -61,7 +60,6 @@ import kotlin.test.assertNull
 /**
  * Test class for [CardNumberEditText].
  */
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 @LooperMode(LooperMode.Mode.PAUSED)
 internal class CardNumberEditTextTest {
@@ -341,11 +339,11 @@ internal class CardNumberEditTextTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory
         )
 
-        cardNumberEditText.setText(UNIONPAY_NO_SPACES)
+        cardNumberEditText.setText(UNIONPAY_16_NO_SPACES)
         idleLooper()
 
         assertThat(cardNumberEditText.fieldText)
-            .isEqualTo(UNIONPAY_WITH_SPACES)
+            .isEqualTo(UNIONPAY_16_WITH_SPACES)
         assertThat(cardNumberEditText.cardBrand)
             .isEqualTo(CardBrand.Unknown)
     }
@@ -432,7 +430,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun finishTypingCommonLengthCardNumber_whenInvalidCard_setsErrorValue() {
-        updateCardNumberAndIdle(withoutLastCharacter(UNIONPAY_NO_SPACES))
+        updateCardNumberAndIdle(withoutLastCharacter(UNIONPAY_16_NO_SPACES))
 
         // This makes the number officially invalid
         cardNumberEditText.append("3")
@@ -573,7 +571,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun enterBrandBin_thenDelete_callsUpdateWithUnknown() {
-        updateCardNumberAndIdle(UNIONPAY_BIN)
+        updateCardNumberAndIdle(UNIONPAY_16_BIN)
         assertEquals(CardBrand.UnionPay, lastBrandChangeCallbackInvocation)
 
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
@@ -704,7 +702,7 @@ internal class CardNumberEditTextTest {
                         it.addView(cardNumberEditText)
                     }
 
-                    cardNumberEditText.setText(UNIONPAY_NO_SPACES)
+                    cardNumberEditText.setText(UNIONPAY_16_NO_SPACES)
                     assertThat(cardNumberEditText.accountRangeService.accountRangeRepositoryJob)
                         .isNotNull()
 
@@ -833,7 +831,7 @@ internal class CardNumberEditTextTest {
         )
 
         // 620000 - valid BIN, call repo
-        cardNumberEditText.setText(UNIONPAY_BIN)
+        cardNumberEditText.setText(UNIONPAY_16_BIN)
         idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(1)
@@ -891,7 +889,7 @@ internal class CardNumberEditTextTest {
             },
             paymentAnalyticsRequestFactory = analyticsRequestFactory
         )
-        cardNumberEditText.setText(UNIONPAY_NO_SPACES)
+        cardNumberEditText.setText(UNIONPAY_16_NO_SPACES)
         idleLooper()
         assertThat(analyticsRequests)
             .hasSize(1)

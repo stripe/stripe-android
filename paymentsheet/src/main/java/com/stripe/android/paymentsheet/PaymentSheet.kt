@@ -6,16 +6,20 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.getRawValueFromDimenResource
+import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -63,7 +67,10 @@ class PaymentSheet internal constructor(
         paymentIntentClientSecret: String,
         configuration: Configuration? = null
     ) {
-        paymentSheetLauncher.presentWithPaymentIntent(paymentIntentClientSecret, configuration)
+        paymentSheetLauncher.present(
+            mode = InitializationMode.PaymentIntent(paymentIntentClientSecret),
+            configuration = configuration,
+        )
     }
 
     /**
@@ -79,7 +86,53 @@ class PaymentSheet internal constructor(
         setupIntentClientSecret: String,
         configuration: Configuration? = null
     ) {
-        paymentSheetLauncher.presentWithSetupIntent(setupIntentClientSecret, configuration)
+        paymentSheetLauncher.present(
+            mode = InitializationMode.SetupIntent(setupIntentClientSecret),
+            configuration = configuration,
+        )
+    }
+
+    /**
+     * Present the payment sheet with an [InitializationMode].
+     *
+     * If the [InitializationMode] is [InitializationMode.PaymentIntent] or
+     * [InitializationMode.SetupIntent] and the underlying intent is already confirmed,
+     * [PaymentSheetResultCallback] will be invoked with [PaymentSheetResult.Completed].
+     *
+     * @param mode The [InitializationMode] to use.
+     * @param configuration An optional [PaymentSheet] configuration.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @JvmOverloads
+    fun present(
+        mode: InitializationMode,
+        configuration: Configuration? = null,
+    ) {
+        paymentSheetLauncher.present(mode, configuration)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed class InitializationMode : Parcelable {
+
+        internal abstract fun validate()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        class PaymentIntent(val clientSecret: String) : InitializationMode() {
+
+            override fun validate() {
+                PaymentIntentClientSecret(clientSecret).validate()
+            }
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        class SetupIntent(val clientSecret: String) : InitializationMode() {
+
+            override fun validate() {
+                SetupIntentClientSecret(clientSecret).validate()
+            }
+        }
     }
 
     /** Configuration for [PaymentSheet] **/
@@ -126,6 +179,14 @@ class PaymentSheet internal constructor(
         val defaultBillingDetails: BillingDetails? = null,
 
         /**
+         * The shipping information for the customer.
+         * If set, PaymentSheet will pre-populate the form fields with the values provided.
+         * This is used to display a "Billing address is same as shipping" checkbox if `defaultBillingDetails` is not provided.
+         * If `name` and `line1` are populated, it's also [attached to the PaymentIntent](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping) during payment.
+         */
+        val shippingDetails: AddressDetails? = null,
+
+        /**
          * If true, allows payment methods that do not move money at the end of the checkout.
          * Defaults to false.
          *
@@ -140,9 +201,29 @@ class PaymentSheet internal constructor(
         val allowsDelayedPaymentMethods: Boolean = false,
 
         /**
+         * If `true`, allows payment methods that require a shipping address, like Afterpay and
+         * Affirm. Defaults to `false`.
+         *
+         * Set this to `true` if you collect shipping addresses via [shippingDetails] or
+         * [FlowController.shippingDetails].
+         *
+         * **Note**: PaymentSheet considers this property `true` if `shipping` details are present
+         * on the PaymentIntent when PaymentSheet loads.
+         */
+        val allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
+
+        /**
          * Describes the appearance of Payment Sheet.
          */
-        val appearance: Appearance = Appearance()
+        val appearance: Appearance = Appearance(),
+
+        /**
+         * The label to use for the primary button.
+         *
+         * If not set, Payment Sheet will display suitable default labels for payment and setup
+         * intents.
+         */
+        val primaryButtonLabel: String? = null,
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
@@ -154,7 +235,9 @@ class PaymentSheet internal constructor(
             private var googlePay: GooglePayConfiguration? = null
             private var primaryButtonColor: ColorStateList? = null
             private var defaultBillingDetails: BillingDetails? = null
+            private var shippingDetails: AddressDetails? = null
             private var allowsDelayedPaymentMethods: Boolean = false
+            private var allowsPaymentMethodsRequiringShippingAddress: Boolean = false
             private var appearance: Appearance = Appearance()
 
             fun merchantDisplayName(merchantDisplayName: String) =
@@ -179,8 +262,18 @@ class PaymentSheet internal constructor(
             fun defaultBillingDetails(defaultBillingDetails: BillingDetails?) =
                 apply { this.defaultBillingDetails = defaultBillingDetails }
 
+            fun shippingDetails(shippingDetails: AddressDetails?) =
+                apply { this.shippingDetails = shippingDetails }
+
             fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) =
                 apply { this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods }
+
+            fun allowsPaymentMethodsRequiringShippingAddress(
+                allowsPaymentMethodsRequiringShippingAddress: Boolean,
+            ) = apply {
+                this.allowsPaymentMethodsRequiringShippingAddress =
+                    allowsPaymentMethodsRequiringShippingAddress
+            }
 
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
@@ -191,7 +284,9 @@ class PaymentSheet internal constructor(
                 googlePay,
                 primaryButtonColor,
                 defaultBillingDetails,
+                shippingDetails,
                 allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress,
                 appearance
             )
         }
@@ -341,31 +436,31 @@ class PaymentSheet internal constructor(
 
         companion object {
             val defaultLight = Colors(
-                primary = PaymentsThemeDefaults.colorsLight.materialColors.primary,
-                surface = PaymentsThemeDefaults.colorsLight.materialColors.surface,
-                component = PaymentsThemeDefaults.colorsLight.component,
-                componentBorder = PaymentsThemeDefaults.colorsLight.componentBorder,
-                componentDivider = PaymentsThemeDefaults.colorsLight.componentDivider,
-                onComponent = PaymentsThemeDefaults.colorsLight.onComponent,
-                subtitle = PaymentsThemeDefaults.colorsLight.subtitle,
-                placeholderText = PaymentsThemeDefaults.colorsLight.placeholderText,
-                onSurface = PaymentsThemeDefaults.colorsLight.materialColors.onSurface,
-                appBarIcon = PaymentsThemeDefaults.colorsLight.appBarIcon,
-                error = PaymentsThemeDefaults.colorsLight.materialColors.error
+                primary = StripeThemeDefaults.colorsLight.materialColors.primary,
+                surface = StripeThemeDefaults.colorsLight.materialColors.surface,
+                component = StripeThemeDefaults.colorsLight.component,
+                componentBorder = StripeThemeDefaults.colorsLight.componentBorder,
+                componentDivider = StripeThemeDefaults.colorsLight.componentDivider,
+                onComponent = StripeThemeDefaults.colorsLight.onComponent,
+                subtitle = StripeThemeDefaults.colorsLight.subtitle,
+                placeholderText = StripeThemeDefaults.colorsLight.placeholderText,
+                onSurface = StripeThemeDefaults.colorsLight.materialColors.onSurface,
+                appBarIcon = StripeThemeDefaults.colorsLight.appBarIcon,
+                error = StripeThemeDefaults.colorsLight.materialColors.error
             )
 
             val defaultDark = Colors(
-                primary = PaymentsThemeDefaults.colorsDark.materialColors.primary,
-                surface = PaymentsThemeDefaults.colorsDark.materialColors.surface,
-                component = PaymentsThemeDefaults.colorsDark.component,
-                componentBorder = PaymentsThemeDefaults.colorsDark.componentBorder,
-                componentDivider = PaymentsThemeDefaults.colorsDark.componentDivider,
-                onComponent = PaymentsThemeDefaults.colorsDark.onComponent,
-                subtitle = PaymentsThemeDefaults.colorsDark.subtitle,
-                placeholderText = PaymentsThemeDefaults.colorsDark.placeholderText,
-                onSurface = PaymentsThemeDefaults.colorsDark.materialColors.onSurface,
-                appBarIcon = PaymentsThemeDefaults.colorsDark.appBarIcon,
-                error = PaymentsThemeDefaults.colorsDark.materialColors.error
+                primary = StripeThemeDefaults.colorsDark.materialColors.primary,
+                surface = StripeThemeDefaults.colorsDark.materialColors.surface,
+                component = StripeThemeDefaults.colorsDark.component,
+                componentBorder = StripeThemeDefaults.colorsDark.componentBorder,
+                componentDivider = StripeThemeDefaults.colorsDark.componentDivider,
+                onComponent = StripeThemeDefaults.colorsDark.onComponent,
+                subtitle = StripeThemeDefaults.colorsDark.subtitle,
+                placeholderText = StripeThemeDefaults.colorsDark.placeholderText,
+                onSurface = StripeThemeDefaults.colorsDark.materialColors.onSurface,
+                appBarIcon = StripeThemeDefaults.colorsDark.appBarIcon,
+                error = StripeThemeDefaults.colorsDark.materialColors.error
             )
         }
     }
@@ -389,8 +484,8 @@ class PaymentSheet internal constructor(
 
         companion object {
             val default = Shapes(
-                cornerRadiusDp = PaymentsThemeDefaults.shapes.cornerRadius,
-                borderStrokeWidthDp = PaymentsThemeDefaults.shapes.borderStrokeWidth
+                cornerRadiusDp = StripeThemeDefaults.shapes.cornerRadius,
+                borderStrokeWidthDp = StripeThemeDefaults.shapes.borderStrokeWidth
             )
         }
     }
@@ -411,8 +506,8 @@ class PaymentSheet internal constructor(
     ) : Parcelable {
         companion object {
             val default = Typography(
-                sizeScaleFactor = PaymentsThemeDefaults.typography.fontSizeMultiplier,
-                fontResId = PaymentsThemeDefaults.typography.fontFamily
+                sizeScaleFactor = StripeThemeDefaults.typography.fontSizeMultiplier,
+                fontResId = StripeThemeDefaults.typography.fontFamily
             )
         }
     }
@@ -470,14 +565,14 @@ class PaymentSheet internal constructor(
             val defaultLight = PrimaryButtonColors(
                 background = null,
                 onBackground =
-                PaymentsThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                border = PaymentsThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb()
+                StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb()
             )
             val defaultDark = PrimaryButtonColors(
                 background = null,
                 onBackground =
-                PaymentsThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                border = PaymentsThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb()
+                StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb()
             )
         }
     }
@@ -679,6 +774,8 @@ class PaymentSheet internal constructor(
      */
     interface FlowController {
 
+        var shippingDetails: AddressDetails?
+
         /**
          * Configure the FlowController to process a [PaymentIntent].
          *
@@ -701,6 +798,20 @@ class PaymentSheet internal constructor(
          */
         fun configureWithSetupIntent(
             setupIntentClientSecret: String,
+            configuration: Configuration? = null,
+            callback: ConfigCallback
+        )
+
+        /**
+         * Configure the FlowController with an [InitializationMode].
+         *
+         * @param mode The [InitializationMode] to use.
+         * @param configuration An optional [PaymentSheet] configuration.
+         * @param callback called with the result of configuring the FlowController.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun configure(
+            mode: InitializationMode,
             configuration: Configuration? = null,
             callback: ConfigCallback
         )

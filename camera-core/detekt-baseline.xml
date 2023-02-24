@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:Camera1Adapter.kt$Camera1Adapter$size.height >= h &amp;&amp; ratioDiff &lt;= minDiffRatio &amp;&amp; size.height &lt;= MAXIMUM_RESOLUTION.height &amp;&amp; size.width &lt;= MAXIMUM_RESOLUTION.width</ID>
+    <ID>ComplexCondition:NV21Image.kt$NV21Image$left == 0 &amp;&amp; top == 0 &amp;&amp; right == width &amp;&amp; bottom == height</ID>
+    <ID>EmptyFunctionBlock:Camera1Adapter.kt$Camera1Adapter.CameraPreview${}</ID>
+    <ID>ForbiddenComment:CameraAdapter.kt$CameraAdapter$// TODO: change this to be a channelFlow once it's no longer experimental, add some capacity and use a backpressure drop strategy</ID>
+    <ID>ForbiddenComment:Clock.kt$* Measure the amount of time a process takes. * * TODO: use contracts when they are no longer experimental</ID>
+    <ID>ForbiddenComment:Memoize.kt$CachedFirstResult1$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
+    <ID>ForbiddenComment:Memoize.kt$CachedFirstResult2$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
+    <ID>ForbiddenComment:Memoize.kt$CachedFirstResult3$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
+    <ID>ForbiddenComment:Memoize.kt$CachedFirstResultSuspend1$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
+    <ID>ForbiddenComment:Memoize.kt$CachedFirstResultSuspend2$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
+    <ID>ForbiddenComment:Memoize.kt$CachedFirstResultSuspend3$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
+    <ID>ForbiddenComment:NV21Image.kt$NV21Image$* https://github.com/silvaren/easyrs/blob/c8eed0f0b713bbb1eb375aca23d615677e8adb3c/easyrs/src/main/java/io/github/silvaren/easyrs/tools/YuvToRgb.java * * TODO: once the renderscript toolkit is available in maven central, replace this method with * the yuvToRgbBitmap from that https://github.com/android/renderscript-intrinsics-replacement-toolkit/blob/main/renderscript-toolkit/src/main/java/com/google/android/renderscript/Toolkit.kt#L1079</ID>
+    <ID>LongMethod:Layout.kt$@CheckResult @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Size.resizeRegion( originalRegion: Rect, newRegion: Rect, newSize: Size ): Map&lt;Rect, Rect></ID>
+    <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter$1.5</ID>
+    <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter$1000</ID>
+    <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter$150</ID>
+    <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter$360</ID>
+    <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter.CameraPreview$8</ID>
+    <ID>MagicNumber:CameraAdapter.kt$CameraAdapter.Companion$90</ID>
+    <ID>MagicNumber:CameraXAdapter.kt$4</ID>
+    <ID>MagicNumber:Duration.kt$10</ID>
+    <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$1000</ID>
+    <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$12</ID>
+    <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$24</ID>
+    <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$365.25</ID>
+    <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$60</ID>
+    <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$7</ID>
+    <ID>MagicNumber:Image.kt$0x00030001</ID>
+    <ID>MagicNumber:NV21Image.kt$4</ID>
+    <ID>MagicNumber:NV21Image.kt$8</ID>
+    <ID>MagicNumber:NV21Image.kt$95</ID>
+    <ID>MagicNumber:NV21Image.kt$NV21Image$0xff</ID>
+    <ID>MagicNumber:NV21Image.kt$NV21Image$180</ID>
+    <ID>MagicNumber:NV21Image.kt$NV21Image$270</ID>
+    <ID>MagicNumber:NV21Image.kt$NV21Image$360</ID>
+    <ID>MagicNumber:NV21Image.kt$NV21Image$90</ID>
+    <ID>MagicNumber:ViewFinderBackground.kt$ViewFinderBackground$0.0722F</ID>
+    <ID>MagicNumber:ViewFinderBackground.kt$ViewFinderBackground$0.2126F</ID>
+    <ID>MagicNumber:ViewFinderBackground.kt$ViewFinderBackground$0.7152F</ID>
+    <ID>MagicNumber:ViewFinderBackground.kt$ViewFinderBackground$0xff</ID>
+    <ID>MagicNumber:ViewFinderBackground.kt$ViewFinderBackground$16</ID>
+    <ID>MagicNumber:ViewFinderBackground.kt$ViewFinderBackground$255F</ID>
+    <ID>MagicNumber:ViewFinderBackground.kt$ViewFinderBackground$8</ID>
+    <ID>MaxLineLength:CameraAdapter.kt$CameraAdapter$// TODO: change this to be a channelFlow once it's no longer experimental, add some capacity and use a backpressure drop strategy</ID>
+    <ID>MaxLineLength:CameraView.kt$CameraView$*</ID>
+    <ID>MaxLineLength:CameraView.kt$CameraView$* a [View] to highlight a sub area from previewFrame, the [Rect] of this view is used to crop the highlighted area from the preview.</ID>
+    <ID>MaxLineLength:CameraView.kt$CameraView$* an optional [ViewFinderBackground] to draw background and reveals a center viewFinder on previewFrame, has the same size of the [CameraView].</ID>
+    <ID>MaxLineLength:CameraView.kt$CameraView.ViewFinderType$* The type of viewfinder, decides if [viewFinderBackgroundView] should be drawn and the aspect ratio of [viewFinderWindowView]</ID>
+    <ID>MaxLineLength:CameraView.kt$CameraView.ViewFinderType.CreditCard$* [CreditCard] draws [viewFinderBackgroundView] and draws [viewFinderWindowView] in center with aspect ratio [CREDIT_CARD_ASPECT_RATIO]</ID>
+    <ID>MaxLineLength:CameraView.kt$CameraView.ViewFinderType.Passport$* [Passport] draws [viewFinderBackgroundView] and draws [viewFinderWindowView] in center with aspect ratio [Passport]</ID>
+    <ID>MaxLineLength:Memoize.kt$fun</ID>
+    <ID>MaxLineLength:NV21Image.kt$NV21Image$// Log.d(Config.logTag, "Bitmap to RGB Byte buffer conversion took: ${System.currentTimeMillis() - startTime} ms")</ID>
+    <ID>MaximumLineLength:com.stripe.android.camera.framework.util.Memoize.kt:612</ID>
+    <ID>NestedBlockDepth:NV21Image.kt$@CheckResult private fun yuvPlanesToNV21Compat( width: Int, height: Int, planeBuffers: Array&lt;ByteBuffer>, rowStrides: IntArray, pixelStrides: IntArray, format: Int, crop: Rect = Rect(0, 0, width, height) ): ByteArray</ID>
+    <ID>ReturnCount:Loop.kt$AnalyzerLoop$protected fun subscribeToFlow( flow: Flow&lt;DataFrame>, processingCoroutineScope: CoroutineScope ): Job?</ID>
+    <ID>ReturnCount:NV21Image.kt$NV21Image$fun crop(left: Int, top: Int, right: Int, bottom: Int): NV21Image</ID>
+    <ID>SwallowedException:Camera1Adapter.kt$Camera1Adapter$e: java.lang.Exception</ID>
+    <ID>SwallowedException:Camera1Adapter.kt$Camera1Adapter$t: Throwable</ID>
+    <ID>SwallowedException:Camera1Adapter.kt$Camera1Adapter.CameraPreview$t: Throwable</ID>
+    <ID>SwallowedException:CameraAdapter.kt$CameraAdapter$e: ClosedSendChannelException</ID>
+    <ID>SwallowedException:CameraXAdapter.kt$ex: ReadOnlyBufferException</ID>
+    <ID>SwallowedException:NV21Image.kt$ex: ReadOnlyBufferException</ID>
+    <ID>ThrowsCount:Retry.kt$internal fun &lt;T> retrySync( times: Int = DEFAULT_RETRIES, excluding: List&lt;Class&lt;out Throwable>> = emptyList(), task: () -> T ): T</ID>
+    <ID>TooGenericExceptionCaught:Camera1Adapter.kt$Camera1Adapter$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:Camera1Adapter.kt$Camera1Adapter.CameraPreview$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:CameraAdapter.kt$CameraAdapter$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:CameraXAdapter.kt$CameraXAdapter$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:Loop.kt$AnalyzerLoop$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:Retry.kt$t: Throwable</ID>
+    <ID>TooManyFunctions:BitmapExtensions.kt$com.stripe.android.camera.framework.image.BitmapExtensions.kt</ID>
+    <ID>TooManyFunctions:CameraAdapter.kt$CameraAdapter&lt;CameraOutput> : LifecycleEventObserver</ID>
+    <ID>TooManyFunctions:CameraXAdapter.kt$CameraXAdapter : CameraAdapter</ID>
+    <ID>TooManyFunctions:Duration.kt$Duration : Comparable</ID>
+    <ID>TooManyFunctions:Layout.kt$com.stripe.android.camera.framework.util.Layout.kt</ID>
+    <ID>TooManyFunctions:Memoize.kt$com.stripe.android.camera.framework.util.Memoize.kt</ID>
+    <ID>UnnecessaryAbstractClass:SimpleScanStateful.kt$ScanState$ScanState</ID>
+    <ID>UnusedPrivateMember:Camera1Adapter.kt$Camera1Adapter.CameraPreview$i</ID>
+    <ID>UnusedPrivateMember:NV21Image.kt$@CheckResult private fun yuvPlanesToNV21Compat( width: Int, height: Int, planeBuffers: Array&lt;ByteBuffer>, rowStrides: IntArray, pixelStrides: IntArray, format: Int, crop: Rect = Rect(0, 0, width, height) ): ByteArray</ID>
+    <ID>UnusedPrivateMember:NV21Image.kt$@CheckResult private fun yuvPlanesToNV21Slow(planeBuffers: Array&lt;ByteBuffer>): ByteArray</ID>
+    <ID>UnusedPrivateMember:NV21Image.kt$private fun yuvPlanesToBitmap( width: Int, height: Int, planeBuffers: Array&lt;ByteBuffer> ): Bitmap</ID>
+    <ID>UnusedPrivateMember:Retry.kt$attempt</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -9,6 +9,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
@@ -22,7 +23,6 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
@@ -40,7 +40,6 @@ import kotlin.test.Test
 /**
  * Test class for [AddPaymentMethodActivity].
  */
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class AddPaymentMethodActivityTest {
     private val testDispatcher = StandardTestDispatcher()
@@ -67,6 +66,13 @@ class AddPaymentMethodActivityTest {
             "acct_12345"
         )
         CustomerSession.instance = customerSession
+    }
+
+    @Test
+    fun testActivityIsFinishedWhenNoArgsPassed() {
+        activityScenarioFactory.create<AddPaymentMethodActivity>().use { activityScenario ->
+            assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        }
     }
 
     @Test
@@ -118,7 +124,7 @@ class AddPaymentMethodActivityTest {
 
     @Test
     fun addCardData_whenDataIsValidAndServerReturnsSuccess_finishesWithIntent() {
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
+        activityScenarioFactory.createForResult<AddPaymentMethodActivity>(
             BASE_CARD_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
@@ -139,7 +145,7 @@ class AddPaymentMethodActivityTest {
 
     @Test
     fun addFpx_whenServerReturnsSuccessAndUpdatesCustomer_finishesWithIntent() {
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
+        activityScenarioFactory.createForResult<AddPaymentMethodActivity>(
             createArgs(PaymentMethod.Type.Fpx)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
@@ -229,7 +235,7 @@ class AddPaymentMethodActivityTest {
 
     @Test
     fun addCardData_whenServerReturnsSuccessAndUpdatesCustomer_finishesWithIntent() {
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
+        activityScenarioFactory.createForResult<AddPaymentMethodActivity>(
             createArgs(PaymentMethod.Type.Card)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
@@ -273,7 +279,7 @@ class AddPaymentMethodActivityTest {
 
     @Test
     fun addCardData_whenDataIsValidButServerReturnsError_doesNotFinish() {
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
+        activityScenarioFactory.createForResult<AddPaymentMethodActivity>(
             BASE_CARD_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
@@ -309,7 +315,7 @@ class AddPaymentMethodActivityTest {
 
     @Test
     fun addCardData_whenPaymentMethodCreateWorksButAddToCustomerFails_showErrorNotFinish() {
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
+        activityScenarioFactory.createForResult<AddPaymentMethodActivity>(
             createArgs(PaymentMethod.Type.Card)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
@@ -373,7 +379,7 @@ class AddPaymentMethodActivityTest {
         whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
             .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
+        activityScenarioFactory.createForResult<AddPaymentMethodActivity>(
             createArgs(PaymentMethod.Type.Card)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->

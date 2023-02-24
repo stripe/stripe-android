@@ -14,7 +14,6 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.utils.TestUtils
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -30,7 +29,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class CardAccountRangeServiceTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()

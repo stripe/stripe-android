@@ -1,21 +1,19 @@
 package com.stripe.android.paymentsheet.example.samples.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.annotation.Keep
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.serialization.Serializable
 
-internal class PaymentSheetViewModel(
-    application: Application,
-) : AndroidViewModel(application) {
+internal class PaymentSheetViewModel : ViewModel() {
     val inProgress = MutableLiveData<Boolean>()
     val status = MutableLiveData<String>()
     val exampleCheckoutResponse = MutableLiveData<ExampleCheckoutResponse>()
-    val appearance = MutableLiveData(PaymentSheet.Appearance())
 
     fun statusDisplayed() {
         status.value = ""
@@ -42,10 +40,15 @@ internal class PaymentSheetViewModel(
     }
 
     @Serializable
+    @Keep
     data class ExampleCheckoutResponse(
+        @SerializedName("publishableKey")
         val publishableKey: String,
+        @SerializedName("paymentIntent")
         val paymentIntent: String,
+        @SerializedName("customer")
         val customer: String? = null,
+        @SerializedName("ephemeralKey")
         val ephemeralKey: String? = null
     ) {
         internal fun makeCustomerConfig() =

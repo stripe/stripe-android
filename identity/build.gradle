@@ -1,34 +1,18 @@
-plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
-    id 'org.jetbrains.dokka'
-    id 'org.jetbrains.kotlin.plugin.parcelize'
-    id 'org.jetbrains.kotlin.plugin.serialization'
-    id 'kotlin-kapt'
-}
+apply from: configs.androidLibrary
 
-assemble.dependsOn('lint')
-check.dependsOn('checkstyle')
-
-configurations {
-    javadocDeps
-    ktlint
-}
-
-if (System.getenv("JITPACK")) {
-    group = 'com.github.stripe.stripe-android'
-}
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'kotlin-kapt'
 
 dependencies {
     implementation project(":camera-core")
     implementation project(":stripe-core")
+    implementation project(":stripe-ui-core")
 
     // vanilla tflite library
-    implementation "org.tensorflow:tensorflow-lite:2.9.0"
-    // flex ops
-    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.9.0'
+    implementation "org.tensorflow:tensorflow-lite:2.11.0"
     // support library to reshape image to the input model shape
-    implementation 'org.tensorflow:tensorflow-lite-support:0.4.1'
+    implementation 'org.tensorflow:tensorflow-lite-support:0.4.3'
 
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
@@ -54,8 +38,25 @@ dependencies {
     implementation "androidx.browser:browser:$androidxBrowserVersion"
 
     // Compose
-    implementation "androidx.compose.runtime:runtime:$androidxComposeVersion"
+    implementation "androidx.compose.runtime:runtime:$androidxComposeRuntimeVersion"
     implementation "androidx.activity:activity-compose:$androidxActivityVersion"
+    // Integration with ViewModels
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$androidxLifecycleVersion"
+    // Integration with Navigation
+    implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
+    // Integration with observables
+    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeRuntimeVersion"
+    // Material Design
+    implementation "androidx.compose.material:material:$androidxComposeVersion"
+    // MdcTheme
+    implementation "com.google.accompanist:accompanist-themeadapter-material:$accompanistVersion"
+    // Test rules and transitive dependencies:
+    testImplementation("androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion")
+    // Needed for createComposeRule, but not createAndroidComposeRule:
+    debugImplementation("androidx.compose.ui:ui-test-manifest:$androidxComposeUiVersion")
+    // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
+    testImplementation "androidx.test.espresso:espresso-core:3.5.0"
+
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
@@ -72,21 +73,8 @@ dependencies {
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
-    defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion rootProject.ext.compileSdkVersion
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
-        vectorDrawables.useSupportLibrary = true
-    }
-
     sourceSets {
         main {
-            res.srcDirs = ['res']
             assets {
                 srcDirs 'src/main/assets'
             }
@@ -100,25 +88,8 @@ android {
                 maxHeapSize = "1024m"
             }
         }
-    }
-
-    lintOptions {
-        enable "Interoperability"
-        disable "CoroutineCreationDuringComposition"
-        lintConfig file("../settings/lint.xml")
-    }
-
-    dokkaHtml {
-        outputDirectory = new File("${project.rootDir}/docs/$project.name")
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
+        // Make sure animations are off when we run espresso tests
+        animationsDisabled = true
     }
 
     buildFeatures {
@@ -127,26 +98,8 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeVersion"
+        kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
     }
-}
-
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "src/**/*.kt"
-    // to generate report in checkstyle format prepend following args:
-    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
-    // see https://github.com/pinterest/ktlint#usage for more
-}
-check.dependsOn ktlint
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
 }
 
 ext {

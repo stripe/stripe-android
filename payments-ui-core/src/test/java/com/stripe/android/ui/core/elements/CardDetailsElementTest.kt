@@ -6,7 +6,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,7 +47,7 @@ class CardDetailsElementTest {
                 IdentifierSpec.CardNumber to FormFieldEntry("4242424242424242", true),
                 IdentifierSpec.CardCvc to FormFieldEntry("321", true),
                 IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                IdentifierSpec.CardExpMonth to FormFieldEntry("1", true),
+                IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
                 IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
             )
         )
@@ -71,7 +72,7 @@ class CardDetailsElementTest {
             }
 
         cardDetailsElement.controller.cvcElement.controller.onValueChange("321")
-        cardDetailsElement.controller.expirationDateElement.controller.onValueChange("130")
+        cardDetailsElement.controller.expirationDateElement.controller.onValueChange("1230")
 
         idleLooper()
 
@@ -80,7 +81,7 @@ class CardDetailsElementTest {
                 IdentifierSpec.CardNumber to FormFieldEntry("4242424242424242", true),
                 IdentifierSpec.CardCvc to FormFieldEntry("321", true),
                 IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                IdentifierSpec.CardExpMonth to FormFieldEntry("1", true),
+                IdentifierSpec.CardExpMonth to FormFieldEntry("12", true),
                 IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
             )
         )

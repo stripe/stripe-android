@@ -110,6 +110,14 @@ class LauncherActivity : AppCompatActivity() {
                 AffirmPaymentActivity::class.java
             ),
             Item(
+                activity.getString(R.string.confirm_with_alipay_native),
+                AlipayPaymentNativeActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.confirm_with_alipay_web),
+                AlipayPaymentWebActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.becs_debit_example),
                 BecsDebitPaymentMethodActivity::class.java
             ),
@@ -156,6 +164,15 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.manual_us_bank_account_example),
                 ManualUSBankAccountPaymentMethodActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.cash_app_pay_example),
+                CashAppPayActivity::class.java
+            ),
+            // This is for internal use so as not to confuse the user.
+            Item(
+                "StripeImage Example",
+                StripeImageActivity::class.java
             )
         )
 

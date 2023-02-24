@@ -18,8 +18,6 @@
   <string name="address_country_invalid">Țara dvs. nu este validă</string>
   <!-- Error text indicating that county is required, used for UK addresses -->
   <string name="address_county_required">Introduceți județul în care locuiți</string>
-  <!-- Caption for Address field on address form -->
-  <string name="address_label_address">Adresa</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Rândul 1 pentru adresă (opțional)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -32,8 +30,6 @@
   <string name="address_label_city_optional">Oraș (opțional)</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Județ (opțional)</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="address_label_phone_number">Număr de telefon</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Număr de telefon (opțional)</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
@@ -72,10 +68,6 @@
   <string name="address_required">Introduceți adresa dvs.</string>
   <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Introduceți statul în care locuiți</string>
-  <!-- Error text indicating zip code is invalid, used for US addresses -->
-  <string name="address_zip_invalid">Codul dvs. poștal nu este valid.</string>
-  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
-  <string name="address_zip_postal_invalid">Codul dvs. poștal nu este valid</string>
   <!-- Pay over time with Affirm copy -->
   <string name="affirm_buy_now_pay_later">Folosiți ca metodă de plată de-a lungul timpului &lt;img src=\"affirm\"&gt;.</string>
   <!-- Label for Name on account field on form -->
@@ -110,6 +102,8 @@
   <string name="becs_widget_name_required">Este necesar numele dvs.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Anulare</string>
+  <!-- Error when the card was declined by the credit card networks -->
+  <string name="card_declined">Cardul dvs. a fost respins</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s se termină în %2$s</string>
   <!-- Text for close button -->
@@ -121,13 +115,19 @@
   <string name="done">Efectuat</string>
   <!-- Button title to enter editing mode -->
   <string name="edit">Editare</string>
+  <!-- Error when the card has already expired -->
+  <string name="expired_card">Cardul dvs. a expirat</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">LL/AA</string>
   <string name="expiry_label_short">Data de expirare</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="fpx_bank_offline">%s - Offline</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="generic_decline">Metoda dvs. de plată a fost respinsă.</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
   <string name="incomplete_expiry_date">Data de expirare a cardului dvs. nu este completă.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="invalid_bank_account_iban">Codul IBAN pe care l-ați introdus nu este valid.</string>
   <string name="invalid_card_number">Numărul cardului dvs. nu este valid.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Codul de securitate al cardului dvs. nu este valid.</string>
@@ -135,6 +135,8 @@
   <string name="invalid_expiry_month">Luna de expirare a cardului dvs. nu este validă.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="invalid_expiry_year">Anul de expirare al cardului dvs. nu este valid.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="invalid_owner_name">Numele dvs. nu este valid.</string>
   <!-- Shipping form error message -->
   <string name="invalid_shipping_information">Adresa de expediere nu este validă</string>
   <!-- Error message for when postal code in form is incomplete -->
@@ -143,6 +145,8 @@
   <string name="payment_method_add_new_fpx">Selectare cont bancar (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Expediere gratuită</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="processing_error">A apărut o eroare la procesarea cardului dvs. -- încercați din nou în câteva secunde</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="remove">Eliminare</string>

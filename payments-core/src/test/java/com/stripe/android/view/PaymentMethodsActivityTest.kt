@@ -3,7 +3,9 @@ package com.stripe.android.view
 import android.app.Activity.RESULT_CANCELED
 import android.content.Context
 import android.view.View
+import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
@@ -42,6 +44,13 @@ class PaymentMethodsActivityTest {
     fun setup() {
         CustomerSession.instance = customerSession
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+    }
+
+    @Test
+    fun onCreate_finishesActivityWhenArgsAreMissing() {
+        activityScenarioFactory.create<PaymentMethodsActivity>().use { activityScenario ->
+            assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        }
     }
 
     @Test
@@ -200,7 +209,7 @@ class PaymentMethodsActivityTest {
 
     @Test
     fun setSelectionAndFinish_finishedWithExpectedResult() {
-        activityScenarioFactory.create<PaymentMethodsActivity>(
+        activityScenarioFactory.createForResult<PaymentMethodsActivity>(
             PaymentMethodsActivityStarter.Args.Builder()
                 .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
                 .build()
@@ -230,7 +239,7 @@ class PaymentMethodsActivityTest {
                 paymentMethodsAdapter.selectedPaymentMethodId =
                     PaymentMethodFixtures.CARD_PAYMENT_METHODS[0].id
 
-                activity.onBackPressed()
+                activity.onBackPressedDispatcher.onBackPressed()
 
                 // Now it should be gone.
                 assertEquals(View.GONE, progressBar.visibility)

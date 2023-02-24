@@ -7,14 +7,13 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.ui.core.elements.TextFieldIcon
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
+import com.stripe.android.uicore.elements.TextFieldIcon
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -35,7 +34,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class AutocompleteViewModelTest {
     private val args = mock<AddressElementActivityContract.Args>()
@@ -256,5 +254,36 @@ class AutocompleteViewModelTest {
     fun `initializing ViewModel emits onShow event`() {
         createViewModel()
         verify(mockEventReporter).onShow(eq("US"))
+    }
+
+    @Test
+    fun `clearQuery clears textfield and predictions`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+
+        viewModel.textFieldController.onRawValueChange("Some valid query")
+
+        whenever(mockClient.findAutocompletePredictions(any(), any(), any())).thenReturn(
+            Result.success(
+                FindAutocompletePredictionsResponse(
+                    listOf(
+                        AutocompletePrediction(
+                            SpannableString("primaryText"),
+                            SpannableString("secondaryText"),
+                            "placeId"
+                        )
+                    )
+                )
+            )
+        )
+
+        // Advance past search debounce delay
+        advanceTimeBy(AutocompleteViewModel.SEARCH_DEBOUNCE_MS + 1)
+
+        assertThat(viewModel.predictions.value?.size).isEqualTo(1)
+
+        viewModel.clearQuery()
+
+        assertThat(viewModel.predictions.value).isEqualTo(null)
+        assertThat(viewModel.textFieldController.rawFieldValue.stateIn(viewModel.viewModelScope).value).isEqualTo("")
     }
 }

@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Test
 import org.junit.runner.RunWith

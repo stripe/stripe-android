@@ -2,48 +2,39 @@ package com.stripe.android.paymentsheet.model
 
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
-import androidx.annotation.RestrictTo
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
-import com.stripe.android.paymentsheet.ui.getCardBrandIcon
+import com.stripe.android.paymentsheet.R
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class PaymentSelection : Parcelable {
+internal sealed class PaymentSelection : Parcelable {
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object GooglePay : PaymentSelection()
 
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object Link : PaymentSelection()
 
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Saved(
         val paymentMethod: PaymentMethod,
         internal val isGooglePay: Boolean = false
     ) : PaymentSelection()
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class CustomerRequestedSave {
         RequestReuse,
         RequestNoReuse,
         NoRequest
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class New : PaymentSelection() {
         abstract val paymentMethodCreateParams: PaymentMethodCreateParams
         abstract val customerRequestedSave: CustomerRequestedSave
 
         @Parcelize
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class Card(
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             val brand: CardBrand,
@@ -58,7 +49,6 @@ sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class USBankAccount(
             val labelResource: String,
             @DrawableRes val iconResource: Int,
@@ -71,7 +61,6 @@ sealed class PaymentSelection : Parcelable {
         ) : New()
 
         @Parcelize
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class LinkInline(val linkPaymentDetails: LinkPaymentDetails.New) : New() {
             @IgnoredOnParcel
             override val customerRequestedSave = CustomerRequestedSave.NoRequest
@@ -84,24 +73,23 @@ sealed class PaymentSelection : Parcelable {
 
             @IgnoredOnParcel
             @DrawableRes
-            val iconResource = when (paymentDetails) {
-                is ConsumerPaymentDetails.Card -> paymentDetails.brand.getCardBrandIcon()
-                is ConsumerPaymentDetails.BankAccount ->
-                    TransformToBankIcon(paymentDetails.bankName)
-            }
+            val iconResource = R.drawable.stripe_ic_paymentsheet_link
 
             @IgnoredOnParcel
             val label = when (paymentDetails) {
-                is ConsumerPaymentDetails.Card -> paymentDetails.last4
-                is ConsumerPaymentDetails.BankAccount -> paymentDetails.last4
+                is ConsumerPaymentDetails.Card ->
+                    "····${paymentDetails.last4}"
+                is ConsumerPaymentDetails.BankAccount ->
+                    "····${paymentDetails.last4}"
             }
         }
 
         @Parcelize
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class GenericPaymentMethod(
             val labelResource: String,
             @DrawableRes val iconResource: Int,
+            val lightThemeIconUrl: String?,
+            val darkThemeIconUrl: String?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val customerRequestedSave: CustomerRequestedSave
         ) : New()

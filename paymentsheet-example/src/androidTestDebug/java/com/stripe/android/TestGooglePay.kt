@@ -14,9 +14,11 @@ import com.stripe.android.test.core.Browser
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
+import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
@@ -24,6 +26,7 @@ import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.initializedLpmRepository
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
@@ -46,6 +49,9 @@ class TestGooglePay {
     @get:Rule
     val testWatcher = TestWatcher()
 
+    @get:Rule
+    val disableAnimations = DisableAnimationsRule()
+
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
     private val screenshotProcessor = MyScreenCaptureProcessor()
@@ -59,13 +65,14 @@ class TestGooglePay {
     private val testParameters = TestParameters(
         lpmRepository.fromCode("bancontact")!!,
         Customer.New,
+        LinkState.Off,
         GooglePayState.On,
         Currency.EUR,
         IntentType.Pay,
         Billing.On,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
-        automatic = Automatic.On,
+        automatic = Automatic.Off,
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = Browser.Chrome,
@@ -79,7 +86,7 @@ class TestGooglePay {
             testParameters.copy(
                 googlePayState = GooglePayState.On
             ),
-            R.string.stripe_paymentsheet_or_pay_using
+            R.string.stripe_paymentsheet_or_pay_with_card
         )
     }
 
@@ -92,7 +99,7 @@ class TestGooglePay {
                 merchantCountryCode = "US",
                 intentType = IntentType.Setup, // This means only card will show
             ),
-            R.string.stripe_paymentsheet_or_pay_using
+            R.string.stripe_paymentsheet_or_pay_with_card
         )
     }
 
@@ -132,12 +139,8 @@ class TestGooglePay {
     }
 
     companion object {
-        private val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
-                InstrumentationRegistry.getInstrumentation().targetContext.resources
-            )
-        ).apply {
-            forceUpdate(LpmRepository.exposedPaymentMethods, null)
-        }
+        private val lpmRepository = initializedLpmRepository(
+            context = InstrumentationRegistry.getInstrumentation().targetContext,
+        )
     }
 }

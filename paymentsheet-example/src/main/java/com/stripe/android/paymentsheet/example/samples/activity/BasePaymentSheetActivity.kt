@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.samples.activity
 
-import androidx.annotation.DrawableRes
+import android.graphics.drawable.Drawable
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
@@ -25,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -38,11 +40,10 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.viewmodel.PaymentSheetViewModel
+import com.stripe.android.paymentsheet.example.utils.rememberDrawablePainter
 
 internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
-    protected val viewModel: PaymentSheetViewModel by lazy {
-        PaymentSheetViewModel(application)
-    }
+    protected val viewModel: PaymentSheetViewModel by viewModels()
     
     protected val snackbar by lazy {
         Snackbar.make(findViewById(android.R.id.content), "", Snackbar.LENGTH_SHORT)
@@ -101,9 +102,11 @@ fun Receipt(
     isLoading: Boolean,
     bottomContent: @Composable () -> Unit
 ) {
+    val scrollState = rememberScrollState()
     Surface(color = BACKGROUND_COLOR) {
         Column(
             Modifier.fillMaxSize()
+                .verticalScroll(state = scrollState)
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 16.dp, top = 2.dp)
         ) {
@@ -206,7 +209,7 @@ fun ReceiptRow(
 fun PaymentMethodSelector(
     isEnabled: Boolean,
     paymentMethodLabel: String,
-    @DrawableRes paymentMethodIcon: Int?,
+    paymentMethodIcon: Drawable?,
     onClick: () -> Unit,
 ) {
     Row(
@@ -228,7 +231,7 @@ fun PaymentMethodSelector(
         ) {
             paymentMethodIcon?.let {
                 Icon(
-                    painter = painterResource(id = paymentMethodIcon),
+                    painter = rememberDrawablePainter(paymentMethodIcon),
                     contentDescription = null, // decorative element
                     modifier = Modifier.padding(horizontal = 4.dp),
                     tint = Color.Unspecified

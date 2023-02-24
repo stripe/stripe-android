@@ -1,28 +1,27 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.annotation.RestrictTo
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.stripeColors
 
 @Composable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun AddressOptionsAppBar(
+internal fun AddressOptionsAppBar(
     isRootScreen: Boolean,
     onButtonClick: () -> Unit
 ) {
-    Row(
+    TopAppBar(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top
+        elevation = 0.dp,
+        backgroundColor = MaterialTheme.colors.surface
     ) {
         IconButton(
             onClick = onButtonClick
@@ -30,16 +29,19 @@ fun AddressOptionsAppBar(
             Icon(
                 painter = painterResource(
                     id = if (isRootScreen) {
-                        R.drawable.stripe_ic_paymentsheet_close_enabled
+                        R.drawable.stripe_ic_paymentsheet_close
                     } else {
-                        R.drawable.stripe_ic_paymentsheet_back_enabled
+                        R.drawable.stripe_ic_paymentsheet_back
                     }
                 ),
                 contentDescription = stringResource(
-                    if (isRootScreen) R.string.stripe_paymentsheet_close
-                    else R.string.stripe_paymentsheet_back
+                    if (isRootScreen) {
+                        R.string.stripe_paymentsheet_close
+                    } else {
+                        R.string.back
+                    }
                 ),
-                tint = MaterialTheme.paymentsColors.appBarIcon
+                tint = MaterialTheme.stripeColors.appBarIcon
             )
         }
     }

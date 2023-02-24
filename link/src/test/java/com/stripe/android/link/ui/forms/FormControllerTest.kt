@@ -7,19 +7,18 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SectionSingleFieldElement
-import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SectionSingleFieldElement
+import com.stripe.android.uicore.elements.TextFieldController
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -46,10 +45,10 @@ class FormControllerTest {
         amount = null,
         saveForFutureUseInitialValue = false,
         merchantName = "Merchant",
-        context = context
+        context = context,
+        shippingValues = null
     )
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify params are set when element flows are complete`() = runTest {
         // Using Sofort as a complex enough example to test the form view model class.
@@ -66,7 +65,7 @@ class FormControllerTest {
         )
 
         val nameElement =
-            getSectionFieldTextControllerWithLabel(formController, R.string.address_label_name)
+            getSectionFieldTextControllerWithLabel(formController, R.string.address_label_full_name)
         val emailElement =
             getSectionFieldTextControllerWithLabel(formController, R.string.email)
 

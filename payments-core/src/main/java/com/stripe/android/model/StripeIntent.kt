@@ -3,6 +3,7 @@ package com.stripe.android.model
 import android.net.Uri
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.parcelize.Parcelize
@@ -83,7 +84,9 @@ sealed interface StripeIntent : StripeModel {
         AlipayRedirect("alipay_handle_redirect"),
         BlikAuthorize("blik_authorize"),
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
-        VerifyWithMicrodeposits("verify_with_microdeposits");
+        VerifyWithMicrodeposits("verify_with_microdeposits"),
+        UpiAwaitNotification("upi_await_notification"),
+        CashAppRedirect("cashapp_handle_redirect_or_display_qr_code");
 
         override fun toString(): String {
             return code
@@ -261,7 +264,7 @@ sealed interface StripeIntent : StripeModel {
         @Parcelize
         object BlikAuthorize : NextActionData() {
             override fun hashCode(): Int {
-                return 0
+                return this::class.java.hashCode()
             }
 
             override fun equals(other: Any?): Boolean {
@@ -278,6 +281,26 @@ sealed interface StripeIntent : StripeModel {
             val arrivalDate: Long,
             val hostedVerificationUrl: String,
             val microdepositType: MicrodepositType
+        ) : NextActionData()
+
+        @Parcelize
+        object UpiAwaitNotification : NextActionData() {
+            override fun hashCode(): Int {
+                return this::class.java.hashCode()
+            }
+
+            override fun equals(other: Any?): Boolean {
+                return this === other
+            }
+        }
+
+        /**
+         * Contains the authentication URL for redirecting your customer to Cash App.
+         */
+        @StripeCashAppPayBetaApi
+        @Parcelize
+        data class CashAppRedirect(
+            val mobileAuthUrl: String,
         ) : NextActionData()
     }
 }

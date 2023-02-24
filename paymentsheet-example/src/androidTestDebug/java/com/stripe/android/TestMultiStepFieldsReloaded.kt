@@ -13,15 +13,18 @@ import com.stripe.android.test.core.Billing
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
+import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.initializedLpmRepository
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
@@ -41,19 +44,23 @@ class TestMultiStepFieldsReloaded {
     @get:Rule
     val testWatcher = TestWatcher()
 
+    @get:Rule
+    val disableAnimations = DisableAnimationsRule()
+
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
 
     private val newUser = TestParameters(
         paymentMethod = lpmRepository.fromCode("bancontact")!!,
         Customer.New,
+        LinkState.Off,
         GooglePayState.Off,
         Currency.EUR,
         IntentType.Pay,
         Billing.Off,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
-        automatic = Automatic.On,
+        automatic = Automatic.Off,
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = null,
@@ -168,6 +175,7 @@ class TestMultiStepFieldsReloaded {
                 paymentMethod = lpmRepository.fromCode("affirm")!!,
                 merchantCountryCode = "US",
                 currency = Currency.USD,
+                shipping = Shipping.On
             )
         )
     }
@@ -202,16 +210,25 @@ class TestMultiStepFieldsReloaded {
         )
     }
 
+    @Test
+    fun testCashAppPay() {
+        testDriver.confirmCustom(
+            newUser.copy(
+                paymentMethod = lpmRepository.fromCode("cashapp")!!,
+                currency = Currency.USD,
+                merchantCountryCode = "US",
+                authorizationAction = AuthorizeAction.Authorize,
+                supportedPaymentMethods = listOf("card", "cashapp"),
+            )
+        )
+    }
+
     companion object {
         // There exists only one screenshot processor so that all tests put
         // their files in the same directory.
         private val screenshotProcessor = MyScreenCaptureProcessor()
-        private val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
-                InstrumentationRegistry.getInstrumentation().targetContext.resources
-            )
-        ).apply {
-            forceUpdate(LpmRepository.exposedPaymentMethods, null)
-        }
+        private val lpmRepository = initializedLpmRepository(
+            context = InstrumentationRegistry.getInstrumentation().targetContext,
+        )
     }
 }

@@ -10,6 +10,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
@@ -19,15 +20,17 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodPreference
+import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -39,7 +42,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import org.json.JSONException
-import org.json.JSONObject
 import java.util.Locale
 
 /**
@@ -78,19 +80,6 @@ abstract class StripeRepository {
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
     ): PaymentIntent?
-
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    abstract suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        locale: Locale
-    ): PaymentMethodPreference?
 
     @Throws(
         AuthenticationException::class,
@@ -140,19 +129,6 @@ abstract class StripeRepository {
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
     ): SetupIntent?
-
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    abstract suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        locale: Locale
-    ): PaymentMethodPreference?
 
     @Throws(
         AuthenticationException::class,
@@ -329,7 +305,8 @@ abstract class StripeRepository {
         APIException::class,
         CardException::class
     )
-    internal abstract suspend fun retrieveCustomer(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
@@ -390,45 +367,23 @@ abstract class StripeRepository {
     internal abstract suspend fun retrieveObject(
         url: String,
         requestOptions: ApiRequest.Options
-    ): JSONObject
+    ): StripeResponse<String>
 
     internal abstract suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
     ): RadarSession?
 
     // Link endpoints
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    abstract suspend fun lookupConsumerSession(
-        email: String?,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSessionLookup?
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Suppress("LongParameterList")
     abstract suspend fun consumerSignUp(
         email: String,
         phoneNumber: String,
         country: String,
+        name: String?,
         locale: Locale?,
         authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSession?
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    abstract suspend fun startConsumerVerification(
-        consumerSessionClientSecret: String,
-        locale: Locale,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSession?
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    abstract suspend fun confirmConsumerVerification(
-        consumerSessionClientSecret: String,
-        verificationCode: String,
-        authSessionCookie: String?,
+        consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?
 
@@ -438,6 +393,19 @@ abstract class StripeRepository {
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun createLinkFinancialConnectionsSession(
+        consumerSessionClientSecret: String,
+        requestOptions: ApiRequest.Options
+    ): FinancialConnectionsSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        financialConnectionsAccountId: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun createPaymentDetails(
@@ -486,7 +454,8 @@ abstract class StripeRepository {
         clientSecret: String,
         paymentIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
     ): PaymentIntent?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -494,7 +463,8 @@ abstract class StripeRepository {
         clientSecret: String,
         setupIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
     ): SetupIntent?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -526,4 +496,21 @@ abstract class StripeRepository {
         descriptorCode: String,
         requestOptions: ApiRequest.Options
     ): SetupIntent?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun retrievePaymentMethodMessage(
+        paymentMethods: List<String>,
+        amount: Int,
+        currency: String,
+        country: String,
+        locale: String,
+        logoColor: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentMethodMessage?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun retrieveElementsSession(
+        params: ElementsSessionParams,
+        options: ApiRequest.Options,
+    ): ElementsSession?
 }

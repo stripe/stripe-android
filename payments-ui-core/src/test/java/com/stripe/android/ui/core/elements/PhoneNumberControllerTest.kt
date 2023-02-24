@@ -2,6 +2,8 @@ package com.stripe.android.ui.core.elements
 
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,7 +46,7 @@ internal class PhoneNumberControllerTest {
 
         phoneNumberController.onValueChange("1")
         idleLooper()
-        assertThat(isComplete.last()).isTrue()
+        assertThat(isComplete.last()).isFalse()
 
         phoneNumberController.onValueChange("")
         idleLooper()
@@ -111,5 +113,35 @@ internal class PhoneNumberControllerTest {
 
         assertThat(phoneNumberController.getCountryCode()).isEqualTo("CA")
         assertThat(phoneNumberController.initialPhoneNumber).isEqualTo("1234567890")
+    }
+
+    @Test
+    fun `when phone number is less than expected length error is emitted`() {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initiallySelectedCountryCode = "US"
+        )
+
+        val isComplete = mutableListOf<Boolean>()
+        phoneNumberController.isComplete.asLiveData().observeForever {
+            isComplete.add(it)
+        }
+
+        val error = mutableListOf<FieldError?>()
+        phoneNumberController.error.asLiveData().observeForever {
+            error.add(it)
+        }
+
+        assertThat(isComplete.last()).isFalse()
+        assertThat(error.last()).isNull()
+
+        phoneNumberController.onValueChange("1")
+        idleLooper()
+        assertThat(isComplete.last()).isFalse()
+        assertThat(error.last()).isNotNull()
+
+        phoneNumberController.onValueChange("1234567891")
+        idleLooper()
+        assertThat(isComplete.last()).isTrue()
+        assertThat(error.last()).isNull()
     }
 }

@@ -27,7 +27,8 @@ data class ApiRequest internal constructor(
     val options: Options,
     private val appInfo: AppInfo? = null,
     private val apiVersion: String = ApiVersion.get().code,
-    private val sdkVersion: String = StripeSdkVersion.VERSION
+    private val sdkVersion: String = StripeSdkVersion.VERSION,
+    override val shouldCache: Boolean = false
 ) : StripeRequest() {
     private val query: String = QueryStringFactory.createFromParamsWithEmptyValues(params)
 
@@ -142,7 +143,8 @@ data class ApiRequest internal constructor(
         fun createGet(
             url: String,
             options: Options,
-            params: Map<String, *>? = null
+            params: Map<String, *>? = null,
+            shouldCache: Boolean = false,
         ): ApiRequest {
             return ApiRequest(
                 method = Method.GET,
@@ -151,14 +153,16 @@ data class ApiRequest internal constructor(
                 options = options,
                 appInfo = appInfo,
                 apiVersion = apiVersion,
-                sdkVersion = sdkVersion
+                sdkVersion = sdkVersion,
+                shouldCache = shouldCache
             )
         }
 
         fun createPost(
             url: String,
             options: Options,
-            params: Map<String, *>? = null
+            params: Map<String, *>? = null,
+            shouldCache: Boolean = false,
         ): ApiRequest {
             return ApiRequest(
                 method = Method.POST,
@@ -167,7 +171,8 @@ data class ApiRequest internal constructor(
                 options = options,
                 appInfo = appInfo,
                 apiVersion = apiVersion,
-                sdkVersion = sdkVersion
+                sdkVersion = sdkVersion,
+                shouldCache = shouldCache
             )
         }
 
@@ -190,6 +195,12 @@ data class ApiRequest internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        const val API_HOST = "https://api.stripe.com"
+        @Volatile
+        var apiTestHost: String? = null
+
+        val API_HOST: String
+            get() {
+                return apiTestHost ?: "https://api.stripe.com"
+            }
     }
 }

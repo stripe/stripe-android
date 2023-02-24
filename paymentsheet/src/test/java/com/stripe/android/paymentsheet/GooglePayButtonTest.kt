@@ -27,7 +27,7 @@ class GooglePayButtonTest {
     }
 
     private val primaryButton: PrimaryButton by lazy {
-        googlePayButton.viewBinding.primaryButton
+        googlePayButton.viewBinding.googlePayPrimaryButton
     }
 
     @BeforeTest
@@ -47,14 +47,14 @@ class GooglePayButtonTest {
             PrimaryButton.State.FinishProcessing {}
         )
         assertThat(primaryButton.isVisible).isTrue()
-        assertThat(googlePayButton.viewBinding.googlePayButtonIcon.isVisible).isFalse()
+        assertThat(googlePayButton.viewBinding.googlePayButtonContent.isVisible).isFalse()
 
         googlePayButton.updateState(
             PrimaryButton.State.Ready
         )
         assertThat(primaryButton.isVisible).isFalse()
         assertThat((primaryButton.background as GradientDrawable).color).isNotNull()
-        assertThat(googlePayButton.viewBinding.googlePayButtonIcon.isVisible).isTrue()
+        assertThat(googlePayButton.viewBinding.googlePayButtonContent.isVisible).isTrue()
     }
 
     @Test
@@ -68,7 +68,7 @@ class GooglePayButtonTest {
             "Processing…"
         )
         assertThat(primaryButton.isVisible).isTrue()
-        assertThat(googlePayButton.viewBinding.googlePayButtonIcon.isVisible).isFalse()
+        assertThat(googlePayButton.viewBinding.googlePayButtonContent.isVisible).isFalse()
     }
 
     @Test
@@ -84,29 +84,29 @@ class GooglePayButtonTest {
 
         assertThat(finishedProcessing).isTrue()
         assertThat(primaryButton.isVisible).isTrue()
-        assertThat(googlePayButton.viewBinding.googlePayButtonIcon.isVisible).isFalse()
+        assertThat(googlePayButton.viewBinding.googlePayButtonContent.isVisible).isFalse()
     }
 
     @Test
-    fun `not setting view state and not enabled should be 50% alpha`() {
+    fun `not setting view state and not enabled should be 50pct alpha`() {
         googlePayButton.isEnabled = false
-        assertThat(googlePayButton.viewBinding.googlePayButtonIcon.alpha)
+        assertThat(googlePayButton.viewBinding.googlePayButtonLayout.alpha)
             .isEqualTo(0.5f)
     }
 
     @Test
-    fun `ready view state and not enabled should be 50% alpha`() {
+    fun `ready view state and not enabled should be 50pct alpha`() {
         googlePayButton.updateState(PrimaryButton.State.Ready)
         googlePayButton.isEnabled = false
-        assertThat(googlePayButton.viewBinding.googlePayButtonIcon.alpha)
+        assertThat(googlePayButton.viewBinding.googlePayButtonLayout.alpha)
             .isEqualTo(0.5f)
     }
 
     @Test
-    fun `ready view state and enabled should be 100% alpha`() {
+    fun `ready view state and enabled should be 100pct alpha`() {
         googlePayButton.updateState(PrimaryButton.State.Ready)
         googlePayButton.isEnabled = true
-        assertThat(googlePayButton.viewBinding.googlePayButtonIcon.alpha)
+        assertThat(googlePayButton.viewBinding.googlePayButtonLayout.alpha)
             .isEqualTo(1.0f)
     }
 }

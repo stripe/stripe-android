@@ -8,19 +8,18 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.link.R
-import com.stripe.android.ui.core.elements.Html
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.text.Html
 
 @Preview
 @Composable
-fun LinkTerms(
+internal fun LinkTerms(
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center
 ) {
     Html(
-        html = stringResource(R.string.sign_up_terms),
-        imageGetter = emptyMap(),
-        color = MaterialTheme.paymentsColors.placeholderText,
+        html = stringResource(R.string.sign_up_terms).replaceHyperlinks(),
+        color = MaterialTheme.stripeColors.placeholderText,
         style = MaterialTheme.typography.subtitle1,
         modifier = modifier,
         urlSpanStyle = SpanStyle(
@@ -28,3 +27,11 @@ fun LinkTerms(
         )
     )
 }
+
+private fun String.replaceHyperlinks() = this.replace(
+    "<terms>",
+    "<a href=\"https://link.co/terms\">"
+).replace("</terms>", "</a>").replace(
+    "<privacy>",
+    "<a href=\"https://link.co/privacy\">"
+).replace("</privacy>", "</a>")

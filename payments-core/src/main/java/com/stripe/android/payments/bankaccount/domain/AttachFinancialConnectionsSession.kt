@@ -29,7 +29,8 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
             requestOptions = ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            expandFields = EXPAND_PAYMENT_METHOD
         )
     }.mapCatching { it ?: throw InternalError("Error attaching session to PaymentIntent") }
 
@@ -52,7 +53,12 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
             requestOptions = ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            expandFields = EXPAND_PAYMENT_METHOD
         )
     }.mapCatching { it ?: throw InternalError("Error attaching session to SetupIntent") }
+
+    private companion object {
+        private val EXPAND_PAYMENT_METHOD = listOf("payment_method")
+    }
 }

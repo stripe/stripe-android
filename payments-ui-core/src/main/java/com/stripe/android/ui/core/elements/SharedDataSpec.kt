@@ -15,5 +15,11 @@ internal data class SharedDataSpec(
     // If a form is empty, it must still have an EmptyFormSpec
     // field to get the form into a complete state (i.e. PayPal).
     @SerialName("fields")
-    val fields: ArrayList<FormItemSpec> = arrayListOf(EmptyFormSpec)
+    val fields: ArrayList<FormItemSpec> = arrayListOf(EmptyFormSpec),
+
+    @SerialName("next_action_spec")
+    val nextActionSpec: NextActionSpec? = null,
+
+    @SerialName("selector_icon")
+    val selectorIcon: SelectorIcon? = null,
 )

@@ -8,27 +8,30 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.CardNumberViewOnlyController
-import com.stripe.android.ui.core.elements.CountryConfig
-import com.stripe.android.ui.core.elements.CountryElement
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
-import com.stripe.android.ui.core.elements.EmailConfig
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.NameConfig
 import com.stripe.android.ui.core.elements.NameSpec
-import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
-import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.TranslationId
+import com.stripe.android.ui.core.elements.UpiElement
+import com.stripe.android.ui.core.elements.UpiSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
+import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SimpleTextElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -62,7 +65,8 @@ internal class TransformSpecToElementTest {
                 amount = null,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
-                context
+                context = context,
+                shippingValues = null
             )
     }
 
@@ -146,7 +150,7 @@ internal class TransformSpecToElementTest {
             as SimpleTextElement
 
         // Verify the correct config is setup for the controller
-        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_name)
+        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_full_name)
         assertThat(nameElement.identifier.v1).isEqualTo("simple")
         assertThat(nameElement.controller.showOptionalLabel).isTrue()
     }
@@ -193,8 +197,9 @@ internal class TransformSpecToElementTest {
                 amount = null,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
-                context,
-                viewOnlyFields = setOf(IdentifierSpec.CardNumber)
+                context = context,
+                viewOnlyFields = setOf(IdentifierSpec.CardNumber),
+                shippingValues = null
             )
 
         val formElements = transformSpecToElements.transform(
@@ -206,6 +211,26 @@ internal class TransformSpecToElementTest {
 
         assertThat(cardNumberElement.controller)
             .isInstanceOf(CardNumberViewOnlyController::class.java)
+    }
+
+    @Test
+    fun `Empty spec is transformed to single EmptyFormElement`() {
+        val formElement = transformSpecToElements.transform(
+            emptyList()
+        )
+
+        assertThat(formElement).containsExactly(EmptyFormElement())
+    }
+
+    @Test
+    fun `UPI spec is transformed into UPI element wrapped in section`() {
+        val upiSpec = UpiSpec()
+        val formElement = transformSpecToElements.transform(listOf(upiSpec))
+
+        val sectionElement = formElement.first() as SectionElement
+        val upiElement = sectionElement.fields.first() as UpiElement
+
+        assertThat(sectionElement.fields).containsExactly(upiElement)
     }
 
     companion object {
