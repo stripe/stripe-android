@@ -10,21 +10,19 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-class PaymentSheetContract :
-    ActivityResultContract<PaymentSheetContract.Args, PaymentSheetResult>() {
+internal class PaymentSheetContractV2 :
+    ActivityResultContract<PaymentSheetContractV2.Args, PaymentSheetResult>() {
+
     override fun createIntent(
         context: Context,
         input: Args
     ): Intent {
         val statusBarColor = (context as? Activity)?.window?.statusBarColor
-        val args = input.copy(statusBarColor = statusBarColor)
-        return Intent(context, PaymentSheetActivity::class.java).putExtra(EXTRA_ARGS, args.toV2())
+        return Intent(context, PaymentSheetActivity::class.java)
+            .putExtra(EXTRA_ARGS, input.copy(statusBarColor = statusBarColor))
     }
 
     override fun parseResult(
@@ -38,8 +36,8 @@ class PaymentSheetContract :
     }
 
     @Parcelize
-    data class Args internal constructor(
-        internal val clientSecret: ClientSecret,
+    data class Args(
+        internal val initializationMode: PaymentSheet.InitializationMode,
         internal val config: PaymentSheet.Configuration?,
         @ColorInt internal val statusBarColor: Int? = null,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
@@ -47,42 +45,10 @@ class PaymentSheetContract :
 
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
 
-        internal fun toV2(): PaymentSheetContractV2.Args {
-            return PaymentSheetContractV2.Args(
-                initializationMode = when (clientSecret) {
-                    is PaymentIntentClientSecret -> {
-                        PaymentSheet.InitializationMode.PaymentIntent(clientSecret.value)
-                    }
-                    is SetupIntentClientSecret -> {
-                        PaymentSheet.InitializationMode.SetupIntent(clientSecret.value)
-                    }
-                },
-                config = config,
-                statusBarColor = statusBarColor,
-                injectorKey = injectorKey,
-            )
-        }
-
         companion object {
             internal fun fromIntent(intent: Intent): Args? {
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
-
-            fun createPaymentIntentArgs(
-                clientSecret: String,
-                config: PaymentSheet.Configuration? = null
-            ) = Args(
-                clientSecret = PaymentIntentClientSecret(clientSecret),
-                config = config,
-            )
-
-            fun createSetupIntentArgs(
-                clientSecret: String,
-                config: PaymentSheet.Configuration? = null
-            ) = Args(
-                clientSecret = SetupIntentClientSecret(clientSecret),
-                config = config,
-            )
         }
     }
 

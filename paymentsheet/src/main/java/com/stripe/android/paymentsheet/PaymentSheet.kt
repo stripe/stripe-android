@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -14,7 +15,9 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
@@ -64,7 +67,10 @@ class PaymentSheet internal constructor(
         paymentIntentClientSecret: String,
         configuration: Configuration? = null
     ) {
-        paymentSheetLauncher.presentWithPaymentIntent(paymentIntentClientSecret, configuration)
+        paymentSheetLauncher.present(
+            mode = InitializationMode.PaymentIntent(paymentIntentClientSecret),
+            configuration = configuration,
+        )
     }
 
     /**
@@ -80,7 +86,53 @@ class PaymentSheet internal constructor(
         setupIntentClientSecret: String,
         configuration: Configuration? = null
     ) {
-        paymentSheetLauncher.presentWithSetupIntent(setupIntentClientSecret, configuration)
+        paymentSheetLauncher.present(
+            mode = InitializationMode.SetupIntent(setupIntentClientSecret),
+            configuration = configuration,
+        )
+    }
+
+    /**
+     * Present the payment sheet with an [InitializationMode].
+     *
+     * If the [InitializationMode] is [InitializationMode.PaymentIntent] or
+     * [InitializationMode.SetupIntent] and the underlying intent is already confirmed,
+     * [PaymentSheetResultCallback] will be invoked with [PaymentSheetResult.Completed].
+     *
+     * @param mode The [InitializationMode] to use.
+     * @param configuration An optional [PaymentSheet] configuration.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @JvmOverloads
+    fun present(
+        mode: InitializationMode,
+        configuration: Configuration? = null,
+    ) {
+        paymentSheetLauncher.present(mode, configuration)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed class InitializationMode : Parcelable {
+
+        internal abstract fun validate()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        class PaymentIntent(val clientSecret: String) : InitializationMode() {
+
+            override fun validate() {
+                PaymentIntentClientSecret(clientSecret).validate()
+            }
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        class SetupIntent(val clientSecret: String) : InitializationMode() {
+
+            override fun validate() {
+                SetupIntentClientSecret(clientSecret).validate()
+            }
+        }
     }
 
     /** Configuration for [PaymentSheet] **/
@@ -746,6 +798,20 @@ class PaymentSheet internal constructor(
          */
         fun configureWithSetupIntent(
             setupIntentClientSecret: String,
+            configuration: Configuration? = null,
+            callback: ConfigCallback
+        )
+
+        /**
+         * Configure the FlowController with an [InitializationMode].
+         *
+         * @param mode The [InitializationMode] to use.
+         * @param configuration An optional [PaymentSheet] configuration.
+         * @param callback called with the result of configuring the FlowController.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun configure(
+            mode: InitializationMode,
             configuration: Configuration? = null,
             callback: ConfigCallback
         )

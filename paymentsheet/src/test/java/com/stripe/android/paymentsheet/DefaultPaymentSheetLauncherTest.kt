@@ -44,7 +44,7 @@ class DefaultPaymentSheetLauncherTest {
                 }
 
                 moveToState(Lifecycle.State.RESUMED)
-                launcher.presentWithPaymentIntent("pi_fake")
+                launcher.present(mode = PaymentSheet.InitializationMode.PaymentIntent("pi_fake"))
                 assertThat(results)
                     .containsExactly(com.stripe.android.paymentsheet.PaymentSheetResult.Completed)
             }

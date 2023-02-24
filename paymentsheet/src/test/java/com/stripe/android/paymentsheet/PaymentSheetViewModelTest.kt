@@ -1266,7 +1266,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     private fun createViewModel(
-        args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
         customerPaymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
         customerRepository: CustomerRepository = FakeCustomerRepository(customerPaymentMethods),

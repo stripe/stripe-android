@@ -81,7 +81,7 @@ internal open class BasePaymentSheetViewModelInjectionTest {
         stripeIntent: StripeIntent,
         customerRepositoryPMs: List<PaymentMethod> = emptyList(),
         @InjectorKey injectorKey: String,
-        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
+        args: PaymentSheetContractV2.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): PaymentSheetViewModel = runBlocking {
         TestViewModelFactory.create { linkHandler, savedStateHandle ->
             PaymentSheetViewModel(
