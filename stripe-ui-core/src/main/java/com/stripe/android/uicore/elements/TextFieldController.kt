@@ -143,7 +143,7 @@ class SimpleTextFieldController constructor(
         _textField.value.state.getError()?.takeIf { visibleError }
     }
 
-    override val isComplete: Flow<Boolean> = _textField.map { it.state }.map { it.isComplete() }
+    override val isComplete: Flow<Boolean> = _textField.map { it.state.isComplete() }
 
     override val formFieldValue: Flow<FormFieldEntry> =
         _textField.map {
