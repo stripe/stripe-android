@@ -52,12 +52,12 @@ class TestMultiStepFieldsReloaded {
 
     private val newUser = TestParameters(
         paymentMethod = lpmRepository.fromCode("bancontact")!!,
-        Customer.New,
-        LinkState.Off,
-        GooglePayState.Off,
-        Currency.EUR,
-        IntentType.Pay,
-        Billing.Off,
+        customer = Customer.New,
+        linkState = LinkState.Off,
+        googlePayState = GooglePayState.Off,
+        currency = Currency.EUR,
+        intentType = IntentType.Pay,
+        billing = Billing.Off,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
         automatic = Automatic.Off,

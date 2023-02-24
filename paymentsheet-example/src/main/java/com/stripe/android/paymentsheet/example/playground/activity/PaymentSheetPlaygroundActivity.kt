@@ -15,7 +15,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.MenuProvider
 import androidx.core.view.isInvisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.material.snackbar.Snackbar
@@ -33,10 +36,13 @@ import com.stripe.android.paymentsheet.example.databinding.ActivityPaymentSheetP
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.model.InitializationType
 import com.stripe.android.paymentsheet.example.playground.model.Shipping
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -167,6 +173,25 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         )
         addressLauncher = AddressLauncher(this, ::onAddressLauncherResult)
 
+        viewBinding.initializationRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            val type = when (checkedId) {
+                R.id.normal_initialization_button -> InitializationType.Normal
+                R.id.deferred_initialization_button -> InitializationType.Deferred
+                else -> error("🤔")
+            }
+            viewModel.initializationType.value = type
+        }
+
+        viewBinding.modeRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            val checkoutMode = when (checkedId) {
+                R.id.mode_payment_button -> CheckoutMode.Payment
+                R.id.mode_payment_with_setup_button -> CheckoutMode.PaymentWithSetup
+                R.id.mode_setup_button -> CheckoutMode.Setup
+                else -> error("🤔")
+            }
+            viewModel.checkoutMode.value = checkoutMode
+        }
+
         viewBinding.currencySpinner.adapter =
             ArrayAdapter(
                 this,
@@ -185,6 +210,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             PaymentSheet.resetCustomer(this)
 
             setToggles(
+                initialization = Toggle.Initialization.default.toString(),
                 customer = Toggle.Customer.default.toString(),
                 link = Toggle.Link.default as Boolean,
                 googlePay = Toggle.GooglePay.default as Boolean,
@@ -201,7 +227,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         viewBinding.reloadButton.setOnClickListener {
+            val initializationType = viewModel.initializationType.value
+
             viewModel.storeToggleState(
+                initializationType = initializationType.value,
                 customer = customer.value,
                 link = linkEnabled,
                 googlePay = googlePayConfig != null,
@@ -216,15 +245,16 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
             lifecycleScope.launch {
                 viewModel.prepareCheckout(
-                    customer,
-                    currency,
-                    merchantCountryCode,
-                    mode,
-                    linkEnabled,
-                    setDefaultShippingAddress,
-                    setAutomaticPaymentMethods,
-                    settings.playgroundBackendUrl,
-                    intent.extras?.getStringArray(SUPPORTED_PAYMENT_METHODS_EXTRA)?.toList()
+                    initializationType = initializationType,
+                    customer = customer,
+                    currency = currency,
+                    merchantCountry = merchantCountryCode,
+                    mode = mode,
+                    linkEnabled = linkEnabled,
+                    setShippingAddress = setDefaultShippingAddress,
+                    setAutomaticPaymentMethod = setAutomaticPaymentMethods,
+                    backendUrl = settings.playgroundBackendUrl,
+                    supportedPaymentMethods = intent.extras?.getStringArray(SUPPORTED_PAYMENT_METHODS_EXTRA)?.toList(),
                 )
             }
         }
@@ -269,13 +299,17 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.readyToCheckout.observe(this) { isReady ->
-            if (isReady) {
-                viewBinding.completeCheckoutButton.isEnabled = true
-                viewBinding.shippingAddressButton.isEnabled = true
-                configureCustomCheckout()
-            } else {
-                disableViews()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                viewModel.readyToCheckout.collect { isReady ->
+                    if (isReady) {
+                        viewBinding.completeCheckoutButton.isEnabled = true
+                        viewBinding.shippingAddressButton.isEnabled = true
+                        configureCustomCheckout()
+                    } else {
+                        disableViews()
+                    }
+                }
             }
         }
 
@@ -310,6 +344,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         super.onResume()
         val savedToggles = viewModel.getSavedToggleState()
         setToggles(
+            initialization = savedToggles.initialization,
             customer = savedToggles.customer,
             link = savedToggles.link,
             googlePay = savedToggles.googlePay,
@@ -324,6 +359,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     }
 
     private fun setToggles(
+        initialization: String?,
         customer: String?,
         link: Boolean,
         googlePay: Boolean,
@@ -335,6 +371,11 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         setAutomaticPaymentMethods: Boolean,
         setDelayedPaymentMethods: Boolean
     ) {
+        when (initialization) {
+            InitializationType.Normal.value -> viewBinding.initializationRadioGroup.check(R.id.normal_initialization_button)
+            InitializationType.Deferred.value -> viewBinding.initializationRadioGroup.check(R.id.deferred_initialization_button)
+        }
+
         when (customer) {
             CheckoutCustomer.Guest.value -> viewBinding.customerRadioGroup.check(R.id.guest_customer_button)
             CheckoutCustomer.New.value -> viewBinding.customerRadioGroup.check(R.id.new_customer_button)
@@ -393,18 +434,55 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     }
 
     private fun startCompleteCheckout() {
-        val clientSecret = viewModel.clientSecret.value ?: return
-        viewBinding.customLabelTextField.clearFocus()
+        if (viewModel.initializationType.value == InitializationType.Normal) {
+            val clientSecret = viewModel.clientSecret.value ?: return
+            viewBinding.customLabelTextField.clearFocus()
 
-        if (viewModel.checkoutMode == CheckoutMode.Setup) {
-            paymentSheet.presentWithSetupIntent(
-                clientSecret,
-                makeConfiguration()
-            )
+            if (viewModel.checkoutMode.value == CheckoutMode.Setup) {
+                paymentSheet.presentWithSetupIntent(
+                    setupIntentClientSecret = clientSecret,
+                    configuration = makeConfiguration()
+                )
+            } else {
+                paymentSheet.presentWithPaymentIntent(
+                    paymentIntentClientSecret = clientSecret,
+                    configuration = makeConfiguration()
+                )
+            }
         } else {
-            paymentSheet.presentWithPaymentIntent(
-                clientSecret,
-                makeConfiguration()
+            val mode = when (viewModel.checkoutMode.value) {
+                CheckoutMode.Setup -> {
+                    PaymentSheet.IntentConfiguration.Mode.Setup(
+                        currency = currency.value,
+                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                    )
+                }
+                CheckoutMode.Payment -> {
+                    PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 12345,
+                        currency = currency.value,
+                    )
+                }
+                CheckoutMode.PaymentWithSetup -> {
+                    PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 12345,
+                        currency = currency.value,
+                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                    )
+                }
+            }
+
+            val initMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = mode,
+                    customer = viewModel.customerConfig.value?.id,
+                    paymentMethodTypes = viewModel.paymentMethodTypes.value,
+                )
+            )
+
+            paymentSheet.present(
+                mode = initMode,
+                configuration = makeConfiguration(),
             )
         }
     }
@@ -473,19 +551,55 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     }
 
     private fun configureCustomCheckout() {
-        val clientSecret = viewModel.clientSecret.value ?: return
+        if (viewModel.initializationType.value == InitializationType.Normal) {
+            val clientSecret = viewModel.clientSecret.value ?: return
 
-        if (viewModel.checkoutMode == CheckoutMode.Setup) {
-            flowController.configureWithSetupIntent(
-                clientSecret,
-                makeConfiguration(),
-                ::onConfigured
+            val mode = if (viewModel.checkoutMode.value == CheckoutMode.Payment) {
+                PaymentSheet.InitializationMode.PaymentIntent(clientSecret)
+            } else {
+                PaymentSheet.InitializationMode.SetupIntent(clientSecret)
+            }
+
+            flowController.configure(
+                mode = mode,
+                configuration = makeConfiguration(),
+                callback = ::onConfigured,
             )
         } else {
-            flowController.configureWithPaymentIntent(
-                clientSecret,
-                makeConfiguration(),
-                ::onConfigured
+            val mode = when (viewModel.checkoutMode.value) {
+                CheckoutMode.Setup -> {
+                    PaymentSheet.IntentConfiguration.Mode.Setup(
+                        currency = "usd",
+                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                    )
+                }
+                CheckoutMode.Payment -> {
+                    PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 12345,
+                        currency = "usd",
+                    )
+                }
+                CheckoutMode.PaymentWithSetup -> {
+                    PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 12345,
+                        currency = "usd",
+                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                    )
+                }
+            }
+
+            val initMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = mode,
+                    customer = viewModel.customerConfig.value?.id,
+                    paymentMethodTypes = viewModel.paymentMethodTypes.value,
+                )
+            )
+
+            flowController.configure(
+                mode = initMode,
+                configuration = makeConfiguration(),
+                callback = ::onConfigured,
             )
         }
     }
