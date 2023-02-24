@@ -20,7 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.camera.framework.time.asEpochMillisecondsClockMark
 import com.stripe.android.core.injection.IOContext
@@ -42,6 +41,7 @@ import com.stripe.android.identity.navigation.IndividualWelcomeDestination
 import com.stripe.android.identity.navigation.clearDataAndNavigateUp
 import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
+import com.stripe.android.identity.ui.IdentityTheme
 import com.stripe.android.identity.ui.IdentityTopBarState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
@@ -183,7 +183,7 @@ internal class IdentityActivity :
             var topBarState by remember {
                 mutableStateOf(IdentityTopBarState.GO_BACK)
             }
-            MdcTheme {
+            IdentityTheme {
                 IdentityNavGraph(
                     identityViewModel = identityViewModel,
                     fallbackUrlLauncher = this,
