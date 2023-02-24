@@ -214,6 +214,14 @@ public final class com/stripe/android/identity/networking/models/VerificationPag
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/identity/networking/models/VerificationPageStaticContentCountryNotListedPage$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentCountryNotListedPage;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentCountryNotListedPage;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/identity/networking/models/VerificationPageStaticContentDocumentCaptureModels$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentDocumentCaptureModels;
@@ -243,6 +251,14 @@ public final class com/stripe/android/identity/networking/models/VerificationPag
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentIndividualPage;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentIndividualPage;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/networking/models/VerificationPageStaticContentIndividualWelcomePage$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentIndividualWelcomePage;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentIndividualWelcomePage;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

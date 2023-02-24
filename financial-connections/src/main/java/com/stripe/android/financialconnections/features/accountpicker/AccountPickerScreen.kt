@@ -107,7 +107,7 @@ private fun AccountPickerContent(
     ) {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> AccountPickerLoading()
-            is Success -> when (payload().skipAccountSelection) {
+            is Success -> when (payload().shouldSkipPane) {
                 // ensures account picker is not shown momentarily
                 // if account selection should be skipped.
                 true -> AccountPickerLoading()
@@ -154,8 +154,8 @@ private fun AccountPickerContent(
 @Composable
 private fun AccountPickerLoading() {
     LoadingContent(
-        stringResource(R.string.stripe_account_picker_loading_title),
-        stringResource(R.string.stripe_account_picker_loading_desc)
+        title = stringResource(R.string.stripe_account_picker_loading_title),
+        content = stringResource(R.string.stripe_account_picker_loading_desc)
     )
 }
 

@@ -286,7 +286,9 @@ class TestHardCodedLpms {
                 paymentMethod = lpmRepository.fromCode("cashapp")!!,
                 currency = Currency.USD,
                 merchantCountryCode = "US",
-                authorizationAction = AuthorizeAction.Fail,
+                authorizationAction = AuthorizeAction.Fail(
+                    expectedError = "The customer declined this payment.",
+                ),
                 supportedPaymentMethods = listOf("card", "cashapp"),
             ),
         )

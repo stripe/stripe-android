@@ -20,7 +20,7 @@ jobs:
           ref: master
       - uses: ./.github/actions/stripe_setup
       - name: Build in master
-        run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-unsigned.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-master.apk
+        run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-master.apk
       - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/stripe_setup
       - name: Build from PR
-        run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-unsigned.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-pr.apk
+        run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-pr.apk
       - name: Upload APK
         uses: actions/upload-artifact@v3
         with:

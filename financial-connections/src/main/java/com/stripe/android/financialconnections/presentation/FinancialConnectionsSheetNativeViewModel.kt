@@ -27,8 +27,11 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
+import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
+import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
@@ -70,6 +73,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     Message.ClearPartnerWebAuth -> {
                         setState { copy(webAuthFlow = Uninitialized) }
                     }
+
+                    is Terminate -> closeAuthFlow(
+                        earlyTerminationCause = message.cause
+                    )
                 }
             }
         }
@@ -91,6 +98,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         copy(webAuthFlow = Success(receivedUrl))
                     }
                 }
+
                 uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     baseUrl(applicationId)
@@ -192,9 +200,13 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         closeAuthFlow(closeAuthFlowError = null)
     }
 
-    fun onCloseFromErrorClick(error: Throwable) = closeAuthFlow(closeAuthFlowError = error)
+    fun onCloseFromErrorClick(error: Throwable) = closeAuthFlow(
+        closeAuthFlowError = error
+    )
 
-    fun onCloseConfirm() = closeAuthFlow(closeAuthFlowError = null)
+    fun onCloseConfirm() = closeAuthFlow(
+        closeAuthFlowError = null
+    )
 
     fun onCloseDismiss() = setState { copy(showCloseDialog = false) }
 
@@ -214,11 +226,16 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      * 3. User closes without an error, and fetching accounts returns NO accounts. That's a cancel.
      */
     private fun closeAuthFlow(
+        earlyTerminationCause: Terminate.EarlyTerminationCause? = null,
         closeAuthFlowError: Throwable? = null
     ) {
         viewModelScope.launch {
             kotlin
-                .runCatching { completeFinancialConnectionsSession() }
+                .runCatching {
+                    completeFinancialConnectionsSession(
+                        terminalError = earlyTerminationCause?.value
+                    )
+                }
                 .onSuccess { session ->
                     eventTracker.track(
                         Complete(
@@ -227,6 +244,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         )
                     )
                     when {
+                        session.isCustomManualEntryError() -> {
+                            val result = Failed(CustomManualEntryRequiredError())
+                            setState { copy(viewEffect = Finish(result)) }
+                        }
+
                         session.accounts.data.isNotEmpty() ||
                             session.paymentAccount != null ||
                             session.bankAccountToken != null -> {

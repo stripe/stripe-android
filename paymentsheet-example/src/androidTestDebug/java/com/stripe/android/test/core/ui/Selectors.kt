@@ -46,7 +46,7 @@ class Selectors(
     testParameters: TestParameters
 ) {
     val reset = EspressoIdButton(R.id.reset_button)
-    val continueButton = EspressoIdButton(R.id.primary_button)
+    val continueButton = BuyButton(composeTestRule)
     val complete = EspressoLabelIdButton(R.string.checkout_complete)
     val reload = EspressoLabelIdButton(R.string.reload_paymentsheet)
     val multiStepSelect = EspressoIdButton(R.id.payment_method)
@@ -105,9 +105,7 @@ class Selectors(
         "-" +
         testParameters.intentType.name
 
-    val buyButton = BuyButton(device)
-
-    val editButton = EditButton(device)
+    val buyButton = BuyButton(composeTestRule)
 
     val addPaymentMethodButton = AddPaymentMethodButton(device)
 
@@ -184,7 +182,7 @@ class Selectors(
         .getInstalledApplications(PackageManager.GET_META_DATA)
 
     val authorizeAction = when (testParameters.authorizationAction) {
-        AuthorizeAction.Authorize -> {
+        is AuthorizeAction.Authorize -> {
             object : UiAutomatorText(
                 label = testParameters.authorizationAction.text,
                 className = "android.widget.Button",
@@ -203,7 +201,7 @@ class Selectors(
                 }
             }
         }
-        AuthorizeAction.Cancel -> {
+        is AuthorizeAction.Cancel -> {
             object : UiAutomatorText(
                 label = testParameters.authorizationAction.text,
                 className = "android.widget.Button",
@@ -214,7 +212,7 @@ class Selectors(
                 }
             }
         }
-        AuthorizeAction.Fail -> {
+        is AuthorizeAction.Fail -> {
             object : UiAutomatorText(
                 label = testParameters.authorizationAction.text,
                 className = "android.widget.Button",

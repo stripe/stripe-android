@@ -23,6 +23,8 @@
   <string name="klarna_pay_later">用 Klarna 延後支付。</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="p24_bank">Przelewy24 銀行</string>
+  <!-- PayPal mandate text -->
+  <string name="paypal_mandate">確認您的 PayPal 付款，即表示您允許 %s 按照他們的條款從您的 PayPal 扣取未來款項。</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">保存以用於未來的%s付款</string>
   <!-- Button title to open camera to scan credit/debit card -->

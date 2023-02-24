@@ -1,23 +1,11 @@
-plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-    id 'com.google.firebase.appdistribution'
-    id 'com.google.gms.google-services'
-}
+apply from: configs.androidApplication
 
-ext {
-    retrofitVersion = '2.9.0'
-}
+apply plugin: 'com.google.firebase.appdistribution'
+apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
     defaultConfig {
         applicationId "com.stripe.android.financialconnections.example"
-        minSdk 21
-        targetSdk rootProject.ext.compileSdkVersion
-        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -32,15 +20,6 @@ android {
                 groups = "financial-connections"
             }
         }
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildFeatures {
@@ -50,10 +29,6 @@ android {
 
     composeOptions {
         kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
-    }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
     }
 }
 

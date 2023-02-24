@@ -18,9 +18,13 @@ internal data class VerificationPage(
     @SerialName("document_select")
     val documentSelect: VerificationPageStaticContentDocumentSelectPage,
     @SerialName("individual")
-    val individual: VerificationPageStaticContentIndividualPage? = null,
+    val individual: VerificationPageStaticContentIndividualPage,
+    @SerialName("individual_welcome")
+    val individualWelcome: VerificationPageStaticContentIndividualWelcomePage,
     @SerialName("selfie")
     val selfieCapture: VerificationPageStaticContentSelfieCapturePage? = null,
+    @SerialName("country_not_listed")
+    val countryNotListedPage: VerificationPageStaticContentCountryNotListedPage,
     /* The short-lived URL that can be used in the case that the client cannot support the VerificationSession. */
     @SerialName("fallback_url")
     val fallbackUrl: String,

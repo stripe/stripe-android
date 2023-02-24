@@ -21,6 +21,7 @@ stages:
     workflows:
       - check: {}
       - test: {}
+      - run-instrumentation-tests: {}
 
 workflows:
   check:
@@ -49,7 +50,48 @@ workflows:
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
       - cache-push@2: {}
-
+  maestro-financial-connections:
+    steps:
+      - avd-manager@1: {}
+      - activate-ssh-key@4:
+          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+      - git-clone@7.0: {}
+      - cache-pull@2: {}
+      - script@1:
+          inputs:
+            - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
+      - wait-for-android-emulator@1: {}
+      - script-runner@0:
+          title: Execute Maestro tests
+          inputs:
+            - file_path: ./scripts/execute_maestro_tests.sh
+      - slack@3:
+          is_always_run: true
+          inputs:
+          - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+          - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+      - custom-test-results-export@0:
+          inputs:
+            - search_pattern: '*/maestroReport.xml'
+            - test_name: Maestro tests
+      - deploy-to-bitrise-io@2: {}
+      - cache-push@2: {}
+  run-instrumentation-tests:
+    steps:
+      - avd-manager@1: { }
+      - activate-ssh-key@4:
+          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+      - git-clone@7.0: { }
+      - cache-pull@2: { }
+      - script@1:
+          inputs:
+            - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
+      - wait-for-android-emulator@1: { }
+      - script-runner@0:
+          title: Execute instrumentation tests
+          inputs:
+            - file_path: ./scripts/execute_instrumentation_tests.sh
+      - cache-push@2: { }
 meta:
   bitrise.io:
     stack: linux-docker-android-20.04

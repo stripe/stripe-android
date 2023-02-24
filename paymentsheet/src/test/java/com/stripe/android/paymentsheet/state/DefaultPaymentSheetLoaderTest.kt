@@ -23,7 +23,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
@@ -453,6 +453,26 @@ internal class DefaultPaymentSheetLoaderTest {
                 .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
+    // PayPal isn't supported as a saved payment method due to issues with on-session.
+    // See: https://docs.google.com/document/d/1_bCPJXxhV4Kdgy7LX7HPwpZfElN3a2DcYUooiWC9SgM
+    @Test
+    fun `load() with customer should filter out PayPal`() = runTest {
+        val result = createPaymentSheetLoader(
+            customerRepo = FakeCustomerRepository(
+                listOf(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    PaymentMethodFixtures.PAYPAL_PAYMENT_METHOD,
+                )
+            )
+        ).load(
+            PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) as PaymentSheetLoader.Result.Success
+
+        assertThat(result.state.customerPaymentMethods)
+            .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+    }
+
     @Test
     fun `load() when PaymentIntent has invalid status should return null`() =
         runTest {
@@ -679,7 +699,7 @@ internal class DefaultPaymentSheetLoaderTest {
             googlePayRepositoryFactory = {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
             },
-            stripeIntentRepository = StripeIntentRepository.Static(stripeIntent),
+            elementsSessionRepository = ElementsSessionRepository.Static(stripeIntent),
             stripeIntentValidator = StripeIntentValidator(),
             customerRepository = customerRepo,
             lpmResourceRepository = lpmResourceRepository,

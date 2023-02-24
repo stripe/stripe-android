@@ -51,7 +51,7 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -84,7 +84,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     eventReporter: EventReporter,
     // Properties provided through injection
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
-    private val stripeIntentRepository: StripeIntentRepository,
+    private val elementsSessionRepository: ElementsSessionRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val paymentSheetLoader: PaymentSheetLoader,
     customerRepository: CustomerRepository,
@@ -197,6 +197,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override val shouldCompleteLinkFlowInline: Boolean = true
+
+    fun handleLinkPressed() {
+        linkHandler.launchLink()
+    }
 
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
@@ -432,10 +436,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
             runCatching {
-                stripeIntentRepository.get(args.clientSecret)
+                elementsSessionRepository.get(args.clientSecret)
             }.fold(
-                onSuccess = {
-                    processPayment(it.intent, paymentResult)
+                onSuccess = { session ->
+                    processPayment(session.stripeIntent, paymentResult)
                 },
                 onFailure = ::onFatal
             )

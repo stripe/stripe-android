@@ -3,10 +3,12 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -14,6 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -58,7 +61,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,19 +68,20 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
+@Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentOptionsActivityTest {
 
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<PaymentOptionsActivity>()
+    val composeTestRule = createEmptyComposeRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -371,31 +374,25 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `notes visibility is visible`() {
+    fun `notes visibility is set correctly`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent()
         ).use {
-            it.onActivity { activity ->
-                viewModel.updateBelowButtonText(
-                    ApplicationProvider.getApplicationContext<Context>().getString(
-                        R.string.stripe_paymentsheet_payment_method_us_bank_account
-                    )
-                )
-                assertThat(activity.viewBinding.notes.isVisible).isTrue()
-            }
-        }
-    }
+            it.onActivity {
+                val text = "a below-button text"
 
-    @Test
-    fun `notes visibility is gone`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity { activity ->
+                viewModel.updateBelowButtonText(text)
+
+                composeTestRule
+                    .onNodeWithText(text)
+                    .assertIsDisplayed()
+
                 viewModel.updateBelowButtonText(null)
-                assertThat(activity.viewBinding.notes.isVisible).isFalse()
+
+                composeTestRule
+                    .onNodeWithText(text)
+                    .assertDoesNotExist()
             }
         }
     }
@@ -445,22 +442,21 @@ internal class PaymentOptionsActivityTest {
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
     }
 
-    @Ignore("Figure out why this times out when run with other tests")
     @Test
     fun `Clears error on user selection`() {
         val scenario = activityScenario()
         scenario.launch(createIntent()).onActivity { activity ->
-            viewModel.onError("some error")
-            assertThat(activity.viewBinding.message.isVisible).isTrue()
+            val text = "some error"
+            viewModel.onError(text)
 
             composeTestRule
-                .onNodeWithText("some error")
-                .assertExists()
+                .onNodeWithText(text)
+                .assertIsDisplayed()
 
             viewModel.onUserSelection()
 
             composeTestRule
-                .onNodeWithText("some error")
+                .onNodeWithText(text)
                 .assertDoesNotExist()
         }
     }

@@ -219,6 +219,11 @@ internal class LinkHandler @Inject constructor(
         }
     }
 
+    fun launchLink() {
+        val config = linkConfiguration.value ?: return
+        launchLink(config, launchedDirectly = false)
+    }
+
     fun launchLink(
         configuration: LinkPaymentLauncher.Configuration,
         launchedDirectly: Boolean,

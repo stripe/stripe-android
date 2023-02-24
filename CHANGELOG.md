@@ -2,6 +2,20 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### StripeCardScan
+[FIXED][6253](https://github.com/stripe/stripe-android/pull/6253) Use the full screen card scanner to alleviate fragment crashes
+
+## 20.19.3 - 2023-02-13
+
+### Financial Connections
+* Stability and efficiency improvements.
+
+## 20.19.2 - 2023-02-06
+
+### PaymentSheet
+[ADDED][6174](https://github.com/stripe/stripe-android/pull/6174) Make PaymentLauncher.create methods Java-friendly.
+[FIXED][6172](https://github.com/stripe/stripe-android/pull/6172) Centers PaymentSheet on tablets.
+
 ## 20.19.1 - 2023-01-30
 
 ### PaymentSheet

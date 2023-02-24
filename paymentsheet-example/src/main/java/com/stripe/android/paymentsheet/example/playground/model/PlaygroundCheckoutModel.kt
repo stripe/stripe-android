@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.model
 
+import androidx.annotation.Keep
+import com.google.gson.annotations.SerializedName
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.serialization.Serializable
 
@@ -59,22 +61,36 @@ sealed class CheckoutCustomer(val value: String) {
 }
 
 @Serializable
+@Keep
 data class CheckoutRequest(
+    @SerializedName("customer")
     val customer: String,
+    @SerializedName("currency")
     val currency: String,
+    @SerializedName("mode")
     val mode: String,
+    @SerializedName("set_shipping_address")
     val set_shipping_address: Boolean,
+    @SerializedName("automatic_payment_methods")
     val automatic_payment_methods: Boolean,
+    @SerializedName("use_link")
     val use_link: Boolean,
+    @SerializedName("merchant_country_code")
     val merchant_country_code: String,
+    @SerializedName("supported_payment_methods")
     val supported_payment_methods: List<String>?
 )
 
 @Serializable
+@Keep
 data class CheckoutResponse(
+    @SerializedName("publishableKey")
     val publishableKey: String,
+    @SerializedName("intentClientSecret")
     val intentClientSecret: String,
+    @SerializedName("customerId")
     val customerId: String? = null,
+    @SerializedName("customerEphemeralKeySecret")
     val customerEphemeralKeySecret: String? = null
 ) {
     fun makeCustomerConfig() =

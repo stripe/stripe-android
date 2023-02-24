@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -27,6 +26,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -59,8 +59,17 @@ internal fun PaymentMethodsUI(
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
 ) {
+    // This is to fix an issue in tests involving this composable
+    // where the test would succeed when run in isolation, but would
+    // fail when run as part of test suite.
+    val inspectionMode = LocalInspectionMode.current
+
     LaunchedEffect(selectedIndex) {
-        state.animateScrollToItem(selectedIndex)
+        if (inspectionMode) {
+            state.scrollToItem(selectedIndex)
+        } else {
+            state.animateScrollToItem(selectedIndex)
+        }
     }
 
     BoxWithConstraints(
@@ -119,7 +128,7 @@ internal fun calculateViewWidth(
     numberOfPaymentMethods: Int
 ): Dp {
     val targetWidth = maxWidth - (Spacing.carouselOuterPadding * 2)
-    val minItemWidth = 100.dp
+    val minItemWidth = 90.dp
 
     val minimumCardsWidth = minItemWidth * numberOfPaymentMethods
     val spacingWidth = Spacing.carouselInnerPadding * (numberOfPaymentMethods - 1)
@@ -129,11 +138,15 @@ internal fun calculateViewWidth(
         // Stretch cards to fill entire width
         (targetWidth - spacingWidth) / numberOfPaymentMethods
     } else {
-        computeItemWidthWhenExceedingMaxWidth(
-            availableWidth = targetWidth,
-            minItemWidth = minItemWidth,
-            spacing = Spacing.carouselInnerPadding,
-        )
+        // Naively finds the minimum item width for the target peek amount
+        listOf(.3f, .4f, .5f).minOf { lastCardPeekAmount ->
+            computeItemWidthWhenExceedingMaxWidth(
+                availableWidth = targetWidth,
+                minItemWidth = minItemWidth,
+                spacing = Spacing.carouselInnerPadding,
+                lastCardPeekAmount = lastCardPeekAmount,
+            )
+        }
     }
     return viewWidth
 }
@@ -142,16 +155,18 @@ private fun computeItemWidthWhenExceedingMaxWidth(
     availableWidth: Dp,
     minItemWidth: Dp,
     spacing: Dp,
+    lastCardPeekAmount: Float,
 ): Dp {
     val itemWithSpacing = minItemWidth + spacing
 
-    val remainingWidthAfterAddingFirstCard = availableWidth - minItemWidth
-    val numberOfAdditionalCards = (remainingWidthAfterAddingFirstCard / itemWithSpacing).toInt()
+    val peekingCardWidth = (minItemWidth.value * lastCardPeekAmount).dp
+    val remainingWidthAfterAddingFixedCards = availableWidth - minItemWidth - peekingCardWidth
+    val numberOfAdditionalCards = (remainingWidthAfterAddingFixedCards / itemWithSpacing).toInt()
 
-    val visibleCards = numberOfAdditionalCards + 1
+    val visibleCards = numberOfAdditionalCards + 1 + lastCardPeekAmount
     val overallSpacing = spacing * numberOfAdditionalCards
 
-    return (availableWidth - overallSpacing) / visibleCards
+    return ((availableWidth - overallSpacing).value / visibleCards).dp
 }
 
 @Composable
@@ -186,7 +201,6 @@ internal fun PaymentMethodUI(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
                 .selectable(
                     selected = isSelected,
                     enabled = isEnabled,

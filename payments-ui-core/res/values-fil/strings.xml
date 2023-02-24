@@ -23,6 +23,8 @@
   <string name="klarna_pay_later">Magbayad sa ibang pagkakataon gamit ang Klarna.</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="p24_bank">Bangko ng Przelewy24</string>
+  <!-- PayPal mandate text -->
+  <string name="paypal_mandate">Sa pagkumpirma sa iyong pagbabayad sa PayPal, pinapayagan mo ang %s na singilin ang iyong PayPal account para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">I-save para sa mga pagbabayad sa %s sa hinaharap</string>
   <!-- Button title to open camera to scan credit/debit card -->

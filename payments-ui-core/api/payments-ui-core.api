@@ -163,15 +163,6 @@ public final class com/stripe/android/ui/core/elements/CardDetailsSectionSpec$Co
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public abstract class com/stripe/android/ui/core/elements/CardNumberController : com/stripe/android/uicore/elements/SectionFieldErrorController, com/stripe/android/uicore/elements/TextFieldController {
-	public static final field $stable I
-	public fun ComposeUI-MxjM1cc (ZLcom/stripe/android/uicore/elements/SectionFieldElement;Landroidx/compose/ui/Modifier;Ljava/util/Set;Lcom/stripe/android/uicore/elements/IdentifierSpec;IILandroidx/compose/runtime/Composer;I)V
-	public abstract fun getCardBrandFlow ()Lkotlinx/coroutines/flow/Flow;
-	public abstract fun getCardScanEnabled ()Z
-	public fun getEnabled ()Z
-	public final fun onCardScanResult (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult;)V
-}
-
 public abstract class com/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/ui/core/elements/ConfirmResponseStatusSpecs$Companion;
@@ -596,9 +587,6 @@ public final class com/stripe/android/ui/core/elements/SaveForFutureUseSpec$$ser
 
 public final class com/stripe/android/ui/core/elements/SaveForFutureUseSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/SectionElementUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/SimpleDialogElementUIKt {

@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,18 +16,26 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -133,7 +143,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                         .padding(16.dp)
                 ) {
                     NativeOverrideSection()
-                    TestModeSection(selectedMode, onModeSelected)
+                    ModeSection(selectedMode, onModeSelected)
                     FlowSection(selectedFlow, onFlowSelected)
                     if (state.loading) {
                         LinearProgressIndicator(
@@ -211,29 +221,51 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun TestModeSection(
+    private fun ModeSection(
         selectedOption: Mode,
         onOptionSelected: (Mode) -> Unit
     ) {
+        var expanded by remember { mutableStateOf(false) }
+        val items = Mode.values()
         Text(
             text = "Mode",
             style = MaterialTheme.typography.h6.merge(),
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Mode.values().forEach { text ->
-                RadioButton(
-                    modifier = Modifier
-                        .semantics { testTagsAsResourceId = true }
-                        .testTag("${text.name}_checkbox"),
-                    selected = (text == selectedOption),
-                    onClick = { onOptionSelected(text) }
-                )
-                Text(
-                    text = text.name,
-                    style = MaterialTheme.typography.body1.merge(),
-                )
+        val icon = if (expanded)
+            Icons.Filled.KeyboardArrowUp
+        else
+            Icons.Filled.KeyboardArrowDown
+        Box {
+            OutlinedTextField(
+                readOnly = true,
+                value = selectedOption.name,
+                onValueChange = { },
+                modifier = Modifier
+                    .fillMaxWidth(),
+                trailingIcon = {
+                    Icon(icon, "Mode_Dropdown_Icon",
+                        Modifier.clickable { expanded = !expanded })
+                }
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                items.forEachIndexed { index, mode ->
+                    DropdownMenuItem(
+                        modifier = Modifier
+                            .semantics { testTagsAsResourceId = true }
+                            .testTag("${mode.name}_checkbox"),
+                        onClick = {
+                            onOptionSelected(items[index])
+                            expanded = false
+                        }) {
+                        Text(text = mode.name)
+
+                    }
+                }
             }
         }
     }

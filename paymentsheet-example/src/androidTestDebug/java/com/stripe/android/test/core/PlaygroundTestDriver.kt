@@ -6,8 +6,10 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -26,7 +28,6 @@ import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.test.core.ui.BrowserUI
-import com.stripe.android.test.core.ui.EspressoText
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
 import org.junit.Assume
@@ -105,6 +106,13 @@ class PlaygroundTestDriver(
         }
 
         closeSoftKeyboard()
+
+        runCatching {
+            // We need to wait for the built in debounce time for filling in the link email.
+            composeTestRule.waitUntil(timeoutMillis = 1100L) {
+                false
+            }
+        }
 
         composeTestRule.waitUntil(timeoutMillis = 5000L) {
             selectors.continueButton.checkEnabled()
@@ -264,10 +272,16 @@ class PlaygroundTestDriver(
     }
 
     internal fun pressEdit() {
-        selectors.editButton.apply {
-            waitProcessingComplete()
-            click()
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodesWithText("EDIT")
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
+
+        composeTestRule
+            .onNodeWithText("EDIT")
+            .performClick()
     }
 
     /**
@@ -373,9 +387,7 @@ class PlaygroundTestDriver(
 
     private fun doAuthorization() {
         selectors.apply {
-            if (testParameters.authorizationAction != null
-                && this.authorizeAction != null
-            ) {
+            if (testParameters.authorizationAction != null && authorizeAction != null) {
                 // If a specific browser is requested we will use it, otherwise, we will
                 // select the first browser found
                 val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
@@ -390,11 +402,10 @@ class PlaygroundTestDriver(
 
                 blockUntilAuthorizationPageLoaded()
 
-                if(authorizeAction.exists()){
+                if (authorizeAction.exists()) {
                     authorizeAction.click()
-                }
+                } else if (!authorizeAction.exists()) {
                 // Buttons aren't showing the same way each time in the web page.
-                else if(!authorizeAction.exists()){
                     object : UiAutomatorText(
                         label = requireNotNull(testParameters.authorizationAction).text,
                         className = "android.widget.TextView",
@@ -403,16 +414,16 @@ class PlaygroundTestDriver(
                     Log.e("Stripe", "Fail authorization was a text view not a button this time")
                 }
 
-                when (testParameters.authorizationAction) {
-                    AuthorizeAction.Authorize -> {}
-                    AuthorizeAction.Cancel -> {
+                when (val authAction = testParameters.authorizationAction) {
+                    is AuthorizeAction.Authorize -> {}
+                    is AuthorizeAction.Cancel -> {
                         buyButton.apply {
                             waitProcessingComplete()
                             isEnabled()
                             isDisplayed()
                         }
                     }
-                    AuthorizeAction.Fail -> {
+                    is AuthorizeAction.Fail -> {
                         buyButton.apply {
                             waitProcessingComplete()
                             isEnabled()
@@ -420,11 +431,13 @@ class PlaygroundTestDriver(
                         }
 
                         // The text comes after the buy button animation is complete
-                        // TODO: This string gets localized.
-                        EspressoText(
-                            "We are unable to authenticate your payment method. Please " +
-                                "choose a different payment method and try again."
-                        ).isDisplayed()
+                        composeTestRule.waitUntil {
+                            runCatching {
+                                composeTestRule
+                                    .onNodeWithText(authAction.expectedError)
+                                    .assertIsDisplayed()
+                            }.isSuccess
+                        }
                     }
                     null -> {}
                 }

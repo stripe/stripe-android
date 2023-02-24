@@ -32,6 +32,13 @@ internal val VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         "title": "mlgb.band uses Stripe to verify your identity",
         "scroll_to_continue_button_text": "Scroll to consent"
       },
+      "country_not_listed": {
+        "address_from_other_country_text_button_text": "Have an Address from another country?",
+        "body": "The countries not listed are not supported yet. Unfortunately, we cannot verify your identity.",
+        "cancel_button_text": "Cancel verification",
+        "id_from_other_country_text_button_text": "Have an ID from another country?",
+        "title": "We cannot verify your identity"
+      },
       "document_capture": {
         "autocapture_timeout": 8000,
         "file_purpose": "identity_private",
@@ -60,6 +67,57 @@ internal val VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         "title": "Which form of identification do you want to use?"
       },
       "fallback_url": "https://verify.stripe.com/start/test_YWNjdF8xSU84aDNFQWphT2tpdUdNLF9MTjg5dFZtRWV1T1c1QXBxMkJ6MTUwZlI5c3JtTE5U0100BzkFlqqD",
+      "individual": {
+        "address_countries": {
+          "AT": "Austria",
+          "AU": "Australia",
+          "BE": "Belgium",
+          "BR": "Brazil",
+          "CA": "Canada",
+          "CH": "Switzerland",
+          "CZ": "Czech Republic",
+          "DE": "Germany",
+          "DK": "Denmark",
+          "ES": "Spain",
+          "FI": "Finland",
+          "FR": "France",
+          "GB": "United Kingdom",
+          "HK": "Hong Kong",
+          "ID": "Indonesia",
+          "IE": "Ireland",
+          "IT": "Italy",
+          "LU": "Luxembourg",
+          "MT": "Malta",
+          "MX": "Mexico",
+          "MY": "Malaysia",
+          "NL": "Netherlands",
+          "NO": "Norway",
+          "PL": "Poland",
+          "PT": "Portugal",
+          "RO": "Romania",
+          "SE": "Sweden",
+          "SG": "Singapore",
+          "SK": "Slovakia",
+          "TH": "Thailand",
+          "US": "United States"
+        },
+        "address_country_not_listed_text_button_text": "My country is not listed",
+        "button_text": "Submit",
+        "id_number_countries": {
+          "BR": "Brazil",
+          "SG": "Singapore",
+          "US": "United States"
+        },
+        "id_number_country_not_listed_text_button_text": "My country is not listed",
+        "title": "Provide personal information"
+      },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+      },
       "livemode": false,
       "requirements": {
         "missing": [
@@ -93,6 +151,13 @@ internal val VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         "title": "mlgb.band uses Stripe to verify your identity",
         "scroll_to_continue_button_text": "Scroll to consent"
       },
+      "country_not_listed": {
+        "address_from_other_country_text_button_text": "Have an Address from another country?",
+        "body": "The countries not listed are not supported yet. Unfortunately, we cannot verify your identity.",
+        "cancel_button_text": "Cancel verification",
+        "id_from_other_country_text_button_text": "Have an ID from another country?",
+        "title": "We cannot verify your identity"
+      },
       "document_capture": {
         "autocapture_timeout": 8000,
         "file_purpose": "identity_private",
@@ -121,6 +186,57 @@ internal val VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         "title": "Which form of identification do you want to use?"
       },
       "fallback_url": "https://verify.stripe.com/start/test_YWNjdF8xSU84aDNFQWphT2tpdUdNLF9MTjg5dFZtRWV1T1c1QXBxMkJ6MTUwZlI5c3JtTE5U0100BzkFlqqD",
+      "individual": {
+        "address_countries": {
+          "AT": "Austria",
+          "AU": "Australia",
+          "BE": "Belgium",
+          "BR": "Brazil",
+          "CA": "Canada",
+          "CH": "Switzerland",
+          "CZ": "Czech Republic",
+          "DE": "Germany",
+          "DK": "Denmark",
+          "ES": "Spain",
+          "FI": "Finland",
+          "FR": "France",
+          "GB": "United Kingdom",
+          "HK": "Hong Kong",
+          "ID": "Indonesia",
+          "IE": "Ireland",
+          "IT": "Italy",
+          "LU": "Luxembourg",
+          "MT": "Malta",
+          "MX": "Mexico",
+          "MY": "Malaysia",
+          "NL": "Netherlands",
+          "NO": "Norway",
+          "PL": "Poland",
+          "PT": "Portugal",
+          "RO": "Romania",
+          "SE": "Sweden",
+          "SG": "Singapore",
+          "SK": "Slovakia",
+          "TH": "Thailand",
+          "US": "United States"
+        },
+        "address_country_not_listed_text_button_text": "My country is not listed",
+        "button_text": "Submit",
+        "id_number_countries": {
+          "BR": "Brazil",
+          "SG": "Singapore",
+          "US": "United States"
+        },
+        "id_number_country_not_listed_text_button_text": "My country is not listed",
+        "title": "Provide personal information"
+      },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+      },
       "livemode": false,
       "requirements": {
         "missing": [
@@ -153,6 +269,13 @@ internal val VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING = """
         "scroll_to_continue_button_text": "Scroll to continue",
         "time_estimate": "Takes about 1–2 minutes.",
         "title": "Andrew's Audio uses Stripe to verify your identity"
+      },
+      "country_not_listed": {
+        "address_from_other_country_text_button_text": "Have an Address from another country?",
+        "body": "The countries not listed are not supported yet. Unfortunately, we cannot verify your identity.",
+        "cancel_button_text": "Cancel verification",
+        "id_from_other_country_text_button_text": "Have an ID from another country?",
+        "title": "We cannot verify your identity"
       },
       "document_capture": {
         "autocapture_timeout": 8000,
@@ -187,6 +310,57 @@ internal val VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING = """
         "title": "Which form of identification do you want to use?"
       },
       "fallback_url": "https://verify.stripe.com/start/live_YWNjdF8xSDM0ZFhHTVpZR054SmtCLF9Nc0V5NkI2TjZ6MkZPWUxsUndtMXlyZzA5YzdDdjVU0100gEzqe9Je",
+      "individual": {
+        "address_countries": {
+          "AT": "Austria",
+          "AU": "Australia",
+          "BE": "Belgium",
+          "BR": "Brazil",
+          "CA": "Canada",
+          "CH": "Switzerland",
+          "CZ": "Czech Republic",
+          "DE": "Germany",
+          "DK": "Denmark",
+          "ES": "Spain",
+          "FI": "Finland",
+          "FR": "France",
+          "GB": "United Kingdom",
+          "HK": "Hong Kong",
+          "ID": "Indonesia",
+          "IE": "Ireland",
+          "IT": "Italy",
+          "LU": "Luxembourg",
+          "MT": "Malta",
+          "MX": "Mexico",
+          "MY": "Malaysia",
+          "NL": "Netherlands",
+          "NO": "Norway",
+          "PL": "Poland",
+          "PT": "Portugal",
+          "RO": "Romania",
+          "SE": "Sweden",
+          "SG": "Singapore",
+          "SK": "Slovakia",
+          "TH": "Thailand",
+          "US": "United States"
+        },
+        "address_country_not_listed_text_button_text": "My country is not listed",
+        "button_text": "Submit",
+        "id_number_countries": {
+          "BR": "Brazil",
+          "SG": "Singapore",
+          "US": "United States"
+        },
+        "id_number_country_not_listed_text_button_text": "My country is not listed",
+        "title": "Provide personal information"
+      },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
+      },
       "livemode": true,
       "requirements": {
         "missing": [
@@ -271,6 +445,13 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING = """
         "time_estimate": "Takes about 1–2 minutes.",
         "title": "Tora's catfood uses Stripe to verify your identity"
       },
+      "country_not_listed": {
+        "address_from_other_country_text_button_text": "Have an Address from another country?",
+        "body": "The countries not listed are not supported yet. Unfortunately, we cannot verify your identity.",
+        "cancel_button_text": "Cancel verification",
+        "id_from_other_country_text_button_text": "Have an ID from another country?",
+        "title": "We cannot verify your identity"
+      },
       "document_capture": {
         "autocapture_timeout": 8000,
         "file_purpose": "identity_private",
@@ -338,13 +519,22 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING = """
           "TH": "Thailand",
           "US": "United States"
         },
+        "address_country_not_listed_text_button_text": "My country is not listed",
         "button_text": "Submit",
         "id_number_countries": {
           "BR": "Brazil",
           "SG": "Singapore",
           "US": "United States"
         },
+        "id_number_country_not_listed_text_button_text": "My country is not listed",
         "title": "Provide personal information"
+      },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
       },
       "livemode": false,
       "requirements": {
@@ -381,6 +571,13 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING = """
         "scroll_to_continue_button_text": "Scroll to continue",
         "time_estimate": "Takes about 1–2 minutes.",
         "title": "Tora's catfood uses Stripe to verify your identity"
+      },
+      "country_not_listed": {
+        "address_from_other_country_text_button_text": "Have an Address from another country?",
+        "body": "The countries not listed are not supported yet. Unfortunately, we cannot verify your identity.",
+        "cancel_button_text": "Cancel verification",
+        "id_from_other_country_text_button_text": "Have an ID from another country?",
+        "title": "We cannot verify your identity"
       },
       "document_capture": {
         "autocapture_timeout": 8000,
@@ -449,13 +646,22 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING = """
           "TH": "Thailand",
           "US": "United States"
         },
+        "address_country_not_listed_text_button_text": "My country is not listed",
         "button_text": "Submit",
         "id_number_countries": {
           "BR": "Brazil",
           "SG": "Singapore",
           "US": "United States"
         },
+        "id_number_country_not_listed_text_button_text": "My country is not listed",
         "title": "Provide personal information"
+      },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
       },
       "livemode": true,
       "requirements": {
@@ -491,6 +697,13 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_
         "scroll_to_continue_button_text": "Scroll to continue",
         "time_estimate": "Takes about 1–2 minutes.",
         "title": "Tora's catfood uses Stripe to verify your identity"
+      },
+      "country_not_listed": {
+        "address_from_other_country_text_button_text": "Have an Address from another country?",
+        "body": "The countries not listed are not supported yet. Unfortunately, we cannot verify your identity.",
+        "cancel_button_text": "Cancel verification",
+        "id_from_other_country_text_button_text": "Have an ID from another country?",
+        "title": "We cannot verify your identity"
       },
       "document_capture": {
         "autocapture_timeout": 8000,
@@ -559,13 +772,22 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_
           "TH": "Thailand",
           "US": "United States"
         },
+        "address_country_not_listed_text_button_text": "My country is not listed",
         "button_text": "Submit",
         "id_number_countries": {
           "BR": "Brazil",
           "SG": "Singapore",
           "US": "United States"
         },
+        "id_number_country_not_listed_text_button_text": "My country is not listed",
         "title": "Provide personal information"
+      },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
       },
       "livemode": false,
       "requirements": {
@@ -602,6 +824,13 @@ internal val VERIFICATION_PAGE_TYPE_ID_NUMBER_JSON_STRING = """
         "scroll_to_continue_button_text": "Scroll to continue",
         "time_estimate": "Takes about 1–2 minutes.",
         "title": "Tora's catfood uses Stripe to verify your identity"
+      },
+      "country_not_listed": {
+        "address_from_other_country_text_button_text": "Have an Address from another country?",
+        "body": "The countries not listed are not supported yet. Unfortunately, we cannot verify your identity.",
+        "cancel_button_text": "Cancel verification",
+        "id_from_other_country_text_button_text": "Have an ID from another country?",
+        "title": "We cannot verify your identity"
       },
       "document_capture": {
         "autocapture_timeout": 8000,
@@ -670,13 +899,22 @@ internal val VERIFICATION_PAGE_TYPE_ID_NUMBER_JSON_STRING = """
           "TH": "Thailand",
           "US": "United States"
         },
+        "address_country_not_listed_text_button_text": "My country is not listed",
         "button_text": "Submit",
         "id_number_countries": {
           "BR": "Brazil",
           "SG": "Singapore",
           "US": "United States"
         },
+        "id_number_country_not_listed_text_button_text": "My country is not listed",
         "title": "Provide personal information"
+      },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
       },
       "livemode": false,
       "requirements": {
@@ -710,6 +948,13 @@ internal val VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING = """
         "scroll_to_continue_button_text": "Scroll to continue",
         "time_estimate": "Takes about 1–2 minutes.",
         "title": "Tora's catfood uses Stripe to verify your identity"
+      },
+      "country_not_listed": {
+        "address_from_other_country_text_button_text": "Have an Address from another country?",
+        "body": "The countries not listed are not supported yet. Unfortunately, we cannot verify your identity.",
+        "cancel_button_text": "Cancel verification",
+        "id_from_other_country_text_button_text": "Have an ID from another country?",
+        "title": "We cannot verify your identity"
       },
       "document_capture": {
         "autocapture_timeout": 8000,
@@ -778,13 +1023,22 @@ internal val VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING = """
           "TH": "Thailand",
           "US": "United States"
         },
+        "address_country_not_listed_text_button_text": "My country is not listed",
         "button_text": "Submit",
         "id_number_countries": {
           "BR": "Brazil",
           "SG": "Singapore",
           "US": "United States"
         },
+        "id_number_country_not_listed_text_button_text": "My country is not listed",
         "title": "Provide personal information"
+      },
+      "individual_welcome": {
+        "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
+        "get_started_button_text": "Get started",
+        "privacy_policy": "Data will be stored and may be used according to the <a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy.",
+        "time_estimate": "Takes less than 1 minute.",
+        "title": "Tora's catfood partners with Stripe for secure Identity verification"
       },
       "livemode": false,
       "requirements": {

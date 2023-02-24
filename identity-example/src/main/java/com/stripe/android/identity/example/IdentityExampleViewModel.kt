@@ -79,9 +79,7 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
         const val PASSPORT = "passport"
         const val ID_CARD = "id_card"
 
-        // TODO(ccen) revert to reflective-fossil-rib when id/address is supported
         const val EXAMPLE_BACKEND_URL =
-            "https://humane-tidy-restaurant.glitch.me/create-verification-session"
-//            "https://reflective-fossil-rib.glitch.me/create-verification-session"
+            "https://stripe-mobile-identity-verification-playground.glitch.me/create-verification-session"
     }
 }

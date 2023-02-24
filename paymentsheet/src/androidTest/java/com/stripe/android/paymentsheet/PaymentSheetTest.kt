@@ -1,15 +1,13 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.lifecycle.Lifecycle
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.scrollTo
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
@@ -17,6 +15,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -83,7 +82,9 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-intent-get-success.json")
         }
 
-        onView(withId(R.id.primary_button)).perform(scrollTo(), click())
+        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+            .performScrollTo()
+            .performClick()
 
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
@@ -155,7 +156,9 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-intent-get-success.json")
         }
 
-        onView(withId(R.id.primary_button)).perform(scrollTo(), click())
+        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+            .performScrollTo()
+            .performClick()
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
@@ -224,7 +227,9 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-intent-get-success.json")
         }
 
-        onView(withId(R.id.primary_button)).perform(click())
+        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+            .performScrollTo()
+            .performClick()
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
@@ -289,7 +294,9 @@ internal class PaymentSheetTest {
             response.setResponseCode(400)
         }
 
-        onView(withId(R.id.primary_button)).perform(click())
+        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+            .performScrollTo()
+            .performClick()
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
@@ -334,7 +341,7 @@ internal class PaymentSheetTest {
     }
 
     private fun fillOutCard() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule.onAllNodes(hasText("Card number"))
                 .fetchSemanticsNodes().isNotEmpty()
         }

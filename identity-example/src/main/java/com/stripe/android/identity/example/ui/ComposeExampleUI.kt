@@ -1,5 +1,8 @@
 package com.stripe.android.identity.example.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.clickable
@@ -64,15 +67,21 @@ import com.github.kittinunf.result.Result
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.example.IdentityExampleViewModel
 import com.stripe.android.identity.example.R
-import kotlinx.coroutines.CoroutineScope
+import com.stripe.android.identity.example.ui.IntegrationType.LINK
+import com.stripe.android.identity.example.ui.IntegrationType.NATIVE
+import com.stripe.android.identity.example.ui.IntegrationType.WEB
 import kotlinx.coroutines.launch
 
 internal enum class VerificationType(val value: String) {
     DOCUMENT("document"), ID_NUMBER("id_number"), ADDRESS("address"), PHONE("phone")
 }
 
+internal enum class IntegrationType {
+    NATIVE, WEB, LINK
+}
+
 private data class IdentitySubmissionState(
-    val shouldUseNativeSdk: Boolean = true,
+    val integrationType: IntegrationType = NATIVE,
     val verificationType: VerificationType = VerificationType.DOCUMENT,
     val allowDrivingLicense: Boolean = true,
     val allowPassport: Boolean = true,
@@ -86,7 +95,7 @@ private data class IdentitySubmissionState(
 private sealed class LoadingState {
     object Idle : LoadingState()
     object Loading : LoadingState()
-    class Result(val vsId: String = "", val resultString: String) : LoadingState()
+    class Result(val highlight: String = "", val resultString: String = "") : LoadingState()
 }
 
 @Composable
@@ -118,11 +127,11 @@ internal fun ExampleScreen(
                 .fillMaxWidth()
                 .fillMaxHeight()
         ) {
-            NativeOrWeb(submissionState, onSubmissionStateChanged)
+            IntegrationTypeUI(submissionState, onSubmissionStateChanged)
             Divider()
             TypeSelectUI(
                 submissionState.verificationType,
-                submissionState.shouldUseNativeSdk
+                submissionState.integrationType
             ) { newVerificationType ->
                 onSubmissionStateChanged(
                     submissionState.copy(
@@ -145,18 +154,18 @@ internal fun ExampleScreen(
 }
 
 @Composable
-private fun NativeOrWeb(
+private fun IntegrationTypeUI(
     identitySubmissionState: IdentitySubmissionState,
     onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         RadioButton(
-            selected = identitySubmissionState.shouldUseNativeSdk,
+            selected = identitySubmissionState.integrationType == NATIVE,
             onClick = {
                 onSubmissionStateChangedListener(
                     identitySubmissionState.copy(
                         verificationType = VerificationType.DOCUMENT,
-                        shouldUseNativeSdk = true
+                        integrationType = NATIVE
                     )
                 )
             }
@@ -167,7 +176,7 @@ private fun NativeOrWeb(
                 onSubmissionStateChangedListener(
                     identitySubmissionState.copy(
                         verificationType = VerificationType.DOCUMENT,
-                        shouldUseNativeSdk = true
+                        integrationType = NATIVE
                     )
                 )
             }
@@ -175,12 +184,12 @@ private fun NativeOrWeb(
         Spacer(modifier = Modifier.width(40.dp))
 
         RadioButton(
-            selected = !identitySubmissionState.shouldUseNativeSdk,
+            selected = identitySubmissionState.integrationType == WEB,
             onClick = {
                 onSubmissionStateChangedListener(
                     identitySubmissionState.copy(
                         verificationType = VerificationType.DOCUMENT,
-                        shouldUseNativeSdk = false
+                        integrationType = WEB
                     )
                 )
             }
@@ -191,19 +200,42 @@ private fun NativeOrWeb(
                 onSubmissionStateChangedListener(
                     identitySubmissionState.copy(
                         verificationType = VerificationType.DOCUMENT,
-                        shouldUseNativeSdk = false
+                        integrationType = WEB
                     )
                 )
             }
         )
         Spacer(modifier = Modifier.width(40.dp))
+
+        RadioButton(
+            selected = identitySubmissionState.integrationType == LINK,
+            onClick = {
+                onSubmissionStateChangedListener(
+                    identitySubmissionState.copy(
+                        verificationType = VerificationType.DOCUMENT,
+                        integrationType = LINK
+                    )
+                )
+            }
+        )
+        StyledClickableText(
+            text = AnnotatedString(stringResource(R.string.get_link)),
+            onClick = {
+                onSubmissionStateChangedListener(
+                    identitySubmissionState.copy(
+                        verificationType = VerificationType.DOCUMENT,
+                        integrationType = LINK
+                    )
+                )
+            }
+        )
     }
 }
 
 @Composable
 private fun TypeSelectUI(
     verificationType: VerificationType,
-    shouldUseNativeSdk: Boolean,
+    integrationType: IntegrationType,
     onVerificationTypeChanged: (VerificationType) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -242,7 +274,7 @@ private fun TypeSelectUI(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            if (shouldUseNativeSdk) {
+            if (integrationType == NATIVE) {
                 listOf(
                     VerificationType.DOCUMENT,
                     VerificationType.ID_NUMBER,
@@ -480,8 +512,6 @@ private fun LoadVSView(
     viewModel: IdentityExampleViewModel,
     loadingState: LoadingState,
     identitySubmissionState: IdentitySubmissionState,
-    scaffoldState: ScaffoldState,
-    coroutineScope: CoroutineScope,
     onLoadingStateChanged: (LoadingState) -> Unit,
     onPostResult: (String, String, String) -> Unit
 ) {
@@ -496,8 +526,6 @@ private fun LoadVSView(
                     viewModel = viewModel,
                     enabled = true,
                     submissionState = identitySubmissionState,
-                    scaffoldState = scaffoldState,
-                    coroutineScope = coroutineScope,
                     onLoadingStateChanged = onLoadingStateChanged,
                     onPostResult = onPostResult
                 )
@@ -518,8 +546,6 @@ private fun LoadVSView(
                     viewModel = viewModel,
                     enabled = false,
                     submissionState = identitySubmissionState,
-                    scaffoldState = scaffoldState,
-                    coroutineScope = coroutineScope,
                     onLoadingStateChanged = onLoadingStateChanged,
                     onPostResult = onPostResult
                 )
@@ -539,7 +565,7 @@ private fun LoadVSView(
                 ) {
                     SelectionContainer {
                         Text(
-                            text = loadingState.vsId,
+                            text = loadingState.highlight,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(10.dp)
                         )
@@ -553,8 +579,6 @@ private fun LoadVSView(
                     viewModel = viewModel,
                     enabled = true,
                     submissionState = identitySubmissionState,
-                    scaffoldState = scaffoldState,
-                    coroutineScope = coroutineScope,
                     onLoadingStateChanged = onLoadingStateChanged,
                     onPostResult = onPostResult
                 )
@@ -568,17 +592,12 @@ private fun LoadingButton(
     viewModel: IdentityExampleViewModel,
     enabled: Boolean,
     submissionState: IdentitySubmissionState,
-    scaffoldState: ScaffoldState,
-    coroutineScope: CoroutineScope,
     onLoadingStateChanged: (LoadingState) -> Unit,
     onPostResult: (String, String, String) -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     Button(
         onClick = {
-            coroutineScope.launch {
-                scaffoldState.snackbarHostState.showSnackbar("Getting verificationSessionId and ephemeralKeySecret from backend...")
-            }
             onLoadingStateChanged(LoadingState.Loading)
             viewModel.postForResult(
                 type = submissionState.verificationType,
@@ -638,7 +657,7 @@ private fun SubmitView(
                 is IdentityVerificationSheet.VerificationFlowResult.Failed -> {
                     onLoadingStateChanged(
                         LoadingState.Result(
-                            vsId = vsId,
+                            highlight = vsId,
                             resultString = "Verification result: ${result.javaClass.simpleName} - ${result.throwable}"
                         )
                     )
@@ -646,7 +665,7 @@ private fun SubmitView(
                 else -> {
                     onLoadingStateChanged(
                         LoadingState.Result(
-                            vsId = vsId,
+                            highlight = vsId,
                             resultString = "Verification result: ${result.javaClass.simpleName}"
                         )
                     )
@@ -658,19 +677,30 @@ private fun SubmitView(
         viewModel,
         loadingState,
         submissionState,
-        scaffoldState,
-        coroutineScope,
-        onLoadingStateChanged
+        onLoadingStateChanged,
     ) { verificationSessionId, ephemeralKeySecret, url ->
         vsId = verificationSessionId
-        if (submissionState.shouldUseNativeSdk) {
-            identityVerificationSheet.present(verificationSessionId, ephemeralKeySecret)
-        } else {
-            onLoadingStateChanged(
-                LoadingState.Result(vsId, "web redirect")
-            )
-            CustomTabsIntent.Builder().build()
-                .launchUrl(context, Uri.parse(url))
+        when (submissionState.integrationType) {
+            NATIVE -> {
+                identityVerificationSheet.present(verificationSessionId, ephemeralKeySecret)
+            }
+            WEB -> {
+                onLoadingStateChanged(
+                    LoadingState.Result(vsId, "web redirect")
+                )
+                CustomTabsIntent.Builder().build()
+                    .launchUrl(context, Uri.parse(url))
+            }
+            LINK -> {
+                (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                    .setPrimaryClip(ClipData.newPlainText("verification link", url))
+                coroutineScope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar("Link copied to clipboard!")
+                }
+                onLoadingStateChanged(
+                    LoadingState.Result(url)
+                )
+            }
         }
     }
 }

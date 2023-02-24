@@ -7,8 +7,10 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LuxePostConfirmActionRepository
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
@@ -36,8 +38,10 @@ import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Compani
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.EmptyFormSpec
+import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
+import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.ui.core.elements.transform
@@ -206,7 +210,7 @@ class LpmRepository constructor(
         inputStream?.bufferedReader().use { it?.readText() }
 
     private fun convertToSupportedPaymentMethod(
-        @Suppress("UNUSED_PARAMETER") stripeIntent: StripeIntent,
+        stripeIntent: StripeIntent,
         sharedDataSpec: SharedDataSpec,
     ) = when (sharedDataSpec.type) {
         PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
@@ -327,17 +331,24 @@ class LpmRepository constructor(
             requirement = KlarnaRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
-        PaymentMethod.Type.PayPal.code -> SupportedPaymentMethod(
-            code = "paypal",
-            requiresMandate = false,
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = false,
-            requirement = PaypalRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields)
-        )
+        PaymentMethod.Type.PayPal.code -> {
+            val localLayoutSpecs: List<FormItemSpec> = if (stripeIntent.payPalRequiresMandate()) {
+                listOf(MandateTextSpec(stringResId = R.string.paypal_mandate))
+            } else {
+                emptyList()
+            }
+            SupportedPaymentMethod(
+                code = "paypal",
+                requiresMandate = stripeIntent.payPalRequiresMandate(),
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+                lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+                darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+                tintIconOnSelection = false,
+                requirement = PaypalRequirement,
+                formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs)
+            )
+        }
         PaymentMethod.Type.Affirm.code -> SupportedPaymentMethod(
             code = "affirm",
             requiresMandate = false,
@@ -531,4 +542,11 @@ class LpmRepository constructor(
         val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
             DefaultIsFinancialConnectionsAvailable(),
     )
+}
+
+private fun StripeIntent.payPalRequiresMandate(): Boolean {
+    return when (this) {
+        is PaymentIntent -> setupFutureUsage != null
+        is SetupIntent -> true
+    }
 }

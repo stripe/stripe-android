@@ -26,7 +26,6 @@ class IdentityTopLevelDestinationTest {
 
     private class IdentityTopLevelDestinationWithoutArgs : IdentityTopLevelDestination() {
         override val destinationRoute = ROUTE_WITHOUT_ARGS
-        override val routeWithArgs = destinationRoute.route
     }
 
     @Test

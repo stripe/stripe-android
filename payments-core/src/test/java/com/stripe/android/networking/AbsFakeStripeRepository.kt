@@ -18,13 +18,14 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
-import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -70,14 +71,6 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return null
     }
 
-    override suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        locale: Locale
-    ): PaymentMethodPreference? {
-        return null
-    }
-
     override suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
@@ -99,14 +92,6 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         options: ApiRequest.Options,
         expandFields: List<String>
     ): SetupIntent? {
-        return null
-    }
-
-    override suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        locale: Locale
-    ): PaymentMethodPreference? {
         return null
     }
 
@@ -298,24 +283,6 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return null
     }
 
-    override suspend fun startConsumerVerification(
-        consumerSessionClientSecret: String,
-        locale: Locale,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        return null
-    }
-
-    override suspend fun confirmConsumerVerification(
-        consumerSessionClientSecret: String,
-        verificationCode: String,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        return null
-    }
-
     override suspend fun logoutConsumer(
         consumerSessionClientSecret: String,
         authSessionCookie: String?,
@@ -449,6 +416,13 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         logoColor: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethodMessage? {
+        return null
+    }
+
+    override suspend fun retrieveElementsSession(
+        params: ElementsSessionParams,
+        options: ApiRequest.Options
+    ): ElementsSession? {
         return null
     }
 }
