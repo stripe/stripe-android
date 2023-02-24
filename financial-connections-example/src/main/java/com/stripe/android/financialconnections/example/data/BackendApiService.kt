@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.example.data
 
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 import com.stripe.android.financialconnections.example.data.model.CreateIntentResponse
 import com.stripe.android.financialconnections.example.data.model.CreateLinkAccountSessionResponse
@@ -23,10 +24,13 @@ interface BackendApiService {
     ): CreateIntentResponse
 }
 
+@Keep
 data class LinkAccountSessionBody(
+    @SerializedName("flow")
     val flow: String?
 )
 
+@Keep
 data class PaymentIntentBody(
     @SerializedName("flow")
     val flow: String?,
