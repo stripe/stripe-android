@@ -133,6 +133,61 @@ class PaymentSheet internal constructor(
                 SetupIntentClientSecret(clientSecret).validate()
             }
         }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        class DeferredIntent(val intentConfiguration: IntentConfiguration) : InitializationMode() {
+
+            override fun validate() {
+                // Nothing to do here
+            }
+        }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    class IntentConfiguration(
+        val mode: Mode,
+        val captureMethod: CaptureMethod? = null,
+        val customer: String? = null,
+        val paymentMethodTypes: List<String> = emptyList(),
+    ) : Parcelable {
+
+        internal val setupFutureUse: SetupFutureUse?
+            get() = mode.setupFutureUse
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        sealed class Mode : Parcelable {
+
+            internal abstract val setupFutureUse: SetupFutureUse?
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @Parcelize
+            data class Payment(
+                val amount: Long,
+                val currency: String,
+                override val setupFutureUse: SetupFutureUse? = null,
+            ) : Mode()
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @Parcelize
+            data class Setup(
+                val currency: String?,
+                override val setupFutureUse: SetupFutureUse = SetupFutureUse.OffSession,
+            ) : Mode()
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class SetupFutureUse {
+            OnSession,
+            OffSession,
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class CaptureMethod {
+            Automatic,
+            Manual,
+        }
     }
 
     /** Configuration for [PaymentSheet] **/

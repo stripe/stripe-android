@@ -45,10 +45,12 @@ sealed interface ElementsSessionParams : Parcelable {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class DeferredIntentType(
-        override val clientSecret: String? = null,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
-        val deferredIntentParams: DeferredIntentParams
+        val deferredIntentParams: DeferredIntentParams,
     ) : ElementsSessionParams {
+
+        override val clientSecret: String?
+            get() = null
 
         override val type: String
             get() = "deferred_intent"
