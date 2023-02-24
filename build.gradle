@@ -80,6 +80,7 @@ ext {
     okhttpVersion = '4.10.0'
     stripe3ds2Version = '6.1.6'
     retrofitVersion = '2.9.0'
+    gsonVersion = '2.10.1'
 
     androidTestVersion = '1.5.0'
     androidTestRunnerVersion = '1.5.2'
