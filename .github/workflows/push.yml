@@ -20,3 +20,16 @@ jobs:
           artifact_path: identity-example/build/outputs/bundle/theme1Release/identity-example-theme1-release.aab
           emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
           build_type: push
+  upload-financial-connections:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/stripe_setup
+      - name: Generate Android release bundle for Financial Connections example app
+        run: ./gradlew :financial-connections-example:bundleRelease
+      - name: Upload artifact to Emerge
+        uses: EmergeTools/emerge-upload-action@v1.0.2
+        with:
+          artifact_path: financial-connections-example/build/outputs/bundle/release/financial-connections-example-release.aab
+          emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
+          build_type: push
