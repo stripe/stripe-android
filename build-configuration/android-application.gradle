@@ -6,6 +6,8 @@
 apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
 
+apply from: rootProject.file('build-configuration/version.gradle')
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion

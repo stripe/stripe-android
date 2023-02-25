@@ -81,7 +81,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                         applicationId = applicationId
                     )
                 }.onFailure {
-                    onFatal(state, it)
+                    finishWithResult(state, Failed(it))
                 }.onSuccess {
                     openAuthFlow(it)
                 }
@@ -104,7 +104,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
         if (manifest.hostedAuthUrl == null) {
             withState {
-                onFatal(it, IllegalArgumentException("hostedAuthUrl is required!"))
+                finishWithResult(
+                    state = it,
+                    result = Failed(IllegalArgumentException("hostedAuthUrl is required!"))
+                )
             }
         } else {
             val authFlowStatus = if (nativeAuthFlowEnabled) {
@@ -160,19 +163,20 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun onResume() {
         viewModelScope.launch {
             mutex.withLock {
-                setState {
-                    if (activityRecreated.not()) {
-                        when (webAuthFlowStatus) {
-                            AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> copy(
-                                viewEffect = FinishWithResult(Canceled)
-                            )
-                            AuthFlowStatus.INTERMEDIATE_DEEPLINK -> copy(
+                val state = awaitState()
+                if (state.activityRecreated.not()) {
+                    when (state.webAuthFlowStatus) {
+                        AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> finishWithResult(
+                            state = state,
+                            result = Canceled
+                        )
+                        AuthFlowStatus.INTERMEDIATE_DEEPLINK -> setState {
+                            copy(
                                 webAuthFlowStatus = AuthFlowStatus.ON_EXTERNAL_ACTIVITY
                             )
-                            AuthFlowStatus.NONE -> this
                         }
-                    } else {
-                        this
+
+                        AuthFlowStatus.NONE -> Unit
                     }
                 }
             }
@@ -187,20 +191,20 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun onBrowserActivityResult() {
         viewModelScope.launch {
             mutex.withLock {
-                setState {
-                    if (activityRecreated) {
-                        when (webAuthFlowStatus) {
-                            AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> copy(
-                                viewEffect = FinishWithResult(Canceled)
-                            )
-
-                            AuthFlowStatus.INTERMEDIATE_DEEPLINK -> copy(
+                val state = awaitState()
+                if (state.activityRecreated) {
+                    when (state.webAuthFlowStatus) {
+                        AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> finishWithResult(
+                            state = state,
+                            result = Canceled
+                        )
+                        AuthFlowStatus.INTERMEDIATE_DEEPLINK -> setState {
+                            copy(
                                 webAuthFlowStatus = AuthFlowStatus.ON_EXTERNAL_ACTIVITY
                             )
-                            AuthFlowStatus.NONE -> this
                         }
-                    } else {
-                        this
+
+                        AuthFlowStatus.NONE -> Unit
                     }
                 }
             }
@@ -211,13 +215,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val result: FinancialConnectionsSheetActivityResult? = activityResult.data
             ?.parcelable(FinancialConnectionsSheetNativeActivity.EXTRA_RESULT)
         if (activityResult.resultCode == Activity.RESULT_OK && result != null) {
-            setState {
-                copy(
-                    viewEffect = FinishWithResult(result)
-                )
-            }
+            withState { finishWithResult(it, result) }
         } else {
-            setState { copy(viewEffect = FinishWithResult(Canceled)) }
+            withState { finishWithResult(it, Canceled) }
         }
     }
 
@@ -233,11 +233,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             kotlin.runCatching {
                 fetchFinancialConnectionsSession(state.sessionSecret)
             }.onSuccess {
-                val result = Completed(financialConnectionsSession = it)
-                eventReporter.onResult(state.initialArgs.configuration, result)
-                setState { copy(viewEffect = FinishWithResult(result)) }
-            }.onFailure {
-                onFatal(state, it)
+                finishWithResult(
+                    state = state,
+                    result = Completed(financialConnectionsSession = it)
+                )
+            }.onFailure { error ->
+                withState { finishWithResult(it, Failed(error)) }
             }
         }
     }
@@ -254,25 +255,14 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             kotlin.runCatching {
                 fetchFinancialConnectionsSessionForToken(clientSecret = state.sessionSecret)
             }.onSuccess { (las, token) ->
-                val result = Completed(financialConnectionsSession = las, token = token)
-                eventReporter.onResult(state.initialArgs.configuration, result)
-                setState { copy(viewEffect = FinishWithResult(result)) }
-            }.onFailure {
-                onFatal(state, it)
+                finishWithResult(
+                    state = state,
+                    result = Completed(financialConnectionsSession = las, token = token)
+                )
+            }.onFailure { error ->
+                withState { finishWithResult(it, Failed(error)) }
             }
         }
-    }
-
-    /**
-     * If an error occurs during the auth flow, return that error via the
-     * [FinancialConnectionsSheetResultCallback] and [FinancialConnectionsSheetResult.Failed].
-     *
-     * @param throwable the error encountered during the [FinancialConnectionsSheet] auth flow
-     */
-    private fun onFatal(state: FinancialConnectionsSheetState, throwable: Throwable) {
-        val result = Failed(throwable)
-        eventReporter.onResult(state.initialArgs.configuration, result)
-        setState { copy(viewEffect = FinishWithResult(result)) }
     }
 
     /**
@@ -285,16 +275,17 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             kotlin.runCatching {
                 fetchFinancialConnectionsSession(clientSecret = state.sessionSecret)
-            }.onSuccess {
-                val result = if (it.isCustomManualEntryError()) {
-                    Failed(CustomManualEntryRequiredError())
-                } else {
-                    Canceled
-                }
-                eventReporter.onResult(state.initialArgs.configuration, result)
-                setState { copy(viewEffect = FinishWithResult(result)) }
-            }.onFailure {
-                onFatal(state, it)
+            }.onSuccess { session ->
+                finishWithResult(
+                    state = state,
+                    result = if (session.isCustomManualEntryError()) {
+                        Failed(CustomManualEntryRequiredError())
+                    } else {
+                        Canceled
+                    }
+                )
+            }.onFailure { error ->
+                withState { finishWithResult(it, Failed(error)) }
             }
         }
     }
@@ -341,9 +332,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
                     else -> {
                         setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
-                        onFatal(
+                        finishWithResult(
                             state,
-                            Exception("Error processing FinancialConnectionsSheet intent")
+                            Failed(Exception("Error processing FinancialConnectionsSheet intent"))
                         )
                     }
                 }
@@ -375,13 +366,17 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     private fun onFlowSuccess(state: FinancialConnectionsSheetState, receivedUrl: Uri?) {
         if (receivedUrl == null) {
-            onFatal(state, Exception("Intent url received from web flow is null"))
-        }
-        setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
-        when (state.initialArgs) {
-            is ForData -> fetchFinancialConnectionsSession(state)
-            is ForToken -> fetchFinancialConnectionsSessionForToken(state)
-            is ForLink -> onSuccessFromLinkFlow(receivedUrl)
+            finishWithResult(
+                state = state,
+                result = Failed(Exception("Intent url received from web flow is null"))
+            )
+        } else {
+            setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
+            when (state.initialArgs) {
+                is ForData -> fetchFinancialConnectionsSession(state)
+                is ForToken -> fetchFinancialConnectionsSessionForToken(state)
+                is ForLink -> onSuccessFromLinkFlow(receivedUrl)
+            }
         }
     }
 
@@ -398,14 +393,19 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * Link flows do not need to fetch the FC session, since the linked account id is
      * appended to the web success url.
      */
-    private fun onSuccessFromLinkFlow(url: Uri?) {
+    private fun onSuccessFromLinkFlow(url: Uri) {
         kotlin.runCatching {
-            requireNotNull(url?.getQueryParameter(QUERY_PARAM_LINKED_ACCOUNT))
-        }.onSuccess {
-            setState { copy(viewEffect = FinishWithResult(Completed(linkedAccountId = it))) }
+            requireNotNull(url.getQueryParameter(QUERY_PARAM_LINKED_ACCOUNT))
+        }.onSuccess { linkedAccountId ->
+            withState {
+                finishWithResult(
+                    state = it,
+                    result = Completed(linkedAccountId = linkedAccountId)
+                )
+            }
         }.onFailure { error ->
             logger.error("Could not retrieve linked account from success url", error)
-            withState { state -> onFatal(state, error) }
+            withState { state -> finishWithResult(state, Failed(error)) }
         }
     }
 
@@ -416,6 +416,14 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }.onFailure {
             logger.error("Could not parse web flow url", it)
         }.getOrNull()
+    }
+
+    private fun finishWithResult(
+        state: FinancialConnectionsSheetState,
+        result: FinancialConnectionsSheetActivityResult
+    ) {
+        eventReporter.onResult(state.initialArgs.configuration, result)
+        setState { copy(viewEffect = FinishWithResult(result)) }
     }
 
     companion object :
