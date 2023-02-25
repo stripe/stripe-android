@@ -1,5 +1,4 @@
 apply from: configs.androidApplication
-apply from: rootProject.file('build-configuration/version.gradle')
 
 apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'com.google.gms.google-services'
