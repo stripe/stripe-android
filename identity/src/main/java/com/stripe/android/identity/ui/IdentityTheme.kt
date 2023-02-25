@@ -16,6 +16,8 @@ import com.stripe.android.uicore.LocalColors
 import com.stripe.android.uicore.LocalShapes
 import com.stripe.android.uicore.LocalTypography
 import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.StripeTypography
+import com.stripe.android.uicore.toComposeTypography
 import java.lang.reflect.Method
 
 /**
@@ -41,32 +43,52 @@ internal fun IdentityTheme(content: @Composable () -> Unit) {
         )
     }
 
-    val mdcColors = themeParams.colors ?: MaterialTheme.colors
-
     val isRobolectricTest = runCatching {
         Build.FINGERPRINT.lowercase() == "robolectric"
     }.getOrDefault(false)
 
     val inspectionMode = LocalInspectionMode.current || isRobolectricTest
+    val hostingAppColors = themeParams.colors ?: MaterialTheme.colors
+    val hostingAppTypography = themeParams.typography ?: MaterialTheme.typography
+    val hostingAppShapes = themeParams.shapes ?: MaterialTheme.shapes
+
+    val stripeTypography: StripeTypography = StripeThemeDefaults.typography.copy(
+        body1FontFamily = hostingAppTypography.body1.fontFamily,
+        body2FontFamily = hostingAppTypography.body2.fontFamily,
+        h4FontFamily = hostingAppTypography.h4.fontFamily,
+        h5FontFamily = hostingAppTypography.h5.fontFamily,
+        h6FontFamily = hostingAppTypography.h6.fontFamily,
+        subtitle1FontFamily = hostingAppTypography.subtitle1.fontFamily,
+        captionFontFamily = hostingAppTypography.caption.fontFamily,
+    )
 
     // These LocalProviders are required by StripeTheme, refer to StripeTheme.kt for details
     CompositionLocalProvider(
         LocalColors provides StripeThemeDefaults.colors(isSystemInDarkTheme()).copy(
-            component = mdcColors.background,
-            componentDivider = mdcColors.onSurface.copy(alpha = DividerAlpha),
-            onComponent = mdcColors.onBackground,
-            subtitle = mdcColors.onBackground.copy(alpha = ContentAlpha.medium),
-            placeholderText = mdcColors.onBackground.copy(alpha = ContentAlpha.medium),
-            materialColors = mdcColors,
+            component = hostingAppColors.background,
+            componentDivider = hostingAppColors.onSurface.copy(alpha = DividerAlpha),
+            onComponent = hostingAppColors.onBackground,
+            subtitle = hostingAppColors.onBackground.copy(alpha = ContentAlpha.medium),
+            placeholderText = hostingAppColors.onBackground.copy(alpha = ContentAlpha.medium),
+            materialColors = hostingAppColors,
         ),
         LocalShapes provides StripeThemeDefaults.shapes,
-        LocalTypography provides StripeThemeDefaults.typography,
+        LocalTypography provides stripeTypography,
         LocalInspectionMode provides inspectionMode,
     ) {
         MaterialTheme(
-            colors = mdcColors,
-            typography = themeParams.typography ?: MaterialTheme.typography,
-            shapes = themeParams.shapes ?: MaterialTheme.shapes,
+            colors = hostingAppColors,
+            // stripeTypography.toComposeTypography has overridden body1, body2, h4, h5, h6, subtitle1, caption
+            // need to copy over the rest from hosting app.
+            typography = stripeTypography.toComposeTypography().copy(
+                h1 = hostingAppTypography.h1,
+                h2 = hostingAppTypography.h2,
+                h3 = hostingAppTypography.h3,
+                subtitle2 = hostingAppTypography.subtitle2,
+                button = hostingAppTypography.button,
+                overline = hostingAppTypography.overline
+            ),
+            shapes = hostingAppShapes,
             content = content
         )
     }

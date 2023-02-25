@@ -34,6 +34,7 @@ import kotlin.math.absoluteValue
  */
 @Composable
 internal fun DOBSection(
+    enabled: Boolean,
     onDobCollected: (Resource<DobParam>) -> Unit
 ) {
     val dateController = remember {
@@ -69,7 +70,7 @@ internal fun DOBSection(
     }
 
     SectionElementUI(
-        enabled = true,
+        enabled = enabled,
         element = dobSectionElement,
         hiddenIdentifiers = setOf(),
         lastTextFieldIdentifier = null
