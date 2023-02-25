@@ -1,4 +1,5 @@
 apply from: configs.androidApplication
+apply from: rootProject.file('build-configuration/version.gradle')
 
 apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'com.google.gms.google-services'
@@ -8,6 +9,9 @@ android {
         applicationId "com.stripe.android.financialconnections.example"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        versionName VERSION_NAME
+        versionCode getVersionCode(versionName)
 
         manifestPlaceholders = [
             STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: getBackendUrl()
