@@ -9,6 +9,9 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
+        versionName VERSION_NAME
+        versionCode getVersionCode(versionName)
+
         manifestPlaceholders = [
             STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: getBackendUrl()
         ]

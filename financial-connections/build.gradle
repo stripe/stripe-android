@@ -50,6 +50,7 @@ dependencies {
     debugImplementation "com.airbnb.android:showkase:$showkaseVersion"
 
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+
     kaptDebug "com.airbnb.android:showkase-processor:$showkaseVersion"
 
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
