@@ -20,7 +20,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
-import org.junit.Ignore
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
@@ -67,6 +66,8 @@ class LoopTest {
         repeat(dataCount) {
             while (!channel.trySend(it).isSuccess) {
                 // loop until the channel accepts the data
+                println("Waiting for channel to become available to send data $it")
+                yield()
             }
         }
 
@@ -74,8 +75,7 @@ class LoopTest {
         assertTrue { dataCount == resultCount.get() }
     }
 
-    @Ignore("Ignored due to flakiness")
-    @Test(timeout = 200)
+    @Test(timeout = 1000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun processBoundAnalyzerLoop_analyzeDataNoDuplicates() = runTest {
@@ -121,6 +121,8 @@ class LoopTest {
         repeat(dataCount) {
             while (!channel.trySend(it).isSuccess) {
                 // loop until the channel accepts the data
+                println("Waiting for channel to become available to send data $it")
+                yield()
             }
         }
 
@@ -133,7 +135,7 @@ class LoopTest {
         }
     }
 
-    @Test(timeout = 200)
+    @Test(timeout = 1000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun processBoundAnalyzerLoop_noAnalyzersAvailable() = runTest {
@@ -172,7 +174,6 @@ class LoopTest {
     @Test(timeout = 1000)
     @SmallTest
     @ExperimentalCoroutinesApi
-    @Ignore("This test is flaking in CI")
     fun finiteAnalyzerLoop_analyzeData() = runTest {
         val dataCount = 3
         var dataProcessed = false
@@ -262,7 +263,7 @@ class LoopTest {
         assertTrue { terminatedEarly }
     }
 
-    @Test(timeout = 200)
+    @Test(timeout = 1000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun finiteAnalyzerLoop_analyzeDataNoData() = runTest {
