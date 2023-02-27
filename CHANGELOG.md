@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.19.4 - 2023-02-27
+
 ### StripeCardScan
 [FIXED][6253](https://github.com/stripe/stripe-android/pull/6253) Use the full screen card scanner to alleviate fragment crashes
 
