@@ -100,13 +100,13 @@ class TestFieldPopulation {
     )
 
     private val bancontact = TestParameters(
-        lpmRepository.fromCode("bancontact")!!,
-        Customer.New,
-        LinkState.Off,
-        GooglePayState.Off,
-        Currency.EUR,
-        IntentType.Pay,
-        Billing.Off,
+        paymentMethod = lpmRepository.fromCode("bancontact")!!,
+        customer = Customer.New,
+        linkState = LinkState.Off,
+        googlePayState = GooglePayState.Off,
+        currency = Currency.EUR,
+        intentType = IntentType.Pay,
+        billing = Billing.Off,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
         automatic = Automatic.Off,

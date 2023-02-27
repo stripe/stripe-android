@@ -298,6 +298,9 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSheet.InitializationMode.SetupIntent -> {
                 SetupIntentClientSecret(mode.clientSecret)
             }
+            is PaymentSheet.InitializationMode.DeferredIntent -> {
+                TODO("Not implemented yet")
+            }
         }
 
         val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(

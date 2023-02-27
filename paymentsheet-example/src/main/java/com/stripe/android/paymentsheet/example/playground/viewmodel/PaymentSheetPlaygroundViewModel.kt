@@ -2,10 +2,10 @@ package com.stripe.android.paymentsheet.example.playground.viewmodel
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
+import androidx.lifecycle.asFlow
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
@@ -18,8 +18,11 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
+import com.stripe.android.paymentsheet.example.playground.model.InitializationType
 import com.stripe.android.paymentsheet.example.playground.model.SavedToggles
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 
 class PaymentSheetPlaygroundViewModel(
     application: Application
@@ -27,19 +30,29 @@ class PaymentSheetPlaygroundViewModel(
     val inProgress = MutableLiveData<Boolean>()
     val status = MutableLiveData<String>()
 
-    val customerConfig = MutableLiveData<PaymentSheet.CustomerConfiguration?>()
-    val clientSecret = MutableLiveData<String?>()
+    val customerConfig = MutableLiveData<PaymentSheet.CustomerConfiguration?>(null)
+    val clientSecret = MutableLiveData<String?>(null)
 
-    val readyToCheckout: LiveData<Boolean> = clientSecret.map {
-        it != null
+    val initializationType = MutableStateFlow(InitializationType.Normal)
+    val paymentMethodTypes = MutableStateFlow<List<String>>(emptyList())
+
+    val readyToCheckout = combine(
+        initializationType,
+        clientSecret.asFlow(),
+    ) { type, secret ->
+        when (type) {
+            InitializationType.Normal -> secret != null
+            InitializationType.Deferred -> true
+        }
     }
 
-    var checkoutMode: CheckoutMode? = null
+    val checkoutMode = MutableStateFlow(CheckoutMode.Payment)
     var temporaryCustomerId: String? = null
 
     private val sharedPreferencesName = "playgroundToggles"
 
     fun storeToggleState(
+        initializationType: String,
         customer: String,
         link: Boolean,
         googlePay: Boolean,
@@ -55,19 +68,20 @@ class PaymentSheetPlaygroundViewModel(
             sharedPreferencesName,
             AppCompatActivity.MODE_PRIVATE
         )
-        val editor = sharedPreferences.edit()
 
-        editor.putString(Toggle.Customer.key, customer)
-        editor.putBoolean(Toggle.Link.key, link)
-        editor.putBoolean(Toggle.GooglePay.key, googlePay)
-        editor.putString(Toggle.Currency.key, currency)
-        editor.putString(Toggle.MerchantCountryCode.key, merchantCountryCode)
-        editor.putString(Toggle.Mode.key, mode)
-        editor.putString(Toggle.ShippingAddress.key, shipping)
-        editor.putBoolean(Toggle.SetDefaultBillingAddress.key, setDefaultBillingAddress)
-        editor.putBoolean(Toggle.SetAutomaticPaymentMethods.key, setAutomaticPaymentMethods)
-        editor.putBoolean(Toggle.SetDelayedPaymentMethods.key, setDelayedPaymentMethods)
-        editor.apply()
+        sharedPreferences.edit {
+            putString(Toggle.Initialization.key, initializationType)
+            putString(Toggle.Customer.key, customer)
+            putBoolean(Toggle.Link.key, link)
+            putBoolean(Toggle.GooglePay.key, googlePay)
+            putString(Toggle.Currency.key, currency)
+            putString(Toggle.MerchantCountryCode.key, merchantCountryCode)
+            putString(Toggle.Mode.key, mode)
+            putString(Toggle.ShippingAddress.key, shipping)
+            putBoolean(Toggle.SetDefaultBillingAddress.key, setDefaultBillingAddress)
+            putBoolean(Toggle.SetAutomaticPaymentMethods.key, setAutomaticPaymentMethods)
+            putBoolean(Toggle.SetDelayedPaymentMethods.key, setDelayedPaymentMethods)
+        }
     }
 
     fun getSavedToggleState(): SavedToggles {
@@ -76,6 +90,10 @@ class PaymentSheetPlaygroundViewModel(
             AppCompatActivity.MODE_PRIVATE
         )
 
+        val initialization = sharedPreferences.getString(
+            Toggle.Initialization.key,
+            Toggle.Initialization.default.toString(),
+        )
         val customer = sharedPreferences.getString(
             Toggle.Customer.key,
             Toggle.Customer.default.toString()
@@ -118,6 +136,7 @@ class PaymentSheetPlaygroundViewModel(
         )
 
         return SavedToggles(
+            initialization = initialization.toString(),
             customer= customer.toString(),
             googlePay = googlePay,
             currency = currency.toString(),
@@ -137,6 +156,7 @@ class PaymentSheetPlaygroundViewModel(
      * that will be confirmed on the client using Payment Sheet.
      */
     fun prepareCheckout(
+        initializationType: InitializationType,
         customer: CheckoutCustomer,
         currency: CheckoutCurrency,
         merchantCountry: CountryCode,
@@ -153,6 +173,7 @@ class PaymentSheetPlaygroundViewModel(
         inProgress.postValue(true)
 
         val requestBody = CheckoutRequest(
+            initialization = initializationType.value,
             customer = customer.value,
             currency = currency.value.lowercase(),
             mode = mode.value,
@@ -168,14 +189,14 @@ class PaymentSheetPlaygroundViewModel(
             .responseString { _, _, result ->
                 when (result) {
                     is Result.Failure -> {
-                        status.postValue(
-                            "Preparing checkout failed:\n${result.getException().message}"
-                        )
+                        status.postValue("Preparing checkout failed:\n${result.getException().message}")
                     }
                     is Result.Success -> {
-                        val checkoutResponse = Gson()
-                            .fromJson(result.get(), CheckoutResponse::class.java)
-                        checkoutMode = mode
+                        val checkoutResponse = Gson().fromJson(
+                            result.get(),
+                            CheckoutResponse::class.java
+                        )
+                        checkoutMode.value = mode
                         temporaryCustomerId = if (customer == CheckoutCustomer.New) {
                             checkoutResponse.customerId
                         } else {
@@ -188,6 +209,7 @@ class PaymentSheetPlaygroundViewModel(
 
                         customerConfig.postValue(checkoutResponse.makeCustomerConfig())
                         clientSecret.postValue(checkoutResponse.intentClientSecret)
+                        paymentMethodTypes.value = checkoutResponse.paymentMethodTypes.orEmpty()
                     }
                 }
                 inProgress.postValue(false)

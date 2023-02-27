@@ -58,13 +58,13 @@ class TestCustomers {
     }
 
     private val bancontactNewUser = TestParameters(
-        lpmRepository.fromCode("bancontact")!!,
-        Customer.New,
-        LinkState.Off,
-        GooglePayState.On,
-        Currency.EUR,
-        IntentType.Pay,
-        Billing.On,
+        paymentMethod = lpmRepository.fromCode("bancontact")!!,
+        customer = Customer.New,
+        linkState = LinkState.Off,
+        googlePayState = GooglePayState.On,
+        currency = Currency.EUR,
+        intentType = IntentType.Pay,
+        billing = Billing.On,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
         automatic = Automatic.Off,

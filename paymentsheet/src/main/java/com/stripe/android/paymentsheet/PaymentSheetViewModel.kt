@@ -424,6 +424,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is PaymentSheet.InitializationMode.SetupIntent -> {
                 SetupIntentClientSecret(mode.clientSecret)
             }
+            is PaymentSheet.InitializationMode.DeferredIntent -> {
+                TODO("Not implemented yet")
+            }
         }
 
         val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
@@ -615,4 +618,7 @@ private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
     get() = when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> true
         is PaymentSheet.InitializationMode.SetupIntent -> false
+        is PaymentSheet.InitializationMode.DeferredIntent -> {
+            intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
+        }
     }
