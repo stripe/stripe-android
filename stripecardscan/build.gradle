@@ -34,7 +34,7 @@ dependencies {
     androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    androidTestImplementation "androidx.test:core-ktx:1.4.0"
+    androidTestImplementation "androidx.test:core-ktx:1.5.0"
     androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
