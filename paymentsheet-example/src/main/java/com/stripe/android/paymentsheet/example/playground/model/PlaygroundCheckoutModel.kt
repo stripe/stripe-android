@@ -102,7 +102,7 @@ data class CheckoutResponse(
     @SerializedName("customerEphemeralKeySecret")
     val customerEphemeralKeySecret: String? = null,
     @SerializedName("paymentMethodTypes")
-    val paymentMethodTypes: List<String>? = null,
+    val paymentMethodTypes: String? = null,
 ) {
     fun makeCustomerConfig() =
         if (customerId != null && customerEphemeralKeySecret != null) {
