@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Payments
+[ADDED][6279](https://github.com/stripe/stripe-android/pull/6279) Update to Stripe 3DS2 6.1.7, removed keep-all proguard rules in favor of the minimal required ones.
+
 ## 20.19.4 - 2023-02-27
 
 ### StripeCardScan
