@@ -5,6 +5,9 @@
 ### StripeCardScan
 [FIXED][6253](https://github.com/stripe/stripe-android/pull/6253) Use the full screen card scanner to alleviate fragment crashes
 
+### All SDKs
+[ADDED][6227](https://github.com/stripe/stripe-android/pull/6227) Removed keep-all proguard rules in favor of the minimal required ones. 
+
 ## 20.19.3 - 2023-02-13
 
 ### Financial Connections
