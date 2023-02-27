@@ -17,7 +17,7 @@ class SectionController(
         sectionFieldErrorControllers.map {
             it.error
         }
-    ) {
-        it.firstOrNull()
+    ) { errorArray ->
+        errorArray.firstNotNullOfOrNull { it }
     }
 }
