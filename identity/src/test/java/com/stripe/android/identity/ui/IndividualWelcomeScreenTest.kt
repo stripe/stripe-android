@@ -12,7 +12,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.TestApplication
-import com.stripe.android.identity.navigation.IndividualDestination
+import com.stripe.android.identity.navigation.INDIVIDUAL
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentIndividualWelcomePage
@@ -83,7 +83,7 @@ class IndividualWelcomeScreenTest {
         testIndividualWelcome {
             onNodeWithTag(INDIVIDUAL_WELCOME_GET_STARTED_BUTTON_TAG).performClick()
             verify(mockNavController).navigate(
-                eq(IndividualDestination.INDIVIDUAL),
+                eq(INDIVIDUAL),
                 any<NavOptionsBuilder.() -> Unit>()
             )
         }

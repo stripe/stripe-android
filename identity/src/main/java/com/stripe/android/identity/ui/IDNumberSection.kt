@@ -47,7 +47,10 @@ internal fun IDNumberSection(
 ) {
     val controller = remember {
         DropdownFieldController(
-            CountryConfig(onlyShowCountryCodes = idNumberCountries.map { it.code.value }.toSet())
+            CountryConfig(
+                onlyShowCountryCodes = idNumberCountries.map { it.code.value }.toSet(),
+                disableDropdownWithSingleElement = true
+            )
         )
     }
     val countryElement = remember { CountryElement(IdentifierSpec.Country, controller) }
@@ -217,7 +220,6 @@ private object SGIDConfig : SimpleTextFieldConfig(
     label = R.string.nric_or_fin
 ) {
     override val placeHolder = SINGAPORE_ID_PLACEHOLDER
-    override val keyboard = KeyboardType.Number
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean) = false
 

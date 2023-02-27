@@ -37,6 +37,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -44,7 +45,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -439,7 +439,6 @@ internal class DefaultFlowControllerTest {
         val expectedArgs = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                clientSecret = PaymentIntentClientSecret("client_secret"),
                 customerPaymentMethods = emptyList(),
                 config = null,
                 isGooglePayReady = false,
@@ -604,38 +603,49 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `confirmPaymentSelection() with new card payment method should start paymentlauncher`() =
-        runTest {
-            flowController.confirmPaymentSelection(
-                NEW_CARD_PAYMENT_SELECTION,
-                PaymentSheetState.Full(
-                    PaymentSheetFixtures.CONFIG_CUSTOMER,
-                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-                    PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    customerPaymentMethods = PAYMENT_METHODS,
-                    savedSelection = SavedSelection.PaymentMethod(
-                        id = "pm_123456789"
-                    ),
-                    isGooglePayReady = false,
-                    linkState = null,
-                    newPaymentSelection = null,
-                )
-            )
+    fun `confirmPaymentSelection() with new card payment method should start paymentlauncher`() = runTest {
+        flowController.configure(
+            mode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+            ),
+            callback = { _, _ -> },
+        )
 
-            verifyPaymentSelection(
-                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                expectedPaymentMethodOptions = PaymentMethodOptionsParams.Card()
+        flowController.confirmPaymentSelection(
+            NEW_CARD_PAYMENT_SELECTION,
+            PaymentSheetState.Full(
+                PaymentSheetFixtures.CONFIG_CUSTOMER,
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                customerPaymentMethods = PAYMENT_METHODS,
+                savedSelection = SavedSelection.PaymentMethod(
+                    id = "pm_123456789"
+                ),
+                isGooglePayReady = false,
+                linkState = null,
+                newPaymentSelection = null,
             )
-        }
+        )
+
+        verifyPaymentSelection(
+            PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            expectedPaymentMethodOptions = PaymentMethodOptionsParams.Card()
+        )
+    }
 
     @Test
     fun `confirmPaymentSelection() with generic payment method should start paymentLauncher`() {
+        flowController.configure(
+            mode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+            ),
+            callback = { _, _ -> },
+        )
+
         flowController.confirmPaymentSelection(
             GENERIC_PAYMENT_SELECTION,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
                 savedSelection = SavedSelection.PaymentMethod(
@@ -655,6 +665,13 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with us_bank_account payment method should start paymentLauncher`() {
+        flowController.configure(
+            mode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+            ),
+            callback = { _, _ -> },
+        )
+
         val paymentSelection = GENERIC_PAYMENT_SELECTION.copy(
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT
         )
@@ -663,7 +680,6 @@ internal class DefaultFlowControllerTest {
             paymentSelection,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
                 savedSelection = SavedSelection.PaymentMethod(

@@ -8,6 +8,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPayment
  * This is the data class that represents the parameters used to run the test.
  */
 data class TestParameters(
+    val initializationType: InitializationType = InitializationType.Normal,
     val paymentMethod: SupportedPaymentMethod,
     val customer: Customer,
     val linkState: LinkState = LinkState.Off,
@@ -30,6 +31,14 @@ data class TestParameters(
     val supportedPaymentMethods: List<PaymentMethodCode> = listOf(),
     val customPrimaryButtonLabel: String? = null,
 )
+
+/**
+ * Indicates if we use the normal or deferred payment sheet initialization
+ */
+enum class InitializationType {
+    Normal,
+    Deferred,
+}
 
 /**
  * Indicates if automatic payment methods are used on the payment intent

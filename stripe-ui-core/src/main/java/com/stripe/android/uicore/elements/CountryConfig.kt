@@ -24,6 +24,7 @@ class CountryConfig(
     val onlyShowCountryCodes: Set<String> = emptySet(),
     val locale: Locale = Locale.getDefault(),
     override val tinyMode: Boolean = false,
+    override val disableDropdownWithSingleElement: Boolean = false,
     private val collapsedLabelMapper: (Country) -> String = { country -> country.name },
     expandedLabelMapper: (Country) -> String = { country ->
         "${countryCodeToEmoji(country.code.value)} ${country.name}"

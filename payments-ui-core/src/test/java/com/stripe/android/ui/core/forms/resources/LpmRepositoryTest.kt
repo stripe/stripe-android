@@ -3,6 +3,8 @@ package com.stripe.android.ui.core.forms.resources
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethod.Type.Card
+import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.EmptyFormSpec
@@ -331,7 +333,6 @@ class LpmRepositoryTest {
     fun `Verify LpmRepository waitUntilLoaded completes after update`() = runTest(
         context = TestCoroutineScheduler(),
         dispatchTimeoutMs = TimeUnit.SECONDS.toMillis(1)
-
     ) {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
@@ -358,5 +359,29 @@ class LpmRepositoryTest {
         assertThat(lpmRepository.isLoaded()).isTrue()
         job.join()
         assertThat(job.isCompleted).isTrue()
+    }
+
+    @Test
+    fun `Verify LpmRepository filters out USBankAccount if StripeIntent has no client secret`() = runTest {
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+        )
+
+        val deferredPaymentIntent = PaymentIntentFactory.create(
+            paymentMethodTypes = listOf("card", "us_bank_account", "cashapp"),
+        ).copy(
+            clientSecret = null,
+        )
+
+        lpmRepository.update(
+            stripeIntent = deferredPaymentIntent,
+            serverLpmSpecs = null,
+        )
+
+        val supportedPaymentMethods = lpmRepository.values().map { it.code }
+        assertThat(supportedPaymentMethods).containsExactly(Card.code, CashAppPay.code)
     }
 }

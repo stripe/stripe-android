@@ -16,7 +16,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -462,7 +461,6 @@ internal class PaymentOptionsViewModelTest {
         private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
                 stripeIntent = PAYMENT_INTENT,
-                clientSecret = PaymentIntentClientSecret("secret"),
                 customerPaymentMethods = emptyList(),
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                 isGooglePayReady = true,

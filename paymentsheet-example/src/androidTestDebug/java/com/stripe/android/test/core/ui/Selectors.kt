@@ -29,6 +29,7 @@ import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
+import com.stripe.android.test.core.InitializationType
 import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.Shipping
@@ -93,6 +94,11 @@ class Selectors(
     val automatic = when (testParameters.automatic) {
         Automatic.Off -> EspressoIdButton(R.id.automatic_pm_off_button)
         Automatic.On -> EspressoIdButton(R.id.automatic_pm_on_button)
+    }
+
+    val initializationType = when (testParameters.initializationType) {
+        InitializationType.Normal -> EspressoIdButton(R.id.normal_initialization_button)
+        InitializationType.Deferred -> EspressoIdButton(R.id.deferred_initialization_button)
     }
 
     val paymentSelection = PaymentSelection(

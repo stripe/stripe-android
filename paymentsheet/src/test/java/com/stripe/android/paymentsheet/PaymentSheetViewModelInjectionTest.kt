@@ -55,13 +55,13 @@ internal class PaymentSheetViewModelInjectionTest : BasePaymentSheetViewModelInj
         }
     }
 
-    private fun createArgs(): PaymentSheetContract.Args {
+    private fun createArgs(): PaymentSheetContractV2.Args {
         return PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
             injectorKey = "testInjectorKeyAddFragmentTest"
         )
     }
 
-    private fun createViewModel(args: PaymentSheetContract.Args): PaymentSheetViewModel {
+    private fun createViewModel(args: PaymentSheetContractV2.Args): PaymentSheetViewModel {
         return createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
             customerRepositoryPMs = emptyList(),

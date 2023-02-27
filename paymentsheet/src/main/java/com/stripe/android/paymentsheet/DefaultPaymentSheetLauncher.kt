@@ -19,7 +19,7 @@ import org.jetbrains.annotations.TestOnly
  * able to pass in an activity.
  */
 internal class DefaultPaymentSheetLauncher(
-    private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>,
+    private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
     application: Application
 ) : PaymentSheetLauncher, NonFallbackInjector {
     @InjectorKey
@@ -42,7 +42,7 @@ internal class DefaultPaymentSheetLauncher(
         callback: PaymentSheetResultCallback
     ) : this(
         activity.registerForActivityResult(
-            PaymentSheetContract()
+            PaymentSheetContractV2()
         ) {
             callback.onPaymentSheetResult(it)
         },
@@ -54,7 +54,7 @@ internal class DefaultPaymentSheetLauncher(
         callback: PaymentSheetResultCallback
     ) : this(
         fragment.registerForActivityResult(
-            PaymentSheetContract()
+            PaymentSheetContractV2()
         ) {
             callback.onPaymentSheetResult(it)
         },
@@ -68,7 +68,7 @@ internal class DefaultPaymentSheetLauncher(
         callback: PaymentSheetResultCallback
     ) : this(
         fragment.registerForActivityResult(
-            PaymentSheetContract(),
+            PaymentSheetContractV2(),
             registry
         ) {
             callback.onPaymentSheetResult(it)
@@ -76,29 +76,15 @@ internal class DefaultPaymentSheetLauncher(
         fragment.requireActivity().application
     )
 
-    override fun presentWithPaymentIntent(
-        paymentIntentClientSecret: String,
+    override fun present(
+        mode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?
-    ) = present(
-        PaymentSheetContract.Args.createPaymentIntentArgsWithInjectorKey(
-            paymentIntentClientSecret,
-            configuration,
-            injectorKey
+    ) {
+        val args = PaymentSheetContractV2.Args(
+            initializationMode = mode,
+            config = configuration,
+            injectorKey = injectorKey,
         )
-    )
-
-    override fun presentWithSetupIntent(
-        setupIntentClientSecret: String,
-        configuration: PaymentSheet.Configuration?
-    ) = present(
-        PaymentSheetContract.Args.createSetupIntentArgsWithInjectorKey(
-            setupIntentClientSecret,
-            configuration,
-            injectorKey
-        )
-    )
-
-    private fun present(args: PaymentSheetContract.Args) {
         activityResultLauncher.launch(args)
     }
 

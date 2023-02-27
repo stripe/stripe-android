@@ -92,6 +92,7 @@ public final class com/stripe/android/uicore/elements/ComposableSingletons$Secti
 }
 
 public final class com/stripe/android/uicore/elements/DropdownConfig$DefaultImpls {
+	public static fun getDisableDropdownWithSingleElement (Lcom/stripe/android/uicore/elements/DropdownConfig;)Z
 	public static fun getTinyMode (Lcom/stripe/android/uicore/elements/DropdownConfig;)Z
 }
 

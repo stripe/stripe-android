@@ -74,8 +74,17 @@ data class StripeTypography(
     val mediumFontSize: TextUnit,
     val largeFontSize: TextUnit,
     val xLargeFontSize: TextUnit,
+    // global font overrides, takes precedence over individual font overrides below.
     @FontRes
-    val fontFamily: Int?
+    val fontFamily: Int?,
+    // individual front overrides, only valid when fontFamily is null.
+    val body1FontFamily: FontFamily? = null,
+    val body2FontFamily: FontFamily? = null,
+    val h4FontFamily: FontFamily? = null,
+    val h5FontFamily: FontFamily? = null,
+    val h6FontFamily: FontFamily? = null,
+    val subtitle1FontFamily: FontFamily? = null,
+    val captionFontFamily: FontFamily? = null
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -213,11 +222,11 @@ fun StripeShapes.toComposeShapes(): StripeComposeShapes {
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun StripeTypography.toComposeTypography(): Typography {
-    val fontFamily = if (fontFamily != null) FontFamily(Font(fontFamily)) else FontFamily.Default
+    val globalFontFamily = fontFamily?.let { FontFamily(Font(it)) }
     // h4 is our largest headline. It is used for the most important labels in our UI
     // ex: "Select your payment method" in Payment Sheet.
     val h4 = TextStyle.Default.copy(
-        fontFamily = fontFamily,
+        fontFamily = globalFontFamily ?: h4FontFamily ?: FontFamily.Default,
         fontSize = (xLargeFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightBold)
     )
@@ -225,7 +234,7 @@ fun StripeTypography.toComposeTypography(): Typography {
     // h5 is our medium headline label.
     // ex: "Pay $50.99" in Payment Sheet's buy button.
     val h5 = TextStyle.Default.copy(
-        fontFamily = fontFamily,
+        fontFamily = globalFontFamily ?: h5FontFamily ?: FontFamily.Default,
         fontSize = (largeFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightMedium),
         letterSpacing = (-0.32).sp
@@ -234,7 +243,7 @@ fun StripeTypography.toComposeTypography(): Typography {
     // h6 is our smallest headline label.
     // ex: Section labels in Payment Sheet
     val h6 = TextStyle.Default.copy(
-        fontFamily = fontFamily,
+        fontFamily = globalFontFamily ?: h6FontFamily ?: FontFamily.Default,
         fontSize = (smallFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightMedium),
         letterSpacing = (-0.15).sp
@@ -243,7 +252,7 @@ fun StripeTypography.toComposeTypography(): Typography {
     // body1 is our larger body text. Used for the bulk of our elements and forms.
     // ex: the text used in Payment Sheet's text form elements.
     val body1 = TextStyle.Default.copy(
-        fontFamily = fontFamily,
+        fontFamily = globalFontFamily ?: body1FontFamily ?: FontFamily.Default,
         fontSize = (mediumFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightNormal)
     )
@@ -251,7 +260,7 @@ fun StripeTypography.toComposeTypography(): Typography {
     // subtitle1 is our only subtitle size. Used for labeling fields.
     // ex: the placeholder texts that appear when you type in Payment Sheet's forms.
     val subtitle1 = TextStyle.Default.copy(
-        fontFamily = fontFamily,
+        fontFamily = globalFontFamily ?: subtitle1FontFamily ?: FontFamily.Default,
         fontSize = (mediumFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightNormal),
         letterSpacing = (-0.15).sp
@@ -260,7 +269,7 @@ fun StripeTypography.toComposeTypography(): Typography {
     // caption is used to label images in payment sheet.
     // ex: the labels under our payment method selectors in Payment Sheet.
     val caption = TextStyle.Default.copy(
-        fontFamily = fontFamily,
+        fontFamily = globalFontFamily ?: captionFontFamily ?: FontFamily.Default,
         fontSize = (xSmallFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightMedium)
     )
@@ -268,7 +277,7 @@ fun StripeTypography.toComposeTypography(): Typography {
     // body2 is our smaller body text. Used for less important fields that are not required to
     // read. Ex: our mandate texts in Payment Sheet.
     val body2 = TextStyle.Default.copy(
-        fontFamily = fontFamily,
+        fontFamily = globalFontFamily ?: body2FontFamily ?: FontFamily.Default,
         fontSize = (xxSmallFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightNormal),
         letterSpacing = (-0.15).sp

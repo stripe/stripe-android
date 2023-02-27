@@ -7,6 +7,7 @@
     <ID>ConstructorParameterNaming:RowElement.kt$RowElement$_identifier: IdentifierSpec</ID>
     <ID>CyclomaticComplexMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
     <ID>CyclomaticComplexMethod:IdentifierSpec.kt$IdentifierSpec.Companion$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) fun get(value: String)</ID>
+    <ID>CyclomaticComplexMethod:StripeTheme.kt$@Composable @ReadOnlyComposable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun StripeTypography.toComposeTypography(): Typography</ID>
     <ID>CyclomaticComplexMethod:TextFieldUI.kt$@Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
     <ID>EmptyFunctionBlock:DrawablePainter.kt$EmptyPainter${}</ID>
     <ID>FunctionParameterNaming:IdentifierSpec.kt$IdentifierSpec.Companion$_value: String</ID>

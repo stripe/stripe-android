@@ -23,8 +23,8 @@ class PaymentSheetContract :
         input: Args
     ): Intent {
         val statusBarColor = (context as? Activity)?.window?.statusBarColor
-        return Intent(context, PaymentSheetActivity::class.java)
-            .putExtra(EXTRA_ARGS, input.copy(statusBarColor = statusBarColor))
+        val args = input.copy(statusBarColor = statusBarColor)
+        return Intent(context, PaymentSheetActivity::class.java).putExtra(EXTRA_ARGS, args.toV2())
     }
 
     override fun parseResult(
@@ -38,13 +38,30 @@ class PaymentSheetContract :
     }
 
     @Parcelize
-    data class Args @VisibleForTesting internal constructor(
+    data class Args internal constructor(
         internal val clientSecret: ClientSecret,
         internal val config: PaymentSheet.Configuration?,
         @ColorInt internal val statusBarColor: Int? = null,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     ) : ActivityStarter.Args {
+
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
+
+        internal fun toV2(): PaymentSheetContractV2.Args {
+            return PaymentSheetContractV2.Args(
+                initializationMode = when (clientSecret) {
+                    is PaymentIntentClientSecret -> {
+                        PaymentSheet.InitializationMode.PaymentIntent(clientSecret.value)
+                    }
+                    is SetupIntentClientSecret -> {
+                        PaymentSheet.InitializationMode.SetupIntent(clientSecret.value)
+                    }
+                },
+                config = config,
+                statusBarColor = statusBarColor,
+                injectorKey = injectorKey,
+            )
+        }
 
         companion object {
             internal fun fromIntent(intent: Intent): Args? {
@@ -55,36 +72,16 @@ class PaymentSheetContract :
                 clientSecret: String,
                 config: PaymentSheet.Configuration? = null
             ) = Args(
-                PaymentIntentClientSecret(clientSecret),
-                config
+                clientSecret = PaymentIntentClientSecret(clientSecret),
+                config = config,
             )
 
             fun createSetupIntentArgs(
                 clientSecret: String,
                 config: PaymentSheet.Configuration? = null
             ) = Args(
-                SetupIntentClientSecret(clientSecret),
-                config
-            )
-
-            internal fun createPaymentIntentArgsWithInjectorKey(
-                clientSecret: String,
-                config: PaymentSheet.Configuration? = null,
-                @InjectorKey injectorKey: String
-            ) = Args(
-                PaymentIntentClientSecret(clientSecret),
-                config,
-                injectorKey = injectorKey
-            )
-
-            internal fun createSetupIntentArgsWithInjectorKey(
-                clientSecret: String,
-                config: PaymentSheet.Configuration? = null,
-                @InjectorKey injectorKey: String
-            ) = Args(
-                SetupIntentClientSecret(clientSecret),
-                config,
-                injectorKey = injectorKey
+                clientSecret = SetupIntentClientSecret(clientSecret),
+                config = config,
             )
         }
     }

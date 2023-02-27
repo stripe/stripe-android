@@ -46,7 +46,6 @@ import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerFlowControllerComponent
 import com.stripe.android.paymentsheet.injection.FlowControllerComponent
-import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -188,10 +187,10 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
-        configureInternal(
-            PaymentIntentClientSecret(paymentIntentClientSecret),
-            configuration,
-            callback
+        configure(
+            mode = PaymentSheet.InitializationMode.PaymentIntent(paymentIntentClientSecret),
+            configuration = configuration,
+            callback = callback,
         )
     }
 
@@ -200,31 +199,30 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
-        configureInternal(
-            SetupIntentClientSecret(setupIntentClientSecret),
-            configuration,
-            callback
+        configure(
+            mode = PaymentSheet.InitializationMode.SetupIntent(setupIntentClientSecret),
+            configuration = configuration,
+            callback = callback,
         )
     }
 
-    private fun configureInternal(
-        clientSecret: ClientSecret,
+    override fun configure(
+        mode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         try {
+            mode.validate()
             configuration?.validate()
-            clientSecret.validate()
         } catch (e: InvalidParameterException) {
             callback.onConfigured(success = false, e)
             return
         }
 
+        viewModel.initializationMode = mode
+
         lifecycleScope.launch {
-            val result = paymentSheetLoader.load(
-                clientSecret,
-                configuration
-            )
+            val result = paymentSheetLoader.load(mode, configuration)
 
             // Wait until all required resources are loaded before completing initialization.
             resourceRepositories.forEach { it.waitUntilLoaded() }
@@ -291,11 +289,24 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
     ) {
-        val confirmParamsFactory =
-            ConfirmStripeIntentParamsFactory.createFactory(
-                state.clientSecret,
-                state.config?.shippingDetails?.toConfirmPaymentIntentShipping()
-            )
+        val mode = viewModel.initializationMode ?: return
+
+        val clientSecret = when (mode) {
+            is PaymentSheet.InitializationMode.PaymentIntent -> {
+                PaymentIntentClientSecret(mode.clientSecret)
+            }
+            is PaymentSheet.InitializationMode.SetupIntent -> {
+                SetupIntentClientSecret(mode.clientSecret)
+            }
+            is PaymentSheet.InitializationMode.DeferredIntent -> {
+                TODO("Not implemented yet")
+            }
+        }
+
+        val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
+            clientSecret = clientSecret,
+            shipping = state.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
+        )
 
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
