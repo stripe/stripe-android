@@ -1,5 +1,6 @@
 package com.stripe.android.identity.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -15,6 +16,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.stripe.android.core.model.Country
 import com.stripe.android.identity.R
@@ -40,6 +42,7 @@ import com.stripe.android.uicore.elements.TextFieldState
  */
 @Composable
 internal fun IDNumberSection(
+    enabled: Boolean,
     idNumberCountries: List<Country>,
     countryNotListedText: String,
     navController: NavController,
@@ -107,6 +110,7 @@ internal fun IDNumberSection(
         }
     }
     IDNumberContent(
+        enabled = enabled,
         navController = navController,
         countryElement = countryElement,
         usElement = usElement,
@@ -121,6 +125,7 @@ internal fun IDNumberSection(
 
 @Composable
 private fun IDNumberContent(
+    enabled: Boolean,
     navController: NavController,
     countryElement: CountryElement,
     usElement: SimpleTextElement,
@@ -158,7 +163,7 @@ private fun IDNumberContent(
     }
 
     SectionElementUI(
-        enabled = true,
+        enabled = enabled,
         element = idNumberSectionElement,
         hiddenIdentifiers = emptySet(),
         lastTextFieldIdentifier = null
@@ -166,6 +171,7 @@ private fun IDNumberContent(
 
     TextButton(
         modifier = Modifier.testTag(ID_NUMBER_COUNTRY_NOT_LISTED_BUTTON_TAG),
+        contentPadding = PaddingValues(0.dp),
         onClick = {
             navController.navigateTo(
                 CountryNotListedDestination(

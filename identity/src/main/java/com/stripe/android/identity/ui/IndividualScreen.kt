@@ -85,6 +85,7 @@ internal fun IndividualScreen(
                     .verticalScroll(rememberScrollState())
             ) {
                 IndividualScreenBodyContent(
+                    enabled = submitButtonState != LoadingButtonState.Loading,
                     navController = navController,
                     identityViewModel = identityViewModel,
                     individualPage = individualPage,
@@ -116,6 +117,7 @@ internal fun IndividualScreen(
 
 @Composable
 private fun IndividualScreenBodyContent(
+    enabled: Boolean,
     navController: NavController,
     identityViewModel: IdentityViewModel,
     individualPage: VerificationPageStaticContentIndividualPage,
@@ -130,7 +132,7 @@ private fun IndividualScreenBodyContent(
         modifier = Modifier.testTag(INDIVIDUAL_TITLE_TAG)
     )
     if (missing.contains(Requirement.NAME)) {
-        NameSection {
+        NameSection(enabled) {
             collectedStates.name = it
             onUpdateLoadingButtonState(
                 updateSubmitButtonState(
@@ -140,7 +142,7 @@ private fun IndividualScreenBodyContent(
         }
     }
     if (missing.contains(Requirement.DOB)) {
-        DOBSection {
+        DOBSection(enabled) {
             collectedStates.dob = it
             onUpdateLoadingButtonState(
                 updateSubmitButtonState(
@@ -151,6 +153,7 @@ private fun IndividualScreenBodyContent(
     }
     if (missing.contains(Requirement.IDNUMBER)) {
         IDNumberSection(
+            enabled,
             individualPage.idNumberCountries,
             individualPage.idNumberCountryNotListedTextButtonText,
             navController
@@ -165,6 +168,7 @@ private fun IndividualScreenBodyContent(
     }
     if (missing.contains(Requirement.ADDRESS)) {
         AddressSection(
+            enabled,
             identityViewModel,
             individualPage.addressCountries,
             individualPage.addressCountryNotListedTextButtonText,

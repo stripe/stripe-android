@@ -20,6 +20,7 @@ import com.stripe.android.uicore.elements.SimpleTextFieldController
  */
 @Composable
 internal fun NameSection(
+    enabled: Boolean,
     onNameCollected: (Resource<NameParam>) -> Unit
 ) {
     val firstNameController = remember {
@@ -52,7 +53,7 @@ internal fun NameSection(
     val lastName by lastNameController.fieldValue.collectAsState("")
 
     SectionElementUI(
-        enabled = true,
+        enabled = enabled,
         element = nameSectionElement,
         hiddenIdentifiers = setOf(),
         lastTextFieldIdentifier = null
