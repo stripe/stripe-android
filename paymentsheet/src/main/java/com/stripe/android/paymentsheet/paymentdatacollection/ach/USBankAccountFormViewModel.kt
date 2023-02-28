@@ -20,6 +20,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
@@ -30,10 +31,10 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.model.create
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
@@ -410,8 +411,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun confirm(clientSecret: ClientSecret, paymentSelection: PaymentSelection.New) {
         viewModelScope.launch {
             val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-                clientSecret,
-                args.shippingDetails?.toConfirmPaymentIntentShipping()
+                clientSecret = clientSecret.value,
+                shipping = args.shippingDetails?.toConfirmPaymentIntentShipping()
             )
             val confirmIntent = confirmParamsFactory.create(paymentSelection)
             args.onConfirmStripeIntent(confirmIntent)

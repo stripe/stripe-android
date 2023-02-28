@@ -24,6 +24,7 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -43,12 +44,12 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.model.create
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import dagger.Lazy
@@ -267,7 +268,7 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
         val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-            clientSecret = clientSecret,
+            clientSecret = clientSecret.value,
             shipping = state.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
         )
 

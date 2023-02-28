@@ -14,7 +14,6 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
@@ -24,6 +23,7 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
+import com.stripe.android.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
@@ -203,11 +203,12 @@ internal class PaymentMethodViewModel @Inject constructor(
     }
 
     private fun completePayment(linkPaymentDetails: LinkPaymentDetails) {
-        val params = ConfirmStripeIntentParamsFactory.createFactory(
-            stripeIntent,
-            args.shippingValues?.toConfirmPaymentIntentShipping()
+        val factory = ConfirmStripeIntentParamsFactory.createFactory(
+            clientSecret = requireNotNull(stripeIntent.clientSecret),
+            shipping = args.shippingValues?.toConfirmPaymentIntentShipping(),
         )
-            .createConfirmStripeIntentParams(linkPaymentDetails.paymentMethodCreateParams)
+
+        val params = factory.create(linkPaymentDetails.paymentMethodCreateParams)
 
         confirmationManager.confirmStripeIntent(params) { result ->
             result.fold(

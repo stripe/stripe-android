@@ -27,6 +27,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
@@ -42,12 +43,12 @@ import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
-import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.model.create
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
@@ -430,7 +431,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-            clientSecret = clientSecret,
+            clientSecret = clientSecret.value,
             shipping = args.config?.shippingDetails?.toConfirmPaymentIntentShipping()
         )
 
