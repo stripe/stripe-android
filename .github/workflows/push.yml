@@ -4,7 +4,7 @@ name: Upload aabs on push
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, jaynewstrom/payments-emerge-tools ]
 
 jobs:
   upload-identity:
