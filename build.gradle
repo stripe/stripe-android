@@ -97,7 +97,7 @@ ext {
     mockitoCoreVersion = '5.1.1'
     mockitoKotlinVersion = '4.1.0'
     espressoVersion = '3.5.1'
-    jsonVersion = '20220924'
+    jsonVersion = '20230227'
     uiautomator = '2.2.0'
     showkaseVersion = '1.0.0-beta14'
 
