@@ -6,6 +6,8 @@ buildscript {
     apply from: './build-configuration/build-environment.gradle'
     ext.kotlinVersion = '1.8.0'
     ext.dokkaVersion = '1.7.20'
+    ext.jacksonVersion = '2.12.7.1'
+    ext.jsoupVersion = '1.15.4'
 
     repositories {
         mavenCentral()
@@ -24,6 +26,20 @@ buildscript {
         classpath 'com.google.gms:google-services:4.3.15'
         classpath 'com.google.firebase:firebase-appdistribution-gradle:3.2.0'
         classpath buildLibs.detektGradlePlugin
+
+        /*
+         * The following values are normally pulled-in by dokka, however the versions that
+         * dokka 1.7.20 includes have known vulnerabilities. These are updated versions of the
+         * dependencies that do not have known vulnerabilities.
+         *
+         * Once dokka upgrades past 1.7.20 and no longer uses the vulnerable versions of these
+         * libraries, we should remove these imports.
+         *
+         * See https://jira.corp.stripe.com/browse/RUN_MOBILESDK-1764
+         */
+        classpath "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+        classpath "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        classpath "org.jsoup:jsoup:$jsoupVersion"
     }
 }
 
