@@ -159,6 +159,24 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class NetworkingNewConsumer(
+        pane: Pane,
+    ) : FinancialConnectionsEvent(
+        name = "networking.new_consumer",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class NetworkingReturningConsumer(
+        pane: Pane,
+    ) : FinancialConnectionsEvent(
+        name = "networking.returning_consumer",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
     class ClickDone(
         pane: Pane,
     ) : FinancialConnectionsEvent(
