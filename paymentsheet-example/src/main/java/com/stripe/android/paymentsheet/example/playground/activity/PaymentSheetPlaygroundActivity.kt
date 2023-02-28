@@ -10,13 +10,13 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.MenuProvider
 import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.test.espresso.IdlingResource
@@ -41,8 +41,6 @@ import com.stripe.android.paymentsheet.example.playground.model.Shipping
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -67,9 +65,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     }
 
     @VisibleForTesting
-    val viewModel: PaymentSheetPlaygroundViewModel by lazy {
-        PaymentSheetPlaygroundViewModel(application)
-    }
+    val viewModel: PaymentSheetPlaygroundViewModel by viewModels()
 
     private val customer: CheckoutCustomer
         get() = when (viewBinding.customerRadioGroup.checkedRadioButtonId) {
