@@ -73,6 +73,7 @@ module:paymentsheet
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.addresselement
 com.stripe.android.paymentsheet.model
+com.stripe.android.paymentsheet.ui
 module:stripe-core
 com.stripe.android.core
 com.stripe.android.core.browser

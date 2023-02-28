@@ -57,11 +57,9 @@ import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -83,7 +81,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
-import kotlin.time.Duration.Companion.seconds
 
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
@@ -186,18 +183,6 @@ internal class DefaultFlowControllerTest {
     @AfterTest
     fun after() {
         Dispatchers.resetMain()
-    }
-
-    @Test
-    fun `successful configure() should fire analytics event`() {
-        val flowController = createFlowController()
-        flowController.configureWithPaymentIntent(
-            PaymentSheetFixtures.CLIENT_SECRET,
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) { _, _ ->
-        }
-        verify(eventReporter)
-            .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
     }
 
     @Test
@@ -318,94 +303,6 @@ internal class DefaultFlowControllerTest {
         // Should return null instead of any cached value from the previous customer
         assertThat(flowController.getPaymentOption())
             .isNull()
-    }
-
-    @Test
-    fun `configure() with invalid paymentIntent`() {
-        var result = Pair<Boolean, Throwable?>(true, null)
-        val flowController = createFlowController()
-        flowController.configureWithPaymentIntent(
-            " ",
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) { success, error ->
-            result = success to error
-        }
-
-        assertThat(result.first).isFalse()
-        assertThat(result.second?.message)
-            .isEqualTo("The PaymentIntent client_secret cannot be an empty string.")
-    }
-
-    @Test
-    fun `configure() with invalid merchant`() {
-        var result = Pair<Boolean, Throwable?>(true, null)
-        val flowController = createFlowController()
-        flowController.configureWithPaymentIntent(
-            PaymentSheetFixtures.CLIENT_SECRET,
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(merchantDisplayName = "")
-        ) { success, error ->
-            result = success to error
-        }
-
-        assertThat(result.first).isFalse()
-        assertThat(result.second?.message)
-            .isEqualTo("When a Configuration is passed to PaymentSheet, the Merchant display name cannot be an empty string.")
-    }
-
-    @Test
-    fun `configure() with invalid customer id`() {
-        var result = Pair<Boolean, Throwable?>(true, null)
-        val flowController = createFlowController()
-        flowController.configureWithPaymentIntent(
-            PaymentSheetFixtures.CLIENT_SECRET,
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
-                    id = " "
-                )
-            )
-        ) { success, error ->
-            result = success to error
-        }
-
-        assertThat(result.first).isFalse()
-        assertThat(result.second?.message)
-            .isEqualTo("When a CustomerConfiguration is passed to PaymentSheet, the Customer ID cannot be an empty string.")
-    }
-
-    @Test
-    fun `configure() with invalid customer ephemeral key`() {
-        var result = Pair<Boolean, Throwable?>(true, null)
-        val flowController = createFlowController()
-        flowController.configureWithPaymentIntent(
-            PaymentSheetFixtures.CLIENT_SECRET,
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
-                    ephemeralKeySecret = " "
-                )
-            )
-        ) { success, error ->
-            result = success to error
-        }
-
-        assertThat(result.first).isFalse()
-        assertThat(result.second?.message)
-            .isEqualTo("When a CustomerConfiguration is passed to PaymentSheet, the ephemeralKeySecret cannot be an empty string.")
-    }
-
-    @Test
-    fun `configure() with invalid setupIntent`() {
-        var result = Pair<Boolean, Throwable?>(true, null)
-        val flowController = createFlowController()
-        flowController.configureWithSetupIntent(
-            " ",
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) { success, error ->
-            result = success to error
-        }
-
-        assertThat(result.first).isFalse()
-        assertThat(result.second?.message)
-            .isEqualTo("The SetupIntent client_secret cannot be an empty string.")
     }
 
     @Test
@@ -946,27 +843,6 @@ internal class DefaultFlowControllerTest {
         }
 
     @Test
-    fun `configure() when scope is cancelled before completion should not call onInit lambda`() =
-        runTest {
-            var onInitCallbacks = 0
-
-            val flowController = createFlowController(
-                FakePaymentSheetLoader(
-                    customerPaymentMethods = emptyList(),
-                    delay = 2.seconds,
-                )
-            )
-            flowController.configureWithPaymentIntent(PaymentSheetFixtures.CLIENT_SECRET) { _, _ ->
-                onInitCallbacks++
-            }
-
-            testScope.advanceTimeBy(500L)
-            testScope.cancel()
-
-            assertThat(onInitCallbacks).isEqualTo(0)
-        }
-
-    @Test
     fun `onPaymentResult when succeeded should invoke callback with Completed`() = runTest {
         var isReadyState = false
         flowController.configureWithPaymentIntent(
@@ -1070,26 +946,30 @@ internal class DefaultFlowControllerTest {
         paymentSheetLoader: PaymentSheetLoader,
         viewModel: FlowControllerViewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
     ) = DefaultFlowController(
-        testScope,
-        lifeCycleOwner,
-        { activity.window.statusBarColor },
-        PaymentOptionFactory(activity.resources, StripeImageLoader(activity)),
-        paymentOptionCallback,
-        paymentResultCallback,
-        activityResultCaller,
-        INJECTOR_KEY,
-        paymentSheetLoader,
-        eventReporter,
-        viewModel,
-        paymentLauncherAssistedFactory,
-        mock(),
-        mock(),
-        { PaymentConfiguration.getInstance(activity) },
-        testDispatcher,
-        ENABLE_LOGGING,
-        PRODUCT_USAGE,
-        createGooglePayPaymentMethodLauncherFactory(),
-        linkPaymentLauncher
+        lifecycleScope = testScope,
+        lifecycleOwner = lifeCycleOwner,
+        statusBarColor = { activity.window.statusBarColor },
+        paymentOptionFactory = PaymentOptionFactory(activity.resources, StripeImageLoader(activity)),
+        paymentOptionCallback = paymentOptionCallback,
+        paymentResultCallback = paymentResultCallback,
+        activityResultCaller = activityResultCaller,
+        injectorKey = INJECTOR_KEY,
+        eventReporter = eventReporter,
+        viewModel = viewModel,
+        paymentLauncherFactory = paymentLauncherAssistedFactory,
+        lazyPaymentConfiguration = { PaymentConfiguration.getInstance(activity) },
+        enableLogging = ENABLE_LOGGING,
+        productUsage = PRODUCT_USAGE,
+        googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory(),
+        linkLauncher = linkPaymentLauncher,
+        configurationHandler = FlowControllerConfigurationHandler(
+            paymentSheetLoader = paymentSheetLoader,
+            uiContext = testDispatcher,
+            eventReporter = eventReporter,
+            viewModel = viewModel,
+            lpmResourceRepository = mock(),
+            addressResourceRepository = mock(),
+        ),
     )
 
     private fun createGooglePayPaymentMethodLauncherFactory() =

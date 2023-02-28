@@ -3,6 +3,7 @@ package com.stripe.android.identity.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -120,12 +121,13 @@ private fun BodyContent(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+                bottom = dimensionResource(id = R.dimen.item_vertical_margin)
             )
             .testTag(COUNTRY_NOT_LISTED_BODY_TAG),
     )
     TextButton(
         modifier = Modifier.testTag(COUNTRY_NOT_LISTED_OTHER_COUNTRY_TAG),
+        contentPadding = PaddingValues(0.dp),
         onClick = {
             navController.navigateTo(IndividualDestination)
         }

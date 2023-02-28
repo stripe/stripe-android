@@ -209,7 +209,7 @@ class PaymentSheetPlaygroundViewModel(
 
                         customerConfig.postValue(checkoutResponse.makeCustomerConfig())
                         clientSecret.postValue(checkoutResponse.intentClientSecret)
-                        paymentMethodTypes.value = checkoutResponse.paymentMethodTypes.orEmpty()
+                        paymentMethodTypes.value = checkoutResponse.paymentMethodTypes.orEmpty().split(",")
                     }
                 }
                 inProgress.postValue(false)

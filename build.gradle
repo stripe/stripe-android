@@ -5,16 +5,19 @@ buildscript {
     apply from: 'dependencies.gradle'
     apply from: './build-configuration/build-environment.gradle'
     ext.kotlinVersion = '1.8.0'
-    ext.dokkaVersion = '1.7.20'
+    // until Dokka 1.8.0 is released and we no longer need dev builds
+    ext.dokkaVersion = '1.8.0-dev-194'
 
     repositories {
         mavenCentral()
         google()
         gradlePluginPortal()
+        // until Dokka 1.8.0 is released and we no longer need dev builds
+        maven { url "https://maven.pkg.jetbrains.space/kotlin/p/dokka/dev" }
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.1'
+        classpath 'com.android.tools.build:gradle:7.4.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
@@ -41,6 +44,8 @@ allprojects {
         mavenCentral()
         google()
         gradlePluginPortal()
+        // until Dokka 1.8.0 is released and we no longer need dev builds
+        maven { url "https://maven.pkg.jetbrains.space/kotlin/p/dokka/dev" }
     }
 }
 
@@ -78,7 +83,7 @@ ext {
     playServicesVersion = '1.6.4'
     leakCanaryVersion = '2.10'
     okhttpVersion = '4.10.0'
-    stripe3ds2Version = '6.1.6'
+    stripe3ds2Version = '6.1.7'
     retrofitVersion = '2.9.0'
     gsonVersion = '2.10.1'
 
@@ -92,7 +97,7 @@ ext {
     mockitoCoreVersion = '5.1.1'
     mockitoKotlinVersion = '4.1.0'
     espressoVersion = '3.5.1'
-    jsonVersion = '20220924'
+    jsonVersion = '20230227'
     uiautomator = '2.2.0'
     showkaseVersion = '1.0.0-beta14'
 
