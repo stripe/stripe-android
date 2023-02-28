@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.wallet
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.NonFallbackInjector
@@ -21,7 +22,6 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentMethod
