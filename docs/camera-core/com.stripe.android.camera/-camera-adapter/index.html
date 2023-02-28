@@ -37,6 +37,9 @@
     <div>
     </div>
     <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":camera-core:dokkaHtmlPartial/release">androidJvm</button>
+        </div>
         <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
         <div id="searchBar"></div>
     </div>
@@ -50,10 +53,10 @@
   <div class="breadcrumbs"><a href="../../index.html">camera-core</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.camera</a><span class="delimiter">/</span><span class="current">CameraAdapter</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Camera</span><wbr><span><span>Adapter</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":camera-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">CameraAdapter</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">CameraOutput</a><span class="token operator">&gt;</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/LifecycleEventObserver.html">LifecycleEventObserver</a></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":camera-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">CameraAdapter</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">CameraOutput</a><span class="token operator">&gt;</span> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/LifecycleEventObserver.html">LifecycleEventObserver</a></div><h4 class="">Inheritors</h4><div class="table" data-togglable="Inheritors"><div class="table-row" data-filterable-current=":camera-core:dokkaHtmlPartial/release" data-filterable-set=":camera-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-camera1-adapter/index.html">Camera1Adapter</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":camera-core:dokkaHtmlPartial/release" data-filterable-set=":camera-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-camera-x-adapter/index.html">CameraXAdapter</a></div></span></div><div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button><button class="section-tab" data-togglable="Inheritors">Inheritors</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
     <div class="tabs-section-body">
       <h2 class="tabbedcontent">Constructors</h2>
       <div class="table" data-togglable="Constructors"><a data-name="-67645649%2FConstructors%2F1417790" anchor-label="CameraAdapter" id="-67645649%2FConstructors%2F1417790" data-filterable-set=":camera-core:dokkaHtmlPartial/release"></a>
@@ -66,7 +69,7 @@
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":camera-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-camera-adapter.html"><span class="token function">CameraAdapter</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":camera-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
               </div>
             </div>
           </div>
@@ -288,30 +291,6 @@
           </div>
         </div>
       </div>
-      <h2 class="">Inheritors</h2>
-      <div class="table" data-togglable="Inheritors"><a data-name="159016695%2FInheritors%2F1417790" anchor-label="Camera1Adapter" id="159016695%2FInheritors%2F1417790" data-filterable-set=":camera-core:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":camera-core:dokkaHtmlPartial/release" data-filterable-set=":camera-core:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="../-camera1-adapter/index.html">Camera1Adapter</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="159016695%2FInheritors%2F1417790"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div></div>
-          </div>
-        </div>
-<a data-name="894962462%2FInheritors%2F1417790" anchor-label="CameraXAdapter" id="894962462%2FInheritors%2F1417790" data-filterable-set=":camera-core:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":camera-core:dokkaHtmlPartial/release" data-filterable-set=":camera-core:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="../-camera-x-adapter/index.html">CameraXAdapter</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="894962462%2FInheritors%2F1417790"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div></div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -320,6 +299,6 @@
       </div>
     </div>
 </div>
-
-</body></html>
+</body>
+</html>
 

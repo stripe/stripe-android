@@ -5,12 +5,15 @@ buildscript {
     apply from: 'dependencies.gradle'
     apply from: './build-configuration/build-environment.gradle'
     ext.kotlinVersion = '1.8.0'
-    ext.dokkaVersion = '1.7.20'
+    // until Dokka 1.8.0 is released and we no longer need dev builds
+    ext.dokkaVersion = '1.8.0-dev-194'
 
     repositories {
         mavenCentral()
         google()
         gradlePluginPortal()
+        // until Dokka 1.8.0 is released and we no longer need dev builds
+        maven { url "https://maven.pkg.jetbrains.space/kotlin/p/dokka/dev" }
     }
 
     dependencies {
@@ -41,6 +44,8 @@ allprojects {
         mavenCentral()
         google()
         gradlePluginPortal()
+        // until Dokka 1.8.0 is released and we no longer need dev builds
+        maven { url "https://maven.pkg.jetbrains.space/kotlin/p/dokka/dev" }
     }
 }
 
