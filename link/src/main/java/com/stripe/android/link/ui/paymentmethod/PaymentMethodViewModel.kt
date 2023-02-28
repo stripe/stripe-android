@@ -23,7 +23,7 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
-import com.stripe.android.model.ConfirmStripeIntentParamsFactory
+import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter

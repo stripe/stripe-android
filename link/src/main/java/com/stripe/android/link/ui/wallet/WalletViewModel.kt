@@ -21,7 +21,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParamsFactory
+import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentMethod

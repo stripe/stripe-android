@@ -1,6 +1,15 @@
-package com.stripe.android.model
+package com.stripe.android
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.MandateDataParams
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.SetupIntent
 
 /**
  * Factory class for creating [ConfirmPaymentIntentParams] or [ConfirmSetupIntentParams].

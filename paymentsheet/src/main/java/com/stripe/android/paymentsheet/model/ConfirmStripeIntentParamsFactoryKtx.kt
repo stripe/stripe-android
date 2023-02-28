@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.model
 
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParamsFactory
+import com.stripe.android.ConfirmStripeIntentParamsFactory
 
 internal fun <T : ConfirmStripeIntentParams> ConfirmStripeIntentParamsFactory<T>.create(
     paymentSelection: PaymentSelection.Saved,

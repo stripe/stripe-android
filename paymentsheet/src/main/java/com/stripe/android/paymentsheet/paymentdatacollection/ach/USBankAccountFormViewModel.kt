@@ -20,7 +20,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParamsFactory
+import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
