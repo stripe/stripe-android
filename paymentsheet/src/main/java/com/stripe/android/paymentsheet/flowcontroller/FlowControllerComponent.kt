@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.injection
+package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import androidx.activity.result.ActivityResultCaller
@@ -12,8 +12,8 @@ import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
-import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component

@@ -14,7 +14,6 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
-import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -44,8 +43,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.injection.DaggerFlowControllerComponent
-import com.stripe.android.paymentsheet.injection.FlowControllerComponent
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -53,25 +50,16 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.currency
-import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.paymentsheet.validate
-import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.uicore.address.AddressRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
-import java.security.InvalidParameterException
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @Singleton
 internal class DefaultFlowController @Inject internal constructor(
@@ -85,23 +73,19 @@ internal class DefaultFlowController @Inject internal constructor(
     activityResultCaller: ActivityResultCaller,
     @InjectorKey private val injectorKey: String,
     // Properties provided through injection
-    private val paymentSheetLoader: PaymentSheetLoader,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
-    // even though unused this forces Dagger to initialize it here.
-    private val lpmResourceRepository: ResourceRepository<LpmRepository>,
-    private val addressResourceRepository: ResourceRepository<AddressRepository>,
     /**
      * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
      * stripeAccountId after creating a [DefaultFlowController].
      */
     private val lazyPaymentConfiguration: Provider<PaymentConfiguration>,
-    @UIContext private val uiContext: CoroutineContext,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
-    private val linkLauncher: LinkPaymentLauncher
+    private val linkLauncher: LinkPaymentLauncher,
+    private val configurationHandler: FlowControllerConfigurationHandler,
 ) : PaymentSheet.FlowController, NonFallbackInjector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val googlePayActivityLauncher:
@@ -114,8 +98,6 @@ internal class DefaultFlowController @Inject internal constructor(
     lateinit var flowControllerComponent: FlowControllerComponent
 
     private var paymentLauncher: StripePaymentLauncher? = null
-
-    private val resourceRepositories = listOf(lpmResourceRepository, addressResourceRepository)
 
     override var shippingDetails: AddressDetails?
         get() = viewModel.state?.config?.shippingDetails
@@ -211,27 +193,8 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
-        try {
-            mode.validate()
-            configuration?.validate()
-        } catch (e: InvalidParameterException) {
-            callback.onConfigured(success = false, e)
-            return
-        }
-
-        viewModel.initializationMode = mode
-
         lifecycleScope.launch {
-            val result = paymentSheetLoader.load(mode, configuration)
-
-            // Wait until all required resources are loaded before completing initialization.
-            resourceRepositories.forEach { it.waitUntilLoaded() }
-
-            if (isActive) {
-                dispatchResult(result, callback)
-            } else {
-                callback.onConfigured(false, null)
-            }
+            configurationHandler.configure(mode, configuration, callback)
         }
     }
 
@@ -382,32 +345,6 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun onLinkActivityResult(result: LinkActivityResult) =
         onPaymentResult(result.convertToPaymentResult())
-
-    private suspend fun dispatchResult(
-        result: PaymentSheetLoader.Result,
-        callback: PaymentSheet.FlowController.ConfigCallback
-    ) = withContext(uiContext) {
-        when (result) {
-            is PaymentSheetLoader.Result.Success -> {
-                onInitSuccess(result.state, callback)
-            }
-            is PaymentSheetLoader.Result.Failure -> {
-                callback.onConfigured(false, result.throwable)
-            }
-        }
-    }
-
-    private fun onInitSuccess(
-        state: PaymentSheetState.Full,
-        callback: PaymentSheet.FlowController.ConfigCallback
-    ) {
-        eventReporter.onInit(state.config)
-
-        viewModel.paymentSelection = state.initialPaymentSelection
-        viewModel.state = state
-
-        callback.onConfigured(true, null)
-    }
 
     @JvmSynthetic
     internal fun onPaymentOptionResult(
