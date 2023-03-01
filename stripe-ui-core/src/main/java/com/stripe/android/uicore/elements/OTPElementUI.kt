@@ -55,7 +55,6 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.stripeColors
 
-
 @Composable
 @Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
 fun OTPElementUIPreview() {
@@ -85,6 +84,7 @@ fun OTPElementUIDisabledPreview() {
 }
 
 @Composable
+@Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun OTPElementUI(
     enabled: Boolean,
