@@ -19,7 +19,7 @@ import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
-import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
+import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -53,7 +53,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             LinkAccountPickerState.Payload(
                 stepUpAuthenticationRequired = manifest.stepUpAuthenticationRequired,
                 consumerSessionClientSecret = consumerSession.clientSecret,
-                businessName = ConsentTextBuilder.getBusinessName(manifest) ?: "",
+                businessName = manifest.getBusinessName() ?: "",
                 accounts = accounts,
                 accessibleData = accessibleData
             )

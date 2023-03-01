@@ -24,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Permissions
@@ -227,7 +226,7 @@ internal data class AccessibleDataCalloutModel(
     companion object {
         fun fromManifest(manifest: FinancialConnectionsSessionManifest): AccessibleDataCalloutModel =
             AccessibleDataCalloutModel(
-                businessName = ConsentTextBuilder.getBusinessName(manifest),
+                businessName = manifest.getBusinessName(),
                 permissions = manifest.permissions,
                 isStripeDirect = manifest.isStripeDirect ?: false,
                 dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)

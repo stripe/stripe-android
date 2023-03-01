@@ -5,7 +5,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
-import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
+import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -52,7 +52,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
             } catch (@Suppress("SwallowedException") e: StripeException) {
                 throw e.toDomainException(
                     institution = manifest.activeInstitution,
-                    businessName = ConsentTextBuilder.getBusinessName(manifest),
+                    businessName = manifest.getBusinessName(),
                     canRetry = canRetry,
                     allowManualEntry = manifest.allowManualEntry
                 )
