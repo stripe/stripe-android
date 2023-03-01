@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.kittinunf.result.Result
 import com.stripe.android.identity.IdentityVerificationSheet
+import com.stripe.android.identity.example.BuildConfig
 import com.stripe.android.identity.example.IdentityExampleViewModel
 import com.stripe.android.identity.example.R
 import com.stripe.android.identity.example.ui.IntegrationType.LINK
@@ -112,14 +113,18 @@ internal fun ExampleScreen(
         scaffoldState = scaffoldState,
         topBar = {
             TopAppBar {
-                Text(
-                    text = stringResource(id = R.string.compose_example),
-                    modifier = Modifier.padding(start = 10.dp),
-                    fontWeight = FontWeight.Bold,
-                    color = LocalContentColor.current
-                )
+                Row {
+                    Text(
+                        text = stringResource(id = R.string.identity_example),
+                        modifier = Modifier.padding(start = 10.dp),
+                        fontWeight = FontWeight.Bold,
+                        color = LocalContentColor.current
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(text = "${BuildConfig.VERSION_CODE}(${BuildConfig.VERSION_NAME})")
+                }
             }
-        }
+        },
     ) {
         Column(
             modifier = Modifier
@@ -658,15 +663,23 @@ private fun SubmitView(
                     onLoadingStateChanged(
                         LoadingState.Result(
                             highlight = vsId,
-                            resultString = "Verification result: ${result.javaClass.simpleName} - ${result.throwable}"
+                            resultString = "Verification result: Failed - ${result.throwable}"
                         )
                     )
                 }
-                else -> {
+                IdentityVerificationSheet.VerificationFlowResult.Canceled -> {
                     onLoadingStateChanged(
                         LoadingState.Result(
                             highlight = vsId,
-                            resultString = "Verification result: ${result.javaClass.simpleName}"
+                            resultString = "Verification result: Canceled"
+                        )
+                    )
+                }
+                IdentityVerificationSheet.VerificationFlowResult.Completed -> {
+                    onLoadingStateChanged(
+                        LoadingState.Result(
+                            highlight = vsId,
+                            resultString = "Verification result: Completed"
                         )
                     )
                 }
