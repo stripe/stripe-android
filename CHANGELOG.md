@@ -2,6 +2,15 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+[ADDED][6230](https://github.com/stripe/stripe-android/pull/6230) Added dedicated remember methods for PaymentSheet and PaymentSheet.FlowController for easier integration in Compose.
+[ADDED][6283](https://github.com/stripe/stripe-android/pull/6283) Added support for Zip payments.
+[DEPRECATED][6230](https://github.com/stripe/stripe-android/pull/6230) Deprecated PaymentSheetContract and PaymentSheetContract.Args. Use the PaymentSheet constructor or new rememberPaymentSheet method instead.
+
+### Payments
+[ADDED][6279](https://github.com/stripe/stripe-android/pull/6279) Update to Stripe 3DS2 6.1.7, removed keep-all proguard rules in favor of the minimal required ones.
+[DEPRECATED][6230](https://github.com/stripe/stripe-android/pull/6230) Deprecated static rememberLauncher methods on GooglePayLauncher, GooglePayPaymentMethodLauncher, and PaymentLauncher in favor of top-level remember***Launcher methods.
+
 ## 20.23.1 - 2023-04-17
 
 ### PaymentSheet
