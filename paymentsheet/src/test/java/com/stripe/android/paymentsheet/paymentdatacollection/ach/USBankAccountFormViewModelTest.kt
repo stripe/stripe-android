@@ -57,7 +57,7 @@ class USBankAccountFormViewModelTest {
             )
         ),
         isCompleteFlow = true,
-        clientSecret = PaymentIntentClientSecret("pi_12345"),
+        clientSecret = PaymentIntentClientSecret("pi_12345_secret_54321"),
         savedPaymentMethod = null,
         shippingDetails = null,
         onConfirmStripeIntent = onConfirmStripeIntent,

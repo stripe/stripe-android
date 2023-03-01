@@ -146,9 +146,9 @@ internal class PaymentSheetActivityTest {
         context,
         PaymentSheetContractV2.Args(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = "client_secret",
+                clientSecret = "pi_1234_secret_5678",
             ),
-            PaymentSheetFixtures.CONFIG_CUSTOMER,
+            config = PaymentSheetFixtures.CONFIG_CUSTOMER,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
         )
     )
@@ -680,7 +680,7 @@ internal class PaymentSheetActivityTest {
                 activity,
                 PaymentSheetContractV2.Args(
                     initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                        clientSecret = "client_secret",
+                        clientSecret = "pi_1234_secret_9876",
                     ),
                     PaymentSheetFixtures.CONFIG_CUSTOMER
                 )
