@@ -73,7 +73,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
 
         runCatching {
-            retrieveElementsSession(initializationMode)
+            retrieveElementsSession(initializationMode, paymentSheetConfiguration)
         }.fold(
             onSuccess = { stripeIntent ->
                 create(
@@ -222,8 +222,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
+        configuration: PaymentSheet.Configuration?,
     ): StripeIntent {
-        val elementsSession = elementsSessionRepository.get(initializationMode)
+        val elementsSession = elementsSessionRepository.get(
+            initializationMode = initializationMode,
+            configuration = configuration,
+        )
         val lpmRepository = lpmResourceRepository.getRepository()
 
         lpmRepository.update(
