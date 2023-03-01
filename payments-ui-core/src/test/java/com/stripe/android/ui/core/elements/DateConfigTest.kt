@@ -219,7 +219,7 @@ class DateConfigTest {
 
     @Test
     fun `date is valid 2X month and 2 digit year`() {
-        val state = dateConfig.determineState("229")
+        val state = dateConfig.determineState("230")
         Truth.assertThat(state)
             .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
     }
