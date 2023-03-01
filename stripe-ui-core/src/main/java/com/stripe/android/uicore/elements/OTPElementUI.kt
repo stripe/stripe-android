@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -120,7 +119,7 @@ fun OTPElementUI(
                 backgroundColor = if (enabled) {
                     MaterialTheme.stripeColors.component
                 } else {
-                    MaterialTheme.stripeColors.placeholderText.copy(alpha = ContentAlpha.disabled)
+                    MaterialTheme.stripeColors.placeholderText.copy(alpha = 0.1f)
                 },
                 border = BorderStroke(
                     width = MaterialTheme.getBorderStrokeWidth(isSelected),
