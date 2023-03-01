@@ -63,6 +63,7 @@
     <ID>MaximumLineLength:com.stripe.android.identity.camera.IdentityScanFlow.kt:34</ID>
     <ID>MaximumLineLength:com.stripe.android.identity.states.FaceDetectorTransitioner.kt:221</ID>
     <ID>MaximumLineLength:com.stripe.android.identity.states.IDDetectorTransitioner.kt:127</ID>
+    <ID>ReturnCount:AddressSection.kt$private fun isValidAddress(addressMap: Map&lt;IdentifierSpec, FormFieldEntry>): Boolean</ID>
     <ID>ReturnCount:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>
     <ID>ReturnCount:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
     <ID>SpreadOperator:AddressSection.kt$( it.errorMessage, *args )</ID>

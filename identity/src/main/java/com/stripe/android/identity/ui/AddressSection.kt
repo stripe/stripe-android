@@ -92,7 +92,7 @@ internal fun AddressSection(
                     },
                     city = addressMap[IdentifierSpec.City]?.value!!,
                     postalCode = addressMap[IdentifierSpec.PostalCode]?.value!!,
-                    state = addressMap[IdentifierSpec.State]?.value!!,
+                    state = addressMap[IdentifierSpec.State]?.value,
                     country = addressMap[IdentifierSpec.Country]?.value!!,
                 )
             } else {
@@ -219,21 +219,16 @@ private fun CountrySectionElementUI(
 }
 
 private fun isValidAddress(addressMap: Map<IdentifierSpec, FormFieldEntry>): Boolean {
-    if (listOf(
-            IdentifierSpec.Line1,
-            IdentifierSpec.City,
-            IdentifierSpec.PostalCode,
-            IdentifierSpec.State,
-            IdentifierSpec.Country
-        ).firstOrNull {
-            addressMap[it]?.value.isNullOrBlank()
-        } != null
-    ) {
+    addressMap.forEach { (spec, entry) ->
+        if (REQUIRED_FIELDS.contains(spec) && entry.value.isNullOrBlank()) {
+            return false
+        }
+    }
+    val country = addressMap[IdentifierSpec.Country]?.value
+    val postal = addressMap[IdentifierSpec.PostalCode]?.value
+    if (country == null || postal == null) {
         return false
     }
-
-    val country = requireNotNull(addressMap[IdentifierSpec.Country]?.value)
-    val postal = requireNotNull(addressMap[IdentifierSpec.PostalCode]?.value)
     return when (val format = PostalCodeConfig.CountryPostalFormat.forCountry(country)) {
         is PostalCodeConfig.CountryPostalFormat.Other -> postal.isNotBlank()
         else -> {
@@ -242,5 +237,13 @@ private fun isValidAddress(addressMap: Map<IdentifierSpec, FormFieldEntry>): Boo
         }
     }
 }
+
+private val REQUIRED_FIELDS = listOf(
+    IdentifierSpec.Line1,
+    IdentifierSpec.City,
+    IdentifierSpec.PostalCode,
+    IdentifierSpec.State,
+    IdentifierSpec.Country
+)
 
 internal const val ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TAG = "IdNumberSectionCountryNotListed"
