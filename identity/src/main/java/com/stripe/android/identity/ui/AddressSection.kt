@@ -127,7 +127,7 @@ private fun AddressSectionContent(
     textIdentifiers: List<IdentifierSpec>,
     navController: NavController
 ) {
-    CountrySectionElementUI(
+    IdentityAddressSectionElementUI(
         enabled = enabled,
         element = sectionElement,
         hiddenIdentifiers = emptySet(),
@@ -154,7 +154,7 @@ private fun AddressSectionContent(
  * focus directions. The City field will be skipped with default values
  */
 @Composable
-private fun CountrySectionElementUI(
+private fun IdentityAddressSectionElementUI(
     enabled: Boolean,
     element: SectionElement,
     hiddenIdentifiers: Set<IdentifierSpec>,
