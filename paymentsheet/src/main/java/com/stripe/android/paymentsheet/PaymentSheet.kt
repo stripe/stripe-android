@@ -38,6 +38,8 @@ import kotlinx.parcelize.Parcelize
  * Creates a [PaymentSheet] that is remembered across compositions.
  *
  * This *must* be called unconditionally, as part of the initialization path.
+ *
+ * @param callback Called with the result of the payment after [PaymentSheet] is dismissed.
  */
 @Composable
 fun rememberPaymentSheet(

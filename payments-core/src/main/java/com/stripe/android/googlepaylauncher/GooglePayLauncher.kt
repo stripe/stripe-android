@@ -30,6 +30,12 @@ import java.util.Locale
  * Creates a [GooglePayLauncher] that is remembered across compositions.
  *
  * This *must* be called unconditionally, as part of the initialization path.
+ *
+ * @param config Configuration to tweak what's displayed in Google Pay
+ * @param readyCallback Called after determining whether Google Pay is available and ready on the
+ * device. [GooglePayLauncher.presentForPaymentIntent] and [GooglePayLauncher.presentForSetupIntent]
+ * may only be called if Google Pay is ready.
+ * @param resultCallback Called with the [Result] of the operation
  */
 @Composable
 fun rememberGooglePayLauncher(
@@ -43,16 +49,14 @@ fun rememberGooglePayLauncher(
     val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
     val activityResultLauncher = rememberLauncherForActivityResult(
         GooglePayLauncherContract(),
-        resultCallback::onResult
+        resultCallback::onResult,
     )
 
     return remember(config) {
         GooglePayLauncher(
             lifecycleScope = lifecycleScope,
             config = config,
-            readyCallback = {
-                currentReadyCallback.onReady(it)
-            },
+            readyCallback = currentReadyCallback::onReady,
             activityResultLauncher = activityResultLauncher,
             googlePayRepositoryFactory = {
                 DefaultGooglePayRepository(
@@ -60,15 +64,15 @@ fun rememberGooglePayLauncher(
                     environment = config.environment,
                     billingAddressParameters = config.billingAddressConfig.convert(),
                     existingPaymentMethodRequired = config.existingPaymentMethodRequired,
-                    allowCreditCards = config.allowCreditCards
+                    allowCreditCards = config.allowCreditCards,
                 )
             },
-            PaymentAnalyticsRequestFactory(
-                context,
-                PaymentConfiguration.getInstance(context).publishableKey,
-                setOf(GooglePayLauncher.PRODUCT_USAGE)
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context = context,
+                publishableKey = PaymentConfiguration.getInstance(context).publishableKey,
+                defaultProductUsageTokens = setOf(GooglePayLauncher.PRODUCT_USAGE),
             ),
-            DefaultAnalyticsRequestExecutor()
+            analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
         )
     }
 }

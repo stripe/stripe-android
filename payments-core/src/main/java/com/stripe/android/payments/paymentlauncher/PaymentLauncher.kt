@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
+import com.stripe.android.googlepaylauncher.GooglePayLauncher.Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -16,6 +17,10 @@ import com.stripe.android.model.SetupIntent
  * Creates a [PaymentLauncher] that is remembered across compositions.
  *
  * This *must* be called unconditionally, as part of the initialization path.
+ *
+ * @param publishableKey Your Stripe publishable key
+ * @param stripeAccountId An optional Stripe Connect account ID.
+ * @param callback Called with the [Result] of the payment operation
  */
 @Composable
 fun rememberPaymentLauncher(
@@ -26,13 +31,13 @@ fun rememberPaymentLauncher(
     val context = LocalContext.current
     val activityResultLauncher = rememberLauncherForActivityResult(
         PaymentLauncherContract(),
-        callback::onPaymentResult
+        callback::onPaymentResult,
     )
 
     return remember(publishableKey, stripeAccountId) {
         PaymentLauncherFactory(
-            context,
-            activityResultLauncher
+            context = context,
+            hostActivityLauncher = activityResultLauncher,
         ).create(publishableKey, stripeAccountId)
     }
 }
@@ -111,7 +116,7 @@ interface PaymentLauncher {
         @Deprecated(
             message = "This method creates a new PaymentLauncher object every time it is called, " +
                 "even during recompositions.",
-            replaceWith = ReplaceWith("PaymentLauncher.rememberLauncher(publishableKey, stripeAccountId, callback)"),
+            replaceWith = ReplaceWith("rememberPaymentLauncher(publishableKey, stripeAccountId, callback)"),
             level = DeprecationLevel.ERROR,
         )
         @Composable

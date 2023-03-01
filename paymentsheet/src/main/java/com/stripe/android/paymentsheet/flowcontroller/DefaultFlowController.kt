@@ -79,7 +79,10 @@ import javax.inject.Singleton
  * Creates a [PaymentSheet.FlowController] that is remembered across compositions.
  *
  * This *must* be called unconditionally, as part of the initialization path.
- */
+ *
+ * @param paymentOptionCallback Called when the customer's desired payment method changes.
+ * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
+*/
 @Composable
 fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,

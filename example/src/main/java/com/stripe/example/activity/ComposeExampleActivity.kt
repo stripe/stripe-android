@@ -57,7 +57,7 @@ class ComposeExampleActivity : AppCompatActivity() {
         val paymentLauncher = rememberPaymentLauncher(
             publishableKey = settings.publishableKey,
             stripeAccountId = settings.stripeAccountId,
-            callback = onPaymentResult,
+            callback = onPaymentResult
         )
 
         ComposeScreen(

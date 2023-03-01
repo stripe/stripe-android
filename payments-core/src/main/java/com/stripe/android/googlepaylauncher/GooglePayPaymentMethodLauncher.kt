@@ -50,12 +50,17 @@ import kotlin.coroutines.CoroutineContext
  * Creates a [GooglePayPaymentMethodLauncher] that is remembered across compositions.
  *
  * This *must* be called unconditionally, as part of the initialization path.
+ *
+ * @param config Configuration to tweak what's displayed in Google Pay
+ * @param readyCallback Called after determining whether Google Pay is available and ready on the
+ * device. [GooglePayPaymentMethodLauncher.present] may only be called if Google Pay is ready.
+ * @param resultCallback Called with the [Result] of the operation
  */
 @Composable
 fun rememberGooglePayPaymentMethodLauncher(
     config: GooglePayPaymentMethodLauncher.Config,
     readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
-    resultCallback: GooglePayPaymentMethodLauncher.ResultCallback
+    resultCallback: GooglePayPaymentMethodLauncher.ResultCallback,
 ): GooglePayPaymentMethodLauncher {
     val currentReadyCallback by rememberUpdatedState(readyCallback)
 
@@ -63,7 +68,7 @@ fun rememberGooglePayPaymentMethodLauncher(
     val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
     val activityResultLauncher = rememberLauncherForActivityResult(
         GooglePayPaymentMethodLauncherContract(),
-        resultCallback::onResult
+        resultCallback::onResult,
     )
 
     return remember(config) {
@@ -72,9 +77,7 @@ fun rememberGooglePayPaymentMethodLauncher(
             lifecycleScope = lifecycleScope,
             activityResultLauncher = activityResultLauncher,
             config = config,
-            readyCallback = {
-                currentReadyCallback.onReady(it)
-            }
+            readyCallback = currentReadyCallback::onReady,
         )
     }
 }
