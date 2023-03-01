@@ -57,7 +57,7 @@ import com.stripe.android.uicore.stripeColors
 
 @Composable
 @Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
-fun OTPElementUIPreview() {
+internal fun OTPElementUIPreview() {
     StripeTheme {
         OTPElementUI(
             enabled = true,
@@ -71,7 +71,7 @@ fun OTPElementUIPreview() {
 
 @Composable
 @Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
-fun OTPElementUIDisabledPreview() {
+internal fun OTPElementUIDisabledPreview() {
     StripeTheme {
         OTPElementUI(
             enabled = false,
