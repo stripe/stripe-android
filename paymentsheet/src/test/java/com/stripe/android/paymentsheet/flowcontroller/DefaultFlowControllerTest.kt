@@ -37,7 +37,6 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -501,10 +500,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with new card payment method should start paymentlauncher`() = runTest {
-        flowController.configure(
-            mode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            ),
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             callback = { _, _ -> },
         )
 
@@ -532,10 +529,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with generic payment method should start paymentLauncher`() {
-        flowController.configure(
-            mode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            ),
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             callback = { _, _ -> },
         )
 
@@ -562,10 +557,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with us_bank_account payment method should start paymentLauncher`() {
-        flowController.configure(
-            mode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            ),
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             callback = { _, _ -> },
         )
 

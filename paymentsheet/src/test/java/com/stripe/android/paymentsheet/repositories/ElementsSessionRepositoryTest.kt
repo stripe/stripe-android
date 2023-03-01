@@ -45,7 +45,8 @@ internal class ElementsSessionRepositoryTest {
             createRepository().get(
                 initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret",
-                )
+                ),
+                configuration = null,
             )
         }
 
@@ -71,7 +72,8 @@ internal class ElementsSessionRepositoryTest {
                 createRepository().get(
                     initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                         clientSecret = "client_secret",
-                    )
+                    ),
+                    configuration = null,
                 )
             }
 
@@ -94,7 +96,8 @@ internal class ElementsSessionRepositoryTest {
                 createRepository().get(
                     initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                         clientSecret = "client_secret",
-                    )
+                    ),
+                    configuration = null,
                 )
             }
 
@@ -122,7 +125,8 @@ internal class ElementsSessionRepositoryTest {
         ).get(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret",
-            )
+            ),
+            configuration = null,
         )
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
