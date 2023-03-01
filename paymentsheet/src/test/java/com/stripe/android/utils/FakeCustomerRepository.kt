@@ -26,4 +26,9 @@ internal class FakeCustomerRepository(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodId: String
     ): PaymentMethod? = null
+
+    override suspend fun attachPaymentMethod(
+        customerConfig: PaymentSheet.CustomerConfiguration,
+        paymentMethodId: String
+    ) { }
 }

@@ -181,7 +181,7 @@ internal abstract class BaseSheetViewModel(
             currentSelection = selection,
             googlePayState = googlePayState,
             isLinkEnabled = linkHandler.isLinkEnabled,
-            isNotPaymentFlow = this is PaymentOptionsViewModel,
+            isNotPaymentFlow = this !is PaymentSheetViewModel,
             nameProvider = { code ->
                 val paymentMethod = lpmRepository.fromCode(code)
                 paymentMethod?.displayNameResource?.let {
@@ -193,6 +193,10 @@ internal abstract class BaseSheetViewModel(
 
     val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()
         .filterNotNull()
+        .map {
+            println("JAMES: paymentoptionstate ${it.items}")
+            it
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(),

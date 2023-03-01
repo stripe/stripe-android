@@ -10,6 +10,9 @@ dependencies {
     implementation project(":payments-core")
     implementation project(':payments-ui-core')
     implementation project(':stripe-ui-core')
+    implementation 'androidx.datastore:datastore-android:1.1.0-alpha04'
+    implementation 'androidx.datastore:datastore-core-android:1.1.0-alpha04'
+    implementation 'androidx.datastore:datastore-preferences-android:1.1.0-alpha04'
     compileOnly project(':financial-connections')
 
     implementation platform(boms.androidx.compose)

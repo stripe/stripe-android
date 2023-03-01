@@ -26,6 +26,7 @@ internal class PaymentOptionsStateMapper(
             isLinkEnabled,
             googlePayState,
         ) { paymentMethods, currentSelection, isLinkEnabled, googlePayState ->
+            println("JAMES: updating $paymentMethods")
             createPaymentOptionsState(
                 paymentMethods = paymentMethods,
                 currentSelection = currentSelection,
@@ -42,15 +43,20 @@ internal class PaymentOptionsStateMapper(
         isLinkEnabled: Boolean?,
         googlePayState: GooglePayState,
     ): PaymentOptionsState? {
+        println("JAMES: createPaymentOptionsState ${paymentMethods == null}, ${isLinkEnabled == null}")
         if (paymentMethods == null) return null
         if (isLinkEnabled == null) return null
 
-        return PaymentOptionsStateFactory.create(
+        val state = PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
             showGooglePay = (googlePayState is GooglePayState.Available) && isNotPaymentFlow,
             showLink = isLinkEnabled && isNotPaymentFlow,
             currentSelection = currentSelection,
             nameProvider = nameProvider,
         )
+
+        println("JAMES: $state")
+
+        return state
     }
 }

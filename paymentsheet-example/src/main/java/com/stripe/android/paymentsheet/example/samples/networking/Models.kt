@@ -9,6 +9,7 @@ import com.github.kittinunf.fuel.core.awaitResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
+import com.stripe.android.paymentsheet.example.samples.ui.saved_pms.SavedPaymentMethodsViewState
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -153,6 +154,22 @@ data class ExampleCreateAndConfirmErrorResponse(
         }
     }
 }
+
+@Serializable
+data class ExampleSavedPaymentMethodRequest(
+    @SerialName("customer_type")
+    val customerType: String
+)
+
+@Serializable
+data class ExampleSavedPaymentMethodResponse(
+    @SerialName("publishableKey")
+    val publishableKey: String,
+    @SerialName("customerEphemeralKeySecret")
+    val customerEphemeralKeySecret: String,
+    @SerialName("customerId")
+    val customerId: String
+)
 
 /**
  * Awaits the [ApiResult] and deserializes it into the desired type [T].

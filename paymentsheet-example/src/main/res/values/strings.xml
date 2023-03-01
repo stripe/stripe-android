@@ -8,6 +8,9 @@
     <string name="paymentsheet_custom_serverside_confirmation_title">FlowController with server-side confirmation</string>
     <string name="paymentsheet_serverside_confirmation_subtitle">Create and confirm the payment or setup intent on your own backend</string>
     <string name="beta_badge_label">This is currently in beta</string>
+    <string name="under_construction_badge_label">This is currently under construction</string>
+    <string name="saved_payment_methods_title">SavedPaymentMethodsSheet</string>
+    <string name="saved_payment_methods_subtitle">Manage a customers saved payment methods</string>
     <string name="playground_title">Playground</string>
     <string name="playground_subtitle">Testing playground for Stripe engineers</string>
     <string name="action_settings">Settings</string>

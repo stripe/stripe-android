@@ -43,6 +43,8 @@ internal fun PaymentOptions(
     val isEditing by viewModel.editing.collectAsState()
     val isProcessing by viewModel.processing.collectAsState()
 
+    println("JAMES: items ${state.items}")
+
     PaymentOptions(
         state = state,
         isEditing = isEditing,
@@ -238,7 +240,7 @@ private fun Link(
 }
 
 @Composable
-private fun SavedPaymentMethod(
+internal fun SavedPaymentMethod(
     paymentMethod: PaymentOptionsItem.SavedPaymentMethod,
     width: Dp,
     isEnabled: Boolean,

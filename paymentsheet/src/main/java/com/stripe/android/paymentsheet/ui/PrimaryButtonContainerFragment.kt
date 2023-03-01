@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonCo
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.wallet.sheet.SavedPaymentMethodsSheetViewModel
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 
@@ -77,6 +78,13 @@ internal class PaymentOptionsPrimaryButtonContainerFragment : BasePrimaryButtonC
 
     override val viewModel: PaymentOptionsViewModel by activityViewModels {
         PaymentOptionsViewModel.Factory { error("PaymentOptionsViewModel should already exist") }
+    }
+}
+
+internal class SavedPaymentMethodsSheetPrimaryButtonContainerFragment : BasePrimaryButtonContainerFragment() {
+
+    override val viewModel: SavedPaymentMethodsSheetViewModel by activityViewModels {
+        SavedPaymentMethodsSheetViewModel.Factory { error("SavedPaymentMethodsSheetViewModel should already exist") }
     }
 }
 

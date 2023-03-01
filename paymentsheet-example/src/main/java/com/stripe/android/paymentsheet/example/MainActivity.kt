@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
+import com.stripe.android.paymentsheet.example.samples.ui.saved_pms.SavedPaymentMethodsActivity
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlowActivity
@@ -85,6 +87,15 @@ class MainActivity : AppCompatActivity() {
                 section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(
+                titleResId = R.string.saved_payment_methods_title,
+                subtitleResId = R.string.saved_payment_methods_subtitle,
+                klass = SavedPaymentMethodsActivity::class.java,
+                section = MenuItem.Section.SavedPms,
+                badge = MenuItem.Badge(
+                    labelResId = R.string.under_construction_badge_label,
+                )
+            ),
+            MenuItem(
                 titleResId = R.string.playground_title,
                 subtitleResId = R.string.playground_subtitle,
                 klass = PaymentSheetPlaygroundActivity::class.java,
@@ -115,12 +126,13 @@ private data class MenuItem(
 ) {
     data class Badge(
         val labelResId: Int,
-        val onClick: () -> Unit,
+        val onClick: () -> Unit = { },
     )
 
     enum class Section {
         CompleteFlow,
         CustomFlow,
+        SavedPms,
         Internal,
     }
 }
@@ -140,6 +152,11 @@ private fun MainScreen(items: List<MenuItem>) {
         Section(
             title = "Custom flow",
             items = groupedItems.getOrElse(MenuItem.Section.CustomFlow) { emptyList() },
+        )
+
+        Section(
+            title = "Saved payment methods",
+            items = groupedItems.getOrElse(MenuItem.Section.SavedPms) { emptyList() }
         )
 
         Section(

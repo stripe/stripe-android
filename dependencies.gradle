@@ -21,6 +21,7 @@ ext.versions = [
         androidxPreference          : '1.2.0',
         androidxRecyclerview        : '1.2.1',
         androidxSecurity            : '1.1.0-alpha05',
+        androidxDataStore           : '1.0.0',
         binaryCompatibilityValidator: '0.13.1',
         buildTools                  : "30.0.3",
         cameraX                     : '1.2.1',
@@ -118,6 +119,8 @@ ext.libs = [
                 preference        : "androidx.preference:preference-ktx:${versions.androidxPreference}",
                 recyclerView      : "androidx.recyclerview:recyclerview:${versions.androidxRecyclerview}",
                 security          : "androidx.security:security-crypto:${versions.androidxSecurity}",
+                datastore         : "androidx.datastore.datastore-preferences:${versions.androidxDataStore}",
+                datastoreCore     : "androidx.datastore.datastore-core:${versions.androidxDataStore}",
         ],
         camera                              : [
                 core     : "androidx.camera:camera-core:${versions.cameraX}",

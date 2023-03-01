@@ -90,4 +90,20 @@ internal class CustomerApiRepository @Inject constructor(
                 logger.error("Failed to detach payment method $paymentMethodId.", it)
             }.getOrNull()
         }
+
+    override suspend fun attachPaymentMethod(
+        customerConfig: PaymentSheet.CustomerConfiguration,
+        paymentMethodId: String
+    ) {
+        stripeRepository.attachPaymentMethod(
+            customerId = customerConfig.id,
+            publishableKey = lazyPaymentConfig.get().publishableKey,
+            productUsageTokens = productUsageTokens,
+            paymentMethodId = paymentMethodId,
+            requestOptions = ApiRequest.Options(
+                apiKey = customerConfig.ephemeralKeySecret,
+                stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            )
+        )
+    }
 }
