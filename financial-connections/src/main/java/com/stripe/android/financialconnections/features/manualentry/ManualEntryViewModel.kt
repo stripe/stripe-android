@@ -127,6 +127,7 @@ internal class ManualEntryViewModel @Inject constructor(
             pollAttachPaymentAccount(
                 allowManualEntry = manifest.allowManualEntry,
                 activeInstitution = null,
+                consumerSessionClientSecret = null,
                 params = PaymentAccountParams.BankAccount(
                     routingNumber = requireNotNull(state.routing),
                     accountNumber = requireNotNull(state.account)

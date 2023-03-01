@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.paymentsheet.forms.UpiRequirement
+import com.stripe.android.paymentsheet.forms.ZipRequirement
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
@@ -87,6 +88,7 @@ class LpmRepository constructor(
             PaymentMethod.Type.Affirm.code,
             PaymentMethod.Type.RevolutPay.code,
             PaymentMethod.Type.MobilePay.code,
+            PaymentMethod.Type.Zip.code,
             PaymentMethod.Type.AuBecsDebit.code,
             PaymentMethod.Type.Upi.code,
             PaymentMethod.Type.CashAppPay.code,
@@ -380,6 +382,17 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             requirement = MobilePayRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.Zip.code -> SupportedPaymentMethod(
+            code = "zip",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_zip,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_zip,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = ZipRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.AuBecsDebit.code -> SupportedPaymentMethod(
