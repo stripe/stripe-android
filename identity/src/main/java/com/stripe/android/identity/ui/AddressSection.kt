@@ -44,7 +44,6 @@ internal fun AddressSection(
             _identifier = IdentifierSpec.Generic(ADDRESS_SPEC),
             addressRepository = identityViewModel.addressRepository,
             countryCodes = addressCountries.map { it.code.value }.toSet(),
-            rawValuesMap = EMPTY_ADDRESS_MAP,
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -144,13 +143,3 @@ private fun AddressSectionContent(
 
 internal const val ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TAG = "IdNumberSectionCountryNotListed"
 internal const val ADDRESS_SPEC = "AddressSpec"
-
-// Initial empty address provided to AddressElement to clean the cached values from global singleton.
-private val EMPTY_ADDRESS_MAP = mapOf(
-    IdentifierSpec.Line1 to "",
-    IdentifierSpec.Line2 to "",
-    IdentifierSpec.City to "",
-    IdentifierSpec.PostalCode to "",
-    IdentifierSpec.State to "",
-    IdentifierSpec.Country to "",
-)
