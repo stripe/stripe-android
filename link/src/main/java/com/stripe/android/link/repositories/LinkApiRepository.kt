@@ -5,7 +5,6 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
@@ -239,18 +238,20 @@ internal class LinkApiRepository @Inject constructor(
                         publishableKeyProvider(),
                         stripeAccountIdProvider()
                     )
-                )?.paymentDetails?.first()?.let {
+                )?.paymentDetails?.first()?.let { paymentDetails ->
+                    val extraParams = ConsumerPaymentDetailsCreateParams.Card
+                        .extraConfirmationParams(paymentMethodCreateParams)
+
+                    val createParams = PaymentMethodCreateParams.createLink(
+                        paymentDetailsId = paymentDetails.id,
+                        consumerSessionClientSecret = consumerSessionClientSecret,
+                        extraParams = extraParams,
+                    )
+
                     LinkPaymentDetails.New(
-                        it,
-                        ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
-                            .createPaymentMethodCreateParams(
-                                consumerSessionClientSecret,
-                                it,
-                                ConsumerPaymentDetailsCreateParams.Card.extraConfirmationParams(
-                                    paymentMethodCreateParams
-                                )
-                            ),
-                        paymentMethodCreateParams
+                        paymentDetails = paymentDetails,
+                        paymentMethodCreateParams = createParams,
+                        originalParams = paymentMethodCreateParams,
                     )
                 }
             )

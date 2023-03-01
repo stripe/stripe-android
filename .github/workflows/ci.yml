@@ -42,3 +42,17 @@ jobs:
           path: |
             **/build/reports/tests/
             **/out/failures/
+
+  payment-sheet-apk-size-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/stripe_setup
+      - name: Generate Android release bundle
+        run: ./gradlew :paymentsheet-example:bundleRelease
+      - name: Upload artifact to Emerge
+        uses: EmergeTools/emerge-upload-action@v1.0.3
+        with:
+          artifact_path: paymentsheet-example/build/outputs/bundle/release/paymentsheet-example-release.aab
+          emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
+          build_type: pull_request
