@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.ConfirmCallback
 import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
@@ -21,6 +22,7 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.utils.StripeIntentValidator
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
@@ -46,7 +48,6 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.create
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -99,7 +100,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @InjectorKey injectorKey: String,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
-    private val deferredIntentRepository: DeferredIntentRepository
+    private val deferredIntentRepository: DeferredIntentRepository,
+    private val confirmCallback: ConfirmCallback?
 ) : BaseSheetViewModel(
     application = application,
     config = args.config,
@@ -428,9 +430,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }
                 is PaymentSheet.InitializationMode.DeferredIntent -> {
                     val result = deferredIntentRepository.get(
+                        config = config,
                         paymentSelection = paymentSelection,
                         initializationMode = mode,
-                        confirmCallback = PaymentSheet.confirmCallback
+                        confirmCallback = confirmCallback
                     )
                     when (result) {
                         is DeferredIntentRepository.Result.Error -> {
@@ -618,6 +621,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         override fun fallbackInitialize(arg: FallbackInitializeParam): Injector {
             val component = DaggerPaymentSheetLauncherComponent
                 .builder()
+                .confirmCallback(null)
                 .application(arg.application)
                 .injectorKey(DUMMY_INJECTOR_KEY)
                 .build()

@@ -131,6 +131,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
                 .stripeAccountIdProvider { arg.stripeAccountId }
                 .productUsage(arg.productUsage)
                 .starterArgs(arg.starterArgs)
+                .confirmCallback(null)
                 .build()
             viewModelComponent.inject(this)
             return viewModelComponent

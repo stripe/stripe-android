@@ -1,6 +1,7 @@
 package com.stripe.android.link.injection
 
 import android.content.Context
+import com.stripe.android.ConfirmCallback
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -80,6 +81,9 @@ internal abstract class LinkViewModelFactoryComponent : NonFallbackInjector {
 
         @BindsInstance
         fun starterArgs(starterArgs: LinkActivityContract.Args): Builder
+
+        @BindsInstance
+        fun confirmCallback(confirmCallback: ConfirmCallback?): Builder
 
         fun build(): LinkViewModelFactoryComponent
     }

@@ -22,12 +22,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.material.snackbar.Snackbar
+import com.stripe.android.ConfirmCallback
+import com.stripe.android.ConfirmCallbackForClientSideConfirmation
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.paymentsheet.ConfirmCallback
-import com.stripe.android.paymentsheet.ConfirmCallbackForClientSideConfirmation
-import com.stripe.android.paymentsheet.ConfirmCallbackForServerSideConfirmation
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -150,6 +149,22 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     private var singleStepUIReadyIdlingResource: CountingIdlingResource? = null
 
+    private suspend fun onCreatePaymentIntent(
+        paymentMethodId: String?
+    ): ConfirmCallback.Result {
+        val response = viewModel.createPaymentIntent(
+            paymentMethodId = paymentMethodId,
+            shouldSavePaymentMethod = false,
+            amount = (viewModel.intentConfigurationMode.value as? PaymentSheet.IntentConfiguration.Mode.Payment)?.amount,
+            currency = currency.value,
+            confirm = true
+        )
+
+        return ConfirmCallback.Result.Success(
+            clientSecret = response.clientSecret
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val shouldUseDarkMode = intent.extras?.get(FORCE_DARK_MODE_EXTRA) as Boolean?
         if (shouldUseDarkMode != null) {
@@ -167,19 +182,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         paymentSheet = PaymentSheet(
             activity = this,
             callback = ::onPaymentSheetResult,
-            confirmCallback = ConfirmCallbackForServerSideConfirmation { paymentMethodId, shouldSavePaymentMethod ->
-                val response = viewModel.createPaymentIntent(
-                    paymentMethodId = paymentMethodId,
-                    shouldSavePaymentMethod = shouldSavePaymentMethod,
-                    amount = (viewModel.intentConfigurationMode.value as? PaymentSheet.IntentConfiguration.Mode.Payment)?.amount,
-                    currency = currency.value,
-                    confirm = true
-                )
-
-                ConfirmCallback.Result.Success(
-                    clientSecret = response.clientSecret
-                )
-            }
+            confirmCallback = ::onCreatePaymentIntent,
         )
 
         flowController = PaymentSheet.FlowController.create(

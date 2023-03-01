@@ -3,10 +3,10 @@ package com.stripe.android.link.ui.wallet
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.NonFallbackInjector
+import com.stripe.android.interceptor.IntentConfirmationInterceptor
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason.PayAnotherWay
@@ -21,7 +21,6 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentMethod
@@ -47,7 +46,8 @@ internal class WalletViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val confirmationManager: ConfirmationManager,
-    private val logger: Logger
+    private val logger: Logger,
+    private val intentConfirmationInterceptor: IntentConfirmationInterceptor
 ) : ViewModel() {
 
     private val stripeIntent = args.stripeIntent
@@ -149,16 +149,35 @@ internal class WalletViewModel @Inject constructor(
                 }
             )
         } else {
-            val params = createConfirmStripeIntentParams(
+            val params = createPaymentMethodCreateParams(
                 selectedPaymentDetails = selectedPaymentDetails,
                 linkAccount = linkAccount
             )
 
-            confirmationManager.confirmStripeIntent(params) { result ->
-                result.fold(
-                    onSuccess = ::handleConfirmPaymentSuccess,
-                    onFailure = ::onError
-                )
+            val nextStep = intentConfirmationInterceptor.intercept(
+                clientSecret = stripeIntent.clientSecret,
+                paymentMethodCreateParams = params,
+                shippingValues = args.shippingValues?.toConfirmPaymentIntentShipping(),
+                setupForFutureUsage = null,
+            )
+
+            when (nextStep) {
+                IntentConfirmationInterceptor.NextStep.Complete -> {
+                    handleConfirmPaymentSuccess(PaymentResult.Completed)
+                }
+                is IntentConfirmationInterceptor.NextStep.Confirm -> {
+                    confirmationManager.confirmStripeIntent(
+                        nextStep.confirmStripeIntentParams
+                    ) { result ->
+                        result.fold(
+                            onSuccess = ::handleConfirmPaymentSuccess,
+                            onFailure = ::onError
+                        )
+                    }
+                }
+                is IntentConfirmationInterceptor.NextStep.Fail -> {
+                    onError(ErrorMessage.Raw(nextStep.error))
+                }
             }
         }
     }
@@ -177,15 +196,10 @@ internal class WalletViewModel @Inject constructor(
         return linkAccountManager.updatePaymentDetails(updateParams)
     }
 
-    private fun createConfirmStripeIntentParams(
+    private fun createPaymentMethodCreateParams(
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount
-    ): ConfirmStripeIntentParams {
-        val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-            clientSecret = requireNotNull(stripeIntent.clientSecret),
-            shipping = args.shippingValues?.toConfirmPaymentIntentShipping()
-        )
-
+    ): PaymentMethodCreateParams {
         val cvc = uiState.value.cvcInput.takeIf { it.isComplete }?.value
         val extraParams = if (cvc != null) {
             mapOf("card" to mapOf("cvc" to cvc))
@@ -199,7 +213,7 @@ internal class WalletViewModel @Inject constructor(
             extraParams = extraParams
         )
 
-        return paramsFactory.create(params)
+        return params
     }
 
     private fun handleConfirmPaymentSuccess(paymentResult: PaymentResult) {

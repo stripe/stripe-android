@@ -38,10 +38,12 @@ class DefaultPaymentSheetLauncherTest {
                 val results = mutableListOf<PaymentSheetResult>()
                 val launcher = com.stripe.android.paymentsheet.DefaultPaymentSheetLauncher(
                     fragment,
-                    testRegistry
-                ) {
-                    results.add(it)
-                }
+                    testRegistry,
+                    {
+                        results.add(it)
+                    },
+                    null
+                )
 
                 moveToState(Lifecycle.State.RESUMED)
                 launcher.present(mode = PaymentSheet.InitializationMode.PaymentIntent("pi_fake"))

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.StripeIntentValidator
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures

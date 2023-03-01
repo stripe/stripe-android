@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
+import com.stripe.android.ConfirmCallback
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.Injectable
@@ -47,6 +48,9 @@ internal abstract class PaymentOptionsViewModelFactoryComponent : NonFallbackInj
 
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
+
+        @BindsInstance
+        fun confirmCallback(confirmCallback: ConfirmCallback?): Builder
 
         fun build(): PaymentOptionsViewModelFactoryComponent
     }

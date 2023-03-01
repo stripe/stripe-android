@@ -9,6 +9,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.ConfirmCallback
 import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -72,6 +73,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
+    private val confirmCallback: ConfirmCallback?,
     activityResultCaller: ActivityResultCaller,
     @InjectorKey private val injectorKey: String,
     // Properties provided through injection
@@ -280,9 +282,10 @@ internal class DefaultFlowController @Inject internal constructor(
                 is PaymentSheet.InitializationMode.DeferredIntent -> {
                     when (
                         val result = deferredIntentRepository.get(
+                            config = viewModel.state?.config,
                             paymentSelection = paymentSelection,
                             initializationMode = mode,
-                            confirmCallback = PaymentSheet.FlowController.confirmCallback
+                            confirmCallback = confirmCallback
                         )
                     ) {
                         is DeferredIntentRepository.Result.Error -> {
@@ -529,7 +532,8 @@ internal class DefaultFlowController @Inject internal constructor(
             activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
             paymentOptionCallback: PaymentOptionCallback,
-            paymentResultCallback: PaymentSheetResultCallback
+            paymentResultCallback: PaymentSheetResultCallback,
+            confirmCallback: ConfirmCallback?
         ): PaymentSheet.FlowController {
             val injectorKey =
                 WeakMapInjectorRegistry.nextKey(
@@ -543,6 +547,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 .statusBarColor(statusBarColor)
                 .paymentOptionCallback(paymentOptionCallback)
                 .paymentResultCallback(paymentResultCallback)
+                .confirmCallback(confirmCallback)
                 .injectorKey(injectorKey)
                 .build()
             val flowController = flowControllerComponent.flowController

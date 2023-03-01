@@ -361,6 +361,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val component = DaggerPaymentOptionsViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .productUsage(arg.productUsage)
+                .confirmCallback(null)
                 .build()
             component.inject(this)
             return component

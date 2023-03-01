@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.ConfirmCallback
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.InjectorKey
@@ -59,6 +60,9 @@ internal interface FlowControllerComponent {
 
         @BindsInstance
         fun paymentResultCallback(paymentResultCallback: PaymentSheetResultCallback): Builder
+
+        @BindsInstance
+        fun confirmCallback(confirmCallback: ConfirmCallback?): Builder
 
         @BindsInstance
         fun injectorKey(@InjectorKey injectorKey: String): Builder

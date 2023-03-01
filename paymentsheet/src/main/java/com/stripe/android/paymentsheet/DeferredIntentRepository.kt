@@ -1,14 +1,17 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.ConfirmCallback
+import com.stripe.android.ConfirmCallbackForClientSideConfirmation
+import com.stripe.android.ConfirmCallbackForServerSideConfirmation
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.utils.StripeIntentValidator
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import dagger.Lazy
 import javax.inject.Inject
@@ -23,6 +26,7 @@ internal interface DeferredIntentRepository {
         ) : Result
     }
     suspend fun get(
+        config: PaymentSheet.Configuration?,
         paymentSelection: PaymentSelection?,
         initializationMode: PaymentSheet.InitializationMode,
         confirmCallback: ConfirmCallback?
@@ -37,6 +41,7 @@ internal class DefaultDeferredIntentRepository @Inject constructor(
 ) : DeferredIntentRepository {
 
     override suspend fun get(
+        config: PaymentSheet.Configuration?,
         paymentSelection: PaymentSelection?,
         initializationMode: PaymentSheet.InitializationMode,
         confirmCallback: ConfirmCallback?
@@ -62,7 +67,7 @@ internal class DefaultDeferredIntentRepository @Inject constructor(
         }
 
         return if (serverSideConfirmed) {
-            val stripeIntent = retrieveDeferredIntent(initializationMode, clientSecret)
+            val stripeIntent = retrieveDeferredIntent(config, initializationMode, clientSecret)
             val isConfirmed = stripeIntentValidator.isConfirmed(stripeIntent)
             if (isConfirmed) {
                 DeferredIntentRepository.Result.Success(
@@ -84,6 +89,7 @@ internal class DefaultDeferredIntentRepository @Inject constructor(
     }
 
     private suspend fun retrieveDeferredIntent(
+        config: PaymentSheet.Configuration?,
         mode: PaymentSheet.InitializationMode,
         clientSecret: ClientSecret
     ): StripeIntent {
@@ -92,7 +98,8 @@ internal class DefaultDeferredIntentRepository @Inject constructor(
                 PaymentSheet.InitializationMode.PaymentIntent(clientSecret.value)
             } else {
                 PaymentSheet.InitializationMode.SetupIntent(clientSecret.value)
-            }
+            },
+            config
         ).stripeIntent
     }
 

@@ -5,6 +5,7 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
+import com.stripe.android.ConfirmCallback
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
@@ -62,7 +63,8 @@ class LinkPaymentLauncher @Inject internal constructor(
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     analyticsRequestExecutor: AnalyticsRequestExecutor,
     stripeRepository: StripeRepository,
-    addressResourceRepository: ResourceRepository<AddressRepository>
+    addressResourceRepository: ResourceRepository<AddressRepository>,
+    confirmCallback: ConfirmCallback?
 ) : NonFallbackInjectable {
     private val launcherComponentBuilder = DaggerLinkPaymentLauncherComponent.builder()
         .context(context)
@@ -76,6 +78,7 @@ class LinkPaymentLauncher @Inject internal constructor(
         .publishableKeyProvider(publishableKeyProvider)
         .stripeAccountIdProvider(stripeAccountIdProvider)
         .productUsage(productUsage)
+        .confirmCallback(confirmCallback)
 
     @InjectorKey
     private val injectorKey: String = WeakMapInjectorRegistry.nextKey(

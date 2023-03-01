@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android
 
 import androidx.annotation.RestrictTo
 import kotlin.coroutines.resume

@@ -1,6 +1,7 @@
 package com.stripe.android.link.injection
 
 import android.content.Context
+import com.stripe.android.ConfirmCallback
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -99,6 +100,9 @@ internal abstract class LinkPaymentLauncherComponent {
 
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
+
+        @BindsInstance
+        fun confirmCallback(confirmCallback: ConfirmCallback?): Builder
 
         fun build(): LinkPaymentLauncherComponent
     }

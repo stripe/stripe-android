@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
+import com.stripe.android.ConfirmCallback
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.Injectable
@@ -45,6 +46,9 @@ internal abstract class PaymentSheetLauncherComponent : NonFallbackInjector {
     interface Builder {
         @BindsInstance
         fun application(application: Application): Builder
+
+        @BindsInstance
+        fun confirmCallback(confirmCallback: ConfirmCallback?): Builder
 
         @BindsInstance
         fun injectorKey(@InjectorKey injectorKey: String): Builder

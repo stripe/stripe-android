@@ -10,6 +10,9 @@ import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import com.stripe.android.ConfirmCallback
+import com.stripe.android.ConfirmCallbackForClientSideConfirmation
+import com.stripe.android.ConfirmCallbackForServerSideConfirmation
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -38,7 +41,7 @@ class PaymentSheet internal constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback
     ) : this(
-        DefaultPaymentSheetLauncher(activity, callback)
+        DefaultPaymentSheetLauncher(activity, callback, null)
     )
 
     /**
@@ -51,7 +54,7 @@ class PaymentSheet internal constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback
     ) : this(
-        DefaultPaymentSheetLauncher(fragment, callback)
+        DefaultPaymentSheetLauncher(fragment, callback, null)
     )
 
     /**
@@ -67,12 +70,28 @@ class PaymentSheet internal constructor(
     constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback,
-        confirmCallback: ConfirmCallback
+        confirmCallback: ConfirmCallbackForClientSideConfirmation
     ) : this(
-        DefaultPaymentSheetLauncher(activity, callback)
-    ) {
-        PaymentSheet.confirmCallback = confirmCallback
-    }
+        DefaultPaymentSheetLauncher(activity, callback, confirmCallback)
+    )
+
+    /**
+     * 🚧 Under construction 🚧
+     * Constructor to be used when launching payment sheet with the deferred intent flow.
+     *
+     * @param activity  the Activity that is presenting the payment sheet.
+     * @param callback  called with the result of the payment after the payment sheet is dismissed.
+     * @param serverSideConfirmCallback  called with the payment method id which should be
+     * retrieved from your server
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        activity: ComponentActivity,
+        callback: PaymentSheetResultCallback,
+        serverSideConfirmCallback: ConfirmCallbackForServerSideConfirmation
+    ) : this(
+        DefaultPaymentSheetLauncher(activity, callback, serverSideConfirmCallback)
+    )
 
     /**
      * 🚧 Under construction 🚧
@@ -80,19 +99,35 @@ class PaymentSheet internal constructor(
      *
      * @param fragment the Fragment that is presenting the payment sheet.
      * @param callback  called with the result of the payment after the payment sheet is dismissed.
-     * @param retrieveConfirmCallback  called with the payment method id which should be
+     * @param confirmCallback  called with the payment method id which should be
      * retrieved from your server
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback,
-        confirmCallback: ConfirmCallback
+        confirmCallback: ConfirmCallbackForClientSideConfirmation
     ) : this(
-        DefaultPaymentSheetLauncher(fragment, callback)
-    ) {
-        PaymentSheet.confirmCallback = confirmCallback
-    }
+        DefaultPaymentSheetLauncher(fragment, callback, confirmCallback)
+    )
+
+    /**
+     * 🚧 Under construction 🚧
+     * Constructor to be used when launching payment sheet with the deferred intent flow.
+     *
+     * @param fragment the Fragment that is presenting the payment sheet.
+     * @param callback  called with the result of the payment after the payment sheet is dismissed.
+     * @param serverSideConfirmCallback  called with the payment method id which should be
+     * retrieved from your server
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        fragment: Fragment,
+        callback: PaymentSheetResultCallback,
+        serverSideConfirmCallback: ConfirmCallbackForServerSideConfirmation
+    ) : this(
+        DefaultPaymentSheetLauncher(fragment, callback, serverSideConfirmCallback)
+    )
 
     /**
      * Present the payment sheet to process a [PaymentIntent].
@@ -963,8 +998,6 @@ class PaymentSheet internal constructor(
         }
 
         companion object {
-            internal var confirmCallback: ConfirmCallback? = null
-
             /**
              * Create the FlowController when launching the payment sheet from an Activity.
              *
@@ -982,7 +1015,8 @@ class PaymentSheet internal constructor(
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
-                    paymentResultCallback
+                    paymentResultCallback,
+                    null
                 ).create()
             }
 
@@ -1002,7 +1036,8 @@ class PaymentSheet internal constructor(
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
-                    paymentResultCallback
+                    paymentResultCallback,
+                    null
                 ).create()
             }
 
@@ -1026,11 +1061,11 @@ class PaymentSheet internal constructor(
                 paymentResultCallback: PaymentSheetResultCallback,
                 confirmCallback: ConfirmCallback
             ): FlowController {
-                FlowController.confirmCallback = confirmCallback
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
-                    paymentResultCallback
+                    paymentResultCallback,
+                    confirmCallback
                 ).create()
             }
 
@@ -1052,19 +1087,17 @@ class PaymentSheet internal constructor(
                 paymentResultCallback: PaymentSheetResultCallback,
                 confirmCallback: ConfirmCallback
             ): FlowController {
-                FlowController.confirmCallback = confirmCallback
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
-                    paymentResultCallback
+                    paymentResultCallback,
+                    confirmCallback
                 ).create()
             }
         }
     }
 
     companion object {
-        internal var confirmCallback: ConfirmCallback? = null
-
         /**
          * Deletes all persisted authentication state associated with a customer.
          *
