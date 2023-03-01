@@ -12,6 +12,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAttachPaymentsSucceeded
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
+import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
@@ -32,6 +33,7 @@ internal class AttachPaymentViewModel @Inject constructor(
     private val getCachedAccounts: GetCachedAccounts,
     private val navigationManager: NavigationManager,
     private val getManifest: GetManifest,
+    private val getCachedConsumerSession: GetCachedConsumerSession,
     private val goNext: GoNext,
     private val logger: Logger
 ) : MavericksViewModel<AttachPaymentState>(initialState) {
@@ -47,6 +49,7 @@ internal class AttachPaymentViewModel @Inject constructor(
         }.execute { copy(payload = it) }
         suspend {
             val manifest = getManifest()
+            val consumerSession = getCachedConsumerSession()
             val authSession = requireNotNull(manifest.activeAuthSession)
             val activeInstitution = requireNotNull(manifest.activeInstitution)
             val accounts = getCachedAccounts()
@@ -56,6 +59,7 @@ internal class AttachPaymentViewModel @Inject constructor(
                 pollAttachPaymentAccount(
                     allowManualEntry = manifest.allowManualEntry,
                     activeInstitution = activeInstitution,
+                    consumerSessionClientSecret = consumerSession?.clientSecret,
                     params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
                 ).also { goNext(it.nextPane ?: Pane.SUCCESS) }
             }
