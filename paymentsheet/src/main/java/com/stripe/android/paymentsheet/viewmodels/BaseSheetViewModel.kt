@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.getPMsToAdd
+import com.stripe.android.paymentsheet.model.mandateText
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
@@ -397,14 +398,16 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
 
-    open fun updateSelection(selection: PaymentSelection?) {
+    fun updateSelection(selection: PaymentSelection?) {
         if (selection is PaymentSelection.New) {
             newPaymentSelection = selection
         }
 
         savedStateHandle[SAVE_SELECTION] = selection
 
-        updateBelowButtonText(null)
+        val mandateText = selection?.mandateText(getApplication())
+        updateBelowButtonText(mandateText)
+
         clearErrorMessages()
     }
 

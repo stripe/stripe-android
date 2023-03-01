@@ -1,13 +1,16 @@
 package com.stripe.android.paymentsheet.model
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -95,3 +98,27 @@ internal sealed class PaymentSelection : Parcelable {
         ) : New()
     }
 }
+
+internal fun PaymentSelection.mandateText(context: Context): String? {
+    return if (this is PaymentSelection.Saved && paymentMethod.type == USBankAccount) {
+        ACHText.getContinueMandateText(context)
+    } else {
+        null
+    }
+}
+
+internal val PaymentSelection.requiresConfirmation: Boolean
+    get() = when (this) {
+        is PaymentSelection.GooglePay,
+        is PaymentSelection.Link,
+        is PaymentSelection.New.Card,
+        is PaymentSelection.New.GenericPaymentMethod,
+        is PaymentSelection.New.LinkInline,
+        is PaymentSelection.New.USBankAccount -> {
+            false
+        }
+        is PaymentSelection.Saved -> {
+            // US Bank Account requires the user to accept a mandate
+            paymentMethod.type == USBankAccount
+        }
+    }

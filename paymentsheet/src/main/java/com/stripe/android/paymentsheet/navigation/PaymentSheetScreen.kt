@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 internal sealed interface PaymentSheetScreen {
 
     val showsBuyButton: Boolean
+    val showsContinueButton: Boolean
 
     @Composable
     fun Content(viewModel: BaseSheetViewModel, modifier: Modifier)
@@ -17,6 +18,7 @@ internal sealed interface PaymentSheetScreen {
     object Loading : PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = false
+        override val showsContinueButton: Boolean = false
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
@@ -27,6 +29,7 @@ internal sealed interface PaymentSheetScreen {
     object SelectSavedPaymentMethods : PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
+        override val showsContinueButton: Boolean = false
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
@@ -37,6 +40,7 @@ internal sealed interface PaymentSheetScreen {
     object AddAnotherPaymentMethod : PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
+        override val showsContinueButton: Boolean = true
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
@@ -47,6 +51,7 @@ internal sealed interface PaymentSheetScreen {
     object AddFirstPaymentMethod : PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
+        override val showsContinueButton: Boolean = true
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {

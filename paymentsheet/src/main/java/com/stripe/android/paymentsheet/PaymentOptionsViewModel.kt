@@ -15,17 +15,16 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.currency
+import com.stripe.android.paymentsheet.model.requiresConfirmation
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
@@ -205,14 +204,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             eventReporter.onSelectPaymentOption(paymentSelection, stripeIntent.value?.currency)
 
             when (paymentSelection) {
-                is PaymentSelection.Saved ->
-                    // We don't want the USBankAccount selection to close the payment sheet right
-                    // away, the user needs to accept a mandate
-                    if (paymentSelection.paymentMethod.type != PaymentMethod.Type.USBankAccount) {
-                        processExistingPaymentMethod(
-                            paymentSelection
-                        )
-                    }
+                is PaymentSelection.Saved,
                 is PaymentSelection.GooglePay,
                 is PaymentSelection.Link -> processExistingPaymentMethod(paymentSelection)
                 is PaymentSelection.New -> processNewPaymentMethod(paymentSelection)
@@ -227,52 +219,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
         if (!editing.value) {
             updateSelection(selection)
-            onUserSelection()
-        }
-    }
 
-    override fun updateSelection(selection: PaymentSelection?) {
-        super.updateSelection(selection)
-        when {
-            selection is PaymentSelection.Saved &&
-                selection.paymentMethod.type == PaymentMethod.Type.USBankAccount -> {
-                updateBelowButtonText(
-                    ACHText.getContinueMandateText(getApplication())
-                )
-                updatePrimaryButtonUIState(
-                    PrimaryButton.UIState(
-                        label = getApplication<Application>().getString(
-                            R.string.stripe_continue_button_label
-                        ),
-                        visible = true,
-                        enabled = true,
-                        onClick = {
-                            processExistingPaymentMethod(selection)
-                        }
-                    )
-                )
-            }
-            selection is PaymentSelection.Saved ||
-                selection is PaymentSelection.GooglePay -> {
-                updatePrimaryButtonUIState(
-                    primaryButtonUIState.value?.copy(
-                        visible = false
-                    )
-                )
-            }
-            else -> {
-                updatePrimaryButtonUIState(
-                    primaryButtonUIState.value?.copy(
-                        label = getApplication<Application>().getString(
-                            R.string.stripe_continue_button_label
-                        ),
-                        visible = true,
-                        enabled = true,
-                        onClick = {
-                            onUserSelection()
-                        }
-                    )
-                )
+            if (selection?.requiresConfirmation != true) {
+                onUserSelection()
             }
         }
     }
