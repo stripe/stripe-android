@@ -15,17 +15,49 @@ import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 internal sealed class PaymentSelection : Parcelable {
-    @Parcelize
-    object GooglePay : PaymentSelection()
+
+    abstract val requiresConfirmation: Boolean
+    abstract fun mandateText(context: Context): String?
 
     @Parcelize
-    object Link : PaymentSelection()
+    object GooglePay : PaymentSelection() {
+
+        override val requiresConfirmation: Boolean
+            get() = false
+
+        override fun mandateText(context: Context): String? {
+            return null
+        }
+    }
+
+    @Parcelize
+    object Link : PaymentSelection() {
+
+        override val requiresConfirmation: Boolean
+            get() = false
+
+        override fun mandateText(context: Context): String? {
+            return null
+        }
+    }
 
     @Parcelize
     data class Saved(
         val paymentMethod: PaymentMethod,
         internal val isGooglePay: Boolean = false
-    ) : PaymentSelection()
+    ) : PaymentSelection() {
+
+        override val requiresConfirmation: Boolean
+            get() = paymentMethod.type == USBankAccount
+
+        override fun mandateText(context: Context): String? {
+            return if (paymentMethod.type == USBankAccount) {
+                ACHText.getContinueMandateText(context)
+            } else {
+                null
+            }
+        }
+    }
 
     enum class CustomerRequestedSave {
         RequestReuse,
@@ -34,8 +66,16 @@ internal sealed class PaymentSelection : Parcelable {
     }
 
     sealed class New : PaymentSelection() {
+
         abstract val paymentMethodCreateParams: PaymentMethodCreateParams
         abstract val customerRequestedSave: CustomerRequestedSave
+
+        override val requiresConfirmation: Boolean
+            get() = false
+
+        override fun mandateText(context: Context): String? {
+            return null
+        }
 
         @Parcelize
         data class Card(
@@ -98,27 +138,3 @@ internal sealed class PaymentSelection : Parcelable {
         ) : New()
     }
 }
-
-internal fun PaymentSelection.mandateText(context: Context): String? {
-    return if (this is PaymentSelection.Saved && paymentMethod.type == USBankAccount) {
-        ACHText.getContinueMandateText(context)
-    } else {
-        null
-    }
-}
-
-internal val PaymentSelection.requiresConfirmation: Boolean
-    get() = when (this) {
-        is PaymentSelection.GooglePay,
-        is PaymentSelection.Link,
-        is PaymentSelection.New.Card,
-        is PaymentSelection.New.GenericPaymentMethod,
-        is PaymentSelection.New.LinkInline,
-        is PaymentSelection.New.USBankAccount -> {
-            false
-        }
-        is PaymentSelection.Saved -> {
-            // US Bank Account requires the user to accept a mandate
-            paymentMethod.type == USBankAccount
-        }
-    }
