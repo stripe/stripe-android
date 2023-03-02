@@ -7,16 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentOptionsPrimaryButtonBinding
 import com.stripe.android.paymentsheet.navigation.Content
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.stripeColors
@@ -50,6 +47,8 @@ internal fun PaymentOptionsScreenContent(
     val showLinkDialog by viewModel.linkHandler.showLinkVerificationDialog.collectAsState()
     val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
 
+    val primaryButtonUiState by viewModel.primaryButtonUiState.collectAsState()
+
     Column(
         modifier = modifier.padding(bottom = bottomPadding),
     ) {
@@ -78,10 +77,9 @@ internal fun PaymentOptionsScreenContent(
             )
         }
 
-        AndroidViewBinding(
-            factory = FragmentPaymentOptionsPrimaryButtonBinding::inflate,
-            modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
-        )
+        primaryButtonUiState?.let { uiState ->
+            PrimaryButton(uiState = uiState)
+        }
 
         notesText?.let { text ->
             Html(

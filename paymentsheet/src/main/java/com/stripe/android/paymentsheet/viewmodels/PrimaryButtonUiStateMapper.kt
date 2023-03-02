@@ -4,6 +4,7 @@ import android.content.Context
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
@@ -31,10 +32,12 @@ internal class PrimaryButtonUiStateMapper(
             customPrimaryButtonUiStateFlow,
         ) { screen, buttonsEnabled, amount, selection, customPrimaryButton ->
             customPrimaryButton ?: PrimaryButton.UIState(
+                processingState = PrimaryButton.State.Ready,
                 label = buyButtonLabel(amount),
                 onClick = onClick,
                 enabled = buttonsEnabled && selection != null,
                 lockVisible = true,
+                color = config?.primaryButtonColor,
             ).takeIf { screen.showsBuyButton }
         }
     }
@@ -47,10 +50,12 @@ internal class PrimaryButtonUiStateMapper(
             customPrimaryButtonUiStateFlow,
         ) { screen, buttonsEnabled, selection, customPrimaryButton ->
             customPrimaryButton ?: PrimaryButton.UIState(
+                processingState = PrimaryButton.State.Ready,
                 label = continueButtonLabel(),
                 onClick = onClick,
                 enabled = buttonsEnabled && selection != null,
                 lockVisible = false,
+                color = config?.primaryButtonColor,
             ).takeIf {
                 screen.showsContinueButton || selection?.requiresConfirmation == true
             }
@@ -71,5 +76,19 @@ internal class PrimaryButtonUiStateMapper(
     private fun continueButtonLabel(): String {
         val customLabel = config?.primaryButtonLabel
         return customLabel ?: context.getString(R.string.stripe_continue_button_label)
+    }
+}
+
+internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
+    return when (this) {
+        is PaymentSheetViewState.Reset -> {
+            PrimaryButton.State.Ready
+        }
+        is PaymentSheetViewState.StartProcessing -> {
+            PrimaryButton.State.StartProcessing
+        }
+        is PaymentSheetViewState.FinishProcessing -> {
+            PrimaryButton.State.FinishProcessing(this.onComplete)
+        }
     }
 }

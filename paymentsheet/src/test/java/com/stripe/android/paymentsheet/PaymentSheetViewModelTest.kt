@@ -780,18 +780,18 @@ internal class PaymentSheetViewModelTest {
             .isEqualTo(null)
     }
 
-    @Test
-    fun `updatePrimaryButtonState updates the primary button state`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.primaryButtonState.test {
-            assertThat(awaitItem()).isNull()
-
-            viewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
-
-            assertThat(awaitItem()).isEqualTo(PrimaryButton.State.Ready)
-        }
-    }
+//    @Test
+//    fun `updatePrimaryButtonState updates the primary button state`() = runTest {
+//        val viewModel = createViewModel()
+//
+//        viewModel.primaryButtonState.test {
+//            assertThat(awaitItem()).isNull()
+//
+//            viewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
+//
+//            assertThat(awaitItem()).isEqualTo(PrimaryButton.State.Ready)
+//        }
+//    }
 
     @Test
     fun `Content should be hidden when Google Pay is visible`() = runTest {

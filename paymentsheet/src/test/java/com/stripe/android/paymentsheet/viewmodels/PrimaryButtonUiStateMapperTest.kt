@@ -28,6 +28,8 @@ class PrimaryButtonUiStateMapperTest {
             onClick = {},
             enabled = false,
             lockVisible = true,
+            processingState = PrimaryButton.State.Ready,
+            color = null,
         )
 
         val mapper = createMapper(

@@ -245,7 +245,7 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     override fun onDetach() {
-        sheetViewModel?.resetUSBankPrimaryButton()
+        sheetViewModel?.resetCustomPrimaryButton()
         viewModel.onDestroy()
         super.onDetach()
     }
@@ -442,21 +442,26 @@ internal class USBankAccountFormFragment : Fragment() {
         shouldShowProcessingWhenClicked: Boolean = true,
         enabled: Boolean = true,
     ) {
-        sheetViewModel?.updatePrimaryButtonState(PrimaryButton.State.Ready)
         sheetViewModel?.updateCustomPrimaryButtonUiState {
             PrimaryButton.UIState(
+                processingState = PrimaryButton.State.Ready,
                 label = text,
                 onClick = {
                     if (shouldShowProcessingWhenClicked) {
-                        sheetViewModel?.updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+                        sheetViewModel?.updateCustomPrimaryButtonUiState {
+                            it?.copy(processingState = PrimaryButton.State.StartProcessing)
+                        }
                     }
+
                     onClick()
+
                     sheetViewModel?.updateCustomPrimaryButtonUiState { button ->
                         button?.copy(enabled = false)
                     }
                 },
                 enabled = enabled,
                 lockVisible = completePayment,
+                color = sheetViewModel?.config?.primaryButtonColor,
             )
         }
     }

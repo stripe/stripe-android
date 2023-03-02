@@ -15,18 +15,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentSheetPrimaryButtonBinding
 import com.stripe.android.paymentsheet.state.WalletsContainerState
+import com.stripe.android.paymentsheet.viewmodels.convert
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
@@ -80,6 +78,8 @@ internal fun PaymentSheetScreenContent(
     val currentScreen by viewModel.currentScreen.collectAsState()
     val notes by viewModel.notesText.collectAsState()
 
+    val primaryButtonUiState by viewModel.primaryButtonUiState.collectAsState()
+
     val bottomPadding = dimensionResource(
         R.dimen.stripe_paymentsheet_button_container_spacing_bottom
     )
@@ -119,10 +119,9 @@ internal fun PaymentSheetScreenContent(
             )
         }
 
-        AndroidViewBinding(
-            factory = FragmentPaymentSheetPrimaryButtonBinding::inflate,
-            modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
-        )
+        primaryButtonUiState?.let { uiState ->
+            PrimaryButton(uiState = uiState)
+        }
 
         notes?.let { text ->
             Html(

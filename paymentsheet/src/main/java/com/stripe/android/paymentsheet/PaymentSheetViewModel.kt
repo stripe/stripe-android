@@ -249,10 +249,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }
             }
             LinkHandler.ProcessingState.Ready -> {
-                updatePrimaryButtonState(PrimaryButton.State.Ready)
+                updateCustomPrimaryButtonUiState {
+                    it?.copy(processingState = PrimaryButton.State.Ready)
+                }
+                // TODO Test this
+                // updatePrimaryButtonState(PrimaryButton.State.Ready)
             }
             LinkHandler.ProcessingState.Started -> {
-                updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+                updateCustomPrimaryButtonUiState {
+                    it?.copy(processingState = PrimaryButton.State.StartProcessing)
+                }
+                // TODO Test this
+                // updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
             }
         }
     }

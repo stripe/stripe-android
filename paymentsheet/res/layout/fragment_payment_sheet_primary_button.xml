@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.fragment.app.FragmentContainerView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/payment_sheet_primary_button_fragment_container_view"
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
-    android:name="com.stripe.android.paymentsheet.ui.PaymentSheetPrimaryButtonContainerFragment" />

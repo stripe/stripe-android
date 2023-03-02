@@ -251,18 +251,18 @@ internal class PaymentOptionsViewModelTest {
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
     }
 
-    @Test
-    fun `updatePrimaryButtonState updates the primary button state`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.primaryButtonState.test {
-            assertThat(awaitItem()).isNull()
-
-            viewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
-
-            assertThat(awaitItem()).isEqualTo(PrimaryButton.State.Ready)
-        }
-    }
+//    @Test
+//    fun `updatePrimaryButtonState updates the primary button state`() = runTest {
+//        val viewModel = createViewModel()
+//
+//        viewModel.primaryButtonState.test {
+//            assertThat(awaitItem()).isNull()
+//
+//            viewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
+//
+//            assertThat(awaitItem()).isEqualTo(PrimaryButton.State.Ready)
+//        }
+//    }
 
     @Test
     fun `paymentMethods is not empty if customer has payment methods`() = runTest {

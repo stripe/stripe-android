@@ -374,17 +374,21 @@ internal abstract class BaseSheetViewModel(
 
                 if (userInput != null && paymentSelection != null) {
                     PrimaryButton.UIState(
+                        processingState = PrimaryButton.State.Ready,
                         label = uiState.label,
                         onClick = { payWithLinkInline(userInput) },
                         enabled = true,
                         lockVisible = this is PaymentSheetViewModel,
+                        color = config?.primaryButtonColor,
                     )
                 } else {
                     PrimaryButton.UIState(
+                        processingState = PrimaryButton.State.Ready,
                         label = uiState.label,
                         onClick = {},
                         enabled = false,
                         lockVisible = this is PaymentSheetViewModel,
+                        color = config?.primaryButtonColor,
                     )
                 }
             } else {
@@ -397,10 +401,12 @@ internal abstract class BaseSheetViewModel(
         val uiState = primaryButtonUiState.value ?: return
         updateLinkPrimaryButtonUiState(
             PrimaryButton.UIState(
+                processingState = PrimaryButton.State.Ready,
                 label = uiState.label,
                 onClick = { payWithLinkInline(userInput = null) },
                 enabled = true,
                 lockVisible = this is PaymentSheetViewModel,
+                color = config?.primaryButtonColor,
             )
         )
     }
@@ -413,12 +419,8 @@ internal abstract class BaseSheetViewModel(
         customPrimaryButtonUiState.update(block)
     }
 
-    fun resetUSBankPrimaryButton() {
+    fun resetCustomPrimaryButton() {
         customPrimaryButtonUiState.value = null
-    }
-
-    fun updatePrimaryButtonState(state: PrimaryButton.State) {
-        _primaryButtonState.value = state
     }
 
     fun updateBelowButtonText(text: String?) {

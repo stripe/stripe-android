@@ -7,13 +7,18 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
@@ -24,9 +29,40 @@ import com.stripe.android.uicore.PrimaryButtonStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.convertDpToPx
+import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.getBorderStrokeColor
 import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.getOnBackgroundColor
+
+@Composable
+internal fun PrimaryButton(
+    uiState: PrimaryButton.UIState,
+    modifier: Modifier = Modifier,
+) {
+    val height = dimensionResource(R.dimen.stripe_paymentsheet_primary_button_height)
+    val topPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing)
+    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+
+    AndroidView(
+        factory = { context ->
+            PrimaryButton(context).apply {
+                setAppearanceConfiguration(
+                    primaryButtonStyle = StripeTheme.primaryButtonStyle,
+                    tintList = uiState.color ?: ColorStateList.valueOf(
+                        StripeTheme.primaryButtonStyle.getBackgroundColor(context)
+                    )
+                )
+            }
+        },
+        update = { button -> button.updateUiState(uiState) },
+        modifier = modifier
+            .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+            .padding(top = topPadding)
+            .padding(horizontal = horizontalPadding)
+            .fillMaxWidth()
+            .requiredHeight(height),
+    )
+}
 
 /**
  * The primary call-to-action for a payment sheet screen.
@@ -82,8 +118,8 @@ internal class PrimaryButton @JvmOverloads constructor(
             setLabel(it.toString())
         }
 
-        isClickable = true
-        isEnabled = false
+//        isClickable = true
+//        isEnabled = false
     }
 
     fun setAppearanceConfiguration(
@@ -232,10 +268,12 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     internal data class UIState(
+        val processingState: State,
         val label: String,
         val onClick: () -> Unit,
         val enabled: Boolean,
         val lockVisible: Boolean,
+        val color: ColorStateList?,
     )
 }
 
