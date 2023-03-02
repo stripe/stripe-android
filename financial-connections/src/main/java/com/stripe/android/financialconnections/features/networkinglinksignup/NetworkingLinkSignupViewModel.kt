@@ -37,7 +37,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 internal class NetworkingLinkSignupViewModel @Inject constructor(
     initialState: NetworkingLinkSignupState,
     private val saveAccountToLink: SaveAccountToLink,
@@ -179,7 +178,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         }
 
         private const val SEARCH_DEBOUNCE_MS = 300L
-        private val PANE = Pane.NETWORKING_LINK_SIGNUP_PANE
+        internal val PANE = Pane.NETWORKING_LINK_SIGNUP_PANE
     }
 }
 

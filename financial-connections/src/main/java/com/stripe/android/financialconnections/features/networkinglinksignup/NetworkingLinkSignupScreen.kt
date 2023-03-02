@@ -39,8 +39,8 @@ import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PaneFooter
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupViewModel.Companion.PANE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.ImageResource
@@ -70,7 +70,7 @@ internal fun NetworkingLinkSignupScreen() {
     BackHandler(enabled = true) {}
     NetworkingLinkSignupContent(
         state = state.value,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onSaveToLink = viewModel::onSaveAccount,
