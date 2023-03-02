@@ -1,9 +1,6 @@
 package com.stripe.android.identity.ui
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -15,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.stripe.android.core.model.Country
@@ -31,13 +27,10 @@ import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PostalCodeConfig
-import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.SectionFieldElement
-import com.stripe.android.uicore.elements.SectionFieldElementUI
 import com.stripe.android.uicore.forms.FormFieldEntry
-import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.stripeShapes
 
 /**
  * Section to collect User's Address.
@@ -127,11 +120,13 @@ private fun AddressSectionContent(
     textIdentifiers: List<IdentifierSpec>,
     navController: NavController
 ) {
-    IdentityAddressSectionElementUI(
+    SectionElementUI(
         enabled = enabled,
         element = sectionElement,
         hiddenIdentifiers = emptySet(),
-        lastTextFieldIdentifier = textIdentifiers.lastOrNull()
+        lastTextFieldIdentifier = textIdentifiers.lastOrNull(),
+        nextFocusDirection = FocusDirection.Next,
+        previousFocusDirection = FocusDirection.Previous
     )
 
     TextButton(
@@ -146,75 +141,6 @@ private fun AddressSectionContent(
         }
     ) {
         Text(text = addressNotListedText)
-    }
-}
-
-/**
- * Similar to SectionElementUI, but uses FocusDirection.Next and FocusDirection.Previous for
- * focus directions. The City field will be skipped with default values
- */
-@Composable
-private fun IdentityAddressSectionElementUI(
-    enabled: Boolean,
-    element: SectionElement,
-    hiddenIdentifiers: Set<IdentifierSpec>,
-    lastTextFieldIdentifier: IdentifierSpec?
-) {
-    if (!hiddenIdentifiers.contains(element.identifier)) {
-        val controller = element.controller
-
-        val error by controller.error.collectAsState(null)
-        val sectionErrorString = error?.let {
-            it.formatArgs?.let { args ->
-                stringResource(
-                    it.errorMessage,
-                    *args
-                )
-            } ?: stringResource(it.errorMessage)
-        }
-
-        val elementsInsideCard = element.fields.filter {
-            !it.shouldRenderOutsideCard
-        }
-        val elementsOutsideCard = element.fields.filter {
-            it.shouldRenderOutsideCard
-        }
-
-        Section(
-            controller.label,
-            sectionErrorString,
-            contentOutsideCard = {
-                elementsOutsideCard.forEach { field ->
-                    SectionFieldElementUI(
-                        enabled,
-                        field,
-                        hiddenIdentifiers = hiddenIdentifiers,
-                        lastTextFieldIdentifier = lastTextFieldIdentifier
-                    )
-                }
-            },
-            contentInCard = {
-                elementsInsideCard.forEachIndexed { index, field ->
-                    SectionFieldElementUI(
-                        enabled,
-                        field,
-                        hiddenIdentifiers = hiddenIdentifiers,
-                        lastTextFieldIdentifier = lastTextFieldIdentifier,
-                        nextFocusDirection = FocusDirection.Next,
-                        previousFocusDirection = FocusDirection.Previous
-                    )
-                    if (index != elementsInsideCard.lastIndex) {
-                        Divider(
-                            color = MaterialTheme.stripeColors.componentDivider,
-                            thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                            modifier = Modifier.padding(
-                                horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
-                            )
-                        )
-                    }
-                }
-            }
-        )
     }
 }
 
