@@ -45,6 +45,8 @@
     <string name="data_accessible_callout_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%1$s.<annotation clickable="learn_more"> Learn more</annotation></string>
     <string name="data_accessible_callout_through_stripe"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Stripe.<annotation clickable="learn_more"> Learn more</annotation></string>
     <string name="data_accessible_callout_through_stripe_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Stripe.<annotation clickable="learn_more"> Learn more</annotation></string>
+    <string name="data_accessible_callout_through_link"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Link.<annotation clickable="learn_more"> Learn more</annotation></string>
+    <string name="data_accessible_callout_through_link_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Link.<annotation clickable="learn_more"> Learn more</annotation></string>
     <string name="data_accessible_type_accountdetails">account details</string>
     <string name="data_accessible_type_balances">balances</string>
     <string name="data_accessible_type_transactions">transactions</string>

@@ -113,6 +113,7 @@ internal class LinkedAccountPickerStates : PreviewParameterProvider<LinkAccountP
                 FinancialConnectionsAccount.Permissions.TRANSACTIONS
             ),
             isStripeDirect = true,
+            isNetworking = false,
             dataPolicyUrl = ""
         )
     }
