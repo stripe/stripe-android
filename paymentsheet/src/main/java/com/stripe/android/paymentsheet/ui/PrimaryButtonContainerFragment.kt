@@ -126,12 +126,8 @@ internal class PaymentOptionsPrimaryButtonContainerFragment : BasePrimaryButtonC
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupPrimaryButton()
 
-        viewModel.currentScreen.launchAndCollectIn(viewLifecycleOwner) { currentScreen ->
-            val visible = currentScreen.showsContinueButton ||
-                viewModel.primaryButtonUIState.value?.visible == true ||
-                viewModel.selection.value?.requiresConfirmation == true
-
-            viewBinding?.primaryButton?.isVisible = visible
+        viewModel.isPrimaryButtonVisible.launchAndCollectIn(viewLifecycleOwner) { isVisible ->
+            viewBinding?.primaryButton?.isVisible = isVisible
         }
     }
 

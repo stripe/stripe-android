@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -80,6 +81,15 @@ internal class PaymentOptionsViewModel @Inject constructor(
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
     override var newPaymentSelection = args.state.newPaymentSelection
+
+    val isPrimaryButtonVisible = combine(
+        currentScreen,
+        primaryButtonUIState,
+        selection,
+    ) { screen, uiState, selection ->
+        screen.showsContinueButton || uiState?.visible == true ||
+            selection?.requiresConfirmation == true
+    }
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (args.state.isGooglePayReady) {
