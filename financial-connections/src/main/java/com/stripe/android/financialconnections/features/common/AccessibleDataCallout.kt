@@ -230,7 +230,6 @@ internal data class AccessibleDataCalloutModel(
     val dataPolicyUrl: String
 ) {
 
-
     companion object {
         fun fromManifest(manifest: FinancialConnectionsSessionManifest): AccessibleDataCalloutModel =
             AccessibleDataCalloutModel(

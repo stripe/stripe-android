@@ -8,7 +8,8 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Click
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
@@ -49,7 +50,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             val accounts = pollNetworkedAccounts(consumerSession.clientSecret)
                 .data
                 .sortedBy { it.allowSelection.not() }
-            eventTracker.track(PaneLoaded(Pane.LINK_ACCOUNT_PICKER))
+            eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
                 stepUpAuthenticationRequired = manifest.stepUpAuthenticationRequired,
                 consumerSessionClientSecret = consumerSession.clientSecret,
@@ -65,27 +66,25 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             LinkAccountPickerState::payload,
             onFail = { error ->
                 logger.error("Error fetching payload", error)
-                eventTracker.track(Error(Pane.LINK_ACCOUNT_PICKER, error))
+                eventTracker.track(Error(PANE, error))
             },
         )
         onAsync(
             LinkAccountPickerState::selectNetworkedAccountAsync,
             onFail = { error ->
                 logger.error("Error selecting networked account", error)
-                eventTracker.track(Error(Pane.LINK_ACCOUNT_PICKER, error))
+                eventTracker.track(Error(PANE, error))
             },
         )
     }
 
     fun onLearnMoreAboutDataAccessClick() {
-        viewModelScope.launch {
-            eventTracker.track(
-                FinancialConnectionsEvent.ClickLearnMoreDataAccess(Pane.LINK_STEP_UP_VERIFICATION)
-            )
-        }
+        // navigation to learn more about data access happens within the view component.
+        viewModelScope.launch { eventTracker.track(ClickLearnMoreDataAccess(PANE)) }
     }
 
-    fun onNewBankAccountClick() {
+    fun onNewBankAccountClick() = viewModelScope.launch {
+        eventTracker.track(Click("click.new_account", PANE))
         goNext(Pane.INSTITUTION_PICKER)
     }
 
@@ -102,7 +101,8 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         Unit
     }.execute { copy(selectNetworkedAccountAsync = it) }
 
-    private fun repairAccount() {
+    private suspend fun repairAccount() {
+        eventTracker.track(Click("click.repair_accounts", PANE))
         TODO("Account repair flow not yet implemented")
     }
 
@@ -118,6 +118,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
         // Updates cached accounts with the one selected.
         updateCachedAccounts { listOf(selectedAccount) }
+        eventTracker.track(Click("click.link_accounts", PANE))
         goNext(Pane.SUCCESS)
     }
 
@@ -127,6 +128,8 @@ internal class LinkAccountPickerViewModel @Inject constructor(
 
     companion object :
         MavericksViewModelFactory<LinkAccountPickerViewModel, LinkAccountPickerState> {
+
+        internal val PANE = Pane.LINK_ACCOUNT_PICKER
 
         override fun create(
             viewModelContext: ViewModelContext,
