@@ -153,6 +153,9 @@ private fun IDNumberContent(
             label = R.string.country_of_id_number
         )
     }
+    val textIdentifiers by idNumberSectionElement.getTextFieldIdentifiers()
+        .collectAsState(initial = emptyList())
+
     LaunchedEffect(idNumberParam) {
         onIdNumberCollected(
             idNumberParam?.let {
@@ -167,7 +170,7 @@ private fun IDNumberContent(
         enabled = enabled,
         element = idNumberSectionElement,
         hiddenIdentifiers = emptySet(),
-        lastTextFieldIdentifier = null
+        lastTextFieldIdentifier = textIdentifiers.lastOrNull()
     )
 
     TextButton(
