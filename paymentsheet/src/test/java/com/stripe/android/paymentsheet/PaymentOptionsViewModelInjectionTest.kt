@@ -85,7 +85,7 @@ internal class PaymentOptionsViewModelInjectionTest : BasePaymentOptionsViewMode
                 savedSelection = SavedSelection.None,
                 config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
                 isGooglePayReady = false,
-                newPaymentSelection = null,
+                paymentSelection = null,
                 linkState = null,
             ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,

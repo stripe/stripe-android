@@ -36,13 +36,11 @@ internal object PaymentOptionsStateFactory {
 
         val currentSelectionIndex = currentSelection?.let {
             items.findSelectedPosition(it)
-        }.takeIf { it != -1 }
-
-        val initialSelectionIndex = items.findInitialSelectedPosition(initialSelection)
+        } ?: -1
 
         return PaymentOptionsState(
             items = items,
-            selectedIndex = currentSelectionIndex ?: initialSelectionIndex,
+            selectedIndex = currentSelectionIndex,
         )
     }
 

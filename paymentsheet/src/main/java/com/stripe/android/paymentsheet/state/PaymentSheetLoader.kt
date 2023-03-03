@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
@@ -156,7 +155,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 savedSelection = savedSelection.await(),
                 isGooglePayReady = isGooglePayReady,
                 linkState = linkState.await(),
-                newPaymentSelection = null,
+                paymentSelection = null,
             )
         )
     }
@@ -197,30 +196,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             return savedSelection
         }
 
-        // No saved selection has been set yet, so we'll initialize it with a default
-        // value based on which payment methods are available.
-        val paymentSelection = determineDefaultPaymentSelection(
-            isGooglePayReady,
-            isLinkReady,
-            paymentMethods
-        )
-
-        prefsRepository.savePaymentSelection(paymentSelection)
-
-        return prefsRepository.getSavedSelection(isGooglePayReady, isLinkReady)
-    }
-
-    private fun determineDefaultPaymentSelection(
-        isGooglePayReady: Boolean,
-        isLinkReady: Boolean,
-        paymentMethods: List<PaymentMethod>
-    ): PaymentSelection? {
-        return when {
-            paymentMethods.isNotEmpty() -> PaymentSelection.Saved(paymentMethods.first())
-            isLinkReady -> PaymentSelection.Link
-            isGooglePayReady -> PaymentSelection.GooglePay
-            else -> null
-        }
+        // We select the first customer payment method if we haven't retrieved a previously used
+        // payment method.
+        val paymentMethodId = paymentMethods.firstNotNullOfOrNull { it.id }
+        return paymentMethodId?.let { SavedSelection.PaymentMethod(it) } ?: SavedSelection.None
     }
 
     private suspend fun retrieveElementsSession(

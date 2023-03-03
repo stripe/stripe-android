@@ -104,7 +104,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
 
         linkHandler.linkInlineSelection.value = args.state.newPaymentSelection as? PaymentSelection.New.LinkInline
-        linkHandler.prepareLink(linkState)
+        linkHandler.setupLink(linkState)
 
         // After recovering from don't keep activities the stripe intent will be saved,
         // calling setStripeIntent would require the repository be initialized, which
@@ -115,6 +115,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.state.customerPaymentMethods
         savedStateHandle[SAVE_SAVED_SELECTION] = args.state.savedSelection
         savedStateHandle[SAVE_PROCESSING] = false
+
+        updateSelection(args.state.paymentSelection)
 
         // If we are not recovering from don't keep activities than the resources
         // repository is loaded, and we should save off the LPM repository server specs so

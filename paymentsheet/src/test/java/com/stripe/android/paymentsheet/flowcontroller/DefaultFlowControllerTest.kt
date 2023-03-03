@@ -338,7 +338,7 @@ internal class DefaultFlowControllerTest {
                 customerPaymentMethods = emptyList(),
                 config = null,
                 isGooglePayReady = false,
-                newPaymentSelection = null,
+                paymentSelection = null,
                 linkState = null,
                 savedSelection = SavedSelection.None,
             ),
@@ -516,7 +516,7 @@ internal class DefaultFlowControllerTest {
                 ),
                 isGooglePayReady = false,
                 linkState = null,
-                newPaymentSelection = null,
+                paymentSelection = null,
             )
         )
 
@@ -545,7 +545,7 @@ internal class DefaultFlowControllerTest {
                 ),
                 isGooglePayReady = false,
                 linkState = null,
-                newPaymentSelection = null,
+                paymentSelection = null,
             )
         )
 
@@ -577,7 +577,7 @@ internal class DefaultFlowControllerTest {
                 ),
                 isGooglePayReady = false,
                 linkState = null,
-                newPaymentSelection = null,
+                paymentSelection = null,
             )
         )
 

@@ -41,7 +41,7 @@ internal class FakePaymentSheetLoader(
                     savedSelection = savedSelection,
                     isGooglePayReady = isGooglePayAvailable,
                     linkState = linkState,
-                    newPaymentSelection = null,
+                    paymentSelection = null,
                 )
             )
         }

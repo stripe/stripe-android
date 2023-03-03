@@ -12,7 +12,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SELECTION
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -78,7 +77,7 @@ internal class LinkHandler @Inject constructor(
         linkLauncher.unregister()
     }
 
-    private fun setupLink(state: LinkState?) {
+    fun setupLink(state: LinkState?) {
         _isLinkEnabled.value = state != null
         _activeLinkSession.value = state?.loginState == LinkState.LoginState.LoggedIn
 
@@ -105,15 +104,6 @@ internal class LinkHandler @Inject constructor(
             null -> {
                 // Nothing to do here
             }
-        }
-    }
-
-    fun prepareLink(state: LinkState?) {
-        setupLink(state)
-
-        if (state?.isReadyForUse == true) {
-            // If account exists, select Link by default
-            savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
         }
     }
 

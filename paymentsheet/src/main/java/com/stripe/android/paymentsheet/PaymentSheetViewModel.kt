@@ -493,7 +493,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     isGooglePay = true,
                 )
 
-                savedStateHandle[SAVE_SELECTION] = newPaymentSelection
+                updateSelection(newPaymentSelection)
                 confirmPaymentSelection(newPaymentSelection)
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {

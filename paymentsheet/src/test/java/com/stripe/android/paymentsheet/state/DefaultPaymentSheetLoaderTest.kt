@@ -111,7 +111,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     customerPaymentMethods = emptyList(),
                     savedSelection = SavedSelection.Link,
                     isGooglePayReady = false,
-                    newPaymentSelection = null,
+                    paymentSelection = null,
                     linkState = LinkState(
                         configuration = LinkPaymentLauncher.Configuration(
                             stripeIntent = stripeIntent,
@@ -154,7 +154,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     customerPaymentMethods = PAYMENT_METHODS,
                     savedSelection = SavedSelection.PaymentMethod(id = "pm_123456789"),
                     isGooglePayReady = true,
-                    newPaymentSelection = null,
+                    paymentSelection = null,
                     linkState = null,
                 )
             )
@@ -183,7 +183,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     customerPaymentMethods = emptyList(),
                     savedSelection = SavedSelection.Link,
                     isGooglePayReady = true,
-                    newPaymentSelection = null,
+                    paymentSelection = null,
                     linkState = LinkState(
                         configuration = LinkPaymentLauncher.Configuration(
                             stripeIntent = stripeIntent,
@@ -236,7 +236,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     customerPaymentMethods = emptyList(),
                     savedSelection = SavedSelection.Link,
                     isGooglePayReady = false,
-                    newPaymentSelection = null,
+                    paymentSelection = null,
                     linkState = expectedLinkState,
                 )
             )
@@ -267,7 +267,7 @@ internal class DefaultPaymentSheetLoaderTest {
                         customerPaymentMethods = PAYMENT_METHODS,
                         savedSelection = SavedSelection.PaymentMethod("pm_123456789"),
                         isGooglePayReady = true,
-                        newPaymentSelection = null,
+                        paymentSelection = null,
                         linkState = null,
                     )
                 )
@@ -316,7 +316,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     PaymentSheetState.Full(
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                         expectedIntent,
-                        newPaymentSelection = null,
+                        paymentSelection = null,
                         customerPaymentMethods = emptyList(),
                         savedSelection = SavedSelection.Link,
                         isGooglePayReady = false,
@@ -363,7 +363,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     PaymentSheetState.Full(
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                         expectedIntent,
-                        newPaymentSelection = null,
+                        paymentSelection = null,
                         customerPaymentMethods = emptyList(),
                         savedSelection = SavedSelection.Link,
                         isGooglePayReady = true,

@@ -122,7 +122,7 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `Opens saved payment methods if no new payment method was previously selected`() = runTest {
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(newPaymentSelection = null)
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(paymentSelection = null)
         )
 
         viewModel.currentScreen.test {
@@ -137,7 +137,7 @@ internal class PaymentOptionsViewModelTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-                newPaymentSelection = NEW_CARD_PAYMENT_SELECTION.copy(
+                paymentSelection = NEW_CARD_PAYMENT_SELECTION.copy(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
                 ),
             )
@@ -497,7 +497,7 @@ internal class PaymentOptionsViewModelTest {
                 customerPaymentMethods = emptyList(),
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                 isGooglePayReady = true,
-                newPaymentSelection = null,
+                paymentSelection = null,
                 linkState = null,
                 savedSelection = SavedSelection.None,
             ),

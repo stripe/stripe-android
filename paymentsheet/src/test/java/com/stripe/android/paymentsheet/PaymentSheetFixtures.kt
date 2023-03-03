@@ -91,7 +91,7 @@ internal object PaymentSheetFixtures {
             customerPaymentMethods = emptyList(),
             config = CONFIG_GOOGLEPAY,
             isGooglePayReady = false,
-            newPaymentSelection = null,
+            paymentSelection = null,
             linkState = null,
             savedSelection = SavedSelection.None,
         ),
@@ -106,7 +106,7 @@ internal object PaymentSheetFixtures {
         isGooglePayReady: Boolean = state.isGooglePayReady,
         stripeIntent: StripeIntent = state.stripeIntent,
         config: PaymentSheet.Configuration? = state.config,
-        newPaymentSelection: PaymentSelection.New? = state.newPaymentSelection,
+        paymentSelection: PaymentSelection.New? = state.newPaymentSelection,
         linkState: LinkState? = state.linkState,
     ): PaymentOptionContract.Args {
         return copy(
@@ -115,7 +115,7 @@ internal object PaymentSheetFixtures {
                 isGooglePayReady = isGooglePayReady,
                 stripeIntent = stripeIntent,
                 config = config,
-                newPaymentSelection = newPaymentSelection,
+                paymentSelection = paymentSelection,
                 linkState = linkState,
             ),
         )

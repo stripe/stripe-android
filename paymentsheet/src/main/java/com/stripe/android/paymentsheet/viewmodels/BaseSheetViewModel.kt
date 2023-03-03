@@ -268,12 +268,8 @@ internal abstract class BaseSheetViewModel(
             // If the currently selected payment option has been removed, we set it to the one
             // determined in the payment options state.
             paymentOptionsState
-                .mapNotNull {
-                    it.selectedItem?.toPaymentSelection()
-                }
-                .filter {
-                    it != selection.value
-                }
+                .mapNotNull { it.selectedItem?.toPaymentSelection() }
+                .filter { it != selection.value }
                 .collect { updateSelection(it) }
         }
     }
@@ -426,7 +422,7 @@ internal abstract class BaseSheetViewModel(
             if (didRemoveSelectedItem) {
                 // Remove the current selection. The new selection will be set when we're computing
                 // the next PaymentOptionsState.
-                savedStateHandle[SAVE_SELECTION] = null
+                updateSelection(null)
             }
 
             savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value?.filter {
