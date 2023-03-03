@@ -15,7 +15,7 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
-import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
+import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -53,7 +53,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             val manifest = getManifest()
             eventTracker.track(PaneLoaded(Pane.NETWORKING_LINK_SIGNUP_PANE))
             NetworkingLinkSignupState.Payload(
-                merchantName = ConsentTextBuilder.getBusinessName(manifest),
+                merchantName = manifest.getBusinessName(),
                 emailController = EmailConfig.createController(manifest.accountholderCustomerEmailAddress),
                 phoneController = PhoneNumberController.createPhoneNumberController()
             )

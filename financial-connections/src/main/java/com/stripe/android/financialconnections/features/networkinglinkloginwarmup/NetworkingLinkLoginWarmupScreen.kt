@@ -2,7 +2,6 @@
 
 package com.stripe.android.financialconnections.features.networkinglinkloginwarmup
 
-import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.border
@@ -39,7 +38,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupState.Payload
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupViewModel.Companion.PANE
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource.StringId
@@ -54,10 +53,9 @@ internal fun NetworkingLinkLoginWarmupScreen() {
     val viewModel: NetworkingLinkLoginWarmupViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
-    BackHandler(enabled = true) {}
     NetworkingLinkLoginWarmupContent(
         state = state.value,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onContinueClick = viewModel::onContinueClick,
@@ -76,7 +74,7 @@ private fun NetworkingLinkLoginWarmupContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                showBack = false,
+                showBack = true,
                 onCloseClick = onCloseClick
             )
         }
