@@ -33,7 +33,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
-import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
+import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
@@ -189,7 +189,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     fun onCloseWithConfirmationClick(pane: Pane) = viewModelScope.launch {
         val manifest = kotlin.runCatching { getManifest() }.getOrNull()
-        val businessName = manifest?.let(ConsentTextBuilder::getBusinessName)
+        val businessName = manifest?.getBusinessName()
         val isNetworkingSignupPane =
             manifest?.isNetworkingUserFlow == true && pane == NETWORKING_LINK_SIGNUP_PANE
         val description = when {
