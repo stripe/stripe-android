@@ -114,7 +114,7 @@ internal sealed class ElementsSessionRepository {
     }
 }
 
-private fun PaymentSheet.InitializationMode.toElementsSessionParams(
+internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
     configuration: PaymentSheet.Configuration?,
 ): ElementsSessionParams {
     return when (this) {

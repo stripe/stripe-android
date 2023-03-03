@@ -73,7 +73,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
 
         runCatching {
-            retrieveElementsSession(initializationMode, paymentSheetConfiguration)
+            retrieveElementsSession(
+                initializationMode = initializationMode,
+                configuration = paymentSheetConfiguration,
+            )
         }.fold(
             onSuccess = { stripeIntent ->
                 create(
