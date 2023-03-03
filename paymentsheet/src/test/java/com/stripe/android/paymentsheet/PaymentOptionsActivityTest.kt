@@ -60,7 +60,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -109,13 +108,6 @@ internal class PaymentOptionsActivityTest {
     }
 
     private val viewModel = createViewModel()
-
-    private val primaryButtonUIState = PrimaryButton.UIState(
-        label = "Test",
-        onClick = {},
-        enabled = true,
-        visible = true
-    )
 
     private val ActivityPaymentOptionsBinding.continueButton: PrimaryButton
         get() = root.findViewById(R.id.primary_button)
@@ -293,82 +285,6 @@ internal class PaymentOptionsActivityTest {
 
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            }
-        }
-    }
-
-    @Test
-    fun `ContinueButton should be enabled when primaryButtonEnabled is true`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity { activity ->
-                viewModel.updatePrimaryButtonUIState(
-                    primaryButtonUIState.copy(
-                        enabled = true
-                    )
-                )
-                assertThat(activity.viewBinding.continueButton.isEnabled).isTrue()
-            }
-        }
-    }
-
-    @Test
-    fun `ContinueButton should be disabled when primaryButtonEnabled is false`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity { activity ->
-                viewModel.updatePrimaryButtonUIState(
-                    primaryButtonUIState.copy(
-                        enabled = false
-                    )
-                )
-                assertThat(activity.viewBinding.continueButton.isEnabled).isFalse()
-            }
-        }
-    }
-
-    @Test
-    fun `ContinueButton text should update when primaryButtonText updates`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity { activity ->
-                viewModel.updatePrimaryButtonUIState(
-                    primaryButtonUIState.copy(
-                        label = "Some text"
-                    )
-                )
-                assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Some text")
-            }
-        }
-    }
-
-    @Test
-    fun `ContinueButton should go back to initial state after updating selection`() {
-        Dispatchers.setMain(testDispatcher)
-
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity { activity ->
-                viewModel.updatePrimaryButtonUIState(
-                    primaryButtonUIState.copy(
-                        label = "Some text",
-                        enabled = false
-                    )
-                )
-                assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Some text")
-                assertThat(activity.viewBinding.continueButton.isEnabled).isFalse()
-
-                viewModel.updateSelection(mock<PaymentSelection.New.Card>())
-                assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Continue")
-                assertThat(activity.viewBinding.continueButton.isEnabled).isTrue()
             }
         }
     }

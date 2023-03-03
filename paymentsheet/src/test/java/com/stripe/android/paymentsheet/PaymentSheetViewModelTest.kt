@@ -112,13 +112,6 @@ internal class PaymentSheetViewModelTest {
         on { getAccountStatusFlow(any()) } doReturn flowOf(AccountStatus.SignedOut)
     }
 
-    private val primaryButtonUIState = PrimaryButton.UIState(
-        label = "Test",
-        onClick = {},
-        enabled = true,
-        visible = true
-    )
-
     @BeforeTest
     fun setup() {
         MockitoAnnotations.openMocks(this)
@@ -645,64 +638,6 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP)
         assertThat(viewModel.googlePayLauncherConfig)
             .isNotNull()
-    }
-
-    @Test
-    fun `buyButton is enabled when primaryButtonEnabled is true, else not processing, not editing, and a selection has been made`() = runTest(testDispatcher) {
-        val viewModel = createViewModel()
-
-        viewModel.isPrimaryButtonEnabled.test {
-            assertThat(awaitItem()).isFalse()
-
-            viewModel.savedStateHandle[SAVE_PROCESSING] = false
-            viewModel.updateSelection(PaymentSelection.GooglePay)
-            assertThat(awaitItem()).isTrue()
-
-            viewModel.updateSelection(null)
-            assertThat(awaitItem()).isFalse()
-
-            viewModel.updateSelection(PaymentSelection.GooglePay)
-            assertThat(awaitItem()).isTrue()
-
-            viewModel.updatePrimaryButtonUIState(primaryButtonUIState.copy(enabled = false))
-            assertThat(awaitItem()).isFalse()
-
-            viewModel.updatePrimaryButtonUIState(primaryButtonUIState.copy(enabled = true))
-            assertThat(awaitItem()).isTrue()
-
-            viewModel.savedStateHandle[SAVE_PROCESSING] = true
-            assertThat(awaitItem()).isFalse()
-
-            viewModel.savedStateHandle[SAVE_PROCESSING] = false
-            assertThat(awaitItem()).isTrue()
-
-            viewModel.toggleEditing()
-            assertThat(awaitItem()).isFalse()
-
-            viewModel.toggleEditing()
-            assertThat(awaitItem()).isTrue()
-        }
-    }
-
-    @Test
-    fun `buttonsEnabled should be true when not processing and not editing`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.buttonsEnabled.test {
-            assertThat(awaitItem()).isTrue()
-
-            viewModel.toggleEditing()
-            assertThat(awaitItem()).isFalse()
-
-            viewModel.toggleEditing()
-            assertThat(awaitItem()).isTrue()
-
-            viewModel.savedStateHandle[SAVE_PROCESSING] = true
-            assertThat(awaitItem()).isFalse()
-
-            viewModel.savedStateHandle[SAVE_PROCESSING] = false
-            assertThat(awaitItem()).isTrue()
-        }
     }
 
     @Test
@@ -1262,6 +1197,22 @@ internal class PaymentSheetViewModelTest {
         viewModel.walletsContainerState.test {
             val textResource = awaitItem().dividerTextResource
             assertThat(textResource).isEqualTo(R.string.stripe_paymentsheet_or_pay_using)
+        }
+    }
+
+    @Test
+    fun `Shows processing state when paying inline with Link`() = runTest {
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.LoggedOut,
+            )
+        )
+
+        viewModel.processing.test {
+            assertThat(awaitItem()).isFalse()
+            viewModel.payWithLinkInline(userInput = null)
+            assertThat(awaitItem()).isTrue()
         }
     }
 

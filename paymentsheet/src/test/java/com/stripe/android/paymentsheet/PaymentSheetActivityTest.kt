@@ -153,13 +153,6 @@ internal class PaymentSheetActivityTest {
         )
     )
 
-    private val primaryButtonUIState = PrimaryButton.UIState(
-        label = "Test",
-        onClick = {},
-        enabled = true,
-        visible = true
-    )
-
     @BeforeTest
     fun before() {
         viewModel = createViewModel()
@@ -775,69 +768,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Buy button should be enabled when primaryButtonEnabled is true`() {
-        val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
-            viewModel.updatePrimaryButtonUIState(
-                primaryButtonUIState.copy(
-                    enabled = true
-                )
-            )
-            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
-        }
-    }
-
-    @Test
-    fun `Buy button should be disabled when primaryButtonEnabled is false`() {
-        val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
-            viewModel.updatePrimaryButtonUIState(
-                primaryButtonUIState.copy(
-                    enabled = false
-                )
-            )
-            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
-        }
-    }
-
-    @Test
-    fun `Buy button text should update when primaryButtonText updates`() {
-        val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
-            viewModel.updatePrimaryButtonUIState(
-                primaryButtonUIState.copy(
-                    label = "Some text"
-                )
-            )
-            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
-        }
-    }
-
-    @Test
-    fun `Buy button should go back to initial state after resetPrimaryButton called`() {
-        Dispatchers.setMain(testDispatcher)
-
-        val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
-            viewModel.viewState.value = PaymentSheetViewState.Reset(null)
-
-            viewModel.updatePrimaryButtonUIState(
-                primaryButtonUIState.copy(
-                    label = "Some text",
-                    enabled = false
-                )
-            )
-            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
-            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
-
-            viewModel.updatePrimaryButtonUIState(null)
-            assertThat(activity.viewBinding.buyButton.externalLabel)
-                .isEqualTo(viewModel.amount.value?.buildPayButtonLabel(context.resources))
-            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
-        }
-    }
-
-    @Test
     fun `notes visibility is visible`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
@@ -989,7 +919,7 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity { activity ->
             testDispatcher.scheduler.advanceTimeBy(50)
-            assertThat(activity.viewBinding.buyButton.externalLabel).isNull()
+            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Pay")
             testDispatcher.scheduler.advanceTimeBy(250)
             assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Pay CA\$99.99")
         }
