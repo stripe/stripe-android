@@ -1,6 +1,7 @@
 package com.stripe.android.identity.ui
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -180,7 +181,10 @@ private fun IDNumberContent(
             )
         }
     ) {
-        Text(text = countryNotListedText)
+        Text(
+            text = countryNotListedText,
+            style = MaterialTheme.typography.h6
+        )
     }
 }
 
