@@ -294,7 +294,7 @@ internal class DefaultFlowControllerTest {
         paymentSheetLoader.updatePaymentMethods(emptyList())
 
         flowController.configureWithPaymentIntent(
-            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.DIFFERENT_CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_MINIMUM
         ) { _, _ ->
         }
