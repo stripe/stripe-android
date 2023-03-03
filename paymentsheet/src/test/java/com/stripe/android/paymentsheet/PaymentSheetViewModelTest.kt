@@ -14,6 +14,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.interceptor.IntentConfirmationInterceptor
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.Address
@@ -51,7 +52,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
-import com.stripe.android.utils.FakeDeferredIntentRepository
+import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.Dispatchers
@@ -86,7 +87,7 @@ internal class PaymentSheetViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
-    private val deferredIntentRepository = FakeDeferredIntentRepository()
+    private val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
     private val lpmRepository = LpmRepository(
@@ -160,15 +161,22 @@ internal class PaymentSheetViewModelTest {
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
-        verify(viewModel).confirmStripeIntent(
-            ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                requireNotNull(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
-                CLIENT_SECRET,
-                paymentMethodOptions = PaymentMethodOptionsParams.Card(
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                )
+
+        val params = ConfirmPaymentIntentParams.createWithPaymentMethodId(
+            requireNotNull(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
+            CLIENT_SECRET,
+            paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
             )
         )
+
+        intentConfirmationInterceptor.emitNextStep(
+            IntentConfirmationInterceptor.NextStep.Confirm(
+                confirmStripeIntentParams = params
+            )
+        )
+
+        verify(viewModel).confirmStripeIntent(params)
     }
 
     @Test
@@ -177,18 +185,25 @@ internal class PaymentSheetViewModelTest {
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
-        verify(viewModel).confirmStripeIntent(
-            ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                requireNotNull(PaymentMethodFixtures.US_BANK_ACCOUNT.id),
-                CLIENT_SECRET,
-                paymentMethodOptions = PaymentMethodOptionsParams.USBankAccount(
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                ),
-                mandateData = MandateDataParams(
-                    type = MandateDataParams.Type.Online.DEFAULT
-                )
+
+        val params = ConfirmPaymentIntentParams.createWithPaymentMethodId(
+            requireNotNull(PaymentMethodFixtures.US_BANK_ACCOUNT.id),
+            CLIENT_SECRET,
+            paymentMethodOptions = PaymentMethodOptionsParams.USBankAccount(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            mandateData = MandateDataParams(
+                type = MandateDataParams.Type.Online.DEFAULT
             )
         )
+
+        intentConfirmationInterceptor.emitNextStep(
+            IntentConfirmationInterceptor.NextStep.Confirm(
+                confirmStripeIntentParams = params
+            )
+        )
+
+        verify(viewModel).confirmStripeIntent(params)
     }
 
     @Test
@@ -201,6 +216,13 @@ internal class PaymentSheetViewModelTest {
         val paymentSelection = PaymentSelection.Saved(SEPA_DEBIT_PAYMENT_METHOD)
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
+
+        intentConfirmationInterceptor.emitNextStep(
+            IntentConfirmationInterceptor.NextStep.Confirm(
+                confirmStripeIntentParams = mock<ConfirmSetupIntentParams>()
+            )
+        )
+
         verify(viewModel).confirmStripeIntent(any<ConfirmSetupIntentParams>())
     }
 
@@ -214,15 +236,22 @@ internal class PaymentSheetViewModelTest {
         )
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
-        verify(viewModel).confirmStripeIntent(
-            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                CLIENT_SECRET,
-                paymentMethodOptions = PaymentMethodOptionsParams.Card(
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                )
+
+        val params = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CLIENT_SECRET,
+            paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
             )
         )
+
+        intentConfirmationInterceptor.emitNextStep(
+            IntentConfirmationInterceptor.NextStep.Confirm(
+                confirmStripeIntentParams = params
+            )
+        )
+
+        verify(viewModel).confirmStripeIntent(params)
     }
 
     @Test
@@ -248,21 +277,28 @@ internal class PaymentSheetViewModelTest {
         )
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
-        verify(viewModel).confirmStripeIntent(
-            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                CLIENT_SECRET,
-                paymentMethodOptions = PaymentMethodOptionsParams.Card(
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+
+        val params = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CLIENT_SECRET,
+            paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            shipping = ConfirmPaymentIntentParams.Shipping(
+                address = Address(
+                    country = "US"
                 ),
-                shipping = ConfirmPaymentIntentParams.Shipping(
-                    address = Address(
-                        country = "US"
-                    ),
-                    name = "Test Name"
-                )
+                name = "Test Name"
             )
         )
+
+        intentConfirmationInterceptor.emitNextStep(
+            IntentConfirmationInterceptor.NextStep.Confirm(
+                confirmStripeIntentParams = params
+            )
+        )
+
+        verify(viewModel).confirmStripeIntent(params)
     }
 
     @Test
@@ -301,10 +337,9 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewStateTurbine.awaitItem())
             .isInstanceOf(PaymentSheetViewState.StartProcessing::class.java)
 
-        deferredIntentRepository.emitResult(
-            DeferredIntentRepository.Result.Success(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-                isConfirmed = false
+        intentConfirmationInterceptor.emitNextStep(
+            IntentConfirmationInterceptor.NextStep.Confirm(
+                confirmStripeIntentParams = mock()
             )
         )
 
@@ -350,11 +385,8 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewStateTurbine.awaitItem())
             .isEqualTo(PaymentSheetViewState.StartProcessing)
 
-        deferredIntentRepository.emitResult(
-            DeferredIntentRepository.Result.Success(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-                isConfirmed = true
-            )
+        intentConfirmationInterceptor.emitNextStep(
+            IntentConfirmationInterceptor.NextStep.Complete
         )
 
         verify(viewModel, never()).confirmStripeIntent(any())
@@ -763,8 +795,6 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.isPrimaryButtonEnabled.test {
-            assertThat(awaitItem()).isFalse()
-
             viewModel.savedStateHandle[SAVE_PROCESSING] = false
             viewModel.updateSelection(PaymentSelection.GooglePay)
             assertThat(awaitItem()).isTrue()
@@ -899,6 +929,7 @@ internal class PaymentSheetViewModelTest {
     fun `Resets selection correctly after cancelling Google Pay`() = runTest {
         val viewModel = createViewModel()
 
+        // New valid card
         val initialSelection = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             CardBrand.Visa,
@@ -906,8 +937,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.selection.test {
-            // New valid card
-            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isNotNull()
             viewModel.updateSelection(initialSelection)
             viewModel.transitionToAddPaymentScreen()
             assertThat(awaitItem()).isEqualTo(initialSelection)
@@ -1264,12 +1294,12 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.selection.test {
+            assertThat(awaitItem()).isNotNull()
             val newSelection = PaymentSelection.New.Card(
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 CardBrand.Visa,
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
             )
-            assertThat(awaitItem()).isNull()
             viewModel.updateSelection(newSelection)
             assertThat(awaitItem())
                 .isEqualTo(newSelection)
@@ -1282,10 +1312,12 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.selection.test {
+            assertThat(awaitItem()).isNotNull()
             val savedSelection = PaymentSelection.Saved(
-                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                    id = "other saved card"
+                )
             )
-            assertThat(awaitItem()).isNull()
             viewModel.updateSelection(savedSelection)
             assertThat(awaitItem()).isEqualTo(savedSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(null)
@@ -1417,7 +1449,7 @@ internal class PaymentSheetViewModelTest {
                 DUMMY_INJECTOR_KEY,
                 savedStateHandle = savedStateHandle,
                 linkHandler,
-                deferredIntentRepository
+                intentConfirmationInterceptor
             )
         }
     }

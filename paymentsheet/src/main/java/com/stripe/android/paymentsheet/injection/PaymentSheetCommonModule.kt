@@ -7,11 +7,11 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.interceptor.DefaultIntentConfirmationInterceptor
+import com.stripe.android.interceptor.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.BuildConfig
-import com.stripe.android.paymentsheet.DefaultDeferredIntentRepository
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.DeferredIntentRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -47,9 +47,9 @@ internal abstract class PaymentSheetCommonModule {
     ): ElementsSessionRepository
 
     @Binds
-    abstract fun bindsDeferredIntentRepository(
-        impl: DefaultDeferredIntentRepository
-    ): DeferredIntentRepository
+    abstract fun bindIntentConfirmationInterceptor(
+        intentConfirmationInterceptor: DefaultIntentConfirmationInterceptor
+    ): IntentConfirmationInterceptor
 
     @Binds
     abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentSheetLoader): PaymentSheetLoader

@@ -8,6 +8,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -20,10 +21,14 @@ import javax.inject.Named
 interface IntentConfirmationInterceptor {
     sealed interface NextStep {
         data class Fail(val error: String) : NextStep
+
         data class Confirm(
             val confirmStripeIntentParams: ConfirmStripeIntentParams
         ) : NextStep
+
         object Complete : NextStep
+
+        data class HandleNextAction(val clientSecret: String) : NextStep
     }
 
     suspend fun intercept(
@@ -118,8 +123,8 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 is ConfirmCallbackForServerSideConfirmation -> {
                     handleServerSideConfirmation(
                         confirmCallback = confirmCallback,
-                        // TODO(jameswoo) pass shouldSavePaymentMethod
-                        shouldSavePaymentMethod = false,
+                        // TODO(jameswoo) confirm if this is correct
+                        shouldSavePaymentMethod = setupForFutureUsage == OffSession,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues
                     )
@@ -173,6 +178,10 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 // TODO(jameswoo) What do we do if the intent is in a failed state?
                 if (stripeIntentValidator.isConfirmed(intent)) {
                     IntentConfirmationInterceptor.NextStep.Complete
+                } else if (stripeIntentValidator.requiresNextAction(intent)) {
+                    IntentConfirmationInterceptor.NextStep.HandleNextAction(
+                        clientSecret = result.clientSecret
+                    )
                 } else {
                     IntentConfirmationInterceptor.NextStep.Confirm(
                         ConfirmStripeIntentParamsFactory.createFactory(

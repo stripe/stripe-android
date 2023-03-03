@@ -23,8 +23,10 @@ import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.address.toConfirmPaymentIntentShipping
@@ -177,6 +179,30 @@ internal class WalletViewModel @Inject constructor(
                 }
                 is IntentConfirmationInterceptor.NextStep.Fail -> {
                     onError(ErrorMessage.Raw(nextStep.error))
+                }
+                is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
+                    when (stripeIntent) {
+                        is PaymentIntent -> {
+                            confirmationManager.handleNextActionForPaymentIntent(
+                                clientSecret = nextStep.clientSecret,
+                            ) { result ->
+                                result.fold(
+                                    onSuccess = ::handleConfirmPaymentSuccess,
+                                    onFailure = ::onError
+                                )
+                            }
+                        }
+                        is SetupIntent -> {
+                            confirmationManager.handleNextActionForSetupIntent(
+                                clientSecret = nextStep.clientSecret,
+                            ) { result ->
+                                result.fold(
+                                    onSuccess = ::handleConfirmPaymentSuccess,
+                                    onFailure = ::onError
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

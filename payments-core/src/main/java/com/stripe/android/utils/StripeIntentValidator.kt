@@ -69,4 +69,9 @@ class StripeIntentValidator @Inject constructor() {
             }
         }
     }
+
+    @JvmSynthetic
+    fun requiresNextAction(stripeIntent: StripeIntent): Boolean {
+        return stripeIntent.status == StripeIntent.Status.RequiresAction
+    }
 }

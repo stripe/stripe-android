@@ -10,7 +10,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ConfirmCallback
-import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.Injectable
@@ -21,6 +20,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.interceptor.IntentConfirmationInterceptor
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -32,7 +32,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.DeferredIntentRepository
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -46,14 +45,12 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.model.create
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.utils.intercept
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -73,14 +70,13 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
-    private val confirmCallback: ConfirmCallback?,
     activityResultCaller: ActivityResultCaller,
     @InjectorKey private val injectorKey: String,
     // Properties provided through injection
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
-    private val deferredIntentRepository: DeferredIntentRepository,
+    private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     /**
      * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
      * stripeAccountId after creating a [DefaultFlowController].
@@ -273,58 +269,45 @@ internal class DefaultFlowController @Inject internal constructor(
             val mode = viewModel.initializationMode ?: return@launch
 
             val clientSecret = when (mode) {
-                is PaymentSheet.InitializationMode.PaymentIntent -> {
-                    PaymentIntentClientSecret(mode.clientSecret)
-                }
-                is PaymentSheet.InitializationMode.SetupIntent -> {
-                    SetupIntentClientSecret(mode.clientSecret)
-                }
-                is PaymentSheet.InitializationMode.DeferredIntent -> {
-                    when (
-                        val result = deferredIntentRepository.get(
-                            config = viewModel.state?.config,
-                            paymentSelection = paymentSelection,
-                            initializationMode = mode,
-                            confirmCallback = confirmCallback
-                        )
-                    ) {
-                        is DeferredIntentRepository.Result.Error -> {
-                            onPaymentResult(
-                                PaymentResult.Failed(IllegalStateException(result.error))
-                            )
-                            return@launch
-                        }
-                        is DeferredIntentRepository.Result.Success -> {
-                            if (result.isConfirmed) {
-                                onPaymentResult(PaymentResult.Completed)
-                                return@launch
-                            }
-                            result.clientSecret
-                        }
-                    }
-                }
+                is PaymentSheet.InitializationMode.DeferredIntent -> null
+                is PaymentSheet.InitializationMode.PaymentIntent -> mode.clientSecret
+                is PaymentSheet.InitializationMode.SetupIntent -> mode.clientSecret
             }
 
-            val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-                clientSecret = clientSecret.value,
-                shipping = state.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
+            val nextStep = intentConfirmationInterceptor.intercept(
+                clientSecret = clientSecret,
+                paymentSelection = paymentSelection,
+                shippingValues =
+                    state.config?.shippingDetails?.toConfirmPaymentIntentShipping()
             )
 
-            when (paymentSelection) {
-                is PaymentSelection.Saved -> {
-                    confirmParamsFactory.create(paymentSelection)
+            when (nextStep) {
+                is IntentConfirmationInterceptor.NextStep.Complete -> {
+                    onPaymentResult(PaymentResult.Completed)
+                    return@launch
                 }
-                is PaymentSelection.New -> {
-                    confirmParamsFactory.create(paymentSelection)
-                }
-                else -> null
-            }?.let { confirmParams ->
-                when (confirmParams) {
-                    is ConfirmPaymentIntentParams -> {
-                        paymentLauncher?.confirm(confirmParams)
+                is IntentConfirmationInterceptor.NextStep.Confirm -> {
+                    when (val params = nextStep.confirmStripeIntentParams) {
+                        is ConfirmPaymentIntentParams -> paymentLauncher?.confirm(params)
+                        is ConfirmSetupIntentParams -> paymentLauncher?.confirm(params)
                     }
-                    is ConfirmSetupIntentParams -> {
-                        paymentLauncher?.confirm(confirmParams)
+
+                }
+                is IntentConfirmationInterceptor.NextStep.Fail -> {
+                    onPaymentResult(
+                        PaymentResult.Failed(IllegalStateException(nextStep.error))
+                    )
+                    return@launch
+                }
+                is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
+                    if (mode.isProcessingPayment) {
+                        paymentLauncher?.handleNextActionForPaymentIntent(
+                            clientSecret = nextStep.clientSecret
+                        )
+                    } else {
+                        paymentLauncher?.handleNextActionForPaymentIntent(
+                            clientSecret = nextStep.clientSecret
+                        )
                     }
                 }
             }
