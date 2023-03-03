@@ -11,7 +11,7 @@ configurations {
 android {
     defaultConfig {
         applicationId "com.stripe.android.identity.example"
-        versionCode 12
+        versionCode 13
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
