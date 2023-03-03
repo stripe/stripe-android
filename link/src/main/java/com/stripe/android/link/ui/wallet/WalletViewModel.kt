@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.wallet
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.NonFallbackInjector
@@ -11,7 +12,6 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason.PayAnotherWay
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
@@ -182,7 +182,7 @@ internal class WalletViewModel @Inject constructor(
         linkAccount: LinkAccount
     ): ConfirmStripeIntentParams {
         val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-            stripeIntent = stripeIntent,
+            clientSecret = requireNotNull(stripeIntent.clientSecret),
             shipping = args.shippingValues?.toConfirmPaymentIntentShipping()
         )
 
@@ -193,13 +193,13 @@ internal class WalletViewModel @Inject constructor(
             null
         }
 
-        val params = paramsFactory.createPaymentMethodCreateParams(
+        val params = PaymentMethodCreateParams.createLink(
+            paymentDetailsId = selectedPaymentDetails.id,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            selectedPaymentDetails = selectedPaymentDetails,
             extraParams = extraParams
         )
 
-        return paramsFactory.createConfirmStripeIntentParams(params)
+        return paramsFactory.create(params)
     }
 
     private fun handleConfirmPaymentSuccess(paymentResult: PaymentResult) {

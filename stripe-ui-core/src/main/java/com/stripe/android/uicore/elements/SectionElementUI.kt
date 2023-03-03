@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.stripeColors
@@ -21,7 +22,9 @@ fun SectionElementUI(
     enabled: Boolean,
     element: SectionElement,
     hiddenIdentifiers: Set<IdentifierSpec>,
-    lastTextFieldIdentifier: IdentifierSpec?
+    lastTextFieldIdentifier: IdentifierSpec?,
+    nextFocusDirection: FocusDirection = FocusDirection.Down,
+    previousFocusDirection: FocusDirection = FocusDirection.Up
 ) {
     if (!hiddenIdentifiers.contains(element.identifier)) {
         val controller = element.controller
@@ -52,7 +55,9 @@ fun SectionElementUI(
                         enabled,
                         field,
                         hiddenIdentifiers = hiddenIdentifiers,
-                        lastTextFieldIdentifier = lastTextFieldIdentifier
+                        lastTextFieldIdentifier = lastTextFieldIdentifier,
+                        nextFocusDirection = nextFocusDirection,
+                        previousFocusDirection = previousFocusDirection
                     )
                 }
             },
@@ -62,7 +67,9 @@ fun SectionElementUI(
                         enabled,
                         field,
                         hiddenIdentifiers = hiddenIdentifiers,
-                        lastTextFieldIdentifier = lastTextFieldIdentifier
+                        lastTextFieldIdentifier = lastTextFieldIdentifier,
+                        nextFocusDirection = nextFocusDirection,
+                        previousFocusDirection = previousFocusDirection
                     )
                     if (index != elementsInsideCard.lastIndex) {
                         Divider(

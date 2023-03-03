@@ -1,28 +1,63 @@
 package com.stripe.android.paymentsheet.model
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 internal sealed class PaymentSelection : Parcelable {
-    @Parcelize
-    object GooglePay : PaymentSelection()
+
+    abstract val requiresConfirmation: Boolean
+    abstract fun mandateText(context: Context): String?
 
     @Parcelize
-    object Link : PaymentSelection()
+    object GooglePay : PaymentSelection() {
+
+        override val requiresConfirmation: Boolean
+            get() = false
+
+        override fun mandateText(context: Context): String? {
+            return null
+        }
+    }
+
+    @Parcelize
+    object Link : PaymentSelection() {
+
+        override val requiresConfirmation: Boolean
+            get() = false
+
+        override fun mandateText(context: Context): String? {
+            return null
+        }
+    }
 
     @Parcelize
     data class Saved(
         val paymentMethod: PaymentMethod,
         internal val isGooglePay: Boolean = false
-    ) : PaymentSelection()
+    ) : PaymentSelection() {
+
+        override val requiresConfirmation: Boolean
+            get() = paymentMethod.type == USBankAccount
+
+        override fun mandateText(context: Context): String? {
+            return if (paymentMethod.type == USBankAccount) {
+                ACHText.getContinueMandateText(context)
+            } else {
+                null
+            }
+        }
+    }
 
     enum class CustomerRequestedSave {
         RequestReuse,
@@ -31,8 +66,16 @@ internal sealed class PaymentSelection : Parcelable {
     }
 
     sealed class New : PaymentSelection() {
+
         abstract val paymentMethodCreateParams: PaymentMethodCreateParams
         abstract val customerRequestedSave: CustomerRequestedSave
+
+        override val requiresConfirmation: Boolean
+            get() = false
+
+        override fun mandateText(context: Context): String? {
+            return null
+        }
 
         @Parcelize
         data class Card(

@@ -10,6 +10,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -20,11 +21,15 @@ import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.RequiredInternationalAddress
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.address.transformToElementList
+import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PostalCodeConfig
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
+import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 
 /**
@@ -39,22 +44,39 @@ internal fun AddressSection(
     navController: NavController,
     onAddressCollected: (Resource<RequiredInternationalAddress>) -> Unit
 ) {
-    val addressElement = remember {
-        AddressElement(
-            _identifier = IdentifierSpec.Generic(ADDRESS_SPEC),
-            addressRepository = identityViewModel.addressRepository,
-            countryCodes = addressCountries.map { it.code.value }.toSet(),
-            rawValuesMap = EMPTY_ADDRESS_MAP,
-            sameAsShippingElement = null,
-            shippingValuesMap = null
+    val controller = remember {
+        DropdownFieldController(
+            CountryConfig(
+                onlyShowCountryCodes = addressCountries.map { it.code.value }.toSet(),
+                disableDropdownWithSingleElement = true
+            )
         )
     }
-
-    val formFieldValue by addressElement.getFormFieldValueFlow().collectAsState(emptyList())
-
+    val selectedCountryCode by controller.rawFieldValue.collectAsState(addressCountries[0].code.value)
+    val addressDetailSectionElements = remember(selectedCountryCode) {
+        requireNotNull(
+            identityViewModel.addressSchemaRepository
+                .getSchema(selectedCountryCode)
+        ).transformToElementList(
+            requireNotNull(selectedCountryCode)
+        )
+    }
+    val countryElement = remember { CountryElement(IdentifierSpec.Country, controller) }
+    val sectionList = remember(selectedCountryCode) {
+        mutableListOf<SectionFieldElement>(countryElement).also {
+            it.addAll(addressDetailSectionElements)
+        }
+    }
+    val sectionElement = remember(selectedCountryCode) {
+        SectionElement.wrap(sectionList, R.string.address_label_address)
+    }
+    val formFieldValues by sectionElement.getFormFieldValueFlow()
+        .collectAsState(initial = emptyList())
+    val textIdentifiers by sectionElement.getTextFieldIdentifiers()
+        .collectAsState(initial = emptyList())
     val currentAddress: RequiredInternationalAddress? by remember {
         derivedStateOf {
-            val addressMap = formFieldValue.toMap()
+            val addressMap = formFieldValues.toMap()
             if (isValidAddress(addressMap)) {
                 RequiredInternationalAddress(
                     line1 = addressMap[IdentifierSpec.Line1]?.value!!,
@@ -63,7 +85,7 @@ internal fun AddressSection(
                     },
                     city = addressMap[IdentifierSpec.City]?.value!!,
                     postalCode = addressMap[IdentifierSpec.PostalCode]?.value!!,
-                    state = addressMap[IdentifierSpec.State]?.value!!,
+                    state = addressMap[IdentifierSpec.State]?.value,
                     country = addressMap[IdentifierSpec.Country]?.value!!,
                 )
             } else {
@@ -82,51 +104,31 @@ internal fun AddressSection(
         )
     }
     AddressSectionContent(
-        enabled = enabled,
-        navController = navController,
-        addressElement = addressElement,
-        addressNotListedText = addressNotListedText
+        enabled,
+        addressNotListedText,
+        sectionElement,
+        textIdentifiers,
+        navController
     )
-}
-
-private fun isValidAddress(addressMap: Map<IdentifierSpec, FormFieldEntry>): Boolean {
-    if (listOf(
-            IdentifierSpec.Line1,
-            IdentifierSpec.City,
-            IdentifierSpec.PostalCode,
-            IdentifierSpec.State,
-            IdentifierSpec.Country
-        ).firstOrNull {
-            addressMap[it]?.value.isNullOrBlank()
-        } != null
-    ) {
-        return false
-    }
-
-    val country = requireNotNull(addressMap[IdentifierSpec.Country]?.value)
-    val postal = requireNotNull(addressMap[IdentifierSpec.PostalCode]?.value)
-    return when (val format = PostalCodeConfig.CountryPostalFormat.forCountry(country)) {
-        is PostalCodeConfig.CountryPostalFormat.Other -> postal.isNotBlank()
-        else -> {
-            postal.length in format.minimumLength..format.maximumLength &&
-                postal.matches(format.regexPattern)
-        }
-    }
 }
 
 @Composable
 private fun AddressSectionContent(
     enabled: Boolean,
-    navController: NavController,
-    addressElement: AddressElement,
-    addressNotListedText: String
+    addressNotListedText: String,
+    sectionElement: SectionElement,
+    textIdentifiers: List<IdentifierSpec>,
+    navController: NavController
 ) {
     SectionElementUI(
         enabled = enabled,
-        element = SectionElement.wrap(addressElement, label = R.string.address_label_address),
+        element = sectionElement,
         hiddenIdentifiers = emptySet(),
-        lastTextFieldIdentifier = null
+        lastTextFieldIdentifier = textIdentifiers.lastOrNull(),
+        nextFocusDirection = FocusDirection.Next,
+        previousFocusDirection = FocusDirection.Previous
     )
+
     TextButton(
         modifier = Modifier.testTag(ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TAG),
         contentPadding = PaddingValues(horizontal = 0.dp),
@@ -142,15 +144,32 @@ private fun AddressSectionContent(
     }
 }
 
-internal const val ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TAG = "IdNumberSectionCountryNotListed"
-internal const val ADDRESS_SPEC = "AddressSpec"
+private fun isValidAddress(addressMap: Map<IdentifierSpec, FormFieldEntry>): Boolean {
+    addressMap.forEach { (spec, entry) ->
+        if (REQUIRED_FIELDS.contains(spec) && entry.value.isNullOrBlank()) {
+            return false
+        }
+    }
+    val country = addressMap[IdentifierSpec.Country]?.value
+    val postal = addressMap[IdentifierSpec.PostalCode]?.value
+    if (country == null || postal == null) {
+        return false
+    }
+    return when (val format = PostalCodeConfig.CountryPostalFormat.forCountry(country)) {
+        is PostalCodeConfig.CountryPostalFormat.Other -> postal.isNotBlank()
+        else -> {
+            postal.length in format.minimumLength..format.maximumLength &&
+                postal.matches(format.regexPattern)
+        }
+    }
+}
 
-// Initial empty address provided to AddressElement to clean the cached values from global singleton.
-private val EMPTY_ADDRESS_MAP = mapOf(
-    IdentifierSpec.Line1 to "",
-    IdentifierSpec.Line2 to "",
-    IdentifierSpec.City to "",
-    IdentifierSpec.PostalCode to "",
-    IdentifierSpec.State to "",
-    IdentifierSpec.Country to "",
+private val REQUIRED_FIELDS = listOf(
+    IdentifierSpec.Line1,
+    IdentifierSpec.City,
+    IdentifierSpec.PostalCode,
+    IdentifierSpec.State,
+    IdentifierSpec.Country
 )
+
+internal const val ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TAG = "IdNumberSectionCountryNotListed"

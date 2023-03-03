@@ -20,7 +20,8 @@ internal object PaymentSheetFixtures {
         get() = "#121212".toColorInt()
 
     internal const val MERCHANT_DISPLAY_NAME = "Merchant, Inc."
-    internal const val CLIENT_SECRET = "client_secret"
+    internal const val CLIENT_SECRET = "pi_1234_secret_1234"
+    internal const val DIFFERENT_CLIENT_SECRET = "pi_4321_secret_4321"
 
     internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(
         CLIENT_SECRET
@@ -122,7 +123,7 @@ internal object PaymentSheetFixtures {
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         get() = PaymentSheetContractV2.Args(
-            initializationMode = PaymentSheet.InitializationMode.SetupIntent(CLIENT_SECRET),
+            initializationMode = PaymentSheet.InitializationMode.SetupIntent("seti_1234_secret_1234"),
             CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             STATUS_BAR_COLOR
         )

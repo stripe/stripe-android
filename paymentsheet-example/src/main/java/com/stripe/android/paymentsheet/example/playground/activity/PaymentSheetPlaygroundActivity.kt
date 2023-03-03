@@ -468,16 +468,11 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 }
             }
 
-            val initMode = PaymentSheet.InitializationMode.DeferredIntent(
+            paymentSheet.presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = mode,
-                    customer = viewModel.customerConfig.value?.id,
                     paymentMethodTypes = viewModel.paymentMethodTypes.value,
-                )
-            )
-
-            paymentSheet.present(
-                mode = initMode,
+                ),
                 configuration = makeConfiguration(),
             )
         }
@@ -550,17 +545,19 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         if (viewModel.initializationType.value == InitializationType.Normal) {
             val clientSecret = viewModel.clientSecret.value ?: return
 
-            val mode = if (viewModel.checkoutMode.value == CheckoutMode.Payment) {
-                PaymentSheet.InitializationMode.PaymentIntent(clientSecret)
+            if (viewModel.checkoutMode.value == CheckoutMode.Payment) {
+                flowController.configureWithPaymentIntent(
+                    paymentIntentClientSecret = clientSecret,
+                    configuration = makeConfiguration(),
+                    callback = ::onConfigured,
+                )
             } else {
-                PaymentSheet.InitializationMode.SetupIntent(clientSecret)
+                flowController.configureWithSetupIntent(
+                    setupIntentClientSecret = clientSecret,
+                    configuration = makeConfiguration(),
+                    callback = ::onConfigured,
+                )
             }
-
-            flowController.configure(
-                mode = mode,
-                configuration = makeConfiguration(),
-                callback = ::onConfigured,
-            )
         } else {
             val mode = when (viewModel.checkoutMode.value) {
                 CheckoutMode.Setup -> {
@@ -584,16 +581,11 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 }
             }
 
-            val initMode = PaymentSheet.InitializationMode.DeferredIntent(
+            flowController.configureWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = mode,
-                    customer = viewModel.customerConfig.value?.id,
                     paymentMethodTypes = viewModel.paymentMethodTypes.value,
-                )
-            )
-
-            flowController.configure(
-                mode = initMode,
+                ),
                 configuration = makeConfiguration(),
                 callback = ::onConfigured,
             )

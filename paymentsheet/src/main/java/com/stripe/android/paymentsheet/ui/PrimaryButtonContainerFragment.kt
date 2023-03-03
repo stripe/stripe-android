@@ -13,7 +13,6 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPrimaryButtonContainerBinding
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.StripeTheme
@@ -109,6 +108,7 @@ internal class PaymentSheetPrimaryButtonContainerFragment : BasePrimaryButtonCon
             getString(R.string.stripe_setup_button_label)
         }
 
+        viewBinding.primaryButton.isEnabled = viewModel.selection.value != null
         viewBinding.primaryButton.setLabel(label)
 
         viewBinding.primaryButton.setOnClickListener {
@@ -126,12 +126,8 @@ internal class PaymentOptionsPrimaryButtonContainerFragment : BasePrimaryButtonC
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupPrimaryButton()
 
-        viewModel.currentScreen.launchAndCollectIn(viewLifecycleOwner) { currentScreen ->
-            val visible = currentScreen is PaymentSheetScreen.AddFirstPaymentMethod ||
-                currentScreen is PaymentSheetScreen.AddAnotherPaymentMethod ||
-                viewModel.primaryButtonUIState.value?.visible == true
-
-            viewBinding?.primaryButton?.isVisible = visible
+        viewModel.isPrimaryButtonVisible.launchAndCollectIn(viewLifecycleOwner) { isVisible ->
+            viewBinding?.primaryButton?.isVisible = isVisible
         }
     }
 
@@ -144,6 +140,7 @@ internal class PaymentOptionsPrimaryButtonContainerFragment : BasePrimaryButtonC
         val customLabel = viewModel.config?.primaryButtonLabel
         val label = customLabel ?: getString(R.string.stripe_continue_button_label)
 
+        viewBinding.primaryButton.isEnabled = viewModel.selection.value != null
         viewBinding.primaryButton.setLabel(label)
 
         viewBinding.primaryButton.setOnClickListener {

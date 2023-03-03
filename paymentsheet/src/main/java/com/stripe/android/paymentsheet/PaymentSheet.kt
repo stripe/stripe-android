@@ -93,50 +93,51 @@ class PaymentSheet internal constructor(
     }
 
     /**
-     * Present the payment sheet with an [InitializationMode].
+     * Present the payment sheet with an [IntentConfiguration].
      *
-     * If the [InitializationMode] is [InitializationMode.PaymentIntent] or
-     * [InitializationMode.SetupIntent] and the underlying intent is already confirmed,
-     * [PaymentSheetResultCallback] will be invoked with [PaymentSheetResult.Completed].
-     *
-     * @param mode The [InitializationMode] to use.
+     * @param intentConfiguration The [IntentConfiguration] to use.
      * @param configuration An optional [PaymentSheet] configuration.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @JvmOverloads
-    fun present(
-        mode: InitializationMode,
+    fun presentWithIntentConfiguration(
+        intentConfiguration: IntentConfiguration,
         configuration: Configuration? = null,
     ) {
-        paymentSheetLauncher.present(mode, configuration)
+        paymentSheetLauncher.present(
+            mode = InitializationMode.DeferredIntent(intentConfiguration),
+            configuration = configuration,
+        )
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    sealed class InitializationMode : Parcelable {
+    internal sealed class InitializationMode : Parcelable {
 
         internal abstract fun validate()
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
-        class PaymentIntent(val clientSecret: String) : InitializationMode() {
+        internal data class PaymentIntent(
+            val clientSecret: String,
+        ) : InitializationMode() {
 
             override fun validate() {
                 PaymentIntentClientSecret(clientSecret).validate()
             }
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
-        class SetupIntent(val clientSecret: String) : InitializationMode() {
+        internal data class SetupIntent(
+            val clientSecret: String,
+        ) : InitializationMode() {
 
             override fun validate() {
                 SetupIntentClientSecret(clientSecret).validate()
             }
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
-        class DeferredIntent(val intentConfiguration: IntentConfiguration) : InitializationMode() {
+        internal data class DeferredIntent(
+            val intentConfiguration: IntentConfiguration,
+        ) : InitializationMode() {
 
             override fun validate() {
                 // Nothing to do here
@@ -148,10 +149,11 @@ class PaymentSheet internal constructor(
     @Parcelize
     class IntentConfiguration(
         val mode: Mode,
-        val captureMethod: CaptureMethod? = null,
-        val customer: String? = null,
         val paymentMethodTypes: List<String> = emptyList(),
     ) : Parcelable {
+
+        internal val captureMethod: CaptureMethod?
+            get() = mode.captureMethod
 
         internal val setupFutureUse: SetupFutureUse?
             get() = mode.setupFutureUse
@@ -160,21 +162,27 @@ class PaymentSheet internal constructor(
         sealed class Mode : Parcelable {
 
             internal abstract val setupFutureUse: SetupFutureUse?
+            internal abstract val captureMethod: CaptureMethod?
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
-            data class Payment(
+            class Payment(
                 val amount: Long,
                 val currency: String,
                 override val setupFutureUse: SetupFutureUse? = null,
+                override val captureMethod: CaptureMethod = CaptureMethod.Automatic,
             ) : Mode()
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
-            data class Setup(
+            class Setup(
                 val currency: String?,
                 override val setupFutureUse: SetupFutureUse = SetupFutureUse.OffSession,
-            ) : Mode()
+            ) : Mode() {
+
+                override val captureMethod: CaptureMethod?
+                    get() = null
+            }
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -858,15 +866,15 @@ class PaymentSheet internal constructor(
         )
 
         /**
-         * Configure the FlowController with an [InitializationMode].
+         * Configure the FlowController with an [IntentConfiguration].
          *
-         * @param mode The [InitializationMode] to use.
+         * @param intentConfiguration The [IntentConfiguration] to use.
          * @param configuration An optional [PaymentSheet] configuration.
          * @param callback called with the result of configuring the FlowController.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun configure(
-            mode: InitializationMode,
+        fun configureWithIntentConfiguration(
+            intentConfiguration: IntentConfiguration,
             configuration: Configuration? = null,
             callback: ConfigCallback
         )
