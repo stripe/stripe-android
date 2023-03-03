@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
@@ -121,6 +122,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val paymentMethods = async {
             if (customerConfig != null) {
                 retrieveCustomerPaymentMethods(
+                    prefsRepository,
                     stripeIntent,
                     config,
                     customerConfig
@@ -131,7 +133,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
 
         val savedSelection = async {
-            retrieveSavedPaymentSelection(
+            retrievePaymentSelection(
                 prefsRepository,
                 isGooglePayReady,
                 isLinkAvailable,
@@ -152,15 +154,15 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 config = config,
                 stripeIntent = stripeIntent,
                 customerPaymentMethods = paymentMethods.await(),
-                savedSelection = savedSelection.await(),
                 isGooglePayReady = isGooglePayReady,
                 linkState = linkState.await(),
-                paymentSelection = null,
+                paymentSelection = savedSelection.await(),
             )
         )
     }
 
     private suspend fun retrieveCustomerPaymentMethods(
+        prefsRepository: PrefsRepository,
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration?,
         customerConfig: PaymentSheet.CustomerConfiguration
@@ -175,7 +177,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             PaymentMethod.Type.fromCode(it.code)
         }
 
-        return customerRepository.getPaymentMethods(
+        val savedSelection = prefsRepository.getSavedSelection(
+            isGooglePayAvailable = false,
+            isLinkAvailable = false,
+        )
+
+        val paymentMethods = customerRepository.getPaymentMethods(
             customerConfig,
             paymentMethodTypes
         ).filter { paymentMethod ->
@@ -183,23 +190,47 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 // PayPal isn't supported yet as a saved payment method (backend limitation).
                 paymentMethod.type != PaymentMethod.Type.PayPal
         }
+
+        return when (savedSelection) {
+            is SavedSelection.GooglePay,
+            is SavedSelection.Link,
+            is SavedSelection.None -> {
+                paymentMethods
+            }
+            is SavedSelection.PaymentMethod -> {
+                // Move the previously used payment method to the top of the list
+                paymentMethods.sortedByDescending { it.id == savedSelection.id }
+            }
+        }
     }
 
-    private suspend fun retrieveSavedPaymentSelection(
+    private suspend fun retrievePaymentSelection(
         prefsRepository: PrefsRepository,
         isGooglePayReady: Boolean,
         isLinkReady: Boolean,
         paymentMethods: List<PaymentMethod>
-    ): SavedSelection {
+    ): PaymentSelection? {
         val savedSelection = prefsRepository.getSavedSelection(isGooglePayReady, isLinkReady)
-        if (savedSelection != SavedSelection.None) {
-            return savedSelection
-        }
+        return when (savedSelection) {
+            is SavedSelection.GooglePay -> PaymentSelection.GooglePay
+            is SavedSelection.Link -> PaymentSelection.Link
+            is SavedSelection.PaymentMethod -> {
+                // If the previously used payment method no longer exists, fall back to the first
+                // customer payment method
+                val paymentMethod = paymentMethods.find { it.id == savedSelection.id }
+                    ?: paymentMethods.firstOrNull()
 
-        // We select the first customer payment method if we haven't retrieved a previously used
-        // payment method.
-        val paymentMethodId = paymentMethods.firstNotNullOfOrNull { it.id }
-        return paymentMethodId?.let { SavedSelection.PaymentMethod(it) } ?: SavedSelection.None
+                paymentMethod?.let {
+                    PaymentSelection.Saved(paymentMethod = it, isGooglePay = false)
+                }
+            }
+            is SavedSelection.None -> {
+                val paymentMethod = paymentMethods.firstOrNull()
+                return paymentMethod?.let {
+                    PaymentSelection.Saved(paymentMethod = it, isGooglePay = false)
+                }
+            }
+        }
     }
 
     private suspend fun retrieveElementsSession(

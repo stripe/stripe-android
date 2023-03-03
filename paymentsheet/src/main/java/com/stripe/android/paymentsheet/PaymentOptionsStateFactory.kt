@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SavedSelection
 
 internal data class PaymentOptionsState(
     val items: List<PaymentOptionsItem> = emptyList(),
@@ -19,15 +18,14 @@ internal object PaymentOptionsStateFactory {
         paymentMethods: List<PaymentMethod>,
         showGooglePay: Boolean,
         showLink: Boolean,
-        initialSelection: SavedSelection,
         currentSelection: PaymentSelection? = null,
         nameProvider: (PaymentMethodCode?) -> String,
     ): PaymentOptionsState {
         val items = listOfNotNull(
             PaymentOptionsItem.AddCard,
             PaymentOptionsItem.GooglePay.takeIf { showGooglePay },
-            PaymentOptionsItem.Link.takeIf { showLink }
-        ) + sortedPaymentMethods(paymentMethods, initialSelection).map {
+            PaymentOptionsItem.Link.takeIf { showLink },
+        ) + paymentMethods.map {
             PaymentOptionsItem.SavedPaymentMethod(
                 displayName = nameProvider(it.type?.code),
                 paymentMethod = it,
@@ -43,72 +41,8 @@ internal object PaymentOptionsStateFactory {
             selectedIndex = currentSelectionIndex,
         )
     }
-
-    private fun sortedPaymentMethods(
-        paymentMethods: List<PaymentMethod>,
-        savedSelection: SavedSelection
-    ): List<PaymentMethod> {
-        val primaryPaymentMethodIndex = when (savedSelection) {
-            is SavedSelection.PaymentMethod -> {
-                paymentMethods.indexOfFirst {
-                    it.id == savedSelection.id
-                }
-            }
-            else -> -1
-        }
-        return if (primaryPaymentMethodIndex != -1) {
-            val mutablePaymentMethods = paymentMethods.toMutableList()
-            mutablePaymentMethods.removeAt(primaryPaymentMethodIndex)
-                .also { primaryPaymentMethod ->
-                    mutablePaymentMethods.add(0, primaryPaymentMethod)
-                }
-            mutablePaymentMethods
-        } else {
-            paymentMethods
-        }
-    }
 }
 
-/**
- * The initial selection position follows this prioritization:
- * 1. The index of [PaymentOptionsItem.SavedPaymentMethod] if it matches the [SavedSelection]
- * 2. The index of [PaymentOptionsItem.GooglePay] if it exists
- * 3. The index of the first [PaymentOptionsItem.SavedPaymentMethod]
- * 4. None (-1)
- */
-internal fun List<PaymentOptionsItem>.findInitialSelectedPosition(
-    savedSelection: SavedSelection?
-): Int {
-    return listOfNotNull(
-        // saved selection
-        indexOfFirst { item ->
-            val b = when (savedSelection) {
-                SavedSelection.GooglePay -> item is PaymentOptionsItem.GooglePay
-                SavedSelection.Link -> item is PaymentOptionsItem.Link
-                is SavedSelection.PaymentMethod -> {
-                    when (item) {
-                        is PaymentOptionsItem.SavedPaymentMethod -> {
-                            savedSelection.id == item.paymentMethod.id
-                        }
-                        else -> false
-                    }
-                }
-                SavedSelection.None -> false
-                else -> false
-            }
-            b
-        }.takeIf { it != -1 },
-
-        // Google Pay
-        indexOfFirst { it is PaymentOptionsItem.GooglePay }.takeIf { it != -1 },
-
-        // Link
-        indexOfFirst { it is PaymentOptionsItem.Link }.takeIf { it != -1 },
-
-        // the first payment method
-        indexOfFirst { it is PaymentOptionsItem.SavedPaymentMethod }.takeIf { it != -1 }
-    ).firstOrNull() ?: -1
-}
 
 /**
  * Find the index of [paymentSelection] in the current items. Return -1 if not found.

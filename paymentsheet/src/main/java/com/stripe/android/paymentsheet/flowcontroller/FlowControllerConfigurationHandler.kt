@@ -84,7 +84,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     ) {
         eventReporter.onInit(state.config)
 
-        viewModel.paymentSelection = state.initialPaymentSelection
+        viewModel.paymentSelection = state.paymentSelection
         viewModel.state = state
 
         callback.onConfigured(true, null)

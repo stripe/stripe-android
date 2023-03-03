@@ -113,7 +113,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             setStripeIntent(args.state.stripeIntent)
         }
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.state.customerPaymentMethods
-        savedStateHandle[SAVE_SAVED_SELECTION] = args.state.savedSelection
+        savedStateHandle[SAVE_SELECTION] = args.state.paymentSelection
         savedStateHandle[SAVE_PROCESSING] = false
 
         updateSelection(args.state.paymentSelection)

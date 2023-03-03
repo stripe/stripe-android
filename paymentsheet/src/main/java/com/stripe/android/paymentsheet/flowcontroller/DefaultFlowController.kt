@@ -227,9 +227,33 @@ internal class DefaultFlowController @Inject internal constructor(
             )
         }
 
+        val canUseExistingPaymentSelection = when (val selection = viewModel.paymentSelection) {
+            is PaymentSelection.GooglePay -> {
+                state.isGooglePayReady
+            }
+            is PaymentSelection.Link -> {
+                state.linkState != null
+            }
+            is PaymentSelection.New -> {
+                val type = selection.paymentMethodCreateParams.typeCode
+                state.stripeIntent.paymentMethodTypes.contains(type)
+            }
+            is PaymentSelection.Saved -> {
+                val paymentMethodId = selection.paymentMethod.id
+                state.customerPaymentMethods.find { it.id == paymentMethodId } != null
+            }
+            null -> {
+                true
+            }
+        }
+
         paymentOptionActivityLauncher.launch(
             PaymentOptionContract.Args(
-                state = state.copy(paymentSelection = viewModel.paymentSelection),
+                state = state.copy(
+                    paymentSelection = viewModel.paymentSelection.takeIf {
+                        canUseExistingPaymentSelection
+                    },
+                ),
                 statusBarColor = statusBarColor(),
                 injectorKey = injectorKey,
                 enableLogging = enableLogging,
