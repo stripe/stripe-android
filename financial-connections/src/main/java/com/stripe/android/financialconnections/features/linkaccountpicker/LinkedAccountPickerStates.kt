@@ -25,7 +25,8 @@ internal class LinkedAccountPickerStates : PreviewParameterProvider<LinkAccountP
                     accessibleData = accessibleCallout(),
                     businessName = "Random business",
                     consumerSessionClientSecret = "secret",
-                    stepUpAuthenticationRequired = null,
+                    repairAuthorizationEnabled = false,
+                    stepUpAuthenticationRequired = false,
                 )
             ),
         )
@@ -38,7 +39,8 @@ internal class LinkedAccountPickerStates : PreviewParameterProvider<LinkAccountP
                     accessibleData = accessibleCallout(),
                     businessName = "Random business",
                     consumerSessionClientSecret = "secret",
-                    stepUpAuthenticationRequired = null,
+                    repairAuthorizationEnabled = false,
+                    stepUpAuthenticationRequired = false,
                 )
             ),
         )

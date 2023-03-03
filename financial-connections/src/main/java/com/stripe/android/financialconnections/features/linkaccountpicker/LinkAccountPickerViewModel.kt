@@ -47,12 +47,14 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             val manifest = getManifest()
             val accessibleData = AccessibleDataCalloutModel.fromManifest(manifest)
             val consumerSession = requireNotNull(getCachedConsumerSession())
-            val accounts = pollNetworkedAccounts(consumerSession.clientSecret)
+            val accountsResponse = pollNetworkedAccounts(consumerSession.clientSecret)
+            val accounts = accountsResponse
                 .data
                 .sortedBy { it.allowSelection.not() }
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
-                stepUpAuthenticationRequired = manifest.stepUpAuthenticationRequired,
+                repairAuthorizationEnabled = accountsResponse.repairAuthorizationEnabled ?: false,
+                stepUpAuthenticationRequired = manifest.stepUpAuthenticationRequired ?: false,
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 businessName = ConsentTextBuilder.getBusinessName(manifest) ?: "",
                 accounts = accounts,
@@ -95,7 +97,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             requireNotNull(payload.accounts.first { it.id == state.selectedAccountId })
         when {
             selectedAccount.status != Status.ACTIVE -> repairAccount()
-            payload.stepUpAuthenticationRequired == true -> goNext(Pane.LINK_STEP_UP_VERIFICATION)
+            payload.stepUpAuthenticationRequired -> goNext(Pane.LINK_STEP_UP_VERIFICATION)
             else -> selectAccount(payload, selectedAccount)
         }
         Unit
@@ -157,6 +159,9 @@ internal data class LinkAccountPickerState(
         val accessibleData: AccessibleDataCalloutModel,
         val businessName: String,
         val consumerSessionClientSecret: String,
-        val stepUpAuthenticationRequired: Boolean?
-    )
+        val repairAuthorizationEnabled: Boolean,
+        val stepUpAuthenticationRequired: Boolean
+    ) {
+        fun PartnerAccount.enabled() = status == Status.ACTIVE || repairAuthorizationEnabled
+    }
 }
