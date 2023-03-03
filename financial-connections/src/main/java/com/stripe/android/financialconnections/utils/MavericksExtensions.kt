@@ -41,6 +41,15 @@ internal inline fun <T, reified VM : MavericksViewModel<S>, reified S : Maverick
 }
 
 /**
+ * A utility function that takes a list of Async objects and returns the first Throwable error
+ * encountered, if any.
+ *
+ * @return A Throwable object representing the error, or null if no errors were found.
+ */
+internal fun List<Async<*>>.firstErrorOrNull(): Throwable? =
+    filterIsInstance<Fail<*>>().firstOrNull()?.error
+
+/**
  * Replicates [com.airbnb.mvrx.argsOrNull] for [ComponentActivity].
  */
 internal fun <V> argsOrNull() = object : ReadOnlyProperty<ComponentActivity, V?> {

@@ -94,6 +94,7 @@
     <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Please enter your bank details manually or select another bank.</string>
     <string name="stripe_close_dialog_title">Are you sure you want to cancel?</string>
     <string name="stripe_close_dialog_desc">You haven\'t finished linking your bank account.</string>
+    <string name="stripe_close_dialog_networking_desc">If you cancel now, your account will be linked to %1$s but it will not be saved to Link.</string>
     <string name="stripe_close_dialog_confirm">Yes, cancel</string>
     <string name="stripe_close_dialog_back">Back</string>
     <string name="stripe_error_cta_close">Close</string>

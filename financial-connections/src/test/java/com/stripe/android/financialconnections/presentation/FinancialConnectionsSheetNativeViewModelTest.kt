@@ -166,6 +166,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         completeFinancialConnectionsSession = completeFinancialConnectionsSession,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         logger = mock(),
+        getManifest = mock(),
         initialState = initialState
     )
 }

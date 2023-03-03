@@ -8,7 +8,10 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.NetworkingNewConsumer
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.NetworkingReturningConsumer
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -51,7 +54,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         logErrors()
         suspend {
             val manifest = getManifest()
-            eventTracker.track(PaneLoaded(Pane.NETWORKING_LINK_SIGNUP_PANE))
+            eventTracker.track(PaneLoaded(PANE))
             NetworkingLinkSignupState.Payload(
                 merchantName = manifest.getBusinessName(),
                 emailController = EmailConfig.createController(manifest.accountholderCustomerEmailAddress),
@@ -68,9 +71,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 viewModelScope.launch {
                     payload.emailController
                         .validFormFieldState()
-                        .collectLatest {
-                            onEmailEntered(it)
-                        }
+                        .collectLatest(::onEmailEntered)
                 }
                 viewModelScope.launch {
                     payload.phoneController.validFormFieldState().collectLatest {
@@ -80,24 +81,29 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             },
             onFail = { error ->
                 logger.error("Error fetching payload", error)
-                eventTracker.track(Error(Pane.NETWORKING_LINK_SIGNUP_PANE, error))
+                eventTracker.track(Error(PANE, error))
             },
         )
         onAsync(
             NetworkingLinkSignupState::saveAccountToLink,
             onFail = { error ->
                 logger.error("Error saving account to Link", error)
-                eventTracker.track(Error(Pane.NETWORKING_LINK_SIGNUP_PANE, error))
+                eventTracker.track(Error(PANE, error))
             },
         )
         onAsync(
             NetworkingLinkSignupState::lookupAccount,
-            onSuccess = {
-                if (it.exists) goNext(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION)
+            onSuccess = { consumerSession ->
+                if (consumerSession.exists) {
+                    eventTracker.track(NetworkingReturningConsumer(PANE))
+                    goNext(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION)
+                } else {
+                    eventTracker.track(NetworkingNewConsumer(PANE))
+                }
             },
             onFail = { error ->
                 logger.error("Error looking up account", error)
-                eventTracker.track(Error(Pane.NETWORKING_LINK_SIGNUP_PANE, error))
+                eventTracker.track(Error(PANE, error))
             },
         )
     }
@@ -118,6 +124,11 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         } else {
             setState { copy(lookupAccount = Uninitialized) }
         }
+    }
+
+    fun onSkipClick() = viewModelScope.launch {
+        eventTracker.track(Click(eventName = "click.not_now", pane = PANE))
+        goNext(Pane.SUCCESS)
     }
 
     fun onSaveAccount() {
@@ -167,6 +178,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         }
 
         private const val SEARCH_DEBOUNCE_MS = 300L
+        internal val PANE = Pane.NETWORKING_LINK_SIGNUP_PANE
     }
 }
 
