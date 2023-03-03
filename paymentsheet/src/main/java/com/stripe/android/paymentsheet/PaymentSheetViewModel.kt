@@ -29,7 +29,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -51,7 +50,6 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.create
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
@@ -365,23 +363,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override fun updateSelection(selection: PaymentSelection?) {
-        super.updateSelection(selection)
-
-        when (selection) {
-            is PaymentSelection.Saved -> {
-                if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
-                    updateBelowButtonText(
-                        ACHText.getContinueMandateText(getApplication())
-                    )
-                }
-            }
-            else -> {
-                // no-op
-            }
-        }
-    }
-
     override fun clearErrorMessages() {
         if (viewState.value is PaymentSheetViewState.Reset) {
             viewState.value = PaymentSheetViewState.Reset(message = null)
@@ -451,7 +432,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
             runCatching {
-                elementsSessionRepository.get(args.initializationMode)
+                elementsSessionRepository.get(
+                    initializationMode = args.initializationMode,
+                    configuration = args.config,
+                )
             }.fold(
                 onSuccess = { session ->
                     processPayment(session.stripeIntent, paymentResult)

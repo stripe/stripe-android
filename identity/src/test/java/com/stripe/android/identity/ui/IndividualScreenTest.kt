@@ -58,7 +58,7 @@ class IndividualScreenTest {
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn MutableLiveData(Resource.success(verificationPage))
         on { missingRequirements } doReturn missingRequirementsFlow
-        on { addressRepository } doReturn mock()
+        on { addressSchemaRepository } doReturn mock()
     }
     private val mockNavController = mock<NavController>()
 

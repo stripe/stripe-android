@@ -402,6 +402,40 @@ internal class PaymentOptionsViewModelTest {
         assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
     }
 
+    @Test
+    fun `Does not close the sheet if the selected payment method requires confirmation`() = runTest {
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
+
+        val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link) }
+
+        viewModel.paymentOptionResult.test {
+            viewModel.handlePaymentMethodSelected(selection)
+            expectNoEvents()
+
+            viewModel.handlePaymentMethodSelected(PaymentSelection.Link)
+
+            val result = awaitItem() as? PaymentOptionResult.Succeeded
+            assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link)
+        }
+    }
+
+    @Test
+    fun `Primary button is visible if the selected payment method requires confirmation`() = runTest {
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
+
+        val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link) }
+
+        viewModel.isPrimaryButtonVisible.test {
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.handlePaymentMethodSelected(selection)
+            assertThat(awaitItem()).isTrue()
+
+            viewModel.handlePaymentMethodSelected(PaymentSelection.Link)
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,

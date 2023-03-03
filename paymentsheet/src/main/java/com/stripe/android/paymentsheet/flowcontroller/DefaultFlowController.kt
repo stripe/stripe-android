@@ -189,7 +189,19 @@ internal class DefaultFlowController @Inject internal constructor(
         )
     }
 
-    override fun configure(
+    override fun configureWithIntentConfiguration(
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        configuration: PaymentSheet.Configuration?,
+        callback: PaymentSheet.FlowController.ConfigCallback
+    ) {
+        configure(
+            mode = PaymentSheet.InitializationMode.DeferredIntent(intentConfiguration),
+            configuration = configuration,
+            callback = callback,
+        )
+    }
+
+    private fun configure(
         mode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback

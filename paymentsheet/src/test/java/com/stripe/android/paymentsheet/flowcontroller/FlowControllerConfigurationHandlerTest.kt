@@ -1,18 +1,20 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
-import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
@@ -31,8 +33,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
@@ -44,7 +49,7 @@ class FlowControllerConfigurationHandlerTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
-    private lateinit var activity: ComponentActivity
+    private lateinit var viewModel: FlowControllerViewModel
 
     @Before
     fun setup() {
@@ -53,8 +58,8 @@ class FlowControllerConfigurationHandlerTest {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         val activityScenario = activityScenarioFactory.createAddPaymentMethodActivity()
         activityScenario.moveToState(Lifecycle.State.CREATED)
-        activityScenario.onActivity {
-            activity = it
+        activityScenario.onActivity { activity ->
+            viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
         }
     }
 
@@ -64,13 +69,80 @@ class FlowControllerConfigurationHandlerTest {
     }
 
     @Test
-    fun `successful configure() should fire analytics event`() = runTest {
+    fun `configure() should run initial configuration`() = runTest {
+        val countDownLatch = CountDownLatch(1)
         val configurationHandler = createConfigurationHandler()
         configurationHandler.configure(
             PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.CLIENT_SECRET),
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) { _, _ ->
+        ) { success, exception ->
+            assertThat(success).isTrue()
+            assertThat(exception).isNull()
+            countDownLatch.countDown()
         }
+        assertThat(countDownLatch.await(0, TimeUnit.SECONDS)).isTrue()
+        assertThat(viewModel.initializationMode).isNotNull()
+        assertThat(viewModel.previousElementsSessionParams).isNotNull()
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
+        assertThat(viewModel.state).isNotNull()
+        verify(eventReporter)
+            .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+    }
+
+    @Test
+    fun `configure() should not re-run initial config during second config`() = runTest {
+        val countDownLatch = CountDownLatch(1)
+        val elementsSessionParams = createElementsSessionParams()
+        val configurationHandler = createConfigurationHandler()
+
+        // Signaling we previously loaded elements session here.
+        viewModel.previousElementsSessionParams = elementsSessionParams
+        viewModel.paymentSelection = PaymentSelection.GooglePay
+
+        configurationHandler.configure(
+            PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.CLIENT_SECRET),
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { success, exception ->
+            assertThat(success).isTrue()
+            assertThat(exception).isNull()
+            countDownLatch.countDown()
+        }
+        assertThat(countDownLatch.await(0, TimeUnit.SECONDS)).isTrue()
+        assertThat(viewModel.previousElementsSessionParams).isSameInstanceAs(elementsSessionParams)
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+
+        // We're running ONLY the second config run, so we don't expect any interactions.
+        verify(eventReporter, never())
+            .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+    }
+
+    @Test
+    fun `configure() should re-run CHANGED config during second config`() = runTest {
+        val countDownLatch = CountDownLatch(1)
+        val elementsSessionParams = createElementsSessionParams()
+        val differentElementsSessionParams = createElementsSessionParams(PaymentSheetFixtures.DIFFERENT_CLIENT_SECRET)
+        val configurationHandler = createConfigurationHandler()
+
+        // Signaling we previously loaded elements session here.
+        viewModel.previousElementsSessionParams = elementsSessionParams
+        viewModel.paymentSelection = PaymentSelection.GooglePay
+
+        configurationHandler.configure(
+            PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.DIFFERENT_CLIENT_SECRET),
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { success, exception ->
+            assertThat(success).isTrue()
+            assertThat(exception).isNull()
+            countDownLatch.countDown()
+        }
+        assertThat(countDownLatch.await(0, TimeUnit.SECONDS)).isTrue()
+        assertThat(viewModel.initializationMode).isNotNull()
+        assertThat(viewModel.previousElementsSessionParams).isNotSameInstanceAs(
+            differentElementsSessionParams
+        )
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
+
+        // We're running a new config, so we DO expect an interaction.
         verify(eventReporter)
             .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
     }
@@ -177,7 +249,7 @@ class FlowControllerConfigurationHandlerTest {
         return FakePaymentSheetLoader(
             customerPaymentMethods = emptyList(),
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            savedSelection = SavedSelection.None,
+            savedSelection = SavedSelection.Link,
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedIn,
@@ -185,10 +257,17 @@ class FlowControllerConfigurationHandlerTest {
         )
     }
 
+    private fun createElementsSessionParams(
+        clientSecret: String = PaymentSheetFixtures.CLIENT_SECRET,
+        configuration: PaymentSheet.Configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+    ): ElementsSessionParams {
+        val initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret)
+        return initializationMode.toElementsSessionParams(configuration)
+    }
+
     private fun createConfigurationHandler(
         paymentSheetLoader: PaymentSheetLoader = defaultPaymentSheetLoader()
     ): FlowControllerConfigurationHandler {
-        val viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
         return FlowControllerConfigurationHandler(
             paymentSheetLoader = paymentSheetLoader,
             uiContext = testDispatcher,
