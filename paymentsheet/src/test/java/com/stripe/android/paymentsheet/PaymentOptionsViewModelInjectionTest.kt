@@ -9,7 +9,6 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeAndroidKeyStore
@@ -82,7 +81,6 @@ internal class PaymentOptionsViewModelInjectionTest : BasePaymentOptionsViewMode
             state = PaymentSheetState.Full(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = emptyList(),
-                savedSelection = SavedSelection.None,
                 config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
                 isGooglePayReady = false,
                 paymentSelection = null,

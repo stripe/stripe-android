@@ -29,7 +29,6 @@ class PaymentOptionsStateMapperTest {
     fun `Only emits value if required flows have emitted values`() = runTest {
         val mapper = PaymentOptionsStateMapper(
             paymentMethods = paymentMethodsFlow,
-            initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
@@ -58,7 +57,6 @@ class PaymentOptionsStateMapperTest {
     fun `Doesn't include Google Pay and Link in payment flow`() = runTest {
         val mapper = PaymentOptionsStateMapper(
             paymentMethods = paymentMethodsFlow,
-            initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
@@ -84,7 +82,6 @@ class PaymentOptionsStateMapperTest {
     fun `Removing selected payment option results in saved selection being selected`() = runTest {
         val mapper = PaymentOptionsStateMapper(
             paymentMethods = paymentMethodsFlow,
-            initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
@@ -120,7 +117,6 @@ class PaymentOptionsStateMapperTest {
     fun `Removing selected payment option results in first available option if no saved selection`() = runTest {
         val mapper = PaymentOptionsStateMapper(
             paymentMethods = paymentMethodsFlow,
-            initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
