@@ -1,6 +1,7 @@
 package com.stripe.android.identity.ui
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -140,7 +141,10 @@ private fun AddressSectionContent(
             )
         }
     ) {
-        Text(text = addressNotListedText)
+        Text(
+            text = addressNotListedText,
+            style = MaterialTheme.typography.h6
+        )
     }
 }
 
