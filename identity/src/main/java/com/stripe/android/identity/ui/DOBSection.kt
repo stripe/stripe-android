@@ -85,18 +85,23 @@ internal object DobTextFieldConfig : SimpleTextFieldConfig(
      */
     private fun String.isValidDate(): Boolean {
         val dateFormat = SimpleDateFormat(
-            "MMddyyyy",
+            DATE_PATTERN,
             Locale.getDefault()
         )
-        val fromDate = dateFormat.parse("01011990")
-        val toDate = Date()
         return try {
-            val currentDate = dateFormat.parse(this)
-            currentDate?.after(fromDate) == true && currentDate.before(toDate)
+            dateFormat.parse(this).between(requireNotNull(dateFormat.parse(START_DATE)), Date())
         } catch (e: ParseException) {
+            // Otherwise it's an invalid date, prompt error message and ignore the exception
             false
         }
     }
+
+    private fun Date?.between(from: Date, to: Date) =
+        this?.let {
+            this == from || this.after(from) && this.before(to)
+        } ?: run {
+            false
+        }
 
     override val keyboard = KeyboardType.Number
     override val visualTransformation = MaskVisualTransformation(DATE_MASK)
@@ -113,6 +118,9 @@ internal object DobTextFieldConfig : SimpleTextFieldConfig(
 
         override fun isBlank(): Boolean = input.isBlank()
     }
+
+    private const val DATE_PATTERN = "MMddyyyy"
+    private const val START_DATE = "01011900"
 }
 
 internal class MaskVisualTransformation(private val mask: String) : VisualTransformation {
