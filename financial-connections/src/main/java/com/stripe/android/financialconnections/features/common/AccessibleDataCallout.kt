@@ -140,13 +140,18 @@ private fun AccessibleDataText(
     val permissionsReadable = remember(model.permissions) { model.permissions.toStringRes() }
     AnnotatedText(
         text = TextResource.StringId(
-            value = when (model.isStripeDirect) {
-                true -> when (model.businessName) {
+            value = when {
+                model.isNetworking -> when (model.businessName) {
+                    null -> R.string.data_accessible_callout_through_link_no_business
+                    else -> R.string.data_accessible_callout_through_link
+                }
+
+                model.isStripeDirect -> when (model.businessName) {
                     null -> R.string.data_accessible_callout_through_stripe_no_business
                     else -> R.string.data_accessible_callout_through_stripe
                 }
 
-                false -> when (model.businessName) {
+                else -> when (model.businessName) {
                     null -> R.string.data_accessible_callout_no_business
                     else -> R.string.data_accessible_callout
                 }
@@ -220,6 +225,7 @@ internal data class AccessibleDataCalloutModel(
     val businessName: String?,
     val permissions: List<Permissions>,
     val isStripeDirect: Boolean,
+    val isNetworking: Boolean,
     val dataPolicyUrl: String
 ) {
 
@@ -229,6 +235,7 @@ internal data class AccessibleDataCalloutModel(
                 businessName = manifest.getBusinessName(),
                 permissions = manifest.permissions,
                 isStripeDirect = manifest.isStripeDirect ?: false,
+                isNetworking = manifest.isNetworkingUserFlow ?: false,
                 dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
             )
     }
@@ -249,6 +256,7 @@ internal fun AccessibleDataCalloutPreview() {
                     Permissions.ACCOUNT_NUMBERS
                 ),
                 isStripeDirect = true,
+                isNetworking = false,
                 dataPolicyUrl = ""
             ),
             onLearnMoreClick = {}
@@ -271,6 +279,7 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
                     Permissions.TRANSACTIONS
                 ),
                 isStripeDirect = true,
+                isNetworking = false,
                 dataPolicyUrl = ""
             ),
             accounts = listOf(
@@ -355,6 +364,7 @@ internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
                     Permissions.TRANSACTIONS
                 ),
                 isStripeDirect = true,
+                isNetworking = false,
                 dataPolicyUrl = ""
             ),
             accounts = listOf(
@@ -412,6 +422,7 @@ internal fun AccessibleDataCalloutWithOneAccountPreview() {
                     Permissions.TRANSACTIONS
                 ),
                 isStripeDirect = true,
+                isNetworking = false,
                 dataPolicyUrl = ""
             ),
             accounts = listOf(
