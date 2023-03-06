@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -65,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.kittinunf.result.Result
 import com.stripe.android.identity.IdentityVerificationSheet
+import com.stripe.android.identity.example.BuildConfig
 import com.stripe.android.identity.example.IdentityExampleViewModel
 import com.stripe.android.identity.example.R
 import com.stripe.android.identity.example.ui.IntegrationType.LINK
@@ -104,6 +104,7 @@ internal fun ExampleScreen(
     viewModel: IdentityExampleViewModel
 ) {
     val scaffoldState = rememberScaffoldState()
+    val scrollState = rememberScrollState()
     val (submissionState, onSubmissionStateChanged) = remember {
         mutableStateOf(IdentitySubmissionState())
     }
@@ -112,14 +113,18 @@ internal fun ExampleScreen(
         scaffoldState = scaffoldState,
         topBar = {
             TopAppBar {
-                Text(
-                    text = stringResource(id = R.string.compose_example),
-                    modifier = Modifier.padding(start = 10.dp),
-                    fontWeight = FontWeight.Bold,
-                    color = LocalContentColor.current
-                )
+                Row {
+                    Text(
+                        text = stringResource(id = R.string.identity_example),
+                        modifier = Modifier.padding(start = 10.dp),
+                        fontWeight = FontWeight.Bold,
+                        color = LocalContentColor.current
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(text = "${BuildConfig.VERSION_CODE}(${BuildConfig.VERSION_NAME})")
+                }
             }
-        }
+        },
     ) {
         Column(
             modifier = Modifier
@@ -139,8 +144,14 @@ internal fun ExampleScreen(
                     )
                 )
             }
-            if (submissionState.verificationType == VerificationType.DOCUMENT) {
-                DocumentUI(submissionState, onSubmissionStateChanged)
+            Column(
+                modifier = Modifier
+                .verticalScroll(scrollState)
+                .weight(weight = 1f, fill = true)
+            ) {
+                if (submissionState.verificationType == VerificationType.DOCUMENT) {
+                    DocumentUI(submissionState, onSubmissionStateChanged)
+                }
             }
             Divider()
             SubmitView(
@@ -519,9 +530,8 @@ private fun LoadVSView(
         LoadingState.Idle -> {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Spacer(modifier = Modifier.weight(1f))
                 LoadingButton(
                     viewModel = viewModel,
                     enabled = true,
@@ -534,10 +544,9 @@ private fun LoadVSView(
         LoadingState.Loading -> {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
-                    modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     CircularProgressIndicator()
@@ -554,12 +563,11 @@ private fun LoadVSView(
         is LoadingState.Result -> {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxWidth()
             ) {
                 val scrollState = rememberScrollState()
                 Column(
                     modifier = Modifier
-                        .weight(1f)
                         .fillMaxWidth()
                         .verticalScroll(scrollState)
                 ) {
@@ -627,7 +635,6 @@ private fun LoadingButton(
                 }
             }
         },
-        modifier = Modifier.padding(bottom = 40.dp),
         enabled = enabled
     ) {
         Text(text = stringResource(id = R.string.start_verification))
@@ -658,15 +665,23 @@ private fun SubmitView(
                     onLoadingStateChanged(
                         LoadingState.Result(
                             highlight = vsId,
-                            resultString = "Verification result: ${result.javaClass.simpleName} - ${result.throwable}"
+                            resultString = "Verification result: Failed - ${result.throwable}"
                         )
                     )
                 }
-                else -> {
+                IdentityVerificationSheet.VerificationFlowResult.Canceled -> {
                     onLoadingStateChanged(
                         LoadingState.Result(
                             highlight = vsId,
-                            resultString = "Verification result: ${result.javaClass.simpleName}"
+                            resultString = "Verification result: Canceled"
+                        )
+                    )
+                }
+                IdentityVerificationSheet.VerificationFlowResult.Completed -> {
+                    onLoadingStateChanged(
+                        LoadingState.Result(
+                            highlight = vsId,
+                            resultString = "Verification result: Completed"
                         )
                     )
                 }
