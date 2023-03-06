@@ -3,7 +3,7 @@
 ## XX.XX.XX - 2023-XX-XX
 
 ### PaymentSheet
-* [FIXED][63260](https://github.com/stripe/stripe-android/pull/6326) Fixed and issue where the pay button would lose it's padding on configuration changes.
+* [FIXED][6326](https://github.com/stripe/stripe-android/pull/6326) Fixed an issue where the primary button would lose its padding on configuration changes.
 
 ## 20.19.5 - 2023-03-06
 
