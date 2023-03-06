@@ -57,7 +57,6 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
 
     fun createViewModel(
         paymentMethods: List<PaymentMethod> = emptyList(),
-        @InjectorKey injectorKey: String,
         args: PaymentOptionContract.Args = PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
     ): PaymentOptionsViewModel = runBlocking {
         val lpmRepository = LpmRepository(

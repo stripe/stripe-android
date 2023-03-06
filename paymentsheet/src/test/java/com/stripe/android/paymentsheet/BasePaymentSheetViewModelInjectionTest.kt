@@ -80,7 +80,6 @@ internal open class BasePaymentSheetViewModelInjectionTest {
     fun createViewModel(
         stripeIntent: StripeIntent,
         customerRepositoryPMs: List<PaymentMethod> = emptyList(),
-        @InjectorKey injectorKey: String,
         args: PaymentSheetContractV2.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): PaymentSheetViewModel = runBlocking {
         TestViewModelFactory.create { linkHandler, savedStateHandle ->
