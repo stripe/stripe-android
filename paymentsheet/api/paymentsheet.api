@@ -1072,7 +1072,7 @@ public final class com/stripe/android/paymentsheet/databinding/FragmentPrimaryBu
 	public final field primaryButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPrimaryButtonContainerBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
+	public fun getRoot ()Landroid/widget/FrameLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentPrimaryButtonContainerBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentPrimaryButtonContainerBinding;
 }
