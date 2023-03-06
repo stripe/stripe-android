@@ -44,7 +44,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
         suspend {
             val consumerSession = requireNotNull(getCachedConsumerSession())
             startVerification.sms(consumerSession.clientSecret)
-            eventTracker.track(PaneLoaded(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION))
+            eventTracker.track(PaneLoaded(PANE))
             NetworkingSaveToLinkVerificationState.Payload(
                 email = consumerSession.emailAddress,
                 phoneNumber = consumerSession.redactedPhoneNumber,
@@ -67,14 +67,14 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
             },
             onFail = { error ->
                 logger.error("Error fetching payload", error)
-                eventTracker.track(Error(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION, error))
+                eventTracker.track(Error(PANE, error))
             },
         )
         onAsync(
             NetworkingSaveToLinkVerificationState::confirmVerification,
             onFail = { error ->
                 logger.error("Error confirming verification", error)
-                eventTracker.track(Error(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION, error))
+                eventTracker.track(Error(PANE, error))
             },
         )
     }
@@ -103,6 +103,8 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
 
     companion object :
         MavericksViewModelFactory<NetworkingSaveToLinkVerificationViewModel, NetworkingSaveToLinkVerificationState> {
+
+        internal val PANE = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION
 
         override fun create(
             viewModelContext: ViewModelContext,

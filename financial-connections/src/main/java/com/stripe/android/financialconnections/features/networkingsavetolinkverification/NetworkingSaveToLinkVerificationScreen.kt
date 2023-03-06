@@ -2,7 +2,6 @@
 
 package com.stripe.android.financialconnections.features.networkingsavetolinkverification
 
-import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
@@ -36,7 +35,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationState.Payload
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationViewModel.Companion.PANE
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
@@ -57,12 +56,11 @@ internal fun NetworkingSaveToLinkVerificationScreen() {
     val viewModel: NetworkingSaveToLinkVerificationViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
-    BackHandler(enabled = true) {}
     NetworkingSaveToLinkVerificationContent(
         state = state.value,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION) },
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
-        onSkipClick = { viewModel.onSkipClick() }
+        onSkipClick = viewModel::onSkipClick
     )
 }
 
@@ -77,7 +75,7 @@ private fun NetworkingSaveToLinkVerificationContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                showBack = false,
+                showBack = true,
                 onCloseClick = onCloseClick
             )
         }
