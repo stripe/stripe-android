@@ -12,7 +12,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -1303,7 +1302,6 @@ internal class PaymentSheetViewModelTest {
                 mock(),
                 Logger.noop(),
                 testDispatcher,
-                DUMMY_INJECTOR_KEY,
                 savedStateHandle = savedStateHandle,
                 linkHandler
             )

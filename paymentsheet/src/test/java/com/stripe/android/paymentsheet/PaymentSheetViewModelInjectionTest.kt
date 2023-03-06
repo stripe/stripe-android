@@ -29,7 +29,7 @@ internal class PaymentSheetViewModelInjectionTest : BasePaymentSheetViewModelInj
     fun `Factory gets initialized by Injector when Injector is available`() {
         ActivityScenario.launch(ComponentActivity::class.java).onActivity { activity ->
             val args = createArgs()
-            val viewModel = createViewModel(args)
+            val viewModel = createViewModel()
 
             val factory = PaymentSheetViewModel.Factory { args }
             registerViewModel(args.injectorKey, viewModel, lpmRepository, addressRepository)
@@ -45,7 +45,7 @@ internal class PaymentSheetViewModelInjectionTest : BasePaymentSheetViewModelInj
     fun `Factory gets initialized with fallback when no Injector is available`() {
         ActivityScenario.launch(ComponentActivity::class.java).onActivity { activity ->
             val args = createArgs()
-            val viewModel = createViewModel(args)
+            val viewModel = createViewModel()
 
             val factory = PaymentSheetViewModel.Factory { args }
             val creationExtras = activity.fakeCreationExtras()
@@ -61,11 +61,10 @@ internal class PaymentSheetViewModelInjectionTest : BasePaymentSheetViewModelInj
         )
     }
 
-    private fun createViewModel(args: PaymentSheetContractV2.Args): PaymentSheetViewModel {
+    private fun createViewModel(): PaymentSheetViewModel {
         return createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
             customerRepositoryPMs = emptyList(),
-            injectorKey = args.injectorKey
         )
     }
 

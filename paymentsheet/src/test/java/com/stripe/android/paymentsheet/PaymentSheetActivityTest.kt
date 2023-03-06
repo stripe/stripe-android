@@ -28,7 +28,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -1068,7 +1067,6 @@ internal class PaymentSheetActivityTest {
                 googlePayPaymentMethodLauncherFactory,
                 Logger.noop(),
                 testDispatcher,
-                DUMMY_INJECTOR_KEY,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler
             ).also {

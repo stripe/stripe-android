@@ -6,7 +6,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.ui.inline.UserInput
@@ -74,7 +73,6 @@ internal abstract class BaseSheetViewModel(
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO,
     protected val logger: Logger,
-    @InjectorKey val injectorKey: String,
     val lpmResourceRepository: ResourceRepository<LpmRepository>,
     val addressResourceRepository: ResourceRepository<AddressRepository>,
     val savedStateHandle: SavedStateHandle,

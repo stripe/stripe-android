@@ -12,7 +12,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -52,7 +51,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     @IOContext workContext: CoroutineContext,
     application: Application,
     logger: Logger,
-    @InjectorKey injectorKey: String,
     lpmResourceRepository: ResourceRepository<LpmRepository>,
     addressResourceRepository: ResourceRepository<AddressRepository>,
     savedStateHandle: SavedStateHandle,
@@ -65,7 +63,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerRepository = customerRepository,
     workContext = workContext,
     logger = logger,
-    injectorKey = injectorKey,
     lpmResourceRepository = lpmResourceRepository,
     addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
