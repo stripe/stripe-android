@@ -10,6 +10,9 @@
 ### PaymentSheet
 * [ADDED][6283](https://github.com/stripe/stripe-android/pull/6283) Added support for Zip payments.
 
+### Identity
+* [ADDED] ID/Address verification
+
 ## 20.19.4 - 2023-02-27
 
 ### StripeCardScan
