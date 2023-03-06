@@ -1,6 +1,7 @@
 package com.stripe.android.identity.ui
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -152,6 +153,9 @@ private fun IDNumberContent(
             label = R.string.country_of_id_number
         )
     }
+    val textIdentifiers by idNumberSectionElement.getTextFieldIdentifiers()
+        .collectAsState(initial = emptyList())
+
     LaunchedEffect(idNumberParam) {
         onIdNumberCollected(
             idNumberParam?.let {
@@ -166,7 +170,7 @@ private fun IDNumberContent(
         enabled = enabled,
         element = idNumberSectionElement,
         hiddenIdentifiers = emptySet(),
-        lastTextFieldIdentifier = null
+        lastTextFieldIdentifier = textIdentifiers.lastOrNull()
     )
 
     TextButton(
@@ -180,7 +184,10 @@ private fun IDNumberContent(
             )
         }
     ) {
-        Text(text = countryNotListedText)
+        Text(
+            text = countryNotListedText,
+            style = MaterialTheme.typography.h6
+        )
     }
 }
 
@@ -242,11 +249,7 @@ private object SGIDConfig : SimpleTextFieldConfig(
 private object Last4SSNTransformation : VisualTransformation {
     private fun last4SSNTranslator() = object : OffsetMapping {
         override fun originalToTransformed(offset: Int): Int {
-            return if (offset == 0) {
-                0
-            } else {
-                offset + US_ID_PLACEHOLDER_PREFIX.length
-            }
+            return offset + US_ID_PLACEHOLDER_PREFIX.length
         }
 
         override fun transformedToOriginal(offset: Int): Int {
@@ -261,11 +264,7 @@ private object Last4SSNTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         // prepend with US_ID_PLACEHOLDER_PREFIX
         return TransformedText(
-            if (text.isBlank()) {
-                AnnotatedString("")
-            } else {
-                AnnotatedString(US_ID_PLACEHOLDER_PREFIX + text)
-            },
+            AnnotatedString(US_ID_PLACEHOLDER_PREFIX + text),
             last4SSNTranslator()
         )
     }

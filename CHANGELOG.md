@@ -2,19 +2,24 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.19.5 - 2023-03-06
+
 ### Payments
-[ADDED][6279](https://github.com/stripe/stripe-android/pull/6279) Update to Stripe 3DS2 6.1.7, removed keep-all proguard rules in favor of the minimal required ones.
+* [ADDED][6279](https://github.com/stripe/stripe-android/pull/6279) Update to Stripe 3DS2 6.1.7, removed keep-all proguard rules in favor of the minimal required ones.
 
 ### PaymentSheet
-[ADDED][6283](https://github.com/stripe/stripe-android/pull/6283) Added support for Zip payments.
+* [ADDED][6283](https://github.com/stripe/stripe-android/pull/6283) Added support for Zip payments.
+
+### Identity
+* [ADDED] ID/Address verification
 
 ## 20.19.4 - 2023-02-27
 
 ### StripeCardScan
-[FIXED][6253](https://github.com/stripe/stripe-android/pull/6253) Use the full screen card scanner to alleviate fragment crashes
+* [FIXED][6253](https://github.com/stripe/stripe-android/pull/6253) Use the full screen card scanner to alleviate fragment crashes
 
 ### All SDKs
-[ADDED][6227](https://github.com/stripe/stripe-android/pull/6227) Removed keep-all proguard rules in favor of the minimal required ones. 
+* [ADDED][6227](https://github.com/stripe/stripe-android/pull/6227) Removed keep-all proguard rules in favor of the minimal required ones. 
 
 ## 20.19.3 - 2023-02-13
 
@@ -24,8 +29,8 @@
 ## 20.19.2 - 2023-02-06
 
 ### PaymentSheet
-[ADDED][6174](https://github.com/stripe/stripe-android/pull/6174) Make PaymentLauncher.create methods Java-friendly.
-[FIXED][6172](https://github.com/stripe/stripe-android/pull/6172) Centers PaymentSheet on tablets.
+* [ADDED][6174](https://github.com/stripe/stripe-android/pull/6174) Make PaymentLauncher.create methods Java-friendly.
+* [FIXED][6172](https://github.com/stripe/stripe-android/pull/6172) Centers PaymentSheet on tablets.
 
 ## 20.19.1 - 2023-01-30
 

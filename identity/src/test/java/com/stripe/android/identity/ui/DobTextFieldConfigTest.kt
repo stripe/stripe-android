@@ -10,7 +10,7 @@ class DobTextFieldConfigTest {
     @Test
     fun testErrorDateBefore1900() {
         assertThat(
-            shouldShowErrorWithFocus(dateString = "01011989")
+            shouldShowErrorWithFocus(dateString = "01011899")
         ).isEqualTo(true)
     }
 
