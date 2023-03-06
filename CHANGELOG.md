@@ -8,6 +8,9 @@
 ### PaymentSheet
 * [ADDED][6283](https://github.com/stripe/stripe-android/pull/6283) Added support for Zip payments.
 
+### All SDKs
+[FIXED][6316](https://github.com/stripe/stripe-android/pull/6316) No longer requiring Kotlin 1.8 compiler.
+
 ## 20.19.4 - 2023-02-27
 
 ### StripeCardScan
