@@ -25,7 +25,6 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -47,7 +46,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         suspend {
             val email = requireNotNull(getManifest().accountholderCustomerEmailAddress)
             val consumerSession = requireNotNull(lookupAccount(email).consumerSession)
-            startVerification.sms(consumerSessionClientSecret = consumerSession.clientSecret,)
+            startVerification.sms(consumerSessionClientSecret = consumerSession.clientSecret)
             eventTracker.track(PaneLoaded(Pane.NETWORKING_LINK_VERIFICATION))
             NetworkingLinkVerificationState.Payload(
                 email = consumerSession.emailAddress,
@@ -66,12 +65,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             NetworkingLinkVerificationState::payload,
             onSuccess = {
                 viewModelScope.launch {
-                    it.otpElement.getFormFieldValueFlow()
-                        .mapNotNull { formFieldsList ->
-                            // formFieldsList contains only one element, for the OTP. Take the second value of
-                            // the pair, which is the FormFieldEntry containing the value entered by the user.
-                            formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value
-                        }.collectLatest { onOTPEntered(it) }
+                    it.otpElement.otpCompleteFlow.collectLatest { onOTPEntered(it) }
                 }
             },
             onFail = { error ->
