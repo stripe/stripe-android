@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -15,39 +14,28 @@ import com.stripe.android.test.core.Browser
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
-import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.GooglePayState
-import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
-import com.stripe.android.test.core.TestWatcher
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.TestRules
 import com.stripe.android.utils.initializedLpmRepository
 import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.Timeout
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class TestFieldPopulation {
-    @get:Rule
-    var globalTimeout: Timeout = Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS)
 
     @get:Rule
-    val composeTestRule = createEmptyComposeRule()
-
-    @get:Rule
-    val testWatcher = TestWatcher()
-
-    @get:Rule
-    val disableAnimations = DisableAnimationsRule()
+    val rules = TestRules.create()
 
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
@@ -56,7 +44,7 @@ class TestFieldPopulation {
     @Before
     fun before() {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        testDriver = PlaygroundTestDriver(device, composeTestRule, screenshotProcessor)
+        testDriver = PlaygroundTestDriver(device, rules.compose, screenshotProcessor)
     }
 
     @After
@@ -156,7 +144,7 @@ class TestFieldPopulation {
         testDriver.confirmNewOrGuestComplete(
             sepaDebit.copy(billing = Billing.Off)
         ) {
-            composeTestRule.onNodeWithText("IBAN")
+            rules.compose.onNodeWithText("IBAN")
                 .performTextInput("DE89370400440532013000")
         }
     }
@@ -166,7 +154,7 @@ class TestFieldPopulation {
         testDriver.confirmNewOrGuestComplete(
             sepaDebit.copy(billing = Billing.On)
         ) {
-            composeTestRule.onNodeWithText("IBAN")
+            rules.compose.onNodeWithText("IBAN")
                 .performTextInput("DE89370400440532013000")
         }
     }
@@ -174,12 +162,12 @@ class TestFieldPopulation {
     @Test
     fun testSinglePaymentMethodWithoutGooglePayAndKeyboardInput() {
         testDriver.confirmNewOrGuestComplete(bancontact) {
-            composeTestRule.waitForIdle()
-            val node = composeTestRule.onNodeWithText("Full name")
+            rules.compose.waitForIdle()
+            val node = rules.compose.onNodeWithText("Full name")
             node.performClick()
-            composeTestRule.waitForIdle()
+            rules.compose.waitForIdle()
             node.performTextInput("Jenny Rosen")
-            composeTestRule.waitForIdle()
+            rules.compose.waitForIdle()
         }
     }
 
