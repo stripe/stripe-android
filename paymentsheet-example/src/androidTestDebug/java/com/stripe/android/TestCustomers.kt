@@ -19,7 +19,6 @@ import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.utils.TestRules
 import com.stripe.android.utils.initializedLpmRepository
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -39,10 +38,6 @@ class TestCustomers {
     fun before() {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         testDriver = PlaygroundTestDriver(device, rules.compose, screenshotProcessor)
-    }
-
-    @After
-    fun after() {
     }
 
     private val bancontactNewUser = TestParameters(

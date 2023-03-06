@@ -154,12 +154,12 @@ def executeTests(appUrl, testUrl):
                 {
                    "name": "Shard 1",
                    "strategy": "class",
-                   "values": ["com.stripe.android.TestAuthorization", "com.stripe.android.TestBrowsers", "com.stripe.android.TestCustomers"]
+                   "values": ["com.stripe.android.TestAuthorization", "com.stripe.android.TestBrowsers"]
                 },
                 {
                    "name": "Shard 2",
                    "strategy": "class",
-                   "values": ["com.stripe.android.TestFieldPopulation", "com.stripe.android.TestGooglePay"]
+                   "values": ["com.stripe.android.TestCustomers", "com.stripe.android.TestFieldPopulation"]
                 },
                 {
                    "name": "Shard 3",

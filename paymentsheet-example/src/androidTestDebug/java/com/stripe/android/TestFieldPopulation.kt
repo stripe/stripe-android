@@ -24,7 +24,6 @@ import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.TestRules
 import com.stripe.android.utils.initializedLpmRepository
-import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
@@ -45,10 +44,6 @@ class TestFieldPopulation {
     fun before() {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         testDriver = PlaygroundTestDriver(device, rules.compose, screenshotProcessor)
-    }
-
-    @After
-    fun after() {
     }
 
     private val sepaDebit = TestParameters(
