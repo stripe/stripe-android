@@ -119,7 +119,6 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                 googlePayPaymentMethodLauncherFactory,
                 Logger.noop(),
                 testDispatcher,
-                injectorKey,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
             )

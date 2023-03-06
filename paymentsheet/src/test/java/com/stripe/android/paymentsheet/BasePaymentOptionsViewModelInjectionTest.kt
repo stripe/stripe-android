@@ -89,7 +89,6 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
                 workContext = testDispatcher,
                 application = ApplicationProvider.getApplicationContext(),
                 logger = Logger.noop(),
-                injectorKey = injectorKey,
                 lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
                 addressResourceRepository = addressResourceRepository,
                 savedStateHandle = savedStateHandle,

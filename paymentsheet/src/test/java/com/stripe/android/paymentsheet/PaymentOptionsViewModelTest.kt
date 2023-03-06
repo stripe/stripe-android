@@ -449,7 +449,6 @@ internal class PaymentOptionsViewModelTest {
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY,
             lpmResourceRepository = lpmResourceRepository,
             addressResourceRepository = mock(),
             savedStateHandle = savedStateHandle,

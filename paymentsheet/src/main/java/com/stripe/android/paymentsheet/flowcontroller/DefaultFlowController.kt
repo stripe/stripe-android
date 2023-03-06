@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Activity
-import android.content.Context
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
@@ -501,7 +500,6 @@ internal class DefaultFlowController @Inject internal constructor(
 
     companion object {
         fun getInstance(
-            appContext: Context,
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleOwner: LifecycleOwner,
             activityResultCaller: ActivityResultCaller,
