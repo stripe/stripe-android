@@ -21,7 +21,7 @@ class RetryRule(private val attempts: Int) : TestRule {
                     if (error != null && isLast) {
                         throw error
                     } else if (error != null) {
-                        Log.d(logTag, "Failed run $attempt with error")
+                        Log.d(logTag, "Failed attempt $attempt out of $attempts with error")
                     } else {
                         // The test succeeded
                         return
