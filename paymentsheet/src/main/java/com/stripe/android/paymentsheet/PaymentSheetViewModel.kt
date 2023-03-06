@@ -25,7 +25,6 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -216,17 +215,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override val shouldCompleteLinkFlowInline: Boolean = true
-
-    override fun payWithLinkInline(userInput: UserInput?) {
-        viewModelScope.launch {
-            startProcessing(CheckoutIdentifier.SheetBottomBuy)
-            linkHandler.payWithLinkInline(
-                userInput = userInput,
-                paymentSelection = selection.value,
-                shouldCompleteLinkInlineFlow = shouldCompleteLinkFlowInline,
-            )
-        }
-    }
 
     fun handleLinkPressed() {
         linkHandler.launchLink()

@@ -15,7 +15,6 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
-import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -145,10 +144,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override val shouldCompleteLinkFlowInline: Boolean = false
-
-    override fun payWithLinkInline(userInput: UserInput?) {
-        // Not happening here
-    }
 
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {

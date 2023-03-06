@@ -1200,22 +1200,6 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
-    @Test
-    fun `Shows processing state when paying inline with Link`() = runTest {
-        val viewModel = createViewModel(
-            linkState = LinkState(
-                configuration = mock(),
-                loginState = LinkState.LoginState.LoggedOut,
-            )
-        )
-
-        viewModel.processing.test {
-            assertThat(awaitItem()).isFalse()
-            viewModel.payWithLinkInline(userInput = null)
-            assertThat(awaitItem()).isTrue()
-        }
-    }
-
     private fun createViewModel(
         args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
