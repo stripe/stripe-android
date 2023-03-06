@@ -21,7 +21,7 @@ import org.jetbrains.annotations.TestOnly
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
     application: Application
-) : PaymentSheetLauncher, NonFallbackInjector {
+) : PaymentSheetLauncher {
     @InjectorKey
     private val injectorKey: String =
         WeakMapInjectorRegistry.nextKey(requireNotNull(PaymentSheetLauncher::class.simpleName))
@@ -34,7 +34,7 @@ internal class DefaultPaymentSheetLauncher(
             .build()
 
     init {
-        WeakMapInjectorRegistry.register(this, injectorKey)
+        WeakMapInjectorRegistry.register(Injector(paymentSheetLauncherComponent), injectorKey)
     }
 
     constructor(
@@ -88,16 +88,20 @@ internal class DefaultPaymentSheetLauncher(
         activityResultLauncher.launch(args)
     }
 
-    override fun inject(injectable: Injectable<*>) {
-        when (injectable) {
-            is PaymentSheetViewModel.Factory -> {
-                paymentSheetLauncherComponent.inject(injectable)
-            }
-            is FormViewModel.Factory -> {
-                paymentSheetLauncherComponent.inject(injectable)
-            }
-            else -> {
-                throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
+    private class Injector(
+        private val paymentSheetLauncherComponent: PaymentSheetLauncherComponent,
+    ) : NonFallbackInjector {
+        override fun inject(injectable: Injectable<*>) {
+            when (injectable) {
+                is PaymentSheetViewModel.Factory -> {
+                    paymentSheetLauncherComponent.inject(injectable)
+                }
+                is FormViewModel.Factory -> {
+                    paymentSheetLauncherComponent.inject(injectable)
+                }
+                else -> {
+                    throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
+                }
             }
         }
     }
