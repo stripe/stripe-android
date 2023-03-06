@@ -69,7 +69,7 @@ internal fun IdentityTheme(content: @Composable () -> Unit) {
             componentDivider = hostingAppColors.onSurface.copy(alpha = DividerAlpha),
             onComponent = hostingAppColors.onBackground,
             subtitle = hostingAppColors.onBackground.copy(alpha = ContentAlpha.medium),
-            placeholderText = hostingAppColors.onBackground.copy(alpha = ContentAlpha.disabled),
+            placeholderText = hostingAppColors.onBackground.copy(alpha = ContentAlpha.medium),
             materialColors = hostingAppColors,
         ),
         LocalShapes provides StripeThemeDefaults.shapes,
