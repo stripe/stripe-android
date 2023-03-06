@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.PaymentConfiguration
@@ -60,9 +61,8 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
-import javax.inject.Singleton
 
-@Singleton
+@FlowControllerScope
 internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
     private val lifecycleScope: CoroutineScope,
@@ -113,10 +113,10 @@ internal class DefaultFlowController @Inject internal constructor(
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is PaymentOptionsViewModel.Factory -> {
-                flowControllerComponent.inject(injectable)
+                flowControllerComponent.stateComponent.inject(injectable)
             }
             is FormViewModel.Factory -> {
-                flowControllerComponent.inject(injectable)
+                flowControllerComponent.stateComponent.inject(injectable)
             }
             else -> {
                 throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
@@ -513,16 +513,20 @@ internal class DefaultFlowController @Inject internal constructor(
                 WeakMapInjectorRegistry.nextKey(
                     requireNotNull(PaymentSheet.FlowController::class.simpleName)
                 )
-            val flowControllerComponent = DaggerFlowControllerComponent.builder()
-                .appContext(appContext)
-                .viewModelStoreOwner(viewModelStoreOwner)
-                .lifeCycleOwner(lifecycleOwner)
-                .activityResultCaller(activityResultCaller)
-                .statusBarColor(statusBarColor)
-                .paymentOptionCallback(paymentOptionCallback)
-                .paymentResultCallback(paymentResultCallback)
-                .injectorKey(injectorKey)
-                .build()
+            val flowControllerViewModel =
+                ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
+
+            val flowControllerStateComponent = flowControllerViewModel.flowControllerStateComponent
+
+            val flowControllerComponent: FlowControllerComponent =
+                flowControllerStateComponent.flowControllerComponentBuilder
+                    .lifeCycleOwner(lifecycleOwner)
+                    .activityResultCaller(activityResultCaller)
+                    .statusBarColor(statusBarColor)
+                    .paymentOptionCallback(paymentOptionCallback)
+                    .paymentResultCallback(paymentResultCallback)
+                    .injectorKey(injectorKey)
+                    .build()
             val flowController = flowControllerComponent.flowController
             flowController.flowControllerComponent = flowControllerComponent
             WeakMapInjectorRegistry.register(flowController, injectorKey)
