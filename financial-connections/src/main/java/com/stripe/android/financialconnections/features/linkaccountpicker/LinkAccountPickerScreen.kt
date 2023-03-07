@@ -173,7 +173,6 @@ private fun LinkAccountPickerLoaded(
                 Text(text = stringResource(R.string.stripe_link_account_picker_cta))
             }
         }
-
     }
 }
 

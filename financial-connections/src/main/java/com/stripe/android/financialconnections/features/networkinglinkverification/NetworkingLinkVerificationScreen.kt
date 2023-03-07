@@ -30,10 +30,12 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.FormErrorText
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.common.VerificationErrorText
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -45,6 +47,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
+import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -128,14 +131,17 @@ private fun NetworkingLinkVerificationLoaded(
             phoneNumber = payload.phoneNumber
         )
         Spacer(modifier = Modifier.size(24.dp))
-        ExistingEmailSection(
+        OtpSection(
             focusRequester = focusRequester,
             otpElement = payload.otpElement,
             enabled = confirmVerificationAsync !is Loading
         )
         if (confirmVerificationAsync is Fail) {
             Spacer(modifier = Modifier.size(4.dp))
-            FormErrorText(confirmVerificationAsync.error)
+            VerificationErrorText(
+                error = confirmVerificationAsync.error,
+                verificationType = VerificationType.SMS
+            )
         }
         Spacer(modifier = Modifier.size(24.dp))
         EmailSubtext(payload.email)
@@ -143,7 +149,7 @@ private fun NetworkingLinkVerificationLoaded(
 }
 
 @Composable
-private fun ExistingEmailSection(
+private fun OtpSection(
     focusRequester: FocusRequester,
     otpElement: OTPElement,
     enabled: Boolean
@@ -235,9 +241,13 @@ internal fun NetworkingLinkVerificationScreenWithErrorPreview() {
     FinancialConnectionsPreview {
         NetworkingLinkVerificationContent(
             state = NetworkingLinkVerificationState(
-                confirmVerification = Fail<Unit>(
-                    Exception(
-                        "The provided 2FA is not valid."
+                confirmVerification = Fail(
+                    APIException(
+                        stripeError = StripeError(
+                            code = "consumer_verification_max_attempts_exceeded"
+                        ),
+                        statusCode = 400,
+                        message = "auth error"
                     )
                 ),
                 payload = Success(
