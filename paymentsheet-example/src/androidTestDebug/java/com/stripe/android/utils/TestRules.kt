@@ -11,7 +11,7 @@ import org.junit.rules.Timeout
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
-class TestRules(
+class TestRules private constructor(
     private val chain: RuleChain,
     val compose: ComposeTestRule,
 ) : TestRule {
