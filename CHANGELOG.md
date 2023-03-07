@@ -2,7 +2,11 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Payments
+* [ADDED][6306](https://github.com/stripe/stripe-android/pull/6306) Added support for Cash App Pay. See the docs [here](https://stripe.com/docs/payments/cash-app-pay).
+
 ### PaymentSheet
+* [ADDED][6306](https://github.com/stripe/stripe-android/pull/6306) Added support for Cash App Pay.
 * [FIXED][6326](https://github.com/stripe/stripe-android/pull/6326) Fixed an issue where the primary button would lose its padding on configuration changes.
 
 ## 20.19.5 - 2023-03-06
