@@ -369,6 +369,12 @@ public abstract interface class com/stripe/android/IssuingCardPinService$Listene
 	public abstract fun onError (Lcom/stripe/android/IssuingCardPinService$CardPinActionError;Ljava/lang/String;Ljava/lang/Throwable;)V
 }
 
+public final class com/stripe/android/LegacyCreateIntentCallback$DefaultImpls {
+}
+
+public final class com/stripe/android/LegacyCreateIntentCallbackForServerSideConfirmation$DefaultImpls {
+}
+
 public final class com/stripe/android/PayWithGoogleUtils {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/PayWithGoogleUtils;
@@ -990,6 +996,9 @@ public final class com/stripe/android/StripeApiBeta : java/lang/Enum {
 	public final fun getCode ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/StripeApiBeta;
 	public static fun values ()[Lcom/stripe/android/StripeApiBeta;
+}
+
+public abstract interface annotation class com/stripe/android/StripeDeferredIntentCreationBetaApi : java/lang/annotation/Annotation {
 }
 
 public abstract class com/stripe/android/StripeIntentResult : com/stripe/android/core/model/StripeModel {

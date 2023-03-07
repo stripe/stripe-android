@@ -76,6 +76,34 @@ internal class DefaultPaymentSheetLauncher(
         fragment.requireActivity().application
     )
 
+    @Suppress("UnusedPrivateMember")
+    internal constructor(
+        activity: ComponentActivity,
+        callback: PaymentSheetResultCallback,
+        deferredIntentCallback: DeferredIntentCallback
+    ) : this(
+        activity.registerForActivityResult(
+            PaymentSheetContractV2()
+        ) {
+            callback.onPaymentSheetResult(it)
+        },
+        activity.application
+    )
+
+    @Suppress("UnusedPrivateMember")
+    internal constructor(
+        fragment: Fragment,
+        callback: PaymentSheetResultCallback,
+        deferredIntentCallback: DeferredIntentCallback
+    ) : this(
+        fragment.registerForActivityResult(
+            PaymentSheetContractV2()
+        ) {
+            callback.onPaymentSheetResult(it)
+        },
+        fragment.requireActivity().application
+    )
+
     override fun present(
         mode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?

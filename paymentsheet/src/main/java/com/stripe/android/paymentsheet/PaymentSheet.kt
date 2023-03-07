@@ -10,6 +10,9 @@ import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import com.stripe.android.CreateIntentCallback
+import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
+import com.stripe.android.StripeDeferredIntentCreationBetaApi
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -52,6 +55,104 @@ class PaymentSheet internal constructor(
         callback: PaymentSheetResultCallback
     ) : this(
         DefaultPaymentSheetLauncher(fragment, callback)
+    )
+
+    /**
+     * 🚧 Under construction 🚧
+     * Constructor to be used when launching payment sheet with the deferred intent flow.
+     *
+     * @param activity  the Activity that is presenting the payment sheet.
+     * @param createIntentCallback called when the customer confirms payment.
+     * @param resultCallback  called with the result of the payment after the payment sheet is
+     * dismissed.
+     */
+    @StripeDeferredIntentCreationBetaApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        activity: ComponentActivity,
+        createIntentCallback: CreateIntentCallback,
+        resultCallback: PaymentSheetResultCallback
+    ) : this(
+        DefaultPaymentSheetLauncher(activity, resultCallback) { paymentMethodId, _ ->
+            createIntentCallback.onIntentCreated(paymentMethodId)
+        }
+    )
+
+    /**
+     * 🚧 Under construction 🚧
+     * Constructor to be used when launching payment sheet with the deferred intent flow.
+     *
+     * @param fragment  the Fragment that is presenting the payment sheet.
+     * @param createIntentCallback called when the customer confirms payment.
+     * @param resultCallback  called with the result of the payment after the payment sheet is
+     * dismissed.
+     */
+    @StripeDeferredIntentCreationBetaApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        fragment: Fragment,
+        createIntentCallback: CreateIntentCallback,
+        resultCallback: PaymentSheetResultCallback
+    ) : this(
+        DefaultPaymentSheetLauncher(fragment, resultCallback) { paymentMethodId, _ ->
+            createIntentCallback.onIntentCreated(paymentMethodId)
+        }
+    )
+
+    /**
+     * 🚧 Under construction 🚧
+     * For advanced users who need server-side confirmation.
+     * Constructor to be used when launching payment sheet with the deferred intent flow.
+     *
+     * @param activity  the Activity that is presenting the payment sheet.
+     * @param serverSideConfirmCreateIntentCallback called when the customer confirms payment.
+     * @param resultCallback  called with the result of the payment after the payment sheet is
+     * dismissed.
+     */
+    @StripeDeferredIntentCreationBetaApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        activity: ComponentActivity,
+        serverSideConfirmCreateIntentCallback: CreateIntentCallbackForServerSideConfirmation,
+        resultCallback: PaymentSheetResultCallback
+    ) : this(
+        DefaultPaymentSheetLauncher(
+            activity,
+            resultCallback
+        ) { paymentMethodId, customerRequestedSave ->
+            serverSideConfirmCreateIntentCallback.onIntentCreated(
+                paymentMethodId,
+                customerRequestedSave
+            )
+        }
+    )
+
+    /**
+     * 🚧 Under construction 🚧
+     * For advanced users who need server-side confirmation.
+     * Constructor to be used when launching payment sheet with the deferred intent flow.
+     *
+     * @param fragment  the Fragment that is presenting the payment sheet.
+     * @param serverSideConfirmCreateIntentCallback called when the customer confirms payment.
+     * @param resultCallback  called with the result of the payment after the payment sheet is
+     * dismissed.
+     */
+    @StripeDeferredIntentCreationBetaApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        fragment: Fragment,
+        serverSideConfirmCreateIntentCallback: CreateIntentCallbackForServerSideConfirmation,
+        resultCallback: PaymentSheetResultCallback
+    ) : this(
+        DefaultPaymentSheetLauncher(
+            fragment,
+            resultCallback
+        ) { paymentMethodId, customerRequestedSave ->
+            serverSideConfirmCreateIntentCallback.onIntentCreated(
+                paymentMethodId,
+                customerRequestedSave
+            )
+        }
     )
 
     /**
@@ -953,6 +1054,134 @@ class PaymentSheet internal constructor(
                     paymentOptionCallback,
                     paymentResultCallback
                 ).create()
+            }
+
+            /**
+             * 🚧 Under construction 🚧
+             * Create the FlowController when launching the payment sheet from an Activity.
+             *
+             * @param activity  the Activity that is presenting the payment sheet.
+             * @param createIntentCallback Called after you call [FlowController.confirm].
+             * @param paymentOptionCallback called when the customer's desired payment method
+             * changes. Called in response to the [FlowController.presentPaymentOptions]
+             * @param paymentResultCallback called when a [PaymentSheetResult] is available.
+             */
+            @OptIn(StripeDeferredIntentCreationBetaApi::class)
+            @JvmStatic
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun create(
+                activity: ComponentActivity,
+                createIntentCallback: CreateIntentCallback,
+                paymentOptionCallback: PaymentOptionCallback,
+                paymentResultCallback: PaymentSheetResultCallback
+            ): FlowController {
+                return FlowControllerFactory(
+                    activity,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ) { paymentMethodId, _ ->
+                    createIntentCallback.onIntentCreated(
+                        paymentMethodId
+                    )
+                }.create()
+            }
+
+            /**
+             * 🚧 Under construction 🚧
+             * Create the FlowController when launching the payment sheet from a Fragment.
+             *
+             * @param fragment the Fragment that is presenting the payment sheet.
+             * @param createIntentCallback Called after you call [FlowController.confirm].
+             * @param paymentOptionCallback called when the customer's desired payment method
+             * changes. Called in response to the [FlowController.presentPaymentOptions]
+             * @param paymentResultCallback called when a [PaymentSheetResult] is available.
+             */
+            @OptIn(StripeDeferredIntentCreationBetaApi::class)
+            @JvmStatic
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun create(
+                fragment: Fragment,
+                createIntentCallback: CreateIntentCallback,
+                paymentOptionCallback: PaymentOptionCallback,
+                paymentResultCallback: PaymentSheetResultCallback
+            ): FlowController {
+                return FlowControllerFactory(
+                    fragment,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ) { paymentMethodId, _ ->
+                    createIntentCallback.onIntentCreated(
+                        paymentMethodId
+                    )
+                }.create()
+            }
+
+            /**
+             * 🚧 Under construction 🚧
+             * For advanced users who need server-side confirmation.
+             * Create the FlowController when launching the payment sheet from an Activity.
+             *
+             * @param activity  the Activity that is presenting the payment sheet.
+             * @param serverSideConfirmCreateIntentCallback Called after you call
+             * [FlowController.confirm].
+             * @param paymentOptionCallback called when the customer's desired payment method
+             * changes. Called in response to the [FlowController.presentPaymentOptions]
+             * @param paymentResultCallback called when a [PaymentSheetResult] is available.
+             */
+            @OptIn(StripeDeferredIntentCreationBetaApi::class)
+            @JvmStatic
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun create(
+                activity: ComponentActivity,
+                serverSideConfirmCreateIntentCallback:
+                    CreateIntentCallbackForServerSideConfirmation,
+                paymentOptionCallback: PaymentOptionCallback,
+                paymentResultCallback: PaymentSheetResultCallback
+            ): FlowController {
+                return FlowControllerFactory(
+                    activity,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ) { paymentMethodId, customerRequestedSave ->
+                    serverSideConfirmCreateIntentCallback.onIntentCreated(
+                        paymentMethodId,
+                        customerRequestedSave
+                    )
+                }.create()
+            }
+
+            /**
+             * 🚧 Under construction 🚧
+             * For advanced users who need server-side confirmation.
+             * Create the FlowController when launching the payment sheet from a Fragment.
+             *
+             * @param fragment the Fragment that is presenting the payment sheet.
+             * @param serverSideConfirmCreateIntentCallback Called after you call
+             * [FlowController.confirm].
+             * @param paymentOptionCallback called when the customer's desired payment method
+             * changes. Called in response to the [FlowController.presentPaymentOptions]
+             * @param paymentResultCallback called when a [PaymentSheetResult] is available.
+             */
+            @OptIn(StripeDeferredIntentCreationBetaApi::class)
+            @JvmStatic
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun create(
+                fragment: Fragment,
+                serverSideConfirmCreateIntentCallback:
+                    CreateIntentCallbackForServerSideConfirmation,
+                paymentOptionCallback: PaymentOptionCallback,
+                paymentResultCallback: PaymentSheetResultCallback
+            ): FlowController {
+                return FlowControllerFactory(
+                    fragment,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ) { paymentMethodId, customerRequestedSave ->
+                    serverSideConfirmCreateIntentCallback.onIntentCreated(
+                        paymentMethodId,
+                        customerRequestedSave
+                    )
+                }.create()
             }
         }
     }

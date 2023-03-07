@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.paymentsheet.DeferredIntentCallback
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -34,6 +35,36 @@ internal class FlowControllerFactory(
         fragment: Fragment,
         paymentOptionCallback: PaymentOptionCallback,
         paymentResultCallback: PaymentSheetResultCallback
+    ) : this(
+        viewModelStoreOwner = fragment,
+        lifecycleOwner = fragment,
+        activityResultCaller = fragment,
+        statusBarColor = { fragment.activity?.window?.statusBarColor },
+        paymentOptionCallback = paymentOptionCallback,
+        paymentResultCallback = paymentResultCallback,
+    )
+
+    @Suppress("UnusedPrivateMember")
+    internal constructor(
+        activity: ComponentActivity,
+        paymentOptionCallback: PaymentOptionCallback,
+        paymentResultCallback: PaymentSheetResultCallback,
+        deferredIntentCallback: DeferredIntentCallback
+    ) : this(
+        viewModelStoreOwner = activity,
+        lifecycleOwner = activity,
+        activityResultCaller = activity,
+        statusBarColor = { activity.window.statusBarColor },
+        paymentOptionCallback = paymentOptionCallback,
+        paymentResultCallback = paymentResultCallback,
+    )
+
+    @Suppress("UnusedPrivateMember")
+    internal constructor(
+        fragment: Fragment,
+        paymentOptionCallback: PaymentOptionCallback,
+        paymentResultCallback: PaymentSheetResultCallback,
+        deferredIntentCallback: DeferredIntentCallback
     ) : this(
         viewModelStoreOwner = fragment,
         lifecycleOwner = fragment,
