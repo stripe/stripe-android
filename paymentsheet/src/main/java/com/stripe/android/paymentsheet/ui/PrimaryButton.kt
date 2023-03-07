@@ -72,25 +72,17 @@ internal class PrimaryButton @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
+
     @VisibleForTesting
     internal var defaultTintList: ColorStateList? = null
     private var state: State? = null
     private val animator = PrimaryButtonAnimator(context)
-
-    // This is the text set by the client.  The internal label text is set to this value
-    // in the on ready state and it is temporarily replaced during the processing and finishing states.
-    private var originalLabel: String? = null
-
-    @VisibleForTesting
-    internal var externalLabel: String? = null
 
     @VisibleForTesting
     internal val viewBinding = PrimaryButtonBinding.inflate(
         LayoutInflater.from(context),
         this
     )
-
-    internal var lockVisible = true
 
     private val confirmedIcon = viewBinding.confirmedIcon
 
@@ -117,9 +109,6 @@ internal class PrimaryButton @JvmOverloads constructor(
         getTextAttributeValue(attrs)?.let {
             setLabel(it.toString())
         }
-
-//        isClickable = true
-//        isEnabled = false
     }
 
     fun setAppearanceConfiguration(
@@ -163,11 +152,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun setLabel(text: String?) {
-        externalLabel = text
-        text?.let {
-            if (state !is State.StartProcessing) {
-                originalLabel = text
-            }
+        if (text != null) {
             viewBinding.label.setContent {
                 LabelUI(label = text)
             }
@@ -176,18 +161,13 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     private fun onReadyState() {
         isClickable = true
-        originalLabel?.let {
-            setLabel(it)
-        }
         defaultTintList?.let {
             backgroundTintList = it
         }
-        viewBinding.lockIcon.isVisible = lockVisible
         viewBinding.confirmingIcon.isVisible = false
     }
 
     private fun onStartProcessing() {
-        viewBinding.lockIcon.isVisible = false
         viewBinding.confirmingIcon.isVisible = true
         isClickable = false
         setLabel(
@@ -216,13 +196,9 @@ internal class PrimaryButton @JvmOverloads constructor(
         isVisible = uiState != null
 
         if (uiState != null) {
-            if (state !is State.StartProcessing && state !is State.FinishProcessing) {
-                // If we're processing or finishing, we're not overriding the label
-                setLabel(uiState.label)
-            }
-
+            setLabel(uiState.label)
             isEnabled = uiState.enabled
-            lockVisible = uiState.lockVisible
+            viewBinding.lockIcon.isVisible = uiState.lockVisible
             setOnClickListener { uiState.onClick() }
         }
     }

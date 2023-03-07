@@ -16,6 +16,7 @@ internal class PrimaryButtonUiStateMapper(
     private val config: PaymentSheet.Configuration?,
     private val isProcessingPayment: Boolean,
     private val currentScreenFlow: Flow<PaymentSheetScreen>,
+    private val processingStateFlow: Flow<PaymentSheetViewState>,
     private val buttonsEnabledFlow: Flow<Boolean>,
     private val amountFlow: Flow<Amount?>,
     private val selectionFlow: Flow<PaymentSelection?>,
@@ -23,17 +24,28 @@ internal class PrimaryButtonUiStateMapper(
     private val onClick: () -> Unit,
 ) {
 
+    private val processingLabel: String
+        get() = context.getString(R.string.stripe_paymentsheet_primary_button_processing)
+
     fun forCompleteFlow(): Flow<PrimaryButton.UIState?> {
         return combine(
             currentScreenFlow,
+            processingStateFlow,
             buttonsEnabledFlow,
             amountFlow,
             selectionFlow,
             customPrimaryButtonUiStateFlow,
-        ) { screen, buttonsEnabled, amount, selection, customPrimaryButton ->
+        ) { items ->
+            val screen = items[0] as PaymentSheetScreen
+            val processingState = items[1] as PaymentSheetViewState
+            val buttonsEnabled = items[2] as Boolean
+            val amount = items[3] as? Amount
+            val selection = items[4] as? PaymentSelection
+            val customPrimaryButton = items[5] as? PrimaryButton.UIState
+
             customPrimaryButton ?: PrimaryButton.UIState(
-                processingState = PrimaryButton.State.Ready,
-                label = buyButtonLabel(amount),
+                processingState = processingState.convert(),
+                label = buyButtonLabel(amount, processingState),
                 onClick = onClick,
                 enabled = buttonsEnabled && selection != null,
                 lockVisible = true,
@@ -45,13 +57,14 @@ internal class PrimaryButtonUiStateMapper(
     fun forCustomFlow(): Flow<PrimaryButton.UIState?> {
         return combine(
             currentScreenFlow,
+            processingStateFlow,
             buttonsEnabledFlow,
             selectionFlow,
             customPrimaryButtonUiStateFlow,
-        ) { screen, buttonsEnabled, selection, customPrimaryButton ->
+        ) { screen, processingState, buttonsEnabled, selection, customPrimaryButton ->
             customPrimaryButton ?: PrimaryButton.UIState(
-                processingState = PrimaryButton.State.Ready,
-                label = continueButtonLabel(),
+                processingState = processingState.convert(),
+                label = continueButtonLabel(processingState),
                 onClick = onClick,
                 enabled = buttonsEnabled && selection != null,
                 lockVisible = false,
@@ -62,8 +75,13 @@ internal class PrimaryButtonUiStateMapper(
         }
     }
 
-    private fun buyButtonLabel(amount: Amount?): String {
-        return if (config?.primaryButtonLabel != null) {
+    private fun buyButtonLabel(
+        amount: Amount?,
+        processingState: PaymentSheetViewState,
+    ): String {
+        return if (processingState.isProcessing) {
+            processingLabel
+        } else if (config?.primaryButtonLabel != null) {
             config.primaryButtonLabel
         } else if (isProcessingPayment) {
             val fallback = context.getString(R.string.stripe_paymentsheet_pay_button_label)
@@ -73,11 +91,17 @@ internal class PrimaryButtonUiStateMapper(
         }
     }
 
-    private fun continueButtonLabel(): String {
-        val customLabel = config?.primaryButtonLabel
-        return customLabel ?: context.getString(R.string.stripe_continue_button_label)
+    private fun continueButtonLabel(
+        processingState: PaymentSheetViewState,
+    ): String {
+        return processingLabel.takeIf { processingState.isProcessing }
+            ?: config?.primaryButtonLabel
+            ?: context.getString(R.string.stripe_continue_button_label)
     }
 }
+
+private val PaymentSheetViewState.isProcessing: Boolean
+    get() = this is PaymentSheetViewState.StartProcessing
 
 internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
     return when (this) {

@@ -367,7 +367,7 @@ internal abstract class BaseSheetViewModel(
     fun updatePrimaryButtonForLinkSignup(viewState: InlineSignupViewState) {
         val uiState = primaryButtonUiState.value ?: return
 
-        updateLinkPrimaryButtonUiState(
+        updateCustomPrimaryButtonUiState {
             if (viewState.useLink) {
                 val userInput = viewState.userInput
                 val paymentSelection = selection.value
@@ -394,12 +394,12 @@ internal abstract class BaseSheetViewModel(
             } else {
                 null
             }
-        )
+        }
     }
 
     fun updatePrimaryButtonForLinkInline() {
         val uiState = primaryButtonUiState.value ?: return
-        updateLinkPrimaryButtonUiState(
+        updateCustomPrimaryButtonUiState {
             PrimaryButton.UIState(
                 processingState = PrimaryButton.State.Ready,
                 label = uiState.label,
@@ -408,15 +408,13 @@ internal abstract class BaseSheetViewModel(
                 lockVisible = this is PaymentSheetViewModel,
                 color = config?.primaryButtonColor,
             )
-        )
+        }
     }
 
-    private fun updateLinkPrimaryButtonUiState(state: PrimaryButton.UIState?) {
-        customPrimaryButtonUiState.value = state
-    }
-
-    fun updateCustomPrimaryButtonUiState(block: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {
-        customPrimaryButtonUiState.update(block)
+    fun updateCustomPrimaryButtonUiState(
+        transform: (PrimaryButton.UIState?) -> PrimaryButton.UIState?,
+    ) {
+        customPrimaryButtonUiState.update(transform)
     }
 
     fun resetCustomPrimaryButton() {
@@ -503,7 +501,7 @@ internal abstract class BaseSheetViewModel(
 
     abstract val shouldCompleteLinkFlowInline: Boolean
 
-    fun payWithLinkInline(userInput: UserInput?) {
+    private fun payWithLinkInline(userInput: UserInput?) {
         viewModelScope.launch {
             linkHandler.payWithLinkInline(
                 userInput = userInput,
