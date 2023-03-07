@@ -14,6 +14,7 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
@@ -28,6 +29,7 @@ import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
@@ -35,8 +37,9 @@ import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -69,6 +72,19 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
 ) {
+
+    private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
+        context = getApplication(),
+        config = config,
+        isProcessingPayment = args.state.stripeIntent is PaymentIntent,
+        currentScreenFlow = currentScreen,
+        buttonsEnabledFlow = buttonsEnabled,
+        amountFlow = amount,
+        selectionFlow = selection,
+        customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
+        onClick = this::onUserSelection,
+    )
+
     private val _paymentOptionResult = MutableSharedFlow<PaymentOptionResult>(replay = 1)
     internal val paymentOptionResult: SharedFlow<PaymentOptionResult> = _paymentOptionResult
 
@@ -79,14 +95,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
     // and how to populate that view.
     override var newPaymentSelection = args.state.newPaymentSelection
 
-    val isPrimaryButtonVisible = combine(
-        currentScreen,
-        primaryButtonUIState,
-        selection,
-    ) { screen, uiState, selection ->
-        screen.showsContinueButton || uiState?.visible == true ||
-            selection?.requiresConfirmation == true
-    }
+    override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (args.state.isGooglePayReady) {

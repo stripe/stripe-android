@@ -419,11 +419,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    private fun buildPrimaryButtonText(): String? {
+    private fun buildPrimaryButtonText(): String {
         return when {
             args.isCompleteFlow -> {
                 if (args.clientSecret is PaymentIntentClientSecret) {
-                    args.formArgs.amount?.buildPayButtonLabel(application.resources)
+                    args.formArgs.amount!!.buildPayButtonLabel(application.resources)
                 } else {
                     application.getString(
                         R.string.stripe_setup_button_label

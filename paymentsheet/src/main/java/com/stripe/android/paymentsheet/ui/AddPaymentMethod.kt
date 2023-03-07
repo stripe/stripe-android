@@ -14,7 +14,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.model.CardBrand
@@ -77,24 +76,13 @@ internal fun AddPaymentMethod(
 
         LaunchedEffect(paymentSelection, linkSignupState, linkInlineSelection) {
             val state = linkSignupState
+            val isUsingLinkInline = linkInlineSelection != null &&
+                paymentSelection is PaymentSelection.New.Card
+
             if (state != null) {
-                sheetViewModel.onLinkSignupStateChanged(linkConfig!!, state, paymentSelection)
-            } else if (linkInlineSelection != null) {
-                (paymentSelection as? PaymentSelection.New.Card)?.let {
-                    sheetViewModel.updatePrimaryButtonUIState(
-                        PrimaryButton.UIState(
-                            label = null,
-                            onClick = {
-                                sheetViewModel.payWithLinkInline(
-                                    linkConfig!!,
-                                    null
-                                )
-                            },
-                            enabled = true,
-                            visible = true
-                        )
-                    )
-                }
+                sheetViewModel.updatePrimaryButtonForLinkSignup(state)
+            } else if (isUsingLinkInline) {
+                sheetViewModel.updatePrimaryButtonForLinkInline()
             }
         }
 
@@ -109,7 +97,6 @@ internal fun AddPaymentMethod(
                 showCheckboxFlow = showCheckboxFlow,
                 onItemSelectedListener = { selectedLpm ->
                     if (selectedItem != selectedLpm) {
-                        sheetViewModel.updatePrimaryButtonUIState(null)
                         selectedPaymentMethodCode = selectedLpm.code
                     }
                 },
@@ -155,37 +142,6 @@ private fun BaseSheetViewModel.showLinkInlineSignupView(
         ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
         paymentMethodCode == PaymentMethod.Type.Card.code &&
         (linkAccountStatus in validStatusStates || linkInlineSelectionValid)
-}
-
-private fun BaseSheetViewModel.onLinkSignupStateChanged(
-    config: LinkPaymentLauncher.Configuration,
-    viewState: InlineSignupViewState,
-    paymentSelection: PaymentSelection?
-) {
-    updatePrimaryButtonUIState(
-        if (viewState.useLink) {
-            val userInput = viewState.userInput
-            if (userInput != null &&
-                paymentSelection != null
-            ) {
-                PrimaryButton.UIState(
-                    label = null,
-                    onClick = { payWithLinkInline(config, userInput) },
-                    enabled = true,
-                    visible = true
-                )
-            } else {
-                PrimaryButton.UIState(
-                    label = null,
-                    onClick = null,
-                    enabled = false,
-                    visible = true
-                )
-            }
-        } else {
-            null
-        }
-    )
 }
 
 @VisibleForTesting

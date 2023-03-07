@@ -193,9 +193,8 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.removePaymentMethod(paymentMethod)
 
-        assertThat(viewModel.paymentMethods.value)
-            .isEmpty()
-        assertThat(viewModel.primaryButtonUIState.value).isNull()
+        assertThat(viewModel.paymentMethods.value).isEmpty()
+        assertThat(viewModel.primaryButtonUiState.value).isNull()
         assertThat(viewModel.notesText.value).isNull()
     }
 
@@ -416,23 +415,6 @@ internal class PaymentOptionsViewModelTest {
 
             val result = awaitItem() as? PaymentOptionResult.Succeeded
             assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link)
-        }
-    }
-
-    @Test
-    fun `Primary button is visible if the selected payment method requires confirmation`() = runTest {
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
-
-        val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link) }
-
-        viewModel.isPrimaryButtonVisible.test {
-            assertThat(awaitItem()).isFalse()
-
-            viewModel.handlePaymentMethodSelected(selection)
-            assertThat(awaitItem()).isTrue()
-
-            viewModel.handlePaymentMethodSelected(PaymentSelection.Link)
-            assertThat(awaitItem()).isFalse()
         }
     }
 
