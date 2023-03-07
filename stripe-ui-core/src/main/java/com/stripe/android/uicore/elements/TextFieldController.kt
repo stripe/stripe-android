@@ -26,7 +26,7 @@ interface TextFieldController : InputController, SectionFieldComposable {
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
 
-    val autofillTypes: List<AutofillType>
+    val autofillType: AutofillType?
     val debugLabel: String
     val trailingIcon: Flow<TextFieldIcon?>
     val capitalization: KeyboardCapitalization
@@ -116,15 +116,12 @@ class SimpleTextFieldController constructor(
     override val debugLabel = textFieldConfig.debugLabel
 
     @OptIn(ExperimentalComposeUiApi::class)
-    override val autofillTypes: List<AutofillType> = when (textFieldConfig) {
-        is DateConfig -> listOf(
-            AutofillType.CreditCardExpirationDate
-        )
-        is PostalCodeConfig -> listOf(
-            AutofillType.PostalCode
-        )
-        is EmailConfig -> listOf(AutofillType.EmailAddress)
-        else -> listOf()
+    override val autofillType: AutofillType? = when (textFieldConfig) {
+        is DateConfig -> AutofillType.CreditCardExpirationDate
+        is PostalCodeConfig -> AutofillType.PostalCode
+        is EmailConfig -> AutofillType.EmailAddress
+        is NameConfig -> AutofillType.PersonFullName
+        else -> null
     }
 
     override val placeHolder = MutableStateFlow(textFieldConfig.placeHolder)

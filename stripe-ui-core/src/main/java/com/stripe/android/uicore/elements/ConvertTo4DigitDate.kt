@@ -1,8 +1,9 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun convertTo4DigitDate(input: String) =
     "0$input".takeIf {
         (input.isNotBlank() && !(input[0] == '0' || input[0] == '1')) ||

@@ -34,7 +34,7 @@ internal sealed class CardNumberController : TextFieldController, SectionFieldEr
     abstract val cardScanEnabled: Boolean
 
     @OptIn(ExperimentalComposeUiApi::class)
-    override val autofillTypes: List<AutofillType> = listOf(AutofillType.CreditCardNumber)
+    override val autofillType: AutofillType = AutofillType.CreditCardNumber
 
     fun onCardScanResult(cardScanSheetResult: CardScanSheetResult) {
         // Don't need to populate the card number if the result is Canceled or Failed

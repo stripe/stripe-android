@@ -12,7 +12,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.uicore.elements.EmailConfig
-import com.stripe.android.ui.core.elements.NameConfig
+import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import org.junit.Rule
 import org.junit.Test

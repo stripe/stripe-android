@@ -41,7 +41,7 @@ class CvcController constructor(
     override val debugLabel = cvcTextFieldConfig.debugLabel
 
     @OptIn(ExperimentalComposeUiApi::class)
-    override val autofillTypes: List<AutofillType> = listOf(AutofillType.CreditCardSecurityCode)
+    override val autofillType: AutofillType = AutofillType.CreditCardSecurityCode
 
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: Flow<String> = _fieldValue

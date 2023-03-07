@@ -37,7 +37,7 @@ class AddressTextFieldController(
     override val debugLabel = config.debugLabel
 
     @ExperimentalComposeUiApi
-    override val autofillTypes: List<AutofillType> = listOf()
+    override val autofillType: AutofillType? = null
 
     /** This is all the information that can be observed on the element */
     private val _fieldValue = MutableStateFlow("")

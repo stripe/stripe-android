@@ -432,10 +432,6 @@ public final class com/stripe/android/ui/core/elements/MandateTextSpec$Companion
 public final class com/stripe/android/ui/core/elements/MandateTextUIKt {
 }
 
-public final class com/stripe/android/ui/core/elements/NameConfig$Companion {
-	public final fun createController (Ljava/lang/String;)Lcom/stripe/android/uicore/elements/SimpleTextFieldController;
-}
-
 public final class com/stripe/android/ui/core/elements/NameSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/NameSpec$$serializer;
