@@ -32,13 +32,16 @@ class TestRules(
             retryCount: Int = 3,
         ): TestRules {
             val composeTestRule = createEmptyComposeRule()
+
             val chain = RuleChain
                 .outerRule(Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS))
                 .around(composeTestRule)
                 .around(TestWatcher())
-                .apply {
+                .let { chain ->
                     if (disableAnimations) {
-                        around(DisableAnimationsRule())
+                        chain.around(DisableAnimationsRule())
+                    } else {
+                        chain
                     }
                 }
                 .around(RetryRule(retryCount))
