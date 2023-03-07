@@ -42,7 +42,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
 ) : MavericksViewModel<LinkAccountPickerState>(initialState) {
 
     init {
-        logErrors()
+        observeAsyncs()
         suspend {
             val manifest = getManifest()
             val accessibleData = AccessibleDataCalloutModel.fromManifest(manifest)
@@ -63,9 +63,13 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    private fun logErrors() {
+    private fun observeAsyncs() {
         onAsync(
             LinkAccountPickerState::payload,
+            onSuccess = {
+                // Select first account by default.
+                setState { copy(selectedAccountId = it.accounts.firstOrNull()?.id) }
+            },
             onFail = { error ->
                 logger.error("Error fetching payload", error)
                 eventTracker.track(Error(PANE, error))
