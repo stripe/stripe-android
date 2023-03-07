@@ -24,6 +24,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativ
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
+import getRedactedPhoneNumber
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -50,7 +51,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             eventTracker.track(PaneLoaded(Pane.NETWORKING_LINK_VERIFICATION))
             NetworkingLinkVerificationState.Payload(
                 email = consumerSession.emailAddress,
-                phoneNumber = consumerSession.redactedPhoneNumber,
+                phoneNumber = consumerSession.getRedactedPhoneNumber(),
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 otpElement = OTPElement(
                     IdentifierSpec.Generic("otp"),
@@ -65,7 +66,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             NetworkingLinkVerificationState::payload,
             onSuccess = {
                 viewModelScope.launch {
-                    it.otpElement.otpCompleteFlow.collectLatest { onOTPEntered(it) }
+                    it.otpElement.otpCompleteFlow.collectLatest(::onOTPEntered)
                 }
             },
             onFail = { error ->

@@ -177,11 +177,9 @@ private fun EmailSubtext(email: String) {
 @Composable
 private fun Description(phoneNumber: String) {
     AnnotatedText(
-        text = TextResource.Text(
-            stringResource(
-                R.string.stripe_networking_verification_desc,
-                phoneNumber
-            )
+        text = TextResource.StringId(
+            R.string.stripe_networking_verification_desc,
+            listOf(phoneNumber)
         ),
         defaultStyle = FinancialConnectionsTheme.typography.body.copy(
             color = FinancialConnectionsTheme.colors.textSecondary
