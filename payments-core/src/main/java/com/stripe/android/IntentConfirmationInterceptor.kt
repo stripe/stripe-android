@@ -115,7 +115,6 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 is ConfirmCallbackForServerSideConfirmation -> {
                     handleServerSideConfirmation(
                         confirmCallback = confirmCallback,
-                        // TODO(jameswoo) confirm if this is correct
                         shouldSavePaymentMethod = setupForFutureUsage == OffSession,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues
@@ -176,7 +175,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
 
                 if (intent?.isConfirmed == true) {
                     IntentConfirmationInterceptor.NextStep.Complete
-                } else if (intent?.nextActionType != null) {
+                } else if (intent?.status == StripeIntent.Status.RequiresAction) {
                     IntentConfirmationInterceptor.NextStep.HandleNextAction(result.clientSecret)
                 } else {
                     createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
