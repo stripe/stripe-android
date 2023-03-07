@@ -80,6 +80,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
         context = getApplication(),
         config = config,
         isProcessingPayment = args.state.stripeIntent is PaymentIntent,
+        currentScreenFlow = currentScreen,
+        buttonsEnabledFlow = buttonsEnabled,
+        amountFlow = amount,
+        selectionFlow = selection,
+        customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         onClick = this::onUserSelection,
     )
 
@@ -93,12 +98,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     // and how to populate that view.
     override var newPaymentSelection = args.state.newPaymentSelection
 
-    override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow(
-        currentScreenFlow = currentScreen,
-        buttonsEnabledFlow = buttonsEnabled,
-        selectionFlow = selection,
-        customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
-    ).stateIn(
+    override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
         initialValue = null,

@@ -14,16 +14,15 @@ internal class PrimaryButtonUiStateMapper(
     private val context: Context,
     private val config: PaymentSheet.Configuration?,
     private val isProcessingPayment: Boolean,
+    private val currentScreenFlow: Flow<PaymentSheetScreen>,
+    private val buttonsEnabledFlow: Flow<Boolean>,
+    private val amountFlow: Flow<Amount?>,
+    private val selectionFlow: Flow<PaymentSelection?>,
+    private val customPrimaryButtonUiStateFlow: Flow<PrimaryButton.UIState?>,
     private val onClick: () -> Unit,
 ) {
 
-    fun forCompleteFlow(
-        currentScreenFlow: Flow<PaymentSheetScreen>,
-        buttonsEnabledFlow: Flow<Boolean>,
-        amountFlow: Flow<Amount?>,
-        selectionFlow: Flow<PaymentSelection?>,
-        customPrimaryButtonUiStateFlow: Flow<PrimaryButton.UIState?>,
-    ): Flow<PrimaryButton.UIState?> {
+    fun forCompleteFlow(): Flow<PrimaryButton.UIState?> {
         return combine(
             currentScreenFlow,
             buttonsEnabledFlow,
@@ -40,12 +39,7 @@ internal class PrimaryButtonUiStateMapper(
         }
     }
 
-    fun forCustomFlow(
-        currentScreenFlow: Flow<PaymentSheetScreen>,
-        buttonsEnabledFlow: Flow<Boolean>,
-        selectionFlow: Flow<PaymentSelection?>,
-        customPrimaryButtonUiStateFlow: Flow<PrimaryButton.UIState?>,
-    ): Flow<PrimaryButton.UIState?> {
+    fun forCustomFlow(): Flow<PrimaryButton.UIState?> {
         return combine(
             currentScreenFlow,
             buttonsEnabledFlow,

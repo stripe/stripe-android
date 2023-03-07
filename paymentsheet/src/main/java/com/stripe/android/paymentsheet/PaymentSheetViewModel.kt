@@ -121,6 +121,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         context = getApplication(),
         config = config,
         isProcessingPayment = isProcessingPaymentIntent,
+        currentScreenFlow = currentScreen,
+        buttonsEnabledFlow = buttonsEnabled,
+        amountFlow = amount,
+        selectionFlow = selection,
+        customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         onClick = this::checkout,
     )
 
@@ -170,13 +175,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-    override val primaryButtonUiState = primaryButtonUiStateMapper.forCompleteFlow(
-        currentScreenFlow = currentScreen,
-        buttonsEnabledFlow = buttonsEnabled,
-        amountFlow = amount,
-        selectionFlow = selection,
-        customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
-    ).stateIn(
+    override val primaryButtonUiState = primaryButtonUiStateMapper.forCompleteFlow().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
         initialValue = null,
