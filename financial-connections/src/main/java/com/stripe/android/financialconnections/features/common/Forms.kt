@@ -1,10 +1,15 @@
 package com.stripe.android.financialconnections.features.common
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -35,20 +40,31 @@ internal fun FormErrorText(error: Throwable) {
 @Composable
 fun VerificationErrorText(error: Throwable, verificationType: VerificationType) {
     val uriHandler = LocalUriHandler.current
-    AnnotatedText(
-        modifier = Modifier.padding(horizontal = 4.dp),
-        text = getVerificationErrorMessage(error = error, verificationType = verificationType),
-        defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-            color = FinancialConnectionsTheme.colors.textCritical
-        ),
-        onClickableTextClick = { uriHandler.openUri("https://support.link.co/contact/email?skipVerification=true") },
-        annotationStyles = mapOf(
-            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption.copy(
-                color = FinancialConnectionsTheme.colors.textCritical,
-                textDecoration = TextDecoration.Underline
-            ).toSpanStyle()
-        ),
-    )
+    Row {
+        Icon(
+            modifier = Modifier
+                .size(12.dp)
+                .offset(y = 2.dp),
+            painter = painterResource(R.drawable.stripe_ic_warning),
+            contentDescription = "Warning icon",
+            tint = FinancialConnectionsTheme.colors.textCritical
+        )
+        AnnotatedText(
+            modifier = Modifier.padding(horizontal = 4.dp),
+            text = getVerificationErrorMessage(error = error, verificationType = verificationType),
+            defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+                color = FinancialConnectionsTheme.colors.textCritical
+            ),
+            onClickableTextClick = { uriHandler.openUri("https://support.link.co/contact/email?skipVerification=true") },
+            annotationStyles = mapOf(
+                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption.copy(
+                    color = FinancialConnectionsTheme.colors.textCritical,
+                    textDecoration = TextDecoration.Underline
+                ).toSpanStyle()
+            ),
+        )
+    }
+
 }
 
 @Composable
