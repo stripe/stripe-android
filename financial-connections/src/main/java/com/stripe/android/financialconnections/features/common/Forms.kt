@@ -15,6 +15,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
@@ -55,7 +56,9 @@ fun VerificationErrorText(error: Throwable, verificationType: VerificationType) 
             defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
                 color = FinancialConnectionsTheme.colors.textCritical
             ),
-            onClickableTextClick = { uriHandler.openUri("https://support.link.co/contact/email?skipVerification=true") },
+            onClickableTextClick = {
+                uriHandler.openUri(FinancialConnectionsUrlResolver.linkVerificationSupportUrl)
+            },
             annotationStyles = mapOf(
                 StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption.copy(
                     color = FinancialConnectionsTheme.colors.textCritical,
@@ -64,7 +67,6 @@ fun VerificationErrorText(error: Throwable, verificationType: VerificationType) 
             ),
         )
     }
-
 }
 
 @Composable
@@ -80,8 +82,7 @@ private fun getVerificationErrorMessage(
             when (verificationType) {
                 VerificationType.EMAIL -> R.string.stripe_verification_codeExpiredEmail
                 VerificationType.SMS -> R.string.stripe_verification_codeExpiredSms
-            },
-            listOf("https://support.link.co/contact/email?skipVerification=true")
+            }
         )
 
         else -> TextResource.StringId(
