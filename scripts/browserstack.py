@@ -138,7 +138,7 @@ def executeTests(appUrl, testUrl):
          "devices": [
             "Google Pixel 7-13.0",
             "Samsung Galaxy S22-12.0",
-            "Google Pixel-7.1",
+            "Google Pixel 2-8.0",
          ],
          "testSuite": testUrl,
          "networkLogs": True,
