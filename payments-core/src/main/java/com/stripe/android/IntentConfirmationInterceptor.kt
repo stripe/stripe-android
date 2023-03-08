@@ -53,7 +53,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
-    private val confirmCallback: ConfirmCallback?,
+    private val createIntentCallback: CreateIntentCallback?,
 ) : IntentConfirmationInterceptor {
 
     private val requestOptions: ApiRequest.Options
@@ -104,18 +104,18 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         return if (clientSecret != null) {
             createConfirmStep(clientSecret, shippingValues, paymentMethod)
         } else {
-            when (confirmCallback) {
-                is ConfirmCallbackForClientSideConfirmation -> {
-                    handleClientSideConfirmation(
-                        confirmCallback = confirmCallback,
+            when (createIntentCallback) {
+                is CreateIntentCallbackForServerSideConfirmation -> {
+                    handleServerSideConfirmation(
+                        createIntentCallback = createIntentCallback,
+                        shouldSavePaymentMethod = setupForFutureUsage == OffSession,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues
                     )
                 }
-                is ConfirmCallbackForServerSideConfirmation -> {
-                    handleServerSideConfirmation(
-                        confirmCallback = confirmCallback,
-                        shouldSavePaymentMethod = setupForFutureUsage == OffSession,
+                is CreateIntentCallback -> {
+                    handleClientSideConfirmation(
+                        createIntentCallback = createIntentCallback,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues
                     )
@@ -142,35 +142,35 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun handleClientSideConfirmation(
-        confirmCallback: ConfirmCallbackForClientSideConfirmation,
+        createIntentCallback: CreateIntentCallback,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): IntentConfirmationInterceptor.NextStep {
-        val result = confirmCallback.onConfirmResponse(paymentMethodId = paymentMethod.id!!)
+        val result = createIntentCallback.onCreateIntent(paymentMethodId = paymentMethod.id!!)
 
         return when (result) {
-            is ConfirmCallback.Result.Success -> {
+            is CreateIntentCallback.Result.Success -> {
                 createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
             }
-            is ConfirmCallback.Result.Failure -> {
+            is CreateIntentCallback.Result.Failure -> {
                 IntentConfirmationInterceptor.NextStep.Fail(result.error)
             }
         }
     }
 
     private suspend fun handleServerSideConfirmation(
-        confirmCallback: ConfirmCallbackForServerSideConfirmation,
+        createIntentCallback: CreateIntentCallbackForServerSideConfirmation,
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): IntentConfirmationInterceptor.NextStep {
-        val result = confirmCallback.onConfirmResponse(
+        val result = createIntentCallback.onCreateIntent(
             paymentMethodId = paymentMethod.id!!,
             shouldSavePaymentMethod = shouldSavePaymentMethod
         )
 
         return when (result) {
-            is ConfirmCallback.Result.Success -> {
+            is CreateIntentCallback.Result.Success -> {
                 val intent = retrieveStripeIntent(result.clientSecret)
 
                 if (intent?.isConfirmed == true) {
@@ -181,7 +181,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                     createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
                 }
             }
-            is ConfirmCallback.Result.Failure -> {
+            is CreateIntentCallback.Result.Failure -> {
                 IntentConfirmationInterceptor.NextStep.Fail(result.error)
             }
         }
