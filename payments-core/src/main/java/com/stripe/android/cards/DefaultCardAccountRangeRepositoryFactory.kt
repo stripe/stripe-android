@@ -10,6 +10,7 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -41,9 +42,25 @@ class DefaultCardAccountRangeRepositoryFactory(
         )
     }
 
-    private fun createRemoteCardAccountRangeSource(): CardAccountRangeSource {
+    override fun createWithStripeRepository(
+        stripeRepository: StripeRepository,
+        publishableKey: String
+    ): CardAccountRangeRepository {
+        val store = DefaultCardAccountRangeStore(appContext)
+        return DefaultCardAccountRangeRepository(
+            inMemorySource = InMemoryCardAccountRangeSource(store),
+            remoteSource = createRemoteCardAccountRangeSource(stripeRepository, publishableKey),
+            staticSource = StaticCardAccountRangeSource(),
+            store = store
+        )
+    }
+
+    private fun createRemoteCardAccountRangeSource(
+        stripeRepository: StripeRepository? = null,
+        publishableKey: String? = null
+    ): CardAccountRangeSource {
         return runCatching {
-            PaymentConfiguration.getInstance(
+            publishableKey ?: PaymentConfiguration.getInstance(
                 appContext
             ).publishableKey
         }.onSuccess { publishableKey ->
@@ -59,7 +76,7 @@ class DefaultCardAccountRangeRepositoryFactory(
         }.fold(
             onSuccess = { publishableKey ->
                 RemoteCardAccountRangeSource(
-                    StripeApiRepository(
+                    stripeRepository ?: StripeApiRepository(
                         appContext,
                         { publishableKey }
                     ),
@@ -90,9 +107,9 @@ class DefaultCardAccountRangeRepositoryFactory(
     }
 
     private class NullCardAccountRangeSource : CardAccountRangeSource {
-        override suspend fun getAccountRange(
+        override suspend fun getAccountRanges(
             cardNumber: CardNumber.Unvalidated
-        ): AccountRange? = null
+        ): Set<AccountRange>? = null
 
         override val loading: Flow<Boolean> = flowOf(false)
     }

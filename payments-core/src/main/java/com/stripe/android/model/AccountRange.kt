@@ -26,6 +26,11 @@ data class AccountRange internal constructor(
         JCB("JCB", CardBrand.JCB),
         DinersClub("DINERS_CLUB", CardBrand.DinersClub),
         Discover("DISCOVER", CardBrand.Discover),
-        UnionPay("UNIONPAY", CardBrand.UnionPay)
+        UnionPay("UNIONPAY", CardBrand.UnionPay),
+        CartesBancaires("CARTES_BANCAIRES", CardBrand.CartesBancaires),
+    }
+
+    fun Set<AccountRange>?.toBrands(): Set<CardBrand> {
+        return (this?.map { it.brand }?.toSet()) ?: setOf()
     }
 }

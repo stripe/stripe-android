@@ -151,6 +151,23 @@ enum class CardBrand(
         renderingOrder = 7
     ),
 
+    CartesBancaires(
+        "cartesbancaire",
+        "Cartes Bancaires",
+        R.drawable.stripe_ic_cartebancaire,
+        pattern = Pattern.compile(
+            "(^(4)[0-9]*) |" +
+                "^(2221|2222|2223|2224|2225|2226|2227|2228|2229|222|223|224|225|226|" +
+                "227|228|229|23|24|25|26|270|271|2720|50|51|52|53|54|55|56|57|58|59|67)[0-9]*$"
+        ),
+        partialPatterns = mapOf(
+            1 to Pattern.compile("^4$"),
+            2 to Pattern.compile("^2|5|6$"),
+            3 to Pattern.compile("^(22|23|24|25|26|27|50|51|52|53|54|55|56|57|58|59|67)$")
+        ),
+        renderingOrder = 8
+    ),
+
     Unknown(
         "unknown",
         "Unknown",

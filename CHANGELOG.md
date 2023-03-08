@@ -4,6 +4,7 @@
 
 ### Payments
 * [ADDED][6306](https://github.com/stripe/stripe-android/pull/6306) Added support for Cash App Pay. See the docs [here](https://stripe.com/docs/payments/cash-app-pay).
+* [ADDED][6335](https://github.com/stripe/stripe-android/pull/6335) Added possibleCardBrands to Stripe which retrieves a list of possible card brands given the card number.
 
 ### PaymentSheet
 * [ADDED][6306](https://github.com/stripe/stripe-android/pull/6306) Added support for Cash App Pay.
