@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -31,11 +29,6 @@ internal object FlowControllerModule {
     @Singleton
     @Named(PRODUCT_USAGE)
     fun provideProductUsageTokens() = setOf("PaymentSheet.FlowController")
-
-    @Provides
-    @Singleton
-    fun provideViewModel(viewModelStoreOwner: ViewModelStoreOwner): FlowControllerViewModel =
-        ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
 
     @Provides
     @Singleton

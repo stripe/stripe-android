@@ -30,8 +30,8 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.address.toConfirmPaymentIntentShipping
 import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.ui.core.elements.DateConfig
 import com.stripe.android.ui.core.elements.createExpiryDateFormFieldValues
+import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

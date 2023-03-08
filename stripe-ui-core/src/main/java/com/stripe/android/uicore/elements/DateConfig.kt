@@ -1,14 +1,11 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.TextFieldConfig
-import com.stripe.android.uicore.elements.TextFieldIcon
-import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +18,7 @@ class DateConfig : TextFieldConfig {
     override val debugLabel = "date"
 
     @StringRes
-    override val label = R.string.stripe_paymentsheet_expiration_date_hint
+    override val label = R.string.expiration_date_hint
     override val keyboard = KeyboardType.NumberPassword
     override val visualTransformation = ExpiryDateVisualTransformation()
     override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)
@@ -58,8 +55,10 @@ class DateConfig : TextFieldConfig {
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @VisibleForTesting
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun determineTextFieldState(
             month1Based: Int,
             twoDigitYear: Int,

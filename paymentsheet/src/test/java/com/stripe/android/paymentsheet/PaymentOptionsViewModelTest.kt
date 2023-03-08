@@ -193,9 +193,8 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.removePaymentMethod(paymentMethod)
 
-        assertThat(viewModel.paymentMethods.value)
-            .isEmpty()
-        assertThat(viewModel.primaryButtonUIState.value).isNull()
+        assertThat(viewModel.paymentMethods.value).isEmpty()
+        assertThat(viewModel.primaryButtonUiState.value).isNull()
         assertThat(viewModel.notesText.value).isNull()
     }
 
@@ -419,23 +418,6 @@ internal class PaymentOptionsViewModelTest {
         }
     }
 
-    @Test
-    fun `Primary button is visible if the selected payment method requires confirmation`() = runTest {
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
-
-        val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link) }
-
-        viewModel.isPrimaryButtonVisible.test {
-            assertThat(awaitItem()).isFalse()
-
-            viewModel.handlePaymentMethodSelected(selection)
-            assertThat(awaitItem()).isTrue()
-
-            viewModel.handlePaymentMethodSelected(PaymentSelection.Link)
-            assertThat(awaitItem()).isFalse()
-        }
-    }
-
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
@@ -449,7 +431,6 @@ internal class PaymentOptionsViewModelTest {
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY,
             lpmResourceRepository = lpmResourceRepository,
             addressResourceRepository = mock(),
             savedStateHandle = savedStateHandle,
