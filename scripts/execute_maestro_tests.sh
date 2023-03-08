@@ -14,7 +14,7 @@ maestro -v
 # Run tests with retry.
 retry=1
 while [ $retry -le 3 ]; do
-  maestro record maestro/financial-connections/Testmode-Data-TestOauthInstitution.yaml
+  maestro test maestro/financial-connections/
   if [ $? -eq 0 ]; then
     break
   fi
