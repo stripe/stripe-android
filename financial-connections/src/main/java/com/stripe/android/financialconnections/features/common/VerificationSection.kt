@@ -27,7 +27,7 @@ import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementUI
 
 @Composable
-fun VerificationSection(
+internal fun VerificationSection(
     focusRequester: FocusRequester,
     otpElement: OTPElement,
     enabled: Boolean,
