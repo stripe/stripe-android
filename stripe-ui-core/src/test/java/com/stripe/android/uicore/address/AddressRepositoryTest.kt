@@ -8,6 +8,9 @@ import com.stripe.android.uicore.address.AddressSchemaRepository.Companion.DEFAU
 import com.stripe.android.uicore.address.AddressSchemaRepository.Companion.SUPPORTED_COUNTRIES
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowElement
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
@@ -15,9 +18,7 @@ import java.io.File
 @RunWith(AndroidJUnit4::class)
 class AddressRepositoryTest {
 
-    private val addressRepository = AddressRepository(
-        ApplicationProvider.getApplicationContext<Application>().resources
-    )
+    private val addressRepository = createAddressRepository()
 
     @Test
     fun `Default country should always be in the supported country list`() {
@@ -63,6 +64,16 @@ class AddressRepositoryTest {
             }
             assertThat(addressRepository.get(it))
                 .isNotNull()
+        }
+    }
+}
+
+private fun createAddressRepository(): AddressRepository {
+    return runBlocking {
+        withContext(Dispatchers.IO) {
+            AddressRepository(
+                ApplicationProvider.getApplicationContext<Application>().resources
+            )
         }
     }
 }

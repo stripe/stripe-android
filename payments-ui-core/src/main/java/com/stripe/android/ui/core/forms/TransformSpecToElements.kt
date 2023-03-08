@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.forms
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
@@ -28,10 +29,10 @@ import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.UpiSpec
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import javax.inject.Provider
 
 /**
  * Transform a [LayoutSpec] data object into an Element, which
@@ -41,8 +42,9 @@ import com.stripe.android.uicore.elements.IdentifierSpec
  * @param viewOnlyFields A set of identifiers for the fields that should be view-only, non-editable.
  * Currently only [IdentifierSpec.CardNumber] is supported and any other identifier is ignored.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class TransformSpecToElements(
-    private val addressResourceRepository: ResourceRepository<AddressRepository>,
+    private val addressRepositoryProvider: Provider<AddressRepository>,
     private val initialValues: Map<IdentifierSpec, String?>,
     private val shippingValues: Map<IdentifierSpec, String?>?,
     private val amount: Amount?,
@@ -78,12 +80,12 @@ class TransformSpecToElements(
                 is CountrySpec -> it.transform(initialValues)
                 is AddressSpec -> it.transform(
                     initialValues,
-                    addressResourceRepository.getRepository(),
+                    addressRepositoryProvider.get(),
                     shippingValues
                 )
                 is CardBillingSpec -> it.transform(
                     initialValues,
-                    addressResourceRepository.getRepository(),
+                    addressRepositoryProvider.get(),
                     shippingValues
                 )
                 is SepaMandateTextSpec -> it.transform(merchantName)

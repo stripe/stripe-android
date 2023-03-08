@@ -1,6 +1,6 @@
 package com.stripe.android.link.ui.forms
 
-import android.content.Context
+import android.app.Application
 import androidx.annotation.StringRes
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
@@ -13,14 +13,16 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.TransformSpecToElements
-import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.TextFieldController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -32,15 +34,8 @@ class FormControllerTest {
         R.style.StripeDefaultTheme
     )
 
-    private val addressResourceRepository =
-        StaticAddressResourceRepository(
-            AddressRepository(
-                ApplicationProvider.getApplicationContext<Context>().resources
-            )
-        )
-
     private val transformSpecToElements = TransformSpecToElements(
-        addressResourceRepository = addressResourceRepository,
+        addressRepositoryProvider = { createAddressRepository() },
         initialValues = emptyMap(),
         amount = null,
         saveForFutureUseInitialValue = false,
@@ -59,9 +54,7 @@ class FormControllerTest {
                 CountrySpec(allowedCountryCodes = setOf("AT", "BE", "DE", "ES", "IT", "NL")),
                 SaveForFutureUseSpec()
             ),
-            addressResourceRepository = addressResourceRepository,
             transformSpecToElement = transformSpecToElements,
-            this
         )
 
         val nameElement =
@@ -95,7 +88,7 @@ class FormControllerTest {
         formController: FormController,
         @StringRes label: Int
     ) =
-        formController.elements.first()!!
+        formController.elements.first()
             .filterIsInstance<SectionElement>()
             .flatMap { it.fields }
             .filterIsInstance<SectionSingleFieldElement>()
@@ -104,4 +97,14 @@ class FormControllerTest {
             .firstOrNull {
                 it.label.first() == label
             }
+}
+
+private fun createAddressRepository(): AddressRepository {
+    return runBlocking {
+        withContext(Dispatchers.IO) {
+            AddressRepository(
+                ApplicationProvider.getApplicationContext<Application>().resources
+            )
+        }
+    }
 }

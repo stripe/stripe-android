@@ -259,13 +259,6 @@ public final class com/stripe/android/link/ui/cardedit/ComposableSingletons$Card
 	public final fun getLambda-3$link_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/link/ui/forms/ComposableSingletons$FormKt {
-	public static final field INSTANCE Lcom/stripe/android/link/ui/forms/ComposableSingletons$FormKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public fun <init> ()V
-	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function3;
-}
-
 public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;

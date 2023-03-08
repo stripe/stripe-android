@@ -10,15 +10,16 @@ import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardBillingAddressElementTest {
-    private val addressRepository = AddressRepository(
-        ApplicationProvider.getApplicationContext<Application>().resources
-    )
+    private val addressRepository = createAddressRepository()
     val dropdownFieldController = DropdownFieldController(
         CountryConfig(emptySet())
     )
@@ -118,5 +119,15 @@ internal class CardBillingAddressElementTest {
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line2)
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
+    }
+}
+
+private fun createAddressRepository(): AddressRepository {
+    return runBlocking {
+        withContext(Dispatchers.IO) {
+            AddressRepository(
+                ApplicationProvider.getApplicationContext<Application>().resources
+            )
+        }
     }
 }

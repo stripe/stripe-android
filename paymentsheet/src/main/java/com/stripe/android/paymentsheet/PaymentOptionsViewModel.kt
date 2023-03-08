@@ -31,7 +31,6 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -54,8 +53,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     @IOContext workContext: CoroutineContext,
     application: Application,
     logger: Logger,
-    lpmResourceRepository: ResourceRepository<LpmRepository>,
-    addressResourceRepository: ResourceRepository<AddressRepository>,
+    lpmRepository: LpmRepository,
+    addressRepositoryProvider: Provider<AddressRepository>,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
 ) : BaseSheetViewModel(
@@ -66,8 +65,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerRepository = customerRepository,
     workContext = workContext,
     logger = logger,
-    lpmResourceRepository = lpmResourceRepository,
-    addressResourceRepository = addressResourceRepository,
+    lpmRepository = lpmRepository,
+    addressRepositoryProvider = addressRepositoryProvider,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
@@ -129,15 +128,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
         savedStateHandle[SAVE_SAVED_SELECTION] = args.state.savedSelection
         savedStateHandle[SAVE_PROCESSING] = false
 
-        // If we are not recovering from don't keep activities than the resources
-        // repository is loaded, and we should save off the LPM repository server specs so
-        // it can be restored after don't keep activities or process killed.
-        if (lpmResourceRepository.getRepository().isLoaded()) {
-            lpmServerSpec =
-                lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
-        }
+        lpmServerSpec = lpmRepository.serverSpecLoadingState.serverLpmSpecs
 
-        transitionToFirstScreenWhenReady()
+        transitionToFirstScreen()
     }
 
     override val shouldCompleteLinkFlowInline: Boolean = false

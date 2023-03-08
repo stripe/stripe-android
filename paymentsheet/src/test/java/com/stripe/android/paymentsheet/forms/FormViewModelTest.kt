@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.content.Context
+import android.app.Application
 import androidx.annotation.StringRes
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
@@ -22,9 +22,6 @@ import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
-import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -33,10 +30,13 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -52,17 +52,12 @@ internal class FormViewModelTest {
     )
     val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(context.resources))
 
-    private val addressResourceRepository = StaticAddressResourceRepository(
-        AddressRepository(
-            ApplicationProvider.getApplicationContext<Context>().resources
-        )
-    )
     val showCheckboxFlow = MutableStateFlow(false)
 
     private fun createLpmRepositorySupportedPaymentMethod(
         paymentMethodType: PaymentMethod.Type,
         layoutSpec: LayoutSpec
-    ): StaticLpmResourceRepository {
+    ): LpmRepository {
         val mockLpmRepository = mock<LpmRepository>()
 
         whenever(mockLpmRepository.fromCode(paymentMethodType.code)).thenReturn(
@@ -78,9 +73,7 @@ internal class FormViewModelTest {
                 layoutSpec
             )
         )
-        return StaticLpmResourceRepository(
-            mockLpmRepository
-        )
+        return mockLpmRepository
     }
 
     @Test
@@ -130,30 +123,31 @@ internal class FormViewModelTest {
     }
 
     @Test
-    fun `Verify setting save for future use visibility removes it from completed values`() = runTest {
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            paymentMethodCode = PaymentMethod.Type.Card.code
-        )
-        val formViewModel = createViewModel(
-            args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    SaveForFutureUseSpec()
+    fun `Verify setting save for future use visibility removes it from completed values`() =
+        runTest {
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                paymentMethodCode = PaymentMethod.Type.Card.code
+            )
+            val formViewModel = createViewModel(
+                args,
+                createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.Card,
+                    LayoutSpec.create(
+                        SaveForFutureUseSpec()
+                    )
                 )
             )
-        )
 
-        formViewModel.hiddenIdentifiers.test {
-            assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
+            formViewModel.hiddenIdentifiers.test {
+                assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
 
-            showCheckboxFlow.tryEmit(true)
-            assertThat(awaitItem()).isEmpty()
+                showCheckboxFlow.tryEmit(true)
+                assertThat(awaitItem()).isEmpty()
 
-            showCheckboxFlow.tryEmit(false)
-            assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
+                showCheckboxFlow.tryEmit(false)
+                assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
+            }
         }
-    }
 
     @Test
     fun `Verify if there are no text fields, there is no last text field id`() = runTest {
@@ -585,12 +579,14 @@ internal class FormViewModelTest {
 
     fun createViewModel(
         arguments: FormArguments,
-        lpmResourceRepository: ResourceRepository<LpmRepository>
+        lpmRepository: LpmRepository
     ) = FormViewModel(
         context = context,
         formArguments = arguments,
-        lpmResourceRepository = lpmResourceRepository,
-        addressResourceRepository = addressResourceRepository,
+        lpmRepository = lpmRepository,
+        addressRepositoryProvider = {
+            createAddressRepository()
+        },
         showCheckboxFlow = showCheckboxFlow
     )
 }
@@ -600,4 +596,14 @@ internal suspend fun FormViewModel.setSaveForFutureUse(value: Boolean) {
         .firstOrNull()
         ?.filterIsInstance<SaveForFutureUseElement>()
         ?.firstOrNull()?.controller?.onValueChange(value)
+}
+
+private fun createAddressRepository(): AddressRepository {
+    return runBlocking {
+        withContext(Dispatchers.IO) {
+            AddressRepository(
+                ApplicationProvider.getApplicationContext<Application>().resources
+            )
+        }
+    }
 }

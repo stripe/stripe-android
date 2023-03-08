@@ -20,14 +20,11 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.Loading
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -51,26 +48,27 @@ internal class PaymentOptionsViewModelTest {
     private val paymentMethodRepository = FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
 
     @Test
-    fun `onUserSelection() when selection has been made should set the view state to process result`() = runTest {
-        val viewModel = createViewModel()
-        viewModel.paymentOptionResult.test {
-            viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
-            viewModel.onUserSelection()
-            assertThat(awaitItem()).isEqualTo(
-                PaymentOptionResult.Succeeded(
-                    SELECTION_SAVED_PAYMENT_METHOD,
-                    listOf()
+    fun `onUserSelection() when selection has been made should set the view state to process result`() =
+        runTest {
+            val viewModel = createViewModel()
+            viewModel.paymentOptionResult.test {
+                viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
+                viewModel.onUserSelection()
+                assertThat(awaitItem()).isEqualTo(
+                    PaymentOptionResult.Succeeded(
+                        SELECTION_SAVED_PAYMENT_METHOD,
+                        listOf()
+                    )
                 )
-            )
-            ensureAllEventsConsumed()
-        }
+                ensureAllEventsConsumed()
+            }
 
-        verify(eventReporter)
-            .onSelectPaymentOption(
-                paymentSelection = SELECTION_SAVED_PAYMENT_METHOD,
-                currency = "usd"
-            )
-    }
+            verify(eventReporter)
+                .onSelectPaymentOption(
+                    paymentSelection = SELECTION_SAVED_PAYMENT_METHOD,
+                    currency = "usd"
+                )
+        }
 
     @Test
     fun `onUserSelection() when new card selection with no save should set the view state to process result`() =
@@ -126,7 +124,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
             viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
@@ -144,7 +141,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
             viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddAnotherPaymentMethod)
 
@@ -301,28 +297,27 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
             viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
         }
     }
 
     @Test
-    fun `transition target is SelectSavedPaymentMethods if payment methods is not empty`() = runTest {
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-                isGooglePayReady = false,
-                linkState = null
+    fun `transition target is SelectSavedPaymentMethods if payment methods is not empty`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                    isGooglePayReady = false,
+                    linkState = null
+                )
             )
-        )
 
-        viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(Loading)
-            viewModel.transitionToFirstScreen()
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+            viewModel.currentScreen.test {
+                viewModel.transitionToFirstScreen()
+                assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+            }
         }
-    }
 
     @Test
     fun `onError updates error`() = runTest {
@@ -402,26 +397,27 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `Does not close the sheet if the selected payment method requires confirmation`() = runTest {
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
+    fun `Does not close the sheet if the selected payment method requires confirmation`() =
+        runTest {
+            val selection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
 
-        val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link) }
+            val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link) }
 
-        viewModel.paymentOptionResult.test {
-            viewModel.handlePaymentMethodSelected(selection)
-            expectNoEvents()
+            viewModel.paymentOptionResult.test {
+                viewModel.handlePaymentMethodSelected(selection)
+                expectNoEvents()
 
-            viewModel.handlePaymentMethodSelected(PaymentSelection.Link)
+                viewModel.handlePaymentMethodSelected(PaymentSelection.Link)
 
-            val result = awaitItem() as? PaymentOptionResult.Succeeded
-            assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link)
+                val result = awaitItem() as? PaymentOptionResult.Succeeded
+                assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link)
+            }
         }
-    }
 
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
-        lpmResourceRepository: ResourceRepository<LpmRepository> = createLpmResourceRepository()
+        lpmRepository: LpmRepository = createLpmRepository()
     ) = TestViewModelFactory.create { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(state = args.state.copy(linkState = linkState)),
@@ -431,24 +427,22 @@ internal class PaymentOptionsViewModelTest {
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
-            lpmResourceRepository = lpmResourceRepository,
-            addressResourceRepository = mock(),
+            lpmRepository = lpmRepository,
+            addressRepositoryProvider = { mock() },
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler
         )
     }
 
-    private fun createLpmResourceRepository(
+    private fun createLpmRepository(
         paymentIntent: PaymentIntent = PAYMENT_INTENT
-    ) = StaticLpmResourceRepository(
-        LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources
-            )
-        ).apply {
-            this.update(paymentIntent, null)
-        }
-    )
+    ) = LpmRepository(
+        LpmRepository.LpmRepositoryArguments(
+            ApplicationProvider.getApplicationContext<Application>().resources
+        )
+    ).apply {
+        this.update(paymentIntent, null)
+    }
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFactory.create()

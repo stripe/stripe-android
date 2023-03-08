@@ -27,16 +27,16 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
-import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Rule
 import org.mockito.kotlin.any
@@ -98,23 +98,21 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                 ),
                 FakeCustomerRepository(customerRepositoryPMs),
                 FakePrefsRepository(),
-                lpmResourceRepository = StaticLpmResourceRepository(
-                    LpmRepository(
-                        LpmRepository.LpmRepositoryArguments(
-                            ApplicationProvider.getApplicationContext<Application>().resources
-                        )
-                    ).apply {
-                        this.update(
-                            PaymentIntentFactory.create(
-                                paymentMethodTypes = listOf(
-                                    PaymentMethod.Type.Card.code,
-                                    PaymentMethod.Type.USBankAccount.code
-                                )
-                            ),
-                            null
-                        )
-                    }
-                ),
+                lpmRepository = LpmRepository(
+                    LpmRepository.LpmRepositoryArguments(
+                        ApplicationProvider.getApplicationContext<Application>().resources
+                    )
+                ).apply {
+                    this.update(
+                        PaymentIntentFactory.create(
+                            paymentMethodTypes = listOf(
+                                PaymentMethod.Type.Card.code,
+                                PaymentMethod.Type.USBankAccount.code
+                            )
+                        ),
+                        null
+                    )
+                },
                 mock(),
                 stripePaymentLauncherAssistedFactory,
                 googlePayPaymentMethodLauncherFactory,
@@ -131,7 +129,6 @@ internal open class BasePaymentSheetViewModelInjectionTest {
         @InjectorKey injectorKey: String,
         viewModel: PaymentSheetViewModel,
         lpmRepository: LpmRepository,
-        addressRepository: AddressRepository,
         formViewModel: FormViewModel = FormViewModel(
             context = context,
             formArguments = FormArguments(
@@ -142,8 +139,8 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                 amount = Amount(50, "USD"),
                 initialPaymentMethodCreateParams = null
             ),
-            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
+            lpmRepository = lpmRepository,
+            addressRepositoryProvider = { createAddressRepository() },
             showCheckboxFlow = mock()
         )
     ) {
@@ -180,5 +177,15 @@ internal open class BasePaymentSheetViewModelInjectionTest {
         }
         viewModel.injector = injector
         WeakMapInjectorRegistry.register(injector, injectorKey)
+    }
+}
+
+private fun createAddressRepository(): AddressRepository {
+    return runBlocking {
+        withContext(Dispatchers.IO) {
+            AddressRepository(
+                ApplicationProvider.getApplicationContext<Application>().resources
+            )
+        }
     }
 }

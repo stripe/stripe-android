@@ -53,15 +53,12 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.S
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -112,7 +109,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     private val prefsRepository = FakePrefsRepository()
-    private val lpmResourceRepository = StaticLpmResourceRepository(lpmRepository)
 
     private val paymentLauncher = mock<StripePaymentLauncher> {
         on { authenticatorRegistry } doReturn mock()
@@ -1066,24 +1062,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `isResourceRepositoryReady emits true on initialize`() = runTest {
-        val viewModel = createViewModel()
-        viewModel.isResourceRepositoryReady.test {
-            assertThat(awaitItem()).isTrue()
-        }
-    }
-
-    @Test
-    fun `isResourceRepositoryReady emits false`() = runTest {
-        val viewModel = createViewModel(
-            lpmResourceRepository = NonLoadingLpmRepository(lpmRepository)
-        )
-        viewModel.isResourceRepositoryReady.test {
-            assertThat(awaitItem()).isFalse()
-        }
-    }
-
-    @Test
     fun `Sets editing to false when removing the last payment method while editing`() = runTest {
         val customerPaymentMethods = PaymentMethodFixtures.createCards(1)
         val viewModel = createViewModel(customerPaymentMethods = customerPaymentMethods)
@@ -1113,16 +1091,6 @@ internal class PaymentSheetViewModelTest {
         viewModel.toggleEditing()
         viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
         assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
-    }
-
-    private class NonLoadingLpmRepository(
-        val lpmRepository: LpmRepository
-    ) : ResourceRepository<LpmRepository> {
-        override suspend fun waitUntilLoaded() {
-            while (true) { delay(1000) }
-        }
-        override fun isLoaded(): Boolean = false
-        override fun getRepository(): LpmRepository = lpmRepository
     }
 
     @Test
@@ -1332,7 +1300,7 @@ internal class PaymentSheetViewModelTest {
         linkState: LinkState? = null,
         isGooglePayReady: Boolean = false,
         delay: Duration = Duration.ZERO,
-        lpmResourceRepository: ResourceRepository<LpmRepository> = this.lpmResourceRepository,
+        lpmRepository: LpmRepository = this.lpmRepository,
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return TestViewModelFactory.create(
@@ -1355,7 +1323,7 @@ internal class PaymentSheetViewModelTest {
                 ),
                 customerRepository,
                 prefsRepository,
-                lpmResourceRepository,
+                lpmRepository,
                 mock(),
                 paymentLauncherFactory = paymentLauncherFactory,
                 mock(),

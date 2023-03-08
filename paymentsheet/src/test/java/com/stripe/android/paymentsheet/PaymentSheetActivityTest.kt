@@ -71,8 +71,6 @@ import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
-import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
@@ -994,7 +992,7 @@ internal class PaymentSheetActivityTest {
                 ),
                 FakeCustomerRepository(paymentMethods),
                 FakePrefsRepository(),
-                StaticLpmResourceRepository(lpmRepository),
+                lpmRepository,
                 mock(),
                 stripePaymentLauncherAssistedFactory,
                 googlePayPaymentMethodLauncherFactory,
@@ -1054,8 +1052,8 @@ internal class PaymentSheetActivityTest {
                 amount = Amount(50, "USD"),
                 initialPaymentMethodCreateParams = null
             ),
-            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = StaticAddressResourceRepository(AddressRepository(context.resources)),
+            lpmRepository = lpmRepository,
+            addressRepositoryProvider = { AddressRepository(context.resources) },
             showCheckboxFlow = mock()
         )
 

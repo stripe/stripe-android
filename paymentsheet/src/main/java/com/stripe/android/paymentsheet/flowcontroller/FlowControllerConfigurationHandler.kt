@@ -8,9 +8,6 @@ import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.validate
-import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
@@ -25,11 +22,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
-    lpmResourceRepository: ResourceRepository<LpmRepository>,
-    addressResourceRepository: ResourceRepository<AddressRepository>,
 ) {
-    private val resourceRepositories = listOf(lpmResourceRepository, addressResourceRepository)
-
     suspend fun configure(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
@@ -50,9 +43,6 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             return
         }
         val result = paymentSheetLoader.load(initializationMode, configuration)
-
-        // Wait until all required resources are loaded before completing initialization.
-        resourceRepositories.forEach { it.waitUntilLoaded() }
 
         if (currentCoroutineContext().isActive) {
             viewModel.initializationMode = initializationMode

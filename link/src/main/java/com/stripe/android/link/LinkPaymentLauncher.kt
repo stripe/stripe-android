@@ -31,7 +31,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.FlowPreview
@@ -43,6 +42,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -62,20 +62,22 @@ class LinkPaymentLauncher @Inject internal constructor(
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     analyticsRequestExecutor: AnalyticsRequestExecutor,
     stripeRepository: StripeRepository,
-    addressResourceRepository: ResourceRepository<AddressRepository>
+    addressRepositoryProvider: Provider<AddressRepository>,
 ) : NonFallbackInjectable {
-    private val launcherComponentBuilder = DaggerLinkPaymentLauncherComponent.builder()
-        .context(context)
-        .ioContext(ioContext)
-        .uiContext(uiContext)
-        .analyticsRequestFactory(paymentAnalyticsRequestFactory)
-        .analyticsRequestExecutor(analyticsRequestExecutor)
-        .stripeRepository(stripeRepository)
-        .addressResourceRepository(addressResourceRepository)
-        .enableLogging(enableLogging)
-        .publishableKeyProvider(publishableKeyProvider)
-        .stripeAccountIdProvider(stripeAccountIdProvider)
-        .productUsage(productUsage)
+    private val launcherComponentBuilder: LinkPaymentLauncherComponent.Builder by lazy {
+        DaggerLinkPaymentLauncherComponent.builder()
+            .context(context)
+            .ioContext(ioContext)
+            .uiContext(uiContext)
+            .analyticsRequestFactory(paymentAnalyticsRequestFactory)
+            .analyticsRequestExecutor(analyticsRequestExecutor)
+            .stripeRepository(stripeRepository)
+            .addressRepository(addressRepositoryProvider.get())
+            .enableLogging(enableLogging)
+            .publishableKeyProvider(publishableKeyProvider)
+            .stripeAccountIdProvider(stripeAccountIdProvider)
+            .productUsage(productUsage)
+    }
 
     @InjectorKey
     private val injectorKey: String = WeakMapInjectorRegistry.nextKey(

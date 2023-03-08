@@ -20,9 +20,11 @@ import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -32,9 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger
 // TODO(ccen) Rewrite the test with generic Element and move it to stripe-ui-core
 @RunWith(RobolectricTestRunner::class)
 class AddressElementTest {
-    private val addressRepository = AddressRepository(
-        ApplicationProvider.getApplicationContext<Application>().resources
-    )
+    private val addressRepository = createAddressRepository()
     private val countryDropdownFieldController = DropdownFieldController(
         CountryConfig(setOf("US", "JP"))
     )
@@ -525,4 +525,14 @@ private suspend fun AddressElement.trailingIconFor(
     val controllerForSpec = (fieldForSpec as SimpleTextElement).controller
     val trailingIcon = (controllerForSpec as SimpleTextFieldController).textFieldConfig.trailingIcon
     return trailingIcon.value as? TextFieldIcon.Trailing?
+}
+
+private fun createAddressRepository(): AddressRepository {
+    return runBlocking {
+        withContext(Dispatchers.IO) {
+            AddressRepository(
+                ApplicationProvider.getApplicationContext<Application>().resources
+            )
+        }
+    }
 }

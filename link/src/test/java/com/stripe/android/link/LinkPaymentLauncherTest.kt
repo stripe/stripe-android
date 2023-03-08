@@ -37,7 +37,7 @@ class LinkPaymentLauncherTest {
         paymentAnalyticsRequestFactory = mock(),
         analyticsRequestExecutor = mock(),
         stripeRepository = mock(),
-        addressResourceRepository = mock()
+        addressRepositoryProvider = { mock() },
     )
 
     init {

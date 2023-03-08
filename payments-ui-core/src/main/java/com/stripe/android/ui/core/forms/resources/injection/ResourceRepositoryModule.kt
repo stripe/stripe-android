@@ -2,31 +2,24 @@ package com.stripe.android.ui.core.forms.resources.injection
 
 import android.content.Context
 import android.content.res.Resources
-import com.stripe.android.ui.core.forms.resources.AsyncAddressResourceRepository
-import com.stripe.android.ui.core.forms.resources.AsyncLpmResourceRepository
+import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.uicore.address.AddressRepository
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
 @Module
-abstract class ResourceRepositoryModule {
-    @Binds
-    abstract fun bindsLpmRepository(lpm: AsyncLpmResourceRepository):
-        ResourceRepository<LpmRepository>
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+object ResourceRepositoryModule {
+    @Provides
+    @Singleton
+    fun provideResources(context: Context): Resources {
+        return context.resources
+    }
 
-    @Binds
-    abstract fun bindsAddressRepository(address: AsyncAddressResourceRepository):
-        ResourceRepository<AddressRepository>
-
-    companion object {
-        @Provides
-        @Singleton
-        fun provideResources(context: Context): Resources {
-            return context.resources
-        }
+    @Provides
+    @Singleton
+    fun providesLpmRepository(resources: Resources): LpmRepository {
+        return LpmRepository.getInstance(LpmRepository.LpmRepositoryArguments(resources))
     }
 }

@@ -8,44 +8,40 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.TransformSpecToElements
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import javax.inject.Provider
 
 @Module
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-abstract class FormControllerModule {
-
-    companion object {
-
-        @Provides
-        fun provideTransformSpecToElements(
-            addressResourceRepository: ResourceRepository<AddressRepository>,
-            context: Context,
-            merchantName: String,
-            stripeIntent: StripeIntent?,
-            @Named(INITIAL_VALUES) initialValues: Map<IdentifierSpec, String?>,
-            @Named(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?,
-            viewOnlyFields: Set<IdentifierSpec>
-        ) = TransformSpecToElements(
-            addressResourceRepository = addressResourceRepository,
-            initialValues = initialValues,
-            shippingValues = shippingValues,
-            amount = (stripeIntent as? PaymentIntent)?.let {
-                val amount = it.amount
-                val currency = it.currency
-                if (amount != null && currency != null) {
-                    Amount(amount, currency)
-                }
-                null
-            },
-            saveForFutureUseInitialValue = false,
-            merchantName = merchantName,
-            context = context,
-            viewOnlyFields = viewOnlyFields
-        )
-    }
+object FormControllerModule {
+    @Provides
+    fun provideTransformSpecToElements(
+        addressRepositoryProvider: Provider<AddressRepository>,
+        context: Context,
+        merchantName: String,
+        stripeIntent: StripeIntent?,
+        @Named(INITIAL_VALUES) initialValues: Map<IdentifierSpec, String?>,
+        @Named(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?,
+        viewOnlyFields: Set<IdentifierSpec>
+    ) = TransformSpecToElements(
+        addressRepositoryProvider = addressRepositoryProvider,
+        initialValues = initialValues,
+        shippingValues = shippingValues,
+        amount = (stripeIntent as? PaymentIntent)?.let {
+            val amount = it.amount
+            val currency = it.currency
+            if (amount != null && currency != null) {
+                Amount(amount, currency)
+            }
+            null
+        },
+        saveForFutureUseInitialValue = false,
+        merchantName = merchantName,
+        context = context,
+        viewOnlyFields = viewOnlyFields
+    )
 }

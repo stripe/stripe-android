@@ -1,8 +1,10 @@
 package com.stripe.android.uicore.address
 
 import android.content.res.Resources
+import android.os.Looper
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.elements.SectionFieldElement
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,6 +27,15 @@ class AddressRepository @Inject constructor(
                     .transformToElementList(countryCode)
             )
         }.toMutableMap()
+
+    init {
+        if (BuildConfig.DEBUG) {
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                // AddressRepository loads JSON files from disk.
+                throw IllegalStateException("AddressRepository created from the main thread.")
+            }
+        }
+    }
 
     @VisibleForTesting
     fun add(countryCode: String, listElements: List<SectionFieldElement>) {

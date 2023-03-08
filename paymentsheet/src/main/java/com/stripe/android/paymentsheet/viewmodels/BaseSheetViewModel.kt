@@ -39,9 +39,7 @@ import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,13 +50,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -73,8 +71,8 @@ internal abstract class BaseSheetViewModel(
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO,
     protected val logger: Logger,
-    val lpmResourceRepository: ResourceRepository<LpmRepository>,
-    val addressResourceRepository: ResourceRepository<AddressRepository>,
+    val lpmRepository: LpmRepository,
+    addressRepositoryProvider: Provider<AddressRepository>,
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
     private val headerTextFactory: HeaderTextFactory,
@@ -94,11 +92,6 @@ internal abstract class BaseSheetViewModel(
 
     internal val googlePayState: StateFlow<GooglePayState> = savedStateHandle
         .getStateFlow(SAVE_GOOGLE_PAY_STATE, GooglePayState.Indeterminate)
-
-    // Don't save the resource repository state because it must be re-initialized
-    // with the save server specs when reconstructed.
-    private val _isResourceRepositoryReady = MutableStateFlow(false)
-    internal val isResourceRepositoryReady: StateFlow<Boolean> = _isResourceRepositoryReady
 
     private val _stripeIntent = MutableStateFlow<StripeIntent?>(null)
     internal val stripeIntent: StateFlow<StripeIntent?> = _stripeIntent
@@ -205,7 +198,7 @@ internal abstract class BaseSheetViewModel(
             initialSelection = savedSelection,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
             nameProvider = { code ->
-                val paymentMethod = lpmResourceRepository.getRepository().fromCode(code)
+                val paymentMethod = lpmRepository.fromCode(code)
                 paymentMethod?.displayNameResource?.let {
                     application.getString(it)
                 }.orEmpty()
@@ -230,25 +223,6 @@ internal abstract class BaseSheetViewModel(
             }.collect()
         }
 
-        if (!_isResourceRepositoryReady.value) {
-            viewModelScope.launch {
-                // This work should be done on the background
-                CoroutineScope(workContext).launch {
-                    // If we have been killed and are being restored then we need to re-populate
-                    // the lpm repository
-                    stripeIntent.value?.let { intent ->
-                        lpmResourceRepository.getRepository().apply {
-                            update(intent, lpmServerSpec)
-                        }
-                    }
-
-                    lpmResourceRepository.waitUntilLoaded()
-                    addressResourceRepository.waitUntilLoaded()
-                    _isResourceRepositoryReady.value = true
-                }
-            }
-        }
-
         viewModelScope.launch {
             // If the currently selected payment option has been removed, we set it to the one
             // determined in the payment options state.
@@ -261,17 +235,12 @@ internal abstract class BaseSheetViewModel(
                 }
                 .collect { updateSelection(it) }
         }
-    }
 
-    protected fun transitionToFirstScreenWhenReady() {
-        viewModelScope.launch {
-            awaitRepositoriesReady()
-            transitionToFirstScreen()
+        viewModelScope.launch(workContext) {
+            // Initialize the AddressRepository on a background thread.
+            // It's not used directly in the ViewModel, but we need to initialize before it's used.
+            addressRepositoryProvider.get()
         }
-    }
-
-    private suspend fun awaitRepositoriesReady() {
-        isResourceRepositoryReady.filter { it }.first()
     }
 
     abstract fun transitionToFirstScreen()
@@ -312,7 +281,7 @@ internal abstract class BaseSheetViewModel(
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
         _stripeIntent.value = stripeIntent
 
-        val pmsToAdd = getPMsToAdd(stripeIntent, config, lpmResourceRepository.getRepository())
+        val pmsToAdd = getPMsToAdd(stripeIntent, config, lpmRepository)
         supportedPaymentMethods = pmsToAdd
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
@@ -322,7 +291,7 @@ internal abstract class BaseSheetViewModel(
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
                         " (${
-                        lpmResourceRepository.getRepository().values()
+                        lpmRepository.values()
                             .map { it.code }.toList()
                         })"
                 )

@@ -58,7 +58,6 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
@@ -89,8 +88,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val paymentSheetLoader: PaymentSheetLoader,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
-    lpmResourceRepository: ResourceRepository<LpmRepository>,
-    addressResourceRepository: ResourceRepository<AddressRepository>,
+    lpmRepository: LpmRepository,
+    addressRepositoryProvider: Provider<AddressRepository>,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
@@ -106,8 +105,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     prefsRepository = prefsRepository,
     workContext = workContext,
     logger = logger,
-    lpmResourceRepository = lpmResourceRepository,
-    addressResourceRepository = addressResourceRepository,
+    lpmRepository = lpmRepository,
+    addressRepositoryProvider = addressRepositoryProvider,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = true),
@@ -273,7 +272,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
-        lpmServerSpec = lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
+        lpmServerSpec = lpmRepository.serverSpecLoadingState.serverLpmSpecs
 
         savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
         savedStateHandle[SAVE_SAVED_SELECTION] = state.savedSelection
@@ -291,7 +290,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         linkHandler.setupLinkLaunchingEagerly(viewModelScope, linkState)
 
         resetViewState()
-        transitionToFirstScreenWhenReady()
+        transitionToFirstScreen()
     }
 
     fun setupGooglePay(

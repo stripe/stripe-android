@@ -123,14 +123,6 @@ internal fun InputAddressScreen(
                         enabledFlow = viewModel.formEnabled,
                         elementsFlow = it.elements,
                         lastTextFieldIdentifierFlow = it.lastTextFieldIdentifier,
-                        loadingComposable = {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
                     )
                 },
                 checkboxContent = {

@@ -24,7 +24,6 @@ import com.stripe.android.ui.core.elements.TranslationId
 import com.stripe.android.ui.core.elements.UpiElement
 import com.stripe.android.ui.core.elements.UpiSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailConfig
@@ -58,9 +57,7 @@ internal class TransformSpecToElementTest {
     fun beforeTest() {
         transformSpecToElements =
             TransformSpecToElements(
-                addressResourceRepository = StaticAddressResourceRepository(
-                    mock()
-                ),
+                addressRepositoryProvider = { mock() },
                 initialValues = mapOf(),
                 amount = null,
                 saveForFutureUseInitialValue = true,
@@ -190,9 +187,7 @@ internal class TransformSpecToElementTest {
     fun `Setting card number to view only returns the correct elements`() {
         transformSpecToElements =
             TransformSpecToElements(
-                addressResourceRepository = StaticAddressResourceRepository(
-                    mock()
-                ),
+                addressRepositoryProvider = { mock() },
                 initialValues = mapOf(),
                 amount = null,
                 saveForFutureUseInitialValue = true,
