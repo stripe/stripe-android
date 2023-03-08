@@ -33,7 +33,9 @@ class NameConfig : TextFieldConfig {
     override fun convertToRaw(displayName: String) = displayName
     override fun convertFromRaw(rawValue: String) = rawValue
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createController(initialValue: String?) = SimpleTextFieldController(
             NameConfig(),
             initialValue = initialValue
