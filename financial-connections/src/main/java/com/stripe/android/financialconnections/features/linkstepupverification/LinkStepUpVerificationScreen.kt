@@ -36,9 +36,9 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.FormErrorText
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -50,11 +50,10 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
-import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
+import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
-import com.stripe.android.uicore.elements.OTPElementUI
 
 @Composable
 internal fun LinkStepUpVerificationScreen() {
@@ -137,35 +136,18 @@ private fun LinkStepUpVerificationLoaded(
         Spacer(modifier = Modifier.size(8.dp))
         Description(email = payload.email)
         Spacer(modifier = Modifier.size(24.dp))
-        ExistingEmailSection(
+        VerificationSection(
             focusRequester = focusRequester,
             otpElement = payload.otpElement,
-            enabled = confirmVerificationAsync !is Loading
+            enabled = confirmVerificationAsync !is Loading,
+            verificationType = VerificationType.EMAIL,
+            confirmVerificationError = (confirmVerificationAsync as? Fail)?.error
         )
-        if (confirmVerificationAsync is Fail) {
-            Spacer(modifier = Modifier.size(4.dp))
-            FormErrorText(confirmVerificationAsync.error)
-        }
         Spacer(modifier = Modifier.size(24.dp))
         EmailSubtext(
             email = payload.email,
             isLoading = resendOtpAsync is Loading,
             onClickableTextClick = onClickableTextClick
-        )
-    }
-}
-
-@Composable
-private fun ExistingEmailSection(
-    focusRequester: FocusRequester,
-    otpElement: OTPElement,
-    enabled: Boolean
-) {
-    StripeThemeForConnections {
-        OTPElementUI(
-            focusRequester = focusRequester,
-            enabled = enabled,
-            element = otpElement
         )
     }
 }

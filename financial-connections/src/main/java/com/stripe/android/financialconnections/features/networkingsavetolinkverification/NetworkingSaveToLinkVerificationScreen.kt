@@ -34,6 +34,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationState.Payload
 import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationViewModel.Companion.PANE
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -45,11 +46,10 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
+import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
-import com.stripe.android.uicore.elements.OTPElementUI
 
 @Composable
 internal fun NetworkingSaveToLinkVerificationScreen() {
@@ -130,9 +130,11 @@ private fun NetworkingSaveToLinkVerificationLoaded(
         Spacer(modifier = Modifier.size(8.dp))
         Description(payload.phoneNumber)
         Spacer(modifier = Modifier.size(24.dp))
-        ExistingEmailSection(
+        VerificationSection(
             focusRequester = focusRequester,
             otpElement = payload.otpElement,
+            confirmVerificationError = (confirmVerificationAsync as? Fail)?.error,
+            verificationType = VerificationType.SMS,
             enabled = confirmVerificationAsync !is Loading
         )
         Spacer(modifier = Modifier.size(24.dp))
@@ -146,21 +148,6 @@ private fun NetworkingSaveToLinkVerificationLoaded(
         ) {
             Text(text = stringResource(R.string.stripe_networking_save_to_link_verification_cta_negative))
         }
-    }
-}
-
-@Composable
-private fun ExistingEmailSection(
-    focusRequester: FocusRequester,
-    otpElement: OTPElement,
-    enabled: Boolean
-) {
-    StripeThemeForConnections {
-        OTPElementUI(
-            focusRequester = focusRequester,
-            enabled = enabled,
-            element = otpElement
-        )
     }
 }
 

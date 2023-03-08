@@ -1,16 +1,17 @@
 package com.stripe.android.financialconnections.features.common
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.exception.StripeException
@@ -20,26 +21,45 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.model.VerificationType
+import com.stripe.android.uicore.elements.OTPElement
+import com.stripe.android.uicore.elements.OTPElementUI
 
-/**
- * Error text to show under form elements.
- */
 @Composable
-internal fun FormErrorText(error: Throwable) {
-    Text(
-        modifier = Modifier.padding(horizontal = 4.dp),
-        text = error.localizedMessage ?: stringResource(id = R.string.stripe_error_generic_title),
-        color = FinancialConnectionsTheme.colors.textCritical,
-        style = FinancialConnectionsTheme.typography.caption
-    )
+fun VerificationSection(
+    focusRequester: FocusRequester,
+    otpElement: OTPElement,
+    enabled: Boolean,
+    verificationType: VerificationType,
+    confirmVerificationError: Throwable?,
+) {
+    Column {
+        StripeThemeForConnections {
+            OTPElementUI(
+                focusRequester = focusRequester,
+                enabled = enabled,
+                element = otpElement
+            )
+        }
+        if (confirmVerificationError != null) {
+            Spacer(modifier = Modifier.size(4.dp))
+            VerificationErrorText(
+                error = confirmVerificationError,
+                verificationType = verificationType
+            )
+        }
+    }
 }
 
 /**
  * Error text to show under verification inputs in forms.
  */
 @Composable
-fun VerificationErrorText(error: Throwable, verificationType: VerificationType) {
+private fun VerificationErrorText(
+    error: Throwable,
+    verificationType: VerificationType
+) {
     val uriHandler = LocalUriHandler.current
     Row {
         Icon(
