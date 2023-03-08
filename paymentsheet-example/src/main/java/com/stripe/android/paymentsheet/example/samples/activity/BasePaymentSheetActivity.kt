@@ -3,15 +3,18 @@ package com.stripe.android.paymentsheet.example.samples.activity
 import android.graphics.Color
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.viewmodel.PaymentSheetViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
     protected val viewModel: PaymentSheetViewModel by viewModels()
-    
+
     protected val snackbar by lazy {
         Snackbar.make(findViewById(android.R.id.content), "", Snackbar.LENGTH_SHORT)
         .setBackgroundTint(Color.BLACK)
@@ -26,12 +29,17 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
         viewModel.exampleCheckoutResponse.observe(this) { checkoutResponse ->
             // Init PaymentConfiguration with the publishable key returned from the backend,
             // which will be used on all Stripe API calls
-            PaymentConfiguration.init(this, checkoutResponse.publishableKey)
+            val activity = this
+            lifecycleScope.launch(Dispatchers.IO) {
+                PaymentConfiguration.init(activity, checkoutResponse.publishableKey)
 
-            onSuccess(
-                checkoutResponse.makeCustomerConfig(),
-                checkoutResponse.paymentIntent
-            )
+                launch(Dispatchers.Main) {
+                    onSuccess(
+                        checkoutResponse.makeCustomerConfig(),
+                        checkoutResponse.paymentIntent
+                    )
+                }
+            }
 
             viewModel.exampleCheckoutResponse.removeObservers(this)
         }

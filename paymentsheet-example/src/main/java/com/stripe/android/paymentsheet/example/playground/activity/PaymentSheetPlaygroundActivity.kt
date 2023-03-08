@@ -245,21 +245,21 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewBinding.reloadButton.setOnClickListener {
             val initializationType = viewModel.initializationType.value
 
-            viewModel.storeToggleState(
-                initializationType = initializationType.value,
-                customer = customer.value,
-                link = linkEnabled,
-                googlePay = googlePayConfig != null,
-                currency = currency.value,
-                merchantCountryCode = merchantCountryCode.value,
-                mode = mode.value,
-                shipping = shipping.value,
-                setDefaultBillingAddress = setDefaultBillingAddress,
-                setAutomaticPaymentMethods = setAutomaticPaymentMethods,
-                setDelayedPaymentMethods = setDelayedPaymentMethods
-            )
-
             lifecycleScope.launch {
+                viewModel.storeToggleState(
+                    initializationType = initializationType.value,
+                    customer = customer.value,
+                    link = linkEnabled,
+                    googlePay = googlePayConfig != null,
+                    currency = currency.value,
+                    merchantCountryCode = merchantCountryCode.value,
+                    mode = mode.value,
+                    shipping = shipping.value,
+                    setDefaultBillingAddress = setDefaultBillingAddress,
+                    setAutomaticPaymentMethods = setAutomaticPaymentMethods,
+                    setDelayedPaymentMethods = setDelayedPaymentMethods
+                )
+
                 viewModel.prepareCheckout(
                     initializationType = initializationType,
                     customer = customer,
@@ -352,20 +352,22 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val savedToggles = viewModel.getSavedToggleState()
-        setToggles(
-            initialization = savedToggles.initialization,
-            customer = savedToggles.customer,
-            link = savedToggles.link,
-            googlePay = savedToggles.googlePay,
-            currency = savedToggles.currency,
-            merchantCountryCode = savedToggles.merchantCountryCode,
-            mode = savedToggles.mode,
-            shippingAddress = savedToggles.shippingAddress,
-            setAutomaticPaymentMethods = savedToggles.setAutomaticPaymentMethods,
-            setDelayedPaymentMethods = savedToggles.setDelayedPaymentMethods,
-            setDefaultBillingAddress = savedToggles.setDefaultBillingAddress
-        )
+        lifecycleScope.launch {
+            val savedToggles = viewModel.getSavedToggleState()
+            setToggles(
+                initialization = savedToggles.initialization,
+                customer = savedToggles.customer,
+                link = savedToggles.link,
+                googlePay = savedToggles.googlePay,
+                currency = savedToggles.currency,
+                merchantCountryCode = savedToggles.merchantCountryCode,
+                mode = savedToggles.mode,
+                shippingAddress = savedToggles.shippingAddress,
+                setAutomaticPaymentMethods = savedToggles.setAutomaticPaymentMethods,
+                setDelayedPaymentMethods = savedToggles.setDelayedPaymentMethods,
+                setDefaultBillingAddress = savedToggles.setDefaultBillingAddress
+            )
+        }
     }
 
     private fun setToggles(
