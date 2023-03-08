@@ -41,7 +41,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.ui.core.elements.DateConfig
+import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
 import kotlinx.coroutines.flow.MutableStateFlow

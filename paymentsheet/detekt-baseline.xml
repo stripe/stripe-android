@@ -43,7 +43,6 @@
     <ID>MagicNumber:PrimaryButtonUiStateMapper.kt$PrimaryButtonUiStateMapper$5</ID>
     <ID>MagicNumber:USBankAccountFormFragment.kt$USBankAccountFormFragment$0.5f</ID>
     <ID>MaxLineLength:BillingAddressViewTest.kt$BillingAddressViewTest$fun</ID>
-    <ID>MaxLineLength:ConfirmPaymentIntentParamsFactoryTest.kt$ConfirmPaymentIntentParamsFactoryTest$fun</ID>
     <ID>MaxLineLength:CustomerRepositoryTest.kt$CustomerRepositoryTest$onBlocking { detachPaymentMethod(anyString(), any(), anyString(), any()) }.doThrow(InvalidParameterException("error"))</ID>
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$fun</ID>
     <ID>MaxLineLength:FlowControllerConfigurationHandlerTest.kt$FlowControllerConfigurationHandlerTest$.</ID>
@@ -67,7 +66,6 @@
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
     <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowControllerNonFallbackInjector</ID>
     <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>
-    <ID>TooManyFunctions:PaymentOptionsViewModel.kt$PaymentOptionsViewModel : BaseSheetViewModel</ID>
     <ID>TooManyFunctions:PaymentSheetViewModel.kt$PaymentSheetViewModel : BaseSheetViewModel</ID>
     <ID>UnnecessaryAbstractClass:PaymentSheetCommonModule.kt$PaymentSheetCommonModule$PaymentSheetCommonModule</ID>
     <ID>UnnecessaryAbstractClass:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule$PaymentSheetLauncherModule</ID>

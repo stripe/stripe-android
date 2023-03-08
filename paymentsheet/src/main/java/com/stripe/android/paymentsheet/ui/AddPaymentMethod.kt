@@ -5,6 +5,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,6 +26,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -87,31 +89,35 @@ internal fun AddPaymentMethod(
         }
 
         Column(modifier = modifier.fillMaxWidth()) {
-            PaymentElement(
-                sheetViewModel = sheetViewModel,
-                enabled = !processing,
-                supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
-                selectedItem = selectedItem,
-                showLinkInlineSignup = showLinkInlineSignup,
-                linkPaymentLauncher = linkHandler.linkLauncher,
-                showCheckboxFlow = showCheckboxFlow,
-                onItemSelectedListener = { selectedLpm ->
-                    if (selectedItem != selectedLpm) {
-                        selectedPaymentMethodCode = selectedLpm.code
+            CompositionLocalProvider(
+                LocalAutofillEventReporter provides sheetViewModel.eventReporter::onAutofill
+            ) {
+                PaymentElement(
+                    sheetViewModel = sheetViewModel,
+                    enabled = !processing,
+                    supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
+                    selectedItem = selectedItem,
+                    showLinkInlineSignup = showLinkInlineSignup,
+                    linkPaymentLauncher = linkHandler.linkLauncher,
+                    showCheckboxFlow = showCheckboxFlow,
+                    onItemSelectedListener = { selectedLpm ->
+                        if (selectedItem != selectedLpm) {
+                            selectedPaymentMethodCode = selectedLpm.code
+                        }
+                    },
+                    onLinkSignupStateChanged = { _, inlineSignupViewState ->
+                        linkSignupState = inlineSignupViewState
+                    },
+                    formArguments = arguments,
+                    onFormFieldValuesChanged = { formValues ->
+                        val newSelection = formValues?.transformToPaymentSelection(
+                            context = context,
+                            paymentMethod = selectedItem,
+                        )
+                        sheetViewModel.updateSelection(newSelection)
                     }
-                },
-                onLinkSignupStateChanged = { _, inlineSignupViewState ->
-                    linkSignupState = inlineSignupViewState
-                },
-                formArguments = arguments,
-                onFormFieldValuesChanged = { formValues ->
-                    val newSelection = formValues?.transformToPaymentSelection(
-                        context = context,
-                        paymentMethod = selectedItem,
-                    )
-                    sheetViewModel.updateSelection(newSelection)
-                }
-            )
+                )
+            }
         }
     } else {
         Loading()
