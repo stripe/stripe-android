@@ -8,6 +8,7 @@
 ### PaymentSheet
 * [ADDED][6306](https://github.com/stripe/stripe-android/pull/6306) Added support for Cash App Pay.
 * [FIXED][6326](https://github.com/stripe/stripe-android/pull/6326) Fixed an issue where the primary button would lose its padding on configuration changes.
+* [ADDED][5672](https://github.com/stripe/stripe-android/pull/5672) Added support for credit card autofill.
 
 ## 20.19.5 - 2023-03-06
 
@@ -16,7 +17,6 @@
 
 ### PaymentSheet
 * [ADDED][6283](https://github.com/stripe/stripe-android/pull/6283) Added support for Zip payments.
-* [ADDED][5672](https://github.com/stripe/stripe-android/pull/5672) Added support for credit card autofill.
 
 ### Identity
 * [ADDED] ID/Address verification

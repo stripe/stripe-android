@@ -55,6 +55,7 @@ class DateConfig : TextFieldConfig {
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @VisibleForTesting
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
