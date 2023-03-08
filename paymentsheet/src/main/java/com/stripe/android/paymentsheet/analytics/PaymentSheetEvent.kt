@@ -164,6 +164,17 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val eventName: String = "luxe_serialize_failure"
     }
 
+    class AutofillEvent(type: String) : PaymentSheetEvent() {
+        private fun String.toSnakeCase() = replace(
+            "(?<=.)(?=\\p{Upper})".toRegex(),
+            "_"
+        ).lowercase()
+
+        override val additionalParams: Map<String, Any?>
+            get() = emptyMap()
+        override val eventName: String = "autofill_${type.toSnakeCase()}"
+    }
+
     internal companion object {
         private fun analyticsValue(
             paymentSelection: PaymentSelection?

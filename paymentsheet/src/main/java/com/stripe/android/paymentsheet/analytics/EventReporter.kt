@@ -37,6 +37,8 @@ internal interface EventReporter {
 
     fun onLpmSpecFailure()
 
+    fun onAutofill(type: String)
+
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom");

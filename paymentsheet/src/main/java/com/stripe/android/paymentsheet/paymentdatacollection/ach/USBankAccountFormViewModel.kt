@@ -38,10 +38,10 @@ import com.stripe.android.paymentsheet.model.create
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
-import com.stripe.android.ui.core.elements.NameConfig
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -419,11 +419,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    private fun buildPrimaryButtonText(): String? {
+    private fun buildPrimaryButtonText(): String {
         return when {
             args.isCompleteFlow -> {
                 if (args.clientSecret is PaymentIntentClientSecret) {
-                    args.formArgs.amount?.buildPayButtonLabel(application.resources)
+                    args.formArgs.amount!!.buildPayButtonLabel(application.resources)
                 } else {
                     application.getString(
                         R.string.stripe_setup_button_label

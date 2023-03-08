@@ -4,7 +4,9 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -18,11 +20,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
+@OptIn(ExperimentalComposeUiApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface TextFieldController : InputController, SectionFieldComposable {
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
 
+    val autofillType: AutofillType?
     val debugLabel: String
     val trailingIcon: Flow<TextFieldIcon?>
     val capitalization: KeyboardCapitalization
@@ -110,6 +114,15 @@ class SimpleTextFieldController constructor(
 
     override val label = MutableStateFlow(textFieldConfig.label)
     override val debugLabel = textFieldConfig.debugLabel
+
+    @OptIn(ExperimentalComposeUiApi::class)
+    override val autofillType: AutofillType? = when (textFieldConfig) {
+        is DateConfig -> AutofillType.CreditCardExpirationDate
+        is PostalCodeConfig -> AutofillType.PostalCode
+        is EmailConfig -> AutofillType.EmailAddress
+        is NameConfig -> AutofillType.PersonFullName
+        else -> null
+    }
 
     override val placeHolder = MutableStateFlow(textFieldConfig.placeHolder)
 

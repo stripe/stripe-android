@@ -6,13 +6,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -22,6 +20,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -74,7 +73,6 @@ internal abstract class BaseSheetViewModel(
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO,
     protected val logger: Logger,
-    @InjectorKey val injectorKey: String,
     val lpmResourceRepository: ResourceRepository<LpmRepository>,
     val addressResourceRepository: ResourceRepository<AddressRepository>,
     val savedStateHandle: SavedStateHandle,
@@ -168,15 +166,12 @@ internal abstract class BaseSheetViewModel(
     private val _contentVisible = MutableStateFlow(true)
     internal val contentVisible: StateFlow<Boolean> = _contentVisible
 
-    /**
-     * Use this to override the current UI state of the primary button. The UI state is reset every
-     * time the payment selection is changed.
-     */
-    private val _primaryButtonUIState = MutableStateFlow<PrimaryButton.UIState?>(null)
-    val primaryButtonUIState: StateFlow<PrimaryButton.UIState?> = _primaryButtonUIState
-
     private val _primaryButtonState = MutableStateFlow<PrimaryButton.State?>(null)
     val primaryButtonState: StateFlow<PrimaryButton.State?> = _primaryButtonState
+
+    protected val customPrimaryButtonUiState = MutableStateFlow<PrimaryButton.UIState?>(null)
+
+    abstract val primaryButtonUiState: StateFlow<PrimaryButton.UIState?>
 
     private val _notesText = MutableStateFlow<String?>(null)
     internal val notesText: StateFlow<String?> = _notesText
@@ -197,18 +192,6 @@ internal abstract class BaseSheetViewModel(
         editing
     ) { isProcessing, isEditing ->
         !isProcessing && !isEditing
-    }.distinctUntilChanged()
-
-    val isPrimaryButtonEnabled = combine(
-        primaryButtonUIState,
-        buttonsEnabled,
-        selection,
-    ) { uiState, buttonsEnabled, selection ->
-        if (uiState != null) {
-            uiState.enabled && buttonsEnabled
-        } else {
-            buttonsEnabled && selection != null
-        }
     }.distinctUntilChanged()
 
     internal var lpmServerSpec: String? = null
@@ -352,8 +335,6 @@ internal abstract class BaseSheetViewModel(
                     requireNotNull(stripeIntent.amount),
                     requireNotNull(stripeIntent.currency)
                 )
-                // Reset the primary button state to display the amount
-                _primaryButtonUIState.value = null
             }.onFailure {
                 onFatal(
                     IllegalStateException("PaymentIntent must contain amount and currency.")
@@ -383,8 +364,57 @@ internal abstract class BaseSheetViewModel(
         logger.warning(message)
     }
 
-    fun updatePrimaryButtonUIState(state: PrimaryButton.UIState?) {
-        _primaryButtonUIState.value = state
+    fun updatePrimaryButtonForLinkSignup(viewState: InlineSignupViewState) {
+        val uiState = primaryButtonUiState.value ?: return
+
+        updateLinkPrimaryButtonUiState(
+            if (viewState.useLink) {
+                val userInput = viewState.userInput
+                val paymentSelection = selection.value
+
+                if (userInput != null && paymentSelection != null) {
+                    PrimaryButton.UIState(
+                        label = uiState.label,
+                        onClick = { payWithLinkInline(userInput) },
+                        enabled = true,
+                        lockVisible = this is PaymentSheetViewModel,
+                    )
+                } else {
+                    PrimaryButton.UIState(
+                        label = uiState.label,
+                        onClick = {},
+                        enabled = false,
+                        lockVisible = this is PaymentSheetViewModel,
+                    )
+                }
+            } else {
+                null
+            }
+        )
+    }
+
+    fun updatePrimaryButtonForLinkInline() {
+        val uiState = primaryButtonUiState.value ?: return
+        updateLinkPrimaryButtonUiState(
+            PrimaryButton.UIState(
+                label = uiState.label,
+                onClick = { payWithLinkInline(userInput = null) },
+                enabled = true,
+                lockVisible = this is PaymentSheetViewModel,
+            )
+        )
+    }
+
+    private fun updateLinkPrimaryButtonUiState(state: PrimaryButton.UIState?) {
+        customPrimaryButtonUiState.value = state
+    }
+
+    fun updateCustomPrimaryButtonUiState(block: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {
+        customPrimaryButtonUiState.update(block)
+    }
+
+    fun resetUSBankPrimaryButton() {
+        customPrimaryButtonUiState.value = null
     }
 
     fun updatePrimaryButtonState(state: PrimaryButton.State) {
@@ -448,16 +478,6 @@ internal abstract class BaseSheetViewModel(
             if (shouldResetToAddPaymentMethodForm) {
                 backStack.value = listOf(AddFirstPaymentMethod)
             }
-
-            val hasNoBankAccounts = paymentMethods.value.orEmpty().all { it.type != USBankAccount }
-            if (hasNoBankAccounts) {
-                updatePrimaryButtonUIState(
-                    primaryButtonUIState.value?.copy(
-                        visible = false
-                    )
-                )
-                updateBelowButtonText(null)
-            }
         }
     }
 
@@ -481,10 +501,9 @@ internal abstract class BaseSheetViewModel(
 
     abstract val shouldCompleteLinkFlowInline: Boolean
 
-    fun payWithLinkInline(linkConfig: LinkPaymentLauncher.Configuration, userInput: UserInput?) {
+    fun payWithLinkInline(userInput: UserInput?) {
         viewModelScope.launch {
             linkHandler.payWithLinkInline(
-                configuration = linkConfig,
                 userInput = userInput,
                 paymentSelection = selection.value,
                 shouldCompleteLinkInlineFlow = shouldCompleteLinkFlowInline,

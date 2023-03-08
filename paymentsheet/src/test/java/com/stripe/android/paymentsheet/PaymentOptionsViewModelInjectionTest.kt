@@ -98,7 +98,6 @@ internal class PaymentOptionsViewModelInjectionTest : BasePaymentOptionsViewMode
     private fun createViewModel(args: PaymentOptionContract.Args): PaymentOptionsViewModel {
         return createViewModel(
             paymentMethods = args.state.customerPaymentMethods,
-            injectorKey = args.injectorKey,
             args = args
         )
     }

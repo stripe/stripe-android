@@ -18,7 +18,6 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -59,6 +58,7 @@ import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
@@ -69,8 +69,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -95,7 +97,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
     @IOContext workContext: CoroutineContext,
-    @InjectorKey injectorKey: String,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
 ) : BaseSheetViewModel(
@@ -106,13 +107,24 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     prefsRepository = prefsRepository,
     workContext = workContext,
     logger = logger,
-    injectorKey = injectorKey,
     lpmResourceRepository = lpmResourceRepository,
     addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = true),
 ) {
+
+    private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
+        context = getApplication(),
+        config = config,
+        isProcessingPayment = isProcessingPaymentIntent,
+        currentScreenFlow = currentScreen,
+        buttonsEnabledFlow = buttonsEnabled,
+        amountFlow = amount,
+        selectionFlow = selection,
+        customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
+        onClick = this::checkout,
+    )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
     internal val paymentSheetResult: SharedFlow<PaymentSheetResult> = _paymentSheetResult
@@ -159,6 +171,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 )
             }
         }
+
+    override val primaryButtonUiState = primaryButtonUiStateMapper.forCompleteFlow().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
 
     internal val walletsContainerState: Flow<WalletsContainerState> = combine(
         linkHandler.isLinkEnabled,
