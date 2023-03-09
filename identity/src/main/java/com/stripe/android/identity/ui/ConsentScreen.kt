@@ -44,8 +44,8 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
-import com.stripe.android.identity.utils.urlWithoutQuery
 import com.stripe.android.identity.utils.isRemote
+import com.stripe.android.identity.utils.urlWithoutQuery
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
