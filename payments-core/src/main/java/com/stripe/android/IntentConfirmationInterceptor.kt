@@ -47,6 +47,11 @@ interface IntentConfirmationInterceptor {
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): NextStep
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        var createIntentCallback: AbsCreateIntentCallback? = null
+    }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -55,7 +60,6 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
-    private val createIntentCallback: AbsCreateIntentCallback?,
 ) : IntentConfirmationInterceptor {
 
     private val userError: String
@@ -106,10 +110,10 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         return if (clientSecret != null) {
             createConfirmStep(clientSecret, shippingValues, paymentMethod)
         } else {
-            when (createIntentCallback) {
+            when (val callback = IntentConfirmationInterceptor.createIntentCallback) {
                 is CreateIntentCallbackForServerSideConfirmation -> {
                     handleServerSideConfirmation(
-                        createIntentCallback = createIntentCallback,
+                        createIntentCallback = callback,
                         shouldSavePaymentMethod = setupForFutureUsage == OffSession,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues
@@ -117,7 +121,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 }
                 is CreateIntentCallback -> {
                     handleClientSideConfirmation(
-                        createIntentCallback = createIntentCallback,
+                        createIntentCallback = callback,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues
                     )
