@@ -8,4 +8,7 @@
 
     <!-- UPI -->
     <string name="invalid_upi_id">Invalid UPI ID.</string>
+
+    <!-- Unable to complete operation -->
+    <string name="unable_to_complete_operation">Unable to complete operation</string>
 </resources>
