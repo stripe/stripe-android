@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - Offline-tilassa</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">Maksutapasi on hylätty.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">Kortin voimassaoloaika on puutteellinen.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">Antamasi IBAN on virheellinen.</string>
   <string name="invalid_card_number">Kortin numero ei kelpaa.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Kortin turvakoodi on virheellinen.</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Kortin erääntymiskuukausi ei kelpaa.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">Kortin voimassaolovuosi ei kelpaa.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">Nimi on virheellinen.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">Maksutapasi todennus aikakatkaistiin – yritä uudelleen.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Sisäinen virhe on tapahtunut.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">KK/VV</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Vahvista maksu</string>
   <string name="title_add_a_card">Lisää kortti</string>

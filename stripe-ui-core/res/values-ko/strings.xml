@@ -48,6 +48,8 @@
   <string name="address_zip_invalid">우편번호가 유효하지 않습니다.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">우편번호가 유효하지 않습니다</string>
+  <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
+  <string name="billing_same_as_shipping">청구 주소가 배송 주소와 동일함</string>
   <!-- Used when a required field is blank and submit is clicked. -->
   <string name="blank_and_required">이 필드는 공란으로 비워둘 수 없습니다.</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
@@ -56,8 +58,16 @@
   <string name="email">이메일</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">이메일이 잘못되었습니다.</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiration_date_hint">MM/YY</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="form_label_optional">%s(선택 사항)</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">카드의 만료 날짜가 불완전합니다.</string>
   <!-- Error description for incomplete phone number -->
   <string name="incomplete_phone_number">불완전한 전화번호</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">카드의 만료 월이 유효하지 않습니다.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">카드의 만료 연도가 유효하지 않습니다.</string>
 </resources>

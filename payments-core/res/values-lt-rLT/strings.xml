@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s – neprisijungęs</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">Jūsų mokėjimo būdas buvo atmestas.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">Neišsami kortelės galiojimo pabaigos data.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">Įvedėte neteisingą IBAN.</string>
   <string name="invalid_card_number">Negaliojantis kortelės numeris.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Kortelės saugos kodas negalioja.</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Negaliojantis kortelės galiojimo pabaigos mėnuo.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">Kortelės galiojimo pabaigos metai neteisingi.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">Jūsų vardas neteisingas.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">Baigėsi mokėjimo būdui autentifikuoti skirtas laikas, bandykite dar kartą</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Įvyko vidinė klaida.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">mm / MM</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Patvirtinkite savo mokėjimą.</string>
   <string name="title_add_a_card">Pridėti kortelę</string>
