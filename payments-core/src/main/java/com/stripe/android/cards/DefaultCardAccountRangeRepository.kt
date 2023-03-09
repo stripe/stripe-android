@@ -24,7 +24,7 @@ internal class DefaultCardAccountRangeRepository(
 
     override suspend fun getAccountRanges(
         cardNumber: CardNumber.Unvalidated
-    ): Set<AccountRange>? {
+    ): List<AccountRange>? {
         return cardNumber.bin?.let { bin ->
             if (store.contains(bin)) {
                 inMemorySource.getAccountRanges(cardNumber)

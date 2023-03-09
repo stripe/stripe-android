@@ -24,7 +24,7 @@ internal class RemoteCardAccountRangeSource(
 
     override suspend fun getAccountRanges(
         cardNumber: CardNumber.Unvalidated
-    ): Set<AccountRange>? {
+    ): List<AccountRange>? {
         return cardNumber.bin?.let { bin ->
             _loading.value = true
 
@@ -39,7 +39,7 @@ internal class RemoteCardAccountRangeSource(
                     if (cardNumber.isValidLuhn) {
                         onCardMetadataMissingRange()
                     }
-                    accountRanges.toSet()
+                    accountRanges
                 }
                 else -> null
             }

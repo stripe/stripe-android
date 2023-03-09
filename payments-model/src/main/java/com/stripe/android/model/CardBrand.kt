@@ -46,9 +46,14 @@ enum class CardBrand(
     private val variantMaxLength: Map<Pattern, Int> = emptyMap(),
 
     /**
+     * Whether the brand should be rendered
+     */
+    private val shouldRender: Boolean = true,
+
+    /**
      * The rendering order in the card details cell
      */
-    private val renderingOrder: Int
+    private val renderingOrder: Int,
 ) {
     Visa(
         "visa",
@@ -165,6 +170,7 @@ enum class CardBrand(
             2 to Pattern.compile("^2|5|6$"),
             3 to Pattern.compile("^(22|23|24|25|26|27|50|51|52|53|54|55|56|57|58|59|67)$")
         ),
+        shouldRender = false,
         renderingOrder = 8
     ),
 
@@ -256,6 +262,8 @@ enum class CardBrand(
         private fun getMatchingCards(cardNumber: String) = values().filter { cardBrand ->
             cardBrand.getPatternForLength(cardNumber)?.matcher(cardNumber)
                 ?.matches() == true
+        }.filter {
+            it.shouldRender
         }
 
         /**
@@ -268,6 +276,7 @@ enum class CardBrand(
 
         val orderedBrands = values()
             .toList()
+            .filter { it.shouldRender }
             .filter { it.renderingOrder > 0 }
             .sortedBy { it.renderingOrder }
 

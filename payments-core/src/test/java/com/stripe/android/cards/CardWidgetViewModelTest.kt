@@ -44,7 +44,7 @@ class CardWidgetViewModelTest {
 
         override suspend fun getAccountRanges(
             cardNumber: CardNumber.Unvalidated
-        ) = setOf(ACCOUNT_RANGE)
+        ) = listOf(ACCOUNT_RANGE)
 
         override val loading: Flow<Boolean> = flowOf(false)
     }

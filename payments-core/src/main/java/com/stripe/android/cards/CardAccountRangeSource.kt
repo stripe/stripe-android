@@ -14,7 +14,7 @@ internal interface CardAccountRangeSource {
 
     suspend fun getAccountRanges(
         cardNumber: CardNumber.Unvalidated
-    ): Set<AccountRange>?
+    ): List<AccountRange>?
 
     val loading: Flow<Boolean>
 }

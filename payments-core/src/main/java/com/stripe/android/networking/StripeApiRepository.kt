@@ -1611,7 +1611,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         val accountRanges = cardAccountRangeRepository.getAccountRanges(
             cardNumber = unvalidatedNumber
-        )?.toList() ?: listOf()
+        ) ?: listOf()
 
         return CardMetadata(
             bin = bin,

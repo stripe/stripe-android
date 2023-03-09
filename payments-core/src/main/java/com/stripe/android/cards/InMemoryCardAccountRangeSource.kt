@@ -11,9 +11,9 @@ internal class InMemoryCardAccountRangeSource(
 
     override suspend fun getAccountRanges(
         cardNumber: CardNumber.Unvalidated
-    ): Set<AccountRange>? {
+    ): List<AccountRange>? {
         return cardNumber.bin?.let { bin ->
-            store.get(bin).toSet()
+            store.get(bin)
         }
     }
 }

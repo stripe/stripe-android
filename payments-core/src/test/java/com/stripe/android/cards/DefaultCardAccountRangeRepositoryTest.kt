@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.flow.Flow
@@ -204,6 +205,46 @@ internal class DefaultCardAccountRangeRepositoryTest {
         verify(remoteSource, never()).getAccountRanges(CardNumberFixtures.VISA)
     }
 
+    @Test
+    fun `real repository getAccountRanges should return multiple ranges for cartes bancaires`() = runTest {
+        assertThat(
+            realRepository.getAccountRanges(CardNumber.Unvalidated("455673"))
+        ).containsAtLeast(
+            AccountRange(
+                binRange = BinRange(low = "4556730300000000", high = "4556730309999999"),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.CartesBancaires,
+                country = "FR"
+            ),
+            AccountRange(
+                binRange = BinRange(low = "4556730200000000", high = "4556730209999999"),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Visa,
+                country = "FR"
+            )
+        )
+
+        assertThat(
+            realRepository
+                .getAccountRanges(CardNumber.Unvalidated("455673"))
+                ?.map { it.brand }
+                ?.toSet()
+        ).containsExactly(
+            CardBrand.Visa,
+            CardBrand.CartesBancaires
+        )
+
+        assertThat(
+            realRepository
+                .getAccountRanges(CardNumber.Unvalidated("513130"))
+                ?.map { it.brand }
+                ?.toSet()
+        ).containsExactly(
+            CardBrand.MasterCard,
+            CardBrand.CartesBancaires
+        )
+    }
+
     private fun createRealRepository(
         store: CardAccountRangeStore
     ): CardAccountRangeRepository {
@@ -237,7 +278,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     ) : CardAccountRangeSource {
         override suspend fun getAccountRanges(
             cardNumber: CardNumber.Unvalidated
-        ): Set<AccountRange>? {
+        ): List<AccountRange>? {
             return null
         }
 

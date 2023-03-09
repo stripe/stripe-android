@@ -1803,7 +1803,6 @@ class Stripe internal constructor(
      * @param cardNumber the card number
      * @param callback a [ApiResultCallback] to receive the result or error
      */
-    @UiThread
     fun retrievePossibleBrands(
         cardNumber: String,
         callback: ApiResultCallback<PossibleBrands>

@@ -729,7 +729,7 @@ internal class CardNumberEditTextTest {
 
                 override suspend fun getAccountRanges(
                     cardNumber: CardNumber.Unvalidated
-                ): Set<AccountRange>? {
+                ): List<AccountRange>? {
                     repositoryCalls++
                     return cardAccountRangeRepository.getAccountRanges(cardNumber)
                 }
@@ -833,7 +833,7 @@ internal class CardNumberEditTextTest {
 
                 override suspend fun getAccountRanges(
                     cardNumber: CardNumber.Unvalidated
-                ): Set<AccountRange>? {
+                ): List<AccountRange>? {
                     repositoryCalls++
                     return cardAccountRangeRepository.getAccountRanges(cardNumber)
                 }
@@ -898,7 +898,7 @@ internal class CardNumberEditTextTest {
 
                 override suspend fun getAccountRanges(
                     cardNumber: CardNumber.Unvalidated
-                ): Set<AccountRange>? = null
+                ): List<AccountRange>? = null
 
                 override val loading: Flow<Boolean> = flowOf(false)
             },
@@ -952,7 +952,7 @@ internal class CardNumberEditTextTest {
 
         override suspend fun getAccountRanges(
             cardNumber: CardNumber.Unvalidated
-        ): Set<AccountRange>? {
+        ): List<AccountRange>? {
             delay(TimeUnit.SECONDS.toMillis(10))
             return null
         }
@@ -972,7 +972,7 @@ internal class CardNumberEditTextTest {
 
         override suspend fun getAccountRanges(
             cardNumber: CardNumber.Unvalidated
-        ): Set<AccountRange>? {
+        ): List<AccountRange>? {
             return cardNumber.bin?.let {
                 staticCardAccountRangeSource.getAccountRanges(cardNumber)
             }

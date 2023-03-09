@@ -16,7 +16,7 @@ class StaticCardAccountRangeSource(
 
     override suspend fun getAccountRanges(
         cardNumber: CardNumber.Unvalidated
-    ): Set<AccountRange> {
-        return accountRanges.filter(cardNumber).toSet()
+    ): List<AccountRange> {
+        return accountRanges.filter(cardNumber)
     }
 }
