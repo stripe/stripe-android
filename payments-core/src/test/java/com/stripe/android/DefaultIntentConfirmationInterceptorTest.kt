@@ -18,6 +18,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultIntentConfirmationInterceptorTest {
@@ -86,14 +87,18 @@ class DefaultIntentConfirmationInterceptorTest {
             createIntentCallback = null,
         )
 
-        val nextStep = interceptor.intercept(
-            clientSecret = null,
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            shippingValues = null,
-            setupForFutureUsage = null,
-        )
+        val error = assertFailsWith<IllegalStateException> {
+            interceptor.intercept(
+                clientSecret = null,
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                shippingValues = null,
+                setupForFutureUsage = null,
+            )
+        }
 
-        assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Abort::class.java)
+        assertThat(error.message).isEqualTo(
+            "CreateIntentCallback must be implemented when using IntentConfiguration with PaymentSheet"
+        )
     }
 
     @Test

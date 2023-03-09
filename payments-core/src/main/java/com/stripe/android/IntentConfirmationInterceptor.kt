@@ -25,9 +25,6 @@ interface IntentConfirmationInterceptor {
         data class Fail(val errorMessage: String) : NextStep
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Abort(val error: Exception) : NextStep
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class Confirm(val confirmParams: ConfirmStripeIntentParams) : NextStep
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -126,11 +123,9 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                     )
                 }
                 else -> {
-                    IntentConfirmationInterceptor.NextStep.Abort(
-                        error = IllegalStateException(
-                            "${CreateIntentCallback::class.java.simpleName} must be implemented " +
-                                "when using IntentConfiguration with PaymentSheet",
-                        ),
+                    error(
+                        "${CreateIntentCallback::class.java.simpleName} must be implemented " +
+                            "when using IntentConfiguration with PaymentSheet"
                     )
                 }
             }
