@@ -49,18 +49,23 @@ class DefaultCardAccountRangeRepositoryFactory(
         val store = DefaultCardAccountRangeStore(appContext)
         return DefaultCardAccountRangeRepository(
             inMemorySource = InMemoryCardAccountRangeSource(store),
-            remoteSource = createRemoteCardAccountRangeSource(stripeRepository, publishableKey),
+            remoteSource = RemoteCardAccountRangeSource(
+                stripeRepository,
+                ApiRequest.Options(
+                    publishableKey
+                ),
+                DefaultCardAccountRangeStore(appContext),
+                DefaultAnalyticsRequestExecutor(),
+                PaymentAnalyticsRequestFactory(appContext, publishableKey)
+            ),
             staticSource = StaticCardAccountRangeSource(),
             store = store
         )
     }
 
-    private fun createRemoteCardAccountRangeSource(
-        stripeRepository: StripeRepository? = null,
-        publishableKey: String? = null
-    ): CardAccountRangeSource {
+    private fun createRemoteCardAccountRangeSource(): CardAccountRangeSource {
         return runCatching {
-            publishableKey ?: PaymentConfiguration.getInstance(
+            PaymentConfiguration.getInstance(
                 appContext
             ).publishableKey
         }.onSuccess { publishableKey ->
@@ -76,7 +81,7 @@ class DefaultCardAccountRangeRepositoryFactory(
         }.fold(
             onSuccess = { publishableKey ->
                 RemoteCardAccountRangeSource(
-                    stripeRepository ?: StripeApiRepository(
+                    StripeApiRepository(
                         appContext,
                         { publishableKey }
                     ),
