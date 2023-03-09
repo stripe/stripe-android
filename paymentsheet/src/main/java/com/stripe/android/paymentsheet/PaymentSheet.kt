@@ -10,6 +10,8 @@ import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import com.stripe.android.CreateIntentCallback
+import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -41,6 +43,22 @@ class PaymentSheet internal constructor(
         DefaultPaymentSheetLauncher(activity, callback)
     )
 
+    constructor(
+        activity: ComponentActivity,
+        callback: PaymentSheetResultCallback,
+        createIntentCallback: CreateIntentCallback,
+    ) : this(
+        DefaultPaymentSheetLauncher(activity, callback)
+    )
+
+    constructor(
+        activity: ComponentActivity,
+        callback: PaymentSheetResultCallback,
+        createIntentCallback: CreateIntentCallbackForServerSideConfirmation,
+    ) : this(
+        DefaultPaymentSheetLauncher(activity, callback)
+    )
+
     /**
      * Constructor to be used when launching the payment sheet from a Fragment.
      *
@@ -50,6 +68,22 @@ class PaymentSheet internal constructor(
     constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback
+    ) : this(
+        DefaultPaymentSheetLauncher(fragment, callback)
+    )
+
+    constructor(
+        fragment: Fragment,
+        callback: PaymentSheetResultCallback,
+        createIntentCallback: CreateIntentCallback,
+    ) : this(
+        DefaultPaymentSheetLauncher(fragment, callback)
+    )
+
+    constructor(
+        fragment: Fragment,
+        callback: PaymentSheetResultCallback,
+        createIntentCallback: CreateIntentCallbackForServerSideConfirmation,
     ) : this(
         DefaultPaymentSheetLauncher(fragment, callback)
     )
