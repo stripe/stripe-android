@@ -26,11 +26,8 @@ class FormController @Inject constructor(
     formSpec: LayoutSpec,
     transformSpecToElement: TransformSpecToElements,
 ) {
-    val elements: StateFlow<List<FormElement>>
-
-    init {
-        elements = MutableStateFlow(transformSpecToElement.transform(formSpec.items))
-    }
+    val elements: StateFlow<List<FormElement>> =
+        MutableStateFlow(transformSpecToElement.transform(formSpec.items))
 
     private val cardBillingElement = elements.map { elementsList ->
         elementsList
