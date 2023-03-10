@@ -150,6 +150,7 @@ public final class com/stripe/android/model/Card$Creator : android/os/Parcelable
 
 public final class com/stripe/android/model/CardBrand : java/lang/Enum {
 	public static final field AmericanExpress Lcom/stripe/android/model/CardBrand;
+	public static final field CartesBancaires Lcom/stripe/android/model/CardBrand;
 	public static final field Companion Lcom/stripe/android/model/CardBrand$Companion;
 	public static final field DinersClub Lcom/stripe/android/model/CardBrand;
 	public static final field Discover Lcom/stripe/android/model/CardBrand;

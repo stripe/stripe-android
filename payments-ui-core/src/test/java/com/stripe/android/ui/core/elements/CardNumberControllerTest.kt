@@ -118,6 +118,15 @@ internal class CardNumberControllerTest {
                     }
                 }
 
+                override suspend fun getAccountRanges(
+                    cardNumber: CardNumber.Unvalidated
+                ): List<AccountRange>? {
+                    repositoryCalls++
+                    return cardNumber.bin?.let {
+                        staticCardAccountRangeSource.getAccountRanges(cardNumber)
+                    }
+                }
+
                 override val loading: Flow<Boolean> = flowOf(false)
             },
             testDispatcher,
@@ -198,6 +207,14 @@ internal class CardNumberControllerTest {
         ): AccountRange? {
             return cardNumber.bin?.let {
                 staticCardAccountRangeSource.getAccountRange(cardNumber)
+            }
+        }
+
+        override suspend fun getAccountRanges(
+            cardNumber: CardNumber.Unvalidated
+        ): List<AccountRange>? {
+            return cardNumber.bin?.let {
+                staticCardAccountRangeSource.getAccountRanges(cardNumber)
             }
         }
 

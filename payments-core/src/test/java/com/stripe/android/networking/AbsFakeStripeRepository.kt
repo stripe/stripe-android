@@ -425,4 +425,11 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     ): ElementsSession? {
         return null
     }
+
+    override suspend fun retrieveCardMetadata(
+        cardNumber: String,
+        requestOptions: ApiRequest.Options
+    ): CardMetadata? {
+        return null
+    }
 }

@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
+import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.runner.RunWith
@@ -19,6 +20,10 @@ class CardWidgetViewModelTest {
         application,
         object : CardAccountRangeRepository.Factory {
             override fun create() = FakeCardAccountRangeRepository()
+            override fun createWithStripeRepository(
+                stripeRepository: StripeRepository,
+                publishableKey: String
+            ): CardAccountRangeRepository = FakeCardAccountRangeRepository()
         }
     )
 
@@ -36,6 +41,10 @@ class CardWidgetViewModelTest {
         override suspend fun getAccountRange(
             cardNumber: CardNumber.Unvalidated
         ) = ACCOUNT_RANGE
+
+        override suspend fun getAccountRanges(
+            cardNumber: CardNumber.Unvalidated
+        ) = listOf(ACCOUNT_RANGE)
 
         override val loading: Flow<Boolean> = flowOf(false)
     }

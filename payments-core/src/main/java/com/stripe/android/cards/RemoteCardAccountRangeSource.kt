@@ -22,9 +22,9 @@ internal class RemoteCardAccountRangeSource(
     override val loading: Flow<Boolean>
         get() = _loading
 
-    override suspend fun getAccountRange(
+    override suspend fun getAccountRanges(
         cardNumber: CardNumber.Unvalidated
-    ): AccountRange? {
+    ): List<AccountRange>? {
         return cardNumber.bin?.let { bin ->
             _loading.value = true
 
@@ -36,16 +36,10 @@ internal class RemoteCardAccountRangeSource(
 
             when {
                 accountRanges.isNotEmpty() -> {
-                    val matchedAccountRange = accountRanges
-                        .firstOrNull { (binRange) ->
-                            binRange.matches(cardNumber)
-                        }
-
-                    if (matchedAccountRange == null && cardNumber.isValidLuhn) {
+                    if (cardNumber.isValidLuhn) {
                         onCardMetadataMissingRange()
                     }
-
-                    matchedAccountRange
+                    accountRanges
                 }
                 else -> null
             }
