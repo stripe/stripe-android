@@ -13,6 +13,10 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.ConsumerNotFoundError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.LookupConsumerSession
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.NetworkedAccountsRetrieveMethodError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.StartVerificationSessionError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationSuccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationSuccessNoAccounts
 import com.stripe.android.financialconnections.domain.ConfirmVerification
@@ -52,27 +56,33 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         observeAsyncs()
         viewModelScope.launch {
             setState { copy(payload = Loading()) }
-            lookupConsumerAndStartVerification(
-                email = getManifest().accountholderCustomerEmailAddress!!,
-                verificationType = VerificationType.SMS,
-                onConsumerNotFound = {
-                    analyticsTracker.track(VerificationError(PANE, "ConsumerNotFoundError"))
-                    goNext(Pane.INSTITUTION_PICKER)
-                },
-                onLookupError = { error ->
-                    analyticsTracker.track(VerificationError(PANE, "LookupConsumerSession"))
-                    setState { copy(payload = Fail(error)) }
-                },
-                onStartVerification = { /* no-op */ },
-                onVerificationStarted = { consumerSession ->
-                    val payload = buildPayload(consumerSession)
-                    setState { copy(payload = Success(payload)) }
-                },
-                onStartVerificationError = { error ->
-                    analyticsTracker.track(VerificationError(PANE, "StartVerificationSessionError"))
-                    setState { copy(payload = Fail(error)) }
+            kotlin.runCatching { requireNotNull(getManifest().accountholderCustomerEmailAddress) }
+                .onSuccess { email ->
+                    lookupConsumerAndStartVerification(
+                        email = email,
+                        verificationType = VerificationType.SMS,
+                        onConsumerNotFound = {
+                            analyticsTracker.track(VerificationError(PANE, ConsumerNotFoundError))
+                            goNext(Pane.INSTITUTION_PICKER)
+                        },
+                        onLookupError = { error ->
+                            analyticsTracker.track(VerificationError(PANE, LookupConsumerSession))
+                            setState { copy(payload = Fail(error)) }
+                        },
+                        onStartVerification = { /* no-op */ },
+                        onVerificationStarted = { consumerSession ->
+                            val payload = buildPayload(consumerSession)
+                            setState { copy(payload = Success(payload)) }
+                        },
+                        onStartVerificationError = { error ->
+                            analyticsTracker.track(
+                                VerificationError(PANE, StartVerificationSessionError)
+                            )
+                            setState { copy(payload = Fail(error)) }
+                        }
+                    )
                 }
-            )
+                .onFailure { setState { copy(payload = Fail(it)) } }
         }
     }
 
@@ -121,7 +131,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     ) {
         logger.error("Error fetching networked accounts", error)
         analyticsTracker.track(Error(PANE, error))
-        analyticsTracker.track(VerificationError(PANE, "NetworkedAccountsRetrieveMethodError"))
+        analyticsTracker.track(VerificationError(PANE, NetworkedAccountsRetrieveMethodError))
         goNext(updatedManifest.nextPane)
     }
 
