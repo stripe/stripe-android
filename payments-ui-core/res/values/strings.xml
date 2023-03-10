@@ -47,4 +47,8 @@
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Set up</string>
+  <!-- Label for the field to enter the cardholder's name -->
+  <string name="name_on_card">Name on card</string>
+  <!-- Label for the contact information section -->
+  <string name="contact_information">Contact information</string>
 </resources>

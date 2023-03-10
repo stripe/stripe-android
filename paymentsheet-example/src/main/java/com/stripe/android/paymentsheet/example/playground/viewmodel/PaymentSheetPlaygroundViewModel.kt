@@ -14,6 +14,7 @@ import com.stripe.android.CreateIntentCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.playground.model.BillingCollectionMode
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
@@ -70,6 +71,11 @@ class PaymentSheetPlaygroundViewModel(
         setDefaultBillingAddress: Boolean,
         setAutomaticPaymentMethods: Boolean,
         setDelayedPaymentMethods: Boolean,
+        attachDefaultBillingAddress: Boolean,
+        collectName: String,
+        collectEmail: String,
+        collectPhone: String,
+        collectAddress: String,
     ) {
         val sharedPreferences = getApplication<Application>().getSharedPreferences(
             sharedPreferencesName,
@@ -88,6 +94,11 @@ class PaymentSheetPlaygroundViewModel(
             putBoolean(Toggle.SetDefaultBillingAddress.key, setDefaultBillingAddress)
             putBoolean(Toggle.SetAutomaticPaymentMethods.key, setAutomaticPaymentMethods)
             putBoolean(Toggle.SetDelayedPaymentMethods.key, setDelayedPaymentMethods)
+            putBoolean(Toggle.AttachDefaults.key, attachDefaultBillingAddress)
+            putString(Toggle.CollectName.key, collectName)
+            putString(Toggle.CollectEmail.key, collectEmail)
+            putString(Toggle.CollectPhone.key, collectPhone)
+            putString(Toggle.CollectAddress.key, collectAddress)
         }
     }
 
@@ -141,6 +152,26 @@ class PaymentSheetPlaygroundViewModel(
             Toggle.Link.key,
             Toggle.Link.default as Boolean
         )
+        val attachDefaults = sharedPreferences.getBoolean(
+            Toggle.AttachDefaults.key,
+            Toggle.AttachDefaults.default as Boolean
+        )
+        val collectName = sharedPreferences.getString(
+            Toggle.CollectName.key,
+            Toggle.CollectName.default as String
+        )
+        val collectEmail = sharedPreferences.getString(
+            Toggle.CollectEmail.key,
+            Toggle.CollectEmail.default as String
+        )
+        val collectPhone = sharedPreferences.getString(
+            Toggle.CollectPhone.key,
+            Toggle.CollectPhone.default as String
+        )
+        val collectAddress = sharedPreferences.getString(
+            Toggle.CollectAddress.key,
+            Toggle.CollectAddress.default as String
+        )
 
         return SavedToggles(
             initialization = initialization.toString(),
@@ -153,7 +184,12 @@ class PaymentSheetPlaygroundViewModel(
             setAutomaticPaymentMethods = setAutomaticPaymentMethods,
             setDelayedPaymentMethods = setDelayedPaymentMethods,
             setDefaultBillingAddress = setDefaultBillingAddress,
-            link = setLink
+            link = setLink,
+            attachDefaults = attachDefaults,
+            collectName = collectName.toString(),
+            collectEmail = collectEmail.toString(),
+            collectPhone = collectPhone.toString(),
+            collectAddress = collectAddress.toString(),
         )
 
     }

@@ -11,6 +11,7 @@ import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
+import com.stripe.android.ui.core.elements.ContactInformationSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -24,6 +25,7 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.OTPSpec
+import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
@@ -50,10 +52,10 @@ class TransformSpecToElements(
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
     private val context: Context,
-    private val viewOnlyFields: Set<IdentifierSpec> = emptySet()
+    private val viewOnlyFields: Set<IdentifierSpec> = emptySet(),
 ) {
     fun transform(list: List<FormItemSpec>): List<FormElement> =
-        list.map {
+        list.mapNotNull {
             when (it) {
                 is SaveForFutureUseSpec -> it.transform(
                     saveForFutureUseInitialValue,
@@ -70,6 +72,7 @@ class TransformSpecToElements(
                 is OTPSpec -> it.transform()
                 is NameSpec -> it.transform(initialValues)
                 is EmailSpec -> it.transform(initialValues)
+                is PhoneSpec -> it.transform(initialValues)
                 is SimpleTextSpec -> it.transform(initialValues)
                 is AuBankAccountNumberSpec -> it.transform(initialValues)
                 is IbanSpec -> it.transform(initialValues)
@@ -85,10 +88,11 @@ class TransformSpecToElements(
                 is CardBillingSpec -> it.transform(
                     initialValues,
                     addressRepository,
-                    shippingValues
+                    shippingValues,
                 )
                 is SepaMandateTextSpec -> it.transform(merchantName)
                 is UpiSpec -> it.transform()
+                is ContactInformationSpec -> it.transform(initialValues)
             }
         }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
 }

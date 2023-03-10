@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.model.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
@@ -265,6 +266,7 @@ class PaymentSheet internal constructor(
          *
          * If set, PaymentSheet displays Google Pay as a payment option.
          */
+
         val googlePay: GooglePayConfiguration? = null,
 
         /**
@@ -334,7 +336,16 @@ class PaymentSheet internal constructor(
          * intents.
          */
         val primaryButtonLabel: String? = null,
-    ) : Parcelable {
+
+        /**
+         * Describes how billing details should be collected.
+         * All values default to `automatic`.
+         * If `never` is used for a required field for the Payment Method used during checkout,
+         * you **must** provide an appropriate value as part of `defaultBillingDetails`.
+         */
+        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
+
+        ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */

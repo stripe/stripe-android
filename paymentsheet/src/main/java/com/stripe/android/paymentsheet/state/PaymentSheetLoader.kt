@@ -7,6 +7,7 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentLauncher.Companion.supportedFundingSources
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.model.BillingDetailsCollectionConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
@@ -234,6 +235,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         lpmRepository.update(
             stripeIntent = elementsSession.stripeIntent,
             serverLpmSpecs = elementsSession.paymentMethodSpecs,
+            billingDetailsCollectionConfiguration =
+                configuration?.billingDetailsCollectionConfiguration ?: BillingDetailsCollectionConfiguration(),
         )
 
         if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {

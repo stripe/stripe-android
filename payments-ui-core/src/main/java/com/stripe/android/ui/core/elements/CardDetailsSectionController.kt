@@ -10,14 +10,16 @@ import com.stripe.android.uicore.elements.SectionFieldErrorController
 class CardDetailsSectionController(
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
-    viewOnlyFields: Set<IdentifierSpec>
+    viewOnlyFields: Set<IdentifierSpec>,
+    collectName: Boolean = false,
 ) : SectionFieldErrorController {
 
     internal val cardDetailsElement = CardDetailsElement(
         IdentifierSpec.Generic("card_detail"),
         context,
         initialValues,
-        viewOnlyFields
+        viewOnlyFields,
+        collectName,
     )
 
     internal val isCardScanEnabled = cardDetailsElement.isCardScanEnabled

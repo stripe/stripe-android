@@ -10,6 +10,8 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transform
 
 /**
  * This is the element that represent the collection of all the card details:
@@ -20,10 +22,12 @@ internal class CardDetailsElement(
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
     viewOnlyFields: Set<IdentifierSpec> = emptySet(),
+    val collectName: Boolean = false,
     val controller: CardDetailsController = CardDetailsController(
         context,
         initialValues,
-        viewOnlyFields.contains(IdentifierSpec.CardNumber)
+        viewOnlyFields.contains(IdentifierSpec.CardNumber),
+        collectName,
     )
 ) : SectionMultiFieldElement(identifier) {
     val isCardScanEnabled = controller.numberElement.controller.cardScanEnabled
@@ -37,24 +41,52 @@ internal class CardDetailsElement(
 
     override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> =
         MutableStateFlow(
-            listOf(
+            listOfNotNull(
+                controller.nameElement?.identifier,
                 controller.numberElement.identifier,
                 controller.expirationDateElement.identifier,
                 controller.cvcElement.identifier
             )
         )
 
-    override fun getFormFieldValueFlow() = combine(
-        controller.numberElement.controller.formFieldValue,
-        controller.cvcElement.controller.formFieldValue,
-        controller.expirationDateElement.controller.formFieldValue,
-        controller.numberElement.controller.cardBrandFlow
-    ) { number, cvc, expirationDate, brand ->
-        listOf(
-            controller.numberElement.identifier to number,
-            controller.cvcElement.identifier to cvc,
-            IdentifierSpec.CardBrand to FormFieldEntry(brand.code, true)
-        ) + createExpiryDateFormFieldValues(expirationDate).toList()
+    override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+        val flows = buildList {
+            if (controller.nameElement != null) {
+                add(
+                    controller.nameElement.controller.formFieldValue.transform {
+                        emit(controller.nameElement.identifier to it)
+                    }
+                )
+            }
+            add(
+                controller.numberElement.controller.formFieldValue.transform {
+                    emit(controller.numberElement.identifier to it)
+                }
+            )
+            add(
+                controller.cvcElement.controller.formFieldValue.transform {
+                    emit(controller.cvcElement.identifier to it)
+                }
+            )
+            add(
+                controller.numberElement.controller.cardBrandFlow.transform {
+                    emit(IdentifierSpec.CardBrand to FormFieldEntry(it.code, true))
+                }
+            )
+            add(
+                controller.expirationDateElement.controller.formFieldValue.transform {
+                    emit(IdentifierSpec.CardExpMonth to getExpiryMonthFormFieldEntry(it))
+                }
+            )
+            add(
+                controller.expirationDateElement.controller.formFieldValue.transform {
+                    emit(IdentifierSpec.CardExpYear to getExpiryYearFormFieldEntry(it))
+                }
+            )
+        }
+        return combine(flows) { values ->
+            values.map { it.first to it.second }
+        }
     }
 }
 
@@ -62,26 +94,38 @@ internal class CardDetailsElement(
 fun createExpiryDateFormFieldValues(
     entry: FormFieldEntry
 ): Map<IdentifierSpec, FormFieldEntry> {
+    return mapOf(
+        IdentifierSpec.CardExpMonth to getExpiryMonthFormFieldEntry(entry),
+        IdentifierSpec.CardExpYear to getExpiryYearFormFieldEntry(entry),
+    )
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun getExpiryMonthFormFieldEntry(entry: FormFieldEntry): FormFieldEntry {
     var month = -1
-    var year = -1
     entry.value?.let { date ->
         val newString = convertTo4DigitDate(date)
         if (newString.length == 4) {
             month = requireNotNull(newString.take(2).toIntOrNull())
+        }
+    }
+
+    return entry.copy(
+        value = month.toString().padStart(length = 2, padChar = '0')
+    )
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun getExpiryYearFormFieldEntry(entry: FormFieldEntry): FormFieldEntry {
+    var year = -1
+    entry.value?.let { date ->
+        val newString = convertTo4DigitDate(date)
+        if (newString.length == 4) {
             year = requireNotNull(newString.takeLast(2).toIntOrNull()) + 2000
         }
     }
 
-    val monthEntry = entry.copy(
-        value = month.toString().padStart(length = 2, padChar = '0')
-    )
-
-    val yearEntry = entry.copy(
+    return entry.copy(
         value = year.toString()
-    )
-
-    return mapOf(
-        IdentifierSpec.CardExpMonth to monthEntry,
-        IdentifierSpec.CardExpYear to yearEntry
     )
 }

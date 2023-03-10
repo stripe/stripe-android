@@ -56,4 +56,13 @@
     <string name="currency_aud">AUD</string>
     <string name="show_sheet">Show Sheet</string>
     <string name="merchant_country">Merchant</string>
+    <string name="attach_default_billing_address">Attach Default Billing Address</string>
+    <string name="collect_name">Collect Name</string>
+    <string name="collect_email">Collect Email</string>
+    <string name="collect_phone">Collect Phone</string>
+    <string name="collect_address">Collect Address</string>
+    <string name="never">Never</string>
+    <string name="auto">Auto</string>
+    <string name="always">Always</string>
+    <string name="full">Full</string>
 </resources>
