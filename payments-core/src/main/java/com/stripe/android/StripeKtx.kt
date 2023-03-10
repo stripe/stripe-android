@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.content.Intent
+import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.core.exception.APIConnectionException
@@ -986,6 +987,7 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
     APIConnectionException::class,
     APIException::class
 )
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 suspend fun Stripe.retrievePossibleBrands(
     cardNumber: String
 ): PossibleBrands = runApiRequest {
