@@ -7,29 +7,31 @@ appId: com.stripe.android.financialconnections.example
     id: "Native_checkbox"
 - tapOn: "Mode_Dropdown_Icon"
 - tapOn:
-    id: "Test_checkbox"
+    id: "NetworkingTestMode_checkbox"
 - tapOn:
     id: "PaymentIntent_checkbox"
+- tapOn: Customer email (optional)
+- inputText: "test@test.com"
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
     visible: "Agree"
     timeout: 30000
 - tapOn: "Agree"
-# SELECT LEGACY INSTITUTION
-- tapOn: "Test Institution"
-####### Bypass Chrome on-boarding screen #######
-- runFlow:
-    file: ../common/subflow-skip-chrome-welcome.yaml
-    env:
-      APP_ID: com.stripe.android.financialconnections.example
-###############################################
-# SELECT SUCCESS ACCOUNT
-- extendedWaitUntil:
-    visible: "Success"
-    timeout: 60000
+# LOGIN TO NETWORKING
+- tapOn: test@test.com
+- tapOn:
+    text: ●
+    index: 0
+- inputText: "111111"
+# SELECT NETWORKED ACCOUNT
 - tapOn: "Success"
-- tapOn: "Confirm"
-# CONFIRM AND COMPLETE
+- tapOn: "Connect account"
+# STEP UP AUTHENTICATION
+- tapOn:
+    text: ●
+    index: 0
+- inputText: "111111"
+- assertVisible: "Success!"
 - tapOn: "Done"
 - assertVisible: ".*Intent Confirmed!.*"
