@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
+import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -1803,6 +1804,7 @@ class Stripe internal constructor(
      * @param cardNumber the card number
      * @param callback a [ApiResultCallback] to receive the result or error
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun retrievePossibleBrands(
         cardNumber: String,
         callback: ApiResultCallback<PossibleBrands>
