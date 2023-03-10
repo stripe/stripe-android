@@ -11,6 +11,7 @@
         <activity
             android:name=".IdentityActivity"
             android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|keyboardHidden"
             android:exported="false" />
 

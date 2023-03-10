@@ -284,10 +284,6 @@ public final class com/stripe/android/ui/core/elements/CountrySpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/DateConfig$Companion {
-	public final fun determineTextFieldState (IIII)Lcom/stripe/android/uicore/elements/TextFieldState;
-}
-
 public final class com/stripe/android/ui/core/elements/DisplayField : java/lang/Enum {
 	public static final field Companion Lcom/stripe/android/ui/core/elements/DisplayField$Companion;
 	public static final field Country Lcom/stripe/android/ui/core/elements/DisplayField;
@@ -434,10 +430,6 @@ public final class com/stripe/android/ui/core/elements/MandateTextSpec$Companion
 }
 
 public final class com/stripe/android/ui/core/elements/MandateTextUIKt {
-}
-
-public final class com/stripe/android/ui/core/elements/NameConfig$Companion {
-	public final fun createController (Ljava/lang/String;)Lcom/stripe/android/uicore/elements/SimpleTextFieldController;
 }
 
 public final class com/stripe/android/ui/core/elements/NameSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {

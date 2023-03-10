@@ -34,11 +34,13 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.BulletItem
+import com.stripe.android.financialconnections.features.common.FormErrorText
 import com.stripe.android.financialconnections.features.common.LoadingContent
+import com.stripe.android.financialconnections.features.common.PaneFooter
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupViewModel.Companion.PANE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.ImageResource
@@ -48,9 +50,11 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
+import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
+import com.stripe.android.financialconnections.utils.firstErrorOrNull
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
@@ -66,10 +70,11 @@ internal fun NetworkingLinkSignupScreen() {
     BackHandler(enabled = true) {}
     NetworkingLinkSignupContent(
         state = state.value,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
-        onSaveToLink = viewModel::onSaveAccount
+        onSaveToLink = viewModel::onSaveAccount,
+        onSkipClick = viewModel::onSkipClick
     )
 }
 
@@ -79,14 +84,16 @@ private fun NetworkingLinkSignupContent(
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onClickableTextClick: (String) -> Unit,
-    onSaveToLink: () -> Unit
+    onSaveToLink: () -> Unit,
+    onSkipClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
                 showBack = false,
-                onCloseClick = onCloseClick
+                onCloseClick = onCloseClick,
+                elevation = scrollState.elevation
             )
         }
     ) {
@@ -101,6 +108,7 @@ private fun NetworkingLinkSignupContent(
                 showFullForm = state.showFullForm,
                 onSaveToLink = onSaveToLink,
                 onClickableTextClick = onClickableTextClick,
+                onSkipClick = onSkipClick
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -112,7 +120,6 @@ private fun NetworkingLinkSignupContent(
 }
 
 @Composable
-@Suppress("LongMethod")
 private fun NetworkingLinkSignupLoaded(
     scrollState: ScrollState,
     validForm: Boolean,
@@ -121,7 +128,8 @@ private fun NetworkingLinkSignupLoaded(
     lookupAccountSync: Async<ConsumerSessionLookup>,
     showFullForm: Boolean,
     onClickableTextClick: (String) -> Unit,
-    onSaveToLink: () -> Unit
+    onSaveToLink: () -> Unit,
+    onSkipClick: () -> Unit
 ) {
     Column(
         Modifier.fillMaxSize()
@@ -138,171 +146,212 @@ private fun NetworkingLinkSignupLoaded(
                 )
         ) {
             Spacer(modifier = Modifier.size(16.dp))
-            AnnotatedText(
-                text = TextResource.Text(stringResource(R.string.stripe_networking_signup_title)),
-                defaultStyle = FinancialConnectionsTheme.typography.subtitle,
-                annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.subtitle
-                        .toSpanStyle()
-                        .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                ),
-                onClickableTextClick = {},
-            )
+            Title()
             Spacer(modifier = Modifier.size(8.dp))
-            BulletItem(
-                bullet = BulletUI(
-                    title = null,
-                    // TODO handle no merchant name case.
-                    content = TextResource.StringId(
-                        R.string.stripe_networking_signup_bullet1,
-                        listOf(payload.merchantName ?: "")
-                    ),
-                    imageResource = ImageResource.Local(R.drawable.stripe_ic_convert)
-                ),
-                onClickableTextClick = {}
-            )
+            FirstBullet(payload)
             Spacer(modifier = Modifier.size(12.dp))
-            BulletItem(
-                bullet = BulletUI(
-                    title = null,
-                    TextResource.StringId(R.string.stripe_networking_signup_bullet2),
-                    imageResource = ImageResource.Local(R.drawable.stripe_ic_disputeprotection)
-                ),
-                onClickableTextClick = {}
-            )
+            SecondBullet()
             Spacer(modifier = Modifier.size(24.dp))
-            StripeThemeForConnections {
-                EmailCollectionSection(
-                    showFullForm = showFullForm,
-                    loading = lookupAccountSync is Loading,
-                    emailController = payload.emailController,
-                    enabled = true,
+            EmailSection(
+                showFullForm = showFullForm,
+                loading = lookupAccountSync is Loading,
+                emailController = payload.emailController,
+                enabled = true,
+            )
+            listOf(
+                lookupAccountSync,
+                saveAccountToLinkSync
+            ).firstErrorOrNull()?.let { FormErrorText(error = it) }
+            AnimatedVisibility(visible = showFullForm) {
+                PhoneNumberSection(
+                    payload = payload,
+                    onClickableTextClick = onClickableTextClick
                 )
-            }
-            AnimatedVisibility(
-                visible = showFullForm
-            ) {
-                Column {
-                    StripeThemeForConnections {
-                        PhoneNumberCollectionSection(
-                            phoneNumberController = payload.phoneController,
-                            requestFocusWhenShown = payload.phoneController.initialPhoneNumber.isEmpty(),
-                            imeAction = ImeAction.Default,
-                            enabled = true,
-                        )
-                    }
-                    AnnotatedText(
-                        text = TextResource.StringId(R.string.stripe_networking_signup_phone_number_disclaimer),
-                        onClickableTextClick = onClickableTextClick,
-                        defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                            color = FinancialConnectionsTheme.colors.textSecondary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
-                                .toSpanStyle()
-                                .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
-                                .toSpanStyle()
-                                .copy(color = FinancialConnectionsTheme.colors.textSecondary),
-                        )
-                    )
-                }
             }
             Spacer(modifier = Modifier.weight(1f))
         }
-        Column(
-            modifier = Modifier.padding(
-                start = 24.dp,
-                end = 24.dp,
-                top = 16.dp,
-                bottom = 24.dp
-            )
-        ) {
+        PaneFooter(elevation = scrollState.elevation) {
             AnimatedVisibility(
                 visible = showFullForm
             ) {
-                Column {
-                    AnnotatedText(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = TextResource.StringId(R.string.stripe_networking_signup_terms),
-                        onClickableTextClick = onClickableTextClick,
-                        defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                            textAlign = TextAlign.Center,
-                            color = FinancialConnectionsTheme.colors.textSecondary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
-                                .toSpanStyle()
-                                .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
-                                .toSpanStyle()
-                                .copy(color = FinancialConnectionsTheme.colors.textSecondary),
-                        )
-                    )
-                    Spacer(modifier = Modifier.size(16.dp))
-                    FinancialConnectionsButton(
-                        loading = saveAccountToLinkSync is Loading,
-                        enabled = validForm,
-                        type = FinancialConnectionsButton.Type.Primary,
-                        onClick = onSaveToLink,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(text = stringResource(R.string.stripe_networking_signup_cta_save))
-                    }
-                }
+                SaveToLinkCta(
+                    onClickableTextClick = onClickableTextClick,
+                    saveAccountToLinkSync = saveAccountToLinkSync,
+                    validForm = validForm,
+                    onSaveToLink = onSaveToLink
+                )
             }
             Spacer(modifier = Modifier.size(12.dp))
-            FinancialConnectionsButton(
-                type = FinancialConnectionsButton.Type.Secondary,
-                onClick = { },
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(text = stringResource(R.string.stripe_networking_signup_cta_negative))
-            }
+            SkipCta(onSkipClick)
         }
     }
 }
 
 @Composable
-internal fun EmailCollectionSection(
+private fun SkipCta(onSkipClick: () -> Unit) {
+    FinancialConnectionsButton(
+        type = FinancialConnectionsButton.Type.Secondary,
+        onClick = onSkipClick,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Text(text = stringResource(R.string.stripe_networking_signup_cta_negative))
+    }
+}
+
+@Composable
+private fun SaveToLinkCta(
+    onClickableTextClick: (String) -> Unit,
+    saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
+    validForm: Boolean,
+    onSaveToLink: () -> Unit
+) {
+    Column {
+        AnnotatedText(
+            modifier = Modifier.fillMaxWidth(),
+            text = TextResource.StringId(R.string.stripe_networking_signup_terms),
+            onClickableTextClick = onClickableTextClick,
+            defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+                textAlign = TextAlign.Center,
+                color = FinancialConnectionsTheme.colors.textSecondary
+            ),
+            annotationStyles = mapOf(
+                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                    .toSpanStyle()
+                    .copy(color = FinancialConnectionsTheme.colors.textBrand),
+                StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
+                    .toSpanStyle()
+                    .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+            )
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        FinancialConnectionsButton(
+            loading = saveAccountToLinkSync is Loading,
+            enabled = validForm,
+            type = FinancialConnectionsButton.Type.Primary,
+            onClick = onSaveToLink,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(text = stringResource(R.string.stripe_networking_signup_cta_save))
+        }
+    }
+}
+
+@Composable
+private fun PhoneNumberSection(
+    payload: Payload,
+    onClickableTextClick: (String) -> Unit
+) {
+    Column {
+        StripeThemeForConnections {
+            PhoneNumberCollectionSection(
+                phoneNumberController = payload.phoneController,
+                requestFocusWhenShown = payload.phoneController.initialPhoneNumber.isEmpty(),
+                imeAction = ImeAction.Default,
+                enabled = true,
+            )
+        }
+        AnnotatedText(
+            text = TextResource.StringId(R.string.stripe_networking_signup_phone_number_disclaimer),
+            onClickableTextClick = onClickableTextClick,
+            defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+                color = FinancialConnectionsTheme.colors.textSecondary
+            ),
+            annotationStyles = mapOf(
+                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                    .toSpanStyle()
+                    .copy(color = FinancialConnectionsTheme.colors.textBrand),
+                StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
+                    .toSpanStyle()
+                    .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+            )
+        )
+    }
+}
+
+@Composable
+private fun SecondBullet() {
+    BulletItem(
+        bullet = BulletUI(
+            title = null,
+            TextResource.StringId(R.string.stripe_networking_signup_bullet2),
+            imageResource = ImageResource.Local(R.drawable.stripe_ic_disputeprotection)
+        ),
+        onClickableTextClick = {}
+    )
+}
+
+@Composable
+private fun FirstBullet(payload: Payload) {
+    BulletItem(
+        bullet = BulletUI(
+            title = null,
+            // TODO handle no merchant name case.
+            content = TextResource.StringId(
+                R.string.stripe_networking_signup_bullet1,
+                listOf(payload.merchantName ?: "")
+            ),
+            imageResource = ImageResource.Local(R.drawable.stripe_ic_convert)
+        ),
+        onClickableTextClick = {}
+    )
+}
+
+@Composable
+private fun Title() {
+    AnnotatedText(
+        text = TextResource.Text(stringResource(R.string.stripe_networking_signup_title)),
+        defaultStyle = FinancialConnectionsTheme.typography.subtitle,
+        annotationStyles = mapOf(
+            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.subtitle
+                .toSpanStyle()
+                .copy(color = FinancialConnectionsTheme.colors.textBrand),
+        ),
+        onClickableTextClick = {},
+    )
+}
+
+@Composable
+internal fun EmailSection(
     enabled: Boolean,
     emailController: TextFieldController,
     focusRequester: FocusRequester = remember { FocusRequester() },
     showFullForm: Boolean,
     loading: Boolean
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp),
-        contentAlignment = Alignment.CenterEnd
-    ) {
-        TextFieldSection(
-            textFieldController = emailController,
-            imeAction = if (showFullForm) {
-                ImeAction.Next
-            } else {
-                ImeAction.Done
-            },
-            enabled = enabled,
+    StripeThemeForConnections {
+        Box(
             modifier = Modifier
-                .focusRequester(focusRequester)
-        )
-        if (loading) {
-            CircularProgressIndicator(
+                .fillMaxWidth()
+                .padding(0.dp),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            TextFieldSection(
+                textFieldController = emailController,
+                imeAction = if (showFullForm) {
+                    ImeAction.Next
+                } else {
+                    ImeAction.Done
+                },
+                enabled = enabled,
                 modifier = Modifier
-                    .size(32.dp)
-                    .padding(
-                        start = 0.dp,
-                        top = 8.dp,
-                        end = 16.dp,
-                        bottom = 8.dp
-                    ),
-                color = FinancialConnectionsTheme.colors.iconBrand,
-                strokeWidth = 2.dp
+                    .focusRequester(focusRequester)
             )
+            if (loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(
+                            start = 0.dp,
+                            top = 8.dp,
+                            end = 16.dp,
+                            bottom = 8.dp
+                        ),
+                    color = FinancialConnectionsTheme.colors.iconBrand,
+                    strokeWidth = 2.dp
+                )
+            }
         }
     }
 }
@@ -331,7 +380,8 @@ internal fun NetworkingLinkSignupScreenEnteringEmailPreview() {
             onCloseClick = {},
             onSaveToLink = {},
             onClickableTextClick = {},
-            onCloseFromErrorClick = {}
+            onCloseFromErrorClick = {},
+            onSkipClick = {}
         )
     }
 }
@@ -366,7 +416,8 @@ internal fun NetworkingLinkSignupScreenEnteringPhonePreview() {
             onCloseClick = {},
             onSaveToLink = {},
             onClickableTextClick = {},
-            onCloseFromErrorClick = {}
+            onCloseFromErrorClick = {},
+            onSkipClick = {}
         )
     }
 }

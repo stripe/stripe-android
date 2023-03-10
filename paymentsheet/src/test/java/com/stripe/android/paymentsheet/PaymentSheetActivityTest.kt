@@ -28,7 +28,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -55,14 +54,13 @@ import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -141,22 +139,17 @@ internal class PaymentSheetActivityTest {
 
     private lateinit var viewModel: PaymentSheetViewModel
 
-    private val contract = PaymentSheetContract()
+    private val contract = PaymentSheetContractV2()
 
     private val intent = contract.createIntent(
         context,
-        PaymentSheetContract.Args(
-            PaymentIntentClientSecret("client_secret"),
-            PaymentSheetFixtures.CONFIG_CUSTOMER,
+        PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = "pi_1234_secret_5678",
+            ),
+            config = PaymentSheetFixtures.CONFIG_CUSTOMER,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
         )
-    )
-
-    private val primaryButtonUIState = PrimaryButton.UIState(
-        label = "Test",
-        onClick = {},
-        enabled = true,
-        visible = true
     )
 
     @BeforeTest
@@ -677,14 +670,15 @@ internal class PaymentSheetActivityTest {
 
             val intent = contract.createIntent(
                 activity,
-                PaymentSheetContract.Args(
-                    PaymentIntentClientSecret("client_secret"),
+                PaymentSheetContractV2.Args(
+                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                        clientSecret = "pi_1234_secret_9876",
+                    ),
                     PaymentSheetFixtures.CONFIG_CUSTOMER
                 )
             )
 
-            val args =
-                intent.extras?.get(PaymentSheetContract.EXTRA_ARGS) as PaymentSheetContract.Args
+            val args = intent.extras?.get(PaymentSheetContractV2.EXTRA_ARGS) as PaymentSheetContractV2.Args
             assertThat(args.statusBarColor)
                 .isEqualTo(PaymentSheetFixtures.STATUS_BAR_COLOR)
         }
@@ -773,69 +767,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Buy button should be enabled when primaryButtonEnabled is true`() {
-        val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
-            viewModel.updatePrimaryButtonUIState(
-                primaryButtonUIState.copy(
-                    enabled = true
-                )
-            )
-            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
-        }
-    }
-
-    @Test
-    fun `Buy button should be disabled when primaryButtonEnabled is false`() {
-        val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
-            viewModel.updatePrimaryButtonUIState(
-                primaryButtonUIState.copy(
-                    enabled = false
-                )
-            )
-            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
-        }
-    }
-
-    @Test
-    fun `Buy button text should update when primaryButtonText updates`() {
-        val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
-            viewModel.updatePrimaryButtonUIState(
-                primaryButtonUIState.copy(
-                    label = "Some text"
-                )
-            )
-            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
-        }
-    }
-
-    @Test
-    fun `Buy button should go back to initial state after resetPrimaryButton called`() {
-        Dispatchers.setMain(testDispatcher)
-
-        val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
-            viewModel.viewState.value = PaymentSheetViewState.Reset(null)
-
-            viewModel.updatePrimaryButtonUIState(
-                primaryButtonUIState.copy(
-                    label = "Some text",
-                    enabled = false
-                )
-            )
-            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
-            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
-
-            viewModel.updatePrimaryButtonUIState(null)
-            assertThat(activity.viewBinding.buyButton.externalLabel)
-                .isEqualTo(viewModel.amount.value?.buildPayButtonLabel(context.resources))
-            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
-        }
-    }
-
-    @Test
     fun `notes visibility is visible`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
@@ -900,8 +831,10 @@ internal class PaymentSheetActivityTest {
             ephemeralKeySecret = "",
         )
 
-        val args = PaymentSheetContract.Args(
-            clientSecret = PaymentIntentClientSecret("abc"),
+        val args = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = "abc",
+            ),
             config = PaymentSheet.Configuration(
                 merchantDisplayName = "Some name",
                 customer = invalidCustomerConfig,
@@ -923,8 +856,8 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Handles invalid client secret correctly`() {
-        val args = PaymentSheetContract.Args(
-            clientSecret = PaymentIntentClientSecret(""),
+        val args = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = ""),
             config = null,
         )
 
@@ -985,7 +918,7 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity { activity ->
             testDispatcher.scheduler.advanceTimeBy(50)
-            assertThat(activity.viewBinding.buyButton.externalLabel).isNull()
+            assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Pay")
             testDispatcher.scheduler.advanceTimeBy(250)
             assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Pay CA\$99.99")
         }
@@ -1044,7 +977,7 @@ internal class PaymentSheetActivityTest {
                 PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
                 eventReporter,
                 { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-                StripeIntentRepository.Static(paymentIntent),
+                ElementsSessionRepository.Static(paymentIntent),
                 StripeIntentValidator(),
                 FakePaymentSheetLoader(
                     stripeIntent = paymentIntent,
@@ -1064,7 +997,6 @@ internal class PaymentSheetActivityTest {
                 googlePayPaymentMethodLauncherFactory,
                 Logger.noop(),
                 testDispatcher,
-                DUMMY_INJECTOR_KEY,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler
             ).also {

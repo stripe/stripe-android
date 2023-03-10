@@ -22,7 +22,14 @@ internal abstract class DocumentUploadDestination(
     @StringRes backCheckMarkDescriptionRes: Int = INVALID_STRING_RES,
     collectedDataParamType: CollectedDataParam.Type
 ) : IdentityTopLevelDestination(
-    shouldPopUpToDocSelection = shouldPopUpToDocSelection
+    popUpToParam = if (shouldPopUpToDocSelection) {
+        PopUpToParam(
+            route = DocSelectionDestination.ROUTE.route,
+            inclusive = false
+        )
+    } else {
+        null
+    }
 ) {
     override val routeWithArgs by lazy {
         destinationRoute.withParams(

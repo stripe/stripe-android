@@ -18,12 +18,11 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
@@ -99,14 +98,15 @@ internal class DefaultPaymentSheetLoaderTest {
 
         assertThat(
             loader.load(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
                 paymentSheetConfiguration = null,
             )
         ).isEqualTo(
             PaymentSheetLoader.Result.Success(
                 PaymentSheetState.Full(
                     config = null,
-                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntent = stripeIntent,
                     customerPaymentMethods = emptyList(),
                     savedSelection = SavedSelection.Link,
@@ -141,14 +141,15 @@ internal class DefaultPaymentSheetLoaderTest {
 
         assertThat(
             loader.load(
-                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
         ).isEqualTo(
             PaymentSheetLoader.Result.Success(
                 PaymentSheetState.Full(
                     config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     customerPaymentMethods = PAYMENT_METHODS,
                     savedSelection = SavedSelection.PaymentMethod(id = "pm_123456789"),
@@ -169,14 +170,15 @@ internal class DefaultPaymentSheetLoaderTest {
 
         assertThat(
             loader.load(
-                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
                 PaymentSheetFixtures.CONFIG_GOOGLEPAY
             )
         ).isEqualTo(
             PaymentSheetLoader.Result.Success(
                 PaymentSheetState.Full(
                     config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntent = stripeIntent,
                     customerPaymentMethods = emptyList(),
                     savedSelection = SavedSelection.Link,
@@ -221,14 +223,15 @@ internal class DefaultPaymentSheetLoaderTest {
 
         assertThat(
             loader.load(
-                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
                 PaymentSheetFixtures.CONFIG_GOOGLEPAY
             )
         ).isEqualTo(
             PaymentSheetLoader.Result.Success(
                 PaymentSheetState.Full(
                     config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntent = expectedIntent,
                     customerPaymentMethods = emptyList(),
                     savedSelection = SavedSelection.Link,
@@ -251,14 +254,15 @@ internal class DefaultPaymentSheetLoaderTest {
 
             assertThat(
                 loader.load(
-                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                        clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                    ),
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
                 )
             ).isEqualTo(
                 PaymentSheetLoader.Result.Success(
                     PaymentSheetState.Full(
                         config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                        clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                         customerPaymentMethods = PAYMENT_METHODS,
                         savedSelection = SavedSelection.PaymentMethod("pm_123456789"),
@@ -302,14 +306,15 @@ internal class DefaultPaymentSheetLoaderTest {
             )
             assertThat(
                 loader.load(
-                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                        clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                    ),
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
                 )
             ).isEqualTo(
                 PaymentSheetLoader.Result.Success(
                     PaymentSheetState.Full(
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                        PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         expectedIntent,
                         newPaymentSelection = null,
                         customerPaymentMethods = emptyList(),
@@ -348,14 +353,15 @@ internal class DefaultPaymentSheetLoaderTest {
             )
             assertThat(
                 loader.load(
-                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                        clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                    ),
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
                 )
             ).isEqualTo(
                 PaymentSheetLoader.Result.Success(
                     PaymentSheetState.Full(
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                        PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         expectedIntent,
                         newPaymentSelection = null,
                         customerPaymentMethods = emptyList(),
@@ -391,7 +397,9 @@ internal class DefaultPaymentSheetLoaderTest {
             )
 
             loader.load(
-                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
 
@@ -422,7 +430,9 @@ internal class DefaultPaymentSheetLoaderTest {
             )
 
             loader.load(
-                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
 
@@ -445,7 +455,9 @@ internal class DefaultPaymentSheetLoaderTest {
                     )
                 )
             ).load(
-                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             ) as PaymentSheetLoader.Result.Success
 
@@ -465,8 +477,10 @@ internal class DefaultPaymentSheetLoaderTest {
                 )
             )
         ).load(
-            PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+            ),
+            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) as PaymentSheetLoader.Result.Success
 
         assertThat(result.state.customerPaymentMethods)
@@ -481,7 +495,9 @@ internal class DefaultPaymentSheetLoaderTest {
                     status = StripeIntent.Status.Succeeded
                 ),
             ).load(
-                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
             assertThat(result)
@@ -496,7 +512,9 @@ internal class DefaultPaymentSheetLoaderTest {
                     confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
                 ),
             ).load(
-                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
             )
             assertThat(result)
                 .isInstanceOf(PaymentSheetLoader.Result::class.java)
@@ -507,7 +525,9 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = createPaymentSheetLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
         ).load(
-            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
             paymentSheetConfiguration = mockConfiguration()
         ) as PaymentSheetLoader.Result.Success
 
@@ -518,7 +538,9 @@ internal class DefaultPaymentSheetLoaderTest {
     @Test
     fun `Defaults to Link for guests if available`() = runTest {
         val result = createPaymentSheetLoader().load(
-            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
             // The mock configuration is necessary to enable Google Pay. We want to do that,
             // so that we can check that Link is preferred.
             paymentSheetConfiguration = mockConfiguration()
@@ -532,7 +554,9 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = createPaymentSheetLoader(
             customerRepo = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS)
         ).load(
-            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
             paymentSheetConfiguration = mockConfiguration(
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "some_id",
@@ -550,7 +574,7 @@ internal class DefaultPaymentSheetLoaderTest {
         val loader = createPaymentSheetLoader(linkAccountState = AccountStatus.Verified)
 
         val result = loader.load(
-            clientSecret = PaymentIntentClientSecret("secret"),
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
         ) as PaymentSheetLoader.Result.Success
 
@@ -562,7 +586,7 @@ internal class DefaultPaymentSheetLoaderTest {
         val loader = createPaymentSheetLoader(linkAccountState = AccountStatus.NeedsVerification)
 
         val result = loader.load(
-            clientSecret = PaymentIntentClientSecret("secret"),
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
         ) as PaymentSheetLoader.Result.Success
 
@@ -574,7 +598,7 @@ internal class DefaultPaymentSheetLoaderTest {
         val loader = createPaymentSheetLoader(linkAccountState = AccountStatus.VerificationStarted)
 
         val result = loader.load(
-            clientSecret = PaymentIntentClientSecret("secret"),
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
         ) as PaymentSheetLoader.Result.Success
 
@@ -586,7 +610,7 @@ internal class DefaultPaymentSheetLoaderTest {
         val loader = createPaymentSheetLoader(linkAccountState = AccountStatus.SignedOut)
 
         val result = loader.load(
-            clientSecret = PaymentIntentClientSecret("secret"),
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
         ) as PaymentSheetLoader.Result.Success
 
@@ -603,7 +627,7 @@ internal class DefaultPaymentSheetLoaderTest {
         )
 
         val result = loader.load(
-            clientSecret = PaymentIntentClientSecret("secret"),
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
                 defaultBillingDetails = billingDetails,
             ),
@@ -633,7 +657,7 @@ internal class DefaultPaymentSheetLoaderTest {
         )
 
         val result = loader.load(
-            clientSecret = PaymentIntentClientSecret("secret"),
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
                 shippingDetails = shippingDetails,
             ),
@@ -655,7 +679,7 @@ internal class DefaultPaymentSheetLoaderTest {
         )
 
         val result = loader.load(
-            clientSecret = PaymentIntentClientSecret("secret"),
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
                 shippingDetails = shippingDetails,
                 defaultBillingDetails = billingDetails,
@@ -677,7 +701,7 @@ internal class DefaultPaymentSheetLoaderTest {
         )
 
         val result = loader.load(
-            clientSecret = PaymentIntentClientSecret("secret"),
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
                 customer = PaymentSheet.CustomerConfiguration(id = "id", ephemeralKeySecret = "key"),
             ),
@@ -699,7 +723,7 @@ internal class DefaultPaymentSheetLoaderTest {
             googlePayRepositoryFactory = {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
             },
-            stripeIntentRepository = StripeIntentRepository.Static(stripeIntent),
+            elementsSessionRepository = ElementsSessionRepository.Static(stripeIntent),
             stripeIntentValidator = StripeIntentValidator(),
             customerRepository = customerRepo,
             lpmResourceRepository = lpmResourceRepository,

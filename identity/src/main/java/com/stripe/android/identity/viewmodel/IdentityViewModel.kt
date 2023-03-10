@@ -86,7 +86,7 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
-import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.uicore.address.AddressSchemaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -111,7 +111,7 @@ internal class IdentityViewModel constructor(
     internal val fpsTracker: FPSTracker,
     internal val screenTracker: ScreenTracker,
     internal val imageHandler: IdentityImageHandler,
-    internal val addressRepository: AddressRepository,
+    internal val addressSchemaRepository: AddressSchemaRepository,
     private val savedStateHandle: SavedStateHandle,
     @UIContext internal val uiContext: CoroutineContext,
     @IOContext internal val workContext: CoroutineContext

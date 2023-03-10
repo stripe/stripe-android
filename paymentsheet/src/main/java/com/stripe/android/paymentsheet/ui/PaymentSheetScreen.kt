@@ -1,5 +1,8 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.paymentsheet.ui
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -117,6 +121,7 @@ internal fun PaymentSheetScreenContent(
 
         AndroidViewBinding(
             factory = FragmentPaymentSheetPrimaryButtonBinding::inflate,
+            modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
         )
 
         notes?.let { text ->
@@ -124,6 +129,7 @@ internal fun PaymentSheetScreenContent(
                 html = text,
                 color = MaterialTheme.stripeColors.subtitle,
                 style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
+                modifier = Modifier.padding(top = 8.dp),
             )
         }
     }
@@ -179,3 +185,5 @@ internal fun Wallet(
         }
     }
 }
+
+const val PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON"

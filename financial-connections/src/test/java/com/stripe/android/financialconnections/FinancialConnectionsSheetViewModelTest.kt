@@ -155,6 +155,8 @@ class FinancialConnectionsSheetViewModelTest {
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isInstanceOf(Failed::class.java)
             }
+            verify(eventReporter)
+                .onResult(eq(configuration), any<Failed>())
         }
     }
 
@@ -385,6 +387,7 @@ class FinancialConnectionsSheetViewModelTest {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.ON_EXTERNAL_ACTIVITY)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
+                verify(eventReporter).onResult(eq(configuration), any<Canceled>())
             }
         }
     }
@@ -411,6 +414,7 @@ class FinancialConnectionsSheetViewModelTest {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.ON_EXTERNAL_ACTIVITY)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
+                verify(eventReporter).onResult(eq(configuration), any<Canceled>())
             }
         }
     }

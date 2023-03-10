@@ -12,6 +12,7 @@
     <ID>FunctionOnlyReturningConstant:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput.Companion$fun toCsvHeader()</ID>
     <ID>FunctionOnlyReturningConstant:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.TestOutput.Companion$fun toCsvHeader()</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
+    <ID>LargeClass:DefaultPaymentSheetLoaderTest.kt$DefaultPaymentSheetLoaderTest</ID>
     <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
     <ID>LargeClass:PaymentSheetActivityTest.kt$PaymentSheetActivityTest</ID>
     <ID>LargeClass:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest</ID>
@@ -37,12 +38,14 @@
     <ID>MagicNumber:PaymentOptionUi.kt$14</ID>
     <ID>MagicNumber:PaymentOptionUi.kt$18</ID>
     <ID>MagicNumber:PrimaryButton.kt$PrimaryButton$0.5f</ID>
+    <ID>MagicNumber:PrimaryButtonUiStateMapper.kt$PrimaryButtonUiStateMapper$3</ID>
+    <ID>MagicNumber:PrimaryButtonUiStateMapper.kt$PrimaryButtonUiStateMapper$4</ID>
+    <ID>MagicNumber:PrimaryButtonUiStateMapper.kt$PrimaryButtonUiStateMapper$5</ID>
     <ID>MagicNumber:USBankAccountFormFragment.kt$USBankAccountFormFragment$0.5f</ID>
     <ID>MaxLineLength:BillingAddressViewTest.kt$BillingAddressViewTest$fun</ID>
-    <ID>MaxLineLength:ConfirmPaymentIntentParamsFactoryTest.kt$ConfirmPaymentIntentParamsFactoryTest$fun</ID>
     <ID>MaxLineLength:CustomerRepositoryTest.kt$CustomerRepositoryTest$onBlocking { detachPaymentMethod(anyString(), any(), anyString(), any()) }.doThrow(InvalidParameterException("error"))</ID>
-    <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$.</ID>
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$fun</ID>
+    <ID>MaxLineLength:FlowControllerConfigurationHandlerTest.kt$FlowControllerConfigurationHandlerTest$.</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$val d = delegate ?: throw IllegalStateException("Cannot run onActivity since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.Address$*</ID>
@@ -51,7 +54,6 @@
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.GooglePayConfiguration$*</ID>
     <ID>MaxLineLength:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$fun</ID>
     <ID>MaxLineLength:PrimaryButtonTest.kt$PrimaryButtonTest$primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))</ID>
-    <ID>MaxLineLength:StripeIntentRepositoryTest.kt$StripeIntentRepositoryTest$fun</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$* This will generate payment intent scenarios for all combinations of customers, lpm types in the intent, shipping, and SFU states</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput$fun toCsv()</ID>
@@ -62,8 +64,8 @@
     <ID>NestedBlockDepth:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$private fun generatePaymentIntentScenarios(): List&lt;PaymentIntentTestInput></ID>
     <ID>ReturnCount:AddressUtils.kt$internal fun CharSequence.levenshtein(other: CharSequence): Int</ID>
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
+    <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowControllerNonFallbackInjector</ID>
     <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>
-    <ID>TooManyFunctions:PaymentOptionsViewModel.kt$PaymentOptionsViewModel : BaseSheetViewModel</ID>
     <ID>TooManyFunctions:PaymentSheetViewModel.kt$PaymentSheetViewModel : BaseSheetViewModel</ID>
     <ID>UnnecessaryAbstractClass:PaymentSheetCommonModule.kt$PaymentSheetCommonModule$PaymentSheetCommonModule</ID>
     <ID>UnnecessaryAbstractClass:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule$PaymentSheetLauncherModule</ID>

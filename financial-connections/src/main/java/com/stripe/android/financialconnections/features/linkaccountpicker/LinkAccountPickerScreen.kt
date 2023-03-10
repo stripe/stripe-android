@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -28,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -141,10 +144,11 @@ private fun LinkAccountPickerLoaded(
             Spacer(modifier = Modifier.size(16.dp))
             Title(merchantName = payload.businessName)
             Spacer(modifier = Modifier.size(24.dp))
-            payload.accounts.forEach {
+            payload.accounts.forEach { account ->
                 NetworkedAccountItem(
-                    selected = it.id == selectedAccountId,
-                    account = it,
+                    enabled = payload.run { account.enabled() },
+                    selected = account.id == selectedAccountId,
+                    account = account,
                     onAccountClicked = { selected ->
                         if (selectNetworkedAccountAsync !is Loading) onAccountClick(selected)
                     }
@@ -176,14 +180,19 @@ private fun LinkAccountPickerLoaded(
 private fun NetworkedAccountItem(
     account: PartnerAccount,
     onAccountClicked: (PartnerAccount) -> Unit,
+    enabled: Boolean,
     selected: Boolean
 ) {
     AccountItem(
         selected = selected,
+        enabled = enabled,
         onAccountClicked = onAccountClicked,
         account = account
     ) {
         Image(
+            modifier = Modifier
+                .size(24.dp)
+                .clip(RoundedCornerShape(3.dp)),
             painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
             contentDescription = "Bank logo"
         )
@@ -210,8 +219,15 @@ private fun SelectNewAccount(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val brandColor = FinancialConnectionsTheme.colors.textBrand
             Image(
+                modifier = Modifier
+                    .size(24.dp)
+                    .background(color = brandColor.copy(alpha = 0.1f), CircleShape)
+                    .padding(3.dp)
+                    .clip(CircleShape),
                 imageVector = Icons.Filled.Add,
+                colorFilter = ColorFilter.tint(brandColor),
                 contentDescription = stringResource(id = R.string.stripe_link_account_picker_new_account)
             )
             Spacer(modifier = Modifier.size(16.dp))

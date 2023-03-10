@@ -107,6 +107,13 @@ class PlaygroundTestDriver(
 
         closeSoftKeyboard()
 
+        runCatching {
+            // We need to wait for the built in debounce time for filling in the link email.
+            composeTestRule.waitUntil(timeoutMillis = 1100L) {
+                false
+            }
+        }
+
         composeTestRule.waitUntil(timeoutMillis = 5000L) {
             selectors.continueButton.checkEnabled()
         }
@@ -335,6 +342,8 @@ class PlaygroundTestDriver(
         selectors.customer.click()
         selectors.automatic.click()
 
+        selectors.initializationType.click()
+
         // Set the country first because it will update the default currency value
         selectors.setMerchantCountry(testParameters.merchantCountryCode)
         selectors.setCurrency(testParameters.currency)
@@ -424,9 +433,13 @@ class PlaygroundTestDriver(
                         }
 
                         // The text comes after the buy button animation is complete
-                        composeTestRule
-                            .onNodeWithText(authAction.expectedError)
-                            .assertIsDisplayed()
+                        composeTestRule.waitUntil {
+                            runCatching {
+                                composeTestRule
+                                    .onNodeWithText(authAction.expectedError)
+                                    .assertIsDisplayed()
+                            }.isSuccess
+                        }
                     }
                     null -> {}
                 }

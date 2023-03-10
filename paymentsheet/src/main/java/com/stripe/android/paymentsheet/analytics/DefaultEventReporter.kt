@@ -129,6 +129,12 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onAutofill(type: String) {
+        fireEvent(
+            PaymentSheetEvent.AutofillEvent(type)
+        )
+    }
+
     private fun fireEvent(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(

@@ -20,6 +20,10 @@ interface DropdownConfig {
     val tinyMode: Boolean
         get() = false
 
+    /** Whether the dropdown should be disabled when there is only one single item **/
+    val disableDropdownWithSingleElement: Boolean
+        get() = false
+
     /** The label identifying the selected item used when the dropdown menu is collapsed **/
     fun getSelectedItemLabel(index: Int): String
 

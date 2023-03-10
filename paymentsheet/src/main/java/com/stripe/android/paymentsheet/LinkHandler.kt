@@ -129,7 +129,6 @@ internal class LinkHandler @Inject constructor(
     }
 
     suspend fun payWithLinkInline(
-        configuration: LinkPaymentLauncher.Configuration,
         userInput: UserInput?,
         paymentSelection: PaymentSelection?,
         shouldCompleteLinkInlineFlow: Boolean,
@@ -137,6 +136,8 @@ internal class LinkHandler @Inject constructor(
         (paymentSelection as? PaymentSelection.New.Card?)?.paymentMethodCreateParams?.let { params ->
             savedStateHandle[SAVE_PROCESSING] = true
             _processingState.emit(ProcessingState.Started)
+
+            val configuration = requireNotNull(linkConfiguration.value)
 
             when (linkLauncher.getAccountStatusFlow(configuration).first()) {
                 AccountStatus.Verified -> {
@@ -170,7 +171,6 @@ internal class LinkHandler @Inject constructor(
                             onSuccess = {
                                 // If successful, the account was fetched or created, so try again
                                 payWithLinkInline(
-                                    configuration = configuration,
                                     userInput = userInput,
                                     paymentSelection = paymentSelection,
                                     shouldCompleteLinkInlineFlow = shouldCompleteLinkInlineFlow,

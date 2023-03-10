@@ -16,7 +16,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -194,9 +193,8 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.removePaymentMethod(paymentMethod)
 
-        assertThat(viewModel.paymentMethods.value)
-            .isEmpty()
-        assertThat(viewModel.primaryButtonUIState.value).isNull()
+        assertThat(viewModel.paymentMethods.value).isEmpty()
+        assertThat(viewModel.primaryButtonUiState.value).isNull()
         assertThat(viewModel.notesText.value).isNull()
     }
 
@@ -403,6 +401,23 @@ internal class PaymentOptionsViewModelTest {
         assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
     }
 
+    @Test
+    fun `Does not close the sheet if the selected payment method requires confirmation`() = runTest {
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
+
+        val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link) }
+
+        viewModel.paymentOptionResult.test {
+            viewModel.handlePaymentMethodSelected(selection)
+            expectNoEvents()
+
+            viewModel.handlePaymentMethodSelected(PaymentSelection.Link)
+
+            val result = awaitItem() as? PaymentOptionResult.Succeeded
+            assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link)
+        }
+    }
+
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
@@ -416,7 +431,6 @@ internal class PaymentOptionsViewModelTest {
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY,
             lpmResourceRepository = lpmResourceRepository,
             addressResourceRepository = mock(),
             savedStateHandle = savedStateHandle,
@@ -462,7 +476,6 @@ internal class PaymentOptionsViewModelTest {
         private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
                 stripeIntent = PAYMENT_INTENT,
-                clientSecret = PaymentIntentClientSecret("secret"),
                 customerPaymentMethods = emptyList(),
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                 isGooglePayReady = true,

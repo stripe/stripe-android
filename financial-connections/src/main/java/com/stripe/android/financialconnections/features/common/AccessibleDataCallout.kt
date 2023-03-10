@@ -24,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Permissions
@@ -141,13 +140,18 @@ private fun AccessibleDataText(
     val permissionsReadable = remember(model.permissions) { model.permissions.toStringRes() }
     AnnotatedText(
         text = TextResource.StringId(
-            value = when (model.isStripeDirect) {
-                true -> when (model.businessName) {
+            value = when {
+                model.isNetworking -> when (model.businessName) {
+                    null -> R.string.data_accessible_callout_through_link_no_business
+                    else -> R.string.data_accessible_callout_through_link
+                }
+
+                model.isStripeDirect -> when (model.businessName) {
                     null -> R.string.data_accessible_callout_through_stripe_no_business
                     else -> R.string.data_accessible_callout_through_stripe
                 }
 
-                false -> when (model.businessName) {
+                else -> when (model.businessName) {
                     null -> R.string.data_accessible_callout_no_business
                     else -> R.string.data_accessible_callout
                 }
@@ -221,15 +225,17 @@ internal data class AccessibleDataCalloutModel(
     val businessName: String?,
     val permissions: List<Permissions>,
     val isStripeDirect: Boolean,
+    val isNetworking: Boolean,
     val dataPolicyUrl: String
 ) {
 
     companion object {
         fun fromManifest(manifest: FinancialConnectionsSessionManifest): AccessibleDataCalloutModel =
             AccessibleDataCalloutModel(
-                businessName = ConsentTextBuilder.getBusinessName(manifest),
+                businessName = manifest.getBusinessName(),
                 permissions = manifest.permissions,
                 isStripeDirect = manifest.isStripeDirect ?: false,
+                isNetworking = manifest.isNetworkingUserFlow ?: false,
                 dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
             )
     }
@@ -250,6 +256,7 @@ internal fun AccessibleDataCalloutPreview() {
                     Permissions.ACCOUNT_NUMBERS
                 ),
                 isStripeDirect = true,
+                isNetworking = false,
                 dataPolicyUrl = ""
             ),
             onLearnMoreClick = {}
@@ -272,6 +279,7 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
                     Permissions.TRANSACTIONS
                 ),
                 isStripeDirect = true,
+                isNetworking = false,
                 dataPolicyUrl = ""
             ),
             accounts = listOf(
@@ -356,6 +364,7 @@ internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
                     Permissions.TRANSACTIONS
                 ),
                 isStripeDirect = true,
+                isNetworking = false,
                 dataPolicyUrl = ""
             ),
             accounts = listOf(
@@ -413,6 +422,7 @@ internal fun AccessibleDataCalloutWithOneAccountPreview() {
                     Permissions.TRANSACTIONS
                 ),
                 isStripeDirect = true,
+                isNetworking = false,
                 dataPolicyUrl = ""
             ),
             accounts = listOf(

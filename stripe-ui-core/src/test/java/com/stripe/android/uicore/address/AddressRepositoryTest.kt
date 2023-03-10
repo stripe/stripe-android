@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.uicore.address.AddressRepository.Companion.DEFAULT_COUNTRY_CODE
-import com.stripe.android.uicore.address.AddressRepository.Companion.supportedCountries
+import com.stripe.android.uicore.address.AddressSchemaRepository.Companion.DEFAULT_COUNTRY_CODE
+import com.stripe.android.uicore.address.AddressSchemaRepository.Companion.SUPPORTED_COUNTRIES
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowElement
 import org.junit.Test
@@ -21,12 +21,12 @@ class AddressRepositoryTest {
 
     @Test
     fun `Default country should always be in the supported country list`() {
-        assertThat(supportedCountries).contains("ZZ")
+        assertThat(SUPPORTED_COUNTRIES).contains("ZZ")
     }
 
     @Test
     fun `Country that doesn't exist return the default country`() {
-        assertThat(supportedCountries).doesNotContain("NB")
+        assertThat(SUPPORTED_COUNTRIES).doesNotContain("NB")
 
         assertThat(addressRepository.get("NB"))
             .isEqualTo(addressRepository.get(DEFAULT_COUNTRY_CODE))
@@ -34,7 +34,7 @@ class AddressRepositoryTest {
 
     @Test
     fun `Correct supported country is returned`() {
-        assertThat(supportedCountries).contains("DE")
+        assertThat(SUPPORTED_COUNTRIES).contains("DE")
 
         val elements = addressRepository.get("DE")!!
         assertThat(elements[0].identifier).isEqualTo(IdentifierSpec.Line1)
@@ -49,14 +49,14 @@ class AddressRepositoryTest {
 
         if (files?.isEmpty() == false) {
             files.forEach {
-                assertThat(supportedCountries).contains(it.nameWithoutExtension)
+                assertThat(SUPPORTED_COUNTRIES).contains(it.nameWithoutExtension)
             }
         }
     }
 
     @Test
     fun `Verify all supported countries deserialize`() {
-        supportedCountries.forEach {
+        SUPPORTED_COUNTRIES.forEach {
             if (it != "ZZ") {
                 assertThat(addressRepository.get(it))
                     .isNotEqualTo(addressRepository.get(DEFAULT_COUNTRY_CODE))

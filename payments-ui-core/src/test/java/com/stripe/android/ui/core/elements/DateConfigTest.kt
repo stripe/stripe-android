@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import org.junit.Test
 import java.util.Calendar
@@ -219,7 +220,7 @@ class DateConfigTest {
 
     @Test
     fun `date is valid 2X month and 2 digit year`() {
-        val state = dateConfig.determineState("223")
+        val state = dateConfig.determineState("230")
         Truth.assertThat(state)
             .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
     }

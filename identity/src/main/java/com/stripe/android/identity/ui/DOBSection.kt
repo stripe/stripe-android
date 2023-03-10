@@ -14,7 +14,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.DobParam
-import com.stripe.android.identity.networking.models.DobParam.Companion.regexMMDDYYYY
 import com.stripe.android.identity.networking.models.DobParam.Companion.toDob
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -24,6 +23,10 @@ import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldState
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.math.absoluteValue
 
 /**
@@ -31,6 +34,7 @@ import kotlin.math.absoluteValue
  */
 @Composable
 internal fun DOBSection(
+    enabled: Boolean,
     onDobCollected: (Resource<DobParam>) -> Unit
 ) {
     val dateController = remember {
@@ -66,20 +70,45 @@ internal fun DOBSection(
     }
 
     SectionElementUI(
-        enabled = true,
+        enabled = enabled,
         element = dobSectionElement,
         hiddenIdentifiers = setOf(),
         lastTextFieldIdentifier = null
     )
 }
 
-private object DobTextFieldConfig : SimpleTextFieldConfig() {
-    override val placeHolder = DATE_PLACE_HOLDER
+internal object DobTextFieldConfig : SimpleTextFieldConfig(
+    label = R.string.dob_placeholder
+) {
+    /**
+     * Check if the string is a valid date and is between 01-01-1990 and now.
+     */
+    private fun String.isValidDate(): Boolean {
+        val dateFormat = SimpleDateFormat(
+            DATE_PATTERN,
+            Locale.getDefault()
+        )
+        return try {
+            dateFormat.parse(this).between(requireNotNull(dateFormat.parse(START_DATE)), Date())
+        } catch (e: ParseException) {
+            // Otherwise it's an invalid date, prompt error message and ignore the exception
+            false
+        }
+    }
+
+    private fun Date?.between(from: Date, to: Date) =
+        this?.let {
+            this == from || this.after(from) && this.before(to)
+        } ?: run {
+            false
+        }
+
     override val keyboard = KeyboardType.Number
     override val visualTransformation = MaskVisualTransformation(DATE_MASK)
+
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean) =
-            !hasFocus && input.isNotBlank() && !input.matches(regexMMDDYYYY)
+            !hasFocus && input.isNotBlank() && !input.isValidDate()
 
         override fun isValid(): Boolean = input.isNotBlank()
 
@@ -89,9 +118,12 @@ private object DobTextFieldConfig : SimpleTextFieldConfig() {
 
         override fun isBlank(): Boolean = input.isBlank()
     }
+
+    private const val DATE_PATTERN = "MMddyyyy"
+    private const val START_DATE = "01011900"
 }
 
-private class MaskVisualTransformation(private val mask: String) : VisualTransformation {
+internal class MaskVisualTransformation(private val mask: String) : VisualTransformation {
     private val specialSymbolsIndices = mask.indices.filter { mask[it] != '#' }
     override fun filter(text: AnnotatedString): TransformedText {
         var out = ""
@@ -126,6 +158,5 @@ private class MaskVisualTransformation(private val mask: String) : VisualTransfo
 }
 
 internal const val DATE_MASK = "## / ## / ####"
-internal const val DATE_PLACE_HOLDER = "MM / DD / YY"
 internal val DATE_LENGTH = DATE_MASK.count { it == '#' }
 internal const val DOB_SPEC = "DobSpec"

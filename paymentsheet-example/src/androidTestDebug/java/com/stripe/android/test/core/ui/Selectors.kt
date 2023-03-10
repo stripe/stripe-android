@@ -29,6 +29,7 @@ import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
+import com.stripe.android.test.core.InitializationType
 import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.Shipping
@@ -46,7 +47,7 @@ class Selectors(
     testParameters: TestParameters
 ) {
     val reset = EspressoIdButton(R.id.reset_button)
-    val continueButton = EspressoIdButton(R.id.primary_button)
+    val continueButton = BuyButton(composeTestRule)
     val complete = EspressoLabelIdButton(R.string.checkout_complete)
     val reload = EspressoLabelIdButton(R.string.reload_paymentsheet)
     val multiStepSelect = EspressoIdButton(R.id.payment_method)
@@ -95,6 +96,11 @@ class Selectors(
         Automatic.On -> EspressoIdButton(R.id.automatic_pm_on_button)
     }
 
+    val initializationType = when (testParameters.initializationType) {
+        InitializationType.Normal -> EspressoIdButton(R.id.normal_initialization_button)
+        InitializationType.Deferred -> EspressoIdButton(R.id.deferred_initialization_button)
+    }
+
     val paymentSelection = PaymentSelection(
         composeTestRule,
         testParameters.paymentMethod.displayNameResource
@@ -105,7 +111,7 @@ class Selectors(
         "-" +
         testParameters.intentType.name
 
-    val buyButton = BuyButton(device)
+    val buyButton = BuyButton(composeTestRule)
 
     val addPaymentMethodButton = AddPaymentMethodButton(device)
 

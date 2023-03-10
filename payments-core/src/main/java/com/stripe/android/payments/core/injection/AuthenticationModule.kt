@@ -3,7 +3,6 @@ package com.stripe.android.payments.core.injection
 import android.content.Context
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.PaymentRelayStarter
-import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.payments.DefaultReturnUrl
@@ -57,7 +56,6 @@ internal abstract class AuthenticationModule {
         oxxoAuthenticator: OxxoAuthenticator
     ): PaymentAuthenticator<StripeIntent>
 
-    @OptIn(StripeCashAppPayBetaApi::class)
     @IntentAuthenticatorMap
     @Binds
     @IntoMap

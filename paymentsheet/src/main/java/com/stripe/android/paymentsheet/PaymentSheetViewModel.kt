@@ -11,13 +11,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -28,7 +28,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -42,16 +41,16 @@ import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
-import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.model.create
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -59,6 +58,7 @@ import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
@@ -69,8 +69,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -80,11 +82,11 @@ import kotlin.coroutines.CoroutineContext
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     application: Application,
-    internal val args: PaymentSheetContract.Args,
+    internal val args: PaymentSheetContractV2.Args,
     eventReporter: EventReporter,
     // Properties provided through injection
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
-    private val stripeIntentRepository: StripeIntentRepository,
+    private val elementsSessionRepository: ElementsSessionRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val paymentSheetLoader: PaymentSheetLoader,
     customerRepository: CustomerRepository,
@@ -95,7 +97,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
     @IOContext workContext: CoroutineContext,
-    @InjectorKey injectorKey: String,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
 ) : BaseSheetViewModel(
@@ -106,16 +107,23 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     prefsRepository = prefsRepository,
     workContext = workContext,
     logger = logger,
-    injectorKey = injectorKey,
     lpmResourceRepository = lpmResourceRepository,
     addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = true),
 ) {
-    private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-        args.clientSecret,
-        args.config?.shippingDetails?.toConfirmPaymentIntentShipping()
+
+    private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
+        context = getApplication(),
+        config = config,
+        isProcessingPayment = isProcessingPaymentIntent,
+        currentScreenFlow = currentScreen,
+        buttonsEnabledFlow = buttonsEnabled,
+        amountFlow = amount,
+        selectionFlow = selection,
+        customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
+        onClick = this::checkout,
     )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
@@ -135,7 +143,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     internal val isProcessingPaymentIntent
-        get() = args.clientSecret is PaymentIntentClientSecret
+        get() = args.initializationMode.isProcessingPayment
 
     override var newPaymentSelection: PaymentSelection.New? = null
 
@@ -163,6 +171,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 )
             }
         }
+
+    override val primaryButtonUiState = primaryButtonUiStateMapper.forCompleteFlow().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
 
     internal val walletsContainerState: Flow<WalletsContainerState> = combine(
         linkHandler.isLinkEnabled,
@@ -245,7 +259,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private suspend fun loadPaymentSheetState() {
         val result = withContext(workContext) {
-            paymentSheetLoader.load(args.clientSecret, args.config)
+            paymentSheetLoader.load(args.initializationMode, args.config)
         }
 
         when (result) {
@@ -367,23 +381,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override fun updateSelection(selection: PaymentSelection?) {
-        super.updateSelection(selection)
-
-        when (selection) {
-            is PaymentSelection.Saved -> {
-                if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
-                    updateBelowButtonText(
-                        ACHText.getContinueMandateText(getApplication())
-                    )
-                }
-            }
-            else -> {
-                // no-op
-            }
-        }
-    }
-
     override fun clearErrorMessages() {
         if (viewState.value is PaymentSheetViewState.Reset) {
             viewState.value = PaymentSheetViewState.Reset(message = null)
@@ -420,6 +417,23 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
+        val clientSecret = when (val mode = args.initializationMode) {
+            is PaymentSheet.InitializationMode.PaymentIntent -> {
+                PaymentIntentClientSecret(mode.clientSecret)
+            }
+            is PaymentSheet.InitializationMode.SetupIntent -> {
+                SetupIntentClientSecret(mode.clientSecret)
+            }
+            is PaymentSheet.InitializationMode.DeferredIntent -> {
+                TODO("Not implemented yet")
+            }
+        }
+
+        val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
+            clientSecret = clientSecret.value,
+            shipping = args.config?.shippingDetails?.toConfirmPaymentIntentShipping()
+        )
+
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
                 confirmParamsFactory.create(paymentSelection)
@@ -436,10 +450,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
             runCatching {
-                stripeIntentRepository.get(args.clientSecret)
+                elementsSessionRepository.get(
+                    initializationMode = args.initializationMode,
+                    configuration = args.config,
+                )
             }.fold(
-                onSuccess = {
-                    processPayment(it.intent, paymentResult)
+                onSuccess = { session ->
+                    processPayment(session.stripeIntent, paymentResult)
                 },
                 onFailure = ::onFatal
             )
@@ -549,7 +566,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     internal class Factory(
-        private val starterArgsSupplier: () -> PaymentSheetContract.Args,
+        private val starterArgsSupplier: () -> PaymentSheetContractV2.Args,
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
 
         internal data class FallbackInitializeParam(val application: Application)
@@ -599,3 +616,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         None
     }
 }
+
+private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
+    get() = when (this) {
+        is PaymentSheet.InitializationMode.PaymentIntent -> true
+        is PaymentSheet.InitializationMode.SetupIntent -> false
+        is PaymentSheet.InitializationMode.DeferredIntent -> {
+            intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
+        }
+    }

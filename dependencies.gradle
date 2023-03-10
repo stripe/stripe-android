@@ -10,6 +10,7 @@ ext.buildLibs = [
 
 ext.configs = [
         androidLibrary: "${project.rootDir}/build-configuration/android-library.gradle",
+        androidApplication: "${project.rootDir}/build-configuration/android-application.gradle",
 ]
 
 ext.libs = [

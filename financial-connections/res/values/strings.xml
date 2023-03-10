@@ -45,6 +45,8 @@
     <string name="data_accessible_callout_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%1$s.<annotation clickable="learn_more"> Learn more</annotation></string>
     <string name="data_accessible_callout_through_stripe"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Stripe.<annotation clickable="learn_more"> Learn more</annotation></string>
     <string name="data_accessible_callout_through_stripe_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Stripe.<annotation clickable="learn_more"> Learn more</annotation></string>
+    <string name="data_accessible_callout_through_link"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Link.<annotation clickable="learn_more"> Learn more</annotation></string>
+    <string name="data_accessible_callout_through_link_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Link.<annotation clickable="learn_more"> Learn more</annotation></string>
     <string name="data_accessible_type_accountdetails">account details</string>
     <string name="data_accessible_type_balances">balances</string>
     <string name="data_accessible_type_transactions">transactions</string>
@@ -94,6 +96,7 @@
     <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Please enter your bank details manually or select another bank.</string>
     <string name="stripe_close_dialog_title">Are you sure you want to cancel?</string>
     <string name="stripe_close_dialog_desc">You haven\'t finished linking your bank account.</string>
+    <string name="stripe_close_dialog_networking_desc">If you cancel now, your account will be linked to %1$s but it will not be saved to Link.</string>
     <string name="stripe_close_dialog_confirm">Yes, cancel</string>
     <string name="stripe_close_dialog_back">Back</string>
     <string name="stripe_error_cta_close">Close</string>

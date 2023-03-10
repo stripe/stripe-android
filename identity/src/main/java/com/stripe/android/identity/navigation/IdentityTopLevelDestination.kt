@@ -7,7 +7,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.networking.models.Requirement
 
 internal abstract class IdentityTopLevelDestination(
-    val shouldPopUpToDocSelection: Boolean = false
+    val popUpToParam: PopUpToParam? = null
 ) {
     /**
      * The route this destination navigates to, used for composable.
@@ -46,6 +46,11 @@ internal abstract class IdentityTopLevelDestination(
         get() = destinationRoute.route
 }
 
+internal data class PopUpToParam(
+    val route: String,
+    val inclusive: Boolean
+)
+
 internal fun String.toRouteBase() = substringBefore('?')
 
 internal fun IdentityTopLevelDestination.DestinationRoute.withParams(
@@ -75,8 +80,8 @@ internal fun NavBackStackEntry?.getBooleanArgument(argName: String) =
  */
 internal fun NavController.navigateTo(destination: IdentityTopLevelDestination) {
     navigate(destination.routeWithArgs) {
-        if (destination.shouldPopUpToDocSelection) {
-            popUpTo(DocSelectionDestination.ROUTE.route) { inclusive = false }
+        destination.popUpToParam?.let {
+            popUpTo(it.route) { inclusive = it.inclusive }
         }
     }
 }

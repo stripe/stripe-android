@@ -5,6 +5,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -14,7 +15,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.model.CardBrand
@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -77,54 +78,46 @@ internal fun AddPaymentMethod(
 
         LaunchedEffect(paymentSelection, linkSignupState, linkInlineSelection) {
             val state = linkSignupState
+            val isUsingLinkInline = linkInlineSelection != null &&
+                paymentSelection is PaymentSelection.New.Card
+
             if (state != null) {
-                sheetViewModel.onLinkSignupStateChanged(linkConfig!!, state, paymentSelection)
-            } else if (linkInlineSelection != null) {
-                (paymentSelection as? PaymentSelection.New.Card)?.let {
-                    sheetViewModel.updatePrimaryButtonUIState(
-                        PrimaryButton.UIState(
-                            label = null,
-                            onClick = {
-                                sheetViewModel.payWithLinkInline(
-                                    linkConfig!!,
-                                    null
-                                )
-                            },
-                            enabled = true,
-                            visible = true
-                        )
-                    )
-                }
+                sheetViewModel.updatePrimaryButtonForLinkSignup(state)
+            } else if (isUsingLinkInline) {
+                sheetViewModel.updatePrimaryButtonForLinkInline()
             }
         }
 
         Column(modifier = modifier.fillMaxWidth()) {
-            PaymentElement(
-                sheetViewModel = sheetViewModel,
-                enabled = !processing,
-                supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
-                selectedItem = selectedItem,
-                showLinkInlineSignup = showLinkInlineSignup,
-                linkPaymentLauncher = linkHandler.linkLauncher,
-                showCheckboxFlow = showCheckboxFlow,
-                onItemSelectedListener = { selectedLpm ->
-                    if (selectedItem != selectedLpm) {
-                        sheetViewModel.updatePrimaryButtonUIState(null)
-                        selectedPaymentMethodCode = selectedLpm.code
+            CompositionLocalProvider(
+                LocalAutofillEventReporter provides sheetViewModel.eventReporter::onAutofill
+            ) {
+                PaymentElement(
+                    sheetViewModel = sheetViewModel,
+                    enabled = !processing,
+                    supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
+                    selectedItem = selectedItem,
+                    showLinkInlineSignup = showLinkInlineSignup,
+                    linkPaymentLauncher = linkHandler.linkLauncher,
+                    showCheckboxFlow = showCheckboxFlow,
+                    onItemSelectedListener = { selectedLpm ->
+                        if (selectedItem != selectedLpm) {
+                            selectedPaymentMethodCode = selectedLpm.code
+                        }
+                    },
+                    onLinkSignupStateChanged = { _, inlineSignupViewState ->
+                        linkSignupState = inlineSignupViewState
+                    },
+                    formArguments = arguments,
+                    onFormFieldValuesChanged = { formValues ->
+                        val newSelection = formValues?.transformToPaymentSelection(
+                            context = context,
+                            paymentMethod = selectedItem,
+                        )
+                        sheetViewModel.updateSelection(newSelection)
                     }
-                },
-                onLinkSignupStateChanged = { _, inlineSignupViewState ->
-                    linkSignupState = inlineSignupViewState
-                },
-                formArguments = arguments,
-                onFormFieldValuesChanged = { formValues ->
-                    val newSelection = formValues?.transformToPaymentSelection(
-                        context = context,
-                        paymentMethod = selectedItem,
-                    )
-                    sheetViewModel.updateSelection(newSelection)
-                }
-            )
+                )
+            }
         }
     } else {
         Loading()
@@ -155,37 +148,6 @@ private fun BaseSheetViewModel.showLinkInlineSignupView(
         ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
         paymentMethodCode == PaymentMethod.Type.Card.code &&
         (linkAccountStatus in validStatusStates || linkInlineSelectionValid)
-}
-
-private fun BaseSheetViewModel.onLinkSignupStateChanged(
-    config: LinkPaymentLauncher.Configuration,
-    viewState: InlineSignupViewState,
-    paymentSelection: PaymentSelection?
-) {
-    updatePrimaryButtonUIState(
-        if (viewState.useLink) {
-            val userInput = viewState.userInput
-            if (userInput != null &&
-                paymentSelection != null
-            ) {
-                PrimaryButton.UIState(
-                    label = null,
-                    onClick = { payWithLinkInline(config, userInput) },
-                    enabled = true,
-                    visible = true
-                )
-            } else {
-                PrimaryButton.UIState(
-                    label = null,
-                    onClick = null,
-                    enabled = false,
-                    visible = true
-                )
-            }
-        } else {
-            null
-        }
-    )
 }
 
 @VisibleForTesting

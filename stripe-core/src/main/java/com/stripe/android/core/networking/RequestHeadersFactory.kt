@@ -131,7 +131,7 @@ sealed class RequestHeadersFactory {
         sdkVersion
     ) {
         override var postHeaders = mapOf(
-            HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.Form}; charset=$CHARSET"
+            HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.Form.code}; charset=$CHARSET"
         )
     }
 
@@ -176,7 +176,7 @@ sealed class RequestHeadersFactory {
         }
 
         override var postHeaders = mapOf(
-            HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.Json}; charset=$CHARSET"
+            HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.Json.code}; charset=$CHARSET"
         )
         override val xStripeUserAgent: String
             get() {

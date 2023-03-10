@@ -10,7 +10,6 @@ import com.stripe.android.FinancialConnectionsFixtures
 import com.stripe.android.FraudDetectionDataFixtures
 import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
-import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.model.StripeFileParams
@@ -655,7 +654,6 @@ internal class StripeApiRepositoryTest {
                 )
         }
 
-    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun confirmPaymentIntent_withPaymentMethodCreateParamsAttribution_setsCorrectPaymentUserAgent() =
         runTest {
@@ -766,7 +764,6 @@ internal class StripeApiRepositoryTest {
                 )
         }
 
-    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun confirmSetupIntent_withPaymentMethodCreateParamsAttribution_setsCorrectPaymentUserAgent() =
         runTest {
@@ -1582,66 +1579,6 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `retrievePaymentIntentWithOrderedPaymentMethods() sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val clientSecret = "test_locale"
-            val locale = Locale.GERMANY
-            create().retrievePaymentIntentWithOrderedPaymentMethods(
-                clientSecret,
-                DEFAULT_OPTIONS,
-                locale
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
-            val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
-            assertTrue(paymentMethodDataParams.contains("payment_method_preference.payment_intent.payment_method"))
-            assertEquals(apiRequest.params!!["locale"], locale.toLanguageTag())
-            assertEquals(apiRequest.params!!["type"], "payment_intent")
-            assertEquals(apiRequest.params!!["client_secret"], clientSecret)
-
-            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered)
-        }
-
-    @Test
-    fun `retrieveSetupIntentWithOrderedPaymentMethods() sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val clientSecret = "test_client_secret"
-            val locale = Locale.FRANCE
-            create().retrieveSetupIntentWithOrderedPaymentMethods(
-                clientSecret,
-                DEFAULT_OPTIONS,
-                locale
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
-            val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
-            assertTrue(paymentMethodDataParams.contains("payment_method_preference.setup_intent.payment_method"))
-            assertEquals(apiRequest.params!!["locale"], locale.toLanguageTag())
-            assertEquals(apiRequest.params!!["type"], "setup_intent")
-            assertEquals(apiRequest.params!!["client_secret"], clientSecret)
-
-            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SetupIntentRetrieveOrdered)
-        }
-
-    @Test
     fun verifyRefreshPaymentIntent() =
         runTest {
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
@@ -2353,7 +2290,7 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `Verify that the elements session endpoint has the right query params`() = runTest {
+    fun `Verify that the elements session endpoint has the right query params for payment intents`() = runTest {
         val stripeResponse = StripeResponse(
             200,
             ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
@@ -2362,8 +2299,72 @@ internal class StripeApiRepositoryTest {
         whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
             .thenReturn(stripeResponse)
 
-        create().retrieveDeferredIntent(
-            elementsSessionParams = ElementsSessionParams.DeferredIntentType(
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.PaymentIntentType(clientSecret = "client_secret"),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertEquals(
+            "https://api.stripe.com/v1/elements/sessions",
+            request.baseUrl
+        )
+
+        with(params) {
+            assertEquals("payment_intent", this["type"])
+            assertEquals("en-US", this["locale"])
+            assertEquals("client_secret", this["client_secret"])
+        }
+    }
+
+    @Test
+    fun `Verify that the elements session endpoint has the right query params for setup intents`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.SetupIntentType(clientSecret = "client_secret"),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertEquals(
+            "https://api.stripe.com/v1/elements/sessions",
+            request.baseUrl
+        )
+
+        with(params) {
+            assertEquals("setup_intent", this["type"])
+            assertEquals("en-US", this["locale"])
+            assertEquals("client_secret", this["client_secret"])
+        }
+    }
+
+    @Test
+    fun `Verify that the elements session endpoint has the right query params for deferred intents`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.DeferredIntentType(
                 deferredIntentParams = DeferredIntentParams(
                     mode = DeferredIntentParams.Mode.Payment(
                         amount = 2000,
@@ -2372,7 +2373,7 @@ internal class StripeApiRepositoryTest {
                     paymentMethodTypes = setOf("card", "link")
                 )
             ),
-            requestOptions = DEFAULT_OPTIONS
+            options = DEFAULT_OPTIONS,
         )
 
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())

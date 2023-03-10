@@ -135,13 +135,16 @@ def executeTests(appUrl, testUrl):
     # firefox doesn't work on this samsung: Samsung Galaxy S9 Plus-9.0"]
     response = requests.post(url, json={
          "app": appUrl,
-         "devices": ["Google Pixel 3-9.0"],
+         "devices": [
+            "Google Pixel 7-13.0",
+            "Samsung Galaxy S22-12.0",
+            "Google Pixel 2-8.0",
+         ],
          "testSuite": testUrl,
          "networkLogs": True,
          "deviceLogs": True,
          "video": True,
          "acceptInsecureCerts": True,
-#          "language": "en_US",
          "locale": "en_US",
          "enableSpoonFramework": False,
          "project": "Mobile Payments",
@@ -151,12 +154,12 @@ def executeTests(appUrl, testUrl):
                 {
                    "name": "Shard 1",
                    "strategy": "class",
-                   "values": ["com.stripe.android.TestAuthorization", "com.stripe.android.TestBrowsers", "com.stripe.android.TestCustomers"]
+                   "values": ["com.stripe.android.TestAuthorization", "com.stripe.android.TestBrowsers"]
                 },
                 {
                    "name": "Shard 2",
                    "strategy": "class",
-                   "values": ["com.stripe.android.TestFieldPopulation", "com.stripe.android.TestGooglePay"]
+                   "values": ["com.stripe.android.TestCustomers", "com.stripe.android.TestFieldPopulation"]
                 },
                 {
                    "name": "Shard 3",

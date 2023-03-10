@@ -7,14 +7,14 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 internal sealed class USBankAccountFormScreenState(
     @StringRes open val error: Int? = null
 ) {
-    abstract val primaryButtonText: String?
+    abstract val primaryButtonText: String
     abstract val mandateText: String?
 
     class NameAndEmailCollection(
         @StringRes override val error: Int? = null,
         val name: String,
         val email: String?,
-        override val primaryButtonText: String?
+        override val primaryButtonText: String,
     ) : USBankAccountFormScreenState() {
 
         override val mandateText: String? = null
@@ -34,7 +34,7 @@ internal sealed class USBankAccountFormScreenState(
         val paymentAccount: FinancialConnectionsAccount,
         val financialConnectionsSessionId: String,
         val intentId: String,
-        override val primaryButtonText: String?,
+        override val primaryButtonText: String,
         override val mandateText: String?,
         val saveForFutureUsage: Boolean
     ) : USBankAccountFormScreenState() {
@@ -48,7 +48,7 @@ internal sealed class USBankAccountFormScreenState(
         val paymentAccount: BankAccount,
         val financialConnectionsSessionId: String,
         val intentId: String,
-        override val primaryButtonText: String?,
+        override val primaryButtonText: String,
         override val mandateText: String?,
         val saveForFutureUsage: Boolean
     ) : USBankAccountFormScreenState() {
@@ -63,7 +63,7 @@ internal sealed class USBankAccountFormScreenState(
         val intentId: String,
         val bankName: String,
         val last4: String?,
-        override val primaryButtonText: String?,
+        override val primaryButtonText: String,
         override val mandateText: String?,
         val saveForFutureUsage: Boolean
     ) : USBankAccountFormScreenState() {

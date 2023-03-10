@@ -17,7 +17,7 @@ internal data class RequiredInternationalAddress(
     @SerialName("postal_code")
     val postalCode: String,
     @SerialName("state")
-    val state: String,
+    val state: String?,
     @SerialName("country")
     val country: String
 ) : Parcelable

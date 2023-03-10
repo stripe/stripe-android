@@ -12,10 +12,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
@@ -25,12 +24,12 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
@@ -38,7 +37,9 @@ import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -53,7 +54,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     @IOContext workContext: CoroutineContext,
     application: Application,
     logger: Logger,
-    @InjectorKey injectorKey: String,
     lpmResourceRepository: ResourceRepository<LpmRepository>,
     addressResourceRepository: ResourceRepository<AddressRepository>,
     savedStateHandle: SavedStateHandle,
@@ -66,13 +66,25 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerRepository = customerRepository,
     workContext = workContext,
     logger = logger,
-    injectorKey = injectorKey,
     lpmResourceRepository = lpmResourceRepository,
     addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
 ) {
+
+    private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
+        context = getApplication(),
+        config = config,
+        isProcessingPayment = args.state.stripeIntent is PaymentIntent,
+        currentScreenFlow = currentScreen,
+        buttonsEnabledFlow = buttonsEnabled,
+        amountFlow = amount,
+        selectionFlow = selection,
+        customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
+        onClick = this::onUserSelection,
+    )
+
     private val _paymentOptionResult = MutableSharedFlow<PaymentOptionResult>(replay = 1)
     internal val paymentOptionResult: SharedFlow<PaymentOptionResult> = _paymentOptionResult
 
@@ -82,6 +94,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
     override var newPaymentSelection = args.state.newPaymentSelection
+
+    override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (args.state.isGooglePayReady) {
@@ -205,14 +223,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             eventReporter.onSelectPaymentOption(paymentSelection, stripeIntent.value?.currency)
 
             when (paymentSelection) {
-                is PaymentSelection.Saved ->
-                    // We don't want the USBankAccount selection to close the payment sheet right
-                    // away, the user needs to accept a mandate
-                    if (paymentSelection.paymentMethod.type != PaymentMethod.Type.USBankAccount) {
-                        processExistingPaymentMethod(
-                            paymentSelection
-                        )
-                    }
+                is PaymentSelection.Saved,
                 is PaymentSelection.GooglePay,
                 is PaymentSelection.Link -> processExistingPaymentMethod(paymentSelection)
                 is PaymentSelection.New -> processNewPaymentMethod(paymentSelection)
@@ -227,52 +238,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
         if (!editing.value) {
             updateSelection(selection)
-            onUserSelection()
-        }
-    }
 
-    override fun updateSelection(selection: PaymentSelection?) {
-        super.updateSelection(selection)
-        when {
-            selection is PaymentSelection.Saved &&
-                selection.paymentMethod.type == PaymentMethod.Type.USBankAccount -> {
-                updateBelowButtonText(
-                    ACHText.getContinueMandateText(getApplication())
-                )
-                updatePrimaryButtonUIState(
-                    PrimaryButton.UIState(
-                        label = getApplication<Application>().getString(
-                            R.string.stripe_continue_button_label
-                        ),
-                        visible = true,
-                        enabled = true,
-                        onClick = {
-                            processExistingPaymentMethod(selection)
-                        }
-                    )
-                )
-            }
-            selection is PaymentSelection.Saved ||
-                selection is PaymentSelection.GooglePay -> {
-                updatePrimaryButtonUIState(
-                    primaryButtonUIState.value?.copy(
-                        visible = false
-                    )
-                )
-            }
-            else -> {
-                updatePrimaryButtonUIState(
-                    primaryButtonUIState.value?.copy(
-                        label = getApplication<Application>().getString(
-                            R.string.stripe_continue_button_label
-                        ),
-                        visible = true,
-                        enabled = true,
-                        onClick = {
-                            onUserSelection()
-                        }
-                    )
-                )
+            if (selection?.requiresConfirmation != true) {
+                onUserSelection()
             }
         }
     }

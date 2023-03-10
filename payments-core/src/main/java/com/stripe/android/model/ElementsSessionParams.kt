@@ -8,35 +8,54 @@ import java.util.Locale
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 sealed interface ElementsSessionParams : Parcelable {
+
     val type: String
     val clientSecret: String?
     val locale: String?
+    val expandFields: List<String>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    class PaymentIntentType(
+    data class PaymentIntentType(
         override val clientSecret: String,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
     ) : ElementsSessionParams {
-        override val type: String get() = "payment_intent"
+
+        override val type: String
+            get() = "payment_intent"
+
+        override val expandFields: List<String>
+            get() = listOf("payment_method_preference.$type.payment_method")
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    class SetupIntentType(
+    data class SetupIntentType(
         override val clientSecret: String,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
     ) : ElementsSessionParams {
-        override val type: String get() = "setup_intent"
+
+        override val type: String
+            get() = "setup_intent"
+
+        override val expandFields: List<String>
+            get() = listOf("payment_method_preference.$type.payment_method")
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    class DeferredIntentType(
-        override val clientSecret: String? = null,
+    data class DeferredIntentType(
         override val locale: String? = Locale.getDefault().toLanguageTag(),
-        val deferredIntentParams: DeferredIntentParams
+        val deferredIntentParams: DeferredIntentParams,
     ) : ElementsSessionParams {
-        override val type: String get() = "deferred_intent"
+
+        override val clientSecret: String?
+            get() = null
+
+        override val type: String
+            get() = "deferred_intent"
+
+        override val expandFields: List<String>
+            get() = emptyList()
     }
 }

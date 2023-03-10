@@ -279,6 +279,7 @@ internal fun SuccessScreenPreview() {
                     FinancialConnectionsAccount.Permissions.TRANSACTIONS
                 ),
                 isStripeDirect = true,
+                isNetworking = false,
                 dataPolicyUrl = ""
             ),
             disconnectUrl = "",
