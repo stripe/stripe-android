@@ -38,7 +38,6 @@ import javax.inject.Inject
 
 internal class NetworkingLinkVerificationViewModel @Inject constructor(
     initialState: NetworkingLinkVerificationState,
-    private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
@@ -97,7 +96,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             },
             onFail = { error ->
                 logger.error("Error starting verification", error)
-                eventTracker.track(Error(PANE, error))
+                analyticsTracker.track(Error(PANE, error))
             },
         )
     }
@@ -121,8 +120,8 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         updatedManifest: FinancialConnectionsSessionManifest
     ) {
         logger.error("Error fetching networked accounts", error)
-        eventTracker.track(Error(PANE, error))
-        eventTracker.track(VerificationError(PANE, "NetworkedAccountsRetrieveMethodError"))
+        analyticsTracker.track(Error(PANE, error))
+        analyticsTracker.track(VerificationError(PANE, "NetworkedAccountsRetrieveMethodError"))
         goNext(updatedManifest.nextPane)
     }
 
@@ -132,11 +131,11 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     ) {
         if (accounts.data.isEmpty()) {
             // Networked user has no accounts
-            eventTracker.track(VerificationSuccessNoAccounts(PANE))
+            analyticsTracker.track(VerificationSuccessNoAccounts(PANE))
             goNext(updatedManifest.nextPane)
         } else {
             // Networked user has linked accounts
-            eventTracker.track(VerificationSuccess(PANE))
+            analyticsTracker.track(VerificationSuccess(PANE))
             goNext(Pane.LINK_ACCOUNT_PICKER)
         }
     }

@@ -36,12 +36,13 @@ class LookupConsumerAndStartVerificationTest {
 
         // Act
         lookupConsumerAndStartVerification(
-            email, VerificationType.EMAIL,
-            { onConsumerNotFoundCalled = true },
-            { fail("onLookupError should not be called") },
-            { fail("onStartVerification should not be called") },
-            { fail("onVerificationStarted should not be called") },
-            { fail("onStartVerificationError should not be called") }
+            email = email,
+            verificationType = VerificationType.EMAIL,
+            onConsumerNotFound = { onConsumerNotFoundCalled = true },
+            onLookupError = { fail("onLookupError should not be called") },
+            onStartVerification = { fail("onStartVerification should not be called") },
+            onVerificationStarted = { fail("onVerificationStarted should not be called") },
+            onStartVerificationError = { fail("onStartVerificationError should not be called") }
         )
 
         // Assert
@@ -72,12 +73,13 @@ class LookupConsumerAndStartVerificationTest {
 
             // Act
             lookupConsumerAndStartVerification(
-                email, expectedVerificationType,
-                { fail("onConsumerNotFound should not be called") },
-                { fail("onLookupError should not be called") },
-                { onStartVerificationCalled = true },
-                { onVerificationStartedCalled = true },
-                { fail("onStartVerificationError should not be called") }
+                email = email,
+                verificationType = expectedVerificationType,
+                onConsumerNotFound = { fail("onConsumerNotFound should not be called") },
+                onLookupError = { fail("onLookupError should not be called") },
+                onStartVerification = { onStartVerificationCalled = true },
+                onVerificationStarted = { onVerificationStartedCalled = true },
+                onStartVerificationError = { fail("onStartVerificationError should not be called") }
             )
 
             // Assert
@@ -96,12 +98,13 @@ class LookupConsumerAndStartVerificationTest {
 
         // Act
         lookupConsumerAndStartVerification(
-            email, VerificationType.EMAIL,
-            { fail("onConsumerNotFound should not be called") },
-            { onLookupErrorCalled = true },
-            { fail("onStartVerification should not be called") },
-            { fail("onVerificationStarted should not be called") },
-            { fail("onStartVerificationError should not be called") }
+            email = email,
+            verificationType = VerificationType.EMAIL,
+            onConsumerNotFound = { fail("onConsumerNotFound should not be called") },
+            onLookupError = { onLookupErrorCalled = true },
+            onStartVerification = { fail("onStartVerification should not be called") },
+            onVerificationStarted = { fail("onVerificationStarted should not be called") },
+            onStartVerificationError = { fail("onStartVerificationError should not be called") }
         )
 
         // Assert
@@ -127,7 +130,8 @@ class LookupConsumerAndStartVerificationTest {
 
         // Act
         lookupConsumerAndStartVerification(
-            email = email, verificationType = expectedVerificationType,
+            email = email,
+            verificationType = expectedVerificationType,
             onConsumerNotFound = { fail("onConsumerNotFound should not be called") },
             onLookupError = { fail("onLookupError should not be called") },
             onStartVerification = { },
