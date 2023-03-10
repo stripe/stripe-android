@@ -177,6 +177,35 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class VerificationSuccess(
+        pane: Pane,
+    ) : FinancialConnectionsEvent(
+        name = "networking.verification.success",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class VerificationSuccessNoAccounts(
+        pane: Pane,
+    ) : FinancialConnectionsEvent(
+        name = "networking.verification.success_no_accounts",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class VerificationError(
+        pane: Pane,
+        error: String
+    ) : FinancialConnectionsEvent(
+        name = "networking.verification.error",
+        mapOf(
+            "pane" to pane.value,
+            "error" to error,
+        ).filterNotNullValues()
+    )
+
     class ClickDone(
         pane: Pane,
     ) : FinancialConnectionsEvent(

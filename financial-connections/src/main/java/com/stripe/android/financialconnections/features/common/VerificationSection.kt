@@ -89,13 +89,14 @@ private fun VerificationErrorText(
     }
 }
 
-@Composable
 private fun getVerificationErrorMessage(
     error: Throwable,
     verificationType: VerificationType
 ): TextResource {
     return when ((error as StripeException).stripeError?.code ?: "") {
-        "consumer_verification_code_invalid" -> TextResource.StringId(R.string.stripe_verification_codeInvalid)
+        "consumer_verification_code_invalid" -> TextResource.StringId(
+            R.string.stripe_verification_codeInvalid
+        )
         "consumer_session_expired",
         "consumer_verification_expired",
         "consumer_verification_max_attempts_exceeded" -> TextResource.StringId(
@@ -105,8 +106,6 @@ private fun getVerificationErrorMessage(
             }
         )
 
-        else -> TextResource.StringId(
-            R.string.stripe_verification_unexpectedError
-        )
+        else -> TextResource.StringId(R.string.stripe_verification_unexpectedError)
     }
 }
