@@ -47,6 +47,11 @@ interface IntentConfirmationInterceptor {
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): NextStep
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        var createIntentCallback: AbsCreateIntentCallback? = null
+    }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -55,7 +60,6 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
-    private val createIntentCallback: AbsCreateIntentCallback?,
 ) : IntentConfirmationInterceptor {
 
     private val userError: String
@@ -73,7 +77,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): IntentConfirmationInterceptor.NextStep {
-        return if (clientSecret != null) {
+        val nextStep = if (clientSecret != null) {
             createConfirmStep(
                 clientSecret = clientSecret,
                 shippingValues = shippingValues,
@@ -95,6 +99,10 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 }
             )
         }
+
+        IntentConfirmationInterceptor.createIntentCallback = null
+
+        return nextStep
     }
 
     override suspend fun intercept(
@@ -103,13 +111,13 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): IntentConfirmationInterceptor.NextStep {
-        return if (clientSecret != null) {
+        val nextStep = if (clientSecret != null) {
             createConfirmStep(clientSecret, shippingValues, paymentMethod)
         } else {
-            when (createIntentCallback) {
+            when (val callback = IntentConfirmationInterceptor.createIntentCallback) {
                 is CreateIntentCallbackForServerSideConfirmation -> {
                     handleServerSideConfirmation(
-                        createIntentCallback = createIntentCallback,
+                        createIntentCallback = callback,
                         shouldSavePaymentMethod = setupForFutureUsage == OffSession,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues
@@ -117,12 +125,13 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 }
                 is CreateIntentCallback -> {
                     handleClientSideConfirmation(
-                        createIntentCallback = createIntentCallback,
+                        createIntentCallback = callback,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues
                     )
                 }
                 else -> {
+                    IntentConfirmationInterceptor.createIntentCallback = null
                     error(
                         "${CreateIntentCallback::class.java.simpleName} must be implemented " +
                             "when using IntentConfiguration with PaymentSheet"
@@ -130,6 +139,10 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 }
             }
         }
+
+        IntentConfirmationInterceptor.createIntentCallback = null
+
+        return nextStep
     }
 
     private suspend fun createPaymentMethod(
@@ -150,9 +163,9 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): IntentConfirmationInterceptor.NextStep {
-        val result = createIntentCallback.onCreateIntent(paymentMethodId = paymentMethod.id!!)
-
-        return when (result) {
+        return when (
+            val result = createIntentCallback.onCreateIntent(paymentMethodId = paymentMethod.id!!)
+        ) {
             is CreateIntentCallback.Result.Success -> {
                 createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
             }

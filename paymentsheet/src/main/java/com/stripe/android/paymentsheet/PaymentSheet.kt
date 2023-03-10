@@ -10,6 +10,9 @@ import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import com.stripe.android.CreateIntentCallback
+import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -41,6 +44,28 @@ class PaymentSheet internal constructor(
         DefaultPaymentSheetLauncher(activity, callback)
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        activity: ComponentActivity,
+        createIntentCallback: CreateIntentCallback,
+        paymentResultCallback: PaymentSheetResultCallback,
+    ) : this(
+        DefaultPaymentSheetLauncher(activity, paymentResultCallback)
+    ) {
+        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        activity: ComponentActivity,
+        createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
+        paymentResultCallback: PaymentSheetResultCallback,
+    ) : this(
+        DefaultPaymentSheetLauncher(activity, paymentResultCallback)
+    ) {
+        IntentConfirmationInterceptor.createIntentCallback = createIntentCallbackForServerSideConfirmation
+    }
+
     /**
      * Constructor to be used when launching the payment sheet from a Fragment.
      *
@@ -53,6 +78,28 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(fragment, callback)
     )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        fragment: Fragment,
+        createIntentCallback: CreateIntentCallback,
+        paymentResultCallback: PaymentSheetResultCallback,
+    ) : this(
+        DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
+    ) {
+        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        fragment: Fragment,
+        createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
+        paymentResultCallback: PaymentSheetResultCallback,
+    ) : this(
+        DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
+    ) {
+        IntentConfirmationInterceptor.createIntentCallback = createIntentCallbackForServerSideConfirmation
+    }
 
     /**
      * Present the payment sheet to process a [PaymentIntent].
@@ -935,6 +982,38 @@ class PaymentSheet internal constructor(
                 ).create()
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @JvmStatic
+            fun create(
+                activity: ComponentActivity,
+                paymentOptionCallback: PaymentOptionCallback,
+                createIntentCallback: CreateIntentCallback,
+                paymentResultCallback: PaymentSheetResultCallback,
+            ): FlowController {
+                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                return FlowControllerFactory(
+                    activity,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @JvmStatic
+            fun create(
+                activity: ComponentActivity,
+                paymentOptionCallback: PaymentOptionCallback,
+                createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
+                paymentResultCallback: PaymentSheetResultCallback,
+            ): FlowController {
+                IntentConfirmationInterceptor.createIntentCallback = createIntentCallbackForServerSideConfirmation
+                return FlowControllerFactory(
+                    activity,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
+            }
+
             /**
              * Create the FlowController when launching the payment sheet from a Fragment.
              *
@@ -948,6 +1027,38 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
+                return FlowControllerFactory(
+                    fragment,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @JvmStatic
+            fun create(
+                fragment: Fragment,
+                paymentOptionCallback: PaymentOptionCallback,
+                createIntentCallback: CreateIntentCallback,
+                paymentResultCallback: PaymentSheetResultCallback,
+            ): FlowController {
+                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                return FlowControllerFactory(
+                    fragment,
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @JvmStatic
+            fun create(
+                fragment: Fragment,
+                paymentOptionCallback: PaymentOptionCallback,
+                createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
+                paymentResultCallback: PaymentSheetResultCallback,
+            ): FlowController {
+                IntentConfirmationInterceptor.createIntentCallback = createIntentCallbackForServerSideConfirmation
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
