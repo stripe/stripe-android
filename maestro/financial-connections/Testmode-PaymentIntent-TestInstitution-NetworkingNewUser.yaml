@@ -34,8 +34,7 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Confirm"
 # ENTER PHONE FOR NEW NETWORKED USER
 - tapOn: "Phone number"
-- inputRandomNumber:
-    length: 10
+- inputText: "6223115555"
 - tapOn: "Save to Link"
 # CONFIRM AND COMPLETE
 - tapOn: "Done"
