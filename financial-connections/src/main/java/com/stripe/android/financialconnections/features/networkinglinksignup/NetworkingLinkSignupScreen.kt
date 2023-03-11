@@ -34,7 +34,6 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.BulletItem
-import com.stripe.android.financialconnections.features.common.FormErrorText
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PaneFooter
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
@@ -54,7 +53,6 @@ import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
-import com.stripe.android.financialconnections.utils.firstErrorOrNull
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
@@ -158,10 +156,6 @@ private fun NetworkingLinkSignupLoaded(
                 emailController = payload.emailController,
                 enabled = true,
             )
-            listOf(
-                lookupAccountSync,
-                saveAccountToLinkSync
-            ).firstErrorOrNull()?.let { FormErrorText(error = it) }
             AnimatedVisibility(visible = showFullForm) {
                 PhoneNumberSection(
                     payload = payload,
@@ -395,7 +389,7 @@ internal fun NetworkingLinkSignupScreenEnteringPhonePreview() {
                 payload = Success(
                     Payload(
                         merchantName = "Test",
-                        emailController = EmailConfig.createController("test@test.com"),
+                        emailController = EmailConfig.createController("email"),
                         phoneController = PhoneNumberController.createPhoneNumberController(
                             initialValue = "",
                             initiallySelectedCountryCode = null,

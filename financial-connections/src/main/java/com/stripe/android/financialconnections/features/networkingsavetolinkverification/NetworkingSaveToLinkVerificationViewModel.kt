@@ -23,7 +23,6 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -45,7 +44,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
         suspend {
             val consumerSession = requireNotNull(getCachedConsumerSession())
             startVerification.sms(consumerSession.clientSecret)
-            eventTracker.track(PaneLoaded(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION))
+            eventTracker.track(PaneLoaded(PANE))
             NetworkingSaveToLinkVerificationState.Payload(
                 email = consumerSession.emailAddress,
                 phoneNumber = consumerSession.redactedPhoneNumber,
@@ -63,24 +62,19 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
             NetworkingSaveToLinkVerificationState::payload,
             onSuccess = {
                 viewModelScope.launch {
-                    it.otpElement.getFormFieldValueFlow()
-                        .mapNotNull { formFieldsList ->
-                            // formFieldsList contains only one element, for the OTP. Take the second value of
-                            // the pair, which is the FormFieldEntry containing the value entered by the user.
-                            formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value
-                        }.collectLatest { onOTPEntered(it) }
+                    it.otpElement.otpCompleteFlow.collectLatest { onOTPEntered(it) }
                 }
             },
             onFail = { error ->
                 logger.error("Error fetching payload", error)
-                eventTracker.track(Error(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION, error))
+                eventTracker.track(Error(PANE, error))
             },
         )
         onAsync(
             NetworkingSaveToLinkVerificationState::confirmVerification,
             onFail = { error ->
                 logger.error("Error confirming verification", error)
-                eventTracker.track(Error(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION, error))
+                eventTracker.track(Error(PANE, error))
             },
         )
     }
@@ -109,6 +103,8 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
 
     companion object :
         MavericksViewModelFactory<NetworkingSaveToLinkVerificationViewModel, NetworkingSaveToLinkVerificationState> {
+
+        internal val PANE = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION
 
         override fun create(
             viewModelContext: ViewModelContext,

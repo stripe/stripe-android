@@ -177,6 +177,42 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class VerificationSuccess(
+        pane: Pane,
+    ) : FinancialConnectionsEvent(
+        name = "networking.verification.success",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class VerificationSuccessNoAccounts(
+        pane: Pane,
+    ) : FinancialConnectionsEvent(
+        name = "networking.verification.success_no_accounts",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class VerificationError(
+        pane: Pane,
+        error: Error
+    ) : FinancialConnectionsEvent(
+        name = "networking.verification.error",
+        mapOf(
+            "pane" to pane.value,
+            "error" to error.value,
+        ).filterNotNullValues()
+    ) {
+        enum class Error(val value: String) {
+            ConsumerNotFoundError("ConsumerNotFoundError"),
+            LookupConsumerSession("LookupConsumerSession"),
+            StartVerificationSessionError("StartVerificationSessionError"),
+            NetworkedAccountsRetrieveMethodError("NetworkedAccountsRetrieveMethodError"),
+        }
+    }
+
     class ClickDone(
         pane: Pane,
     ) : FinancialConnectionsEvent(

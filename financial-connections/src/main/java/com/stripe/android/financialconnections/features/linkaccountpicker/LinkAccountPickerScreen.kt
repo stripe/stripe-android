@@ -46,6 +46,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
 import com.stripe.android.financialconnections.features.common.AccountItem
 import com.stripe.android.financialconnections.features.common.LoadingContent
+import com.stripe.android.financialconnections.features.common.PaneFooter
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -132,13 +133,11 @@ private fun LinkAccountPickerLoaded(
     Column(
         Modifier
             .fillMaxSize()
-            .padding(
-                horizontal = 24.dp,
-            )
     ) {
         Column(
             modifier = Modifier
                 .verticalScroll(scrollState)
+                .padding(horizontal = 24.dp)
                 .weight(1f)
         ) {
             Spacer(modifier = Modifier.size(16.dp))
@@ -158,21 +157,22 @@ private fun LinkAccountPickerLoaded(
             SelectNewAccount(onClick = onNewBankAccountClick)
             Spacer(modifier = Modifier.size(16.dp))
         }
-        AccessibleDataCallout(
-            payload.accessibleData,
-            onLearnMoreAboutDataAccessClick
-        )
-        Spacer(modifier = Modifier.size(12.dp))
-        FinancialConnectionsButton(
-            enabled = selectedAccountId != null,
-            loading = selectNetworkedAccountAsync is Loading,
-            onClick = onSelectAccountClick,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Text(text = stringResource(R.string.stripe_link_account_picker_cta))
+        PaneFooter(elevation = scrollState.elevation) {
+            AccessibleDataCallout(
+                payload.accessibleData,
+                onLearnMoreAboutDataAccessClick
+            )
+            Spacer(modifier = Modifier.size(12.dp))
+            FinancialConnectionsButton(
+                enabled = selectedAccountId != null,
+                loading = selectNetworkedAccountAsync is Loading,
+                onClick = onSelectAccountClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(text = stringResource(R.string.stripe_link_account_picker_cta))
+            }
         }
-        Spacer(modifier = Modifier.size(24.dp))
     }
 }
 
