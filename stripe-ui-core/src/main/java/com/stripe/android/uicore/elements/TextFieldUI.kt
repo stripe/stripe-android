@@ -199,11 +199,12 @@ fun TextField(
                     textFieldController.onFocusChange(it.isFocused)
                 }
                 hasFocus = it.isFocused
-                autofill?.run {
+
+                if (autofill != null && autofillNode.boundingBox != null) {
                     if (it.isFocused) {
-                        requestAutofillForNode(autofillNode)
+                        autofill.requestAutofillForNode(autofillNode)
                     } else {
-                        cancelAutofillForNode(autofillNode)
+                        autofill.cancelAutofillForNode(autofillNode)
                     }
                 }
             }

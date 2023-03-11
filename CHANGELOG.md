@@ -10,6 +10,9 @@
 * [FIXED][6326](https://github.com/stripe/stripe-android/pull/6326) Fixed an issue where the primary button would lose its padding on configuration changes.
 * [ADDED][5672](https://github.com/stripe/stripe-android/pull/5672) Added support for credit card autofill.
 
+### Identity
+* [FIXED][6341](https://github.com/stripe/stripe-android/pull/6341) Fixed an issue when remote image URI contains query parameters.
+
 ## 20.19.5 - 2023-03-06
 
 ### Payments

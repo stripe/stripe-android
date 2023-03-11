@@ -9,5 +9,9 @@ internal class NullCardAccountRangeRepository : CardAccountRangeRepository {
         cardNumber: CardNumber.Unvalidated
     ): AccountRange? = null
 
+    override suspend fun getAccountRanges(
+        cardNumber: CardNumber.Unvalidated
+    ): List<AccountRange>? = null
+
     override val loading: Flow<Boolean> = flowOf(false)
 }

@@ -7,6 +7,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
@@ -679,6 +680,33 @@ internal class StripeKtxTest {
             options = isA(),
             expandFields = eq(expandFields),
         )
+    }
+
+    @Test
+    fun `Verify retrievePossibleCardBrands passes card number on to repository`() = runTest {
+        whenever(mockApiRepository.retrieveCardMetadata(any(), any())).thenReturn(
+            CardMetadata(
+                bin = mock(),
+                accountRanges = listOf()
+            )
+        )
+
+        stripe.retrievePossibleBrands("4242 42")
+
+        verify(mockApiRepository).retrieveCardMetadata(
+            cardNumber = eq("4242 42"),
+            requestOptions = isA()
+        )
+    }
+
+    @Test
+    fun `Verify retrievePossibleCardBrands throws an error when less than 6 characters`() = runTest {
+        val error = assertFailsWith<InvalidRequestException> {
+            stripe.retrievePossibleBrands("4242")
+        }
+
+        assertThat(error.message)
+            .isEqualTo("cardNumber cannot be less than 6 characters")
     }
 
     private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
