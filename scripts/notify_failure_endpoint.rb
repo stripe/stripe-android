@@ -40,6 +40,7 @@ params = {
 
 params[:summary] = "stripe-android E2E test failed"
 params[:description] = "Please ACK this ticket and investigate the failure. See https://github.com/stripe/stripe-android/actions/runs/#{github_run_id}"
+params[:components] = %w[Android]
 
 req.body = params.to_json
 
