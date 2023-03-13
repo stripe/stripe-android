@@ -443,13 +443,13 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 }
                 CheckoutMode.Payment -> {
                     PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 12345,
+                        amount = viewModel.amount.value,
                         currency = currency.value,
                     )
                 }
                 CheckoutMode.PaymentWithSetup -> {
                     PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 12345,
+                        amount = viewModel.amount.value,
                         currency = currency.value,
                         setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
                     )

@@ -31,13 +31,11 @@ class Settings(context: Context) {
 
     internal companion object {
         /**
-         * The base URL of the test backend, implementing a `/checkout` endpoint as defined by
-         * [CheckoutBackendApi].
+         * The base URL of the test backend, implementing a `/checkout` endpoint.
          *
          * Note: only necessary if not configured via `gradle.properties`.
          */
-        private const val BASE_URL =
-            "https://stripe-mobile-payment-sheet-test-playground-v6.glitch.me/"
+        private const val BASE_URL = "https://stp-mobile-ci-test-backend-v7.stripedemos.com/"
 
         private const val METADATA_KEY_BACKEND_URL_KEY =
             "com.stripe.android.paymentsheet.example.metadata.backend_url"
