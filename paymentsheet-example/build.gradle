@@ -85,13 +85,6 @@ dependencies {
         exclude group: 'org.checkerframework', module: 'checker'
     }
     androidTestImplementation "androidx.test.espresso:espresso-web:$espressoVersion"
-    androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$espressoVersion"
-
-    // We need "implementation" here because we're using the idling resource in
-    // PaymentSheetPlaygroundActivity.
-    implementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
-
-    androidTestImplementation 'com.jakewharton.espresso:okhttp3-idling-resource:1.0.0'
 
     // Test rules and transitive dependencies:
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion"

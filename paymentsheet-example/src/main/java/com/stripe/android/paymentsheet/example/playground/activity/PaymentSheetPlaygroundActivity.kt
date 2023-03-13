@@ -19,8 +19,6 @@ import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.test.espresso.IdlingResource
-import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
@@ -142,10 +140,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private lateinit var flowController: PaymentSheet.FlowController
     private lateinit var addressLauncher: AddressLauncher
     private var shippingAddress: AddressDetails? = null
-
-    private var multiStepUIReadyIdlingResource: CountingIdlingResource? = null
-
-    private var singleStepUIReadyIdlingResource: CountingIdlingResource? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val shouldUseDarkMode = intent.extras?.get(FORCE_DARK_MODE_EXTRA) as Boolean?
@@ -287,12 +281,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.isInvisible = !it
-            if (it) {
-                singleStepUIReadyIdlingResource?.increment()
-                multiStepUIReadyIdlingResource?.increment()
-            } else {
-                singleStepUIReadyIdlingResource?.decrement()
-            }
         }
 
         lifecycleScope.launch {
@@ -630,7 +618,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         if (success) {
             viewBinding.paymentMethod.isClickable = true
             onPaymentOption(flowController.getPaymentOption())
-            multiStepUIReadyIdlingResource?.decrement()
         } else {
             viewModel.status.value =
                 "Failed to configure PaymentSheetFlowController: ${error?.message}"
@@ -690,27 +677,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 viewBinding.shippingAddressContainer.visibility = View.GONE
             }
         }
-    }
-
-    /**
-     * Only called from test, creates and returns a [IdlingResource].
-     */
-    @VisibleForTesting
-    fun getMultiStepReadyIdlingResource(): IdlingResource {
-        if (multiStepUIReadyIdlingResource == null) {
-            multiStepUIReadyIdlingResource =
-                CountingIdlingResource("multiStepUIReadyIdlingResource")
-        }
-        return multiStepUIReadyIdlingResource!!
-    }
-
-    @VisibleForTesting
-    fun getSingleStepReadyIdlingResource(): IdlingResource {
-        if (singleStepUIReadyIdlingResource == null) {
-            singleStepUIReadyIdlingResource =
-                CountingIdlingResource("singleStepUIReadyIdlingResource")
-        }
-        return singleStepUIReadyIdlingResource!!
     }
 
     companion object {

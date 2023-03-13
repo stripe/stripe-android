@@ -10,8 +10,9 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 
 open class EspressoLabelIdButton(@StringRes val label: Int) {
 
+    val interaction = onView(withText(label))
+
     fun click() {
-        val interaction = onView(withText(label))
         val isNotVisible = runCatching { interaction.check(matches(isCompletelyDisplayed())) }.isFailure
 
         if (isNotVisible) {
