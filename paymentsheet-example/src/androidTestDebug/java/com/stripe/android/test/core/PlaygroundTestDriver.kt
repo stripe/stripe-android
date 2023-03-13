@@ -19,7 +19,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.IdlingPolicies
-import androidx.test.espresso.IdlingRegistry
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
@@ -514,19 +513,9 @@ class PlaygroundTestDriver(
             IdlingPolicies.setIdlingResourceTimeout(45, TimeUnit.SECONDS)
             IdlingPolicies.setMasterPolicyTimeout(45, TimeUnit.SECONDS)
 
-            IdlingRegistry.getInstance().register(
-                activity.getMultiStepReadyIdlingResource(),
-                activity.getSingleStepReadyIdlingResource(),
-            )
-
             // Observe the result of the PaymentSheet completion
             activity.viewModel.status.observeForever {
                 resultValue = it
-
-                IdlingRegistry.getInstance().unregister(
-                    activity.getMultiStepReadyIdlingResource(),
-                    activity.getSingleStepReadyIdlingResource(),
-                )
             }
             launchPlayground.release()
         }
