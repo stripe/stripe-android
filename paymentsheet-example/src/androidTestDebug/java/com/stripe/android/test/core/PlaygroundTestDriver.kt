@@ -19,8 +19,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.IdlingPolicies
+import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
@@ -369,6 +371,9 @@ class PlaygroundTestDriver(
 
     internal fun launchComplete() {
         selectors.reload.click()
+        selectors.complete.interaction.perform(scrollTo())
+        val selector = UiSelector().resourceIdMatches(".*/complete_checkout_button").enabled(true)
+        assertThat(device.findObject(selector).waitForExists(10_000)).isTrue()
         selectors.complete.click()
 
         // PaymentSheetActivity is now on screen
