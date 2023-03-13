@@ -10,6 +10,7 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
+import com.stripe.android.CreateIntentCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -18,11 +19,15 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
+import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
+import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.InitializationType
 import com.stripe.android.paymentsheet.example.playground.model.SavedToggles
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class PaymentSheetPlaygroundViewModel(
     application: Application
@@ -34,6 +39,7 @@ class PaymentSheetPlaygroundViewModel(
     val clientSecret = MutableLiveData<String?>(null)
 
     val initializationType = MutableStateFlow(InitializationType.Normal)
+    val amount = MutableStateFlow<Long>(0)
     val paymentMethodTypes = MutableStateFlow<List<String>>(emptyList())
 
     val readyToCheckout = combine(
@@ -42,7 +48,7 @@ class PaymentSheetPlaygroundViewModel(
     ) { type, secret ->
         when (type) {
             InitializationType.Normal -> secret != null
-            InitializationType.Deferred -> true
+            InitializationType.Deferred -> paymentMethodTypes.value.isNotEmpty()
         }
     }
 
@@ -209,10 +215,74 @@ class PaymentSheetPlaygroundViewModel(
 
                         customerConfig.postValue(checkoutResponse.makeCustomerConfig())
                         clientSecret.postValue(checkoutResponse.intentClientSecret)
+
+                        amount.value = checkoutResponse.amount
                         paymentMethodTypes.value = checkoutResponse.paymentMethodTypes.orEmpty().split(",")
                     }
                 }
                 inProgress.postValue(false)
             }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun createIntent(
+        paymentMethodId: String,
+        merchantCountryCode: String,
+        mode: String,
+        returnUrl: String,
+        backendUrl: String,
+    ): CreateIntentCallback.Result {
+        // Note: This is not how you'd do this in a real application. Instead, your app would
+        // call your backend and create (and optionally confirm) a payment or setup intent.
+        return CreateIntentCallback.Result.Success(clientSecret = clientSecret.value!!)
+    }
+
+    suspend fun createAndConfirmIntent(
+        paymentMethodId: String,
+        shouldSavePaymentMethod: Boolean,
+        merchantCountryCode: String,
+        mode: String,
+        returnUrl: String,
+        backendUrl: String,
+    ): CreateIntentCallback.Result {
+        // Note: This is not how you'd do this in a real application. You wouldn't have a client
+        // secret available at this point, but you'd call your backend to create (and optionally
+        // confirm) a payment or setup intent.
+        val request = ConfirmIntentRequest(
+            clientSecret = clientSecret.value!!,
+            paymentMethodId = paymentMethodId,
+            shouldSavePaymentMethod = shouldSavePaymentMethod,
+            merchantCountryCode = merchantCountryCode,
+            mode = mode,
+            returnUrl = returnUrl,
+        )
+
+        return suspendCoroutine { continuation ->
+            Fuel.post(backendUrl + "confirm_intent")
+                .jsonBody(Gson().toJson(request))
+                .responseString { _, _, result ->
+                    when (result) {
+                        is Result.Failure -> {
+                            status.postValue("Creating intent failed:\n${result.getException().message}")
+                            continuation.resume(
+                                CreateIntentCallback.Result.Failure("Couldn't finish operation")
+                            )
+                        }
+                        is Result.Success -> {
+                            val confirmIntentResponse = Gson().fromJson(
+                                result.get(),
+                                ConfirmIntentResponse::class.java,
+                            )
+
+                            continuation.resume(
+                                CreateIntentCallback.Result.Success(
+                                    clientSecret = confirmIntentResponse.clientSecret,
+                                )
+                            )
+                        }
+                    }
+                    inProgress.postValue(false)
+                }
+        }
     }
 }
