@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## XX.XX.XX - 2023-XX-XX
+## 20.20.0 - 2023-03-13
 
 ### Payments
 * [ADDED][6306](https://github.com/stripe/stripe-android/pull/6306) Added support for Cash App Pay. See the docs [here](https://stripe.com/docs/payments/cash-app-pay).
