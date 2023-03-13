@@ -50,7 +50,6 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     private val updateLocalManifest: UpdateLocalManifest,
     private val markLinkStepUpVerified: MarkLinkStepUpVerified,
     private val updateCachedAccounts: UpdateCachedAccounts,
-    private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val goNext: GoNext,
     private val logger: Logger
 ) : MavericksViewModel<LinkStepUpVerificationState>(initialState) {
@@ -70,11 +69,11 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
                 email = email,
                 verificationType = VerificationType.EMAIL,
                 onConsumerNotFound = {
-                    analyticsTracker.track(VerificationStepUpError(PANE, ConsumerNotFoundError))
+                    eventTracker.track(VerificationStepUpError(PANE, ConsumerNotFoundError))
                     goNext(Pane.INSTITUTION_PICKER)
                 },
                 onLookupError = { error ->
-                    analyticsTracker.track(VerificationStepUpError(PANE, LookupConsumerSession))
+                    eventTracker.track(VerificationStepUpError(PANE, LookupConsumerSession))
                     setState { copy(payload = Fail(error)) }
                 },
                 onStartVerification = { /* no-op */ },
@@ -83,7 +82,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
                     setState { copy(payload = Success(payload)) }
                 },
                 onStartVerificationError = { error ->
-                    analyticsTracker.track(VerificationStepUpError(PANE, StartVerificationError))
+                    eventTracker.track(VerificationStepUpError(PANE, StartVerificationError))
                     setState { copy(payload = Fail(error)) }
                 }
             )
@@ -128,14 +127,14 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
         // Mark session as verified.
         runCatching { markLinkStepUpVerified() }
             .onFailure {
-                analyticsTracker.track(
+                eventTracker.track(
                     VerificationStepUpError(
                         PANE,
                         MarkLinkVerifiedError
                     )
                 )
             }
-            .onSuccess { analyticsTracker.track(VerificationStepUpSuccess(PANE)) }
+            .onSuccess { eventTracker.track(VerificationStepUpSuccess(PANE)) }
             .getOrThrow()
 
         // Mark networked account as selected.
@@ -169,17 +168,17 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
                 email = email,
                 verificationType = VerificationType.EMAIL,
                 onConsumerNotFound = {
-                    analyticsTracker.track(VerificationStepUpError(PANE, ConsumerNotFoundError))
+                    eventTracker.track(VerificationStepUpError(PANE, ConsumerNotFoundError))
                     goNext(Pane.INSTITUTION_PICKER)
                 },
                 onLookupError = { error ->
-                    analyticsTracker.track(VerificationStepUpError(PANE, LookupConsumerSession))
+                    eventTracker.track(VerificationStepUpError(PANE, LookupConsumerSession))
                     setState { copy(resendOtp = Fail(error)) }
                 },
                 onStartVerification = { /* no-op */ },
                 onVerificationStarted = { setState { copy(resendOtp = Success(Unit)) } },
                 onStartVerificationError = { error ->
-                    analyticsTracker.track(VerificationStepUpError(PANE, StartVerificationError))
+                    eventTracker.track(VerificationStepUpError(PANE, StartVerificationError))
                     setState { copy(resendOtp = Fail(error)) }
                 }
             )
