@@ -57,7 +57,7 @@ internal class TransformSpecToElementTest {
     fun beforeTest() {
         transformSpecToElements =
             TransformSpecToElements(
-                addressRepositoryProvider = { mock() },
+                addressRepository = mock(),
                 initialValues = mapOf(),
                 amount = null,
                 saveForFutureUseInitialValue = true,
@@ -187,7 +187,7 @@ internal class TransformSpecToElementTest {
     fun `Setting card number to view only returns the correct elements`() {
         transformSpecToElements =
             TransformSpecToElements(
-                addressRepositoryProvider = { mock() },
+                addressRepository = mock(),
                 initialValues = mapOf(),
                 amount = null,
                 saveForFutureUseInitialValue = true,

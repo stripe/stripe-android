@@ -39,7 +39,6 @@ import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,7 +55,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -72,7 +70,6 @@ internal abstract class BaseSheetViewModel(
     protected val workContext: CoroutineContext = Dispatchers.IO,
     protected val logger: Logger,
     val lpmRepository: LpmRepository,
-    addressRepositoryProvider: Provider<AddressRepository>,
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
     private val headerTextFactory: HeaderTextFactory,
@@ -234,12 +231,6 @@ internal abstract class BaseSheetViewModel(
                     it != selection.value
                 }
                 .collect { updateSelection(it) }
-        }
-
-        viewModelScope.launch(workContext) {
-            // Initialize the AddressRepository on a background thread.
-            // It's not used directly in the ViewModel, but we need to initialize before it's used.
-            addressRepositoryProvider.get()
         }
     }
 

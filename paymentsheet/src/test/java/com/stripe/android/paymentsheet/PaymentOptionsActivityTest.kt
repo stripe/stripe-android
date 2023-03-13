@@ -414,7 +414,6 @@ internal class PaymentOptionsActivityTest {
                 application = ApplicationProvider.getApplicationContext(),
                 logger = Logger.noop(),
                 lpmRepository = lpmRepository,
-                addressRepositoryProvider = { mock() },
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
             ).also {
@@ -435,7 +434,7 @@ internal class PaymentOptionsActivityTest {
                 initialPaymentMethodCreateParams = null
             ),
             lpmRepository = lpmRepository,
-            addressRepositoryProvider = { AddressRepository(context.resources) },
+            addressRepository = AddressRepository(context.resources, Dispatchers.Unconfined),
             showCheckboxFlow = mock()
         )
 

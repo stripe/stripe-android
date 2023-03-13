@@ -20,9 +20,7 @@ import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.TextFieldController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -35,7 +33,7 @@ class FormControllerTest {
     )
 
     private val transformSpecToElements = TransformSpecToElements(
-        addressRepositoryProvider = { createAddressRepository() },
+        addressRepository = createAddressRepository(),
         initialValues = emptyMap(),
         amount = null,
         saveForFutureUseInitialValue = false,
@@ -100,11 +98,8 @@ class FormControllerTest {
 }
 
 private fun createAddressRepository(): AddressRepository {
-    return runBlocking {
-        withContext(Dispatchers.IO) {
-            AddressRepository(
-                ApplicationProvider.getApplicationContext<Application>().resources
-            )
-        }
-    }
+    return AddressRepository(
+        resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        workContext = Dispatchers.Unconfined,
+    )
 }

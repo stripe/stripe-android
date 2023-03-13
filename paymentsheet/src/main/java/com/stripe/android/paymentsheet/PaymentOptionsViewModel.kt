@@ -31,7 +31,6 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,7 +53,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     application: Application,
     logger: Logger,
     lpmRepository: LpmRepository,
-    addressRepositoryProvider: Provider<AddressRepository>,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
 ) : BaseSheetViewModel(
@@ -66,7 +64,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     workContext = workContext,
     logger = logger,
     lpmRepository = lpmRepository,
-    addressRepositoryProvider = addressRepositoryProvider,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),

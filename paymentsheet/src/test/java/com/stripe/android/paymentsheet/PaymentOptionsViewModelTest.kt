@@ -428,7 +428,6 @@ internal class PaymentOptionsViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             lpmRepository = lpmRepository,
-            addressRepositoryProvider = { mock() },
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler
         )

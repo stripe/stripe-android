@@ -13,14 +13,13 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
-import javax.inject.Provider
 
 @Module
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object FormControllerModule {
     @Provides
     fun provideTransformSpecToElements(
-        addressRepositoryProvider: Provider<AddressRepository>,
+        addressRepository: AddressRepository,
         context: Context,
         merchantName: String,
         stripeIntent: StripeIntent?,
@@ -28,7 +27,7 @@ object FormControllerModule {
         @Named(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?,
         viewOnlyFields: Set<IdentifierSpec>
     ) = TransformSpecToElements(
-        addressRepositoryProvider = addressRepositoryProvider,
+        addressRepository = addressRepository,
         initialValues = initialValues,
         shippingValues = shippingValues,
         amount = (stripeIntent as? PaymentIntent)?.let {

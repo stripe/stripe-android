@@ -42,7 +42,7 @@ internal class FormViewModel @Inject internal constructor(
     context: Context,
     formArguments: FormArguments,
     lpmRepository: LpmRepository,
-    addressRepositoryProvider: Provider<AddressRepository>,
+    addressRepository: AddressRepository,
     val showCheckboxFlow: Flow<Boolean>
 ) : ViewModel() {
     internal class Factory(
@@ -65,7 +65,7 @@ internal class FormViewModel @Inject internal constructor(
 
     val elementsFlow = flowOf(
         TransformSpecToElements(
-            addressRepositoryProvider = addressRepositoryProvider,
+            addressRepository = addressRepository,
             initialValues = formArguments.getInitialValuesMap(),
             amount = formArguments.amount,
             saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,

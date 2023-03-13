@@ -24,7 +24,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -40,25 +39,27 @@ class AddressElementTest {
     )
 
     init {
-        // We want to use fields that are easy to set in error
-        addressRepository.add(
-            "US",
-            listOf(
-                EmailElement(
-                    IdentifierSpec.Email,
-                    controller = SimpleTextFieldController(EmailConfig())
+        runBlocking {
+            // We want to use fields that are easy to set in error
+            addressRepository.add(
+                "US",
+                listOf(
+                    EmailElement(
+                        IdentifierSpec.Email,
+                        controller = SimpleTextFieldController(EmailConfig())
+                    )
                 )
             )
-        )
-        addressRepository.add(
-            "JP",
-            listOf(
-                IbanElement(
-                    IdentifierSpec.Generic("sepa_debit[iban]"),
-                    SimpleTextFieldController(IbanConfig())
+            addressRepository.add(
+                "JP",
+                listOf(
+                    IbanElement(
+                        IdentifierSpec.Generic("sepa_debit[iban]"),
+                        SimpleTextFieldController(IbanConfig())
+                    )
                 )
             )
-        )
+        }
     }
 
     @Test
@@ -528,11 +529,8 @@ private suspend fun AddressElement.trailingIconFor(
 }
 
 private fun createAddressRepository(): AddressRepository {
-    return runBlocking {
-        withContext(Dispatchers.IO) {
-            AddressRepository(
-                ApplicationProvider.getApplicationContext<Application>().resources
-            )
-        }
-    }
+    return AddressRepository(
+        resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        workContext = Dispatchers.Unconfined,
+    )
 }

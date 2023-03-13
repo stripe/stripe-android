@@ -1324,7 +1324,6 @@ internal class PaymentSheetViewModelTest {
                 customerRepository,
                 prefsRepository,
                 lpmRepository,
-                mock(),
                 paymentLauncherFactory = paymentLauncherFactory,
                 mock(),
                 Logger.noop(),

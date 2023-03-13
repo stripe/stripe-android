@@ -32,7 +32,6 @@ import com.stripe.android.ui.core.elements.UpiSpec
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
-import javax.inject.Provider
 
 /**
  * Transform a [LayoutSpec] data object into an Element, which
@@ -44,7 +43,7 @@ import javax.inject.Provider
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class TransformSpecToElements(
-    private val addressRepositoryProvider: Provider<AddressRepository>,
+    private val addressRepository: AddressRepository,
     private val initialValues: Map<IdentifierSpec, String?>,
     private val shippingValues: Map<IdentifierSpec, String?>?,
     private val amount: Amount?,
@@ -80,12 +79,12 @@ class TransformSpecToElements(
                 is CountrySpec -> it.transform(initialValues)
                 is AddressSpec -> it.transform(
                     initialValues,
-                    addressRepositoryProvider.get(),
+                    addressRepository,
                     shippingValues
                 )
                 is CardBillingSpec -> it.transform(
                     initialValues,
-                    addressRepositoryProvider.get(),
+                    addressRepository,
                     shippingValues
                 )
                 is SepaMandateTextSpec -> it.transform(merchantName)

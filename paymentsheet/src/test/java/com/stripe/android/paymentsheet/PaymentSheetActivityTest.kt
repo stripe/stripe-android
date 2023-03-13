@@ -993,7 +993,6 @@ internal class PaymentSheetActivityTest {
                 FakeCustomerRepository(paymentMethods),
                 FakePrefsRepository(),
                 lpmRepository,
-                mock(),
                 stripePaymentLauncherAssistedFactory,
                 googlePayPaymentMethodLauncherFactory,
                 Logger.noop(),
@@ -1053,7 +1052,7 @@ internal class PaymentSheetActivityTest {
                 initialPaymentMethodCreateParams = null
             ),
             lpmRepository = lpmRepository,
-            addressRepositoryProvider = { AddressRepository(context.resources) },
+            addressRepository = AddressRepository(context.resources, Dispatchers.Unconfined),
             showCheckboxFlow = mock()
         )
 

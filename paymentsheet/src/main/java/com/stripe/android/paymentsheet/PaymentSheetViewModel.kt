@@ -58,7 +58,6 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -89,7 +88,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
     lpmRepository: LpmRepository,
-    addressRepositoryProvider: Provider<AddressRepository>,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
@@ -106,7 +104,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     workContext = workContext,
     logger = logger,
     lpmRepository = lpmRepository,
-    addressRepositoryProvider = addressRepositoryProvider,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = true),

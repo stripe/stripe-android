@@ -27,7 +27,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Rule
 import org.mockito.kotlin.any
@@ -86,7 +85,6 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
                 application = ApplicationProvider.getApplicationContext(),
                 logger = Logger.noop(),
                 lpmRepository = lpmRepository,
-                addressRepositoryProvider = { mock() },
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
             )
@@ -108,7 +106,7 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
                 initialPaymentMethodCreateParams = null
             ),
             lpmRepository = lpmRepository,
-            addressRepositoryProvider = { createAddressRepository() },
+            addressRepository = createAddressRepository(),
             showCheckboxFlow = mock()
         )
     ) {
@@ -149,11 +147,8 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
 }
 
 private fun createAddressRepository(): AddressRepository {
-    return runBlocking {
-        withContext(Dispatchers.IO) {
-            AddressRepository(
-                ApplicationProvider.getApplicationContext<Application>().resources
-            )
-        }
-    }
+    return AddressRepository(
+        resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        workContext = Dispatchers.Unconfined,
+    )
 }

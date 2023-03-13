@@ -34,9 +34,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -584,9 +582,7 @@ internal class FormViewModelTest {
         context = context,
         formArguments = arguments,
         lpmRepository = lpmRepository,
-        addressRepositoryProvider = {
-            createAddressRepository()
-        },
+        addressRepository = createAddressRepository(),
         showCheckboxFlow = showCheckboxFlow
     )
 }
@@ -599,11 +595,8 @@ internal suspend fun FormViewModel.setSaveForFutureUse(value: Boolean) {
 }
 
 private fun createAddressRepository(): AddressRepository {
-    return runBlocking {
-        withContext(Dispatchers.IO) {
-            AddressRepository(
-                ApplicationProvider.getApplicationContext<Application>().resources
-            )
-        }
-    }
+    return AddressRepository(
+        resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        workContext = Dispatchers.Unconfined,
+    )
 }

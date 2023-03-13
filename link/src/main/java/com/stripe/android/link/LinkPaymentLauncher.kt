@@ -42,7 +42,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -62,7 +61,7 @@ class LinkPaymentLauncher @Inject internal constructor(
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     analyticsRequestExecutor: AnalyticsRequestExecutor,
     stripeRepository: StripeRepository,
-    addressRepositoryProvider: Provider<AddressRepository>,
+    addressRepository: AddressRepository,
 ) : NonFallbackInjectable {
     private val launcherComponentBuilder: LinkPaymentLauncherComponent.Builder by lazy {
         DaggerLinkPaymentLauncherComponent.builder()
@@ -72,7 +71,7 @@ class LinkPaymentLauncher @Inject internal constructor(
             .analyticsRequestFactory(paymentAnalyticsRequestFactory)
             .analyticsRequestExecutor(analyticsRequestExecutor)
             .stripeRepository(stripeRepository)
-            .addressRepository(addressRepositoryProvider.get())
+            .addressRepository(addressRepository)
             .enableLogging(enableLogging)
             .publishableKeyProvider(publishableKeyProvider)
             .stripeAccountIdProvider(stripeAccountIdProvider)

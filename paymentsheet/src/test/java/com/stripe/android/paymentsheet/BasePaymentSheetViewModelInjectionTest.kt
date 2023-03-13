@@ -36,7 +36,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Rule
 import org.mockito.kotlin.any
@@ -113,7 +112,6 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                         null
                     )
                 },
-                mock(),
                 stripePaymentLauncherAssistedFactory,
                 googlePayPaymentMethodLauncherFactory,
                 Logger.noop(),
@@ -140,7 +138,7 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                 initialPaymentMethodCreateParams = null
             ),
             lpmRepository = lpmRepository,
-            addressRepositoryProvider = { createAddressRepository() },
+            addressRepository = createAddressRepository(),
             showCheckboxFlow = mock()
         )
     ) {
@@ -181,11 +179,8 @@ internal open class BasePaymentSheetViewModelInjectionTest {
 }
 
 private fun createAddressRepository(): AddressRepository {
-    return runBlocking {
-        withContext(Dispatchers.IO) {
-            AddressRepository(
-                ApplicationProvider.getApplicationContext<Application>().resources
-            )
-        }
-    }
+    return AddressRepository(
+        resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        workContext = Dispatchers.Unconfined,
+    )
 }

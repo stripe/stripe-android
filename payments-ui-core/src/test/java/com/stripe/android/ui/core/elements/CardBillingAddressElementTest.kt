@@ -12,7 +12,6 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -34,25 +33,27 @@ internal class CardBillingAddressElementTest {
     )
 
     init {
-        // We want to use fields that are easy to set in error
-        addressRepository.add(
-            "US",
-            listOf(
-                EmailElement(
-                    IdentifierSpec.Email,
-                    controller = SimpleTextFieldController(EmailConfig())
+        runBlocking {
+            // We want to use fields that are easy to set in error
+            addressRepository.add(
+                "US",
+                listOf(
+                    EmailElement(
+                        IdentifierSpec.Email,
+                        controller = SimpleTextFieldController(EmailConfig())
+                    )
                 )
             )
-        )
-        addressRepository.add(
-            "JP",
-            listOf(
-                IbanElement(
-                    IdentifierSpec.Generic("sepa_debit[iban]"),
-                    SimpleTextFieldController(IbanConfig())
+            addressRepository.add(
+                "JP",
+                listOf(
+                    IbanElement(
+                        IdentifierSpec.Generic("sepa_debit[iban]"),
+                        SimpleTextFieldController(IbanConfig())
+                    )
                 )
             )
-        )
+        }
     }
 
     @Test
@@ -123,11 +124,8 @@ internal class CardBillingAddressElementTest {
 }
 
 private fun createAddressRepository(): AddressRepository {
-    return runBlocking {
-        withContext(Dispatchers.IO) {
-            AddressRepository(
-                ApplicationProvider.getApplicationContext<Application>().resources
-            )
-        }
-    }
+    return AddressRepository(
+        resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        workContext = Dispatchers.Unconfined,
+    )
 }
