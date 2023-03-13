@@ -63,20 +63,18 @@ class LinkPaymentLauncher @Inject internal constructor(
     stripeRepository: StripeRepository,
     addressRepository: AddressRepository,
 ) : NonFallbackInjectable {
-    private val launcherComponentBuilder: LinkPaymentLauncherComponent.Builder by lazy {
-        DaggerLinkPaymentLauncherComponent.builder()
-            .context(context)
-            .ioContext(ioContext)
-            .uiContext(uiContext)
-            .analyticsRequestFactory(paymentAnalyticsRequestFactory)
-            .analyticsRequestExecutor(analyticsRequestExecutor)
-            .stripeRepository(stripeRepository)
-            .addressRepository(addressRepository)
-            .enableLogging(enableLogging)
-            .publishableKeyProvider(publishableKeyProvider)
-            .stripeAccountIdProvider(stripeAccountIdProvider)
-            .productUsage(productUsage)
-    }
+    private val launcherComponentBuilder = DaggerLinkPaymentLauncherComponent.builder()
+        .context(context)
+        .ioContext(ioContext)
+        .uiContext(uiContext)
+        .analyticsRequestFactory(paymentAnalyticsRequestFactory)
+        .analyticsRequestExecutor(analyticsRequestExecutor)
+        .stripeRepository(stripeRepository)
+        .addressRepository(addressRepository)
+        .enableLogging(enableLogging)
+        .publishableKeyProvider(publishableKeyProvider)
+        .stripeAccountIdProvider(stripeAccountIdProvider)
+        .productUsage(productUsage)
 
     @InjectorKey
     private val injectorKey: String = WeakMapInjectorRegistry.nextKey(
