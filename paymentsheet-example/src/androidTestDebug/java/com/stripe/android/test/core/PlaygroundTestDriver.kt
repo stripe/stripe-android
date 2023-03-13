@@ -385,6 +385,9 @@ class PlaygroundTestDriver(
         Espresso.onIdle()
         selectors.composeTestRule.waitForIdle()
 
+        selectors.multiStepSelect.interaction.perform(scrollTo())
+        val selector = UiSelector().resourceIdMatches(".*/payment_method").enabled(true)
+        assertThat(device.findObject(selector).waitForExists(10_000)).isTrue()
         selectors.multiStepSelect.click()
 
         // PaymentOptionsActivity is now on screen

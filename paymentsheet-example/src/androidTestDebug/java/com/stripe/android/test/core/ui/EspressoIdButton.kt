@@ -10,7 +10,7 @@ import java.security.InvalidParameterException
 
 open class EspressoIdButton(@IntegerRes val id: Int) {
 
-    private val interaction: ViewInteraction
+    val interaction: ViewInteraction
         get() = Espresso.onView(ViewMatchers.withId(id))
 
     fun click() {
