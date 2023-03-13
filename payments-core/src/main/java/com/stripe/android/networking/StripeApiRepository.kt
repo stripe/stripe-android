@@ -112,7 +112,7 @@ import kotlin.coroutines.CoroutineContext
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class StripeApiRepository @JvmOverloads internal constructor(
     private val context: Context,
-    publishableKeyProvider: () -> String,
+    private val publishableKeyProvider: () -> String,
     private val appInfo: AppInfo? = Stripe.appInfo,
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,
@@ -163,16 +163,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private val fraudDetectionData: FraudDetectionData?
         get() = fraudDetectionDataRepository.getCached()
 
-    private val cardAccountRangeRepository: CardAccountRangeRepository
-
     init {
         fireFraudDetectionDataRequest()
-
-        cardAccountRangeRepository =
-            cardAccountRangeRepositoryFactory.createWithStripeRepository(
-                stripeRepository = this,
-                publishableKey = publishableKeyProvider()
-            )
 
         CoroutineScope(workContext).launch {
             val httpCacheDir = File(context.cacheDir, "stripe_api_repository_cache")
@@ -1609,6 +1601,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         val bin = unvalidatedNumber.bin ?: return null
 
+        val cardAccountRangeRepository =
+            cardAccountRangeRepositoryFactory.createWithStripeRepository(
+                stripeRepository = this,
+                publishableKey = publishableKeyProvider()
+            )
         val accountRanges = cardAccountRangeRepository.getAccountRanges(
             cardNumber = unvalidatedNumber
         ) ?: listOf()
