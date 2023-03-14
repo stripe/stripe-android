@@ -9,7 +9,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLinkResult
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -27,6 +26,7 @@ import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
+import com.stripe.android.link.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.FinancialConnectionsSession
@@ -94,7 +94,10 @@ class PaymentMethodViewModelTest {
             whenever(shippingValues(anyOrNull())).thenReturn(this)
             whenever(build()).thenReturn(formControllerSubcomponent)
         }
+
     private val formControllerProvider = Provider { formControllerSubcomponentBuilder }
+
+    private val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
     @Before
     fun before() {
@@ -484,13 +487,14 @@ class PaymentMethodViewModelTest {
 
     private fun createViewModel(loadFromArgs: Boolean = false) =
         PaymentMethodViewModel(
-            args,
-            linkAccount,
-            linkAccountManager,
-            navigator,
-            confirmationManager,
-            logger,
-            formControllerProvider
+            args = args,
+            linkAccount = linkAccount,
+            linkAccountManager = linkAccountManager,
+            navigator = navigator,
+            confirmationManager = confirmationManager,
+            logger = logger,
+            formControllerProvider = formControllerProvider,
+            intentConfirmationInterceptor = intentConfirmationInterceptor,
         ).apply { init(loadFromArgs) }
 
     private fun createLinkPaymentDetails() =
@@ -509,14 +513,6 @@ class PaymentMethodViewModelTest {
                 )
             )
         }
-
-    private fun createFinancialConnectionsAccount(id: String = "id") = FinancialConnectionsAccount(
-        created = 1,
-        id = id,
-        institutionName = "name",
-        livemode = false,
-        supportedPaymentMethodTypes = listOf()
-    )
 
     companion object {
         const val CLIENT_SECRET = "client_secret"
