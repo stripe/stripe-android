@@ -155,12 +155,26 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
-        flowController = PaymentSheet.FlowController.create(
-            this,
-            ::onPaymentOption,
-            ::onPaymentSheetResult
+        paymentSheet = PaymentSheet(
+            activity = this,
+            createIntentCallback = { paymentMethodId ->
+                viewModel.createIntent(
+                    paymentMethodId = paymentMethodId,
+                    merchantCountryCode = merchantCountryCode.value,
+                    mode = mode.value,
+                    returnUrl = returnUrl,
+                    backendUrl = settings.playgroundBackendUrl,
+                )
+            },
+            paymentResultCallback = ::onPaymentSheetResult,
         )
+
+        flowController = PaymentSheet.FlowController.create(
+            activity = this,
+            paymentOptionCallback = ::onPaymentOption,
+            paymentResultCallback = ::onPaymentSheetResult,
+        )
+
         addressLauncher = AddressLauncher(this, ::onAddressLauncherResult)
 
         viewBinding.initializationRadioGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -685,6 +699,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         const val USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA = "UseSnapshotReturningCustomer"
         const val SUPPORTED_PAYMENT_METHODS_EXTRA = "SupportedPaymentMethods"
         private const val merchantName = "Example, Inc."
+
+        private const val returnUrl = "stripesdk://payment_return_url/" +
+            "com.stripe.android.paymentsheet.example"
 
         /**
          * This is a pairing of the countries to their default currency

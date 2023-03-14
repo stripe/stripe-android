@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.ConfirmStripeIntentParamsFactory
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
@@ -29,6 +29,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod.Type.Card
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -41,12 +42,9 @@ import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.model.create
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -99,6 +97,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
+    private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
 ) : BaseSheetViewModel(
     application = application,
     config = args.config,
@@ -375,6 +374,27 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
+    private fun handleNextAction(
+        clientSecret: String,
+        stripeIntent: StripeIntent,
+    ) {
+        runCatching {
+            requireNotNull(paymentLauncher)
+        }.fold(
+            onSuccess = {
+                when (stripeIntent) {
+                    is PaymentIntent -> {
+                        it.handleNextActionForPaymentIntent(clientSecret)
+                    }
+                    is SetupIntent -> {
+                        it.handleNextActionForSetupIntent(clientSecret)
+                    }
+                }
+            },
+            onFailure = ::onFatal
+        )
+    }
+
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
         if (!editing.value && selection != this.selection.value) {
             updateSelection(selection)
@@ -417,33 +437,32 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
-        val clientSecret = when (val mode = args.initializationMode) {
-            is PaymentSheet.InitializationMode.PaymentIntent -> {
-                PaymentIntentClientSecret(mode.clientSecret)
-            }
-            is PaymentSheet.InitializationMode.SetupIntent -> {
-                SetupIntentClientSecret(mode.clientSecret)
-            }
-            is PaymentSheet.InitializationMode.DeferredIntent -> {
-                TODO("Not implemented yet")
-            }
-        }
+        viewModelScope.launch {
+            val stripeIntent = requireNotNull(stripeIntent.value)
 
-        val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-            clientSecret = clientSecret.value,
-            shipping = args.config?.shippingDetails?.toConfirmPaymentIntentShipping()
-        )
+            val nextStep = intentConfirmationInterceptor.intercept(
+                clientSecret = stripeIntent.clientSecret,
+                paymentSelection = paymentSelection,
+                shippingValues = args.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
+            )
 
-        when (paymentSelection) {
-            is PaymentSelection.Saved -> {
-                confirmParamsFactory.create(paymentSelection)
+            when (nextStep) {
+                is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
+                    handleNextAction(
+                        clientSecret = nextStep.clientSecret,
+                        stripeIntent = stripeIntent,
+                    )
+                }
+                is IntentConfirmationInterceptor.NextStep.Confirm -> {
+                    confirmStripeIntent(nextStep.confirmParams)
+                }
+                is IntentConfirmationInterceptor.NextStep.Fail -> {
+                    onError(nextStep.errorMessage)
+                }
+                is IntentConfirmationInterceptor.NextStep.Complete -> {
+                    processPayment(stripeIntent, PaymentResult.Completed)
+                }
             }
-            is PaymentSelection.New -> {
-                confirmParamsFactory.create(paymentSelection)
-            }
-            else -> null
-        }?.let { confirmParams ->
-            confirmStripeIntent(confirmParams)
         }
     }
 

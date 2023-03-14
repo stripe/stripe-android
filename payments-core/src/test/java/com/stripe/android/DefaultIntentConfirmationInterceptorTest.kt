@@ -281,7 +281,9 @@ class DefaultIntentConfirmationInterceptorTest {
             setupForFutureUsage = null,
         )
 
-        assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Complete::class.java)
+        assertThat(nextStep).isEqualTo(
+            IntentConfirmationInterceptor.NextStep.Complete(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
     }
 
     @Test

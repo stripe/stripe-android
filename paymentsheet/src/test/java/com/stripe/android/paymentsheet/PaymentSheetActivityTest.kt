@@ -75,6 +75,7 @@ import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepositor
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -136,6 +137,8 @@ internal class PaymentSheetActivityTest {
     private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory> {
         on { create(any(), any(), any()) } doReturn paymentLauncher
     }
+
+    private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
     private lateinit var viewModel: PaymentSheetViewModel
 
@@ -998,7 +1001,8 @@ internal class PaymentSheetActivityTest {
                 Logger.noop(),
                 testDispatcher,
                 savedStateHandle = savedStateHandle,
-                linkHandler = linkHandler
+                linkHandler = linkHandler,
+                intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
             ).also {
                 it.injector = injector
             }
