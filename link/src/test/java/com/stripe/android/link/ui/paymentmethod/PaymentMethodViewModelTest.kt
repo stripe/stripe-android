@@ -4,7 +4,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asLiveData
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.NonFallbackInjector
@@ -27,6 +29,7 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
 import com.stripe.android.link.utils.FakeIntentConfirmationInterceptor
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.FinancialConnectionsSession
@@ -53,6 +56,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
@@ -172,36 +176,10 @@ class PaymentMethodViewModelTest {
             whenever(args.shippingValues).thenReturn(null)
 
             createViewModel().startPayment(cardFormFieldValues)
+            intentConfirmationInterceptor.enqueueConfirmStep(confirmParams = mock())
 
             val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
             verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
-
-            assertThat(paramsCaptor.firstValue.toParamMap()).isEqualTo(
-                mapOf(
-                    "client_secret" to args.stripeIntent.clientSecret,
-                    "use_stripe_sdk" to false,
-                    "mandate_data" to mapOf(
-                        "customer_acceptance" to mapOf(
-                            "type" to "online",
-                            "online" to mapOf(
-                                "infer_from_client" to true
-                            )
-                        )
-                    ),
-                    "payment_method_data" to mapOf(
-                        "type" to "link",
-                        "link" to mapOf(
-                            "payment_details_id" to "QAAAKJ6",
-                            "credentials" to mapOf(
-                                "consumer_session_client_secret" to CLIENT_SECRET
-                            ),
-                            "card" to mapOf(
-                                "cvc" to "123"
-                            )
-                        )
-                    )
-                )
-            )
         }
 
     @Test
@@ -217,17 +195,22 @@ class PaymentMethodViewModelTest {
             )
         )
 
-        createViewModel().startPayment(mapOf())
+        val mockInterceptor = mock<IntentConfirmationInterceptor>()
+        createViewModel(intentConfirmationInterceptor = mockInterceptor).startPayment(mapOf())
 
-        val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
-        verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
+        val paramsCaptor = argumentCaptor<ConfirmPaymentIntentParams.Shipping>()
 
-        assertThat(paramsCaptor.firstValue.toParamMap()["shipping"]).isEqualTo(
+        verify(mockInterceptor).intercept(
+            clientSecret = anyOrNull(),
+            paymentMethodCreateParams = any(),
+            shippingValues = paramsCaptor.capture(),
+            setupForFutureUsage = isNull(),
+        )
+
+        assertThat(paramsCaptor.firstValue.toParamMap()).isEqualTo(
             mapOf(
-                "address" to mapOf(
-                    "country" to "US"
-                ),
-                "name" to "Test Name"
+                "address" to mapOf("country" to "US"),
+                "name" to "Test Name",
             )
         )
     }
@@ -253,6 +236,7 @@ class PaymentMethodViewModelTest {
 
         val viewModel = createViewModel()
         viewModel.startPayment(cardFormFieldValues)
+        intentConfirmationInterceptor.enqueueConfirmStep(confirmParams = mock())
 
         assertThat(viewModel.primaryButtonState.value).isEqualTo(PrimaryButtonState.Completed)
 
@@ -306,6 +290,7 @@ class PaymentMethodViewModelTest {
         }
 
         viewModel.startPayment(cardFormFieldValues)
+        intentConfirmationInterceptor.enqueueConfirmStep(confirmParams = mock())
 
         assertThat(state).isEqualTo(PrimaryButtonState.Enabled)
     }
@@ -451,6 +436,53 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
+    fun `foo 123`() = runTest {
+        whenever(
+            linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+        ).thenReturn(Result.success(createLinkPaymentDetails()))
+
+        val viewModel = createViewModel()
+        viewModel.startPayment(cardFormFieldValues)
+
+        val confirmParams = mock<ConfirmPaymentIntentParams>()
+        intentConfirmationInterceptor.enqueueConfirmStep(confirmParams)
+
+        verify(confirmationManager).confirmStripeIntent(eq(confirmParams), any())
+    }
+
+    @Test
+    fun `foo 1234`() = runTest {
+        whenever(
+            linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+        ).thenReturn(Result.success(createLinkPaymentDetails()))
+
+        val viewModel = createViewModel()
+        viewModel.startPayment(cardFormFieldValues)
+
+        intentConfirmationInterceptor.enqueueCompleteStep(StripeIntentFixtures.PI_SUCCEEDED)
+
+        advanceTimeBy(PrimaryButtonState.COMPLETED_DELAY_MS + 1)
+        verify(navigator).dismiss(eq(LinkActivityResult.Completed))
+    }
+
+    @Test
+    fun `foo 12345`() = runTest {
+        whenever(
+            linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+        ).thenReturn(Result.success(createLinkPaymentDetails()))
+
+        val viewModel = createViewModel()
+        viewModel.startPayment(cardFormFieldValues)
+
+        val error = "hmmmm why did this not work"
+        intentConfirmationInterceptor.enqueueFailureStep(error)
+
+        viewModel.errorMessage.test {
+            assertThat(awaitItem()).isEqualTo(ErrorMessage.Raw(error))
+        }
+    }
+
+    @Test
     fun `Factory gets initialized by Injector`() {
         val mockBuilder = mock<SignedInViewModelSubcomponent.Builder>()
         val mockSubComponent = mock<SignedInViewModelSubcomponent>()
@@ -485,17 +517,19 @@ class PaymentMethodViewModelTest {
         assertThat(createdViewModel).isEqualTo(vmToBeReturned)
     }
 
-    private fun createViewModel(loadFromArgs: Boolean = false) =
-        PaymentMethodViewModel(
-            args = args,
-            linkAccount = linkAccount,
-            linkAccountManager = linkAccountManager,
-            navigator = navigator,
-            confirmationManager = confirmationManager,
-            logger = logger,
-            formControllerProvider = formControllerProvider,
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
-        ).apply { init(loadFromArgs) }
+    private fun createViewModel(
+        loadFromArgs: Boolean = false,
+        intentConfirmationInterceptor: IntentConfirmationInterceptor = this.intentConfirmationInterceptor,
+    ) = PaymentMethodViewModel(
+        args = args,
+        linkAccount = linkAccount,
+        linkAccountManager = linkAccountManager,
+        navigator = navigator,
+        confirmationManager = confirmationManager,
+        logger = logger,
+        formControllerProvider = formControllerProvider,
+        intentConfirmationInterceptor = intentConfirmationInterceptor,
+    ).apply { init(loadFromArgs) }
 
     private fun createLinkPaymentDetails() =
         PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first().let {
