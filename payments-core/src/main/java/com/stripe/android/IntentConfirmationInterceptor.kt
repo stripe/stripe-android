@@ -77,7 +77,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): IntentConfirmationInterceptor.NextStep {
-        val nextStep = if (clientSecret != null) {
+        return if (clientSecret != null) {
             createConfirmStep(
                 clientSecret = clientSecret,
                 shippingValues = shippingValues,
@@ -99,10 +99,6 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 }
             )
         }
-
-        IntentConfirmationInterceptor.createIntentCallback = null
-
-        return nextStep
     }
 
     override suspend fun intercept(
@@ -111,7 +107,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): IntentConfirmationInterceptor.NextStep {
-        val nextStep = if (clientSecret != null) {
+        return if (clientSecret != null) {
             createConfirmStep(clientSecret, shippingValues, paymentMethod)
         } else {
             when (val callback = IntentConfirmationInterceptor.createIntentCallback) {
@@ -131,7 +127,6 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                     )
                 }
                 else -> {
-                    IntentConfirmationInterceptor.createIntentCallback = null
                     error(
                         "${CreateIntentCallback::class.java.simpleName} must be implemented " +
                             "when using IntentConfiguration with PaymentSheet"
@@ -139,10 +134,6 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 }
             }
         }
-
-        IntentConfirmationInterceptor.createIntentCallback = null
-
-        return nextStep
     }
 
     private suspend fun createPaymentMethod(
