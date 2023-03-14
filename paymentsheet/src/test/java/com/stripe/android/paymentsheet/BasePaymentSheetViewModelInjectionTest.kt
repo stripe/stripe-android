@@ -27,14 +27,13 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
-import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
@@ -98,24 +97,21 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                 ),
                 FakeCustomerRepository(customerRepositoryPMs),
                 FakePrefsRepository(),
-                lpmResourceRepository = StaticLpmResourceRepository(
-                    LpmRepository(
-                        LpmRepository.LpmRepositoryArguments(
-                            ApplicationProvider.getApplicationContext<Application>().resources
-                        )
-                    ).apply {
-                        this.update(
-                            PaymentIntentFactory.create(
-                                paymentMethodTypes = listOf(
-                                    PaymentMethod.Type.Card.code,
-                                    PaymentMethod.Type.USBankAccount.code
-                                )
-                            ),
-                            null
-                        )
-                    }
-                ),
-                mock(),
+                lpmRepository = LpmRepository(
+                    LpmRepository.LpmRepositoryArguments(
+                        ApplicationProvider.getApplicationContext<Application>().resources
+                    )
+                ).apply {
+                    this.update(
+                        PaymentIntentFactory.create(
+                            paymentMethodTypes = listOf(
+                                PaymentMethod.Type.Card.code,
+                                PaymentMethod.Type.USBankAccount.code
+                            )
+                        ),
+                        null
+                    )
+                },
                 stripePaymentLauncherAssistedFactory,
                 googlePayPaymentMethodLauncherFactory,
                 Logger.noop(),
@@ -131,7 +127,6 @@ internal open class BasePaymentSheetViewModelInjectionTest {
         @InjectorKey injectorKey: String,
         viewModel: PaymentSheetViewModel,
         lpmRepository: LpmRepository,
-        addressRepository: AddressRepository,
         formViewModel: FormViewModel = FormViewModel(
             context = context,
             formArguments = FormArguments(
@@ -142,8 +137,8 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                 amount = Amount(50, "USD"),
                 initialPaymentMethodCreateParams = null
             ),
-            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
+            lpmRepository = lpmRepository,
+            addressRepository = createAddressRepository(),
             showCheckboxFlow = mock()
         )
     ) {
@@ -181,4 +176,11 @@ internal open class BasePaymentSheetViewModelInjectionTest {
         viewModel.injector = injector
         WeakMapInjectorRegistry.register(injector, injectorKey)
     }
+}
+
+private fun createAddressRepository(): AddressRepository {
+    return AddressRepository(
+        resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        workContext = Dispatchers.Unconfined,
+    )
 }

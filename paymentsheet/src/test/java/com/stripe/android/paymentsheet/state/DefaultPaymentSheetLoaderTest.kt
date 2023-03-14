@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.flow.flow
@@ -50,21 +49,19 @@ internal class DefaultPaymentSheetLoaderTest {
     private val eventReporter = mock<EventReporter>()
 
     private val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
-    private val lpmResourceRepository = StaticLpmResourceRepository(
-        LpmRepository(
-            LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)
-        ).apply {
-            this.update(
-                PaymentIntentFactory.create(
-                    paymentMethodTypes = listOf(
-                        PaymentMethod.Type.Card.code,
-                        PaymentMethod.Type.USBankAccount.code
-                    )
-                ),
-                null
-            )
-        }
-    )
+    private val lpmRepository = LpmRepository(
+        LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)
+    ).apply {
+        this.update(
+            PaymentIntentFactory.create(
+                paymentMethodTypes = listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.USBankAccount.code
+                )
+            ),
+            null
+        )
+    }
 
     private val prefsRepository = FakePrefsRepository()
 
@@ -703,7 +700,10 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration(id = "id", ephemeralKeySecret = "key"),
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "id",
+                    ephemeralKeySecret = "key"
+                ),
             ),
         ) as PaymentSheetLoader.Result.Success
 
@@ -726,7 +726,7 @@ internal class DefaultPaymentSheetLoaderTest {
             elementsSessionRepository = ElementsSessionRepository.Static(stripeIntent),
             stripeIntentValidator = StripeIntentValidator(),
             customerRepository = customerRepo,
-            lpmResourceRepository = lpmResourceRepository,
+            lpmRepository = lpmRepository,
             logger = Logger.noop(),
             eventReporter = eventReporter,
             workContext = testDispatcher,

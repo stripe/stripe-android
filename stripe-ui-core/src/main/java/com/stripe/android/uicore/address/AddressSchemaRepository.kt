@@ -14,7 +14,7 @@ import javax.inject.Singleton
 open class AddressSchemaRepository @Inject constructor(
     val resources: Resources?
 ) {
-    protected val countryAddressSchemaMap: Map<String, List<CountryAddressSchema>> =
+    protected val countryAddressSchemaMap: Map<String, List<CountryAddressSchema>> by lazy {
         SUPPORTED_COUNTRIES.associateWith { countryCode ->
             "addressinfo/$countryCode.json"
         }.mapValues { (_, assetFileName) ->
@@ -24,6 +24,7 @@ open class AddressSchemaRepository @Inject constructor(
                 )
             )
         }
+    }
 
     /**
      * Get the schemas related to a country's address.

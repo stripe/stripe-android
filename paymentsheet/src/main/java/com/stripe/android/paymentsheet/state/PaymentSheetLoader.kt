@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -59,7 +58,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val elementsSessionRepository: ElementsSessionRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
-    private val lpmResourceRepository: ResourceRepository<LpmRepository>,
+    private val lpmRepository: LpmRepository,
     private val logger: Logger,
     private val eventReporter: EventReporter,
     @IOContext private val workContext: CoroutineContext,
@@ -169,7 +168,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val paymentMethodTypes = getSupportedSavedCustomerPMs(
             stripeIntent,
             config,
-            lpmResourceRepository.getRepository()
+            lpmRepository,
         ).mapNotNull {
             // The SDK is only able to parse customer LPMs
             // that are hard coded in the SDK.
@@ -231,7 +230,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             initializationMode = initializationMode,
             configuration = configuration,
         )
-        val lpmRepository = lpmResourceRepository.getRepository()
 
         lpmRepository.update(
             stripeIntent = elementsSession.stripeIntent,

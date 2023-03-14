@@ -31,7 +31,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.FlowPreview
@@ -62,7 +61,7 @@ class LinkPaymentLauncher @Inject internal constructor(
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     analyticsRequestExecutor: AnalyticsRequestExecutor,
     stripeRepository: StripeRepository,
-    addressResourceRepository: ResourceRepository<AddressRepository>
+    addressRepository: AddressRepository,
 ) : NonFallbackInjectable {
     private val launcherComponentBuilder = DaggerLinkPaymentLauncherComponent.builder()
         .context(context)
@@ -71,7 +70,7 @@ class LinkPaymentLauncher @Inject internal constructor(
         .analyticsRequestFactory(paymentAnalyticsRequestFactory)
         .analyticsRequestExecutor(analyticsRequestExecutor)
         .stripeRepository(stripeRepository)
-        .addressResourceRepository(addressResourceRepository)
+        .addressRepository(addressRepository)
         .enableLogging(enableLogging)
         .publishableKeyProvider(publishableKeyProvider)
         .stripeAccountIdProvider(stripeAccountIdProvider)

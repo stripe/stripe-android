@@ -35,7 +35,7 @@ internal fun PaymentMethodForm(
     )
 
     val hiddenIdentifiers by formViewModel.hiddenIdentifiers.collectAsState(emptySet())
-    val elements by formViewModel.elementsFlow.collectAsState(null)
+    val elements by formViewModel.elementsFlow.collectAsState(emptyList())
     val lastTextFieldIdentifier by formViewModel.lastTextFieldIdentifier.collectAsState(null)
 
     PaymentMethodForm(
@@ -57,7 +57,7 @@ internal fun PaymentMethodForm(
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     completeFormValues: Flow<FormFieldValues?>,
     hiddenIdentifiers: Set<IdentifierSpec>,
-    elements: List<FormElement>?,
+    elements: List<FormElement>,
     lastTextFieldIdentifier: IdentifierSpec?,
     modifier: Modifier = Modifier,
 ) {
@@ -72,9 +72,6 @@ internal fun PaymentMethodForm(
         enabled = enabled,
         elements = elements,
         lastTextFieldIdentifier = lastTextFieldIdentifier,
-        loadingComposable = {
-            Loading()
-        },
         modifier = modifier
     )
 }

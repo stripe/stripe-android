@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
-import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -9,7 +8,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.PaymentIntentFactory
 import com.stripe.android.utils.fakeCreationExtras
 import org.junit.After
@@ -32,7 +30,7 @@ internal class PaymentSheetViewModelInjectionTest : BasePaymentSheetViewModelInj
             val viewModel = createViewModel()
 
             val factory = PaymentSheetViewModel.Factory { args }
-            registerViewModel(args.injectorKey, viewModel, lpmRepository, addressRepository)
+            registerViewModel(args.injectorKey, viewModel, lpmRepository)
 
             val creationExtras = activity.fakeCreationExtras()
             val result = factory.create(PaymentSheetViewModel::class.java, creationExtras)
@@ -69,10 +67,6 @@ internal class PaymentSheetViewModelInjectionTest : BasePaymentSheetViewModelInj
     }
 
     companion object {
-        val addressRepository = AddressRepository(
-            resources = ApplicationProvider.getApplicationContext<Context>().resources
-        )
-
         val lpmRepository = LpmRepository(
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,

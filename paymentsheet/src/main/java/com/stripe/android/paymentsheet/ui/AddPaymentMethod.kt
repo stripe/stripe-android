@@ -38,7 +38,6 @@ internal fun AddPaymentMethod(
     val linkHandler = sheetViewModel.linkHandler
     val showCheckboxFlow = remember { MutableStateFlow(false) }
 
-    val isRepositoryReady by sheetViewModel.isResourceRepositoryReady.collectAsState()
     val processing by sheetViewModel.processing.collectAsState(false)
 
     val linkConfig by linkHandler.linkConfiguration.collectAsState()
@@ -46,81 +45,77 @@ internal fun AddPaymentMethod(
         linkHandler.linkLauncher.getAccountStatusFlow(it).collectAsState(null)
     } ?: mutableStateOf(null)
 
-    if (isRepositoryReady) {
-        var selectedPaymentMethodCode: String by rememberSaveable {
-            mutableStateOf(sheetViewModel.initiallySelectedPaymentMethodType)
+    var selectedPaymentMethodCode: String by rememberSaveable {
+        mutableStateOf(sheetViewModel.initiallySelectedPaymentMethodType)
+    }
+
+    val selectedItem = remember(selectedPaymentMethodCode) {
+        sheetViewModel.supportedPaymentMethods.first {
+            it.code == selectedPaymentMethodCode
         }
+    }
 
-        val selectedItem = remember(selectedPaymentMethodCode) {
-            sheetViewModel.supportedPaymentMethods.first {
-                it.code == selectedPaymentMethodCode
-            }
+    val showLinkInlineSignup = sheetViewModel.showLinkInlineSignupView(
+        selectedPaymentMethodCode,
+        linkAccountStatus
+    )
+
+    val arguments = remember(selectedItem, showLinkInlineSignup) {
+        sheetViewModel.createFormArguments(selectedItem, showLinkInlineSignup)
+    }
+
+    LaunchedEffect(arguments) {
+        showCheckboxFlow.emit(arguments.showCheckbox)
+    }
+
+    val paymentSelection by sheetViewModel.selection.collectAsState()
+    val linkInlineSelection by linkHandler.linkInlineSelection.collectAsState()
+    var linkSignupState by remember {
+        mutableStateOf<InlineSignupViewState?>(null)
+    }
+
+    LaunchedEffect(paymentSelection, linkSignupState, linkInlineSelection) {
+        val state = linkSignupState
+        val isUsingLinkInline = linkInlineSelection != null &&
+            paymentSelection is PaymentSelection.New.Card
+
+        if (state != null) {
+            sheetViewModel.updatePrimaryButtonForLinkSignup(state)
+        } else if (isUsingLinkInline) {
+            sheetViewModel.updatePrimaryButtonForLinkInline()
         }
+    }
 
-        val showLinkInlineSignup = sheetViewModel.showLinkInlineSignupView(
-            selectedPaymentMethodCode,
-            linkAccountStatus
-        )
-
-        val arguments = remember(selectedItem, showLinkInlineSignup) {
-            sheetViewModel.createFormArguments(selectedItem, showLinkInlineSignup)
-        }
-
-        LaunchedEffect(arguments) {
-            showCheckboxFlow.emit(arguments.showCheckbox)
-        }
-
-        val paymentSelection by sheetViewModel.selection.collectAsState()
-        val linkInlineSelection by linkHandler.linkInlineSelection.collectAsState()
-        var linkSignupState by remember {
-            mutableStateOf<InlineSignupViewState?>(null)
-        }
-
-        LaunchedEffect(paymentSelection, linkSignupState, linkInlineSelection) {
-            val state = linkSignupState
-            val isUsingLinkInline = linkInlineSelection != null &&
-                paymentSelection is PaymentSelection.New.Card
-
-            if (state != null) {
-                sheetViewModel.updatePrimaryButtonForLinkSignup(state)
-            } else if (isUsingLinkInline) {
-                sheetViewModel.updatePrimaryButtonForLinkInline()
-            }
-        }
-
-        Column(modifier = modifier.fillMaxWidth()) {
-            CompositionLocalProvider(
-                LocalAutofillEventReporter provides sheetViewModel.eventReporter::onAutofill
-            ) {
-                PaymentElement(
-                    sheetViewModel = sheetViewModel,
-                    enabled = !processing,
-                    supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
-                    selectedItem = selectedItem,
-                    showLinkInlineSignup = showLinkInlineSignup,
-                    linkPaymentLauncher = linkHandler.linkLauncher,
-                    showCheckboxFlow = showCheckboxFlow,
-                    onItemSelectedListener = { selectedLpm ->
-                        if (selectedItem != selectedLpm) {
-                            selectedPaymentMethodCode = selectedLpm.code
-                        }
-                    },
-                    onLinkSignupStateChanged = { _, inlineSignupViewState ->
-                        linkSignupState = inlineSignupViewState
-                    },
-                    formArguments = arguments,
-                    onFormFieldValuesChanged = { formValues ->
-                        val newSelection = formValues?.transformToPaymentSelection(
-                            context = context,
-                            paymentMethod = selectedItem,
-                        )
-                        sheetViewModel.updateSelection(newSelection)
+    Column(modifier = modifier.fillMaxWidth()) {
+        CompositionLocalProvider(
+            LocalAutofillEventReporter provides sheetViewModel.eventReporter::onAutofill
+        ) {
+            PaymentElement(
+                sheetViewModel = sheetViewModel,
+                enabled = !processing,
+                supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
+                selectedItem = selectedItem,
+                showLinkInlineSignup = showLinkInlineSignup,
+                linkPaymentLauncher = linkHandler.linkLauncher,
+                showCheckboxFlow = showCheckboxFlow,
+                onItemSelectedListener = { selectedLpm ->
+                    if (selectedItem != selectedLpm) {
+                        selectedPaymentMethodCode = selectedLpm.code
                     }
-                )
-            }
+                },
+                onLinkSignupStateChanged = { _, inlineSignupViewState ->
+                    linkSignupState = inlineSignupViewState
+                },
+                formArguments = arguments,
+                onFormFieldValuesChanged = { formValues ->
+                    val newSelection = formValues?.transformToPaymentSelection(
+                        context = context,
+                        paymentMethod = selectedItem,
+                    )
+                    sheetViewModel.updateSelection(newSelection)
+                }
+            )
         }
-    } else {
-        Loading()
     }
 }
 

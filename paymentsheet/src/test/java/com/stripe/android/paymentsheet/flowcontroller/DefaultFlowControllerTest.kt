@@ -960,8 +960,6 @@ internal class DefaultFlowControllerTest {
             uiContext = testDispatcher,
             eventReporter = eventReporter,
             viewModel = viewModel,
-            lpmResourceRepository = mock(),
-            addressResourceRepository = mock(),
         ),
     )
 

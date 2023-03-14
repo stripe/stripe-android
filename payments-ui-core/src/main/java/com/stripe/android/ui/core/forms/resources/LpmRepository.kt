@@ -47,8 +47,6 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.ui.core.elements.transform
 import java.io.InputStream
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 /**
  * This class is responsible for loading the LPM UI Specification for all LPMs, and returning
@@ -65,10 +63,8 @@ class LpmRepository constructor(
     private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance,
     private val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
 ) {
-
     private val lpmSerializer = LpmSerializer()
 
-    private val serverInitializedLatch = CountDownLatch(1)
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
 
     val supportedPaymentMethods: List<String> by lazy {
@@ -95,15 +91,9 @@ class LpmRepository constructor(
         )
     }
 
-    fun isLoaded() = serverInitializedLatch.count <= 0L
-
     fun fromCode(code: PaymentMethodCode?) = lpmInitialFormData.fromCode(code)
 
     fun values() = lpmInitialFormData.values()
-
-    fun waitUntilLoaded() {
-        serverInitializedLatch.await(20, TimeUnit.SECONDS)
-    }
 
     /**
      * This method will read the [StripeIntent] and their specs as two separate parameters.
@@ -160,8 +150,6 @@ class LpmRepository constructor(
                     )
                 }
         }
-
-        serverInitializedLatch.countDown()
     }
 
     @VisibleForTesting

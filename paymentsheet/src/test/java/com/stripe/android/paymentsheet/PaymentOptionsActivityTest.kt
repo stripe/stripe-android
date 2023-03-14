@@ -46,8 +46,6 @@ import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
-import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.InjectableActivityScenario
@@ -86,7 +84,6 @@ internal class PaymentOptionsActivityTest {
 
     private val eventReporter = mock<EventReporter>()
     private lateinit var injector: NonFallbackInjector
-    private val addressRepository = AddressRepository(context.resources)
     private val lpmRepository = mock<LpmRepository>().apply {
         whenever(fromCode(any())).thenReturn(
             LpmRepository.SupportedPaymentMethod(
@@ -104,6 +101,7 @@ internal class PaymentOptionsActivityTest {
                 )
             )
         )
+        whenever(serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
     }
 
     private val viewModel = createViewModel()
@@ -415,8 +413,7 @@ internal class PaymentOptionsActivityTest {
                 workContext = testDispatcher,
                 application = ApplicationProvider.getApplicationContext(),
                 logger = Logger.noop(),
-                lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-                addressResourceRepository = StaticAddressResourceRepository(addressRepository),
+                lpmRepository = lpmRepository,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
             ).also {
@@ -436,8 +433,8 @@ internal class PaymentOptionsActivityTest {
                 amount = Amount(50, "USD"),
                 initialPaymentMethodCreateParams = null
             ),
-            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
+            lpmRepository = lpmRepository,
+            addressRepository = AddressRepository(context.resources, Dispatchers.Unconfined),
             showCheckboxFlow = mock()
         )
 
