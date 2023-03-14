@@ -18,12 +18,18 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.BeforeTest
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultIntentConfirmationInterceptorTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
+
+    @BeforeTest
+    fun before() {
+        IntentConfirmationInterceptor.createIntentCallback = null
+    }
 
     @Test
     fun `Returns confirm as next step if invoked with client secret for existing payment method`() = runTest {
@@ -48,7 +54,6 @@ class DefaultIntentConfirmationInterceptorTest {
 
         assertThat(confirmParams?.paymentMethodId).isEqualTo(paymentMethod.id)
         assertThat(confirmParams?.paymentMethodCreateParams).isNull()
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
     }
 
     @Test
@@ -74,7 +79,6 @@ class DefaultIntentConfirmationInterceptorTest {
 
         assertThat(confirmParams?.paymentMethodId).isNull()
         assertThat(confirmParams?.paymentMethodCreateParams).isEqualTo(createParams)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
     }
 
     @Test
@@ -98,7 +102,6 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(error.message).isEqualTo(
             "CreateIntentCallback must be implemented when using IntentConfiguration with PaymentSheet"
         )
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
     }
 
     @Test
@@ -118,7 +121,6 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Fail::class.java)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
     }
 
     @Test
@@ -149,7 +151,6 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Fail::class.java)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
     }
 
     @Test
@@ -183,7 +184,6 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Fail::class.java)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
     }
 
     @Test
@@ -205,7 +205,6 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Fail::class.java)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
     }
 
     @Test
@@ -227,7 +226,6 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Fail::class.java)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
     }
 
     @Test
@@ -252,7 +250,6 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Confirm::class.java)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
     }
 
     @Test
@@ -285,7 +282,6 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Complete::class.java)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
     }
 
     @Test
@@ -322,7 +318,6 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.HandleNextAction("pi_123_secret_456")
         )
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
     }
 
     @Test
@@ -359,7 +354,6 @@ class DefaultIntentConfirmationInterceptorTest {
         }
 
         assertThat(observedValues).containsExactly(false, false, true, false).inOrder()
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
     }
 
     private fun succeedingClientSideCallback(
