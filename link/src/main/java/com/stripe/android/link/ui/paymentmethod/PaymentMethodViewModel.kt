@@ -3,7 +3,7 @@ package com.stripe.android.link.ui.paymentmethod
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.ConfirmStripeIntentParamsFactory
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.NonFallbackInjector
@@ -24,6 +24,7 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
@@ -54,7 +55,8 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val navigator: Navigator,
     private val confirmationManager: ConfirmationManager,
     private val logger: Logger,
-    private val formControllerProvider: Provider<FormControllerSubcomponent.Builder>
+    private val formControllerProvider: Provider<FormControllerSubcomponent.Builder>,
+    private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
 ) : ViewModel() {
     private val stripeIntent = args.stripeIntent
 
@@ -124,7 +126,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                         linkAccount.email,
                         args.stripeIntent
                     ).fold(
-                        onSuccess = ::completePayment,
+                        onSuccess = { completePayment(it) },
                         onFailure = ::onError
                     )
                 }
@@ -202,15 +204,33 @@ internal class PaymentMethodViewModel @Inject constructor(
         navigator.cancel(reason = PayAnotherWay)
     }
 
-    private fun completePayment(linkPaymentDetails: LinkPaymentDetails) {
-        val factory = ConfirmStripeIntentParamsFactory.createFactory(
-            clientSecret = requireNotNull(stripeIntent.clientSecret),
-            shipping = args.shippingValues?.toConfirmPaymentIntentShipping(),
+    private suspend fun completePayment(linkPaymentDetails: LinkPaymentDetails) {
+        val nextStep = intentConfirmationInterceptor.intercept(
+            clientSecret = stripeIntent.clientSecret,
+            paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams,
+            shippingValues = args.shippingValues?.toConfirmPaymentIntentShipping(),
+            setupForFutureUsage = null,
         )
 
-        val params = factory.create(linkPaymentDetails.paymentMethodCreateParams)
+        when (nextStep) {
+            is IntentConfirmationInterceptor.NextStep.Confirm -> {
+                confirmStripeIntent(nextStep.confirmParams)
+            }
+            is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
+                // This can't happen for Link
+            }
+            is IntentConfirmationInterceptor.NextStep.Fail -> {
+                val error = IllegalStateException(nextStep.errorMessage)
+                onError(error)
+            }
+            is IntentConfirmationInterceptor.NextStep.Complete -> {
+                handlePaymentSuccess()
+            }
+        }
+    }
 
-        confirmationManager.confirmStripeIntent(params) { result ->
+    private fun confirmStripeIntent(confirmParams: ConfirmStripeIntentParams) {
+        confirmationManager.confirmStripeIntent(confirmParams) { result ->
             result.fold(
                 onSuccess = { paymentResult ->
                     when (paymentResult) {
@@ -222,16 +242,20 @@ internal class PaymentMethodViewModel @Inject constructor(
                             onError(paymentResult.throwable)
                         }
                         is PaymentResult.Completed -> {
-                            setState(PrimaryButtonState.Completed)
-                            viewModelScope.launch {
-                                delay(PrimaryButtonState.COMPLETED_DELAY_MS)
-                                navigator.dismiss(LinkActivityResult.Completed)
-                            }
+                            handlePaymentSuccess()
                         }
                     }
                 },
                 onFailure = ::onError
             )
+        }
+    }
+
+    private fun handlePaymentSuccess() {
+        setState(PrimaryButtonState.Completed)
+        viewModelScope.launch {
+            delay(PrimaryButtonState.COMPLETED_DELAY_MS)
+            navigator.dismiss(LinkActivityResult.Completed)
         }
     }
 

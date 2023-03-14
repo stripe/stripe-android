@@ -3,7 +3,7 @@ package com.stripe.android.link.ui.wallet
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.ConfirmStripeIntentParamsFactory
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.NonFallbackInjector
@@ -47,7 +47,8 @@ internal class WalletViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val confirmationManager: ConfirmationManager,
-    private val logger: Logger
+    private val logger: Logger,
+    private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
 ) : ViewModel() {
 
     private val stripeIntent = args.stripeIntent
@@ -149,17 +150,41 @@ internal class WalletViewModel @Inject constructor(
                 }
             )
         } else {
-            val params = createConfirmStripeIntentParams(
+            val params = createPaymentMethodCreateParams(
                 selectedPaymentDetails = selectedPaymentDetails,
-                linkAccount = linkAccount
+                linkAccount = linkAccount,
             )
 
-            confirmationManager.confirmStripeIntent(params) { result ->
-                result.fold(
-                    onSuccess = ::handleConfirmPaymentSuccess,
-                    onFailure = ::onError
-                )
+            val nextStep = intentConfirmationInterceptor.intercept(
+                clientSecret = stripeIntent.clientSecret,
+                paymentMethodCreateParams = params,
+                shippingValues = args.shippingValues?.toConfirmPaymentIntentShipping(),
+                setupForFutureUsage = null,
+            )
+
+            when (nextStep) {
+                is IntentConfirmationInterceptor.NextStep.Confirm -> {
+                    confirmStripeIntent(nextStep.confirmParams)
+                }
+                is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
+                    // This can't happen for Link
+                }
+                is IntentConfirmationInterceptor.NextStep.Fail -> {
+                    onError(ErrorMessage.Raw(nextStep.errorMessage))
+                }
+                is IntentConfirmationInterceptor.NextStep.Complete -> {
+                    handleConfirmPaymentSuccess(PaymentResult.Completed)
+                }
             }
+        }
+    }
+
+    private fun confirmStripeIntent(confirmParams: ConfirmStripeIntentParams) {
+        confirmationManager.confirmStripeIntent(confirmParams) { result ->
+            result.fold(
+                onSuccess = ::handleConfirmPaymentSuccess,
+                onFailure = ::onError
+            )
         }
     }
 
@@ -177,15 +202,10 @@ internal class WalletViewModel @Inject constructor(
         return linkAccountManager.updatePaymentDetails(updateParams)
     }
 
-    private fun createConfirmStripeIntentParams(
+    private fun createPaymentMethodCreateParams(
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        linkAccount: LinkAccount
-    ): ConfirmStripeIntentParams {
-        val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-            clientSecret = requireNotNull(stripeIntent.clientSecret),
-            shipping = args.shippingValues?.toConfirmPaymentIntentShipping()
-        )
-
+        linkAccount: LinkAccount,
+    ): PaymentMethodCreateParams {
         val cvc = uiState.value.cvcInput.takeIf { it.isComplete }?.value
         val extraParams = if (cvc != null) {
             mapOf("card" to mapOf("cvc" to cvc))
@@ -193,13 +213,11 @@ internal class WalletViewModel @Inject constructor(
             null
         }
 
-        val params = PaymentMethodCreateParams.createLink(
+        return PaymentMethodCreateParams.createLink(
             paymentDetailsId = selectedPaymentDetails.id,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            extraParams = extraParams
+            extraParams = extraParams,
         )
-
-        return paramsFactory.create(params)
     }
 
     private fun handleConfirmPaymentSuccess(paymentResult: PaymentResult) {
