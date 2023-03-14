@@ -31,6 +31,7 @@ import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepositor
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.CoroutineScope
@@ -54,6 +55,7 @@ internal open class BasePaymentSheetViewModelInjectionTest {
     private val googlePayPaymentMethodLauncherFactory =
         createGooglePayPaymentMethodLauncherFactory()
     private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
+    private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
     private lateinit var injector: NonFallbackInjector
 
@@ -120,6 +122,7 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                 testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
+                intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
             )
         }
     }
