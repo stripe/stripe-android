@@ -19,18 +19,12 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import java.util.Objects
-import kotlin.test.BeforeTest
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultIntentConfirmationInterceptorTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-
-    @BeforeTest
-    fun before() {
-        IntentConfirmationInterceptor.createIntentCallback = null
-    }
 
     @Test
     fun `Returns confirm as next step if invoked with client secret for existing payment method`() = runTest {
@@ -39,6 +33,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            createIntentCallback = mock(),
         )
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -64,6 +59,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            createIntentCallback = mock(),
         )
 
         val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
@@ -89,6 +85,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            createIntentCallback = null,
         )
 
         val error = assertFailsWith<IllegalStateException> {
@@ -119,6 +116,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            createIntentCallback = mock(),
         )
 
         val error = assertFailsWith<IllegalStateException> {
@@ -155,6 +153,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            createIntentCallback = mock(),
         )
 
         val nextStep = interceptor.intercept(
@@ -193,9 +192,8 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            createIntentCallback = succeedingServerSideCallback("pm_123456789"),
         )
-
-        IntentConfirmationInterceptor.createIntentCallback = succeedingServerSideCallback("pm_123456789")
 
         val nextStep = interceptor.intercept(
             clientSecret = null,
@@ -219,10 +217,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-        )
-
-        IntentConfirmationInterceptor.createIntentCallback = failingClientSideCallback(
-            message = "that didn't work…"
+            createIntentCallback = failingClientSideCallback(message = "that didn't work…"),
         )
 
         val nextStep = interceptor.intercept(
@@ -247,9 +242,8 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            createIntentCallback = failingClientSideCallback(),
         )
-
-        IntentConfirmationInterceptor.createIntentCallback = failingClientSideCallback()
 
         val nextStep = interceptor.intercept(
             clientSecret = null,
@@ -273,10 +267,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
-        )
-
-        IntentConfirmationInterceptor.createIntentCallback = failingServerSideCallback(
-            message = "that didn't work…"
+            createIntentCallback = failingServerSideCallback("that didn't work…"),
         )
 
         val nextStep = interceptor.intercept(
@@ -301,9 +292,8 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            createIntentCallback = failingServerSideCallback(),
         )
-
-        IntentConfirmationInterceptor.createIntentCallback = failingServerSideCallback()
 
         val nextStep = interceptor.intercept(
             clientSecret = null,
@@ -330,9 +320,8 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            createIntentCallback = succeedingClientSideCallback(expectedPaymentMethodId),
         )
-
-        IntentConfirmationInterceptor.createIntentCallback = succeedingClientSideCallback(expectedPaymentMethodId)
 
         val nextStep = interceptor.intercept(
             clientSecret = null,
@@ -362,9 +351,8 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            createIntentCallback = succeedingServerSideCallback(expectedPaymentMethodId),
         )
-
-        IntentConfirmationInterceptor.createIntentCallback = succeedingServerSideCallback(expectedPaymentMethodId)
 
         val nextStep = interceptor.intercept(
             clientSecret = null,
@@ -398,9 +386,8 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            createIntentCallback = succeedingServerSideCallback(expectedPaymentMethodId),
         )
-
-        IntentConfirmationInterceptor.createIntentCallback = succeedingServerSideCallback(expectedPaymentMethodId)
 
         val nextStep = interceptor.intercept(
             clientSecret = null,
@@ -419,21 +406,6 @@ class DefaultIntentConfirmationInterceptorTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val observedValues = mutableListOf<Boolean>()
 
-        val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun retrieveStripeIntent(
-                    clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
-                ): StripeIntent {
-                    return PaymentIntentFixtures.PI_SUCCEEDED
-                }
-            },
-            publishableKeyProvider = { "pk" },
-            stripeAccountIdProvider = { null },
-        )
-
         val inputs = listOf(
             null,
             ConfirmPaymentIntentParams.SetupFutureUsage.Blank,
@@ -442,11 +414,27 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         for (input in inputs) {
-            IntentConfirmationInterceptor.createIntentCallback =
-                CreateIntentCallbackForServerSideConfirmation { paymentMethodId, shouldSavePaymentMethod ->
-                    observedValues += shouldSavePaymentMethod
-                    CreateIntentCallback.Result.Success("pi_123_secret_456")
-                }
+            val callback = CreateIntentCallbackForServerSideConfirmation { _, shouldSavePM ->
+                observedValues += shouldSavePM
+                CreateIntentCallback.Result.Success("pi_123_secret_456")
+            }
+
+            val interceptor = DefaultIntentConfirmationInterceptor(
+                context = context,
+                stripeRepository = object : AbsFakeStripeRepository() {
+                    override suspend fun retrieveStripeIntent(
+                        clientSecret: String,
+                        options: ApiRequest.Options,
+                        expandFields: List<String>
+                    ): StripeIntent {
+                        return PaymentIntentFixtures.PI_SUCCEEDED
+                    }
+                },
+                publishableKeyProvider = { "pk" },
+                stripeAccountIdProvider = { null },
+                createIntentCallback = callback,
+            )
+
             interceptor.intercept(
                 clientSecret = null,
                 paymentMethod = paymentMethod,

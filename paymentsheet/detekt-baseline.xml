@@ -38,13 +38,11 @@
     <ID>MagicNumber:PaymentOptionUi.kt$14</ID>
     <ID>MagicNumber:PaymentOptionUi.kt$18</ID>
     <ID>MagicNumber:PrimaryButton.kt$PrimaryButton$0.5f</ID>
-    <ID>MagicNumber:PrimaryButtonUiStateMapper.kt$PrimaryButtonUiStateMapper$3</ID>
-    <ID>MagicNumber:PrimaryButtonUiStateMapper.kt$PrimaryButtonUiStateMapper$4</ID>
-    <ID>MagicNumber:PrimaryButtonUiStateMapper.kt$PrimaryButtonUiStateMapper$5</ID>
     <ID>MagicNumber:USBankAccountFormFragment.kt$USBankAccountFormFragment$0.5f</ID>
     <ID>MaxLineLength:BillingAddressViewTest.kt$BillingAddressViewTest$fun</ID>
     <ID>MaxLineLength:CustomerRepositoryTest.kt$CustomerRepositoryTest$onBlocking { detachPaymentMethod(anyString(), any(), anyString(), any()) }.doThrow(InvalidParameterException("error"))</ID>
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$fun</ID>
+    <ID>MaxLineLength:FakeIntentConfirmationInterceptor.kt$internal</ID>
     <ID>MaxLineLength:FlowControllerConfigurationHandlerTest.kt$FlowControllerConfigurationHandlerTest$.</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$val d = delegate ?: throw IllegalStateException("Cannot run onActivity since the activity hasn't been launched.")</ID>

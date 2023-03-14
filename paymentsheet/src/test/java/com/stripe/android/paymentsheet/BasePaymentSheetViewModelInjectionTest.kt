@@ -32,6 +32,7 @@ import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.PaymentIntentFactory
+import com.stripe.android.utils.wrappedInSubcomponentBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -118,7 +119,7 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                 testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+                interceptorSubcomponentBuilder = fakeIntentConfirmationInterceptor.wrappedInSubcomponentBuilder(),
             )
         }
     }

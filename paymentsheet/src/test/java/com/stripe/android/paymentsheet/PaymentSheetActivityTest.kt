@@ -79,6 +79,7 @@ import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
+import com.stripe.android.utils.wrappedInSubcomponentBuilder
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -999,7 +1000,7 @@ internal class PaymentSheetActivityTest {
                 testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+                interceptorSubcomponentBuilder = fakeIntentConfirmationInterceptor.wrappedInSubcomponentBuilder(),
             ).also {
                 it.injector = injector
             }

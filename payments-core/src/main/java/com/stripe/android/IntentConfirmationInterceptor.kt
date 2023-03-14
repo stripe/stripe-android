@@ -22,10 +22,10 @@ import javax.inject.Named
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
-abstract class IntentConfirmationInterceptorModule {
+interface IntentConfirmationInterceptorModule {
 
     @Binds
-    abstract fun bindsIntentConfirmationInterceptor(
+    fun bindsIntentConfirmationInterceptor(
         impl: DefaultIntentConfirmationInterceptor,
     ): IntentConfirmationInterceptor
 }

@@ -1,12 +1,16 @@
 package com.stripe.android.utils
 
 import com.stripe.android.IntentConfirmationInterceptor
+import com.stripe.android.IntentConfirmationInterceptorSubcomponent
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.channels.Channel
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 
 internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {
 
@@ -51,5 +55,16 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
     ): IntentConfirmationInterceptor.NextStep {
         return channel.receive()
+    }
+}
+
+internal fun FakeIntentConfirmationInterceptor.wrappedInSubcomponentBuilder(): IntentConfirmationInterceptorSubcomponent.Builder {
+    val interceptorSubcomponent = mock<IntentConfirmationInterceptorSubcomponent> {
+        on { intentConfirmationInterceptor } doReturn this@wrappedInSubcomponentBuilder
+    }
+
+    return mock {
+        on { createIntentCallback(anyOrNull()) } doReturn mock
+        on { build() } doReturn interceptorSubcomponent
     }
 }

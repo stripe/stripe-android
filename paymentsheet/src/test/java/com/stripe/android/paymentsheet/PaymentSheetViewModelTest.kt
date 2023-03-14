@@ -58,6 +58,7 @@ import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.PaymentIntentFactory
+import com.stripe.android.utils.wrappedInSubcomponentBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -1306,6 +1307,7 @@ internal class PaymentSheetViewModelTest {
         lpmRepository: LpmRepository = this.lpmRepository,
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
         return TestViewModelFactory.create(
             linkLauncher = linkLauncher,
         ) { linkHandler, savedStateHandle ->
@@ -1333,7 +1335,7 @@ internal class PaymentSheetViewModelTest {
                 testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+                interceptorSubcomponentBuilder = fakeIntentConfirmationInterceptor.wrappedInSubcomponentBuilder(),
             )
         }
     }
