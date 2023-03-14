@@ -31,7 +31,7 @@ interface IntentConfirmationInterceptor {
         data class HandleNextAction(val clientSecret: String) : NextStep
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        object Complete : NextStep
+        data class Complete(val stripeIntent: StripeIntent) : NextStep
     }
 
     suspend fun intercept(
@@ -185,7 +185,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 if (intent == null) {
                     IntentConfirmationInterceptor.NextStep.Fail(userError)
                 } else if (intent.isConfirmed) {
-                    IntentConfirmationInterceptor.NextStep.Complete
+                    IntentConfirmationInterceptor.NextStep.Complete(intent)
                 } else if (intent.status == StripeIntent.Status.RequiresAction) {
                     IntentConfirmationInterceptor.NextStep.HandleNextAction(result.clientSecret)
                 } else {

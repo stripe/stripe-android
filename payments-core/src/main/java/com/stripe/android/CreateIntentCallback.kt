@@ -3,7 +3,7 @@ package com.stripe.android
 import androidx.annotation.RestrictTo
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface AbsCreateIntentCallback
+sealed interface AbsCreateIntentCallback
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface CreateIntentCallback : AbsCreateIntentCallback {
