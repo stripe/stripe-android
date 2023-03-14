@@ -12,6 +12,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.IntentConfirmationInterceptor
+import com.stripe.android.IntentConfirmationInterceptorSubcomponent
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
@@ -94,7 +95,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
-    private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
+    private val interceptorSubcomponentBuilder: IntentConfirmationInterceptorSubcomponent.Builder,
 ) : BaseSheetViewModel(
     application = application,
     config = args.config,
@@ -435,6 +436,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch {
             val stripeIntent = requireNotNull(stripeIntent.value)
+
+            val intentConfirmationInterceptor = interceptorSubcomponentBuilder
+                .createIntentCallback(IntentConfirmationInterceptor.createIntentCallback)
+                .build()
+                .intentConfirmationInterceptor
 
             val nextStep = intentConfirmationInterceptor.intercept(
                 clientSecret = stripeIntent.clientSecret,

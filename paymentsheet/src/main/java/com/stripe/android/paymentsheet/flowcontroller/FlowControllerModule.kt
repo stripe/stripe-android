@@ -16,7 +16,7 @@ import javax.inject.Singleton
 @Module(
     subcomponents = [
         PaymentOptionsViewModelSubcomponent::class,
-        FormViewModelSubcomponent::class
+        FormViewModelSubcomponent::class,
     ]
 )
 internal object FlowControllerModule {

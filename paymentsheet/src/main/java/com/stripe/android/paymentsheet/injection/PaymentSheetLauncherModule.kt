@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.IntentConfirmationInterceptorSubcomponent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import dagger.Binds
@@ -13,7 +14,8 @@ import javax.inject.Singleton
 @Module(
     subcomponents = [
         PaymentSheetViewModelSubcomponent::class,
-        FormViewModelSubcomponent::class
+        FormViewModelSubcomponent::class,
+        IntentConfirmationInterceptorSubcomponent::class,
     ]
 )
 internal abstract class PaymentSheetLauncherModule {

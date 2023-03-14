@@ -2,8 +2,6 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.DefaultIntentConfirmationInterceptor
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -53,11 +51,6 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsLinkAccountStatusProvider(
         impl: DefaultLinkAccountStatusProvider,
     ): LinkAccountStatusProvider
-
-    @Binds
-    abstract fun bindsIntentConfirmationInterceptor(
-        impl: DefaultIntentConfirmationInterceptor,
-    ): IntentConfirmationInterceptor
 
     companion object {
         /**

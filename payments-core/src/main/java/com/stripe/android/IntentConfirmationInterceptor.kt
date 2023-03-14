@@ -13,8 +13,39 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import dagger.Binds
+import dagger.BindsInstance
+import dagger.Module
+import dagger.Subcomponent
 import javax.inject.Inject
 import javax.inject.Named
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Module
+abstract class IntentConfirmationInterceptorModule {
+
+    @Binds
+    abstract fun bindsIntentConfirmationInterceptor(
+        impl: DefaultIntentConfirmationInterceptor,
+    ): IntentConfirmationInterceptor
+}
+
+@Subcomponent(modules = [IntentConfirmationInterceptorModule::class])
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface IntentConfirmationInterceptorSubcomponent {
+
+    val intentConfirmationInterceptor: IntentConfirmationInterceptor
+
+    @Subcomponent.Builder
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    interface Builder {
+
+        @BindsInstance
+        fun createIntentCallback(createIntentCallback: AbsCreateIntentCallback?): Builder
+
+        fun build(): IntentConfirmationInterceptorSubcomponent
+    }
+}
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface IntentConfirmationInterceptor {
@@ -64,6 +95,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
+    private val createIntentCallback: AbsCreateIntentCallback?,
 ) : IntentConfirmationInterceptor {
 
     private val genericErrorMessage: String
@@ -117,10 +149,10 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         return if (clientSecret != null) {
             createConfirmStep(clientSecret, shippingValues, paymentMethod)
         } else {
-            when (val callback = IntentConfirmationInterceptor.createIntentCallback) {
+            when (createIntentCallback) {
                 is CreateIntentCallbackForServerSideConfirmation -> {
                     handleServerSideConfirmation(
-                        createIntentCallback = callback,
+                        createIntentCallback = createIntentCallback,
                         shouldSavePaymentMethod = setupForFutureUsage == OffSession,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues
@@ -128,7 +160,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 }
                 is CreateIntentCallback -> {
                     handleClientSideConfirmation(
-                        createIntentCallback = callback,
+                        createIntentCallback = createIntentCallback,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues
                     )
