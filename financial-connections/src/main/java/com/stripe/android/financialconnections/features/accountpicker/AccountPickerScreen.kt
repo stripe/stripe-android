@@ -500,7 +500,7 @@ internal fun AccountPickerPreviewSingleSelect() {
 @Preview(
     showBackground = true,
     group = "Account Picker Pane",
-    name = "Single select - requiresSingleAccountConfirmation - account selected"
+    name = "Single select - confirm"
 )
 @Composable
 internal fun AccountPickerPreviewSingleSelectWithConfirm() {
