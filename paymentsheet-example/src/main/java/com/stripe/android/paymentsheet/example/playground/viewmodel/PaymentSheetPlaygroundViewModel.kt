@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.example.playground.model.SavedToggles
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -263,9 +264,20 @@ class PaymentSheetPlaygroundViewModel(
                 .responseString { _, _, result ->
                     when (result) {
                         is Result.Failure -> {
-                            status.postValue("Creating intent failed:\n${result.getException().message}")
+                            val message = "Creating intent failed:\n${result.getException().message}"
+                            status.postValue(message)
+
+                            val error = if (result.error.cause is IOException) {
+                                ConfirmIntentNetworkException()
+                            } else {
+                                ConfirmIntentEndpointException()
+                            }
+
                             continuation.resume(
-                                CreateIntentCallback.Result.Failure("Couldn't finish operation")
+                                CreateIntentCallback.Result.Failure(
+                                    cause = error,
+                                    displayMessage = message
+                                )
                             )
                         }
                         is Result.Success -> {
@@ -286,3 +298,7 @@ class PaymentSheetPlaygroundViewModel(
         }
     }
 }
+
+class ConfirmIntentEndpointException : Exception()
+
+class ConfirmIntentNetworkException : Exception()

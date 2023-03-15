@@ -1286,7 +1286,10 @@ internal class PaymentSheetViewModelTest {
             viewModel.checkout()
             assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.StartProcessing)
 
-            fakeIntentConfirmationInterceptor.enqueueFailureStep(error)
+            fakeIntentConfirmationInterceptor.enqueueFailureStep(
+                cause = Exception(error),
+                message = error
+            )
             assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage(error)))
         }
     }
