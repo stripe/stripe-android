@@ -338,7 +338,7 @@ private fun MultiSelectContent(
 private fun FinancialConnectionCheckbox(
     checked: Boolean,
 ) {
-    Crossfade(targetState = checked, label = "FinancialConnectionCheckbox") {
+    Crossfade(targetState = checked) {
         Image(
             painter = painterResource(
                 if (it) {
@@ -356,7 +356,7 @@ private fun FinancialConnectionCheckbox(
 private fun FinancialConnectionRadioButton(
     checked: Boolean,
 ) {
-    Crossfade(targetState = checked, label = "FinancialConnectionRadioButton") {
+    Crossfade(targetState = checked) {
         Image(
             painter = painterResource(
                 if (it) {
