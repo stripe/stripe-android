@@ -23,6 +23,7 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -75,23 +76,7 @@ internal class AccountPickerViewModel @Inject constructor(
                     )
                 )
             }
-            val accounts = partnerAccountList.data.map { account ->
-                AccountPickerState.PartnerAccountUI(
-                    account = account,
-                    institutionIcon = activeInstitution?.icon?.default,
-                    formattedBalance =
-                    if (account.balanceAmount != null && account.currency != null) {
-                        CurrencyFormatter
-                            .format(
-                                amount = account.balanceAmount.toLong(),
-                                amountCurrencyCode = account.currency,
-                                targetLocale = locale ?: Locale.getDefault()
-                            )
-                    } else {
-                        null
-                    }
-                )
-            }.sortedBy { it.account.allowSelection.not() }
+            val accounts = buildAccountList(partnerAccountList, activeInstitution)
 
             AccountPickerState.Payload(
                 skipAccountSelection = partnerAccountList.skipAccountSelection == true ||
@@ -123,6 +108,27 @@ internal class AccountPickerViewModel @Inject constructor(
             }
         }.execute { copy(payload = it) }
     }
+
+    private fun buildAccountList(
+        partnerAccountList: PartnerAccountsList,
+        activeInstitution: FinancialConnectionsInstitution?,
+    ) = partnerAccountList.data.map { account ->
+        AccountPickerState.PartnerAccountUI(
+            account = account,
+            institutionIcon = activeInstitution?.icon?.default,
+            formattedBalance =
+            if (account.balanceAmount != null && account.currency != null) {
+                CurrencyFormatter
+                    .format(
+                        amount = account.balanceAmount.toLong(),
+                        amountCurrencyCode = account.currency,
+                        targetLocale = locale ?: Locale.getDefault()
+                    )
+            } else {
+                null
+            }
+        )
+    }.sortedBy { it.account.allowSelection.not() }
 
     private fun onPayloadLoaded() {
         onAsync(AccountPickerState::payload, onSuccess = { payload ->
