@@ -60,14 +60,16 @@ suspend fun Stripe.confirmAlipayPayment(
     authenticator: AlipayAuthenticator,
     stripeAccountId: String? = this.stripeAccountId
 ): PaymentIntentResult = runApiRequest {
-    paymentController.confirmAndAuthenticateAlipay(
-        confirmPaymentIntentParams,
-        authenticator,
-        ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
+    runCatching {
+        paymentController.confirmAndAuthenticateAlipay(
+            confirmPaymentIntentParams,
+            authenticator,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
         )
-    )
+    }
 }
 
 /**
@@ -685,13 +687,14 @@ suspend fun Stripe.confirmPaymentIntent(
  * @return the result if the API result and JSON parsing are successful; otherwise, throw an exception.
  */
 private inline fun <reified ApiObject : StripeModel> runApiRequest(
-    block: () -> ApiObject?
-): ApiObject =
-    runCatching {
-        requireNotNull(block()) {
-            "Failed to parse ${ApiObject::class.java.simpleName}."
-        }
-    }.getOrElse { throw StripeException.create(it) }
+    block: () -> Result<ApiObject>
+): ApiObject {
+    return block().fold(
+        onSuccess = { it },
+        onFailure = { throw it },
+    )
+}
+
 
 /**
  * Get the [PaymentIntentResult] from [Intent] returned via
@@ -993,21 +996,14 @@ suspend fun Stripe.retrievePossibleBrands(
         message = "cardNumber cannot be less than 6 characters"
     )
 
-    val cardMetaData = stripeRepository.retrieveCardMetadata(
+    stripeRepository.retrieveCardMetadata(
         cardNumber = cardNumber,
         requestOptions = ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         )
-    )
-
-    val brands = cardMetaData?.accountRanges?.map {
-        it.brand
-    }
-
-    brands?.let {
-        PossibleBrands(
-            brands = brands.toSet().toList()
-        )
+    ).map { cardMetaData ->
+        val brands = cardMetaData.accountRanges.map { it.brand }
+        PossibleBrands(brands = brands.toSet().toList())
     }
 }

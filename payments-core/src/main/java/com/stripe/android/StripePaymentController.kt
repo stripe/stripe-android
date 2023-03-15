@@ -151,26 +151,26 @@ constructor(
                     ?: defaultReturnUrl.value
             }
 
-        runCatching {
-            when (confirmStripeIntentParams) {
-                is ConfirmPaymentIntentParams -> {
-                    confirmPaymentIntent(
-                        confirmStripeIntentParams.also {
-                            it.returnUrl = returnUrl
-                        },
-                        requestOptions
-                    )
-                }
-                is ConfirmSetupIntentParams -> {
-                    confirmSetupIntent(
-                        confirmStripeIntentParams.also {
-                            it.returnUrl = returnUrl
-                        },
-                        requestOptions
-                    )
-                }
+        val result = when (confirmStripeIntentParams) {
+            is ConfirmPaymentIntentParams -> {
+                confirmPaymentIntent(
+                    confirmStripeIntentParams.also {
+                        it.returnUrl = returnUrl
+                    },
+                    requestOptions
+                )
             }
-        }.fold(
+            is ConfirmSetupIntentParams -> {
+                confirmSetupIntent(
+                    confirmStripeIntentParams.also {
+                        it.returnUrl = returnUrl
+                    },
+                    requestOptions
+                )
+            }
+        }
+
+        result.fold(
             onSuccess = { intent ->
                 intent.nextActionData?.let {
                     if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
@@ -204,7 +204,7 @@ constructor(
             confirmPaymentIntent(
                 confirmPaymentIntentParams,
                 requestOptions
-            ),
+            ).getOrThrow(),
             authenticator,
             requestOptions
         )
@@ -217,7 +217,7 @@ constructor(
         confirmPaymentIntent(
             confirmPaymentIntentParams,
             requestOptions
-        ).let { paymentIntent ->
+        ).getOrThrow().let { paymentIntent ->
             require(paymentIntent.nextActionData is StripeIntent.NextActionData.WeChatPayRedirect) {
                 "Unable to confirm Payment Intent with WeChatPay SDK"
             }
@@ -231,24 +231,19 @@ constructor(
     private suspend fun confirmPaymentIntent(
         confirmStripeIntentParams: ConfirmPaymentIntentParams,
         requestOptions: ApiRequest.Options
-    ): PaymentIntent {
-        return requireNotNull(
-            stripeRepository.confirmPaymentIntent(
-                // mark this request as `use_stripe_sdk=true`
-                confirmStripeIntentParams
-                    .withShouldUseStripeSdk(shouldUseStripeSdk = true),
-                requestOptions,
-                expandFields = EXPAND_PAYMENT_METHOD
-            )
-        ) {
-            REQUIRED_ERROR
-        }
+    ): Result<PaymentIntent> {
+        return stripeRepository.confirmPaymentIntent(
+            // mark this request as `use_stripe_sdk=true`
+            confirmStripeIntentParams.withShouldUseStripeSdk(shouldUseStripeSdk = true),
+            requestOptions,
+            expandFields = EXPAND_PAYMENT_METHOD
+        )
     }
 
     private suspend fun confirmSetupIntent(
         confirmStripeIntentParams: ConfirmSetupIntentParams,
         requestOptions: ApiRequest.Options
-    ): SetupIntent {
+    ): Result<SetupIntent> {
         return requireNotNull(
             stripeRepository.confirmSetupIntent(
                 // mark this request as `use_stripe_sdk=true`
@@ -268,23 +263,22 @@ constructor(
         requestOptions: ApiRequest.Options,
         type: PaymentController.StripeIntentType
     ) {
-        runCatching {
-            val stripeIntent = when (type) {
-                PaymentController.StripeIntentType.PaymentIntent -> {
-                    stripeRepository.retrievePaymentIntent(
-                        clientSecret,
-                        requestOptions
-                    )
-                }
-                PaymentController.StripeIntentType.SetupIntent -> {
-                    stripeRepository.retrieveSetupIntent(
-                        clientSecret,
-                        requestOptions
-                    )
-                }
+        val stripeIntentResult = when (type) {
+            PaymentController.StripeIntentType.PaymentIntent -> {
+                stripeRepository.retrievePaymentIntent(
+                    clientSecret,
+                    requestOptions
+                )
             }
-            requireNotNull(stripeIntent)
-        }.fold(
+            PaymentController.StripeIntentType.SetupIntent -> {
+                stripeRepository.retrieveSetupIntent(
+                    clientSecret,
+                    requestOptions
+                )
+            }
+        }
+
+        stripeIntentResult.fold(
             onSuccess = { stripeIntent ->
                 handleNextAction(
                     host = host,
@@ -318,15 +312,11 @@ constructor(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceStart)
         )
 
-        runCatching {
-            requireNotNull(
-                stripeRepository.retrieveSource(
-                    sourceId = source.id.orEmpty(),
-                    clientSecret = source.clientSecret.orEmpty(),
-                    options = requestOptions
-                )
-            )
-        }.fold(
+        stripeRepository.retrieveSource(
+            sourceId = source.id.orEmpty(),
+            clientSecret = source.clientSecret.orEmpty(),
+            options = requestOptions
+        ).fold(
             onSuccess = { retrievedSourced ->
                 onSourceRetrieved(host, retrievedSourced, requestOptions)
             },
@@ -454,13 +444,11 @@ constructor(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceResult)
         )
 
-        return requireNotNull(
-            stripeRepository.retrieveSource(
-                sourceId,
-                clientSecret,
-                requestOptions
-            )
-        )
+        return stripeRepository.retrieveSource(
+            sourceId,
+            clientSecret,
+            requestOptions
+        ).getOrThrow()
     }
 
     private suspend fun authenticateAlipay(
@@ -470,13 +458,12 @@ constructor(
     ): PaymentIntentResult {
         val outcome =
             alipayRepository.authenticate(paymentIntent, authenticator, requestOptions).outcome
-        val refreshedPaymentIntent = requireNotNull(
-            stripeRepository.retrievePaymentIntent(
-                paymentIntent.clientSecret.orEmpty(),
-                requestOptions,
-                expandFields = EXPAND_PAYMENT_METHOD
-            )
-        )
+
+        val refreshedPaymentIntent = stripeRepository.retrievePaymentIntent(
+            paymentIntent.clientSecret.orEmpty(),
+            requestOptions,
+            expandFields = EXPAND_PAYMENT_METHOD
+        ).getOrThrow()
 
         return PaymentIntentResult(
             refreshedPaymentIntent,

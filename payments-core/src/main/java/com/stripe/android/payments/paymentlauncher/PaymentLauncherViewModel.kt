@@ -140,25 +140,21 @@ internal class PaymentLauncherViewModel @Inject constructor(
         confirmStripeIntentParams.also {
             it.returnUrl = returnUrl
         }.withShouldUseStripeSdk(shouldUseStripeSdk = true).let { decoratedParams ->
-            requireNotNull(
-                when (decoratedParams) {
-                    is ConfirmPaymentIntentParams -> {
-                        stripeApiRepository.confirmPaymentIntent(
-                            decoratedParams,
-                            apiRequestOptionsProvider.get(),
-                            expandFields = EXPAND_PAYMENT_METHOD
-                        )
-                    }
-                    is ConfirmSetupIntentParams -> {
-                        stripeApiRepository.confirmSetupIntent(
-                            decoratedParams,
-                            apiRequestOptionsProvider.get(),
-                            expandFields = EXPAND_PAYMENT_METHOD
-                        )
-                    }
+            when (decoratedParams) {
+                is ConfirmPaymentIntentParams -> {
+                    stripeApiRepository.confirmPaymentIntent(
+                        decoratedParams,
+                        apiRequestOptionsProvider.get(),
+                        expandFields = EXPAND_PAYMENT_METHOD
+                    ).getOrThrow()
                 }
-            ) {
-                REQUIRED_ERROR
+                is ConfirmSetupIntentParams -> {
+                    stripeApiRepository.confirmSetupIntent(
+                        decoratedParams,
+                        apiRequestOptionsProvider.get(),
+                        expandFields = EXPAND_PAYMENT_METHOD
+                    ).getOrThrow()
+                }
             }
         }
 

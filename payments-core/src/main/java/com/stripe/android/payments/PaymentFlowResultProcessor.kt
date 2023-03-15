@@ -315,7 +315,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
             clientSecret,
             requestOptions,
             expandFields
-        )
+        ).getOrNull()
 
     override suspend fun refreshStripeIntent(
         clientSecret: String,
@@ -325,7 +325,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
         stripeRepository.refreshPaymentIntent(
             clientSecret,
             requestOptions
-        )
+        ).getOrNull()
 
     override suspend fun cancelStripeIntentSource(
         stripeIntentId: String,
@@ -336,7 +336,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
             stripeIntentId,
             sourceId,
             requestOptions
-        )
+        ).getOrNull()
 
     override fun createStripeIntentResult(
         stripeIntent: PaymentIntent,
@@ -376,7 +376,7 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
             clientSecret,
             requestOptions,
             expandFields
-        )
+        ).getOrNull()
 
     override suspend fun refreshStripeIntent(
         clientSecret: String,
@@ -387,7 +387,7 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
             clientSecret,
             requestOptions,
             expandFields
-        )
+        ).getOrNull()
 
     override suspend fun cancelStripeIntentSource(
         stripeIntentId: String,
@@ -398,7 +398,7 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
             stripeIntentId,
             sourceId,
             requestOptions
-        )
+        ).getOrNull()
 
     override fun createStripeIntentResult(
         stripeIntent: SetupIntent,

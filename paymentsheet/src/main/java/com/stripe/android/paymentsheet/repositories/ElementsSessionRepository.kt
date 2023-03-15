@@ -22,7 +22,7 @@ internal sealed class ElementsSessionRepository {
     abstract suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
-    ): ElementsSession
+    ): Result<ElementsSession>
 
     /**
      * Retrieve the [StripeIntent] from a static source.
@@ -33,11 +33,13 @@ internal sealed class ElementsSessionRepository {
         override suspend fun get(
             initializationMode: PaymentSheet.InitializationMode,
             configuration: PaymentSheet.Configuration?,
-        ): ElementsSession {
-            return ElementsSession(
-                linkSettings = null,
-                paymentMethodSpecs = null,
-                stripeIntent = stripeIntent,
+        ): Result<ElementsSession> {
+            return Result.success(
+                ElementsSession(
+                    linkSettings = null,
+                    paymentMethodSpecs = null,
+                    stripeIntent = stripeIntent,
+                )
             )
         }
     }
@@ -62,29 +64,31 @@ internal sealed class ElementsSessionRepository {
         override suspend fun get(
             initializationMode: PaymentSheet.InitializationMode,
             configuration: PaymentSheet.Configuration?,
-        ): ElementsSession {
+        ): Result<ElementsSession> {
             val params = initializationMode.toElementsSessionParams(configuration)
 
-            val elementsSession = runCatching {
-                stripeRepository.retrieveElementsSession(
-                    params = params,
-                    options = requestOptions,
-                )
-            }.getOrNull()
+            val elementsSessionResult = stripeRepository.retrieveElementsSession(
+                params = params,
+                options = requestOptions,
+            )
 
-            return elementsSession ?: requireNotNull(fallback(params))
+            return if (elementsSessionResult.isSuccess) {
+                elementsSessionResult
+            } else {
+                fallback(params)
+            }
         }
 
         private suspend fun fallback(
             params: ElementsSessionParams,
-        ): ElementsSession? = withContext(workContext) {
+        ): Result<ElementsSession> = withContext(workContext) {
             when (params) {
                 is ElementsSessionParams.PaymentIntentType -> {
                     stripeRepository.retrievePaymentIntent(
                         clientSecret = params.clientSecret,
                         options = requestOptions,
                         expandFields = listOf("payment_method")
-                    )?.let {
+                    ).map {
                         ElementsSession(
                             linkSettings = null,
                             paymentMethodSpecs = null,
@@ -97,7 +101,7 @@ internal sealed class ElementsSessionRepository {
                         clientSecret = params.clientSecret,
                         options = requestOptions,
                         expandFields = listOf("payment_method")
-                    )?.let {
+                    ).map {
                         ElementsSession(
                             linkSettings = null,
                             paymentMethodSpecs = null,
@@ -107,7 +111,7 @@ internal sealed class ElementsSessionRepository {
                 }
                 is ElementsSessionParams.DeferredIntentType -> {
                     // We don't have a fallback endpoint for the deferred intent flow
-                    null
+                    Result.failure(IllegalStateException())
                 }
             }
         }

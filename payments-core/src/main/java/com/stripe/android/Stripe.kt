@@ -422,7 +422,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId
                 ),
                 expand,
-            )
+            ).getOrNull()
         }
     }
 
@@ -460,7 +460,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId
                 ),
                 expand,
-            )
+            ).getOrNull()
         }
     }
 
@@ -497,7 +497,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -718,7 +718,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId
                 ),
                 expand,
-            )
+            ).getOrNull()
         }
     }
 
@@ -756,7 +756,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId
                 ),
                 expand,
-            )
+            ).getOrNull()
         }
     }
 
@@ -793,7 +793,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -829,7 +829,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -868,7 +868,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -984,7 +984,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1029,7 +1029,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1066,7 +1066,7 @@ class Stripe internal constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1110,7 +1110,7 @@ class Stripe internal constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1188,7 +1188,7 @@ class Stripe internal constructor(
                         stripeAccount = stripeAccountId,
                         idempotencyKey = idempotencyKey
                     )
-                )
+                ).getOrNull()
             }
         } catch (exception: CardException) {
             // Should never occur. CardException is only for card related requests.
@@ -1268,7 +1268,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1340,7 +1340,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1414,7 +1414,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1486,7 +1486,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1555,7 +1555,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1573,7 +1573,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1602,7 +1602,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1629,7 +1629,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrThrow()
         }
     }
 
@@ -1656,7 +1656,7 @@ class Stripe internal constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1676,7 +1676,6 @@ class Stripe internal constructor(
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
-    @JvmOverloads
     fun verifyPaymentIntentWithMicrodeposits(
         clientSecret: String,
         firstAmount: Int,
@@ -1692,7 +1691,7 @@ class Stripe internal constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1710,7 +1709,6 @@ class Stripe internal constructor(
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
-    @JvmOverloads
     fun verifyPaymentIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
@@ -1724,7 +1722,7 @@ class Stripe internal constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1744,7 +1742,6 @@ class Stripe internal constructor(
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
-    @JvmOverloads
     fun verifySetupIntentWithMicrodeposits(
         clientSecret: String,
         firstAmount: Int,
@@ -1760,7 +1757,7 @@ class Stripe internal constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1778,7 +1775,6 @@ class Stripe internal constructor(
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
-    @JvmOverloads
     fun verifySetupIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
@@ -1792,7 +1788,7 @@ class Stripe internal constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 )
-            )
+            ).getOrNull()
         }
     }
 
@@ -1825,7 +1821,7 @@ class Stripe internal constructor(
                 )
             )
 
-            val brands = cardMetaData?.accountRanges?.map {
+            val brands = cardMetaData.getOrNull()?.accountRanges?.map {
                 it.brand
             }
 

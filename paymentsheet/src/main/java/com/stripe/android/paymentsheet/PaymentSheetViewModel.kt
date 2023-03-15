@@ -464,16 +464,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
-            runCatching {
-                elementsSessionRepository.get(
-                    initializationMode = args.initializationMode,
-                    configuration = args.config,
-                )
-            }.fold(
+            elementsSessionRepository.get(
+                initializationMode = args.initializationMode,
+                configuration = args.config,
+            ).fold(
                 onSuccess = { session ->
                     processPayment(session.stripeIntent, paymentResult)
-                },
-                onFailure = ::onFatal
+                }, onFailure = ::onFatal
             )
         }
     }

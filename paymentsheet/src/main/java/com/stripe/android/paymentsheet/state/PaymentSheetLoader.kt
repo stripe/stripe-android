@@ -71,12 +71,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     ): PaymentSheetLoader.Result = withContext(workContext) {
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
 
-        runCatching {
-            retrieveElementsSession(
-                initializationMode = initializationMode,
-                configuration = paymentSheetConfiguration,
-            )
-        }.fold(
+        retrieveElementsSession(
+            initializationMode = initializationMode,
+            configuration = paymentSheetConfiguration,
+        ).fold(
             onSuccess = { stripeIntent ->
                 create(
                     stripeIntent = stripeIntent,
@@ -225,22 +223,26 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
-    ): StripeIntent {
-        val elementsSession = elementsSessionRepository.get(
+    ): Result<StripeIntent> {
+        val elementsSessionResult = elementsSessionRepository.get(
             initializationMode = initializationMode,
             configuration = configuration,
         )
 
-        lpmRepository.update(
-            stripeIntent = elementsSession.stripeIntent,
-            serverLpmSpecs = elementsSession.paymentMethodSpecs,
-        )
+        elementsSessionResult.getOrNull()?.let { elementsSession ->
+            lpmRepository.update(
+                stripeIntent = elementsSession.stripeIntent,
+                serverLpmSpecs = elementsSession.paymentMethodSpecs,
+            )
+        }
 
         if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
             eventReporter.onLpmSpecFailure()
         }
 
-        return stripeIntentValidator.requireValid(elementsSession.stripeIntent)
+        return elementsSessionResult.mapCatching { elementsSession ->
+            stripeIntentValidator.requireValid(elementsSession.stripeIntent)
+        }
     }
 
     private suspend fun loadLinkState(

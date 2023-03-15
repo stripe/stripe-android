@@ -143,21 +143,15 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         listener: IssuingCardPinRetrievalListener
     ) {
         CoroutineScope(workContext).launch {
-            runCatching {
-                requireNotNull(
-                    stripeRepository.retrieveIssuingCardPin(
-                        operation.cardId,
-                        operation.verificationId,
-                        operation.userOneTimeCode,
-                        ApiRequest.Options(
-                            ephemeralKey.secret,
-                            stripeAccount = stripeAccountId
-                        )
-                    )
-                ) {
-                    "Could not retrieve issuing card PIN."
-                }
-            }.fold(
+            stripeRepository.retrieveIssuingCardPin(
+                operation.cardId,
+                operation.verificationId,
+                operation.userOneTimeCode,
+                ApiRequest.Options(
+                    ephemeralKey.secret,
+                    stripeAccount = stripeAccountId
+                )
+            ).fold(
                 onSuccess = { pin ->
                     withContext(Dispatchers.Main) {
                         listener.onIssuingCardPinRetrieved(pin)

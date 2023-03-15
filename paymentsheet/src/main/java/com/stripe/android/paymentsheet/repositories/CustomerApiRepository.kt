@@ -42,7 +42,7 @@ internal class CustomerApiRepository @Inject constructor(
                 ephemeralKeySecret,
                 lazyPaymentConfig.get().stripeAccountId
             )
-        )
+        ).getOrNull()
     }
 
     override suspend fun getPaymentMethods(
@@ -66,11 +66,7 @@ internal class CustomerApiRepository @Inject constructor(
                     )
                 }
             }.map {
-                runCatching {
-                    it.await()
-                }.onFailure {
-                    logger.error("Failed to retrieve payment methods.", it)
-                }.getOrDefault(emptyList())
+                it.await().getOrDefault(emptyList())
             }.flatten()
         }
     }
@@ -80,18 +76,16 @@ internal class CustomerApiRepository @Inject constructor(
         paymentMethodId: String
     ): PaymentMethod? =
         withContext(workContext) {
-            runCatching {
-                stripeRepository.detachPaymentMethod(
-                    lazyPaymentConfig.get().publishableKey,
-                    productUsageTokens,
-                    paymentMethodId,
-                    ApiRequest.Options(
-                        customerConfig.ephemeralKeySecret,
-                        lazyPaymentConfig.get().stripeAccountId
-                    )
+            stripeRepository.detachPaymentMethod(
+                lazyPaymentConfig.get().publishableKey,
+                productUsageTokens,
+                paymentMethodId,
+                ApiRequest.Options(
+                    customerConfig.ephemeralKeySecret,
+                    lazyPaymentConfig.get().stripeAccountId
                 )
-            }.onFailure {
-                logger.error("Failed to detach payment method $paymentMethodId.", it)
-            }.getOrNull()
-        }
+            )
+        }.onFailure {
+            logger.error("Failed to detach payment method $paymentMethodId.", it)
+        }.getOrNull()
 }

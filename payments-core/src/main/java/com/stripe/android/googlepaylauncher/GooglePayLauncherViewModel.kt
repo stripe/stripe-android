@@ -76,28 +76,21 @@ internal class GooglePayLauncherViewModel(
     ): JSONObject {
         val transactionInfo = when (args) {
             is GooglePayLauncherContract.PaymentIntentArgs -> {
-                val paymentIntent = requireNotNull(
-                    stripeRepository.retrievePaymentIntent(
-                        args.clientSecret,
-                        requestOptions
-                    )
-                ) {
-                    "Could not retrieve PaymentIntent."
-                }
+                val paymentIntent = stripeRepository.retrievePaymentIntent(
+                    args.clientSecret,
+                    requestOptions
+                ).getOrThrow()
                 createTransactionInfo(
                     paymentIntent,
                     paymentIntent.currency.orEmpty()
                 )
             }
+
             is GooglePayLauncherContract.SetupIntentArgs -> {
-                val setupIntent = requireNotNull(
-                    stripeRepository.retrieveSetupIntent(
-                        args.clientSecret,
-                        requestOptions
-                    )
-                ) {
-                    "Could not retrieve SetupIntent."
-                }
+                val setupIntent = stripeRepository.retrieveSetupIntent(
+                    args.clientSecret,
+                    requestOptions
+                ).getOrThrow()
                 createTransactionInfo(
                     setupIntent,
                     args.currencyCode
@@ -115,6 +108,7 @@ internal class GooglePayLauncherViewModel(
                 format = when (args.config.billingAddressConfig.format) {
                     GooglePayLauncher.BillingAddressConfig.Format.Min ->
                         GooglePayJsonFactory.BillingAddressParameters.Format.Min
+
                     GooglePayLauncher.BillingAddressConfig.Format.Full ->
                         GooglePayJsonFactory.BillingAddressParameters.Format.Full
                 },
@@ -141,6 +135,7 @@ internal class GooglePayLauncherViewModel(
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase
                 )
             }
+
             is SetupIntent -> {
                 GooglePayJsonFactory.TransactionInfo(
                     currencyCode = currencyCode,
@@ -175,6 +170,7 @@ internal class GooglePayLauncherViewModel(
                     paymentMethodCreateParams = params,
                     clientSecret = args.clientSecret
                 )
+
             is GooglePayLauncherContract.SetupIntentArgs ->
                 ConfirmSetupIntentParams.create(
                     paymentMethodCreateParams = params,
@@ -210,10 +206,12 @@ internal class GooglePayLauncherViewModel(
                     paymentController.getPaymentIntentResult(data)
                     GooglePayLauncher.Result.Completed
                 }
+
                 paymentController.shouldHandleSetupResult(requestCode, data) -> {
                     paymentController.getSetupIntentResult(data)
                     GooglePayLauncher.Result.Completed
                 }
+
                 else -> throw IllegalStateException("Unexpected confirmation result.")
             }
         }.getOrElse { GooglePayLauncher.Result.Failed(it) }
