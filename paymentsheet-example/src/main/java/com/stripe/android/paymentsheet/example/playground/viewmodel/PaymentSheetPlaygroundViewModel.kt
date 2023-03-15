@@ -276,7 +276,7 @@ class PaymentSheetPlaygroundViewModel(
                             continuation.resume(
                                 CreateIntentCallback.Result.Failure(
                                     cause = error,
-                                    message = message
+                                    displayMessage = message
                                 )
                             )
                         }

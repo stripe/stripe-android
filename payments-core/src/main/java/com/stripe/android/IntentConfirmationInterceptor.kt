@@ -168,7 +168,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
             is CreateIntentCallback.Result.Failure -> {
                 IntentConfirmationInterceptor.NextStep.Fail(
                     cause = result.cause,
-                    message = result.message ?: genericErrorMessage,
+                    message = result.displayMessage ?: genericErrorMessage,
                 )
             }
         }
@@ -208,7 +208,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
             is CreateIntentCallback.Result.Failure -> {
                 IntentConfirmationInterceptor.NextStep.Fail(
                     cause = result.cause,
-                    message = result.message ?: genericErrorMessage,
+                    message = result.displayMessage ?: genericErrorMessage,
                 )
             }
         }

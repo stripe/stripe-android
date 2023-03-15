@@ -482,7 +482,7 @@ class DefaultIntentConfirmationInterceptorTest {
         return CreateIntentCallback {
             CreateIntentCallback.Result.Failure(
                 cause = TestException(message),
-                message = message
+                displayMessage = message
             )
         }
     }
@@ -493,7 +493,7 @@ class DefaultIntentConfirmationInterceptorTest {
         return CreateIntentCallbackForServerSideConfirmation { _, _ ->
             CreateIntentCallback.Result.Failure(
                 cause = TestException(message),
-                message = message
+                displayMessage = message
             )
         }
     }
