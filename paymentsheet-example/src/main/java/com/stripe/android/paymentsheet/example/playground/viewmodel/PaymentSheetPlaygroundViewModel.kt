@@ -264,7 +264,8 @@ class PaymentSheetPlaygroundViewModel(
                 .responseString { _, _, result ->
                     when (result) {
                         is Result.Failure -> {
-                            status.postValue("Creating intent failed:\n${result.getException().message}")
+                            val message = "Creating intent failed:\n${result.getException().message}"
+                            status.postValue(message)
 
                             val error = if (result.error.cause is IOException) {
                                 ConfirmIntentNetworkException()
@@ -272,7 +273,12 @@ class PaymentSheetPlaygroundViewModel(
                                 ConfirmIntentEndpointException()
                             }
 
-                            continuation.resume(CreateIntentCallback.Result.Failure(cause = error))
+                            continuation.resume(
+                                CreateIntentCallback.Result.Failure(
+                                    cause = error,
+                                    message = message
+                                )
+                            )
                         }
                         is Result.Success -> {
                             val confirmIntentResponse = Gson().fromJson(

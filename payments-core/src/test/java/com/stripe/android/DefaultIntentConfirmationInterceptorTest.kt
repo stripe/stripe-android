@@ -221,7 +221,9 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeAccountIdProvider = { null },
         )
 
-        IntentConfirmationInterceptor.createIntentCallback = failingClientSideCallback()
+        IntentConfirmationInterceptor.createIntentCallback = failingClientSideCallback(
+            message = "that didn't work…"
+        )
 
         val nextStep = interceptor.intercept(
             clientSecret = null,
@@ -239,7 +241,61 @@ class DefaultIntentConfirmationInterceptorTest {
     }
 
     @Test
+    fun `Fails if client-side confirm callback returns failure with generic message`() = runTest {
+        val interceptor = DefaultIntentConfirmationInterceptor(
+            context = context,
+            stripeRepository = mock(),
+            publishableKeyProvider = { "pk" },
+            stripeAccountIdProvider = { null },
+        )
+
+        IntentConfirmationInterceptor.createIntentCallback = failingClientSideCallback()
+
+        val nextStep = interceptor.intercept(
+            clientSecret = null,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            shippingValues = null,
+            setupForFutureUsage = null,
+        )
+
+        assertThat(nextStep).isEqualTo(
+            IntentConfirmationInterceptor.NextStep.Fail(
+                cause = TestException(),
+                message = "Unable to complete operation",
+            )
+        )
+    }
+
+    @Test
     fun `Fails if server-side confirm callback returns failure`() = runTest {
+        val interceptor = DefaultIntentConfirmationInterceptor(
+            context = context,
+            stripeRepository = mock(),
+            publishableKeyProvider = { "pk" },
+            stripeAccountIdProvider = { null },
+        )
+
+        IntentConfirmationInterceptor.createIntentCallback = failingServerSideCallback(
+            message = "that didn't work…"
+        )
+
+        val nextStep = interceptor.intercept(
+            clientSecret = null,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            shippingValues = null,
+            setupForFutureUsage = null,
+        )
+
+        assertThat(nextStep).isEqualTo(
+            IntentConfirmationInterceptor.NextStep.Fail(
+                cause = TestException("that didn't work…"),
+                message = "that didn't work…",
+            )
+        )
+    }
+
+    @Test
+    fun `Fails if server-side confirm callback returns failure with generic message`() = runTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
             stripeRepository = mock(),
@@ -258,8 +314,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.Fail(
-                cause = TestException("that didn't work…"),
-                message = "that didn't work…",
+                cause = TestException(),
+                message = "Unable to complete operation",
             )
         )
     }
@@ -420,21 +476,29 @@ class DefaultIntentConfirmationInterceptorTest {
         }
     }
 
-    private fun failingClientSideCallback(): CreateIntentCallback {
-        return CreateIntentCallback { _ ->
-            val exception = TestException("that didn't work…")
-            CreateIntentCallback.Result.Failure(cause = exception)
+    private fun failingClientSideCallback(
+        message: String? = null
+    ): CreateIntentCallback {
+        return CreateIntentCallback {
+            CreateIntentCallback.Result.Failure(
+                cause = TestException(message),
+                message = message
+            )
         }
     }
 
-    private fun failingServerSideCallback(): CreateIntentCallbackForServerSideConfirmation {
+    private fun failingServerSideCallback(
+        message: String? = null
+    ): CreateIntentCallbackForServerSideConfirmation {
         return CreateIntentCallbackForServerSideConfirmation { _, _ ->
-            val exception = TestException("that didn't work…")
-            CreateIntentCallback.Result.Failure(cause = exception)
+            CreateIntentCallback.Result.Failure(
+                cause = TestException(message),
+                message = message
+            )
         }
     }
 
-    private class TestException(message: String) : Exception(message) {
+    private class TestException(message: String? = null) : Exception(message) {
 
         override fun hashCode(): Int {
             return Objects.hash(message)

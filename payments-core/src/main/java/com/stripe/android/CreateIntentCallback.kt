@@ -17,7 +17,10 @@ fun interface CreateIntentCallback : AbsCreateIntentCallback {
         data class Success(val clientSecret: String) : Result
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Failure(val cause: Exception) : Result
+        data class Failure(
+            val cause: Exception,
+            val message: String? = null
+        ) : Result
     }
 }
 
