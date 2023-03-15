@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## XX.XX.XX - 2023-XX-XX
+
+### PaymentSheet
+* [FIXED][6366](https://github.com/stripe/stripe-android/pull/6366) Fixed an issue where the result couldn't be parsed in `PaymentSheetContract`.
+
 ## 20.20.0 - 2023-03-13
 
 ### Payments
