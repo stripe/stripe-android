@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CreateIntentCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -382,6 +383,97 @@ internal class FlowControllerTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
         configureFlowController("pi_example2_secret_example2")
+    }
+
+    @Test
+    fun testDeferredIntentCardPayment() {
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
+        }
+
+        val resultCountDownLatch = CountDownLatch(1)
+        val activityScenarioRule = composeTestRule.activityRule
+        val scenario = activityScenarioRule.scenario
+        scenario.moveToState(Lifecycle.State.CREATED)
+        lateinit var flowController: PaymentSheet.FlowController
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            flowController = PaymentSheet.FlowController.create(
+                activity = it,
+                paymentOptionCallback = { paymentOption ->
+                    assertThat(paymentOption?.label).endsWith("4242")
+                    flowController.confirm()
+                },
+                createIntentCallback = {
+                    CreateIntentCallback.Result.Success(
+                        clientSecret = "pi_example_secret_example"
+                    )
+                },
+                paymentResultCallback = { result ->
+                    assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
+                    resultCountDownLatch.countDown()
+                },
+            )
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        scenario.onActivity {
+            flowController.configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd"
+                    )
+                ),
+                configuration = null,
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    flowController.presentPaymentOptions()
+                }
+            )
+        }
+
+        composeTestRule.waitUntil {
+            composeTestRule.onAllNodes(hasText("+ Add"))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNode(hasText("+ Add"))
+            .onParent()
+            .onParent()
+            .performClick()
+
+        fillOutCard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-success.json")
+        }
+
+        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+            .performScrollTo()
+            .performClick()
+
+        assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
     private fun fillOutCard() {
