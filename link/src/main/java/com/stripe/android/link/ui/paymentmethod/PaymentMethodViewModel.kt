@@ -220,8 +220,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                 // This can't happen for Link
             }
             is IntentConfirmationInterceptor.NextStep.Fail -> {
-                val error = IllegalStateException(nextStep.message)
-                onError(error)
+                onError(ErrorMessage.Raw(nextStep.message))
             }
             is IntentConfirmationInterceptor.NextStep.Complete -> {
                 handlePaymentSuccess()
@@ -263,10 +262,14 @@ internal class PaymentMethodViewModel @Inject constructor(
         _errorMessage.value = null
     }
 
-    private fun onError(error: Throwable) = error.getErrorMessage().let {
+    private fun onError(error: Throwable) {
         logger.error("Error: ", error)
+        onError(errorMessage = error.getErrorMessage())
+    }
+
+    private fun onError(errorMessage: ErrorMessage) {
         setState(PrimaryButtonState.Enabled)
-        _errorMessage.value = it
+        _errorMessage.value = errorMessage
     }
 
     private fun setState(state: PrimaryButtonState) {

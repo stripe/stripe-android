@@ -436,7 +436,7 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `foo 123`() = runTest {
+    fun `Confirms intent if confirmation interceptor returns unconfirmed intent`() = runTest {
         whenever(
             linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
         ).thenReturn(Result.success(createLinkPaymentDetails()))
@@ -451,7 +451,7 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `foo 1234`() = runTest {
+    fun `Finishes with success if confirmation interceptor returns confirmed intent`() = runTest {
         whenever(
             linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
         ).thenReturn(Result.success(createLinkPaymentDetails()))
@@ -466,7 +466,7 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `foo 12345`() = runTest {
+    fun `Displays error if confirmation interceptor returns a failure`() = runTest {
         whenever(
             linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
         ).thenReturn(Result.success(createLinkPaymentDetails()))
