@@ -31,7 +31,7 @@ class PaymentSheetContract :
         resultCode: Int,
         intent: Intent?
     ): PaymentSheetResult {
-        val paymentResult = intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.paymentSheetResult
+        val paymentResult = intent?.getParcelableExtra<PaymentSheetContractV2.Result>(EXTRA_RESULT)?.paymentSheetResult
         return paymentResult ?: PaymentSheetResult.Failed(
             IllegalArgumentException("Failed to retrieve a PaymentSheetResult.")
         )
