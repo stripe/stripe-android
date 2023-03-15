@@ -288,8 +288,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 is IntentConfirmationInterceptor.NextStep.Fail -> {
                     onPaymentResult(
                         PaymentResult.Failed(
-                            // TODO (jameswoo): Exposing new type here
-                            ConfirmPaymentException(nextStep.errorMessage)
+                            nextStep.cause
                         )
                     )
                 }
@@ -525,10 +524,6 @@ internal class DefaultFlowController @Inject internal constructor(
     class GooglePayException(
         val throwable: Throwable
     ) : Exception(throwable)
-
-    class ConfirmPaymentException(
-        override val message: String
-    ) : Exception(message)
 
     @Parcelize
     data class Args(

@@ -27,8 +27,11 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         channel.trySend(nextStep)
     }
 
-    fun enqueueFailureStep(errorMessage: String) {
-        val nextStep = IntentConfirmationInterceptor.NextStep.Fail(errorMessage)
+    fun enqueueFailureStep(cause: Exception, message: String) {
+        val nextStep = IntentConfirmationInterceptor.NextStep.Fail(
+            cause = cause,
+            message = message
+        )
         channel.trySend(nextStep)
     }
 

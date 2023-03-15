@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
@@ -22,7 +23,10 @@ interface IntentConfirmationInterceptor {
     sealed interface NextStep {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Fail(val errorMessage: String) : NextStep
+        data class Fail(
+            val cause: Throwable,
+            val message: String,
+        ) : NextStep
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class Confirm(val confirmParams: ConfirmStripeIntentParams) : NextStep
@@ -62,7 +66,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) : IntentConfirmationInterceptor {
 
-    private val userError: String
+    private val genericErrorMessage: String
         get() = context.getString(R.string.unable_to_complete_operation)
 
     private val requestOptions: ApiRequest.Options
@@ -94,8 +98,11 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                         setupForFutureUsage = setupForFutureUsage,
                     )
                 },
-                onFailure = {
-                    IntentConfirmationInterceptor.NextStep.Fail(userError)
+                onFailure = { error ->
+                    IntentConfirmationInterceptor.NextStep.Fail(
+                        cause = error,
+                        message = genericErrorMessage,
+                    )
                 }
             )
         }
@@ -140,12 +147,10 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         params: PaymentMethodCreateParams,
     ): Result<PaymentMethod> {
         return runCatching {
-            requireNotNull(
-                stripeRepository.createPaymentMethod(
-                    paymentMethodCreateParams = params,
-                    options = requestOptions,
-                )
-            )
+            stripeRepository.createPaymentMethod(
+                paymentMethodCreateParams = params,
+                options = requestOptions,
+            ) ?: throw APIException(message = "Couldn't parse response when creating payment method")
         }
     }
 
@@ -161,7 +166,10 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
             }
             is CreateIntentCallback.Result.Failure -> {
-                IntentConfirmationInterceptor.NextStep.Fail(result.errorMessage)
+                IntentConfirmationInterceptor.NextStep.Fail(
+                    cause = result.cause,
+                    message = result.cause.message ?: genericErrorMessage,
+                )
             }
         }
     }
@@ -179,32 +187,38 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
 
         return when (result) {
             is CreateIntentCallback.Result.Success -> {
-                val intentResult = retrieveStripeIntent(result.clientSecret)
-                val intent = intentResult.getOrNull()
-
-                if (intent == null) {
-                    IntentConfirmationInterceptor.NextStep.Fail(userError)
-                } else if (intent.isConfirmed) {
-                    IntentConfirmationInterceptor.NextStep.Complete(intent)
-                } else if (intent.status == StripeIntent.Status.RequiresAction) {
-                    IntentConfirmationInterceptor.NextStep.HandleNextAction(result.clientSecret)
-                } else {
-                    createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
-                }
+                retrieveStripeIntent(result.clientSecret).fold(
+                    onSuccess = { intent ->
+                        if (intent.isConfirmed) {
+                            IntentConfirmationInterceptor.NextStep.Complete(intent)
+                        } else if (intent.status == StripeIntent.Status.RequiresAction) {
+                            IntentConfirmationInterceptor.NextStep.HandleNextAction(result.clientSecret)
+                        } else {
+                            createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
+                        }
+                    },
+                    onFailure = { error ->
+                        IntentConfirmationInterceptor.NextStep.Fail(
+                            cause = error,
+                            message = genericErrorMessage,
+                        )
+                    }
+                )
             }
             is CreateIntentCallback.Result.Failure -> {
-                IntentConfirmationInterceptor.NextStep.Fail(result.errorMessage)
+                IntentConfirmationInterceptor.NextStep.Fail(
+                    cause = result.cause,
+                    message = result.cause.message ?: genericErrorMessage,
+                )
             }
         }
     }
 
     private suspend fun retrieveStripeIntent(clientSecret: String): Result<StripeIntent> {
         return runCatching {
-            requireNotNull(
-                stripeRepository.retrieveStripeIntent(
-                    clientSecret = clientSecret,
-                    options = requestOptions,
-                )
+            stripeRepository.retrieveStripeIntent(
+                clientSecret = clientSecret,
+                options = requestOptions,
             )
         }
     }

@@ -37,6 +37,8 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.model.InitializationType
 import com.stripe.android.paymentsheet.example.playground.model.Shipping
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
+import com.stripe.android.paymentsheet.example.playground.viewmodel.ConfirmIntentEndpointException
+import com.stripe.android.paymentsheet.example.playground.viewmodel.ConfirmIntentNetworkException
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.launch
@@ -666,7 +668,29 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             disableViews()
         }
 
-        viewModel.status.value = paymentResult.toString()
+        val status = when (paymentResult) {
+            is PaymentSheetResult.Canceled -> {
+                "Canceled"
+            }
+            is PaymentSheetResult.Completed -> {
+                "Success"
+            }
+            is PaymentSheetResult.Failed -> {
+                when (paymentResult.error) {
+                    is ConfirmIntentEndpointException -> {
+                        "Couldn't process your payment."
+                    }
+                    is ConfirmIntentNetworkException -> {
+                        "No internet. Try again later."
+                    }
+                    else -> {
+                        paymentResult.error.message
+                    }
+                }
+            }
+        }
+
+        viewModel.status.value = status
     }
 
     private fun showAppearancePicker() {

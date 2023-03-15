@@ -1047,7 +1047,10 @@ internal class DefaultFlowControllerTest {
             )
         )
 
-        fakeIntentConfirmationInterceptor.enqueueFailureStep("something went wrong")
+        fakeIntentConfirmationInterceptor.enqueueFailureStep(
+            cause = Exception("something went wrong"),
+            message = "something went wrong"
+        )
 
         flowController.confirm()
 
