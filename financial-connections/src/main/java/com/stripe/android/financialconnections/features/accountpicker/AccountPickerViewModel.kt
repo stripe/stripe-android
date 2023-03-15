@@ -104,6 +104,14 @@ internal class AccountPickerViewModel @Inject constructor(
                     isStripeDirect = manifest.isStripeDirect ?: false,
                     dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
                 ),
+                /**
+                 * in the special case that this is single account and the institution would have
+                 * skipped account selection but _didn't_ (because we still saw this), we should
+                 * render specific text that tells the user to "confirm" their account.
+                 */
+                requiresSingleAccountConfirmation = activeAuthSession.institutionSkipAccountSelection == true &&
+                    manifest.singleAccount &&
+                    activeAuthSession.isOAuth,
                 singleAccount = manifest.singleAccount,
                 userSelectedSingleAccountInInstitution = manifest.singleAccount &&
                     activeAuthSession.institutionSkipAccountSelection == true &&
@@ -283,7 +291,8 @@ internal data class AccountPickerState(
         val singleAccount: Boolean,
         val stripeDirect: Boolean,
         val businessName: String?,
-        val userSelectedSingleAccountInInstitution: Boolean
+        val userSelectedSingleAccountInInstitution: Boolean,
+        val requiresSingleAccountConfirmation: Boolean
     ) {
 
         val selectableAccounts
@@ -294,19 +303,11 @@ internal data class AccountPickerState(
 
         val subtitle: TextResource?
             get() = when {
-                singleAccount.not() -> null
-                stripeDirect -> TextResource.StringId(
-                    R.string.stripe_accountpicker_singleaccount_description_withstripe
+                requiresSingleAccountConfirmation -> TextResource.StringId(
+                    R.string.stripe_accountpicker_singleaccount_description
                 )
 
-                businessName != null -> TextResource.StringId(
-                    R.string.stripe_accountpicker_singleaccount_description,
-                    listOf(businessName)
-                )
-
-                else -> TextResource.StringId(
-                    R.string.stripe_accountpicker_singleaccount_description_nobusinessname
-                )
+                else -> null
             }
     }
 

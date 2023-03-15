@@ -28,9 +28,10 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
                     accessibleData = accessibleCallout(),
                     singleAccount = false,
-                    userSelectedSingleAccountInInstitution = false,
-                    businessName = "Random business",
                     stripeDirect = false,
+                    businessName = "Random business",
+                    userSelectedSingleAccountInInstitution = false,
+                    requiresSingleAccountConfirmation = false
                 )
             ),
             selectedIds = setOf("id1"),
@@ -44,9 +45,27 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     selectionMode = AccountPickerState.SelectionMode.RADIO,
                     accessibleData = accessibleCallout(),
                     singleAccount = true,
-                    userSelectedSingleAccountInInstitution = false,
-                    businessName = "Random business",
                     stripeDirect = false,
+                    businessName = "Random business",
+                    userSelectedSingleAccountInInstitution = false,
+                    requiresSingleAccountConfirmation = false
+                )
+            ),
+            selectedIds = setOf("id1"),
+        )
+
+        fun singleSelectWithConfirm() = AccountPickerState(
+            payload = Success(
+                AccountPickerState.Payload(
+                    skipAccountSelection = false,
+                    accounts = partnerAccountList(),
+                    selectionMode = AccountPickerState.SelectionMode.RADIO,
+                    accessibleData = accessibleCallout(),
+                    singleAccount = true,
+                    stripeDirect = false,
+                    businessName = "Random business",
+                    userSelectedSingleAccountInInstitution = false,
+                    requiresSingleAccountConfirmation = true
                 )
             ),
             selectedIds = setOf("id1"),
