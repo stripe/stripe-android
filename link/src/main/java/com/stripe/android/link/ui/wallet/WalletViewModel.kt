@@ -170,7 +170,7 @@ internal class WalletViewModel @Inject constructor(
                     // This can't happen for Link
                 }
                 is IntentConfirmationInterceptor.NextStep.Fail -> {
-                    onError(ErrorMessage.Raw(nextStep.errorMessage))
+                    onError(ErrorMessage.Raw(nextStep.message))
                 }
                 is IntentConfirmationInterceptor.NextStep.Complete -> {
                     handleConfirmPaymentSuccess(PaymentResult.Completed)

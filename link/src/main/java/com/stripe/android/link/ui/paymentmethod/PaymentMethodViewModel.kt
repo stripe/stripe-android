@@ -220,7 +220,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                 // This can't happen for Link
             }
             is IntentConfirmationInterceptor.NextStep.Fail -> {
-                val error = IllegalStateException(nextStep.errorMessage)
+                val error = IllegalStateException(nextStep.message)
                 onError(error)
             }
             is IntentConfirmationInterceptor.NextStep.Complete -> {
