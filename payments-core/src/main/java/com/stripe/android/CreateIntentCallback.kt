@@ -18,8 +18,8 @@ fun interface CreateIntentCallback : AbsCreateIntentCallback {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class Failure(
-            val cause: Exception,
-            val message: String? = null
+            internal val cause: Exception,
+            internal val message: String? = null
         ) : Result
     }
 }
