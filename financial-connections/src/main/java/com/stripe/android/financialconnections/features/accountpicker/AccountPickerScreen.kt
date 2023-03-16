@@ -122,6 +122,7 @@ private fun AccountPickerContent(
                     onSubmit = onSubmit,
                     selectionMode = payload().selectionMode,
                     accessibleDataCalloutModel = payload().accessibleData,
+                    requiresSingleAccountConfirmation = payload().requiresSingleAccountConfirmation,
                     onSelectAllAccountsClicked = onSelectAllAccountsClicked,
                     onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick
                 )
@@ -167,6 +168,7 @@ private fun AccountPickerLoaded(
     accounts: List<PartnerAccountUI>,
     allAccountsSelected: Boolean,
     accessibleDataCalloutModel: AccessibleDataCalloutModel?,
+    requiresSingleAccountConfirmation: Boolean,
     selectionMode: SelectionMode,
     selectedIds: Set<String>,
     onAccountClicked: (PartnerAccount) -> Unit,
@@ -193,9 +195,12 @@ private fun AccountPickerLoaded(
                 modifier = Modifier
                     .fillMaxWidth(),
                 text = stringResource(
-                    when (selectionMode) {
-                        SelectionMode.RADIO -> R.string.stripe_account_picker_singleselect_account
-                        SelectionMode.CHECKBOXES -> R.string.stripe_account_picker_multiselect_account
+                    when (requiresSingleAccountConfirmation) {
+                        true -> R.string.stripe_account_picker_confirm_account
+                        false -> when (selectionMode) {
+                            SelectionMode.RADIO -> R.string.stripe_account_picker_singleselect_account
+                            SelectionMode.CHECKBOXES -> R.string.stripe_account_picker_multiselect_account
+                        }
                     }
                 ),
                 style = FinancialConnectionsTheme.typography.subtitle
@@ -242,17 +247,12 @@ private fun AccountPickerLoaded(
                 .fillMaxWidth()
         ) {
             Text(
-                text = when (selectionMode) {
-                    SelectionMode.CHECKBOXES ->
-                        pluralStringResource(
-                            count = selectedIds.size,
-                            id = R.plurals.stripe_account_picker_multiselect_confirm
-                        )
-
-                    SelectionMode.RADIO ->
-                        stringResource(
-                            R.string.stripe_account_picker_singleselect_confirm
-                        )
+                text = when (requiresSingleAccountConfirmation) {
+                    true -> stringResource(R.string.stripe_account_picker_cta_confirm)
+                    false -> pluralStringResource(
+                        count = selectedIds.size,
+                        id = R.plurals.stripe_account_picker_cta_link
+                    )
                 }
             )
         }
@@ -485,6 +485,28 @@ internal fun AccountPickerPreviewSingleSelect() {
     FinancialConnectionsPreview {
         AccountPickerContent(
             AccountPickerStates.singleSelect(),
+            onAccountClicked = {},
+            onSubmit = {},
+            onSelectAllAccountsClicked = {},
+            onSelectAnotherBank = {},
+            onEnterDetailsManually = {},
+            onLoadAccountsAgain = {},
+            onCloseClick = {},
+            onLearnMoreAboutDataAccessClick = {}
+        ) {}
+    }
+}
+
+@Preview(
+    showBackground = true,
+    group = "Account Picker Pane",
+    name = "Single select - confirm"
+)
+@Composable
+internal fun AccountPickerPreviewSingleSelectWithConfirm() {
+    FinancialConnectionsPreview {
+        AccountPickerContent(
+            AccountPickerStates.singleSelectWithConfirm(),
             onAccountClicked = {},
             onSubmit = {},
             onSelectAllAccountsClicked = {},

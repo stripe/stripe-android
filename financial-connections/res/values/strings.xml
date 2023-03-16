@@ -31,10 +31,11 @@
     <string name="stripe_account_picker_loading_title">Pulling up your accounts</string>
     <string name="stripe_account_picker_loading_desc">After this, there\'s just one more step.</string>
     <string name="stripe_account_picker_select_account">Select your account</string>
-    <string name="stripe_account_picker_singleselect_account">Confirm your account</string>
+    <string name="stripe_account_picker_confirm_account">Confirm your account</string>
+    <string name="stripe_account_picker_singleselect_account">Select an account</string>
     <string name="stripe_account_picker_multiselect_account">Select accounts</string>
-    <string name="stripe_account_picker_singleselect_confirm">Confirm</string>
-    <plurals name="stripe_account_picker_multiselect_confirm">
+    <string name="stripe_account_picker_cta_confirm">Confirm</string>
+    <plurals name="stripe_account_picker_cta_link">
         <item quantity="one">Link account</item>
         <item quantity="other">Link accounts</item>
     </plurals>
@@ -101,9 +102,7 @@
     <string name="stripe_accounts_error_desc_retry">Please select another bank or try again.</string>
     <string name="stripe_accounts_error_desc_manualentry">Please enter your bank details manually or select another bank.</string>
     <string name="stripe_accounts_error_desc_no_retry">Please select another bank.</string>
-    <string name="stripe_accountpicker_singleaccount_description_withstripe">Stripe only needs one account at this time.</string>
-    <string name="stripe_accountpicker_singleaccount_description">%1$s only needs one account at this time.</string>
-    <string name="stripe_accountpicker_singleaccount_description_nobusinessname">This merchant only needs one account at this time.</string>
+    <string name="stripe_accountpicker_singleaccount_description">Select the account you\'d like to link.</string>
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
     <string name="stripe_success_pane_skip_title">Finishing up</string>
     <string name="stripe_success_pane_skip_desc">Hold on, we\'re almost done…</string>
