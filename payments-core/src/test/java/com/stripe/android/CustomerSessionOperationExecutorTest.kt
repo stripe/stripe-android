@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
@@ -49,7 +50,7 @@ internal class CustomerSessionOperationExecutorTest {
                     productUsageTokens: Set<String>,
                     paymentMethodId: String,
                     requestOptions: ApiRequest.Options
-                ): PaymentMethod? = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                ): Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             }
         )
         executor.execute(
@@ -67,7 +68,7 @@ internal class CustomerSessionOperationExecutorTest {
     }
 
     @Test
-    fun `execute with AttachPaymentMethod operation when null PaymentMethod returned should call listener with error`() = runTest {
+    fun `execute with AttachPaymentMethod operation when PaymentMethod returns error should call listener with error`() = runTest {
         val listener = mock<CustomerSession.PaymentMethodRetrievalListener>()
         listeners[OPERATION_ID] = listener
 
@@ -79,7 +80,9 @@ internal class CustomerSessionOperationExecutorTest {
                     productUsageTokens: Set<String>,
                     paymentMethodId: String,
                     requestOptions: ApiRequest.Options
-                ): PaymentMethod? = null
+                ): Result<PaymentMethod> = Result.failure(
+                    APIException(message = "API request returned an invalid response.")
+                )
             }
         )
         executor.execute(
@@ -114,7 +117,7 @@ internal class CustomerSessionOperationExecutorTest {
                     sourceId: String,
                     sourceType: String,
                     requestOptions: ApiRequest.Options
-                ): Customer? = CustomerFixtures.CUSTOMER
+                ): Result<Customer> = Result.success(CustomerFixtures.CUSTOMER)
             }
         )
         executor.execute(

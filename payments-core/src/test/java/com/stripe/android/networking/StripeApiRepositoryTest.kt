@@ -423,7 +423,7 @@ internal class StripeApiRepositoryTest {
                 sourceId,
                 "mocked",
                 DEFAULT_OPTIONS
-            )
+            ).getOrNull()
         )
 
         assertThat(source.id)
@@ -1040,6 +1040,8 @@ internal class StripeApiRepositoryTest {
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
             )
+            .getOrThrow()
+
         assertThat(paymentMethods)
             .hasSize(3)
         assertThat(paymentMethods.map { it.id })
@@ -1098,6 +1100,8 @@ internal class StripeApiRepositoryTest {
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
             )
+            .getOrThrow()
+
         assertThat(paymentMethods)
             .isEmpty()
     }
@@ -1523,9 +1527,8 @@ internal class StripeApiRepositoryTest {
                 ),
                 workContext = testDispatcher
             )
-            val radarSession = requireNotNull(
-                stripeRepository.createRadarSession(DEFAULT_OPTIONS)
-            )
+            val radarSession = stripeRepository.createRadarSession(DEFAULT_OPTIONS).getOrThrow()
+
             assertThat(radarSession.id)
                 .startsWith("rse_")
 
@@ -1956,7 +1959,7 @@ internal class StripeApiRepositoryTest {
                 }
             )
 
-            assertEquals("pm_abcdefg", response?.paymentMethodId)
+            assertEquals("pm_abcdefg", response.getOrNull()?.paymentMethodId)
         }
 
     @Test
@@ -2008,7 +2011,7 @@ internal class StripeApiRepositoryTest {
                 }
             )
 
-            assertEquals("pm_abcdefg", response?.paymentMethodId)
+            assertEquals("pm_abcdefg", response.getOrNull()?.paymentMethodId)
         }
 
     @Test

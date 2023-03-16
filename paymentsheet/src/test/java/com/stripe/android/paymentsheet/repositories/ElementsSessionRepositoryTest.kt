@@ -33,10 +33,12 @@ internal class ElementsSessionRepositoryTest {
         whenever(
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(
-            ElementsSession(
-                linkSettings = null,
-                paymentMethodSpecs = null,
-                stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+            Result.success(
+                ElementsSession(
+                    linkSettings = null,
+                    paymentMethodSpecs = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                )
             )
         )
 
@@ -47,7 +49,7 @@ internal class ElementsSessionRepositoryTest {
                     clientSecret = "client_secret",
                 ),
                 configuration = null,
-            )
+            ).getOrThrow()
         }
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
@@ -66,7 +68,7 @@ internal class ElementsSessionRepositoryTest {
             ).thenReturn(null)
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
-                .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
+                .thenReturn(Result.success(PaymentIntentFixtures.PI_WITH_SHIPPING))
 
             val session = withLocale(Locale.ITALY) {
                 createRepository().get(
@@ -74,7 +76,7 @@ internal class ElementsSessionRepositoryTest {
                         clientSecret = "client_secret",
                     ),
                     configuration = null,
-                )
+                ).getOrThrow()
             }
 
             verify(stripeRepository).retrieveElementsSession(any(), any())
@@ -90,7 +92,7 @@ internal class ElementsSessionRepositoryTest {
             ).thenThrow(RuntimeException())
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
-                .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
+                .thenReturn(Result.success(PaymentIntentFixtures.PI_WITH_SHIPPING))
 
             val session = withLocale(Locale.ITALY) {
                 createRepository().get(
@@ -98,7 +100,7 @@ internal class ElementsSessionRepositoryTest {
                         clientSecret = "client_secret",
                     ),
                     configuration = null,
-                )
+                ).getOrThrow()
             }
 
             verify(stripeRepository).retrieveElementsSession(any(), any())
@@ -111,10 +113,12 @@ internal class ElementsSessionRepositoryTest {
         whenever(
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(
-            ElementsSession(
-                linkSettings = null,
-                paymentMethodSpecs = null,
-                stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+            Result.success(
+                ElementsSession(
+                    linkSettings = null,
+                    paymentMethodSpecs = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                )
             )
         )
 
@@ -127,7 +131,7 @@ internal class ElementsSessionRepositoryTest {
                 clientSecret = "client_secret",
             ),
             configuration = null,
-        )
+        ).getOrThrow()
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
 

@@ -44,92 +44,92 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): StripeIntent {
-        TODO("Not yet implemented")
+    ): Result<StripeIntent> {
+        TODO()
     }
 
     override suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        TODO()
     }
 
     override suspend fun retrievePaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        TODO()
     }
 
     override suspend fun refreshPaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        TODO()
     }
 
     override suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        TODO()
     }
 
     override suspend fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
-        return null
+    ): Result<SetupIntent> {
+        TODO()
     }
 
     override suspend fun retrieveSetupIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
-        return null
+    ): Result<SetupIntent> {
+        TODO()
     }
 
     override suspend fun cancelSetupIntentSource(
         setupIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ): SetupIntent? {
-        return null
+    ): Result<SetupIntent> {
+        TODO()
     }
 
     override suspend fun createSource(
         sourceParams: SourceParams,
         options: ApiRequest.Options
-    ): Source? {
-        return null
+    ): Result<Source> {
+        TODO()
     }
 
     override suspend fun retrieveSource(
         sourceId: String,
         clientSecret: String,
         options: ApiRequest.Options
-    ): Source? {
-        return null
+    ): Result<Source> {
+        TODO()
     }
 
     override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
-    ): PaymentMethod? {
-        return null
+    ): Result<PaymentMethod> {
+        TODO()
     }
 
     override suspend fun createToken(
         tokenParams: TokenParams,
         options: ApiRequest.Options
-    ): Token? {
-        return null
+    ): Result<Token> {
+        TODO()
     }
 
     @Throws(APIException::class)
@@ -140,8 +140,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         sourceId: String,
         sourceType: String,
         requestOptions: ApiRequest.Options
-    ): Source? {
-        return null
+    ): Result<Source> {
+        TODO()
     }
 
     @Throws(APIException::class)
@@ -151,8 +151,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         productUsageTokens: Set<String>,
         sourceId: String,
         requestOptions: ApiRequest.Options
-    ): Source? {
-        return null
+    ): Result<Source> {
+        TODO()
     }
 
     @Throws(APIException::class)
@@ -162,8 +162,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethod? {
-        return null
+    ): Result<PaymentMethod> {
+        TODO()
     }
 
     @Throws(APIException::class)
@@ -172,8 +172,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethod? {
-        return null
+    ): Result<PaymentMethod> {
+        TODO()
     }
 
     @Throws(APIException::class)
@@ -182,8 +182,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
-    ): List<PaymentMethod> {
-        return emptyList()
+    ): Result<List<PaymentMethod>> {
+        TODO()
     }
 
     @Throws(APIException::class)
@@ -194,8 +194,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         sourceId: String,
         sourceType: String,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return null
+    ): Result<Customer> {
+        TODO()
     }
 
     override suspend fun setCustomerShippingInfo(
@@ -204,16 +204,16 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         productUsageTokens: Set<String>,
         shippingInformation: ShippingInformation,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return null
+    ): Result<Customer> {
+        TODO()
     }
 
     override suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return null
+    ): Result<Customer> {
+        TODO()
     }
 
     override suspend fun retrieveIssuingCardPin(
@@ -221,8 +221,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         verificationId: String,
         userOneTimeCode: String,
         requestOptions: ApiRequest.Options
-    ): String? {
-        return ""
+    ): Result<String> {
+        TODO()
     }
 
     override suspend fun updateIssuingCardPin(
@@ -257,8 +257,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun createFile(
         fileParams: StripeFileParams,
         requestOptions: ApiRequest.Options
-    ): StripeFile {
-        return StripeFile()
+    ): Result<StripeFile>{
+        TODO()
     }
 
     override suspend fun retrieveObject(
@@ -268,7 +268,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
 
     override suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
-    ) = RadarSession("rse_abc123")
+    ) = Result.success(RadarSession("rse_abc123"))
 
     override suspend fun consumerSignUp(
         email: String,
@@ -279,47 +279,47 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         authSessionCookie: String?,
         consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        return null
+    ): Result<ConsumerSession> {
+        TODO()
     }
 
     override suspend fun logoutConsumer(
         consumerSessionClientSecret: String,
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        return null
+    ): Result<ConsumerSession> {
+        TODO()
     }
 
     override suspend fun createLinkFinancialConnectionsSession(
         consumerSessionClientSecret: String,
         requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession? {
-        return null
+    ): Result<FinancialConnectionsSession> {
+        TODO()
     }
 
     override suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         financialConnectionsAccountId: String,
         requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails? {
-        return null
+    ): Result<ConsumerPaymentDetails> {
+        TODO()
     }
 
     override suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
         requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails? {
-        return null
+    ): Result<ConsumerPaymentDetails> {
+        TODO()
     }
 
     override suspend fun listPaymentDetails(
         consumerSessionClientSecret: String,
         paymentMethodTypes: Set<String>,
         requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails? {
-        return null
+    ): Result<ConsumerPaymentDetails> {
+        TODO()
     }
 
     override suspend fun deletePaymentDetails(
@@ -333,8 +333,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         consumerSessionClientSecret: String,
         paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
         requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails? {
-        return null
+    ): Result<ConsumerPaymentDetails> {
+        TODO()
     }
 
     override suspend fun attachFinancialConnectionsSessionToPaymentIntent(
@@ -343,8 +343,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        TODO()
     }
 
     override suspend fun attachFinancialConnectionsSessionToSetupIntent(
@@ -353,24 +353,24 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
-        return null
+    ): Result<SetupIntent> {
+        TODO()
     }
 
     override suspend fun createPaymentIntentFinancialConnectionsSession(
         paymentIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession? {
-        return null
+    ): Result<FinancialConnectionsSession> {
+        TODO()
     }
 
     override suspend fun createSetupIntentFinancialConnectionsSession(
         setupIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession? {
-        return null
+    ): Result<FinancialConnectionsSession> {
+        TODO()
     }
 
     override suspend fun verifyPaymentIntentWithMicrodeposits(
@@ -378,16 +378,16 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         firstAmount: Int,
         secondAmount: Int,
         requestOptions: ApiRequest.Options
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        TODO()
     }
 
     override suspend fun verifyPaymentIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
         requestOptions: ApiRequest.Options
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        TODO()
     }
 
     override suspend fun verifySetupIntentWithMicrodeposits(
@@ -395,16 +395,16 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         firstAmount: Int,
         secondAmount: Int,
         requestOptions: ApiRequest.Options
-    ): SetupIntent? {
-        return null
+    ): Result<SetupIntent> {
+        TODO()
     }
 
     override suspend fun verifySetupIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
         requestOptions: ApiRequest.Options
-    ): SetupIntent? {
-        return null
+    ): Result<SetupIntent> {
+        TODO()
     }
 
     override suspend fun retrievePaymentMethodMessage(
@@ -415,21 +415,21 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         locale: String,
         logoColor: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethodMessage? {
-        return null
+    ): Result<PaymentMethodMessage> {
+        TODO()
     }
 
     override suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options
-    ): ElementsSession? {
-        return null
+    ): Result<ElementsSession> {
+        TODO()
     }
 
     override suspend fun retrieveCardMetadata(
         cardNumber: String,
         requestOptions: ApiRequest.Options
-    ): CardMetadata? {
-        return null
+    ): Result<CardMetadata> {
+        TODO()
     }
 }

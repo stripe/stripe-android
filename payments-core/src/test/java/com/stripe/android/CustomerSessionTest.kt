@@ -63,8 +63,12 @@ internal class CustomerSessionTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         runBlocking {
-            whenever(stripeRepository.retrieveCustomer(any(), any(), any()))
-                .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER)
+            whenever(
+                stripeRepository.retrieveCustomer(any(), any(), any())
+            ).thenReturn(
+                Result.success(FIRST_CUSTOMER),
+                Result.success(SECOND_CUSTOMER),
+            )
 
             whenever(
                 stripeRepository.addCustomerSource(
@@ -75,8 +79,9 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
+            ).thenReturn(
+                Result.success(SourceFixtures.SOURCE_CARD)
             )
-                .thenReturn(SourceFixtures.SOURCE_CARD)
 
             whenever(
                 stripeRepository.deleteCustomerSource(
@@ -86,8 +91,9 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
+            ).thenReturn(
+                Result.success(SourceFixtures.SOURCE_CARD)
             )
-                .thenReturn(SourceFixtures.SOURCE_CARD)
 
             whenever(
                 stripeRepository.setDefaultCustomerSource(
@@ -98,8 +104,9 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
+            ).thenReturn(
+                Result.success(SECOND_CUSTOMER)
             )
-                .thenReturn(SECOND_CUSTOMER)
 
             whenever(
                 stripeRepository.attachPaymentMethod(
@@ -109,8 +116,9 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
+            ).thenReturn(
+                Result.success(PAYMENT_METHOD)
             )
-                .thenReturn(PAYMENT_METHOD)
 
             whenever(
                 stripeRepository.detachPaymentMethod(
@@ -119,8 +127,9 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
+            ).thenReturn(
+                Result.success(PAYMENT_METHOD)
             )
-                .thenReturn(PAYMENT_METHOD)
 
             whenever(
                 stripeRepository.getPaymentMethods(
@@ -129,8 +138,9 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
+            ).thenReturn(
+                Result.success(listOf(PAYMENT_METHOD))
             )
-                .thenReturn(listOf(PAYMENT_METHOD))
 
             whenever(
                 stripeRepository.setCustomerShippingInfo(
@@ -140,7 +150,9 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            ).thenReturn(FIRST_CUSTOMER)
+            ).thenReturn(
+                Result.success(FIRST_CUSTOMER)
+            )
         }
     }
 

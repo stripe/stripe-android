@@ -242,8 +242,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
-        ): PaymentMethod {
-            return PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        ): Result<PaymentMethod> {
+            return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
     }
 

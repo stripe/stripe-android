@@ -50,10 +50,11 @@ private class FakeStripeRepository(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent {
+    ): Result<PaymentIntent> {
         val intentStatus = queue.removeFirst()
-        return mock {
+        val paymentIntent = mock<PaymentIntent> {
             on { status } doReturn intentStatus
         }
+        return Result.success(paymentIntent)
     }
 }

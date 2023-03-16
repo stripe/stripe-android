@@ -287,7 +287,7 @@ internal class PaymentMethodEndToEndTest {
             params,
             ApiRequest.Options(ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY)
         )
-        assertThat(paymentMethod?.type)
+        assertThat(paymentMethod.getOrNull()?.type)
             .isEqualTo(PaymentMethod.Type.GrabPay)
     }
 
@@ -302,8 +302,7 @@ internal class PaymentMethodEndToEndTest {
             ApiRequest.Options(ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY)
         )
 
-        requireNotNull(paymentMethod)
-        assertThat(paymentMethod.type)
+        assertThat(paymentMethod.getOrNull()?.type)
             .isEqualTo(PaymentMethod.Type.PayPal)
     }
 

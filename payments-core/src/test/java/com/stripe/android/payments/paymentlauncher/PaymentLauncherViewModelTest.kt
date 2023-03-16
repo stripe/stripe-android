@@ -134,11 +134,11 @@ class PaymentLauncherViewModelTest {
     fun setUpMocks() = runTest {
         whenever(
             stripeApiRepository.confirmPaymentIntent(any(), any(), any())
-        ).thenReturn(paymentIntent)
+        ).thenReturn(Result.success(paymentIntent))
 
         whenever(
             stripeApiRepository.confirmSetupIntent(any(), any(), any())
-        ).thenReturn(setupIntent)
+        ).thenReturn(Result.success(setupIntent))
 
         whenever(authenticatorRegistry.getAuthenticator(eq(paymentIntent)))
             .thenReturn(piAuthenticator)
@@ -152,8 +152,9 @@ class PaymentLauncherViewModelTest {
                 eq(apiRequestOptions),
                 any()
             )
+        ).thenReturn(
+            Result.success(stripeIntent)
         )
-            .thenReturn(stripeIntent)
 
         whenever(authenticatorRegistry.getAuthenticator(eq(stripeIntent)))
             .thenReturn(stripeIntentAuthenticator)

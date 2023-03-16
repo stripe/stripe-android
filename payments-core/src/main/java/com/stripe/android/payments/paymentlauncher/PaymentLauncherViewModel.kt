@@ -338,7 +338,6 @@ internal class PaymentLauncherViewModel @Inject constructor(
     internal companion object {
         const val TIMEOUT_ERROR = "Payment fails due to time out. \n"
         const val UNKNOWN_ERROR = "Payment fails due to unknown error. \n"
-        const val REQUIRED_ERROR = "API request returned an invalid response."
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
 
         @VisibleForTesting

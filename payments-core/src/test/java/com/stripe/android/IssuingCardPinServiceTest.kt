@@ -117,7 +117,9 @@ class IssuingCardPinServiceTest {
             verificationId: String,
             userOneTimeCode: String,
             requestOptions: ApiRequest.Options
-        ): String? = retrievedPin()
+        ): Result<String> {
+            return retrievedPin()?.let { Result.success(it) } ?: Result.failure(RuntimeException())
+        }
 
         override suspend fun updateIssuingCardPin(
             cardId: String,

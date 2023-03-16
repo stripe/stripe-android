@@ -364,8 +364,8 @@ class PaymentSessionTest {
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
-        ): PaymentMethod {
-            return PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        ): Result<PaymentMethod> {
+            return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
         override suspend fun setDefaultCustomerSource(
@@ -375,16 +375,16 @@ class PaymentSessionTest {
             sourceId: String,
             sourceType: String,
             requestOptions: ApiRequest.Options
-        ): Customer {
-            return SECOND_CUSTOMER
+        ): Result<Customer> {
+            return Result.success(SECOND_CUSTOMER)
         }
 
         override suspend fun retrieveCustomer(
             customerId: String,
             productUsageTokens: Set<String>,
             requestOptions: ApiRequest.Options
-        ): Customer {
-            return FIRST_CUSTOMER
+        ): Result<Customer> {
+            return Result.success(FIRST_CUSTOMER)
         }
     }
 

@@ -14,6 +14,7 @@ import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
@@ -247,51 +248,53 @@ internal class StripePaymentControllerTest {
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ) = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
+        ): Result<SetupIntent> = Result.success(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
 
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): PaymentIntent {
+        ): Result<PaymentIntent> {
             retrievePaymentIntentArgs.add(
                 Triple(clientSecret, options, expandFields)
             )
-            return retrievePaymentIntentResponse
+            return Result.success(retrievePaymentIntentResponse)
         }
 
         override suspend fun retrieveSource(
             sourceId: String,
             clientSecret: String,
             options: ApiRequest.Options
-        ) = SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable)
+        ): Result<Source> {
+            return Result.success(SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable))
+        }
 
         override suspend fun cancelPaymentIntentSource(
             paymentIntentId: String,
             sourceId: String,
             options: ApiRequest.Options
-        ): PaymentIntent {
+        ): Result<PaymentIntent> {
             cancelPaymentIntentArgs.add(
                 Triple(paymentIntentId, sourceId, options)
             )
-            return cancelPaymentIntentResponse
+            return Result.success(cancelPaymentIntentResponse)
         }
 
         override suspend fun cancelSetupIntentSource(
             setupIntentId: String,
             sourceId: String,
             options: ApiRequest.Options
-        ) = SetupIntentFixtures.CANCELLED
+        ): Result<SetupIntent> = Result.success(SetupIntentFixtures.CANCELLED)
 
         override suspend fun confirmPaymentIntent(
             confirmPaymentIntentParams: ConfirmPaymentIntentParams,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): PaymentIntent {
+        ): Result<PaymentIntent> {
             confirmPaymentIntentArgs.add(
                 Triple(confirmPaymentIntentParams, options, expandFields)
             )
-            return confirmPaymentIntentResponse
+            return Result.success(confirmPaymentIntentResponse)
         }
     }
 

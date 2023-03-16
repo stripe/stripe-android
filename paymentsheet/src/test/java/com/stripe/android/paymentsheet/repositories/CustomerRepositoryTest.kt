@@ -28,8 +28,13 @@ import java.security.InvalidParameterException
 internal class CustomerRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val stripeRepository = mock<StripeRepository>() {
-        onBlocking { getPaymentMethods(any(), anyString(), any(), any()) }.doReturn(emptyList())
-        onBlocking { detachPaymentMethod(anyString(), any(), anyString(), any()) }.doThrow(InvalidParameterException("error"))
+        onBlocking {
+            getPaymentMethods(any(), anyString(), any(), any())
+        }.doReturn(Result.success(emptyList()))
+
+        onBlocking {
+            detachPaymentMethod(anyString(), any(), anyString(), any())
+        }.doThrow(InvalidParameterException("error"))
     }
     private val repository = CustomerApiRepository(
         stripeRepository,
@@ -110,9 +115,11 @@ internal class CustomerRepositoryTest {
                 any(),
                 any()
             )
+        ).doThrow(
+            InvalidParameterException("Request Failed")
+        ).doReturn(
+            Result.success(listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
         )
-            .doThrow(InvalidParameterException("Request Failed"))
-            .doReturn(listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
         return repository
     }
 }

@@ -223,7 +223,7 @@ internal class StripeKtxTest {
 
             whenever(
                 mockApiRepository.createFile(any(), any())
-            ).thenReturn(expectedFile)
+            ).thenReturn(Result.success(expectedFile))
 
             val actualFile = stripe.createFile(
                 mock(),
@@ -297,7 +297,8 @@ internal class StripeKtxTest {
         val expectedApiObj = mock<Source>()
         whenever(
             mockApiRepository.retrieveSource(any(), any(), any())
-        ).thenReturn(expectedApiObj)
+        ).thenReturn(Result.success(expectedApiObj))
+
         val actualObj = stripe.retrieveSource(
             "param11",
             "param12",
@@ -345,7 +346,8 @@ internal class StripeKtxTest {
             val expectedApiObj = mock<SetupIntent>()
             whenever(
                 mockApiRepository.confirmSetupIntent(any(), any(), any())
-            ).thenReturn(expectedApiObj)
+            ).thenReturn(Result.success(expectedApiObj))
+
             val actualObj = stripe.confirmSetupIntent(mock())
 
             assertSame(expectedApiObj, actualObj)
@@ -381,7 +383,8 @@ internal class StripeKtxTest {
             val expectedApiObj = mock<PaymentIntent>()
             whenever(
                 mockApiRepository.confirmPaymentIntent(any(), any(), any())
-            ).thenReturn(expectedApiObj)
+            ).thenReturn(Result.success(expectedApiObj))
+
             val actualObj = stripe.confirmPaymentIntent(mock())
 
             assertSame(expectedApiObj, actualObj)
@@ -685,9 +688,11 @@ internal class StripeKtxTest {
     @Test
     fun `Verify retrievePossibleCardBrands passes card number on to repository`() = runTest {
         whenever(mockApiRepository.retrieveCardMetadata(any(), any())).thenReturn(
-            CardMetadata(
-                bin = mock(),
-                accountRanges = listOf()
+            Result.success(
+                CardMetadata(
+                    bin = mock(),
+                    accountRanges = listOf()
+                )
             )
         )
 
@@ -711,14 +716,14 @@ internal class StripeKtxTest {
 
     private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns non-empty value when calling createAPI then returns correct result`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,
-        crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> ApiObject
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<ApiObject>,
+        crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> ApiObject,
     ) = runTest {
         val expectedApiObj = mock<ApiObject>()
 
         whenever(
             repositoryBlock(any(), any())
-        ).thenReturn(expectedApiObj)
+        ).thenReturn(Result.success(expectedApiObj))
 
         val actualObj = createApiInvocationBlock(
             mock(),
@@ -731,7 +736,7 @@ internal class StripeKtxTest {
 
     private inline fun <reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository throws exception when calling createAPI then throws same exception`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> StripeModel?,
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<StripeModel>,
         crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> StripeModel
     ): Unit = runTest {
         whenever(
@@ -749,7 +754,7 @@ internal class StripeKtxTest {
 
     private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns null when calling createAPI then throws InvalidRequestException`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<ApiObject>,
         crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> ApiObject
     ): Unit = runTest {
         whenever(
@@ -767,14 +772,14 @@ internal class StripeKtxTest {
 
     private inline fun <reified ApiObject : StripeModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns non-empty value when calling createAPI with String param then returns correct result`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<ApiObject>,
         crossinline createApiInvocationBlock: suspend (String, String?, String?) -> ApiObject
     ) = runTest {
         val expectedApiObj = mock<ApiObject>()
 
         whenever(
             repositoryBlock(any(), any())
-        ).thenReturn(expectedApiObj)
+        ).thenReturn(Result.success(expectedApiObj))
 
         val actualObj = createApiInvocationBlock(
             "param1",
@@ -787,7 +792,7 @@ internal class StripeKtxTest {
 
     private inline fun <reified RepositoryParam : StripeParamsModel>
     `Given repository throws exception when calling createAPI with String param then throws same exception`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> StripeModel?,
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<StripeModel>,
         crossinline createApiInvocationBlock: suspend (String, String?, String?) -> StripeModel
     ): Unit = runTest {
         whenever(
@@ -805,7 +810,7 @@ internal class StripeKtxTest {
 
     private inline fun <reified ApiObject : StripeModel, reified RepositoryParam : Any>
     `Given repository returns null when calling createAPI with String param then throws InvalidRequestException`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<ApiObject>,
         crossinline createApiInvocationBlock: suspend (String, String?, String?) -> ApiObject
     ): Unit = runTest {
         whenever(
@@ -823,14 +828,14 @@ internal class StripeKtxTest {
 
     private inline fun <reified ApiObject : StripeModel>
     `Given repository returns non-empty value when calling retrieveAPI with String param then returns correct result`(
-        crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> ApiObject?,
+        crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> Result<ApiObject>,
         crossinline retrieveApiInvocationBlock: suspend (String, String?) -> ApiObject
     ): Unit = runTest {
         val expectedApiObj = mock<ApiObject>()
 
         whenever(
             repositoryBlock(any(), any(), any())
-        ).thenReturn(expectedApiObj)
+        ).thenReturn(Result.success(expectedApiObj))
 
         val actualObj = retrieveApiInvocationBlock(
             "param1",
@@ -842,7 +847,7 @@ internal class StripeKtxTest {
 
     private fun
     `Given repository throws exception when calling retrieveAPI with String param then throws same exception`(
-        repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> StripeModel?,
+        repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> Result<StripeModel>,
         retrieveApiInvocationBlock: suspend (String, String?) -> StripeModel
     ): Unit = runTest {
         whenever(
@@ -859,7 +864,7 @@ internal class StripeKtxTest {
 
     private inline fun <reified ApiObject : StripeModel>
     `Given repository returns null when calling retrieveAPI with String param then throws InvalidRequestException`(
-        crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> ApiObject?,
+        crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> Result<ApiObject>,
         crossinline retrieveApiInvocationBlock: suspend (String, String?) -> ApiObject
     ): Unit = runTest {
         whenever(

@@ -826,7 +826,7 @@ internal object PaymentIntentFixtures {
         }
                 """.trimIndent()
             )
-        )
+        )!!
     }
 
     val EXPANDED_PAYMENT_METHOD_JSON by lazy {
