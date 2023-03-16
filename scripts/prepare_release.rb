@@ -5,6 +5,7 @@ require 'fileutils'
 require 'erb'
 require 'colorize'
 require 'optparse'
+require 'open3'
 
 def prompt_for_new_version
   puts "What's the new version number?"
@@ -24,6 +25,19 @@ def validate_version_number(version_number)
       part_name = part_names[index]
       abort("Invalid version number: #{part_name} number can\'t begin with 0.")
     end
+  end
+end
+
+def ensure_clean_repo()
+  repo_dir = File.basename(Dir.getwd)
+  if repo_dir != "stripe-android"
+    abort("You must run this script from 'stripe-android'.")
+  end
+
+  stdout, stderr, status = Open3.capture3("git status --porcelain")
+
+  if !stdout.empty?
+    abort("You must have a clean working directory to continue.")
   end
 end
 
@@ -52,6 +66,8 @@ end
 
 # Script start
 
+ensure_clean_repo
+
 new_version_number = prompt_for_new_version
 validate_version_number(new_version_number)
 
@@ -67,7 +83,7 @@ system("git checkout -b #{new_branch_name}")
 update_changelog(new_version_number)
 
 # Push the new branch
-system("git add .")
+system("git add CHANGELOG.md")
 system("git commit -m \"#{action_title}\"")
 system("git push -u origin")
 
