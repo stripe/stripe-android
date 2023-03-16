@@ -1,0 +1,17 @@
+apply from: configs.androidLibrary
+
+dependencies {
+    api project(':ml-core-base')
+    api 'org.tensorflow:tensorflow-lite-support:0.4.3'
+    implementation 'org.tensorflow:tensorflow-lite:2.11.0'
+    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
+}
+
+ext {
+    artifactId = "ml-core-default"
+    artifactName = "ml-core-default"
+    artifactDescrption = "The machine learning module with default local tflite runtime"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"
