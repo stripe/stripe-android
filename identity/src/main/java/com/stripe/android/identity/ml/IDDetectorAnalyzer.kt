@@ -28,7 +28,6 @@ internal class IDDetectorAnalyzer(
 ) :
     Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
-    //    private val interpreterApi: InterpreterApi
     private val interpreterApi: InterpreterWrapper = InterpreterWrapperImpl(
         modelFile, InterpreterOptionsWrapper.Builder().build()
     )

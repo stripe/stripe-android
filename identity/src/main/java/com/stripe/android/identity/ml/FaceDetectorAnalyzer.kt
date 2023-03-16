@@ -26,9 +26,6 @@ internal class FaceDetectorAnalyzer(
     private val modelPerformanceTracker: ModelPerformanceTracker
 ) : Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
-//    private val tfliteInterpreter = Interpreter(modelFile)
-//    private val interpreterApi: InterpreterApi
-
     private val interpreterApi: InterpreterWrapper = InterpreterWrapperImpl(
         modelFile, InterpreterOptionsWrapper.Builder().build()
     )
@@ -63,10 +60,8 @@ internal class FaceDetectorAnalyzer(
 
         val inferenceStat = modelPerformanceTracker.trackInference()
         // inference - input: (1, 128, 128, 3), output: (1, 4), (1, 1)
-
         val boundingBoxes = Array(1) { FloatArray(OUTPUT_BOUNDING_BOX_TENSOR_SIZE) }
         val score = FloatArray(OUTPUT_SCORE_TENSOR_SIZE)
-
         interpreterApi.runForMultipleInputsOutputs(
             arrayOf(tensorImage.buffer),
             mapOf(
@@ -74,7 +69,6 @@ internal class FaceDetectorAnalyzer(
                 OUTPUT_SCORE_TENSOR_INDEX to score
             )
         )
-
         inferenceStat.trackResult()
 
         // FaceDetector outputs (left, top, right, bottom) with absolute value
