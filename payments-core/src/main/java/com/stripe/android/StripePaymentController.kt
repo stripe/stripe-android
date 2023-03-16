@@ -348,6 +348,7 @@ constructor(
         authenticatorRegistry.getAuthenticator(source).authenticate(
             host,
             source,
+            confirmParams = null,
             requestOptions
         )
     }
@@ -512,6 +513,7 @@ constructor(
         authenticatorRegistry.getAuthenticator(stripeIntent).authenticate(
             host,
             stripeIntent,
+            null,
             requestOptions
         )
     }
