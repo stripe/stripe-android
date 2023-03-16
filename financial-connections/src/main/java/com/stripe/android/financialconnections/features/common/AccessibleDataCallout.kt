@@ -523,4 +523,3 @@ private fun partnerAccountsForPreview() = listOf(
         supportedPaymentMethodTypes = emptyList()
     )
 )
-
