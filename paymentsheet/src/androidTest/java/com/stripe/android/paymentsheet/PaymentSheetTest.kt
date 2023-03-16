@@ -204,6 +204,66 @@ internal class PaymentSheetTest {
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
+    @Test
+    fun testDeferredIntentFailedCardPayment() {
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
+        }
+
+        val activityScenarioRule = composeTestRule.activityRule
+        val scenario = activityScenarioRule.scenario
+        scenario.moveToState(Lifecycle.State.CREATED)
+        lateinit var paymentSheet: PaymentSheet
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            paymentSheet = PaymentSheet(
+                activity = it,
+                createIntentCallback = {
+                    CreateIntentCallback.Result.Failure(
+                        cause = Exception("We don't accept visa"),
+                        displayMessage = "We don't accept visa"
+                    )
+                }
+            ) {
+                error("Shouldn't call PaymentSheetResultCallback")
+            }
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        scenario.onActivity {
+            paymentSheet.presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd"
+                    )
+                ),
+                configuration = null,
+            )
+        }
+
+        fillOutCard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+            .performScrollTo()
+            .performClick()
+
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodes(hasText("We don't accept visa"))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
     private fun fillOutCard() {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule.onAllNodes(hasText("Card number"))

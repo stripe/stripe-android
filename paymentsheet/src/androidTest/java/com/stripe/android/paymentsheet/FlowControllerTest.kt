@@ -476,6 +476,88 @@ internal class FlowControllerTest {
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
+    @Test
+    fun testDeferredIntentFailedCardPayment() {
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
+        }
+
+        val resultCountDownLatch = CountDownLatch(1)
+        val activityScenarioRule = composeTestRule.activityRule
+        val scenario = activityScenarioRule.scenario
+        scenario.moveToState(Lifecycle.State.CREATED)
+        lateinit var flowController: PaymentSheet.FlowController
+        var paymentSheetResult: PaymentSheetResult? = null
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            flowController = PaymentSheet.FlowController.create(
+                activity = it,
+                paymentOptionCallback = { paymentOption ->
+                    assertThat(paymentOption?.label).endsWith("4242")
+                    flowController.confirm()
+                },
+                createIntentCallback = {
+                    CreateIntentCallback.Result.Failure(
+                        cause = Exception("We don't accept visa"),
+                        displayMessage = "We don't accept visa"
+                    )
+                },
+                paymentResultCallback = { result ->
+                    assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+                    paymentSheetResult = result
+                    resultCountDownLatch.countDown()
+                },
+            )
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        scenario.onActivity {
+            flowController.configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd"
+                    )
+                ),
+                configuration = null,
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    flowController.presentPaymentOptions()
+                }
+            )
+        }
+
+        composeTestRule.waitUntil {
+            composeTestRule.onAllNodes(hasText("+ Add"))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNode(hasText("+ Add"))
+            .onParent()
+            .onParent()
+            .performClick()
+
+        fillOutCard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+            .performScrollTo()
+            .performClick()
+
+        assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+        assertThat((paymentSheetResult as PaymentSheetResult.Failed).error.message)
+            .isEqualTo("We don't accept visa")
+    }
+
     private fun fillOutCard() {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule.onAllNodes(hasText("Card number"))
