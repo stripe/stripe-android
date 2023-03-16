@@ -1,7 +1,14 @@
 apply from: configs.androidLibrary
 
+android {
+    buildFeatures {
+        buildConfig = false
+    }
+    namespace 'com.stripe.android.mlcore.impl'
+}
+
 dependencies {
-    api project(':ml-core-base')
+    api project(':ml-core:base')
     api 'org.tensorflow:tensorflow-lite-support:0.4.3'
     implementation 'org.tensorflow:tensorflow-lite:2.11.0'
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"

@@ -1,7 +1,14 @@
 apply from: configs.androidLibrary
 
+android {
+    buildFeatures {
+        buildConfig = false
+    }
+    namespace 'com.stripe.android.mlcore.impl'
+}
+
 dependencies {
-    api project(':ml-core-base')
+    api project(':ml-core:base')
     api 'com.google.android.gms:play-services-tflite-support:16.0.1'
     implementation 'com.google.android.gms:play-services-tflite-java:16.0.1'
     ktlint "com.pinterest:ktlint:$ktlintVersion"

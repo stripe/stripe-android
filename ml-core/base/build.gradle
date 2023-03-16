@@ -1,5 +1,12 @@
 apply from: configs.androidLibrary
 
+android {
+    buildFeatures {
+        buildConfig = false
+    }
+    namespace 'com.stripe.android.mlcore.base'
+}
+
 dependencies {
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
     ktlint "com.pinterest:ktlint:$ktlintVersion"
