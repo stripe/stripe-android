@@ -167,7 +167,7 @@ internal class WalletViewModel @Inject constructor(
                     confirmStripeIntent(nextStep.confirmParams)
                 }
                 is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
-                    // This can't happen for Link
+                    handleNextAction(nextStep.clientSecret)
                 }
                 is IntentConfirmationInterceptor.NextStep.Fail -> {
                     onError(ErrorMessage.Raw(nextStep.message))
@@ -183,7 +183,16 @@ internal class WalletViewModel @Inject constructor(
         confirmationManager.confirmStripeIntent(confirmParams) { result ->
             result.fold(
                 onSuccess = ::handleConfirmPaymentSuccess,
-                onFailure = ::onError
+                onFailure = ::onError,
+            )
+        }
+    }
+
+    private fun handleNextAction(clientSecret: String) {
+        confirmationManager.handleNextAction(clientSecret, stripeIntent) { result ->
+            result.fold(
+                onSuccess = ::handleConfirmPaymentSuccess,
+                onFailure = ::onError,
             )
         }
     }

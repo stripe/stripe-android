@@ -217,7 +217,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                 confirmStripeIntent(nextStep.confirmParams)
             }
             is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
-                // This can't happen for Link
+                handleNextAction(nextStep.clientSecret)
             }
             is IntentConfirmationInterceptor.NextStep.Fail -> {
                 onError(ErrorMessage.Raw(nextStep.message))
@@ -231,22 +231,33 @@ internal class PaymentMethodViewModel @Inject constructor(
     private fun confirmStripeIntent(confirmParams: ConfirmStripeIntentParams) {
         confirmationManager.confirmStripeIntent(confirmParams) { result ->
             result.fold(
-                onSuccess = { paymentResult ->
-                    when (paymentResult) {
-                        is PaymentResult.Canceled -> {
-                            // no-op, let the user continue their flow
-                            setState(PrimaryButtonState.Enabled)
-                        }
-                        is PaymentResult.Failed -> {
-                            onError(paymentResult.throwable)
-                        }
-                        is PaymentResult.Completed -> {
-                            handlePaymentSuccess()
-                        }
-                    }
-                },
-                onFailure = ::onError
+                onSuccess = ::handlePaymentResult,
+                onFailure = ::onError,
             )
+        }
+    }
+
+    private fun handleNextAction(clientSecret: String) {
+        confirmationManager.handleNextAction(clientSecret, stripeIntent) { result ->
+            result.fold(
+                onSuccess = ::handlePaymentResult,
+                onFailure = ::onError,
+            )
+        }
+    }
+
+    private fun handlePaymentResult(paymentResult: PaymentResult) {
+        when (paymentResult) {
+            is PaymentResult.Canceled -> {
+                // no-op, let the user continue their flow
+                setState(PrimaryButtonState.Enabled)
+            }
+            is PaymentResult.Failed -> {
+                onError(paymentResult.throwable)
+            }
+            is PaymentResult.Completed -> {
+                handlePaymentSuccess()
+            }
         }
     }
 
