@@ -28,13 +28,13 @@ import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
-import com.stripe.android.link.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.testing.FakeIntentConfirmationInterceptor
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
@@ -474,11 +474,14 @@ class PaymentMethodViewModelTest {
         val viewModel = createViewModel()
         viewModel.startPayment(cardFormFieldValues)
 
-        val error = "hmmmm why did this not work"
-        intentConfirmationInterceptor.enqueueFailureStep(error)
+        val errorMessage = "hmmmm why did this not work"
+        intentConfirmationInterceptor.enqueueFailureStep(
+            cause = Exception("some technical explanation that we don't show to the user"),
+            message = errorMessage,
+        )
 
         viewModel.errorMessage.test {
-            assertThat(awaitItem()).isEqualTo(ErrorMessage.Raw(error))
+            assertThat(awaitItem()).isEqualTo(ErrorMessage.Raw(errorMessage))
         }
     }
 

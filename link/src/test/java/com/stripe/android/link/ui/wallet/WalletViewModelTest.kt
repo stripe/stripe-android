@@ -26,7 +26,6 @@ import com.stripe.android.link.model.PaymentDetailsFixtures.CONSUMER_PAYMENT_DET
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
-import com.stripe.android.link.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -34,6 +33,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.testing.FakeIntentConfirmationInterceptor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
@@ -692,11 +692,14 @@ class WalletViewModelTest {
         viewModel.onItemSelected(paymentDetails)
         viewModel.onConfirmPayment()
 
-        val error = "oops, this one failed"
-        intentConfirmationInterceptor.enqueueFailureStep(error)
+        val errorMessage = "oops, this one failed"
+        intentConfirmationInterceptor.enqueueFailureStep(
+            cause = Exception("some technical explanation that we don't show to the user"),
+            message = errorMessage,
+        )
 
         viewModel.uiState.test {
-            assertThat(awaitItem().errorMessage).isEqualTo(ErrorMessage.Raw(error))
+            assertThat(awaitItem().errorMessage).isEqualTo(ErrorMessage.Raw(errorMessage))
         }
     }
 
