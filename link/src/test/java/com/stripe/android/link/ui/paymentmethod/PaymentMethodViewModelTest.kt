@@ -486,6 +486,28 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
+    fun `Handles next action if confirmation interceptor returns an intent with an outstanding action`() = runTest {
+        whenever(
+            linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+        ).thenReturn(Result.success(createLinkPaymentDetails()))
+
+        val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED.copy(clientSecret = null)
+        whenever(args.stripeIntent).thenReturn(stripeIntent)
+
+        val viewModel = createViewModel()
+        viewModel.startPayment(cardFormFieldValues)
+
+        val clientSecret = "pi_1234_secret_4321"
+        intentConfirmationInterceptor.enqueueNextActionStep(clientSecret = clientSecret)
+
+        verify(confirmationManager).handleNextAction(
+            clientSecret = eq(clientSecret),
+            stripeIntent = eq(stripeIntent),
+            onResult = any(),
+        )
+    }
+
+    @Test
     fun `Factory gets initialized by Injector`() {
         val mockBuilder = mock<SignedInViewModelSubcomponent.Builder>()
         val mockSubComponent = mock<SignedInViewModelSubcomponent>()

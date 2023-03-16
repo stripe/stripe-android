@@ -466,7 +466,6 @@ class WalletViewModelTest {
         viewModel.onConfirmPayment()
 
         val paramsCaptor = argumentCaptor<PaymentMethodCreateParams>()
-//        verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
 
         verify(mockInterceptor).intercept(
             clientSecret = anyOrNull(),
@@ -701,6 +700,27 @@ class WalletViewModelTest {
         viewModel.uiState.test {
             assertThat(awaitItem().errorMessage).isEqualTo(ErrorMessage.Raw(errorMessage))
         }
+    }
+
+    @Test
+    fun `Handles next action if confirmation interceptor returns an intent with an outstanding action`() = runTest {
+        val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED.copy(clientSecret = null)
+        val args = args.copy(configuration = args.configuration.copy(stripeIntent = stripeIntent))
+
+        val viewModel = createViewModel(args)
+        val paymentDetails = CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
+
+        viewModel.onItemSelected(paymentDetails)
+        viewModel.onConfirmPayment()
+
+        val clientSecret = "pi_1234_secret_4321"
+        intentConfirmationInterceptor.enqueueNextActionStep(clientSecret = clientSecret)
+
+        verify(confirmationManager).handleNextAction(
+            clientSecret = eq(clientSecret),
+            stripeIntent = eq(stripeIntent),
+            onResult = any(),
+        )
     }
 
     @Test
