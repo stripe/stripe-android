@@ -457,4 +457,35 @@ internal object PaymentMethodFixtures {
             code = "card"
         )
     }
+
+    val BLIK_JSON = JSONObject(
+        """
+        {
+            "payment_method": {
+                "id": "pm_1Mm5TUKG6vc7r7YC41rnkvqS",
+                "object": "payment_method",
+                "billing_details": {
+                  "address": {
+                    "city": null,
+                    "country": null,
+                    "line1": null,
+                    "line2": null,
+                    "postal_code": null,
+                    "state": null
+                  },
+                  "email": null,
+                  "name": null,
+                  "phone": null
+                },
+                "blik": {},
+                "created": 1678929564,
+                "customer": null,
+                "livemode": false,
+                "type": "blik"
+            }
+        }
+        """.trimIndent()
+    )
+
+    val BLIK_PAYMENT_METHOD = PaymentMethodJsonParser().parse(BLIK_JSON)
 }

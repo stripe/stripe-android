@@ -169,6 +169,10 @@ class LauncherActivity : AppCompatActivity() {
                 activity.getString(R.string.cash_app_pay_example),
                 CashAppPayActivity::class.java
             ),
+            Item(
+                "BLIK",
+                BlikPaymentMethodActivity::class.java
+            ),
             // This is for internal use so as not to confuse the user.
             Item(
                 "StripeImage Example",
