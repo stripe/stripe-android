@@ -6,6 +6,27 @@ require 'erb'
 require 'colorize'
 require 'optparse'
 
+def prompt_for_new_version
+  puts "What's the new version number?"
+  version = gets.chomp
+end
+
+def validate_version_number(version_number)
+  part_names = ['major', 'minor', 'patch']
+  parts = version_number.split('.')
+
+  unless parts.length() == 3
+    abort("Invalid version number. It should consists of a major, minor, and patch number.")
+  end
+
+  parts.each_with_index do | part, index |
+    if part.start_with?('0') && part.length() > 1
+      part_name = part_names[index]
+      abort("Invalid version number: #{part_name} number can\'t begin with 0.")
+    end
+  end
+end
+
 def update_changelog(version)
   done = false
   final_lines = []
@@ -25,28 +46,15 @@ def update_changelog(version)
   File.write('CHANGELOG.md', final_lines.join(""))
 end
 
-def github_login
-  token = `fetch-password -q bindings/gh-tokens/$USER`
-  if $?.exitstatus != 0
-    puts "Couldn't fetch GitHub token. Follow the Android SDK Deploy Guide (https://go/android-sdk-deploy) to set up a token. \a".red
-    exit(1)
-  end
-  client = Octokit::Client.new(access_token: token)
-  abort('Invalid GitHub token. Follow the wiki instructions for setting up a GitHub token.') unless client.login
-  client
-end
-
 def open_url(url)
   `open '#{url}'`
 end
 
 # Script start
 
-if ARGV.length != 1
-    abort('Provide the new version number as an argument.')
-end
+new_version_number = prompt_for_new_version
+validate_version_number(new_version_number)
 
-new_version_number = ARGV[0]
 new_branch_name = "release/#{new_version_number}"
 action_title = "Update release notes for #{new_version_number}"
 
