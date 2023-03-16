@@ -144,23 +144,17 @@ private fun ConsentContent(
     }
 }
 
-
 /**
- *
+ * Shows an empty screen without loading indicator to avoid flashing,
+ * as loading should be super fast.
  */
 @Composable
 private fun ConsentLoadingContent() {
-    var show by remember { mutableStateOf(false) }
-    // Delays showing a loading screen for 2 seconds to avoid a flash (loading happens so fast)
-    LaunchedEffect(Unit) {
-        delay(DELAY_SHOW_LOADING_MS)
-        show = true
-    }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        if (show) LoadingContent()
+        // empty content.
     }
 }
 
