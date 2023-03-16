@@ -257,7 +257,7 @@ internal fun AccessibleDataCalloutPreview() {
                     Permissions.ACCOUNT_NUMBERS
                 ),
                 isNetworking = false,
-                isStripeDirect = true,
+                isStripeDirect = false,
                 dataPolicyUrl = ""
             ),
             onLearnMoreClick = {}
@@ -279,63 +279,11 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
                     Permissions.OWNERSHIP,
                     Permissions.TRANSACTIONS
                 ),
-                isStripeDirect = true,
+                isStripeDirect = false,
                 isNetworking = false,
                 dataPolicyUrl = ""
             ),
-            accounts = listOf(
-                PartnerAccount(
-                    authorization = "Authorization",
-                    institutionName = "Random bank",
-                    category = FinancialConnectionsAccount.Category.CASH,
-                    id = "id1",
-                    name = "Account 1 - no acct numbers",
-                    _allowSelection = true,
-                    allowSelectionMessage = "",
-                    subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-                    supportedPaymentMethodTypes = emptyList()
-                ),
-                PartnerAccount(
-                    authorization = "Authorization",
-                    category = FinancialConnectionsAccount.Category.CASH,
-                    id = "id2",
-                    name = "Account 2 - no acct numbers",
-                    _allowSelection = true,
-                    allowSelectionMessage = "",
-                    subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
-                    supportedPaymentMethodTypes = emptyList()
-                ),
-                PartnerAccount(
-                    authorization = "Authorization",
-                    category = FinancialConnectionsAccount.Category.CASH,
-                    id = "id3",
-                    name = "Account 3 - no acct numbers",
-                    _allowSelection = true,
-                    allowSelectionMessage = "",
-                    subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
-                    supportedPaymentMethodTypes = emptyList()
-                ),
-                PartnerAccount(
-                    authorization = "Authorization",
-                    category = FinancialConnectionsAccount.Category.CASH,
-                    id = "id4",
-                    name = "Account 4 - no acct numbers",
-                    _allowSelection = true,
-                    allowSelectionMessage = "",
-                    subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
-                    supportedPaymentMethodTypes = emptyList()
-                ),
-                PartnerAccount(
-                    authorization = "Authorization",
-                    category = FinancialConnectionsAccount.Category.CASH,
-                    id = "id5",
-                    name = "Account 5 - no acct numbers",
-                    _allowSelection = true,
-                    allowSelectionMessage = "",
-                    subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
-                    supportedPaymentMethodTypes = emptyList()
-                )
-            ),
+            accounts = partnerAccountsForPreview(),
             institution = FinancialConnectionsInstitution(
                 id = "id",
                 name = "name",
@@ -350,6 +298,128 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
         )
     }
 }
+
+@Preview
+@Composable
+@Suppress("LongMethod")
+internal fun AccessibleDataCalloutStripeDirectPreview() {
+    FinancialConnectionsPreview {
+        AccessibleDataCalloutWithAccounts(
+            AccessibleDataCalloutModel(
+                businessName = "My business",
+                permissions = listOf(
+                    Permissions.PAYMENT_METHOD,
+                    Permissions.BALANCES,
+                    Permissions.OWNERSHIP,
+                    Permissions.TRANSACTIONS
+                ),
+                isStripeDirect = true,
+                isNetworking = false,
+                dataPolicyUrl = ""
+            ),
+            accounts = partnerAccountsForPreview(),
+            institution = FinancialConnectionsInstitution(
+                id = "id",
+                name = "name",
+                url = "url",
+                featured = true,
+                icon = null,
+                logo = null,
+                featuredOrder = null,
+                mobileHandoffCapable = false
+            ),
+            onLearnMoreClick = {}
+        )
+    }
+}
+@Preview
+@Composable
+@Suppress("LongMethod")
+internal fun AccessibleDataCalloutNetworkingPreview() {
+    FinancialConnectionsPreview {
+        AccessibleDataCalloutWithAccounts(
+            AccessibleDataCalloutModel(
+                businessName = "My business",
+                permissions = listOf(
+                    Permissions.PAYMENT_METHOD,
+                    Permissions.BALANCES,
+                    Permissions.OWNERSHIP,
+                    Permissions.TRANSACTIONS
+                ),
+                isStripeDirect = false,
+                isNetworking = true,
+                dataPolicyUrl = ""
+            ),
+            accounts = partnerAccountsForPreview(),
+            institution = FinancialConnectionsInstitution(
+                id = "id",
+                name = "name",
+                url = "url",
+                featured = true,
+                icon = null,
+                logo = null,
+                featuredOrder = null,
+                mobileHandoffCapable = false
+            ),
+            onLearnMoreClick = {}
+        )
+    }
+}
+
+@Composable
+private fun partnerAccountsForPreview() = listOf(
+    PartnerAccount(
+        authorization = "Authorization",
+        institutionName = "Random bank",
+        category = FinancialConnectionsAccount.Category.CASH,
+        id = "id1",
+        name = "Account 1 - no acct numbers",
+        _allowSelection = true,
+        allowSelectionMessage = "",
+        subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+        supportedPaymentMethodTypes = emptyList()
+    ),
+    PartnerAccount(
+        authorization = "Authorization",
+        category = FinancialConnectionsAccount.Category.CASH,
+        id = "id2",
+        name = "Account 2 - no acct numbers",
+        _allowSelection = true,
+        allowSelectionMessage = "",
+        subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+        supportedPaymentMethodTypes = emptyList()
+    ),
+    PartnerAccount(
+        authorization = "Authorization",
+        category = FinancialConnectionsAccount.Category.CASH,
+        id = "id3",
+        name = "Account 3 - no acct numbers",
+        _allowSelection = true,
+        allowSelectionMessage = "",
+        subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+        supportedPaymentMethodTypes = emptyList()
+    ),
+    PartnerAccount(
+        authorization = "Authorization",
+        category = FinancialConnectionsAccount.Category.CASH,
+        id = "id4",
+        name = "Account 4 - no acct numbers",
+        _allowSelection = true,
+        allowSelectionMessage = "",
+        subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+        supportedPaymentMethodTypes = emptyList()
+    ),
+    PartnerAccount(
+        authorization = "Authorization",
+        category = FinancialConnectionsAccount.Category.CASH,
+        id = "id5",
+        name = "Account 5 - no acct numbers",
+        _allowSelection = true,
+        allowSelectionMessage = "",
+        subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+        supportedPaymentMethodTypes = emptyList()
+    )
+)
 
 @Preview
 @Composable
