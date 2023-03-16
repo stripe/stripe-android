@@ -1,0 +1,13 @@
+apply from: configs.androidLibrary
+
+dependencies {
+    implementation project(":payments-core")
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
+}
+
+android {
+    namespace 'com.stripe.android.testing'
+}

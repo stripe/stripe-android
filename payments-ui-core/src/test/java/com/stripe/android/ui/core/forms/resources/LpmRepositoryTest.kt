@@ -6,9 +6,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.forms.Delayed
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.EmptyFormSpec
-import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith

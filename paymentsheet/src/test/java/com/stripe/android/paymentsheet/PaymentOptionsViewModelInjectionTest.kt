@@ -11,10 +11,10 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.fakeCreationExtras
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeAndroidKeyStore
-import com.stripe.android.utils.PaymentIntentFactory
-import com.stripe.android.utils.fakeCreationExtras
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

@@ -18,6 +18,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import java.util.Objects
 import kotlin.test.BeforeTest
 import kotlin.test.assertFailsWith
 
@@ -108,23 +109,40 @@ class DefaultIntentConfirmationInterceptorTest {
     fun `Fails if invoked without a confirm callback for new payment method`() = runTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
-            stripeRepository = object : AbsFakeStripeRepository() {},
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun createPaymentMethod(
+                    paymentMethodCreateParams: PaymentMethodCreateParams,
+                    options: ApiRequest.Options
+                ): PaymentMethod {
+                    return PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                }
+            },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
         )
 
-        val nextStep = interceptor.intercept(
-            clientSecret = null,
-            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            shippingValues = null,
-            setupForFutureUsage = null,
-        )
+        val error = assertFailsWith<IllegalStateException> {
+            interceptor.intercept(
+                clientSecret = null,
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                shippingValues = null,
+                setupForFutureUsage = null,
+            )
+        }
 
-        assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Fail::class.java)
+        assertThat(error.message).isEqualTo(
+            "CreateIntentCallback must be implemented when using IntentConfiguration with PaymentSheet"
+        )
     }
 
     @Test
     fun `Fails if creating payment method did not succeed`() = runTest {
+        val apiException = APIException(
+            requestId = "req_123",
+            statusCode = 500,
+            message = "Whoopsie",
+        )
+
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
             stripeRepository = object : AbsFakeStripeRepository() {
@@ -132,11 +150,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     paymentMethodCreateParams: PaymentMethodCreateParams,
                     options: ApiRequest.Options
                 ): PaymentMethod? {
-                    throw APIException(
-                        requestId = "req_123",
-                        statusCode = 500,
-                        message = "Whoopsie",
-                    )
+                    throw apiException
                 }
             },
             publishableKeyProvider = { "pk" },
@@ -150,11 +164,22 @@ class DefaultIntentConfirmationInterceptorTest {
             setupForFutureUsage = null,
         )
 
-        assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Fail::class.java)
+        assertThat(nextStep).isEqualTo(
+            IntentConfirmationInterceptor.NextStep.Fail(
+                cause = apiException,
+                message = "Unable to complete operation",
+            )
+        )
     }
 
     @Test
     fun `Fails if retrieving intent did not succeed`() = runTest {
+        val apiException = APIException(
+            requestId = "req_123",
+            statusCode = 500,
+            message = "Whoopsie",
+        )
+
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
             stripeRepository = object : AbsFakeStripeRepository() {
@@ -163,11 +188,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     options: ApiRequest.Options,
                     expandFields: List<String>
                 ): StripeIntent {
-                    throw APIException(
-                        requestId = "req_123",
-                        statusCode = 500,
-                        message = "Whoopsie",
-                    )
+                    throw apiException
                 }
             },
             publishableKeyProvider = { "pk" },
@@ -183,11 +204,44 @@ class DefaultIntentConfirmationInterceptorTest {
             setupForFutureUsage = null,
         )
 
-        assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Fail::class.java)
+        assertThat(nextStep).isEqualTo(
+            IntentConfirmationInterceptor.NextStep.Fail(
+                cause = apiException,
+                message = "Unable to complete operation",
+            )
+        )
     }
 
     @Test
     fun `Fails if client-side confirm callback returns failure`() = runTest {
+        val interceptor = DefaultIntentConfirmationInterceptor(
+            context = context,
+            stripeRepository = mock(),
+            publishableKeyProvider = { "pk" },
+            stripeAccountIdProvider = { null },
+        )
+
+        IntentConfirmationInterceptor.createIntentCallback = failingClientSideCallback(
+            message = "that didn't work…"
+        )
+
+        val nextStep = interceptor.intercept(
+            clientSecret = null,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            shippingValues = null,
+            setupForFutureUsage = null,
+        )
+
+        assertThat(nextStep).isEqualTo(
+            IntentConfirmationInterceptor.NextStep.Fail(
+                cause = TestException("that didn't work…"),
+                message = "that didn't work…",
+            )
+        )
+    }
+
+    @Test
+    fun `Fails if client-side confirm callback returns failure with generic message`() = runTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
             stripeRepository = mock(),
@@ -204,11 +258,44 @@ class DefaultIntentConfirmationInterceptorTest {
             setupForFutureUsage = null,
         )
 
-        assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Fail::class.java)
+        assertThat(nextStep).isEqualTo(
+            IntentConfirmationInterceptor.NextStep.Fail(
+                cause = TestException(),
+                message = "Unable to complete operation",
+            )
+        )
     }
 
     @Test
     fun `Fails if server-side confirm callback returns failure`() = runTest {
+        val interceptor = DefaultIntentConfirmationInterceptor(
+            context = context,
+            stripeRepository = mock(),
+            publishableKeyProvider = { "pk" },
+            stripeAccountIdProvider = { null },
+        )
+
+        IntentConfirmationInterceptor.createIntentCallback = failingServerSideCallback(
+            message = "that didn't work…"
+        )
+
+        val nextStep = interceptor.intercept(
+            clientSecret = null,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            shippingValues = null,
+            setupForFutureUsage = null,
+        )
+
+        assertThat(nextStep).isEqualTo(
+            IntentConfirmationInterceptor.NextStep.Fail(
+                cause = TestException("that didn't work…"),
+                message = "that didn't work…",
+            )
+        )
+    }
+
+    @Test
+    fun `Fails if server-side confirm callback returns failure with generic message`() = runTest {
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
             stripeRepository = mock(),
@@ -225,7 +312,12 @@ class DefaultIntentConfirmationInterceptorTest {
             setupForFutureUsage = null,
         )
 
-        assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Fail::class.java)
+        assertThat(nextStep).isEqualTo(
+            IntentConfirmationInterceptor.NextStep.Fail(
+                cause = TestException(),
+                message = "Unable to complete operation",
+            )
+        )
     }
 
     @Test
@@ -329,7 +421,15 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
-            stripeRepository = mock(),
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun retrieveStripeIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): StripeIntent {
+                    return PaymentIntentFixtures.PI_SUCCEEDED
+                }
+            },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
         )
@@ -376,15 +476,36 @@ class DefaultIntentConfirmationInterceptorTest {
         }
     }
 
-    private fun failingClientSideCallback(): CreateIntentCallback {
-        return CreateIntentCallback { _ ->
-            CreateIntentCallback.Result.Failure(errorMessage = "that didn't work…")
+    private fun failingClientSideCallback(
+        message: String? = null
+    ): CreateIntentCallback {
+        return CreateIntentCallback {
+            CreateIntentCallback.Result.Failure(
+                cause = TestException(message),
+                displayMessage = message
+            )
         }
     }
 
-    private fun failingServerSideCallback(): CreateIntentCallbackForServerSideConfirmation {
+    private fun failingServerSideCallback(
+        message: String? = null
+    ): CreateIntentCallbackForServerSideConfirmation {
         return CreateIntentCallbackForServerSideConfirmation { _, _ ->
-            CreateIntentCallback.Result.Failure(errorMessage = "that didn't work…")
+            CreateIntentCallback.Result.Failure(
+                cause = TestException(message),
+                displayMessage = message
+            )
+        }
+    }
+
+    private class TestException(message: String? = null) : Exception(message) {
+
+        override fun hashCode(): Int {
+            return Objects.hash(message)
+        }
+
+        override fun equals(other: Any?): Boolean {
+            return other is TestException && other.message == message
         }
     }
 }

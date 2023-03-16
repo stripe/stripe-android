@@ -51,13 +51,13 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
+import com.stripe.android.testing.FakeIntentConfirmationInterceptor
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeCustomerRepository
-import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
-import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -1286,7 +1286,10 @@ internal class PaymentSheetViewModelTest {
             viewModel.checkout()
             assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.StartProcessing)
 
-            fakeIntentConfirmationInterceptor.enqueueFailureStep(error)
+            fakeIntentConfirmationInterceptor.enqueueFailureStep(
+                cause = Exception(error),
+                message = error
+            )
             assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage(error)))
         }
     }
