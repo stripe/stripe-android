@@ -3,6 +3,7 @@ package com.stripe.example.activity
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.example.databinding.BlikActivityBinding
@@ -22,10 +23,16 @@ class BlikPaymentMethodActivity : StripeIntentActivity() {
         viewBinding.submit.setOnClickListener {
             createAndConfirmPaymentIntent(
                 country = "pl",
-                paymentMethodCreateParams = PaymentMethodCreateParams.createBlik(),
+                paymentMethodCreateParams = PaymentMethodCreateParams.createBlik(
+                    billingDetails = PaymentMethod.BillingDetails(
+                        email = viewBinding.email.text.toString()
+                    )
+                ),
                 supportedPaymentMethods = "blik",
                 currency = "pln",
-                paymentMethodOptions = PaymentMethodOptionsParams.Blik("123456")
+                paymentMethodOptions = PaymentMethodOptionsParams.Blik(
+                    viewBinding.code.text.toString()
+                )
             )
         }
     }
