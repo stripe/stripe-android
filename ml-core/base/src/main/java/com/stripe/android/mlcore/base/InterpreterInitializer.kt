@@ -16,5 +16,5 @@ interface InterpreterInitializer {
      * @param onSuccess: Notifies initialization success, can only run inference after this
      * @param onFailure: Notifies initialization failure
      */
-    suspend fun initialize(context: Context, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+    fun initialize(context: Context, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 }

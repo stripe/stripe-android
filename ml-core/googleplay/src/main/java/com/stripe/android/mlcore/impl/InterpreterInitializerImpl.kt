@@ -8,7 +8,7 @@ import com.stripe.android.mlcore.base.InterpreterInitializer
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object InterpreterInitializerImpl : InterpreterInitializer {
-    override suspend fun initialize(
+    override fun initialize(
         context: Context,
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
