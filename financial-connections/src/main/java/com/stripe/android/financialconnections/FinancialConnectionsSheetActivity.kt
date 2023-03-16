@@ -3,27 +3,32 @@ package com.stripe.android.financialconnections
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.animation.AnimationUtils
-import android.widget.ImageView
 import androidx.activity.addCallback
+import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import com.airbnb.mvrx.Mavericks
 import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.withState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
+import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.argsOrNull
 import com.stripe.android.financialconnections.utils.viewModelLazy
 
-internal class FinancialConnectionsSheetActivity :
-    AppCompatActivity(R.layout.activity_financialconnections_sheet), MavericksView {
+internal class FinancialConnectionsSheetActivity : AppCompatActivity(), MavericksView {
 
     val viewModel: FinancialConnectionsSheetViewModel by viewModelLazy()
 
@@ -49,16 +54,19 @@ internal class FinancialConnectionsSheetActivity :
         onBackPressedDispatcher.addCallback {
             finishWithResult(FinancialConnectionsSheetActivityResult.Canceled)
         }
-        animateLoadingSpinner()
+        setContent { Loading() }
     }
 
-    private fun animateLoadingSpinner() {
-        findViewById<ImageView>(R.id.spinner).startAnimation(
-            AnimationUtils.loadAnimation(
-                this,
-                R.anim.anim_loading_spinner_rotation
-            )
-        )
+    @Composable
+    private fun Loading() {
+        FinancialConnectionsTheme {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingSpinner()
+            }
+        }
     }
 
     override fun onResume() {

@@ -29,11 +29,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,7 +51,6 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.BulletItem
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
-import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenBottomSheet
@@ -77,7 +73,6 @@ import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.uicore.image.StripeImage
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
@@ -560,5 +555,3 @@ internal fun ContentManualEntryPlusMicrodeposits(
         ) {}
     }
 }
-
-private const val DELAY_SHOW_LOADING_MS = 2000L
