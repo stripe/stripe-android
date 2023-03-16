@@ -11,6 +11,7 @@ import com.stripe.android.Stripe
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.example.R
 import com.stripe.example.databinding.PaymentExampleActivityBinding
@@ -69,6 +70,7 @@ class AlipayPaymentWebActivity : StripeIntentActivity() {
         existingPaymentMethodId: String?,
         mandateDataParams: MandateDataParams?,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        paymentMethodOptions: PaymentMethodOptionsParams?,
         onPaymentIntentCreated: (String) -> Unit
     ) {
         viewModel.status.value +=

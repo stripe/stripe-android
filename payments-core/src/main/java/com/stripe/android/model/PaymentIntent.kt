@@ -180,8 +180,10 @@ constructor(
             is StripeIntent.NextActionData.CashAppRedirect -> {
                 StripeIntent.NextActionType.CashAppRedirect
             }
+            is StripeIntent.NextActionData.BlikAuthorize -> {
+                StripeIntent.NextActionType.BlikAuthorize
+            }
             is StripeIntent.NextActionData.AlipayRedirect,
-            is StripeIntent.NextActionData.BlikAuthorize,
             is StripeIntent.NextActionData.WeChatPayRedirect,
             null -> {
                 null
