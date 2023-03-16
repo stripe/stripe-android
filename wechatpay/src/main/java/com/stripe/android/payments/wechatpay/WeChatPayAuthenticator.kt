@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.getRequestCode
 import com.stripe.android.payments.PaymentFlowResult
@@ -55,6 +56,7 @@ class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent>() {
     override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
+        confirmParams: ConfirmStripeIntentParams?,
         requestOptions: ApiRequest.Options
     ) {
         require(reflectionHelper.isWeChatPayAvailable()) {

@@ -9,6 +9,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.Source
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -39,6 +40,7 @@ internal class SourceAuthenticator @Inject constructor(
     override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: Source,
+        confirmParams: ConfirmStripeIntentParams?,
         requestOptions: ApiRequest.Options
     ) {
         if (authenticatable.flow == Source.Flow.Redirect) {

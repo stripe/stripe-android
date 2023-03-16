@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
@@ -22,7 +23,8 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent>() {
     override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        confirmParams: ConfirmStripeIntentParams?,
+        requestOptions: ApiRequest.Options,
     ) {
         val args = PollingContract.Args(
             clientSecret = requireNotNull(authenticatable.clientSecret),

@@ -123,6 +123,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     authenticatorRegistry.getAuthenticator(intent).authenticate(
                         host,
                         intent,
+                        confirmStripeIntentParams,
                         apiRequestOptionsProvider.get()
                     )
                 },
@@ -183,6 +184,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                         .authenticate(
                             host,
                             intent,
+                            confirmParams = null,
                             apiRequestOptionsProvider.get()
                         )
                 },

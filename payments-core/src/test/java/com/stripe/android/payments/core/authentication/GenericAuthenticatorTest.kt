@@ -4,6 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.test.runTest
@@ -30,6 +31,7 @@ class GenericAuthenticatorTest {
         authenticator.authenticate(
             host = host,
             authenticatable = mock(),
+            confirmParams = mock(),
             requestOptions = mock(),
         )
 
@@ -48,6 +50,7 @@ class GenericAuthenticatorTest {
         authenticator.authenticate(
             host = host,
             authenticatable = mock(),
+            confirmParams = mock(),
             requestOptions = mock(),
         )
 
@@ -63,6 +66,7 @@ private class TestAuthenticator : PaymentAuthenticator<StripeIntent>() {
     override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
+        confirmParams: ConfirmStripeIntentParams?,
         requestOptions: ApiRequest.Options
     ) {
         wasInvoked = true

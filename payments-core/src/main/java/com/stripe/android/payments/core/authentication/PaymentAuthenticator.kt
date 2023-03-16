@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.ActivityResultLauncherHost
@@ -28,12 +29,13 @@ abstract class PaymentAuthenticator<Authenticatable> : ActivityResultLauncherHos
     suspend fun authenticate(
         host: AuthActivityStarterHost,
         authenticatable: Authenticatable,
-        requestOptions: ApiRequest.Options
+        confirmParams: ConfirmStripeIntentParams?,
+        requestOptions: ApiRequest.Options,
     ) {
         val lifecycleOwner = host.lifecycleOwner
         lifecycleOwner.lifecycleScope.launch {
             lifecycleOwner.whenResumed {
-                performAuthentication(host, authenticatable, requestOptions)
+                performAuthentication(host, authenticatable, confirmParams, requestOptions)
             }
         }
     }
@@ -41,6 +43,7 @@ abstract class PaymentAuthenticator<Authenticatable> : ActivityResultLauncherHos
     protected abstract suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: Authenticatable,
-        requestOptions: ApiRequest.Options
+        confirmParams: ConfirmStripeIntentParams?,
+        requestOptions: ApiRequest.Options,
     )
 }

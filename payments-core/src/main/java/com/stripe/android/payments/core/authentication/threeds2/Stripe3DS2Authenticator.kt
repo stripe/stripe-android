@@ -9,6 +9,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
@@ -63,6 +64,7 @@ internal class Stripe3DS2Authenticator @Inject constructor(
     override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
+        confirmParams: ConfirmStripeIntentParams?,
         requestOptions: ApiRequest.Options
     ) {
         stripe3ds2CompletionStarterFactory(host).start(

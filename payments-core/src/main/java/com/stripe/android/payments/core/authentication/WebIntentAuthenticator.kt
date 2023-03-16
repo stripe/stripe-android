@@ -8,6 +8,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -40,6 +41,7 @@ internal class WebIntentAuthenticator @Inject constructor(
     override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
+        confirmParams: ConfirmStripeIntentParams?,
         requestOptions: ApiRequest.Options
     ) {
         val authUrl: String
@@ -86,7 +88,7 @@ internal class WebIntentAuthenticator @Inject constructor(
             }
             is StripeIntent.NextActionData.CashAppRedirect -> {
                 authUrl = nextActionData.mobileAuthUrl
-                returnUrl = defaultReturnUrl.value
+                returnUrl = confirmParams?.returnUrl ?: defaultReturnUrl.value
                 shouldCancelIntentOnUserNavigation = false
             }
             else ->
