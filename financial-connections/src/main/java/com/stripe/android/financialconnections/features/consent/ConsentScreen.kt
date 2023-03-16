@@ -29,8 +29,11 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -74,6 +77,7 @@ import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.uicore.image.StripeImage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
@@ -140,13 +144,23 @@ private fun ConsentContent(
     }
 }
 
+
+/**
+ *
+ */
 @Composable
 private fun ConsentLoadingContent() {
+    var show by remember { mutableStateOf(false) }
+    // Delays showing a loading screen for 2 seconds to avoid a flash (loading happens so fast)
+    LaunchedEffect(Unit) {
+        delay(DELAY_SHOW_LOADING_MS)
+        show = true
+    }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        LoadingContent()
+        if (show) LoadingContent()
     }
 }
 
@@ -552,3 +566,5 @@ internal fun ContentManualEntryPlusMicrodeposits(
         ) {}
     }
 }
+
+private const val DELAY_SHOW_LOADING_MS = 2000L
