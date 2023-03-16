@@ -24,7 +24,6 @@ import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
-import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.Selectors
@@ -454,13 +453,11 @@ class PlaygroundTestDriver(
 
         }
 
-        if (testParameters.authorizationAction == AuthorizeAction.Authorize
-            || testParameters.authorizationAction == null
-        ) {
+        val isDone = testParameters.authorizationAction in setOf(AuthorizeAction.Authorize, null)
+
+        if (isDone) {
             waitForPlaygroundActivity()
-            assertThat(resultValue).isEqualTo(
-                PaymentSheetResult.Completed.toString()
-            )
+            assertThat(resultValue).isEqualTo("Success")
         }
     }
 
