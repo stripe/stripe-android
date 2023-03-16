@@ -159,7 +159,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                 FinancialConnectionsAccount.Permissions.OWNERSHIP,
                 FinancialConnectionsAccount.Permissions.TRANSACTIONS
             ),
-            isStripeDirect = true,
+            isStripeDirect = false,
             isNetworking = false,
             dataPolicyUrl = ""
         )

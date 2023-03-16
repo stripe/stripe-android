@@ -147,10 +147,7 @@ private fun AccessibleDataText(
                     else -> R.string.data_accessible_callout_through_link
                 }
 
-                model.isStripeDirect -> when (model.businessName) {
-                    null -> R.string.data_accessible_callout_no_business
-                    else -> R.string.data_accessible_callout
-                }
+                model.isStripeDirect -> R.string.data_accessible_callout_stripe_direct
 
                 else -> when (model.businessName) {
                     null -> R.string.data_accessible_callout_through_stripe_no_business
@@ -332,6 +329,7 @@ internal fun AccessibleDataCalloutStripeDirectPreview() {
         )
     }
 }
+
 @Preview
 @Composable
 @Suppress("LongMethod")
