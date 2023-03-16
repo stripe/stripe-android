@@ -364,61 +364,6 @@ internal fun AccessibleDataCalloutNetworkingPreview() {
     }
 }
 
-@Composable
-private fun partnerAccountsForPreview() = listOf(
-    PartnerAccount(
-        authorization = "Authorization",
-        institutionName = "Random bank",
-        category = FinancialConnectionsAccount.Category.CASH,
-        id = "id1",
-        name = "Account 1 - no acct numbers",
-        _allowSelection = true,
-        allowSelectionMessage = "",
-        subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-        supportedPaymentMethodTypes = emptyList()
-    ),
-    PartnerAccount(
-        authorization = "Authorization",
-        category = FinancialConnectionsAccount.Category.CASH,
-        id = "id2",
-        name = "Account 2 - no acct numbers",
-        _allowSelection = true,
-        allowSelectionMessage = "",
-        subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
-        supportedPaymentMethodTypes = emptyList()
-    ),
-    PartnerAccount(
-        authorization = "Authorization",
-        category = FinancialConnectionsAccount.Category.CASH,
-        id = "id3",
-        name = "Account 3 - no acct numbers",
-        _allowSelection = true,
-        allowSelectionMessage = "",
-        subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
-        supportedPaymentMethodTypes = emptyList()
-    ),
-    PartnerAccount(
-        authorization = "Authorization",
-        category = FinancialConnectionsAccount.Category.CASH,
-        id = "id4",
-        name = "Account 4 - no acct numbers",
-        _allowSelection = true,
-        allowSelectionMessage = "",
-        subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
-        supportedPaymentMethodTypes = emptyList()
-    ),
-    PartnerAccount(
-        authorization = "Authorization",
-        category = FinancialConnectionsAccount.Category.CASH,
-        id = "id5",
-        name = "Account 5 - no acct numbers",
-        _allowSelection = true,
-        allowSelectionMessage = "",
-        subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
-        supportedPaymentMethodTypes = emptyList()
-    )
-)
-
 @Preview
 @Composable
 internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
@@ -523,3 +468,59 @@ internal fun AccessibleDataCalloutWithOneAccountPreview() {
         )
     }
 }
+
+@Composable
+private fun partnerAccountsForPreview() = listOf(
+    PartnerAccount(
+        authorization = "Authorization",
+        institutionName = "Random bank",
+        category = FinancialConnectionsAccount.Category.CASH,
+        id = "id1",
+        name = "Account 1 - no acct numbers",
+        _allowSelection = true,
+        allowSelectionMessage = "",
+        subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+        supportedPaymentMethodTypes = emptyList()
+    ),
+    PartnerAccount(
+        authorization = "Authorization",
+        category = FinancialConnectionsAccount.Category.CASH,
+        id = "id2",
+        name = "Account 2 - no acct numbers",
+        _allowSelection = true,
+        allowSelectionMessage = "",
+        subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+        supportedPaymentMethodTypes = emptyList()
+    ),
+    PartnerAccount(
+        authorization = "Authorization",
+        category = FinancialConnectionsAccount.Category.CASH,
+        id = "id3",
+        name = "Account 3 - no acct numbers",
+        _allowSelection = true,
+        allowSelectionMessage = "",
+        subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+        supportedPaymentMethodTypes = emptyList()
+    ),
+    PartnerAccount(
+        authorization = "Authorization",
+        category = FinancialConnectionsAccount.Category.CASH,
+        id = "id4",
+        name = "Account 4 - no acct numbers",
+        _allowSelection = true,
+        allowSelectionMessage = "",
+        subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+        supportedPaymentMethodTypes = emptyList()
+    ),
+    PartnerAccount(
+        authorization = "Authorization",
+        category = FinancialConnectionsAccount.Category.CASH,
+        id = "id5",
+        name = "Account 5 - no acct numbers",
+        _allowSelection = true,
+        allowSelectionMessage = "",
+        subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+        supportedPaymentMethodTypes = emptyList()
+    )
+)
+
