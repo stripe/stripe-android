@@ -3,6 +3,8 @@ package com.stripe.android.financialconnections
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.animation.AnimationUtils
+import android.widget.ImageView
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
@@ -47,6 +49,16 @@ internal class FinancialConnectionsSheetActivity :
         onBackPressedDispatcher.addCallback {
             finishWithResult(FinancialConnectionsSheetActivityResult.Canceled)
         }
+        animateLoadingSpinner()
+    }
+
+    private fun animateLoadingSpinner() {
+        findViewById<ImageView>(R.id.spinner).startAnimation(
+            AnimationUtils.loadAnimation(
+                this,
+                R.anim.anim_loading_spinner_rotation
+            )
+        )
     }
 
     override fun onResume() {
@@ -75,14 +87,17 @@ internal class FinancialConnectionsSheetActivity :
                             uri = Uri.parse(viewEffect.url)
                         )
                     )
+
                     is FinishWithResult -> finishWithResult(
                         viewEffect.result
                     )
+
                     is OpenNativeAuthFlow -> startNativeAuthFlowForResult.launch(
                         Intent(
                             this,
                             FinancialConnectionsSheetNativeActivity::class.java
                         ).also {
+                            it.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                             it.putExtra(
                                 Mavericks.KEY_ARG,
                                 FinancialConnectionsSheetNativeActivityArgs(

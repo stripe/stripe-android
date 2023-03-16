@@ -142,15 +142,11 @@ private fun ConsentContent(
 
 @Composable
 private fun ConsentLoadingContent() {
-    FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            LoadingContent()
-        }
+        LoadingContent()
     }
 }
 
