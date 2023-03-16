@@ -9,13 +9,13 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.utils.any
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
@@ -27,7 +27,7 @@ import java.security.InvalidParameterException
 @RunWith(RobolectricTestRunner::class)
 internal class CustomerRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val stripeRepository = mock<StripeRepository>() {
+    private val stripeRepository = mock<StripeRepository> {
         onBlocking { getPaymentMethods(any(), anyString(), any(), any()) }.doReturn(emptyList())
         onBlocking { detachPaymentMethod(anyString(), any(), anyString(), any()) }.doThrow(InvalidParameterException("error"))
     }

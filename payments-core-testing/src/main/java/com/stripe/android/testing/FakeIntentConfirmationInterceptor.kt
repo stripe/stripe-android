@@ -1,4 +1,4 @@
-package com.stripe.android.utils
+package com.stripe.android.testing
 
 import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -8,7 +8,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.channels.Channel
 
-internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {
+class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {
 
     private val channel = Channel<IntentConfirmationInterceptor.NextStep>(capacity = 1)
 
