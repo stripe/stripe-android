@@ -1,11 +1,11 @@
-package com.stripe.android.utils
+package com.stripe.android.testing
 
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 
-internal object PaymentIntentFactory {
+object PaymentIntentFactory {
 
     fun create(
         paymentMethod: PaymentMethod? = createCardPaymentMethod(),
@@ -31,8 +31,8 @@ internal object PaymentIntentFactory {
         type = PaymentMethod.Type.Card,
         card = PaymentMethod.Card(
             brand = CardBrand.Visa,
-            last4 = "4242",
+            last4 = "4242"
         ),
-        code = "card",
+        code = "card"
     )
 }

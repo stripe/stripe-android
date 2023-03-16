@@ -7,9 +7,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.fakeCreationExtras
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.utils.PaymentIntentFactory
-import com.stripe.android.utils.fakeCreationExtras
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith

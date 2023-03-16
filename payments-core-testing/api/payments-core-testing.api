@@ -1,0 +1,27 @@
+public final class com/stripe/android/testing/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/testing/FakeCreationExtrasKt {
+	public static final fun fakeCreationExtras (Landroidx/lifecycle/HasDefaultViewModelProviderFactory;)Landroidx/lifecycle/viewmodel/CreationExtras;
+}
+
+public final class com/stripe/android/testing/FakeIntentConfirmationInterceptor : com/stripe/android/IntentConfirmationInterceptor {
+	public fun <init> ()V
+	public final fun enqueueCompleteStep (Lcom/stripe/android/model/StripeIntent;)V
+	public final fun enqueueConfirmStep (Lcom/stripe/android/model/ConfirmStripeIntentParams;)V
+	public final fun enqueueFailureStep (Ljava/lang/Exception;Ljava/lang/String;)V
+	public final fun enqueueNextActionStep (Ljava/lang/String;)V
+	public fun intercept (Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun intercept (Ljava/lang/String;Lcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/testing/PaymentIntentFactory {
+	public static final field INSTANCE Lcom/stripe/android/testing/PaymentIntentFactory;
+	public final fun create (Lcom/stripe/android/model/PaymentMethod;Ljava/util/List;)Lcom/stripe/android/model/PaymentIntent;
+	public static synthetic fun create$default (Lcom/stripe/android/testing/PaymentIntentFactory;Lcom/stripe/android/model/PaymentMethod;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentIntent;
+}
+
