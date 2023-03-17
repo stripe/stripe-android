@@ -137,7 +137,7 @@ internal class PaymentOptionsActivityTest {
             assertThat(
                 PaymentOptionResult.fromIntent(scenario.getResult().resultData)
             ).isEqualTo(
-                PaymentOptionResult.Canceled(null, listOf())
+                PaymentOptionResult.Canceled(null, null, listOf())
             )
         }
     }
@@ -158,7 +158,7 @@ internal class PaymentOptionsActivityTest {
             assertThat(
                 PaymentOptionResult.fromIntent(scenario.getResult().resultData)
             ).isEqualTo(
-                PaymentOptionResult.Canceled(null, listOf())
+                PaymentOptionResult.Canceled(null, PaymentSelection.GooglePay, listOf())
             )
         }
     }

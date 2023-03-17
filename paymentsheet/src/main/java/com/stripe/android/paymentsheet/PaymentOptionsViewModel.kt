@@ -189,7 +189,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
                 mostRecentError = mostRecentError,
-                paymentMethods = paymentMethods.value
+                paymentSelection = selection.value,
+                paymentMethods = paymentMethods.value,
             )
         )
     }
