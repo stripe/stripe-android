@@ -60,8 +60,64 @@ def update_changelog(version)
   File.write('CHANGELOG.md', final_lines.join(""))
 end
 
+def github_login
+  token = `fetch-password -q bindings/gh-tokens/$USER`
+  if $?.exitstatus != 0
+    puts "Couldn't fetch GitHub token. Follow the Android SDK Deploy Guide (https://go/android-sdk-deploy) to set up a token. \a".red
+    exit(1)
+  end
+  client = Octokit::Client.new(access_token: token)
+  abort('Invalid GitHub token. Follow the wiki instructions for setting up a GitHub token.') unless client.login
+  client
+end
+
 def open_url(url)
   `open '#{url}'`
+end
+
+def pull_current_master
+  system("git checkout master")
+  system("git pull")
+end
+
+def update_changelog_on_new_branch(branch_name, version_number)
+  system("git checkout -b #{branch_name}")
+  update_changelog(version_number)
+end
+
+def push_changes(commit_title)
+  system("git add CHANGELOG.md")
+  system("git commit -m \"#{commit_title}\"")
+  system("git push -u origin")
+end
+
+def create_pull_request_body(version_number)
+    template_file_path = File.join(File.dirname(__FILE__), '../.github/PULL_REQUEST_TEMPLATE.md')
+    template_file = File.open(template_file_path)
+    template = template_file.read
+    template_file.close
+
+    summary = <<~EOS
+    This pull request adds the release notes for version #{version_number}.
+
+    - [ ] Update README (version number is done by bindings)
+    - [ ] Update CHANGELOG with any new features or breaking changes (be thorough when reviewing commit history)
+    - [ ] Update MIGRATING (if necessary)
+    EOS
+
+    template["<!-- Simple summary of what was changed. -->"] = summary
+    template
+end
+
+def open_pull_request(branch_name, title, body)
+    github_login.create_pull_request(
+      "stripe/stripe-android",
+      "master",
+      branch_name,
+      title,
+      body,
+      options
+    )
 end
 
 # Script start
@@ -74,19 +130,12 @@ validate_version_number(new_version_number)
 new_branch_name = "release/#{new_version_number}"
 action_title = "Update release notes for #{new_version_number}"
 
-# Pull the current state
-system("git checkout master")
-system("git pull")
+# Do changes
+pull_current_master
+update_changelog_on_new_branch(new_branch_name, new_version_number)
+push_changes(action_title)
 
-# Update the changelog on a new branch
-system("git checkout -b #{new_branch_name}")
-update_changelog(new_version_number)
-
-# Push the new branch
-system("git add CHANGELOG.md")
-system("git commit -m \"#{action_title}\"")
-system("git push -u origin")
-
-# Open the pull request creation page
-compare_url = "https://github.com/stripe/stripe-android/compare/master...#{new_branch_name}?expand=1"
-open_url(compare_url)
+# Make pull request
+pull_request_body = create_pull_request_body(new_version_number)
+response = open_pull_request(new_branch_name, action_title, pull_request_body)
+open_url(response.html_url)
