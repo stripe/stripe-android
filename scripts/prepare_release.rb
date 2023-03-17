@@ -45,7 +45,7 @@ def update_changelog(version)
   done = false
   final_lines = []
 
-  File.foreach('CHANGELOG.md') { |line|
+  File.foreach('CHANGELOG.md') do |line|
     is_line = line.include? "XX.XX.XX"
     final_lines.append(line)
 
@@ -55,7 +55,7 @@ def update_changelog(version)
         final_lines.append("\n")
         final_lines.append("## #{version} - #{date}\n")
     end
-  }
+  end
 
   File.write('CHANGELOG.md', final_lines.join(""))
 end
