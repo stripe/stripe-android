@@ -22,6 +22,9 @@ import java.text.BreakIterator
  * A [Text] composable that shows the middle part of the text if the text is too long to fit in the
  * given constraints.
  *
+ * Note: Middle ellipsis text is not yet supported in Compose. This is a temporary solution until
+ * the official support is added. see this issue for more details: https://issuetracker.google.com/issues/185418980
+ *
  **/
 @Composable
 internal fun MiddleEllipsisText(
