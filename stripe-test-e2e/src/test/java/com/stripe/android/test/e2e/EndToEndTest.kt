@@ -21,6 +21,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.runner.RunWith
 import kotlin.coroutines.resume
@@ -473,6 +474,7 @@ internal class EndToEndTest {
             .isEqualTo(StripeIntent.NextActionType.CashAppRedirect)
     }
 
+    @Ignore("Ignore until we can figure out how to create a new customer on every test run")
     @Test
     fun `test cashapp setup intent flow`() = runTest {
         val stripe = Stripe(context, settings.publishableKey)
