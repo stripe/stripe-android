@@ -51,7 +51,6 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.BulletItem
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
-import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenBottomSheet
@@ -140,17 +139,17 @@ private fun ConsentContent(
     }
 }
 
+/**
+ * Shows an empty screen without loading indicator to avoid flashing,
+ * as loading should be super fast.
+ */
 @Composable
 private fun ConsentLoadingContent() {
-    FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            LoadingContent()
-        }
+        // empty content.
     }
 }
 
