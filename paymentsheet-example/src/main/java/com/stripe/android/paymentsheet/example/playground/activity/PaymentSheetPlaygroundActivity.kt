@@ -559,15 +559,15 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         if (viewModel.initializationType.value == InitializationType.Normal) {
             val clientSecret = viewModel.clientSecret.value ?: return
 
-            if (viewModel.checkoutMode.value == CheckoutMode.Payment) {
-                flowController.configureWithPaymentIntent(
-                    paymentIntentClientSecret = clientSecret,
+            if (viewModel.checkoutMode.value == CheckoutMode.Setup) {
+                flowController.configureWithSetupIntent(
+                    setupIntentClientSecret = clientSecret,
                     configuration = makeConfiguration(),
                     callback = ::onConfigured,
                 )
             } else {
-                flowController.configureWithSetupIntent(
-                    setupIntentClientSecret = clientSecret,
+                flowController.configureWithPaymentIntent(
+                    paymentIntentClientSecret = clientSecret,
                     configuration = makeConfiguration(),
                     callback = ::onConfigured,
                 )
