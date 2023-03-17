@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Financial Connections
+* [FIXED][6375](https://github.com/stripe/stripe-android/pull/6375) Fixed Accessible data call out texts
+
 ### PaymentSheet
 * [FIXED][6366](https://github.com/stripe/stripe-android/pull/6366) Fixed an issue where the result couldn't be parsed in `PaymentSheetContract`.
 
