@@ -13,7 +13,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -128,15 +127,6 @@ private fun PaymentOption(
                 modifier = modifier,
             )
         }
-        is PaymentOptionsItem.Link -> {
-            Link(
-                width = width,
-                isEnabled = isEnabled,
-                isSelected = isSelected,
-                onItemSelected = onItemSelected,
-                modifier = modifier,
-            )
-        }
         is PaymentOptionsItem.SavedPaymentMethod -> {
             SavedPaymentMethod(
                 paymentMethod = item,
@@ -195,37 +185,6 @@ private fun GooglePay(
         labelText = stringResource(R.string.google_pay),
         description = stringResource(R.string.google_pay),
         onItemSelectedListener = { onItemSelected(PaymentSelection.GooglePay) },
-        modifier = modifier,
-    )
-}
-
-@Composable
-private fun Link(
-    width: Dp,
-    isEnabled: Boolean,
-    isSelected: Boolean,
-    onItemSelected: (PaymentSelection?) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val surfaceColor = MaterialTheme.stripeColors.component
-    val linkLogoColor = remember(surfaceColor) {
-        if (surfaceColor.shouldUseDarkDynamicColor()) {
-            Color.Black
-        } else {
-            Color.White
-        }
-    }
-
-    PaymentOptionUi(
-        viewWidth = width,
-        isEditing = false,
-        isSelected = isSelected,
-        isEnabled = isEnabled,
-        iconRes = R.drawable.stripe_link_mark,
-        iconTint = linkLogoColor,
-        labelText = stringResource(R.string.link),
-        description = stringResource(R.string.link),
-        onItemSelectedListener = { onItemSelected(PaymentSelection.Link) },
         modifier = modifier,
     )
 }

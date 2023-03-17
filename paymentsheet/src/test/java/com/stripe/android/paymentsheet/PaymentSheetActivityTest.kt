@@ -8,8 +8,6 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -34,9 +32,6 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -61,7 +56,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherP
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
@@ -82,7 +76,6 @@ import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -94,7 +87,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
 import org.robolectric.annotation.Config
 import javax.inject.Provider
@@ -212,42 +204,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `link button should not be enabled when editing`() {
-        val viewModel = createViewModel(isLinkAvailable = true)
-        val scenario = activityScenario(viewModel)
-
-        scenario.launch(intent).onActivity {
-            composeTestRule
-                .onNodeWithTag(LinkButtonTestTag)
-                .assertIsEnabled()
-
-            viewModel.toggleEditing()
-
-            composeTestRule
-                .onNodeWithTag(LinkButtonTestTag)
-                .assertIsNotEnabled()
-        }
-    }
-
-    @Test
-    fun `link button should not be enabled when processing`() {
-        val viewModel = createViewModel(isLinkAvailable = true)
-        val scenario = activityScenario(viewModel)
-
-        scenario.launch(intent).onActivity { activity ->
-            composeTestRule
-                .onNodeWithTag(LinkButtonTestTag)
-                .assertIsEnabled()
-
-            activity.viewBinding.buyButton.callOnClick()
-
-            composeTestRule
-                .onNodeWithTag(LinkButtonTestTag)
-                .assertIsNotEnabled()
-        }
-    }
-
-    @Test
     fun `Errors are cleared when checking out with a generic payment method`() {
         val scenario = activityScenario()
 
@@ -292,33 +248,6 @@ internal class PaymentSheetActivityTest {
 
             composeTestRule
                 .onNodeWithTag(GooglePayButton.TEST_TAG)
-                .performClick()
-
-            composeTestRule
-                .onNodeWithText(error)
-                .assertDoesNotExist()
-        }
-    }
-
-    @Test
-    fun `Errors are cleared when checking out with Link`() {
-        val viewModel = createViewModel(isLinkAvailable = true)
-        val scenario = activityScenario(viewModel)
-
-        scenario.launch(intent).onActivity {
-            val error = "some error"
-            composeTestRule
-                .onNodeWithText(error)
-                .assertDoesNotExist()
-
-            viewModel.onError(error)
-
-            composeTestRule
-                .onNodeWithText(error)
-                .assertExists()
-
-            composeTestRule
-                .onNodeWithTag(LinkButtonTestTag)
                 .performClick()
 
             composeTestRule
@@ -963,16 +892,9 @@ internal class PaymentSheetActivityTest {
         whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
         whenever(lpmRepository.serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
 
-        val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
-            onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
-            on { emailFlow } doReturn flowOf("email@email.com")
-        }
-
         registerFormViewModelInjector()
 
-        TestViewModelFactory.create(
-            linkLauncher = linkPaymentLauncher,
-        ) { linkHandler, savedStateHandle ->
+        TestViewModelFactory.create { savedStateHandle ->
             PaymentSheetViewModel(
                 ApplicationProvider.getApplicationContext(),
                 PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
@@ -984,10 +906,6 @@ internal class PaymentSheetActivityTest {
                     stripeIntent = paymentIntent,
                     customerPaymentMethods = paymentMethods,
                     isGooglePayAvailable = isGooglePayAvailable,
-                    linkState = LinkState(
-                        configuration = mock(),
-                        loginState = LinkState.LoginState.LoggedOut,
-                    ).takeIf { isLinkAvailable },
                     delay = loadDelay,
                 ),
                 FakeCustomerRepository(paymentMethods),
@@ -998,7 +916,6 @@ internal class PaymentSheetActivityTest {
                 Logger.noop(),
                 testDispatcher,
                 savedStateHandle = savedStateHandle,
-                linkHandler = linkHandler,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
             ).also {
                 it.injector = injector

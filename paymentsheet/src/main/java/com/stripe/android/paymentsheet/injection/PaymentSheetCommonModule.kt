@@ -19,9 +19,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentSheetLoader
-import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import dagger.Binds
 import dagger.Lazy
@@ -48,11 +46,6 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentSheetLoader): PaymentSheetLoader
-
-    @Binds
-    abstract fun bindsLinkAccountStatusProvider(
-        impl: DefaultLinkAccountStatusProvider,
-    ): LinkAccountStatusProvider
 
     @Binds
     abstract fun bindsIntentConfirmationInterceptor(

@@ -10,8 +10,6 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -24,7 +22,6 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
@@ -69,11 +66,7 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
             ),
             null
         )
-        TestViewModelFactory.create(
-            linkLauncher = mock<LinkPaymentLauncher>().apply {
-                whenever(getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
-            },
-        ) { linkHandler, savedStateHandle ->
+        TestViewModelFactory.create { savedStateHandle ->
             PaymentOptionsViewModel(
                 args,
                 prefsRepositoryFactory = {
@@ -86,7 +79,6 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
                 logger = Logger.noop(),
                 lpmRepository = lpmRepository,
                 savedStateHandle = savedStateHandle,
-                linkHandler = linkHandler,
             )
         }
     }

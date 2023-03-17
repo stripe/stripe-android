@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.model.PaymentDetailsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -127,62 +125,6 @@ class PaymentSheetEventTest {
     }
 
     @Test
-    fun `Link payment method event should return expected event`() {
-        val linkEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.Link,
-            durationMillis = 1L,
-            result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd"
-        )
-        assertThat(
-            linkEvent.eventName
-        ).isEqualTo(
-            "mc_complete_payment_link_success"
-        )
-        assertThat(
-            linkEvent.additionalParams
-        ).isEqualTo(
-            mapOf(
-                "locale" to "en_US",
-                "currency" to "usd",
-                "duration" to 0.001F
-            )
-        )
-    }
-
-    @Test
-    fun `Inline Link payment method event should return expected event`() {
-        val inlineLinkEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.New.LinkInline(
-                LinkPaymentDetails.New(
-                    PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                    mock(),
-                    mock()
-                )
-            ),
-            durationMillis = 1L,
-            result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd"
-        )
-        assertThat(
-            inlineLinkEvent.eventName
-        ).isEqualTo(
-            "mc_complete_payment_link_success"
-        )
-        assertThat(
-            inlineLinkEvent.additionalParams
-        ).isEqualTo(
-            mapOf(
-                "locale" to "en_US",
-                "currency" to "usd",
-                "duration" to 0.001F
-            )
-        )
-    }
-
-    @Test
     fun `New payment method failure event should return expected event`() {
         val newPMEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
@@ -252,62 +194,6 @@ class PaymentSheetEventTest {
         )
         assertThat(
             googlePayEvent.additionalParams
-        ).isEqualTo(
-            mapOf(
-                "locale" to "en_US",
-                "currency" to "usd",
-                "duration" to 0.001F
-            )
-        )
-    }
-
-    @Test
-    fun `Link payment method failure event should return expected event`() {
-        val linkEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.Link,
-            durationMillis = 1L,
-            result = PaymentSheetEvent.Payment.Result.Failure,
-            currency = "usd"
-        )
-        assertThat(
-            linkEvent.eventName
-        ).isEqualTo(
-            "mc_complete_payment_link_failure"
-        )
-        assertThat(
-            linkEvent.additionalParams
-        ).isEqualTo(
-            mapOf(
-                "locale" to "en_US",
-                "currency" to "usd",
-                "duration" to 0.001F
-            )
-        )
-    }
-
-    @Test
-    fun `Inline Link payment method failure event should return expected event`() {
-        val inlineLinkEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.New.LinkInline(
-                LinkPaymentDetails.New(
-                    PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                    mock(),
-                    mock()
-                )
-            ),
-            durationMillis = 1L,
-            result = PaymentSheetEvent.Payment.Result.Failure,
-            currency = "usd"
-        )
-        assertThat(
-            inlineLinkEvent.eventName
-        ).isEqualTo(
-            "mc_complete_payment_link_failure"
-        )
-        assertThat(
-            inlineLinkEvent.additionalParams
         ).isEqualTo(
             mapOf(
                 "locale" to "en_US",

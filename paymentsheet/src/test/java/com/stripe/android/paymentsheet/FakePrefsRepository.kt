@@ -8,16 +8,13 @@ internal class FakePrefsRepository : PrefsRepository {
 
     private var savedSelection: SavedSelection = SavedSelection.None
 
-    override suspend fun getSavedSelection(isGooglePayAvailable: Boolean, isLinkAvailable: Boolean): SavedSelection =
+    override suspend fun getSavedSelection(isGooglePayAvailable: Boolean): SavedSelection =
         savedSelection
 
     override fun savePaymentSelection(paymentSelection: PaymentSelection?) {
         paymentSelectionArgs.add(paymentSelection)
 
         when (paymentSelection) {
-            is PaymentSelection.Link -> {
-                SavedSelection.Link
-            }
             PaymentSelection.GooglePay -> {
                 SavedSelection.GooglePay
             }
@@ -26,7 +23,6 @@ internal class FakePrefsRepository : PrefsRepository {
             }
             is PaymentSelection.New.Card,
             is PaymentSelection.New.GenericPaymentMethod,
-            is PaymentSelection.New.LinkInline,
             is PaymentSelection.New.USBankAccount,
             null -> SavedSelection.None
         }.let {

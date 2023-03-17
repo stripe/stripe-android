@@ -83,7 +83,7 @@ internal open class BasePaymentSheetViewModelInjectionTest {
         customerRepositoryPMs: List<PaymentMethod> = emptyList(),
         args: PaymentSheetContractV2.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): PaymentSheetViewModel = runBlocking {
-        TestViewModelFactory.create { linkHandler, savedStateHandle ->
+        TestViewModelFactory.create { savedStateHandle ->
             PaymentSheetViewModel(
                 ApplicationProvider.getApplicationContext(),
                 args,
@@ -117,7 +117,6 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                 Logger.noop(),
                 testDispatcher,
                 savedStateHandle = savedStateHandle,
-                linkHandler = linkHandler,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
             )
         }

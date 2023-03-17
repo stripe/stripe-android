@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import org.mockito.kotlin.mock
 
@@ -92,7 +91,6 @@ internal object PaymentSheetFixtures {
             config = CONFIG_GOOGLEPAY,
             isGooglePayReady = false,
             newPaymentSelection = null,
-            linkState = null,
             savedSelection = SavedSelection.None,
         ),
         statusBarColor = STATUS_BAR_COLOR,
@@ -107,7 +105,6 @@ internal object PaymentSheetFixtures {
         stripeIntent: StripeIntent = state.stripeIntent,
         config: PaymentSheet.Configuration? = state.config,
         newPaymentSelection: PaymentSelection.New? = state.newPaymentSelection,
-        linkState: LinkState? = state.linkState,
     ): PaymentOptionContract.Args {
         return copy(
             state = state.copy(
@@ -116,7 +113,6 @@ internal object PaymentSheetFixtures {
                 stripeIntent = stripeIntent,
                 config = config,
                 newPaymentSelection = newPaymentSelection,
-                linkState = linkState,
             ),
         )
     }

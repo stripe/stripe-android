@@ -28,7 +28,6 @@ class PaymentOptionsScreenshotTest {
                 state = PaymentOptionsState(
                     items = listOf(
                         PaymentOptionsItem.AddCard,
-                        PaymentOptionsItem.Link,
                     ),
                     selectedIndex = 1,
                 ),

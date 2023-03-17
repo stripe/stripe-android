@@ -17,23 +17,18 @@ internal object FormArgumentsFactory {
         merchantName: String,
         amount: Amount? = null,
         newLpm: PaymentSelection.New?,
-        isShowingLinkInlineSignup: Boolean = false,
     ): FormArguments {
         val layoutFormDescriptor = paymentMethod.getPMAddForm(stripeIntent, config)
 
-        val initialParams = if (newLpm is PaymentSelection.New.LinkInline) {
-            newLpm.linkPaymentDetails.originalParams
-        } else {
-            newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
-                it == paymentMethod.code
-            }?.let {
-                when (newLpm) {
-                    is PaymentSelection.New.GenericPaymentMethod ->
-                        newLpm.paymentMethodCreateParams
-                    is PaymentSelection.New.Card ->
-                        newLpm.paymentMethodCreateParams
-                    else -> null
-                }
+        val initialParams = newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
+            it == paymentMethod.code
+        }?.let {
+            when (newLpm) {
+                is PaymentSelection.New.GenericPaymentMethod ->
+                    newLpm.paymentMethodCreateParams
+                is PaymentSelection.New.Card ->
+                    newLpm.paymentMethodCreateParams
+                else -> null
             }
         }
 
@@ -45,7 +40,7 @@ internal object FormArgumentsFactory {
 
         return FormArguments(
             paymentMethodCode = paymentMethod.code,
-            showCheckbox = layoutFormDescriptor.showCheckbox && !isShowingLinkInlineSignup,
+            showCheckbox = layoutFormDescriptor.showCheckbox,
             showCheckboxControlledFields = showCheckboxControlledFields,
             merchantName = merchantName,
             amount = amount,

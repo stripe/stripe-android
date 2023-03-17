@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -38,7 +37,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -54,7 +52,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     logger: Logger,
     lpmRepository: LpmRepository,
     savedStateHandle: SavedStateHandle,
-    linkHandler: LinkHandler,
 ) : BaseSheetViewModel(
     application = application,
     config = args.state.config,
@@ -65,7 +62,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     logger = logger,
     lpmRepository = lpmRepository,
     savedStateHandle = savedStateHandle,
-    linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
 ) {
 
@@ -104,17 +100,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             GooglePayState.NotAvailable
         }
 
-        val linkState = args.state.linkState
-
-        viewModelScope.launch {
-            linkHandler.processingState.collect { processingState ->
-                handleLinkProcessingState(processingState)
-            }
-        }
-
-        linkHandler.linkInlineSelection.value = args.state.newPaymentSelection as? PaymentSelection.New.LinkInline
-        linkHandler.prepareLink(linkState)
-
         // After recovering from don't keep activities the stripe intent will be saved,
         // calling setStripeIntent would require the repository be initialized, which
         // would not be the case.
@@ -128,51 +113,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         lpmServerSpec = lpmRepository.serverSpecLoadingState.serverLpmSpecs
 
         transitionToFirstScreen()
-    }
-
-    override val shouldCompleteLinkFlowInline: Boolean = false
-
-    private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
-        when (processingState) {
-            LinkHandler.ProcessingState.Cancelled -> {
-                onPaymentResult(PaymentResult.Canceled)
-            }
-            LinkHandler.ProcessingState.Completed -> {
-                eventReporter.onPaymentSuccess(
-                    PaymentSelection.Link,
-                    stripeIntent.value?.currency
-                )
-                prefsRepository.savePaymentSelection(PaymentSelection.Link)
-                onPaymentResult(PaymentResult.Completed)
-            }
-            is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
-                setContentVisible(true)
-                onPaymentResult(processingState.result)
-            }
-            is LinkHandler.ProcessingState.Error -> {
-                onError(processingState.message)
-            }
-            LinkHandler.ProcessingState.Launched -> {
-                setContentVisible(false)
-            }
-            is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                processingState.details?.let {
-                    // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-                    updateSelection(PaymentSelection.New.LinkInline(it))
-                    onUserSelection()
-                } ?: run {
-                    // Creating Link PaymentDetails failed, fallback to regular checkout.
-                    // paymentSelection is already set to the card parameters from the form.
-                    onUserSelection()
-                }
-            }
-            LinkHandler.ProcessingState.Ready -> {
-                updatePrimaryButtonState(PrimaryButton.State.Ready)
-            }
-            LinkHandler.ProcessingState.Started -> {
-                updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
-            }
-        }
     }
 
     override fun onFatal(throwable: Throwable) {
@@ -215,7 +155,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             when (paymentSelection) {
                 is PaymentSelection.Saved,
                 is PaymentSelection.GooglePay,
-                is PaymentSelection.Link -> processExistingPaymentMethod(paymentSelection)
                 is PaymentSelection.New -> processNewPaymentMethod(paymentSelection)
             }
         }
@@ -237,16 +176,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun clearErrorMessages() {
         _error.value = null
-    }
-
-    private fun processExistingPaymentMethod(paymentSelection: PaymentSelection) {
-        prefsRepository.savePaymentSelection(paymentSelection)
-        _paymentOptionResult.tryEmit(
-            PaymentOptionResult.Succeeded(
-                paymentSelection = paymentSelection,
-                paymentMethods = paymentMethods.value
-            )
-        )
     }
 
     private fun processNewPaymentMethod(paymentSelection: PaymentSelection) {

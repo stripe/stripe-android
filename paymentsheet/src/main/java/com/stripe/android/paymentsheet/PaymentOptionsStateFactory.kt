@@ -18,7 +18,6 @@ internal object PaymentOptionsStateFactory {
     fun create(
         paymentMethods: List<PaymentMethod>,
         showGooglePay: Boolean,
-        showLink: Boolean,
         initialSelection: SavedSelection,
         currentSelection: PaymentSelection? = null,
         nameProvider: (PaymentMethodCode?) -> String,
@@ -26,7 +25,6 @@ internal object PaymentOptionsStateFactory {
         val items = listOfNotNull(
             PaymentOptionsItem.AddCard,
             PaymentOptionsItem.GooglePay.takeIf { showGooglePay },
-            PaymentOptionsItem.Link.takeIf { showLink }
         ) + sortedPaymentMethods(paymentMethods, initialSelection).map {
             PaymentOptionsItem.SavedPaymentMethod(
                 displayName = nameProvider(it.type?.code),
@@ -86,7 +84,6 @@ internal fun List<PaymentOptionsItem>.findInitialSelectedPosition(
         indexOfFirst { item ->
             val b = when (savedSelection) {
                 SavedSelection.GooglePay -> item is PaymentOptionsItem.GooglePay
-                SavedSelection.Link -> item is PaymentOptionsItem.Link
                 is SavedSelection.PaymentMethod -> {
                     when (item) {
                         is PaymentOptionsItem.SavedPaymentMethod -> {
@@ -104,9 +101,6 @@ internal fun List<PaymentOptionsItem>.findInitialSelectedPosition(
         // Google Pay
         indexOfFirst { it is PaymentOptionsItem.GooglePay }.takeIf { it != -1 },
 
-        // Link
-        indexOfFirst { it is PaymentOptionsItem.Link }.takeIf { it != -1 },
-
         // the first payment method
         indexOfFirst { it is PaymentOptionsItem.SavedPaymentMethod }.takeIf { it != -1 }
     ).firstOrNull() ?: -1
@@ -119,7 +113,6 @@ private fun List<PaymentOptionsItem>.findSelectedPosition(paymentSelection: Paym
     return indexOfFirst { item ->
         when (paymentSelection) {
             is PaymentSelection.GooglePay -> item is PaymentOptionsItem.GooglePay
-            is PaymentSelection.Link -> item is PaymentOptionsItem.Link
             is PaymentSelection.Saved -> {
                 when (item) {
                     is PaymentOptionsItem.SavedPaymentMethod -> {
@@ -137,7 +130,6 @@ internal fun PaymentOptionsItem.toPaymentSelection(): PaymentSelection? {
     return when (this) {
         is PaymentOptionsItem.AddCard -> null
         is PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay
-        is PaymentOptionsItem.Link -> PaymentSelection.Link
         is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(paymentMethod)
     }
 }

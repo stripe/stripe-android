@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.CreateIntentCallback
 import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
 import com.stripe.android.IntentConfirmationInterceptor
-import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -1065,21 +1064,6 @@ class PaymentSheet internal constructor(
                     paymentResultCallback
                 ).create()
             }
-        }
-    }
-
-    companion object {
-        /**
-         * Deletes all persisted authentication state associated with a customer.
-         *
-         * You must call this method when the user logs out from your app.
-         * This will ensure that any persisted authentication state in PaymentSheet, such as
-         * authentication cookies, is also cleared during logout.
-         *
-         * @param context the Application [Context].
-         */
-        fun resetCustomer(context: Context) {
-            CookieStore(context).clear()
         }
     }
 }

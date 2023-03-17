@@ -25,8 +25,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -54,7 +52,6 @@ import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import org.junit.Rule
@@ -62,7 +59,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
 import org.robolectric.annotation.Config
 import javax.inject.Provider
@@ -398,12 +394,7 @@ internal class PaymentOptionsActivityTest {
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS
     ): PaymentOptionsViewModel {
-        val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
-            onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
-        }
-        return TestViewModelFactory.create(
-            linkLauncher = linkPaymentLauncher,
-        ) { linkHandler, savedStateHandle ->
+        return TestViewModelFactory.create { savedStateHandle ->
             registerFormViewModelInjector()
             PaymentOptionsViewModel(
                 args = args,
@@ -415,7 +406,6 @@ internal class PaymentOptionsActivityTest {
                 logger = Logger.noop(),
                 lpmRepository = lpmRepository,
                 savedStateHandle = savedStateHandle,
-                linkHandler = linkHandler,
             ).also {
                 it.injector = injector
             }

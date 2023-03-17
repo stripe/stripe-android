@@ -15,8 +15,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -35,15 +33,9 @@ internal fun AddPaymentMethod(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val linkHandler = sheetViewModel.linkHandler
     val showCheckboxFlow = remember { MutableStateFlow(false) }
 
     val processing by sheetViewModel.processing.collectAsState(false)
-
-    val linkConfig by linkHandler.linkConfiguration.collectAsState()
-    val linkAccountStatus by linkConfig?.let {
-        linkHandler.linkLauncher.getAccountStatusFlow(it).collectAsState(null)
-    } ?: mutableStateOf(null)
 
     var selectedPaymentMethodCode: String by rememberSaveable {
         mutableStateOf(sheetViewModel.initiallySelectedPaymentMethodType)
@@ -55,35 +47,12 @@ internal fun AddPaymentMethod(
         }
     }
 
-    val showLinkInlineSignup = sheetViewModel.showLinkInlineSignupView(
-        selectedPaymentMethodCode,
-        linkAccountStatus
-    )
-
-    val arguments = remember(selectedItem, showLinkInlineSignup) {
-        sheetViewModel.createFormArguments(selectedItem, showLinkInlineSignup)
+    val arguments = remember(selectedItem) {
+        sheetViewModel.createFormArguments(selectedItem)
     }
 
     LaunchedEffect(arguments) {
         showCheckboxFlow.emit(arguments.showCheckbox)
-    }
-
-    val paymentSelection by sheetViewModel.selection.collectAsState()
-    val linkInlineSelection by linkHandler.linkInlineSelection.collectAsState()
-    var linkSignupState by remember {
-        mutableStateOf<InlineSignupViewState?>(null)
-    }
-
-    LaunchedEffect(paymentSelection, linkSignupState, linkInlineSelection) {
-        val state = linkSignupState
-        val isUsingLinkInline = linkInlineSelection != null &&
-            paymentSelection is PaymentSelection.New.Card
-
-        if (state != null) {
-            sheetViewModel.updatePrimaryButtonForLinkSignup(state)
-        } else if (isUsingLinkInline) {
-            sheetViewModel.updatePrimaryButtonForLinkInline()
-        }
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
@@ -95,16 +64,11 @@ internal fun AddPaymentMethod(
                 enabled = !processing,
                 supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
                 selectedItem = selectedItem,
-                showLinkInlineSignup = showLinkInlineSignup,
-                linkPaymentLauncher = linkHandler.linkLauncher,
                 showCheckboxFlow = showCheckboxFlow,
                 onItemSelectedListener = { selectedLpm ->
                     if (selectedItem != selectedLpm) {
                         selectedPaymentMethodCode = selectedLpm.code
                     }
-                },
-                onLinkSignupStateChanged = { _, inlineSignupViewState ->
-                    linkSignupState = inlineSignupViewState
                 },
                 formArguments = arguments,
                 onFormFieldValuesChanged = { formValues ->
@@ -121,29 +85,11 @@ internal fun AddPaymentMethod(
 
 private val BaseSheetViewModel.initiallySelectedPaymentMethodType: PaymentMethodCode
     get() = when (val selection = newPaymentSelection) {
-        is PaymentSelection.New.LinkInline -> PaymentMethod.Type.Card.code
         is PaymentSelection.New.Card,
         is PaymentSelection.New.USBankAccount,
         is PaymentSelection.New.GenericPaymentMethod -> selection.paymentMethodCreateParams.typeCode
         else -> supportedPaymentMethods.first().code
     }
-
-private fun BaseSheetViewModel.showLinkInlineSignupView(
-    paymentMethodCode: String,
-    linkAccountStatus: AccountStatus?
-): Boolean {
-    val validStatusStates = setOf(
-        AccountStatus.Verified,
-        AccountStatus.NeedsVerification,
-        AccountStatus.VerificationStarted,
-        AccountStatus.SignedOut,
-    )
-    val linkInlineSelectionValid = linkHandler.linkInlineSelection.value != null
-    return linkHandler.isLinkEnabled.value == true && stripeIntent.value
-        ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
-        paymentMethodCode == PaymentMethod.Type.Card.code &&
-        (linkAccountStatus in validStatusStates || linkInlineSelectionValid)
-}
 
 @VisibleForTesting
 internal fun FormFieldValues.transformToPaymentSelection(

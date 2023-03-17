@@ -181,8 +181,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         ) = when (paymentSelection) {
             PaymentSelection.GooglePay -> "googlepay"
             is PaymentSelection.Saved -> "savedpm"
-            PaymentSelection.Link,
-            is PaymentSelection.New.LinkInline -> "link"
             is PaymentSelection.New -> "newpm"
             else -> "unknown"
         }

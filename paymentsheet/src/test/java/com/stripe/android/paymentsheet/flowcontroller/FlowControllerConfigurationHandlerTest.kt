@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
-import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.view.ActivityScenarioFactory
@@ -83,7 +82,6 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(countDownLatch.await(0, TimeUnit.SECONDS)).isTrue()
         assertThat(viewModel.initializationMode).isNotNull()
         assertThat(viewModel.previousElementsSessionParams).isNotNull()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
         assertThat(viewModel.state).isNotNull()
         verify(eventReporter)
             .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
@@ -140,7 +138,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(viewModel.previousElementsSessionParams).isNotSameInstanceAs(
             differentElementsSessionParams
         )
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
 
         // We're running a new config, so we DO expect an interaction.
         verify(eventReporter)
@@ -249,11 +247,7 @@ class FlowControllerConfigurationHandlerTest {
         return FakePaymentSheetLoader(
             customerPaymentMethods = emptyList(),
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            savedSelection = SavedSelection.Link,
-            linkState = LinkState(
-                configuration = mock(),
-                loginState = LinkState.LoginState.LoggedIn,
-            ),
+            savedSelection = SavedSelection.GooglePay,
         )
     }
 

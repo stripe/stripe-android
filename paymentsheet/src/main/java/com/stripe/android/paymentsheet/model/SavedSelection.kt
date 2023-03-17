@@ -8,9 +8,6 @@ internal sealed class SavedSelection : Parcelable {
     object GooglePay : SavedSelection()
 
     @Parcelize
-    object Link : SavedSelection()
-
-    @Parcelize
     data class PaymentMethod(
         val id: String
     ) : SavedSelection()

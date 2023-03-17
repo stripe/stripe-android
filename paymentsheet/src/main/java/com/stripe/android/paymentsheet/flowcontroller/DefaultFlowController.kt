@@ -20,9 +20,6 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -55,7 +52,6 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -85,7 +81,6 @@ internal class DefaultFlowController @Inject internal constructor(
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
-    private val linkLauncher: LinkPaymentLauncher,
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
 ) : PaymentSheet.FlowController, NonFallbackInjector {
@@ -139,17 +134,11 @@ internal class DefaultFlowController @Inject internal constructor(
                     ).also {
                         it.registerPollingAuthenticator()
                     }
-
-                    linkLauncher.register(
-                        activityResultCaller = activityResultCaller,
-                        callback = ::onLinkActivityResult,
-                    )
                 }
 
                 override fun onDestroy(owner: LifecycleOwner) {
                     paymentLauncher?.unregisterPollingAuthenticator()
                     paymentLauncher = null
-                    linkLauncher.unregister()
                 }
             }
         )
@@ -255,8 +244,6 @@ internal class DefaultFlowController @Inject internal constructor(
 
         when (val paymentSelection = viewModel.paymentSelection) {
             PaymentSelection.GooglePay -> launchGooglePay(state)
-            PaymentSelection.Link,
-            is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
             else -> confirmPaymentSelection(paymentSelection, state)
         }
     }
@@ -388,9 +375,6 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun onLinkActivityResult(result: LinkActivityResult) =
-        onPaymentResult(result.convertToPaymentResult())
-
     @JvmSynthetic
     internal fun onPaymentOptionResult(
         paymentOptionResult: PaymentOptionResult?
@@ -451,35 +435,6 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun confirmLink(
-        paymentSelection: PaymentSelection,
-        state: PaymentSheetState.Full
-    ) {
-        val linkConfig = requireNotNull(state.linkState).configuration
-
-        lifecycleScope.launch {
-            val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
-
-            val linkInline = (paymentSelection as? PaymentSelection.New.LinkInline)?.takeIf {
-                accountStatus == AccountStatus.Verified
-            }
-
-            if (linkInline != null) {
-                // If a returning user is paying with a new card inline, launch Link
-                linkLauncher.present(
-                    configuration = linkConfig,
-                    prefilledNewCardParams = linkInline.linkPaymentDetails.originalParams,
-                )
-            } else if (paymentSelection is PaymentSelection.Link) {
-                // User selected Link as the payment method, not inline
-                linkLauncher.present(linkConfig)
-            } else {
-                // New user paying inline, complete without launching Link
-                confirmPaymentSelection(paymentSelection, state)
-            }
-        }
-    }
-
     private fun launchGooglePay(state: PaymentSheetState.Full) {
         // state.config.googlePay is guaranteed not to be null or GooglePay would be disabled
         val config = requireNotNull(state.config)
@@ -513,12 +468,6 @@ internal class DefaultFlowController @Inject internal constructor(
         is PaymentResult.Completed -> PaymentSheetResult.Completed
         is PaymentResult.Canceled -> PaymentSheetResult.Canceled
         is PaymentResult.Failed -> PaymentSheetResult.Failed(throwable)
-    }
-
-    private fun LinkActivityResult.convertToPaymentResult() = when (this) {
-        is LinkActivityResult.Completed -> PaymentResult.Completed
-        is LinkActivityResult.Canceled -> PaymentResult.Canceled
-        is LinkActivityResult.Failed -> PaymentResult.Failed(error)
     }
 
     class GooglePayException(

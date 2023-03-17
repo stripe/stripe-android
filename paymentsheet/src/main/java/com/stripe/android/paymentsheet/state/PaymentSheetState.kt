@@ -20,17 +20,15 @@ internal sealed interface PaymentSheetState : Parcelable {
         val customerPaymentMethods: List<PaymentMethod>,
         val savedSelection: SavedSelection,
         val isGooglePayReady: Boolean,
-        val linkState: LinkState?,
         val newPaymentSelection: PaymentSelection.New?,
     ) : PaymentSheetState {
 
         val hasPaymentOptions: Boolean
-            get() = isGooglePayReady || linkState != null || customerPaymentMethods.isNotEmpty()
+            get() = isGooglePayReady || customerPaymentMethods.isNotEmpty()
 
         val initialPaymentSelection: PaymentSelection?
             get() = when (savedSelection) {
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                is SavedSelection.Link -> PaymentSelection.Link
                 is SavedSelection.PaymentMethod -> {
                     val paymentMethod = customerPaymentMethods.firstOrNull {
                         it.id == savedSelection.id

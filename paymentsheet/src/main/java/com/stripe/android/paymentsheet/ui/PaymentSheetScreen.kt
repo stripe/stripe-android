@@ -4,9 +4,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,8 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
-import com.stripe.android.link.ui.LinkButton
-import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentSheetPrimaryButtonBinding
@@ -72,8 +68,6 @@ internal fun PaymentSheetScreenContent(
     viewModel: PaymentSheetViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val showLinkDialog by viewModel.linkHandler.showLinkVerificationDialog.collectAsState()
-
     val headerText by viewModel.headerText.collectAsState(null)
     val buyButtonState by viewModel.buyButtonState.collectAsState(initial = null)
 
@@ -85,13 +79,6 @@ internal fun PaymentSheetScreenContent(
     )
 
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-
-    if (showLinkDialog) {
-        LinkVerificationDialog(
-            linkLauncher = viewModel.linkHandler.linkLauncher,
-            onResult = viewModel.linkHandler::handleLinkVerificationResult,
-        )
-    }
 
     Column(
         modifier = modifier.padding(bottom = bottomPadding),
@@ -144,7 +131,6 @@ internal fun Wallet(
         initial = WalletsContainerState(),
     )
 
-    val email by viewModel.linkHandler.linkLauncher.emailFlow.collectAsState(initial = null)
     val googlePayButtonState by viewModel.googlePayButtonState.collectAsState(initial = null)
     val buttonsEnabled by viewModel.buttonsEnabled.collectAsState(initial = false)
 
@@ -158,18 +144,6 @@ internal fun Wallet(
                     isEnabled = buttonsEnabled,
                     onPressed = viewModel::checkoutWithGooglePay,
                     modifier = Modifier.padding(top = 7.dp),
-                )
-            }
-
-            if (containerState.showLink) {
-                LinkButton(
-                    email = email,
-                    enabled = buttonsEnabled,
-                    onClick = viewModel::handleLinkPressed,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 6.dp)
-                        .requiredHeight(48.dp),
                 )
             }
 

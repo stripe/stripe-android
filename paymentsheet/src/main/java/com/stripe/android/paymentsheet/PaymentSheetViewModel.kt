@@ -54,7 +54,6 @@ import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -93,7 +92,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     logger: Logger,
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
-    linkHandler: LinkHandler,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
 ) : BaseSheetViewModel(
     application = application,
@@ -105,7 +103,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     logger = logger,
     lpmRepository = lpmRepository,
     savedStateHandle = savedStateHandle,
-    linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = true),
 ) {
 
@@ -174,12 +171,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     )
 
     internal val walletsContainerState: Flow<WalletsContainerState> = combine(
-        linkHandler.isLinkEnabled,
         googlePayState,
         supportedPaymentMethodsFlow,
-    ) { isLinkAvailable, googlePayState, paymentMethodTypes ->
+    ) { googlePayState, paymentMethodTypes ->
         WalletsContainerState(
-            showLink = isLinkAvailable == true,
             showGooglePay = googlePayState.isReadyForUse,
             dividerTextResource = if (paymentMethodTypes.singleOrNull() == Card.code) {
                 R.string.stripe_paymentsheet_or_pay_with_card
@@ -192,63 +187,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private var paymentLauncher: StripePaymentLauncher? = null
 
     init {
-        viewModelScope.launch {
-            linkHandler.processingState.collect { processingState ->
-                handleLinkProcessingState(processingState)
-            }
-        }
-
         eventReporter.onInit(config)
 
         viewModelScope.launch {
             loadPaymentSheetState()
-        }
-    }
-
-    override val shouldCompleteLinkFlowInline: Boolean = true
-
-    fun handleLinkPressed() {
-        linkHandler.launchLink()
-    }
-
-    private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
-        when (processingState) {
-            LinkHandler.ProcessingState.Cancelled -> {
-                _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
-            }
-            LinkHandler.ProcessingState.Completed -> {
-                eventReporter.onPaymentSuccess(PaymentSelection.Link, stripeIntent.value?.currency)
-                prefsRepository.savePaymentSelection(PaymentSelection.Link)
-                _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
-            }
-            is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
-                setContentVisible(true)
-                onPaymentResult(processingState.result)
-            }
-            is LinkHandler.ProcessingState.Error -> {
-                onError(processingState.message)
-            }
-            LinkHandler.ProcessingState.Launched -> {
-                setContentVisible(false)
-                startProcessing(CheckoutIdentifier.SheetBottomBuy)
-            }
-            is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                processingState.details?.let {
-                    // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-                    updateSelection(PaymentSelection.New.LinkInline(it))
-                    checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
-                } ?: run {
-                    // Link PaymentDetails creating failed, fallback to regular checkout.
-                    // paymentSelection is already set to the card parameters from the form.
-                    checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
-                }
-            }
-            LinkHandler.ProcessingState.Ready -> {
-                updatePrimaryButtonState(PrimaryButton.State.Ready)
-            }
-            LinkHandler.ProcessingState.Started -> {
-                updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
-            }
         }
     }
 
@@ -281,10 +223,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         setStripeIntent(state.stripeIntent)
-
-        val linkState = state.linkState
-
-        linkHandler.setupLinkLaunchingEagerly(viewModelScope, linkState)
 
         resetViewState()
         transitionToFirstScreen()
@@ -408,8 +346,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * Must be called from the Activity's `onCreate`.
      */
     fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
-        linkHandler.registerFromActivity(activityResultCaller)
-
         paymentLauncher = paymentLauncherFactory.create(
             { lazyPaymentConfig.get().publishableKey },
             { lazyPaymentConfig.get().stripeAccountId },
@@ -429,7 +365,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     fun unregisterFromActivity() {
         paymentLauncher?.unregisterPollingAuthenticator()
         paymentLauncher = null
-        linkHandler.unregisterFromActivity()
     }
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
@@ -485,7 +420,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
                 // SavedSelection needs to happen after new cards have been saved.
                 when (selection.value) {
-                    is PaymentSelection.New.LinkInline -> PaymentSelection.Link
                     is PaymentSelection.New -> stripeIntent.paymentMethod?.let {
                         PaymentSelection.Saved(it)
                     }

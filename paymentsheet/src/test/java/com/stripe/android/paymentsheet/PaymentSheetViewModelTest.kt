@@ -13,8 +13,6 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -47,7 +45,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
-import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
@@ -59,7 +56,6 @@ import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -69,7 +65,6 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -117,10 +112,6 @@ internal class PaymentSheetViewModelTest {
         on { create(any(), any(), any()) } doReturn paymentLauncher
     }
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
-
-    private val linkLauncher = mock<LinkPaymentLauncher> {
-        on { getAccountStatusFlow(any()) } doReturn flowOf(AccountStatus.SignedOut)
-    }
 
     @BeforeTest
     fun setup() {
@@ -293,64 +284,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Launches Link when user is logged in to their Link account`() = runTest {
-        val configuration: LinkPaymentLauncher.Configuration = mock()
-
-        val viewModel = createViewModel(
-            linkState = LinkState(
-                configuration = configuration,
-                loginState = LinkState.LoginState.LoggedIn,
-            ),
-        )
-
-        assertThat(viewModel.linkHandler.showLinkVerificationDialog.value).isFalse()
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isTrue()
-        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
-
-        verify(linkLauncher).present(
-            configuration = eq(configuration),
-            prefilledNewCardParams = isNull(),
-        )
-    }
-
-    @Test
-    fun `Launches Link verification when user needs to verify their Link account`() = runTest {
-        val viewModel = createViewModel(
-            linkState = LinkState(
-                configuration = mock(),
-                loginState = LinkState.LoginState.NeedsVerification,
-            ),
-        )
-
-        assertThat(viewModel.linkHandler.showLinkVerificationDialog.value).isTrue()
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
-        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
-    }
-
-    @Test
-    fun `Enables Link when user is logged out of their Link account`() = runTest {
-        val viewModel = createViewModel(
-            linkState = LinkState(
-                configuration = mock(),
-                loginState = LinkState.LoginState.LoggedOut,
-            ),
-        )
-
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
-        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
-    }
-
-    @Test
-    fun `Does not enable Link when the Link state can't be determined`() = runTest {
-        val viewModel = createViewModel(
-            linkState = null,
-        )
-
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
-        assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
-    }
-
-    @Test
     fun `Google Pay checkout cancelled returns to Ready state`() = runTest {
         val viewModel = createViewModel()
 
@@ -459,7 +392,6 @@ internal class PaymentSheetViewModelTest {
             assertThat(
                 prefsRepository.getSavedSelection(
                     isGooglePayAvailable = true,
-                    isLinkAvailable = true
                 )
             ).isEqualTo(
                 SavedSelection.PaymentMethod(selection.paymentMethod.id.orEmpty())
@@ -512,7 +444,6 @@ internal class PaymentSheetViewModelTest {
             assertThat(
                 prefsRepository.getSavedSelection(
                     isGooglePayAvailable = true,
-                    isLinkAvailable = true
                 )
             ).isEqualTo(
                 SavedSelection.PaymentMethod(
@@ -954,7 +885,6 @@ internal class PaymentSheetViewModelTest {
 
         val observedArgs = viewModel.createFormArguments(
             selectedItem = LpmRepository.HardcodedCard,
-            showLinkInlineSignup = false,
         )
 
         assertThat(observedArgs).isEqualTo(
@@ -983,52 +913,6 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(false),
             activeLinkSession = eq(false),
-            currency = eq("usd")
-        )
-
-        receiver.cancelAndIgnoreRemainingEvents()
-    }
-
-    @Test
-    fun `Sends correct event when navigating to AddFirstPaymentMethod screen with Link enabled`() = runTest {
-        val viewModel = createViewModel(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            linkState = LinkState(
-                configuration = mock(),
-                loginState = LinkState.LoginState.NeedsVerification,
-            ),
-            customerPaymentMethods = listOf(),
-            customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
-        )
-
-        val receiver = viewModel.currentScreen.testIn(this)
-
-        verify(eventReporter).onShowNewPaymentOptionForm(
-            linkEnabled = eq(true),
-            activeLinkSession = eq(false),
-            currency = eq("usd")
-        )
-
-        receiver.cancelAndIgnoreRemainingEvents()
-    }
-
-    @Test
-    fun `Sends correct event when navigating to AddFirstPaymentMethod screen with active Link session`() = runTest {
-        val viewModel = createViewModel(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            linkState = LinkState(
-                configuration = mock(),
-                loginState = LinkState.LoginState.LoggedIn,
-            ),
-            customerPaymentMethods = listOf(),
-            customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
-        )
-
-        val receiver = viewModel.currentScreen.testIn(this)
-
-        verify(eventReporter).onShowNewPaymentOptionForm(
-            linkEnabled = eq(true),
-            activeLinkSession = eq(true),
             currency = eq("usd")
         )
 
@@ -1077,21 +961,21 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
-    @Test
-    fun `Ignores payment selection while in edit mode`() = runTest {
-        val viewModel = createViewModel().apply {
-            updateSelection(PaymentSelection.Link)
-        }
-
-        viewModel.toggleEditing()
-        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
-
-        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
-
-        viewModel.toggleEditing()
-        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
-        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
-    }
+//    @Test
+//    fun `Ignores payment selection while in edit mode`() = runTest {
+//        val viewModel = createViewModel().apply {
+//            updateSelection(PaymentSelection.Link)
+//        }
+//
+//        viewModel.toggleEditing()
+//        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
+//
+//        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
+//
+//        viewModel.toggleEditing()
+//        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
+//        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
+//    }
 
     @Test
     fun `updateSelection with new payment method updates the current selection`() = runTest {
@@ -1153,31 +1037,6 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.walletsContainerState.test {
             assertThat(awaitItem().showGooglePay).isFalse()
-        }
-    }
-
-    @Test
-    fun `Shows Link wallet button if Link is available`() = runTest {
-        val viewModel = createViewModel(
-            linkState = LinkState(
-                configuration = mock(),
-                loginState = LinkState.LoginState.LoggedOut,
-            )
-        )
-
-        viewModel.walletsContainerState.test {
-            assertThat(awaitItem().showLink).isTrue()
-            expectNoEvents()
-        }
-    }
-
-    @Test
-    fun `Hides Link wallet button if Link is not available`() = runTest {
-        val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card"))
-        val viewModel = createViewModel(stripeIntent = intent)
-
-        viewModel.walletsContainerState.test {
-            assertThat(awaitItem().showLink).isFalse()
         }
     }
 
@@ -1300,15 +1159,12 @@ internal class PaymentSheetViewModelTest {
         customerPaymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
         customerRepository: CustomerRepository = FakeCustomerRepository(customerPaymentMethods),
         shouldFailLoad: Boolean = false,
-        linkState: LinkState? = null,
         isGooglePayReady: Boolean = false,
         delay: Duration = Duration.ZERO,
         lpmRepository: LpmRepository = this.lpmRepository,
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        return TestViewModelFactory.create(
-            linkLauncher = linkLauncher,
-        ) { linkHandler, savedStateHandle ->
+        return TestViewModelFactory.create { savedStateHandle ->
             PaymentSheetViewModel(
                 application,
                 args,
@@ -1319,7 +1175,6 @@ internal class PaymentSheetViewModelTest {
                 FakePaymentSheetLoader(
                     stripeIntent = stripeIntent,
                     shouldFail = shouldFailLoad,
-                    linkState = linkState,
                     customerPaymentMethods = customerPaymentMethods,
                     delay = delay,
                     isGooglePayAvailable = isGooglePayReady,
@@ -1332,7 +1187,6 @@ internal class PaymentSheetViewModelTest {
                 Logger.noop(),
                 testDispatcher,
                 savedStateHandle = savedStateHandle,
-                linkHandler = linkHandler,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
             )
         }

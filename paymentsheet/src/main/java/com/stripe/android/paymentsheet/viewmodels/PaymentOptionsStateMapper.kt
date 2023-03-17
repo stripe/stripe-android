@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.combine
 internal class PaymentOptionsStateMapper(
     private val paymentMethods: StateFlow<List<PaymentMethod>?>,
     private val googlePayState: StateFlow<GooglePayState>,
-    private val isLinkEnabled: StateFlow<Boolean?>,
     private val initialSelection: StateFlow<SavedSelection?>,
     private val currentSelection: StateFlow<PaymentSelection?>,
     private val nameProvider: (PaymentMethodCode?) -> String,
@@ -26,20 +25,18 @@ internal class PaymentOptionsStateMapper(
             combine(
                 paymentMethods,
                 currentSelection,
-                initialSelection,
-                ::Triple
+                ::Pair
             ),
             combine(
-                isLinkEnabled,
+                initialSelection,
                 googlePayState,
                 ::Pair
             )
-        ) { (paymentMethods, currentSelection, initialSelection), (isLinkEnabled, googlePayState) ->
+        ) { (paymentMethods, currentSelection), (initialSelection, googlePayState) ->
             createPaymentOptionsState(
                 paymentMethods = paymentMethods,
                 currentSelection = currentSelection,
                 initialSelection = initialSelection,
-                isLinkEnabled = isLinkEnabled,
                 googlePayState = googlePayState,
             )
         }
@@ -50,17 +47,14 @@ internal class PaymentOptionsStateMapper(
         paymentMethods: List<PaymentMethod>?,
         currentSelection: PaymentSelection?,
         initialSelection: SavedSelection?,
-        isLinkEnabled: Boolean?,
         googlePayState: GooglePayState,
     ): PaymentOptionsState? {
         if (paymentMethods == null) return null
         if (initialSelection == null) return null
-        if (isLinkEnabled == null) return null
 
         return PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
             showGooglePay = (googlePayState is GooglePayState.Available) && isNotPaymentFlow,
-            showLink = isLinkEnabled && isNotPaymentFlow,
             initialSelection = initialSelection,
             currentSelection = currentSelection,
             nameProvider = nameProvider,

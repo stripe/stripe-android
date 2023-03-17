@@ -63,15 +63,6 @@ internal class PaymentOptionFactory @Inject constructor(
                     imageLoader = ::loadPaymentOption,
                 )
             }
-            PaymentSelection.Link -> {
-                PaymentOption(
-                    drawableResourceId = R.drawable.stripe_ic_paymentsheet_link,
-                    lightThemeIconUrl = null,
-                    darkThemeIconUrl = null,
-                    label = resources.getString(R.string.link),
-                    imageLoader = ::loadPaymentOption,
-                )
-            }
             is PaymentSelection.Saved -> {
                 PaymentOption(
                     drawableResourceId = selection.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
@@ -91,15 +82,6 @@ internal class PaymentOptionFactory @Inject constructor(
                         resources,
                         selection.last4
                     ),
-                    imageLoader = ::loadPaymentOption,
-                )
-            }
-            is PaymentSelection.New.LinkInline -> {
-                PaymentOption(
-                    drawableResourceId = selection.iconResource,
-                    lightThemeIconUrl = null,
-                    darkThemeIconUrl = null,
-                    label = selection.label,
                     imageLoader = ::loadPaymentOption,
                 )
             }

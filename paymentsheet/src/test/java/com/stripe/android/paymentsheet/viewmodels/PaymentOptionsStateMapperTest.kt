@@ -23,7 +23,6 @@ class PaymentOptionsStateMapperTest {
     private val initialSelectionFlow = MutableStateFlow<SavedSelection?>(null)
     private val currentSelectionFlow = MutableStateFlow<PaymentSelection?>(null)
     private val googlePayStateFlow = MutableStateFlow<GooglePayState>(GooglePayState.Indeterminate)
-    private val isLinkEnabledFlow = MutableStateFlow<Boolean?>(null)
 
     @Test
     fun `Only emits value if required flows have emitted values`() = runTest {
@@ -32,7 +31,6 @@ class PaymentOptionsStateMapperTest {
             initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
             googlePayState = googlePayStateFlow,
-            isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
             nameProvider = { it!! },
         )
@@ -43,14 +41,8 @@ class PaymentOptionsStateMapperTest {
             paymentMethodsFlow.value = PaymentMethodFixtures.createCards(2)
             assertThat(awaitItem()).isNull()
 
-            initialSelectionFlow.value = SavedSelection.GooglePay
-            assertThat(awaitItem()).isNull()
-
             googlePayStateFlow.value = GooglePayState.Available
             assertThat(awaitItem()).isNull()
-
-            isLinkEnabledFlow.value = true
-            assertThat(awaitItem()).isNotNull()
         }
     }
 
@@ -61,7 +53,6 @@ class PaymentOptionsStateMapperTest {
             initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
             googlePayState = googlePayStateFlow,
-            isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = false,
             nameProvider = { it!! },
         )
@@ -71,12 +62,8 @@ class PaymentOptionsStateMapperTest {
             paymentMethodsFlow.value = cards
             initialSelectionFlow.value = SavedSelection.PaymentMethod(id = cards.first().id!!)
             googlePayStateFlow.value = GooglePayState.Available
-            isLinkEnabledFlow.value = true
 
-            assertThat(expectMostRecentItem()?.items).containsNoneOf(
-                PaymentOptionsItem.GooglePay,
-                PaymentOptionsItem.Link,
-            )
+            assertThat(expectMostRecentItem()?.items).doesNotContain(PaymentOptionsItem.GooglePay)
         }
     }
 
@@ -87,7 +74,6 @@ class PaymentOptionsStateMapperTest {
             initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
             googlePayState = googlePayStateFlow,
-            isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
             nameProvider = { it!! },
         )
@@ -96,10 +82,9 @@ class PaymentOptionsStateMapperTest {
             val cards = PaymentMethodFixtures.createCards(2)
             val selectedPaymentMethod = PaymentSelection.Saved(paymentMethod = cards.last())
             paymentMethodsFlow.value = cards
-            initialSelectionFlow.value = SavedSelection.Link
+            initialSelectionFlow.value = SavedSelection.GooglePay
             currentSelectionFlow.value = selectedPaymentMethod
             googlePayStateFlow.value = GooglePayState.Available
-            isLinkEnabledFlow.value = true
 
             assertThat(expectMostRecentItem()?.selectedItem).isEqualTo(
                 PaymentOptionsItem.SavedPaymentMethod(
@@ -112,7 +97,7 @@ class PaymentOptionsStateMapperTest {
             paymentMethodsFlow.value = cards - selectedPaymentMethod.paymentMethod
             currentSelectionFlow.value = null
 
-            assertThat(expectMostRecentItem()?.selectedItem).isEqualTo(PaymentOptionsItem.Link)
+            assertThat(expectMostRecentItem()?.selectedItem).isEqualTo(PaymentOptionsItem.GooglePay)
         }
     }
 
@@ -123,7 +108,6 @@ class PaymentOptionsStateMapperTest {
             initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
             googlePayState = googlePayStateFlow,
-            isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
             nameProvider = { it!! },
         )
@@ -135,7 +119,6 @@ class PaymentOptionsStateMapperTest {
             initialSelectionFlow.value = SavedSelection.None
             currentSelectionFlow.value = selectedPaymentMethod
             googlePayStateFlow.value = GooglePayState.Available
-            isLinkEnabledFlow.value = true
 
             assertThat(expectMostRecentItem()?.selectedItem).isEqualTo(
                 PaymentOptionsItem.SavedPaymentMethod(

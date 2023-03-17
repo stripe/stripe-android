@@ -86,7 +86,6 @@ internal class PaymentOptionsViewModelInjectionTest : BasePaymentOptionsViewMode
                 config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
                 isGooglePayReady = false,
                 newPaymentSelection = null,
-                linkState = null,
             ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             injectorKey = DUMMY_INJECTOR_KEY,

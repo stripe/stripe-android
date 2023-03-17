@@ -18,11 +18,6 @@ internal sealed class PaymentOptionsItem {
         override val isEnabledDuringEditing: Boolean = false
     }
 
-    object Link : PaymentOptionsItem() {
-        override val viewType: ViewType = ViewType.Link
-        override val isEnabledDuringEditing: Boolean = false
-    }
-
     /**
      * Represents a [PaymentMethod] that is already saved and attached to the current customer.
      */

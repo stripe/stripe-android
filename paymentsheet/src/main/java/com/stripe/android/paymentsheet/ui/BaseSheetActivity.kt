@@ -19,9 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.paymentsheet.BottomSheetController
-import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
@@ -32,11 +30,6 @@ import kotlin.math.roundToInt
 
 internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val viewModel: BaseSheetViewModel
-
-    val linkHandler: LinkHandler
-        get() = viewModel.linkHandler
-    val linkLauncher: LinkPaymentLauncher
-        get() = linkHandler.linkLauncher
 
     @VisibleForTesting
     internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
