@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.linkstepupverification
 
+import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.test.MavericksTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -11,20 +12,20 @@ import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.domain.LookupAccount
+import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
-import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.VerificationType
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -38,8 +39,7 @@ class LinkStepUpVerificationViewModelTest {
     private val goNext = mock<GoNext>()
     private val confirmVerification = mock<ConfirmVerification>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
-    private val lookupAccount = mock<LookupAccount>()
-    private val startVerification = mock<StartVerification>()
+    private val lookupConsumerAndStartVerification = mock<LookupConsumerAndStartVerification>()
     private val selectNetworkedAccount = mock<SelectNetworkedAccount>()
     private val markLinkVerified = mock<MarkLinkStepUpVerified>()
     private val updateLocalManifest = mock<UpdateLocalManifest>()
@@ -52,14 +52,13 @@ class LinkStepUpVerificationViewModelTest {
         goNext = goNext,
         getManifest = getManifest,
         eventTracker = eventTracker,
-        lookupAccount = lookupAccount,
         confirmVerification = confirmVerification,
         markLinkStepUpVerified = markLinkVerified,
-        startVerification = startVerification,
         getCachedAccounts = getCachedAccounts,
         selectNetworkedAccount = selectNetworkedAccount,
         updateCachedAccounts = updateCachedAccounts,
         updateLocalManifest = updateLocalManifest,
+        lookupConsumerAndStartVerification = lookupConsumerAndStartVerification,
         logger = Logger.noop(),
         initialState = state
     )
@@ -69,14 +68,65 @@ class LinkStepUpVerificationViewModelTest {
         val email = "test@test.com"
         val consumerSession = ApiKeyFixtures.consumerSession()
         getManifestReturnsManifestWithEmail(email)
-        lookupAccountReturns(email, consumerSession)
+
+        val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
+        val onVerificationStartedCaptor = argumentCaptor<suspend (ConsumerSession) -> Unit>()
 
         val viewModel = buildViewModel()
 
+        verify(lookupConsumerAndStartVerification).invoke(
+            email = eq(email),
+            verificationType = eq(VerificationType.EMAIL),
+            onConsumerNotFound = any(),
+            onLookupError = any(),
+            onStartVerification = onStartVerificationCaptor.capture(),
+            onVerificationStarted = onVerificationStartedCaptor.capture(),
+            onStartVerificationError = any()
+        )
+
+        onStartVerificationCaptor.firstValue()
+        onVerificationStartedCaptor.firstValue(consumerSession)
+
         val state = viewModel.awaitState()
-        verify(startVerification).email(consumerSession.clientSecret)
+
         assertThat(state.payload()!!.consumerSessionClientSecret)
             .isEqualTo(consumerSession.clientSecret)
+    }
+
+    @Test
+    fun `init - ConsumerNotFound sends analytics and navigates to institution picker`() = runTest {
+        val email = "test@test.com"
+        val onConsumerNotFoundCaptor = argumentCaptor<suspend () -> Unit>()
+
+        whenever(getManifest()).thenReturn(
+            sessionManifest().copy(accountholderCustomerEmailAddress = email)
+        )
+
+        val viewModel = buildViewModel()
+
+        assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
+
+        verify(lookupConsumerAndStartVerification).invoke(
+            email = eq(email),
+            verificationType = eq(VerificationType.EMAIL),
+            onConsumerNotFound = onConsumerNotFoundCaptor.capture(),
+            onLookupError = any(),
+            onStartVerification = any(),
+            onVerificationStarted = any(),
+            onStartVerificationError = any()
+        )
+
+        onConsumerNotFoundCaptor.firstValue()
+
+        assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
+        verify(goNext).invoke(Pane.INSTITUTION_PICKER)
+        eventTracker.assertContainsEvent(
+            "linked_accounts.networking.verification.step_up.error",
+            mapOf(
+                "pane" to "networking_link_step_up_verification",
+                "error" to "ConsumerNotFoundError"
+            )
+        )
     }
 
     @Test
@@ -84,14 +134,34 @@ class LinkStepUpVerificationViewModelTest {
         runTest {
             val email = "test@test.com"
             val consumerSession = ApiKeyFixtures.consumerSession()
+            val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
+            val onVerificationStartedCaptor = argumentCaptor<suspend (ConsumerSession) -> Unit>()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
             val selectedAccount = partnerAccount()
-            getManifestReturnsManifestWithEmail(email)
+
+            // verify succeeds
+            whenever(getManifest()).thenReturn(
+                sessionManifest().copy(accountholderCustomerEmailAddress = email)
+            )
+            // cached accounts are available.
             whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
-            lookupAccountReturns(email, consumerSession)
+            // link succeeds
             markLinkVerifiedReturns(linkVerifiedManifest)
 
             val viewModel = buildViewModel()
+
+            verify(lookupConsumerAndStartVerification).invoke(
+                email = eq(email),
+                verificationType = eq(VerificationType.EMAIL),
+                onConsumerNotFound = any(),
+                onLookupError = any(),
+                onStartVerification = onStartVerificationCaptor.capture(),
+                onVerificationStarted = onVerificationStartedCaptor.capture(),
+                onStartVerificationError = any()
+            )
+
+            onStartVerificationCaptor.firstValue()
+            onVerificationStartedCaptor.firstValue(consumerSession)
 
             val otpController = viewModel.awaitState().payload()!!.otpElement.controller
 
@@ -123,18 +193,5 @@ class LinkStepUpVerificationViewModelTest {
         manifest: FinancialConnectionsSessionManifest
     ) {
         whenever(markLinkVerified()).thenReturn(manifest)
-    }
-
-    private suspend fun lookupAccountReturns(
-        email: String,
-        consumerSession: ConsumerSession
-    ) {
-        whenever(lookupAccount(eq(email))).thenReturn(
-            ConsumerSessionLookup(
-                consumerSession = consumerSession,
-                exists = true,
-                errorMessage = null
-            )
-        )
     }
 }
