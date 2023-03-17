@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 1.0.0 - 2023-03-16
+
 ### PaymentSheet
 * [FIXED][6366](https://github.com/stripe/stripe-android/pull/6366) Fixed an issue where the result couldn't be parsed in `PaymentSheetContract`.
 
