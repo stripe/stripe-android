@@ -29,7 +29,8 @@ internal class IDDetectorAnalyzer(
     Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
     private val interpreterApi: InterpreterWrapper = InterpreterWrapperImpl(
-        modelFile, InterpreterOptionsWrapper.Builder().build()
+        modelFile,
+        InterpreterOptionsWrapper.Builder().build()
     )
 
     override suspend fun analyze(
