@@ -26,6 +26,7 @@ import java.text.BreakIterator
  * the official support is added. see this issue for more details: https://issuetracker.google.com/issues/185418980
  *
  **/
+@Suppress("LongMethod")
 @Composable
 internal fun MiddleEllipsisText(
     text: String,
@@ -124,7 +125,9 @@ internal fun MiddleEllipsisText(
                                     textLayoutResult!!.getBoundingBox(rightPoint)
 
                                 // For multibyte string handling
-                                if (leftTextWidth <= rightTextWidth && leftTextWidth + leftTextBoundingBox.width + rightTextWidth <= remainingWidth) {
+                                if (leftTextWidth <= rightTextWidth &&
+                                    leftTextWidth + leftTextBoundingBox.width + rightTextWidth <= remainingWidth
+                                ) {
                                     val remainingTargetCodePoints = if (realLeftIndex == 0) {
                                         charSplitIndexList[realLeftIndex]
                                     } else {
@@ -147,7 +150,9 @@ internal fun MiddleEllipsisText(
                                         textFromStart.addAll(targetText)
                                         realLeftIndex += 1
                                     }
-                                } else if (leftTextWidth >= rightTextWidth && leftTextWidth + rightTextWidth + rightTextBoundingBox.width <= remainingWidth) {
+                                } else if (leftTextWidth >= rightTextWidth &&
+                                    leftTextWidth + rightTextWidth + rightTextBoundingBox.width <= remainingWidth
+                                ) {
                                     val remainingTargetCodePoints =
                                         charSplitIndexList[realRightIndex] - charSplitIndexList[realRightIndex - 1]
                                     val targetText = mutableListOf<Char>()
