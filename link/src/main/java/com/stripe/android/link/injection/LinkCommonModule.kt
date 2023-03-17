@@ -1,5 +1,7 @@
 package com.stripe.android.link.injection
 
+import com.stripe.android.DefaultIntentConfirmationInterceptor
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.Stripe
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
@@ -26,6 +28,12 @@ internal interface LinkCommonModule {
     @Binds
     @Singleton
     fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
+
+    @Binds
+    @Singleton
+    fun bindIntentConfirmationInterceptor(
+        impl: DefaultIntentConfirmationInterceptor,
+    ): IntentConfirmationInterceptor
 
     companion object {
         @Provides

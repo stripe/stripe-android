@@ -6,6 +6,9 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -65,6 +68,31 @@ internal class ConfirmationManager @Inject constructor(
                     }
                     is ConfirmSetupIntentParams -> {
                         it.confirm(confirmStripeIntentParams)
+                    }
+                }
+            },
+            onFailure = {
+                onResult(Result.failure(it))
+            }
+        )
+    }
+
+    fun handleNextAction(
+        clientSecret: String,
+        stripeIntent: StripeIntent,
+        onResult: PaymentConfirmationCallback
+    ) {
+        completionCallback = onResult
+        runCatching {
+            requireNotNull(paymentLauncher)
+        }.fold(
+            onSuccess = {
+                when (stripeIntent) {
+                    is PaymentIntent -> {
+                        it.handleNextActionForPaymentIntent(clientSecret)
+                    }
+                    is SetupIntent -> {
+                        it.handleNextActionForSetupIntent(clientSecret)
                     }
                 }
             },
