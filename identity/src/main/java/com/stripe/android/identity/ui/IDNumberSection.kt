@@ -150,7 +150,7 @@ private fun IDNumberContent(
                     }
                 }
             ),
-            label = R.string.country_of_id_number
+            label = R.string.id_number
         )
     }
     val textIdentifiers by idNumberSectionElement.getTextFieldIdentifiers()
