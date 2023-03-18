@@ -12,6 +12,9 @@
 * [ADDED][6335](https://github.com/stripe/stripe-android/pull/6335) Added `Stripe.possibleCardBrands` which retrieves a list of possible card brands given a card number.
 * [FIXED][6376](https://github.com/stripe/stripe-android/pull/6376) Fixed BLIK payment bindings.
 
+### Identity
+* [ADDED][6380](https://github.com/stripe/stripe-android/pull/6380) Integrate with `ml-core` and allow user to swap TFLite runtime.
+* 
 ## 20.20.0 - 2023-03-13
 
 ### Payments
