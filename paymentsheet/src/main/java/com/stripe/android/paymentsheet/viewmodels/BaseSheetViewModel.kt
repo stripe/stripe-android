@@ -405,7 +405,7 @@ internal abstract class BaseSheetViewModel(
             if (didRemoveSelectedItem) {
                 // Remove the current selection. The new selection will be set when we're computing
                 // the next PaymentOptionsState.
-                savedStateHandle[SAVE_SELECTION] = null
+                updateSelection(null)
             }
 
             savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value?.filter {

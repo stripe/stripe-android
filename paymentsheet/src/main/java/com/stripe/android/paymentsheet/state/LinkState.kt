@@ -10,9 +10,6 @@ internal data class LinkState(
     val loginState: LoginState,
 ) : Parcelable {
 
-    val isReadyForUse: Boolean
-        get() = loginState in setOf(LoginState.LoggedIn, LoginState.NeedsVerification)
-
     enum class LoginState {
         LoggedIn, NeedsVerification, LoggedOut,
     }

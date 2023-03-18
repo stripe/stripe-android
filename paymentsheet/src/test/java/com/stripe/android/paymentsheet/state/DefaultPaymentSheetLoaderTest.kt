@@ -87,44 +87,6 @@ internal class DefaultPaymentSheetLoaderTest {
         )
     }
 
-//    @Test
-//    fun `load without configuration should return expected result`() = runTest {
-//        val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-//        val loader = createPaymentSheetLoader(stripeIntent = stripeIntent)
-//
-//        assertThat(
-//            loader.load(
-//                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-//                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-//                ),
-//                paymentSheetConfiguration = null,
-//            )
-//        ).isEqualTo(
-//            PaymentSheetLoader.Result.Success(
-//                PaymentSheetState.Full(
-//                    config = null,
-//                    stripeIntent = stripeIntent,
-//                    customerPaymentMethods = emptyList(),
-////                    savedSelection = SavedSelection.Link,
-//                    isGooglePayReady = false,
-//                    paymentSelection = PaymentSelection.Link,
-//                    linkState = LinkState(
-//                        configuration = LinkPaymentLauncher.Configuration(
-//                            stripeIntent = stripeIntent,
-//                            merchantName = "App Name",
-//                            customerName = null,
-//                            customerEmail = null,
-//                            customerPhone = null,
-//                            customerBillingCountryCode = null,
-//                            shippingValues = null,
-//                        ),
-//                        loginState = LinkState.LoginState.LoggedIn,
-//                    ),
-//                )
-//            )
-//        )
-//    }
-
     @Test
     fun `load with configuration should return expected result`() = runTest {
         prefsRepository.savePaymentSelection(
@@ -148,7 +110,6 @@ internal class DefaultPaymentSheetLoaderTest {
                     config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     customerPaymentMethods = PAYMENT_METHODS,
-//                    savedSelection = SavedSelection.PaymentMethod(id = "pm_123456789"),
                     isGooglePayReady = true,
                     paymentSelection = PaymentSelection.Saved(
                         paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -158,87 +119,6 @@ internal class DefaultPaymentSheetLoaderTest {
             )
         )
     }
-
-//    @Test
-//    fun `load() with no customer and google pay ready should default to Link`() = runTest {
-//        prefsRepository.savePaymentSelection(null)
-//
-//        val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-//        val loader = createPaymentSheetLoader(stripeIntent = stripeIntent)
-//
-//        assertThat(
-//            loader.load(
-//                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-//                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-//                ),
-//                PaymentSheetFixtures.CONFIG_GOOGLEPAY
-//            )
-//        ).isEqualTo(
-//            PaymentSheetLoader.Result.Success(
-//                PaymentSheetState.Full(
-//                    config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-//                    stripeIntent = stripeIntent,
-//                    customerPaymentMethods = emptyList(),
-//                    isGooglePayReady = true,
-//                    paymentSelection = PaymentSelection.Link,
-//                    linkState = LinkState(
-//                        configuration = LinkPaymentLauncher.Configuration(
-//                            stripeIntent = stripeIntent,
-//                            merchantName = "Merchant, Inc.",
-//                            customerName = null,
-//                            customerEmail = null,
-//                            customerPhone = null,
-//                            customerBillingCountryCode = null,
-//                            shippingValues = null,
-//                        ),
-//                        loginState = LinkState.LoginState.LoggedIn,
-//                    ),
-//                )
-//            )
-//        )
-//    }
-
-//    @Test
-//    fun `load() with no customer and Google Pay not ready should default to Link`() = runTest {
-//        prefsRepository.savePaymentSelection(null)
-//
-//        val expectedIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-//        val expectedLinkState = LinkState(
-//            configuration = LinkPaymentLauncher.Configuration(
-//                stripeIntent = expectedIntent,
-//                merchantName = "Merchant, Inc.",
-//                customerName = null,
-//                customerEmail = null,
-//                customerPhone = null,
-//                customerBillingCountryCode = null,
-//                shippingValues = null,
-//            ),
-//            loginState = LinkState.LoginState.LoggedIn,
-//        )
-//
-//        val loader = createPaymentSheetLoader(isGooglePayReady = false)
-//
-//        assertThat(
-//            loader.load(
-//                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-//                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-//                ),
-//                PaymentSheetFixtures.CONFIG_GOOGLEPAY
-//            )
-//        ).isEqualTo(
-//            PaymentSheetLoader.Result.Success(
-//                PaymentSheetState.Full(
-//                    config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-//                    stripeIntent = expectedIntent,
-//                    customerPaymentMethods = emptyList(),
-////                    savedSelection = SavedSelection.Link,
-//                    isGooglePayReady = false,
-//                    paymentSelection = PaymentSelection.Link,
-//                    linkState = expectedLinkState,
-//                )
-//            )
-//        )
-//    }
 
     @Test
     fun `Should default to first payment method if customer has payment methods`() = runTest {
