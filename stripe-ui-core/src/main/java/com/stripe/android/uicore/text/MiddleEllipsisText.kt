@@ -1,5 +1,6 @@
-package com.stripe.android.financialconnections.ui.components
+package com.stripe.android.uicore.text
 
+import androidx.annotation.RestrictTo
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +29,8 @@ import java.text.BreakIterator
  **/
 @Suppress("LongMethod")
 @Composable
-internal fun MiddleEllipsisText(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun MiddleEllipsisText(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
