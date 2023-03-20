@@ -465,7 +465,7 @@ internal class DefaultFlowControllerTest {
         }
 
         flowController.onPaymentOptionResult(
-            PaymentOptionResult.Canceled(null)
+            PaymentOptionResult.Canceled(null, null)
         )
 
         verify(paymentOptionCallback).onPaymentOption(isNull())
@@ -484,7 +484,7 @@ internal class DefaultFlowControllerTest {
         }
 
         flowController.onPaymentOptionResult(
-            PaymentOptionResult.Canceled(null)
+            PaymentOptionResult.Canceled(null, PaymentSelection.GooglePay)
         )
 
         verify(paymentOptionCallback).onPaymentOption(

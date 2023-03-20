@@ -7,6 +7,7 @@
 
 ### PaymentSheet
 * [FIXED][6366](https://github.com/stripe/stripe-android/pull/6366) Fixed an issue where the result couldn't be parsed in `PaymentSheetContract`.
+* [FIXED][6386](https://github.com/stripe/stripe-android/pull/6386) Fixed an issue where `FlowController.getPaymentOption()` and `PaymentOptionCallback` might return an outdated payment option in some cases.
 
 ### Payments
 * [ADDED][6335](https://github.com/stripe/stripe-android/pull/6335) Added `Stripe.possibleCardBrands` which retrieves a list of possible card brands given a card number.
