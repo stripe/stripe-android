@@ -96,7 +96,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
                 TYPE_3DS1 -> StripeIntent.NextActionData.SdkData.Use3DS1(
                     json.optString(FIELD_STRIPE_JS)
                 )
-                TYPE_3DS2 -> StripeIntent.NextActionData.SdkData.Use3DS2(
+                TYPE_3DS2, TYPE_3DS2_ITMX -> StripeIntent.NextActionData.SdkData.Use3DS2(
                     json.optString(FIELD_THREE_D_SECURE_2_SOURCE),
                     json.optString(FIELD_DIRECTORY_SERVER_NAME),
                     json.optString(FIELD_SERVER_TRANSACTION_ID),
@@ -136,6 +136,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             private const val FIELD_TYPE = "type"
 
             private const val TYPE_3DS2 = "stripe_3ds2_fingerprint"
+            private const val TYPE_3DS2_ITMX = "stripe_3ds2_itmx"
             private const val TYPE_3DS1 = "three_d_secure_redirect"
 
             private const val FIELD_THREE_D_SECURE_2_SOURCE = "three_d_secure_2_source"
