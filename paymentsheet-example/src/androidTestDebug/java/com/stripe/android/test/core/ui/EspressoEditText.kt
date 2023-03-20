@@ -1,6 +1,6 @@
 package com.stripe.android.test.core.ui
 
-import android.support.annotation.IdRes
+import androidx.annotation.IdRes
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.typeText

@@ -19,8 +19,6 @@ import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.test.espresso.IdlingResource
-import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
@@ -39,6 +37,8 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.model.InitializationType
 import com.stripe.android.paymentsheet.example.playground.model.Shipping
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
+import com.stripe.android.paymentsheet.example.playground.viewmodel.ConfirmIntentEndpointException
+import com.stripe.android.paymentsheet.example.playground.viewmodel.ConfirmIntentNetworkException
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.launch
@@ -143,10 +143,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private lateinit var addressLauncher: AddressLauncher
     private var shippingAddress: AddressDetails? = null
 
-    private var multiStepUIReadyIdlingResource: CountingIdlingResource? = null
-
-    private var singleStepUIReadyIdlingResource: CountingIdlingResource? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         val shouldUseDarkMode = intent.extras?.get(FORCE_DARK_MODE_EXTRA) as Boolean?
         if (shouldUseDarkMode != null) {
@@ -161,12 +157,36 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
-        flowController = PaymentSheet.FlowController.create(
-            this,
-            ::onPaymentOption,
-            ::onPaymentSheetResult
+        paymentSheet = PaymentSheet(
+            activity = this,
+            createIntentCallback = { paymentMethodId ->
+                viewModel.createIntent(
+                    paymentMethodId = paymentMethodId,
+                    merchantCountryCode = merchantCountryCode.value,
+                    mode = mode.value,
+                    returnUrl = returnUrl,
+                    backendUrl = settings.playgroundBackendUrl,
+                )
+            },
+            paymentResultCallback = ::onPaymentSheetResult,
         )
+
+        flowController = PaymentSheet.FlowController.create(
+            activity = this,
+            paymentOptionCallback = ::onPaymentOption,
+            createIntentCallbackForServerSideConfirmation = { paymentMethodId, shouldSavePaymentMethod ->
+                viewModel.createAndConfirmIntent(
+                    paymentMethodId = paymentMethodId,
+                    shouldSavePaymentMethod = shouldSavePaymentMethod,
+                    merchantCountryCode = merchantCountryCode.value,
+                    mode = mode.value,
+                    returnUrl = returnUrl,
+                    backendUrl = settings.playgroundBackendUrl,
+                )
+            },
+            paymentResultCallback = ::onPaymentSheetResult,
+        )
+
         addressLauncher = AddressLauncher(this, ::onAddressLauncherResult)
 
         viewBinding.initializationRadioGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -287,12 +307,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.isInvisible = !it
-            if (it) {
-                singleStepUIReadyIdlingResource?.increment()
-                multiStepUIReadyIdlingResource?.increment()
-            } else {
-                singleStepUIReadyIdlingResource?.decrement()
-            }
         }
 
         lifecycleScope.launch {
@@ -455,13 +469,13 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 }
                 CheckoutMode.Payment -> {
                     PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 12345,
+                        amount = viewModel.amount.value,
                         currency = currency.value,
                     )
                 }
                 CheckoutMode.PaymentWithSetup -> {
                     PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 12345,
+                        amount = viewModel.amount.value,
                         currency = currency.value,
                         setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
                     )
@@ -545,15 +559,15 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         if (viewModel.initializationType.value == InitializationType.Normal) {
             val clientSecret = viewModel.clientSecret.value ?: return
 
-            if (viewModel.checkoutMode.value == CheckoutMode.Payment) {
-                flowController.configureWithPaymentIntent(
-                    paymentIntentClientSecret = clientSecret,
+            if (viewModel.checkoutMode.value == CheckoutMode.Setup) {
+                flowController.configureWithSetupIntent(
+                    setupIntentClientSecret = clientSecret,
                     configuration = makeConfiguration(),
                     callback = ::onConfigured,
                 )
             } else {
-                flowController.configureWithSetupIntent(
-                    setupIntentClientSecret = clientSecret,
+                flowController.configureWithPaymentIntent(
+                    paymentIntentClientSecret = clientSecret,
                     configuration = makeConfiguration(),
                     callback = ::onConfigured,
                 )
@@ -630,7 +644,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         if (success) {
             viewBinding.paymentMethod.isClickable = true
             onPaymentOption(flowController.getPaymentOption())
-            multiStepUIReadyIdlingResource?.decrement()
         } else {
             viewModel.status.value =
                 "Failed to configure PaymentSheetFlowController: ${error?.message}"
@@ -655,7 +668,29 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             disableViews()
         }
 
-        viewModel.status.value = paymentResult.toString()
+        val status = when (paymentResult) {
+            is PaymentSheetResult.Canceled -> {
+                "Canceled"
+            }
+            is PaymentSheetResult.Completed -> {
+                "Success"
+            }
+            is PaymentSheetResult.Failed -> {
+                when (paymentResult.error) {
+                    is ConfirmIntentEndpointException -> {
+                        "Couldn't process your payment."
+                    }
+                    is ConfirmIntentNetworkException -> {
+                        "No internet. Try again later."
+                    }
+                    else -> {
+                        paymentResult.error.message
+                    }
+                }
+            }
+        }
+
+        viewModel.status.value = status
     }
 
     private fun showAppearancePicker() {
@@ -692,33 +727,15 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Only called from test, creates and returns a [IdlingResource].
-     */
-    @VisibleForTesting
-    fun getMultiStepReadyIdlingResource(): IdlingResource {
-        if (multiStepUIReadyIdlingResource == null) {
-            multiStepUIReadyIdlingResource =
-                CountingIdlingResource("multiStepUIReadyIdlingResource")
-        }
-        return multiStepUIReadyIdlingResource!!
-    }
-
-    @VisibleForTesting
-    fun getSingleStepReadyIdlingResource(): IdlingResource {
-        if (singleStepUIReadyIdlingResource == null) {
-            singleStepUIReadyIdlingResource =
-                CountingIdlingResource("singleStepUIReadyIdlingResource")
-        }
-        return singleStepUIReadyIdlingResource!!
-    }
-
     companion object {
         const val FORCE_DARK_MODE_EXTRA = "ForceDark"
         const val APPEARANCE_EXTRA = "Appearance"
         const val USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA = "UseSnapshotReturningCustomer"
         const val SUPPORTED_PAYMENT_METHODS_EXTRA = "SupportedPaymentMethods"
         private const val merchantName = "Example, Inc."
+
+        private const val returnUrl = "stripesdk://payment_return_url/" +
+            "com.stripe.android.paymentsheet.example"
 
         /**
          * This is a pairing of the countries to their default currency

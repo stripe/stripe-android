@@ -16,7 +16,6 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -42,8 +41,8 @@ import javax.inject.Provider
 internal class FormViewModel @Inject internal constructor(
     context: Context,
     formArguments: FormArguments,
-    lpmResourceRepository: ResourceRepository<LpmRepository>,
-    addressResourceRepository: ResourceRepository<AddressRepository>,
+    lpmRepository: LpmRepository,
+    addressRepository: AddressRepository,
     val showCheckboxFlow: Flow<Boolean>
 ) : ViewModel() {
     internal class Factory(
@@ -66,7 +65,7 @@ internal class FormViewModel @Inject internal constructor(
 
     val elementsFlow = flowOf(
         TransformSpecToElements(
-            addressResourceRepository = addressResourceRepository,
+            addressRepository = addressRepository,
             initialValues = formArguments.getInitialValuesMap(),
             amount = formArguments.amount,
             saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
@@ -75,10 +74,7 @@ internal class FormViewModel @Inject internal constructor(
             shippingValues = formArguments.shippingDetails
                 ?.toIdentifierMap(formArguments.billingDetails)
         ).transform(
-            requireNotNull(
-                lpmResourceRepository.getRepository()
-                    .fromCode(formArguments.paymentMethodCode)
-            ).formSpec.items
+            requireNotNull(lpmRepository.fromCode(formArguments.paymentMethodCode)).formSpec.items
         )
     )
 

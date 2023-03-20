@@ -66,13 +66,12 @@ import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.testing.FakeIntentConfirmationInterceptor
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
-import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
@@ -136,6 +135,8 @@ internal class PaymentSheetActivityTest {
     private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory> {
         on { create(any(), any(), any()) } doReturn paymentLauncher
     }
+
+    private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
     private lateinit var viewModel: PaymentSheetViewModel
 
@@ -991,14 +992,14 @@ internal class PaymentSheetActivityTest {
                 ),
                 FakeCustomerRepository(paymentMethods),
                 FakePrefsRepository(),
-                StaticLpmResourceRepository(lpmRepository),
-                mock(),
+                lpmRepository,
                 stripePaymentLauncherAssistedFactory,
                 googlePayPaymentMethodLauncherFactory,
                 Logger.noop(),
                 testDispatcher,
                 savedStateHandle = savedStateHandle,
-                linkHandler = linkHandler
+                linkHandler = linkHandler,
+                intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
             ).also {
                 it.injector = injector
             }
@@ -1050,8 +1051,8 @@ internal class PaymentSheetActivityTest {
                 amount = Amount(50, "USD"),
                 initialPaymentMethodCreateParams = null
             ),
-            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = StaticAddressResourceRepository(AddressRepository(context.resources)),
+            lpmRepository = lpmRepository,
+            addressRepository = AddressRepository(context.resources, Dispatchers.Unconfined),
             showCheckboxFlow = mock()
         )
 

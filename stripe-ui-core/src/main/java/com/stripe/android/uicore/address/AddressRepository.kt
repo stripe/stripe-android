@@ -3,9 +3,18 @@ package com.stripe.android.uicore.address
 import android.content.res.Resources
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.uicore.elements.SectionFieldElement
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Repository to save country and their corresponding List<SectionFieldElement>.
@@ -16,22 +25,40 @@ import javax.inject.Singleton
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressRepository @Inject constructor(
-    resources: Resources?
+    resources: Resources,
+    @IOContext private val workContext: CoroutineContext,
 ) : AddressSchemaRepository(resources) {
-    private val countryFieldMap =
-        countryAddressSchemaMap.entries.associate { (countryCode, schemaList) ->
-            countryCode to requireNotNull(
-                schemaList
-                    .transformToElementList(countryCode)
-            )
-        }.toMutableMap()
+    private val countryFieldMap: Flow<MutableMap<String, List<SectionFieldElement>>>
+    private val initializeCountryFieldMapJob: Job
 
-    @VisibleForTesting
-    fun add(countryCode: String, listElements: List<SectionFieldElement>) {
-        countryFieldMap[countryCode] = listElements
+    init {
+        val sharedFlow =
+            MutableSharedFlow<MutableMap<String, List<SectionFieldElement>>>(replay = 1)
+        countryFieldMap = sharedFlow
+        initializeCountryFieldMapJob = CoroutineScope(workContext).launch {
+            val map = countryAddressSchemaMap.entries.associate { (countryCode, schemaList) ->
+                countryCode to requireNotNull(
+                    schemaList
+                        .transformToElementList(countryCode)
+                )
+            }.toMutableMap()
+            sharedFlow.emit(map)
+        }
     }
 
-    fun get(countryCode: String?) = countryCode?.let {
-        countryFieldMap[it]
-    } ?: countryFieldMap[DEFAULT_COUNTRY_CODE]
+    @VisibleForTesting
+    suspend fun add(
+        countryCode: String,
+        listElements: List<SectionFieldElement>
+    ): Unit = withContext(workContext) {
+        countryFieldMap.first()[countryCode] = listElements
+    }
+
+    suspend fun get(
+        countryCode: String?
+    ): List<SectionFieldElement>? = withContext(workContext) {
+        countryCode?.let {
+            countryFieldMap.first()[it]
+        } ?: countryFieldMap.first()[DEFAULT_COUNTRY_CODE]
+    }
 }

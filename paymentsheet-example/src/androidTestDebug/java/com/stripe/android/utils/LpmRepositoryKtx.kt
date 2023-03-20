@@ -1,6 +1,7 @@
 package com.stripe.android.utils
 
 import android.content.Context
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 
 internal fun initializedLpmRepository(context: Context): LpmRepository {

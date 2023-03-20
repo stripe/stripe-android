@@ -48,7 +48,7 @@ class Selectors(
 ) {
     val reset = EspressoIdButton(R.id.reset_button)
     val continueButton = BuyButton(composeTestRule)
-    val complete = EspressoLabelIdButton(R.string.checkout_complete)
+    val complete = EspressoIdButton(R.id.complete_checkout_button)
     val reload = EspressoLabelIdButton(R.string.reload_paymentsheet)
     val multiStepSelect = EspressoIdButton(R.id.payment_method)
     val saveForFutureCheckbox = composeTestRule

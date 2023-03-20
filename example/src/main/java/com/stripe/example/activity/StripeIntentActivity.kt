@@ -8,6 +8,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.example.Settings
@@ -81,6 +82,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         mandateDataParams: MandateDataParams? = null,
         customerId: String? = null,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
+        currency: String? = null,
+        paymentMethodOptions: PaymentMethodOptionsParams? = null,
         onPaymentIntentCreated: (String) -> Unit = {}
     ) {
         requireNotNull(paymentMethodCreateParams ?: existingPaymentMethodId)
@@ -91,6 +94,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             country = country,
             supportedPaymentMethods = supportedPaymentMethods,
             customerId = customerId,
+            currency = currency,
         ).observe(
             this
         ) { result ->
@@ -103,6 +107,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                     existingPaymentMethodId,
                     mandateDataParams,
                     setupFutureUsage,
+                    paymentMethodOptions,
                     onPaymentIntentCreated
                 )
             }
@@ -147,6 +152,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         existingPaymentMethodId: String?,
         mandateDataParams: MandateDataParams?,
         setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        paymentMethodOptions: PaymentMethodOptionsParams?,
         onPaymentIntentCreated: (String) -> Unit = {}
     ) {
         val secret = responseData.getString("secret")
@@ -165,6 +171,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                 clientSecret = secret,
                 shipping = shippingDetails,
                 setupFutureUsage = setupFutureUsage,
+                paymentMethodOptions = paymentMethodOptions,
             ).copy(
                 mandateData = mandateDataParams,
             )
@@ -174,6 +181,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                 clientSecret = secret,
                 mandateData = mandateDataParams,
                 setupFutureUsage = setupFutureUsage,
+                paymentMethodOptions = paymentMethodOptions,
             )
         }
         confirmPaymentIntent(confirmPaymentIntentParams)

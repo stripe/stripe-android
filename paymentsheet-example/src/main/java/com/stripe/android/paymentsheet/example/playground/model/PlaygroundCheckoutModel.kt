@@ -101,6 +101,8 @@ data class CheckoutResponse(
     val customerId: String? = null,
     @SerializedName("customerEphemeralKeySecret")
     val customerEphemeralKeySecret: String? = null,
+    @SerializedName("amount")
+    val amount: Long,
     @SerializedName("paymentMethodTypes")
     val paymentMethodTypes: String? = null,
 ) {
@@ -114,3 +116,27 @@ data class CheckoutResponse(
             null
         }
 }
+
+@Serializable
+@Keep
+data class ConfirmIntentRequest(
+    @SerializedName("client_secret")
+    val clientSecret: String,
+    @SerializedName("payment_method_id")
+    val paymentMethodId: String,
+    @SerializedName("should_save_payment_method")
+    val shouldSavePaymentMethod: Boolean,
+    @SerializedName("merchant_country_code")
+    val merchantCountryCode: String,
+    @SerializedName("mode")
+    val mode: String,
+    @SerializedName("return_url")
+    val returnUrl: String,
+)
+
+@Serializable
+@Keep
+data class ConfirmIntentResponse(
+    @SerializedName("client_secret")
+    val clientSecret: String,
+)

@@ -2,6 +2,19 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Financial Connections
+* [FIXED][6375](https://github.com/stripe/stripe-android/pull/6375) Fixed Accessible data call out texts
+
+### PaymentSheet
+* [FIXED][6366](https://github.com/stripe/stripe-android/pull/6366) Fixed an issue where the result couldn't be parsed in `PaymentSheetContract`.
+* [FIXED][6386](https://github.com/stripe/stripe-android/pull/6386) Fixed an issue where `FlowController.getPaymentOption()` and `PaymentOptionCallback` might return an outdated payment option in some cases.
+
+### Payments
+* [ADDED][6335](https://github.com/stripe/stripe-android/pull/6335) Added `Stripe.possibleCardBrands` which retrieves a list of possible card brands given a card number.
+* [FIXED][6376](https://github.com/stripe/stripe-android/pull/6376) Fixed BLIK payment bindings.
+
+## 20.20.0 - 2023-03-13
+
 ### Payments
 * [ADDED][6306](https://github.com/stripe/stripe-android/pull/6306) Added support for Cash App Pay. See the docs [here](https://stripe.com/docs/payments/cash-app-pay).
 

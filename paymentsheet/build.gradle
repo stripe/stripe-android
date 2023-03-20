@@ -49,6 +49,7 @@ dependencies {
     testImplementation "org.hamcrest:hamcrest:2.2"
     testImplementation project(':link')
     testImplementation project(':financial-connections')
+    testImplementation project(':payments-core-testing')
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
     testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
@@ -64,6 +65,7 @@ dependencies {
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
     testImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion"
+    testImplementation "androidx.lifecycle:lifecycle-runtime-testing:$androidxLifecycleVersion"
     testImplementation testLibs.turbine
 
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593

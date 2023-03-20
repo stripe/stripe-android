@@ -19,13 +19,11 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.IdlingPolicies
-import androidx.test.espresso.IdlingRegistry
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
-import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.Selectors
@@ -370,6 +368,7 @@ class PlaygroundTestDriver(
 
     internal fun launchComplete() {
         selectors.reload.click()
+        selectors.complete.waitForEnabled()
         selectors.complete.click()
 
         // PaymentSheetActivity is now on screen
@@ -381,6 +380,7 @@ class PlaygroundTestDriver(
         Espresso.onIdle()
         selectors.composeTestRule.waitForIdle()
 
+        selectors.multiStepSelect.waitForEnabled()
         selectors.multiStepSelect.click()
 
         // PaymentOptionsActivity is now on screen
@@ -453,13 +453,11 @@ class PlaygroundTestDriver(
 
         }
 
-        if (testParameters.authorizationAction == AuthorizeAction.Authorize
-            || testParameters.authorizationAction == null
-        ) {
+        val isDone = testParameters.authorizationAction in setOf(AuthorizeAction.Authorize, null)
+
+        if (isDone) {
             waitForPlaygroundActivity()
-            assertThat(resultValue).isEqualTo(
-                PaymentSheetResult.Completed.toString()
-            )
+            assertThat(resultValue).isEqualTo("Success")
         }
     }
 
@@ -514,19 +512,9 @@ class PlaygroundTestDriver(
             IdlingPolicies.setIdlingResourceTimeout(45, TimeUnit.SECONDS)
             IdlingPolicies.setMasterPolicyTimeout(45, TimeUnit.SECONDS)
 
-            IdlingRegistry.getInstance().register(
-                activity.getMultiStepReadyIdlingResource(),
-                activity.getSingleStepReadyIdlingResource(),
-            )
-
             // Observe the result of the PaymentSheet completion
             activity.viewModel.status.observeForever {
                 resultValue = it
-
-                IdlingRegistry.getInstance().unregister(
-                    activity.getMultiStepReadyIdlingResource(),
-                    activity.getSingleStepReadyIdlingResource(),
-                )
             }
             launchPlayground.release()
         }

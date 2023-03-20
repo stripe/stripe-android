@@ -31,22 +31,22 @@
     <string name="stripe_account_picker_loading_title">Pulling up your accounts</string>
     <string name="stripe_account_picker_loading_desc">After this, there\'s just one more step.</string>
     <string name="stripe_account_picker_select_account">Select your account</string>
-    <string name="stripe_account_picker_singleselect_account">Confirm your account</string>
+    <string name="stripe_account_picker_confirm_account">Confirm your account</string>
+    <string name="stripe_account_picker_singleselect_account">Select an account</string>
     <string name="stripe_account_picker_multiselect_account">Select accounts</string>
-    <string name="stripe_account_picker_singleselect_confirm">Confirm</string>
-    <plurals name="stripe_account_picker_multiselect_confirm">
+    <string name="stripe_account_picker_cta_confirm">Confirm</string>
+    <plurals name="stripe_account_picker_cta_link">
         <item quantity="one">Link account</item>
         <item quantity="other">Link accounts</item>
     </plurals>
     <string name="stripe_success_title">Success!</string>
     <string name="stripe_search">Search</string>
     <string name="stripe_account_picker_dropdown_hint">Choose one</string>
-    <string name="data_accessible_callout"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s.<annotation clickable="learn_more"> Learn more</annotation></string>
-    <string name="data_accessible_callout_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%1$s.<annotation clickable="learn_more"> Learn more</annotation></string>
-    <string name="data_accessible_callout_through_stripe"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Stripe.<annotation clickable="learn_more"> Learn more</annotation></string>
-    <string name="data_accessible_callout_through_stripe_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Stripe.<annotation clickable="learn_more"> Learn more</annotation></string>
-    <string name="data_accessible_callout_through_link"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Link.<annotation clickable="learn_more"> Learn more</annotation></string>
-    <string name="data_accessible_callout_through_link_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Link.<annotation clickable="learn_more"> Learn more</annotation></string>
+    <string name="data_accessible_callout_stripe_direct"><annotation bold="accessible_data">Data accessible to Stripe: </annotation>%2$s. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="data_accessible_callout_through_stripe"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Stripe. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="data_accessible_callout_through_stripe_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Stripe. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="data_accessible_callout_through_link"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Link. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="data_accessible_callout_through_link_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Link. <annotation clickable="learn_more">Learn more</annotation></string>
     <string name="data_accessible_type_accountdetails">account details</string>
     <string name="data_accessible_type_balances">balances</string>
     <string name="data_accessible_type_transactions">transactions</string>
@@ -104,9 +104,7 @@
     <string name="stripe_accounts_error_desc_retry">Please select another bank or try again.</string>
     <string name="stripe_accounts_error_desc_manualentry">Please enter your bank details manually or select another bank.</string>
     <string name="stripe_accounts_error_desc_no_retry">Please select another bank.</string>
-    <string name="stripe_accountpicker_singleaccount_description_withstripe">Stripe only needs one account at this time.</string>
-    <string name="stripe_accountpicker_singleaccount_description">%1$s only needs one account at this time.</string>
-    <string name="stripe_accountpicker_singleaccount_description_nobusinessname">This merchant only needs one account at this time.</string>
+    <string name="stripe_accountpicker_singleaccount_description">Select the account you\'d like to link.</string>
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
     <string name="stripe_success_pane_skip_title">Finishing up</string>
     <string name="stripe_success_pane_skip_desc">Hold on, we\'re almost done…</string>

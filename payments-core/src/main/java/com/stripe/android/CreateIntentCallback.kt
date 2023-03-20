@@ -3,7 +3,7 @@ package com.stripe.android
 import androidx.annotation.RestrictTo
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface AbsCreateIntentCallback
+sealed interface AbsCreateIntentCallback
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface CreateIntentCallback : AbsCreateIntentCallback {
@@ -17,7 +17,10 @@ fun interface CreateIntentCallback : AbsCreateIntentCallback {
         data class Success(val clientSecret: String) : Result
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Failure(val errorMessage: String) : Result
+        data class Failure(
+            internal val cause: Exception,
+            internal val displayMessage: String? = null
+        ) : Result
     }
 }
 
