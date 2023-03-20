@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.ui.theme
 
+import android.app.Activity
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.Colors
@@ -9,11 +10,15 @@ import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 
 private val LightColorPalette = FinancialConnectionsColors(
     backgroundSurface = Color.White,
@@ -146,10 +151,23 @@ private object FinancialConnectionsRippleTheme : RippleTheme {
 
 @Composable
 internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
+
     CompositionLocalProvider(
         LocalFinancialConnectionsTypography provides Typography,
         LocalFinancialConnectionsColors provides LightColorPalette
     ) {
+        val view = LocalView.current
+        val barColor = FinancialConnectionsTheme.colors.borderDefault
+        if (!view.isInEditMode) {
+            SideEffect {
+                val window = (view.context as Activity).window
+                val insets = WindowCompat.getInsetsController(window, view)
+                window.statusBarColor = barColor.toArgb()
+                window.navigationBarColor = barColor.toArgb()
+                insets.isAppearanceLightStatusBars = true
+                insets.isAppearanceLightNavigationBars = true
+            }
+        }
         MaterialTheme(
             colors = debugColors(),
             content = {
