@@ -52,6 +52,8 @@ com.stripe.android.polling
 com.stripe.android.utils
 com.stripe.android.view
 com.stripe.android.view.i18n
+module:payments-core-testing
+com.stripe.android.testing
 module:payments-model
 com.stripe.android
 com.stripe.android.cards
@@ -105,3 +107,11 @@ com.stripe.android.stripecardscan.scanui
 module:wechatpay
 com.stripe.android.payments.wechatpay
 com.stripe.android.payments.wechatpay.reflection
+module:base
+com.stripe.android.mlcore.base
+module:cardscan
+com.stripe.android.mlcore.impl
+module:default
+com.stripe.android.mlcore.impl
+module:googleplay
+com.stripe.android.mlcore.impl
