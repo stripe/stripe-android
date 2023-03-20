@@ -151,7 +151,6 @@ private object FinancialConnectionsRippleTheme : RippleTheme {
 
 @Composable
 internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
-
     CompositionLocalProvider(
         LocalFinancialConnectionsTypography provides Typography,
         LocalFinancialConnectionsColors provides LightColorPalette
@@ -160,7 +159,7 @@ internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
         val barColor = FinancialConnectionsTheme.colors.borderDefault
         if (!view.isInEditMode) {
             SideEffect {
-                (view.context as? Activity)?.window?.let {window ->
+                (view.context as? Activity)?.window?.let { window ->
                     val insets = WindowCompat.getInsetsController(window, view)
                     window.statusBarColor = barColor.toArgb()
                     window.navigationBarColor = barColor.toArgb()
@@ -183,9 +182,10 @@ internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     }
 }
 
-private val LocalFinancialConnectionsTypography = staticCompositionLocalOf<FinancialConnectionsTypography> {
-    error("no FinancialConnectionsTypography provided")
-}
+private val LocalFinancialConnectionsTypography =
+    staticCompositionLocalOf<FinancialConnectionsTypography> {
+        error("no FinancialConnectionsTypography provided")
+    }
 
 private val LocalFinancialConnectionsColors = staticCompositionLocalOf<FinancialConnectionsColors> {
     error("No FinancialConnectionsColors provided")
