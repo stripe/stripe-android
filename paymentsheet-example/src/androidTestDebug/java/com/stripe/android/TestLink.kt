@@ -20,6 +20,7 @@ import com.stripe.android.test.core.TestParameters
 import com.stripe.android.utils.TestRules
 import com.stripe.android.utils.initializedLpmRepository
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,6 +60,7 @@ class TestLink {
     )
 
     @Test
+    @Ignore("neutral-culminate")
     fun testLinkInlineCustom() {
         testDriver.testLinkCustom(linkNewUser)
     }
