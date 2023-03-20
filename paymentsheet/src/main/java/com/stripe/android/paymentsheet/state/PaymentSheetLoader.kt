@@ -122,7 +122,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             prefsRepository.getSavedSelection(
                 isGooglePayAvailable = isGooglePayReady,
                 isLinkAvailable = isLinkAvailable,
-            ).takeIf { it != SavedSelection.None }
+            )
         }
 
         val paymentMethods = async {
@@ -154,7 +154,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 is SavedSelection.PaymentMethod -> {
                     paymentMethods.await().find { it.id == selection.id }?.toPaymentSelection()
                 }
-                is SavedSelection.None, null -> {
+                is SavedSelection.None -> {
                     null
                 }
             }
@@ -288,7 +288,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 }
 
 private fun List<PaymentMethod>.sorted(
-    savedSelection: SavedSelection?,
+    savedSelection: SavedSelection,
 ): List<PaymentMethod> {
     val defaultPaymentMethodIndex = (savedSelection as? SavedSelection.PaymentMethod)?.let {
         indexOfFirst { it.id == savedSelection.id }
