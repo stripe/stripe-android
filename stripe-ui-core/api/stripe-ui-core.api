@@ -311,3 +311,6 @@ public final class com/stripe/android/uicore/text/EmbeddableImage$Drawable : com
 public final class com/stripe/android/uicore/text/HtmlKt {
 }
 
+public final class com/stripe/android/uicore/text/MiddleEllipsisTextKt {
+}
+
