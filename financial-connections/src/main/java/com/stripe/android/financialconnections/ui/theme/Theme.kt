@@ -160,12 +160,13 @@ internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
         val barColor = FinancialConnectionsTheme.colors.borderDefault
         if (!view.isInEditMode) {
             SideEffect {
-                val window = (view.context as Activity).window
-                val insets = WindowCompat.getInsetsController(window, view)
-                window.statusBarColor = barColor.toArgb()
-                window.navigationBarColor = barColor.toArgb()
-                insets.isAppearanceLightStatusBars = true
-                insets.isAppearanceLightNavigationBars = true
+                (view.context as? Activity)?.window?.let {window ->
+                    val insets = WindowCompat.getInsetsController(window, view)
+                    window.statusBarColor = barColor.toArgb()
+                    window.navigationBarColor = barColor.toArgb()
+                    insets.isAppearanceLightStatusBars = true
+                    insets.isAppearanceLightNavigationBars = true
+                }
             }
         }
         MaterialTheme(
