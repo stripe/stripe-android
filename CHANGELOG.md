@@ -2,20 +2,22 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
-### Financial Connections
-* [FIXED][6375](https://github.com/stripe/stripe-android/pull/6375) Fixed Accessible data call out texts
-
-### PaymentSheet
-* [FIXED][6366](https://github.com/stripe/stripe-android/pull/6366) Fixed an issue where the result couldn't be parsed in `PaymentSheetContract`.
-* [FIXED][6386](https://github.com/stripe/stripe-android/pull/6386) Fixed an issue where `FlowController.getPaymentOption()` and `PaymentOptionCallback` might return an outdated payment option in some cases.
+## 20.21.0 - 2023-03-20
 
 ### Payments
 * [ADDED][6335](https://github.com/stripe/stripe-android/pull/6335) Added `Stripe.possibleCardBrands` which retrieves a list of possible card brands given a card number.
 * [FIXED][6376](https://github.com/stripe/stripe-android/pull/6376) Fixed BLIK payment bindings.
 
+### PaymentSheet
+* [FIXED][6366](https://github.com/stripe/stripe-android/pull/6366) Fixed an issue where the result couldn't be parsed in `PaymentSheetContract`.
+* [FIXED][6386](https://github.com/stripe/stripe-android/pull/6386) Fixed an issue where `FlowController.getPaymentOption()` and `PaymentOptionCallback` might return an outdated payment option in some cases.
+
+### Financial Connections
+* [FIXED][6375](https://github.com/stripe/stripe-android/pull/6375) Fixed Accessible data callout texts.
+
 ### Identity
 * [ADDED][6380](https://github.com/stripe/stripe-android/pull/6380) Integrate with `ml-core` and allow user to swap TFLite runtime.
-* 
+
 ## 20.20.0 - 2023-03-13
 
 ### Payments
