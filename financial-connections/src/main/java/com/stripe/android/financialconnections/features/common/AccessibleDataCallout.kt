@@ -233,7 +233,6 @@ internal data class AccessibleDataCalloutModel(
                 permissions = manifest.permissions,
                 isNetworking = manifest.isNetworkingUserFlow ?: false,
                 isStripeDirect = manifest.isStripeDirect ?: false,
-                isNetworking = manifest.isNetworkingUserFlow ?: false,
                 dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
             )
     }

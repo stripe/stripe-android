@@ -21,7 +21,6 @@ import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAc
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
-import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -70,7 +69,7 @@ internal class AccountPickerViewModel @Inject constructor(
                     )
                 )
             }
-            val accounts = buildAccountList(partnerAccountList, activeInstitution)
+            val accounts = partnerAccountList.data.sortedBy { it.allowSelection.not() }
 
             AccountPickerState.Payload(
                 skipAccountSelection = partnerAccountList.skipAccountSelection == true ||
@@ -97,27 +96,6 @@ internal class AccountPickerViewModel @Inject constructor(
             }
         }.execute { copy(payload = it) }
     }
-
-    private fun buildAccountList(
-        partnerAccountList: PartnerAccountsList,
-        activeInstitution: FinancialConnectionsInstitution?,
-    ) = partnerAccountList.data.map { account ->
-        AccountPickerState.PartnerAccountUI(
-            account = account,
-            institutionIcon = activeInstitution?.icon?.default,
-            formattedBalance =
-            if (account.balanceAmount != null && account.currency != null) {
-                CurrencyFormatter
-                    .format(
-                        amount = account.balanceAmount.toLong(),
-                        amountCurrencyCode = account.currency,
-                        targetLocale = locale ?: Locale.getDefault()
-                    )
-            } else {
-                null
-            }
-        )
-    }.sortedBy { it.account.allowSelection.not() }
 
     private fun onPayloadLoaded() {
         onAsync(AccountPickerState::payload, onSuccess = { payload ->
