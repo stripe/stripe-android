@@ -86,6 +86,7 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
+import com.stripe.android.mlcore.base.InterpreterInitializer
 import com.stripe.android.uicore.address.AddressSchemaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -112,6 +113,7 @@ internal class IdentityViewModel constructor(
     internal val screenTracker: ScreenTracker,
     internal val imageHandler: IdentityImageHandler,
     internal val addressSchemaRepository: AddressSchemaRepository,
+    private val tfLiteInitializer: InterpreterInitializer,
     private val savedStateHandle: SavedStateHandle,
     @UIContext internal val uiContext: CoroutineContext,
     @IOContext internal val workContext: CoroutineContext
@@ -235,6 +237,21 @@ internal class IdentityViewModel constructor(
             (SingleSideDocumentUploadState() to CollectedDataParam())
         )
 
+    private val _isTfLiteInitialized: MutableLiveData<Boolean> = MutableLiveData(false)
+    val isTfLiteInitialized: LiveData<Boolean> = _isTfLiteInitialized
+
+    fun initializeTfLite() {
+        viewModelScope.launch(workContext) {
+            tfLiteInitializer.initialize(
+                getApplication(),
+                {
+                    _isTfLiteInitialized.postValue(true)
+                },
+                { throw IllegalStateException("Failed to initialize TFLite runtime: $it") }
+            )
+        }
+    }
+
     /**
      * Response for initial VerificationPage, used for building UI.
      */
@@ -274,6 +291,7 @@ internal class IdentityViewModel constructor(
         private var idDetectorModel: File? = null
         private var faceDetectorModel: File? = null
         private var faceDetectorModelValueSet = false
+        private var isTfliteInitialized = false
 
         init {
             postValue(Resource.loading())
@@ -317,12 +335,18 @@ internal class IdentityViewModel constructor(
                     Status.IDLE -> {} // no-op
                 }
             }
+            addSource(isTfLiteInitialized) { initialized ->
+                isTfliteInitialized = initialized
+                if (isTfliteInitialized) {
+                    maybePostSuccess()
+                }
+            }
         }
 
         private fun maybePostSuccess() {
             page?.let { page ->
                 idDetectorModel?.let { idDetectorModel ->
-                    if (faceDetectorModelValueSet) {
+                    if (isTfliteInitialized && faceDetectorModelValueSet) {
                         postValue(
                             Resource.success(
                                 PageAndModelFiles(
@@ -1597,6 +1621,7 @@ internal class IdentityViewModel constructor(
                 subcomponent.screenTracker,
                 subcomponent.identityImageHandler,
                 subcomponent.addressRepository,
+                subcomponent.tfLiteInitializer,
                 savedStateHandle,
                 uiContextSupplier(),
                 workContextSupplier()

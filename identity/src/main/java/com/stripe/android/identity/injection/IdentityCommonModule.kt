@@ -10,6 +10,8 @@ import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.DefaultIdentityIO
 import com.stripe.android.identity.utils.IdentityIO
+import com.stripe.android.mlcore.base.InterpreterInitializer
+import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -39,5 +41,9 @@ internal abstract class IdentityCommonModule {
         @Provides
         @Singleton
         fun provideResources(context: Context): Resources = context.resources
+
+        @Provides
+        @Singleton
+        fun provideInterpreterInitializer(): InterpreterInitializer = InterpreterInitializerImpl
     }
 }

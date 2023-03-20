@@ -57,7 +57,10 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.BACK
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.FRONT
+import com.stripe.android.mlcore.base.InterpreterInitializer
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -65,6 +68,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -74,6 +78,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.io.File
+import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 internal class IdentityViewModelTest {
@@ -123,7 +128,9 @@ internal class IdentityViewModelTest {
     private val mockOnMissingFront = mock<() -> Unit>()
     private val mockOnMissingBack = mock<() -> Unit>()
     private val mockOnReadyToSubmit = mock<() -> Unit>()
+    private val mockTfLiteInitializer = mock<InterpreterInitializer>()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val viewModel = IdentityViewModel(
         ApplicationProvider.getApplicationContext(),
         IdentityVerificationSheetContract.Args(
@@ -141,9 +148,10 @@ internal class IdentityViewModelTest {
         mockScreenTracker,
         mock(),
         mock(),
+        mockTfLiteInitializer,
         mockSavedStateHandle,
         mock(),
-        mock()
+        UnconfinedTestDispatcher()
     )
 
     private fun mockUploadSuccess() = runBlocking {
@@ -520,6 +528,30 @@ internal class IdentityViewModelTest {
                 eq(ConfirmationDestination.routeWithArgs),
                 any<NavOptionsBuilder.() -> Unit>()
             )
+        }
+    }
+
+    @Test
+    fun `verify tfLite initialization success`() {
+        viewModel.initializeTfLite()
+        val successCaptor = argumentCaptor<() -> Unit>()
+
+        verify(mockTfLiteInitializer).initialize(any(), successCaptor.capture(), any())
+
+        successCaptor.firstValue.invoke()
+
+        assertThat(viewModel.isTfLiteInitialized.value).isTrue()
+    }
+
+    @Test
+    fun `verify tfLite initialization failure`() {
+        viewModel.initializeTfLite()
+        val failureCaptor = argumentCaptor<(Exception) -> Unit>()
+
+        verify(mockTfLiteInitializer).initialize(any(), any(), failureCaptor.capture())
+
+        assertFailsWith<Exception> {
+            failureCaptor.firstValue.invoke(Exception())
         }
     }
 
