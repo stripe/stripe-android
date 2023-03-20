@@ -56,7 +56,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         observeAsyncs()
         viewModelScope.launch {
             setState { copy(payload = Loading()) }
-            kotlin.runCatching { requireNotNull(getManifest().accountholderCustomerEmailAddress) }
+            runCatching { requireNotNull(getManifest().accountholderCustomerEmailAddress) }
                 .onSuccess { email ->
                     lookupConsumerAndStartVerification(
                         email = email,
