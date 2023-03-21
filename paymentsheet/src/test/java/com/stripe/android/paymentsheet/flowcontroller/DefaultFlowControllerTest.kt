@@ -339,7 +339,6 @@ internal class DefaultFlowControllerTest {
                 isGooglePayReady = false,
                 paymentSelection = null,
                 linkState = null,
-//                savedSelection = SavedSelection.None,
             ),
             statusBarColor = ContextCompat.getColor(
                 activity,
@@ -520,12 +519,9 @@ internal class DefaultFlowControllerTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
-//                savedSelection = SavedSelection.PaymentMethod(
-//                    id = "pm_123456789"
-//                ),
                 isGooglePayReady = false,
                 linkState = null,
-                paymentSelection = initialSelection, // PaymentSelection.Saved(pm),
+                paymentSelection = initialSelection,
             )
         )
 
@@ -561,9 +557,6 @@ internal class DefaultFlowControllerTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
-//                savedSelection = SavedSelection.PaymentMethod(
-//                    id = "pm_123456789"
-//                ),
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
@@ -605,9 +598,6 @@ internal class DefaultFlowControllerTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
-//                savedSelection = SavedSelection.PaymentMethod(
-//                    id = "pm_123456789"
-//                ),
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,

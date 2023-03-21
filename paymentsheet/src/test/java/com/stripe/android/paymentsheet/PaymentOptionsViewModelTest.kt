@@ -446,7 +446,6 @@ internal class PaymentOptionsViewModelTest {
                 isGooglePayReady = true,
                 paymentSelection = null,
                 linkState = null,
-//                savedSelection = SavedSelection.None,
             ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             injectorKey = DUMMY_INJECTOR_KEY,

@@ -92,7 +92,6 @@ internal object PaymentSheetFixtures {
             isGooglePayReady = false,
             paymentSelection = null,
             linkState = null,
-//            savedSelection = SavedSelection.None,
         ),
         statusBarColor = STATUS_BAR_COLOR,
         injectorKey = DUMMY_INJECTOR_KEY,

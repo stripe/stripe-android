@@ -81,7 +81,6 @@ internal class PaymentOptionsViewModelInjectionTest : BasePaymentOptionsViewMode
             state = PaymentSheetState.Full(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = emptyList(),
-//                savedSelection = SavedSelection.None,
                 config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
                 isGooglePayReady = false,
                 paymentSelection = null,

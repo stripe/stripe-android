@@ -41,7 +41,6 @@ internal class FakePaymentSheetLoader(
                     config = paymentSheetConfiguration,
                     stripeIntent = stripeIntent,
                     customerPaymentMethods = customerPaymentMethods,
-//                    savedSelection = savedSelection,
                     isGooglePayReady = isGooglePayAvailable,
                     linkState = linkState,
                     paymentSelection = paymentSelection,
