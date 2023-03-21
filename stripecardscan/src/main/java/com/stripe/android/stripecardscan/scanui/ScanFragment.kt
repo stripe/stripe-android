@@ -14,11 +14,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RestrictTo
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.core.storage.StorageFactory
+import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.camera.getCameraAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -236,7 +238,17 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
             onSupportsMultipleCameras(it)
         }
 
-        launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
+        lifecycleScope.launch(Dispatchers.IO) {
+            InterpreterInitializerImpl.initialize(
+                context = requireContext(),
+                onSuccess = {
+                    lifecycleScope.launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
+                },
+                onFailure = {
+                    scanFailure(it)
+                }
+            )
+        }
     }
 
     /**

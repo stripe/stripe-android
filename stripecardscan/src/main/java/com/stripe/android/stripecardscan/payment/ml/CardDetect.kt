@@ -7,13 +7,14 @@ import android.util.Size
 import com.stripe.android.camera.framework.image.cropCameraPreviewToSquare
 import com.stripe.android.camera.framework.image.hasOpenGl31
 import com.stripe.android.camera.framework.image.scale
+import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
+import com.stripe.android.mlcore.base.InterpreterWrapper
 import com.stripe.android.stripecardscan.framework.FetchedData
 import com.stripe.android.stripecardscan.framework.image.MLImage
 import com.stripe.android.stripecardscan.framework.image.toMLImage
 import com.stripe.android.stripecardscan.framework.ml.TFLAnalyzerFactory
 import com.stripe.android.stripecardscan.framework.ml.TensorFlowLiteAnalyzer
 import com.stripe.android.stripecardscan.framework.util.indexOfMax
-import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import kotlin.math.max
 
@@ -22,7 +23,7 @@ private val TRAINED_IMAGE_SIZE = Size(224, 224)
 /** model returns whether or not there is a card present */
 private const val NUM_CLASS = 3
 
-internal class CardDetect private constructor(interpreter: Interpreter) :
+internal class CardDetect private constructor(interpreter: InterpreterWrapper) :
     TensorFlowLiteAnalyzer<
         CardDetect.Input,
         ByteBuffer,
@@ -97,7 +98,7 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
         data.cardDetectImage.getData()
 
     override suspend fun executeInference(
-        tfInterpreter: Interpreter,
+        tfInterpreter: InterpreterWrapper,
         data: ByteBuffer
     ): Array<FloatArray> {
         val mlOutput = arrayOf(FloatArray(NUM_CLASS))
@@ -118,10 +119,10 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
             private const val DEFAULT_THREADS = 4
         }
 
-        override val tfOptions: Interpreter.Options = Interpreter
-            .Options()
-            .setUseNNAPI(USE_GPU && hasOpenGl31(context))
-            .setNumThreads(threads)
+        override val tfOptions = InterpreterOptionsWrapper.Builder()
+            .useNNAPI(USE_GPU && hasOpenGl31(context.applicationContext))
+            .numThreads(threads)
+            .build()
 
         override suspend fun newInstance(): CardDetect? =
             createInterpreter()?.let { CardDetect(it) }
