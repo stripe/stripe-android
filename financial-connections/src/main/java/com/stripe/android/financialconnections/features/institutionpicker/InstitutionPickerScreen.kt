@@ -3,6 +3,7 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -295,6 +296,11 @@ private fun SearchInstitutionsList(
                             InstitutionResultTile({ onInstitutionSelected(it, false) }, institution)
                         }
                     }
+                    if (true) {
+                        item {
+                            ManualEntryRow()
+                        }
+                    }
                     item {
                         Column {
                             Spacer(modifier = Modifier.size(16.dp))
@@ -352,6 +358,42 @@ private fun SearchInstitutionsFailedRow(
                 text = stringResource(id = R.string.stripe_institutionpicker_pane_error_desc),
                 style = FinancialConnectionsTheme.typography.body,
                 color = FinancialConnectionsTheme.colors.textSecondary
+            )
+        }
+    }
+}
+
+@Composable
+private fun ManualEntryRow() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable { TODO() }
+            .padding(
+                vertical = 8.dp,
+                horizontal = 24.dp
+            )
+    ) {
+        Image(
+            painter = painterResource(
+                id = R.drawable.ic_chevron_down
+            ),
+            contentDescription = "Add icon"
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        Column {
+            Text(
+                text = "TEST",
+                color = FinancialConnectionsTheme.colors.textPrimary,
+                style = FinancialConnectionsTheme.typography.bodyEmphasized
+            )
+            Text(
+                text = "TEST",
+                color = FinancialConnectionsTheme.colors.textSecondary,
+                style = FinancialConnectionsTheme.typography.captionTight,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
