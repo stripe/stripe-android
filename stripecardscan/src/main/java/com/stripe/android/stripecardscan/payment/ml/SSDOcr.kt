@@ -3,7 +3,6 @@ package com.stripe.android.stripecardscan.payment.ml
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.util.Log
 import android.util.Size
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.camera.framework.image.cropCameraPreviewToViewFinder

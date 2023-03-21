@@ -262,7 +262,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
                 }
             )
         }
-
     }
 
     /**
