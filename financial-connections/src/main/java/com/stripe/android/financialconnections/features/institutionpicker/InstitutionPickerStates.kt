@@ -14,7 +14,6 @@ internal class InstitutionPickerStates :
         searchModeSearchingInstitutions(),
         searchModeWithResults(),
         searchModeNoResults(),
-        searchModeNoQuery(),
         noSearchMode()
     )
 
@@ -45,20 +44,13 @@ internal class InstitutionPickerStates :
         fun searchModeNoResults() = InstitutionPickerState(
             payload = Success(payload()),
             searchInstitutions = Success(InstitutionResponse(emptyList())),
-            searchMode = false,
+            searchMode = true,
         )
 
         // Search mode: failed
         fun searchModeFailed() = InstitutionPickerState(
             payload = Success(payload()),
             searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
-            searchMode = true,
-        )
-
-        // Search mode: no query
-        fun searchModeNoQuery() = InstitutionPickerState(
-            payload = Success(payload()),
-            searchInstitutions = Success(institutionResponse()),
             searchMode = true,
         )
 

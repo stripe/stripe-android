@@ -97,6 +97,8 @@ internal fun InstitutionPickerScreen() {
         payload = state.payload,
         institutionsProvider = { state.searchInstitutions },
         searchMode = state.searchMode,
+        // This is just used to provide a text in Compose previews
+        previewText = null,
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCancelSearchClick = viewModel::onCancelSearchClick,
@@ -111,6 +113,7 @@ private fun InstitutionPickerContent(
     payload: Async<Payload>,
     institutionsProvider: () -> Async<InstitutionResponse>,
     searchMode: Boolean,
+    previewText: String?,
     onQueryChanged: (String) -> Unit,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     onCancelSearchClick: () -> Unit,
@@ -128,6 +131,7 @@ private fun InstitutionPickerContent(
         }
     ) {
         LoadedContent(
+            previewText = previewText,
             searchMode = searchMode,
             onQueryChanged = onQueryChanged,
             onSearchFocused = onSearchFocused,
@@ -143,15 +147,16 @@ private fun InstitutionPickerContent(
 @Composable
 private fun LoadedContent(
     searchMode: Boolean,
+    previewText: String?,
     onQueryChanged: (String) -> Unit,
     onSearchFocused: () -> Unit,
     onCancelSearchClick: () -> Unit,
     institutionsProvider: () -> Async<InstitutionResponse>,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     payload: Async<Payload>,
-    onManualEntryClick: () -> Unit
+    onManualEntryClick: () -> Unit,
 ) {
-    var input by remember { mutableStateOf(TextFieldValue()) }
+    var input by remember { mutableStateOf(TextFieldValue(previewText ?: "")) }
     LaunchedEffect(searchMode) { if (!searchMode) input = TextFieldValue() }
     Column {
         if (searchMode.not()) {
@@ -531,6 +536,7 @@ internal fun InitialLoading(
 ) {
     FinancialConnectionsPreview {
         InstitutionPickerContent(
+            previewText = "",
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
@@ -550,6 +556,7 @@ internal fun SearchModeSearchingInstitutions(
 ) {
     FinancialConnectionsPreview {
         InstitutionPickerContent(
+            previewText = "Some query",
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
@@ -569,6 +576,7 @@ internal fun SearchModeWithResults(
 ) {
     FinancialConnectionsPreview {
         InstitutionPickerContent(
+            previewText = "Some query",
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
@@ -588,6 +596,7 @@ internal fun SearchModeNoResults(
 ) {
     FinancialConnectionsPreview {
         InstitutionPickerContent(
+            previewText = "Some query",
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
@@ -607,25 +616,7 @@ internal fun SearchModeFailed(
 ) {
     FinancialConnectionsPreview {
         InstitutionPickerContent(
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Composable
-@Preview(group = "Institutions Pane", name = "searchModeNoQuery")
-internal fun SearchModeNoQuery(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeNoQuery()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
+            previewText = "Some query",
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
@@ -645,6 +636,7 @@ internal fun NoSearchMode(
 ) {
     FinancialConnectionsPreview {
         InstitutionPickerContent(
+            previewText = "",
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
