@@ -46,7 +46,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -73,8 +72,6 @@ import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
-import com.stripe.android.financialconnections.ui.TextResource
-import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -189,6 +186,7 @@ private fun LoadedContent(
                 institutionsProvider = institutionsProvider,
                 onInstitutionSelected = onInstitutionSelected,
                 onManualEntryClick = onManualEntryClick,
+                allowManualEntry = payload()?.allowManualEntry ?: false
             )
         } else {
             FeaturedInstitutionsGrid(
@@ -260,6 +258,7 @@ private fun SearchInstitutionsList(
     institutionsProvider: () -> Async<InstitutionResponse>,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     onManualEntryClick: () -> Unit,
+    allowManualEntry: Boolean
 ) {
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -268,10 +267,11 @@ private fun SearchInstitutionsList(
             when (val institutions: Async<InstitutionResponse> = institutionsProvider()) {
                 Uninitialized,
                 is Fail -> item {
-                    SearchInstitutionsFailedRow(
-                        onManualEntryClick = onManualEntryClick,
-                        showManualEntry = false
-                    )
+                    if (allowManualEntry) {
+                        ManualEntryRow(onManualEntryClick)
+                    } else {
+                        NoResultsRow()
+                    }
                 }
 
                 is Loading -> item {
@@ -316,53 +316,6 @@ private fun SearchInstitutionsList(
             }
         }
     )
-}
-
-@Composable
-private fun SearchInstitutionsFailedRow(
-    showManualEntry: Boolean,
-    onManualEntryClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 24.dp,
-                vertical = 8.dp
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.stripe_ic_warning),
-            contentDescription = "Warning icon",
-            tint = FinancialConnectionsTheme.colors.textSecondary
-        )
-        Text(
-            text = stringResource(id = R.string.stripe_institutionpicker_pane_error_title),
-            style = FinancialConnectionsTheme.typography.body,
-            color = FinancialConnectionsTheme.colors.textSecondary
-        )
-        when (showManualEntry) {
-            true -> AnnotatedText(
-                modifier = Modifier.fillMaxWidth(),
-                text = TextResource.StringId(
-                    R.string.stripe_institutionpicker_pane_error_desc_manual_entry
-                ),
-                onClickableTextClick = { onManualEntryClick() },
-                defaultStyle = FinancialConnectionsTheme.typography.body.copy(
-                    textAlign = TextAlign.Center,
-                    color = FinancialConnectionsTheme.colors.textSecondary
-                )
-            )
-
-            false -> Text(
-                text = stringResource(id = R.string.stripe_institutionpicker_pane_error_desc),
-                style = FinancialConnectionsTheme.typography.body,
-                color = FinancialConnectionsTheme.colors.textSecondary
-            )
-        }
-    }
 }
 
 @Composable
