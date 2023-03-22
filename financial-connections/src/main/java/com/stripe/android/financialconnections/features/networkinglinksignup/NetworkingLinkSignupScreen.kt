@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,9 +39,10 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupViewModel.Companion.PANE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.NetworkingLinkSignupBody
+import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.ImageResource
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -51,8 +51,10 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
+import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
+import com.stripe.android.financialconnections.utils.MarkdownParser.toHtml
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
@@ -144,12 +146,16 @@ private fun NetworkingLinkSignupLoaded(
                 )
         ) {
             Spacer(modifier = Modifier.size(16.dp))
-            Title()
+            Title(payload.content.title)
             Spacer(modifier = Modifier.size(8.dp))
-            FirstBullet(payload)
+            payload.content.body.bullets.forEach {
+                BulletItem(
+                    bullet = BulletUI.from(it),
+                    onClickableTextClick = onClickableTextClick
+                )
+                Spacer(modifier = Modifier.size(12.dp))
+            }
             Spacer(modifier = Modifier.size(12.dp))
-            SecondBullet()
-            Spacer(modifier = Modifier.size(24.dp))
             EmailSection(
                 showFullForm = showFullForm,
                 loading = lookupAccountSync is Loading,
@@ -169,6 +175,8 @@ private fun NetworkingLinkSignupLoaded(
                 visible = showFullForm
             ) {
                 SaveToLinkCta(
+                    text = payload.content.cta,
+                    aboveCta = payload.content.aboveCta,
                     onClickableTextClick = onClickableTextClick,
                     saveAccountToLinkSync = saveAccountToLinkSync,
                     validForm = validForm,
@@ -176,25 +184,27 @@ private fun NetworkingLinkSignupLoaded(
                 )
             }
             Spacer(modifier = Modifier.size(12.dp))
-            SkipCta(onSkipClick)
+            SkipCta(payload.content.skipCta, onSkipClick)
         }
     }
 }
 
 @Composable
-private fun SkipCta(onSkipClick: () -> Unit) {
+private fun SkipCta(text: String, onSkipClick: () -> Unit) {
     FinancialConnectionsButton(
         type = FinancialConnectionsButton.Type.Secondary,
         onClick = onSkipClick,
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        Text(text = stringResource(R.string.stripe_networking_signup_cta_negative))
+        Text(text = text)
     }
 }
 
 @Composable
 private fun SaveToLinkCta(
+    aboveCta: String,
+    text: String,
     onClickableTextClick: (String) -> Unit,
     saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
     validForm: Boolean,
@@ -203,7 +213,7 @@ private fun SaveToLinkCta(
     Column {
         AnnotatedText(
             modifier = Modifier.fillMaxWidth(),
-            text = TextResource.StringId(R.string.stripe_networking_signup_terms),
+            text = TextResource.Text(toHtml(aboveCta)),
             onClickableTextClick = onClickableTextClick,
             defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
                 textAlign = TextAlign.Center,
@@ -227,7 +237,7 @@ private fun SaveToLinkCta(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(text = stringResource(R.string.stripe_networking_signup_cta_save))
+            Text(text = text)
         }
     }
 }
@@ -265,37 +275,9 @@ private fun PhoneNumberSection(
 }
 
 @Composable
-private fun SecondBullet() {
-    BulletItem(
-        bullet = BulletUI(
-            title = null,
-            TextResource.StringId(R.string.stripe_networking_signup_bullet2),
-            imageResource = ImageResource.Local(R.drawable.stripe_ic_disputeprotection)
-        ),
-        onClickableTextClick = {}
-    )
-}
-
-@Composable
-private fun FirstBullet(payload: Payload) {
-    BulletItem(
-        bullet = BulletUI(
-            title = null,
-            // TODO handle no merchant name case.
-            content = TextResource.StringId(
-                R.string.stripe_networking_signup_bullet1,
-                listOf(payload.merchantName ?: "")
-            ),
-            imageResource = ImageResource.Local(R.drawable.stripe_ic_convert)
-        ),
-        onClickableTextClick = {}
-    )
-}
-
-@Composable
-private fun Title() {
+private fun Title(title: String) {
     AnnotatedText(
-        text = TextResource.Text(stringResource(R.string.stripe_networking_signup_title)),
+        text = TextResource.Text(fromHtml(title)),
         defaultStyle = FinancialConnectionsTheme.typography.subtitle,
         annotationStyles = mapOf(
             StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.subtitle
@@ -363,7 +345,8 @@ internal fun NetworkingLinkSignupScreenEnteringEmailPreview() {
                         phoneController = PhoneNumberController.createPhoneNumberController(
                             initialValue = "",
                             initiallySelectedCountryCode = null,
-                        )
+                        ),
+                        content = networkingLinkSignupPane()
                     )
                 ),
                 validEmail = null,
@@ -393,7 +376,8 @@ internal fun NetworkingLinkSignupScreenEnteringPhonePreview() {
                         phoneController = PhoneNumberController.createPhoneNumberController(
                             initialValue = "",
                             initiallySelectedCountryCode = null,
-                        )
+                        ),
+                        content = networkingLinkSignupPane()
                     )
                 ),
                 validEmail = "test@test.com",
@@ -415,3 +399,12 @@ internal fun NetworkingLinkSignupScreenEnteringPhonePreview() {
         )
     }
 }
+
+@Composable
+private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(
+    aboveCta = "Above CTA",
+    body = NetworkingLinkSignupBody(emptyList()),
+    cta = "CTA",
+    skipCta = "Skip CTA",
+    title = "Title"
+)

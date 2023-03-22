@@ -76,10 +76,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         withState { state ->
             viewModelScope.launch {
                 kotlin.runCatching {
-                    synchronizeFinancialConnectionsSession(
-                        clientSecret = state.sessionSecret,
-                        applicationId = applicationId
-                    )
+                    synchronizeFinancialConnectionsSession()
                 }.onFailure {
                     finishWithResult(state, Failed(it))
                 }.onSuccess {

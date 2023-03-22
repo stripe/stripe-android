@@ -18,9 +18,11 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
+import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.isCancellationError
@@ -44,6 +46,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private val getCachedAccounts: GetCachedAccounts,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
+    private val sync: SynchronizeFinancialConnectionsSession,
     private val goNext: GoNext,
     private val logger: Logger
 ) : MavericksViewModel<NetworkingLinkSignupState>(initialState) {
@@ -54,11 +57,15 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         logErrors()
         suspend {
             val manifest = getManifest()
+            val content = requireNotNull(sync().text?.networkingLinkSignupPane)
             eventTracker.track(PaneLoaded(PANE))
             NetworkingLinkSignupState.Payload(
+                content = content,
                 merchantName = manifest.getBusinessName(),
-                emailController = EmailConfig.createController(manifest.accountholderCustomerEmailAddress),
-                phoneController = PhoneNumberController.createPhoneNumberController()
+                emailController = EmailConfig
+                    .createController(manifest.accountholderCustomerEmailAddress),
+                phoneController = PhoneNumberController
+                    .createPhoneNumberController(manifest.accountholderPhoneNumber ?: ""),
             )
         }.execute { copy(payload = it) }
     }
@@ -89,6 +96,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             onFail = { error ->
                 logger.error("Error saving account to Link", error)
                 eventTracker.track(Error(PANE, error))
+                goNext(nextPane = Pane.SUCCESS)
             },
         )
         onAsync(
@@ -200,6 +208,7 @@ internal data class NetworkingLinkSignupState(
     data class Payload(
         val merchantName: String?,
         val emailController: SimpleTextFieldController,
-        val phoneController: PhoneNumberController
+        val phoneController: PhoneNumberController,
+        val content: NetworkingLinkSignupPane
     )
 }
