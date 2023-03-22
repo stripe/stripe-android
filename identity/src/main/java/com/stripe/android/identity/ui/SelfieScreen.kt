@@ -339,9 +339,7 @@ private fun ResultView(
     ) {
         TextButton(
             modifier = Modifier.testTag(RETAKE_SELFIE_BUTTON_TAG),
-            onClick = {
-                navController.navigateTo(SelfieDestination)
-            }
+            onClick = { navController.navigateTo(SelfieDestination) }
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.camera_icon),
@@ -362,9 +360,7 @@ private fun ResultView(
         Checkbox(
             modifier = Modifier.testTag(CONSENT_CHECKBOX_TAG),
             checked = allowImageCollection,
-            onCheckedChange = {
-                onAllowImageCollectionChanged(!allowImageCollection)
-            },
+            onCheckedChange = { onAllowImageCollectionChanged(!allowImageCollection) },
             enabled = allowImageCollectionCheckboxEnabled
         )
 
