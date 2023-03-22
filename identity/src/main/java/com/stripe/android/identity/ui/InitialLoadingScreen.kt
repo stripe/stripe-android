@@ -47,6 +47,7 @@ internal fun InitialLoadingScreen(
                 fallbackUrlLauncher.launchFallbackUrl(it.fallbackUrl)
             } else if (it.requirements.missing.contains(Requirement.BIOMETRICCONSENT)) {
                 navController.navigateTo(ConsentDestination)
+//                navController.navigateTo(SelfieDestination)
             } else {
                 navController.navigateTo(IndividualWelcomeDestination)
             }
