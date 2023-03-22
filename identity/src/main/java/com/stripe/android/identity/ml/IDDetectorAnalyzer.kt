@@ -8,8 +8,10 @@ import com.stripe.android.camera.framework.util.maxAspectRatioInSize
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.roundToMaxDecimals
+import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
+import com.stripe.android.mlcore.base.InterpreterWrapper
+import com.stripe.android.mlcore.impl.InterpreterWrapperImpl
 import org.tensorflow.lite.DataType
-import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
@@ -18,8 +20,6 @@ import java.io.File
 
 /**
  * Analyzer to run IDDetector.
- *
- * TODO(ccen): reimplement with ImageClassifier
  */
 internal class IDDetectorAnalyzer(
     modelFile: File,
@@ -28,7 +28,10 @@ internal class IDDetectorAnalyzer(
 ) :
     Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
-    private val tfliteInterpreter = Interpreter(modelFile)
+    private val interpreterApi: InterpreterWrapper = InterpreterWrapperImpl(
+        modelFile,
+        InterpreterOptionsWrapper.Builder().build()
+    )
 
     override suspend fun analyze(
         data: AnalyzerInput,
@@ -60,7 +63,7 @@ internal class IDDetectorAnalyzer(
         // inference - input: (1, 224, 224, 3), output: (392, 4), (392, 4)
         val boundingBoxes = Array(OUTPUT_SIZE) { FloatArray(OUTPUT_BOUNDING_BOX_TENSOR_SIZE) }
         val categories = Array(OUTPUT_SIZE) { FloatArray(OUTPUT_CATEGORY_TENSOR_SIZE) }
-        tfliteInterpreter.runForMultipleInputsOutputs(
+        interpreterApi.runForMultipleInputsOutputs(
             arrayOf(tensorImage.buffer),
             mapOf(
                 OUTPUT_BOUNDING_BOX_TENSOR_INDEX to boundingBoxes,

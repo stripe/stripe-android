@@ -8,11 +8,7 @@ dependencies {
     implementation project(":camera-core")
     implementation project(":stripe-core")
     implementation project(":stripe-ui-core")
-
-    // vanilla tflite library
-    implementation "org.tensorflow:tensorflow-lite:2.11.0"
-    // support library to reshape image to the input model shape
-    implementation 'org.tensorflow:tensorflow-lite-support:0.4.3'
+    implementation project(":ml-core:default")
 
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"

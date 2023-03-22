@@ -28,8 +28,8 @@ appId: com.stripe.android.financialconnections.example
 - extendedWaitUntil:
     visible: "Success"
     timeout: 60000
-- tapOn: "Success"
-- tapOn: "Confirm"
+- tapOn: "Success" # select all accounts
+- tapOn: "Link account"
 # CONFIRM AND COMPLETE
 - tapOn: "Done"
 - assertVisible: ".*Intent Confirmed!.*"

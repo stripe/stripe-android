@@ -28,7 +28,6 @@
     <string name="dob">Date of Birth</string>
     <string name="first_name">First</string>
     <string name="last_name">Last</string>
-    <string name="name">Name</string>
     <!-- Error message when date of birth format is invalid -->
     <string name="invalid_dob_error">Date of birth does not look valid</string>
     <!-- Error message when ID number is incomplete -->

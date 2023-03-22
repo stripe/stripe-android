@@ -45,7 +45,7 @@ internal fun NameSection(
                     controller = lastNameController
                 )
             ),
-            label = R.string.name
+            label = R.string.address_label_name
         )
     }
 

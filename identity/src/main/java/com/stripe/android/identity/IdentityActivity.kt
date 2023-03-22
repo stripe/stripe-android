@@ -104,7 +104,6 @@ internal class IdentityActivity :
         super.onSaveInstanceState(outState)
         outState.putBoolean(KEY_PRESENTED, true)
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         injectWithFallback(
@@ -120,6 +119,7 @@ internal class IdentityActivity :
             .fallbackUrlLauncher(this)
             .build()
         identityViewModel.retrieveAndBufferVerificationPage()
+        identityViewModel.initializeTfLite()
         identityViewModel.registerActivityResultCaller(this)
         fallbackUrlLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
