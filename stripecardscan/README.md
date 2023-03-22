@@ -26,6 +26,18 @@ See the `stripecardscan-example` directory for an example application that you c
     }
     ```
 
+## Use TFLite in Google play to reduce binary size
+
+CardScan Android SDK uses a portable TFLite runtime to execute machine learning models, if your application is released through Google play, you could instead use the Google play runtime, this would reduce the SDK size by ~400kb.
+
+To do so, configure your app's dependency on stripecardscan as follows.
+```
+    implementation('com.stripe:stripecardscan:$stripeVersion') {
+      exclude group: 'com.stripe', module: 'ml-core-cardscan' // exclude the cardscan-specific portable tflite runtime
+    }
+    implementation('com.stripe:ml-core-googleplay:$stripeVersion') // include the google play tflite runtime
+```
+
 # Credit Card OCR
 
 Add `CardScanSheet` in your activity or fragment where you want to invoke the verification flow

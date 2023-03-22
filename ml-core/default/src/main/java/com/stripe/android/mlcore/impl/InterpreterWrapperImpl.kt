@@ -17,6 +17,10 @@ class InterpreterWrapperImpl(file: File, options: InterpreterOptionsWrapper) : I
     override fun run(input: Any, output: Any) {
         interpreter.run(input, output)
     }
+
+    override fun close() {
+        interpreter.close()
+    }
 }
 
 private fun InterpreterOptionsWrapper.toInterpreterOptions(): Interpreter.Options {

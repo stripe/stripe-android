@@ -13,4 +13,6 @@ interface InterpreterWrapper {
     )
 
     fun run(input: Any, output: Any)
+
+    fun close()
 }
