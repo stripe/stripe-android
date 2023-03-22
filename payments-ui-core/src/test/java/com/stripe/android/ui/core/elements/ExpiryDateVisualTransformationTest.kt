@@ -51,7 +51,6 @@ internal class ExpiryDateVisualTransformationTest {
     ) {
         val transformed = result.text.text
 
-        // We run these to make sure that we don't run into any index-based exceptions
         for (offset in 0..original.length) {
             val transformedOffset = result.offsetMapping.originalToTransformed(offset)
             assertThat(transformedOffset).isIn(0..transformed.length)
