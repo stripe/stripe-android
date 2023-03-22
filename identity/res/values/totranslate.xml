@@ -16,6 +16,8 @@
     <string name="description_close">close verification page</string>
     <!-- Content description for back button -->
     <string name="description_go_back">go back to the previous screen</string>
+    <!-- Content description for camera icon -->
+    <string name="description_camera">camera icon</string>
     <!-- Section title of ID number collection -->
     <string name="id_number">ID Number</string>
     <!-- Label for the ID field to collect last 4 of social security number for US ID -->
@@ -32,4 +34,5 @@
     <string name="invalid_dob_error">Date of birth does not look valid</string>
     <!-- Error message when ID number is incomplete -->
     <string name="incomplete_id_number">The ID number you entered is incomplete</string>
+    <string name="retake_photos">Retake Photos</string>
 </resources>

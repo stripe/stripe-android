@@ -181,8 +181,12 @@ internal fun ScanDestinationEffect(
     }
 }
 
-internal object SelfieDestination : IdentityTopLevelDestination() {
-    const val SELFIE = "Selfie"
+internal object SelfieDestination : IdentityTopLevelDestination(
+    popUpToParam = PopUpToParam(
+        route = SELFIE,
+        inclusive = true
+    )
+) {
     val ROUTE = object : DestinationRoute() {
         override val routeBase = SELFIE
     }
@@ -190,6 +194,7 @@ internal object SelfieDestination : IdentityTopLevelDestination() {
     override val destinationRoute = ROUTE
 }
 
+internal const val SELFIE = "Selfie"
 internal const val ARG_SHOULD_START_FROM_BACK = "startFromBack"
 internal const val ARG_FRONT_SCAN_TYPE = "frontScanType"
 internal const val ARG_BACK_SCAN_TYPE = "backScanType"
