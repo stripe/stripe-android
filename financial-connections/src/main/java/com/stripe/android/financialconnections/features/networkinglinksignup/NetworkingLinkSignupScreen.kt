@@ -185,7 +185,7 @@ private fun NetworkingLinkSignupLoaded(
         }
         PaneFooter(elevation = scrollState.elevation) {
             AnimatedVisibility(
-                visible = true
+                visible = showFullForm
             ) {
                 SaveToLinkCta(
                     text = payload.content.cta,
