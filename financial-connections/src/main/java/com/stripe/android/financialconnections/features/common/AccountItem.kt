@@ -26,6 +26,7 @@ import androidx.core.os.ConfigurationCompat.getLocales
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
+import com.stripe.android.uicore.text.MiddleEllipsisText
 import java.util.Locale
 
 @Composable
@@ -78,10 +79,8 @@ internal fun AccountItem(
                 )
                 subtitle?.let {
                     Spacer(modifier = Modifier.size(4.dp))
-                    Text(
+                    MiddleEllipsisText(
                         text = it,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
                         color = FinancialConnectionsTheme.colors.textDisabled,
                         style = FinancialConnectionsTheme.typography.captionTight
                     )
