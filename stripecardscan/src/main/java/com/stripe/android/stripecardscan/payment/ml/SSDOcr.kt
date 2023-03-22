@@ -187,6 +187,7 @@ internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
             1 to arrayOf(FloatArray(NUM_LOC))
         )
 
+        @Suppress("UNCHECKED_CAST")
         tfInterpreter.runForMultipleInputsOutputs(data as Array<Any>, mlOutput)
         return mlOutput
     }
