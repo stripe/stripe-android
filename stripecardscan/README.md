@@ -32,10 +32,10 @@ CardScan Android SDK uses a portable TFLite runtime to execute machine learning 
 
 To do so, configure your app's dependency on stripecardscan as follows.
 ```
-    implementation("com.stripe:stripecardscan:$stripeVersion") {
-      exclude group: 'com.stripe', module: 'ml-core:cardscan' // exclude the cardscan-specific portable tflite runtime
+    implementation('com.stripe:stripecardscan:$stripeVersion') {
+      exclude group: 'com.stripe', module: 'ml-core-cardscan' // exclude the cardscan-specific portable tflite runtime
     }
-    implementation("com.stripe:ml-core-googleplay:$stripeVersion") // include the google play tflite runtime
+    implementation('com.stripe:ml-core-googleplay:$stripeVersion') // include the google play tflite runtime
 ```
 
 # Credit Card OCR
