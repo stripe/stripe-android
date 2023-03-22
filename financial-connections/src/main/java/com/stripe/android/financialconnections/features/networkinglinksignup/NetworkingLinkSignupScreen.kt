@@ -15,11 +15,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +39,7 @@ import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PaneFooter
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupViewModel.Companion.PANE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupBody
@@ -54,7 +57,6 @@ import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
-import com.stripe.android.financialconnections.utils.MarkdownParser.toHtml
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
@@ -68,6 +70,17 @@ internal fun NetworkingLinkSignupScreen() {
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
     BackHandler(enabled = true) {}
+    val uriHandler = LocalUriHandler.current
+
+    state.value.viewEffect?.let { viewEffect ->
+        LaunchedEffect(viewEffect) {
+            when (viewEffect) {
+                is OpenUrl -> uriHandler.openUri(viewEffect.url)
+            }
+            viewModel.onViewEffectLaunched()
+        }
+    }
+
     NetworkingLinkSignupContent(
         state = state.value,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
@@ -172,7 +185,7 @@ private fun NetworkingLinkSignupLoaded(
         }
         PaneFooter(elevation = scrollState.elevation) {
             AnimatedVisibility(
-                visible = showFullForm
+                visible = true
             ) {
                 SaveToLinkCta(
                     text = payload.content.cta,
@@ -213,7 +226,7 @@ private fun SaveToLinkCta(
     Column {
         AnnotatedText(
             modifier = Modifier.fillMaxWidth(),
-            text = TextResource.Text(toHtml(aboveCta)),
+            text = TextResource.Text(fromHtml(aboveCta)),
             onClickableTextClick = onClickableTextClick,
             defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
                 textAlign = TextAlign.Center,

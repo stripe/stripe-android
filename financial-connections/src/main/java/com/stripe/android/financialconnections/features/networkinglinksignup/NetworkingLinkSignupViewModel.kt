@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
+import android.webkit.URLUtil
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -20,11 +21,13 @@ import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.features.common.getBusinessName
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
+import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.EmailConfig
@@ -37,12 +40,15 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.security.InvalidParameterException
+import java.util.Date
 import javax.inject.Inject
 
 internal class NetworkingLinkSignupViewModel @Inject constructor(
     initialState: NetworkingLinkSignupState,
     private val saveAccountToLink: SaveAccountToLink,
     private val lookupAccount: LookupAccount,
+    private val uriUtils: UriUtils,
     private val getCachedAccounts: GetCachedAccounts,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
@@ -141,6 +147,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
 
     fun onSaveAccount() {
         suspend {
+            eventTracker.track(Click(eventName = "click.save_to_link", pane = PANE))
             val state = awaitState()
             val selectedAccounts = getCachedAccounts()
             val phoneController = state.payload()!!.phoneController
@@ -156,9 +163,19 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         }.execute { copy(saveAccountToLink = it) }
     }
 
-    fun onClickableTextClick(text: String) {
-        // TODO handle clicks.
-        logger.debug("Clicked text: $text")
+    fun onClickableTextClick(uri: String) = viewModelScope.launch {
+        // if clicked uri contains an eventName query param, track click event.
+        uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
+            eventTracker.track(Click(eventName, pane = PANE))
+        }
+        val date = Date()
+        if (URLUtil.isNetworkUrl(uri)) {
+            setState { copy(viewEffect = OpenUrl(uri, date.time)) }
+        } else {
+            val errorMessage = "Unrecognized clickable text: $uri"
+            logger.error(errorMessage)
+            eventTracker.track(Error(PANE, InvalidParameterException(errorMessage)))
+        }
     }
 
     /**
@@ -168,6 +185,10 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         formFieldValue
             .map { it.takeIf { it.isComplete }?.value }
             .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    fun onViewEffectLaunched() {
+        setState { copy(viewEffect = null) }
+    }
 
     companion object :
         MavericksViewModelFactory<NetworkingLinkSignupViewModel, NetworkingLinkSignupState> {
@@ -196,6 +217,7 @@ internal data class NetworkingLinkSignupState(
     val validPhone: String? = null,
     val saveAccountToLink: Async<FinancialConnectionsSessionManifest> = Uninitialized,
     val lookupAccount: Async<ConsumerSessionLookup> = Uninitialized,
+    val viewEffect: ViewEffect? = null
 ) : MavericksState {
 
     val showFullForm: Boolean
@@ -211,4 +233,11 @@ internal data class NetworkingLinkSignupState(
         val phoneController: PhoneNumberController,
         val content: NetworkingLinkSignupPane
     )
+
+    sealed class ViewEffect {
+        data class OpenUrl(
+            val url: String,
+            val id: Long
+        ) : ViewEffect()
+    }
 }
