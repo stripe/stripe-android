@@ -3,7 +3,6 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,9 +26,11 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.ripple.rememberRipple
@@ -77,6 +78,7 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
+import com.stripe.android.financialconnections.ui.theme.Brand100
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.image.StripeImage
 
@@ -186,9 +188,7 @@ private fun LoadedContent(
             SearchInstitutionsList(
                 institutionsProvider = institutionsProvider,
                 onInstitutionSelected = onInstitutionSelected,
-                query = input.text,
                 onManualEntryClick = onManualEntryClick,
-                manualEntryEnabled = payload()?.allowManualEntry ?: false
             )
         } else {
             FeaturedInstitutionsGrid(
@@ -259,9 +259,7 @@ private fun FinancialConnectionsSearchRow(
 private fun SearchInstitutionsList(
     institutionsProvider: () -> Async<InstitutionResponse>,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
-    query: String,
     onManualEntryClick: () -> Unit,
-    manualEntryEnabled: Boolean
 ) {
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -272,7 +270,7 @@ private fun SearchInstitutionsList(
                 is Fail -> item {
                     SearchInstitutionsFailedRow(
                         onManualEntryClick = onManualEntryClick,
-                        manualEntryEnabled = manualEntryEnabled
+                        showManualEntry = false
                     )
                 }
 
@@ -285,34 +283,33 @@ private fun SearchInstitutionsList(
 
                 is Success -> {
                     if (institutions().data.isEmpty()) {
+                        // NO RESULTS CASE
                         item {
-                            Text(
-                                text = stringResource(
-                                    R.string.stripe_picker_search_no_results,
-                                    query
-                                ),
-                                style = FinancialConnectionsTheme.typography.detailEmphasized,
-                                color = FinancialConnectionsTheme.colors.textSecondary,
-                                textAlign = TextAlign.Start
-                            )
+                            if (institutions().showManualEntry == true) {
+                                ManualEntryRow(onManualEntryClick)
+                            } else {
+                                NoResultsRow()
+                            }
                         }
                     } else {
                         items(institutions().data, key = { it.id }) { institution ->
                             InstitutionResultTile({ onInstitutionSelected(it, false) }, institution)
                         }
-                    }
-                    if (true) {
-                        item {
-                            ManualEntryRow()
-                        }
-                    }
-                    item {
-                        Column {
-                            Spacer(modifier = Modifier.size(16.dp))
-                            SearchFooter(
-                                onManualEntryClick = onManualEntryClick,
-                                manualEntryEnabled = manualEntryEnabled
-                            )
+                        if (institutions().showManualEntry == true) {
+                            item {
+                                Divider(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(
+                                            vertical = 8.dp,
+                                            horizontal = 24.dp
+                                        ),
+                                    color = FinancialConnectionsTheme.colors.borderDefault
+                                )
+                            }
+                            item {
+                                ManualEntryRow(onManualEntryClick)
+                            }
                         }
                     }
                 }
@@ -323,7 +320,7 @@ private fun SearchInstitutionsList(
 
 @Composable
 private fun SearchInstitutionsFailedRow(
-    manualEntryEnabled: Boolean,
+    showManualEntry: Boolean,
     onManualEntryClick: () -> Unit
 ) {
     Column(
@@ -346,8 +343,8 @@ private fun SearchInstitutionsFailedRow(
             style = FinancialConnectionsTheme.typography.body,
             color = FinancialConnectionsTheme.colors.textSecondary
         )
-        when {
-            manualEntryEnabled -> AnnotatedText(
+        when (showManualEntry) {
+            true -> AnnotatedText(
                 modifier = Modifier.fillMaxWidth(),
                 text = TextResource.StringId(
                     R.string.stripe_institutionpicker_pane_error_desc_manual_entry
@@ -359,7 +356,7 @@ private fun SearchInstitutionsFailedRow(
                 )
             )
 
-            else -> Text(
+            false -> Text(
                 text = stringResource(id = R.string.stripe_institutionpicker_pane_error_desc),
                 style = FinancialConnectionsTheme.typography.body,
                 color = FinancialConnectionsTheme.colors.textSecondary
@@ -369,32 +366,64 @@ private fun SearchInstitutionsFailedRow(
 }
 
 @Composable
-private fun ManualEntryRow() {
+private fun NoResultsRow() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxSize()
-            .clickable { TODO() }
             .padding(
                 vertical = 8.dp,
                 horizontal = 24.dp
             )
     ) {
-        Image(
-            painter = painterResource(
-                id = R.drawable.ic_chevron_down
-            ),
+        Column {
+            Text(
+                text = stringResource(id = R.string.stripe_institutionpicker_no_results_title),
+                color = FinancialConnectionsTheme.colors.textPrimary,
+                style = FinancialConnectionsTheme.typography.bodyEmphasized
+            )
+            Text(
+                text = stringResource(id = R.string.stripe_institutionpicker_no_results_desc),
+                color = FinancialConnectionsTheme.colors.textSecondary,
+                style = FinancialConnectionsTheme.typography.captionTight,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun ManualEntryRow(onManualEntryClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(onClick = onManualEntryClick)
+            .padding(
+                vertical = 8.dp,
+                horizontal = 24.dp
+            )
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Add,
+            tint = FinancialConnectionsTheme.colors.textBrand,
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(Brand100)
+                .padding(8.dp),
             contentDescription = "Add icon"
         )
         Spacer(modifier = Modifier.size(8.dp))
         Column {
             Text(
-                text = "TEST",
+                text = stringResource(R.string.stripe_institutionpicker_manual_entry_title),
                 color = FinancialConnectionsTheme.colors.textPrimary,
                 style = FinancialConnectionsTheme.typography.bodyEmphasized
             )
             Text(
-                text = "TEST",
+                text = stringResource(R.string.stripe_institutionpicker_manual_entry_desc),
                 color = FinancialConnectionsTheme.colors.textSecondary,
                 style = FinancialConnectionsTheme.typography.captionTight,
                 maxLines = 1,
@@ -439,7 +468,7 @@ private fun InstitutionResultTile(
             )
             Text(
                 text = institution.url ?: "",
-                color = FinancialConnectionsTheme.colors.textSecondary,
+                color = FinancialConnectionsTheme.colors.textDisabled,
                 style = FinancialConnectionsTheme.typography.captionTight,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -590,6 +619,26 @@ internal fun SearchModeWithResults(
 }
 
 @Composable
+@Preview(group = "Institutions Pane", name = "searchModeWithResultsNoManualEntry")
+internal fun SearchModeWithResultsNoManualEntry(
+    state: InstitutionPickerState = InstitutionPickerStates.searchModeWithResultsNoManualEntry()
+) {
+    FinancialConnectionsPreview {
+        InstitutionPickerContent(
+            previewText = "Some query",
+            payload = state.payload,
+            institutionsProvider = { state.searchInstitutions },
+            searchMode = state.searchMode,
+            onQueryChanged = {},
+            onInstitutionSelected = { _, _ -> },
+            onCancelSearchClick = {},
+            onCloseClick = {},
+            onSearchFocused = {},
+        ) {}
+    }
+}
+
+@Composable
 @Preview(group = "Institutions Pane", name = "searchModeNoResults")
 internal fun SearchModeNoResults(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeNoResults()
@@ -610,9 +659,49 @@ internal fun SearchModeNoResults(
 }
 
 @Composable
+@Preview(group = "Institutions Pane", name = "searchModeNoResultsNoManualEntry")
+internal fun SearchModeNoResultsNoManualEntry(
+    state: InstitutionPickerState = InstitutionPickerStates.searchModeNoResultsNoManualEntry()
+) {
+    FinancialConnectionsPreview {
+        InstitutionPickerContent(
+            previewText = "Some query",
+            payload = state.payload,
+            institutionsProvider = { state.searchInstitutions },
+            searchMode = state.searchMode,
+            onQueryChanged = {},
+            onInstitutionSelected = { _, _ -> },
+            onCancelSearchClick = {},
+            onCloseClick = {},
+            onSearchFocused = {},
+        ) {}
+    }
+}
+
+@Composable
 @Preview(group = "Institutions Pane", name = "searchModeFailed")
 internal fun SearchModeFailed(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeFailed()
+) {
+    FinancialConnectionsPreview {
+        InstitutionPickerContent(
+            previewText = "Some query",
+            payload = state.payload,
+            institutionsProvider = { state.searchInstitutions },
+            searchMode = state.searchMode,
+            onQueryChanged = {},
+            onInstitutionSelected = { _, _ -> },
+            onCancelSearchClick = {},
+            onCloseClick = {},
+            onSearchFocused = {},
+        ) {}
+    }
+}
+
+@Composable
+@Preview(group = "Institutions Pane", name = "searchModeFailedNoManualEntry")
+internal fun SearchModeFailedNoManualEntry(
+    state: InstitutionPickerState = InstitutionPickerStates.searchModeFailedNoManualEntry()
 ) {
     FinancialConnectionsPreview {
         InstitutionPickerContent(

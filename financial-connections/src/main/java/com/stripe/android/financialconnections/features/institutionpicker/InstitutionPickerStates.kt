@@ -23,38 +23,61 @@ internal class InstitutionPickerStates :
             payload = Loading(),
             searchInstitutions = Uninitialized,
             searchMode = false,
-            allowManualEntry = true,
         )
 
-        // Search mode - searching institutions
         fun searchModeSearchingInstitutions() = InstitutionPickerState(
             payload = Success(payload()),
             searchInstitutions = Loading(),
             searchMode = true,
         )
 
-        // Search mode: with results
         fun searchModeWithResults() = InstitutionPickerState(
             payload = Success(payload()),
-            searchInstitutions = Success(institutionResponse()),
+            searchInstitutions = Success(institutionResponse().copy(showManualEntry = true)),
+            searchMode = true,
+        )
+
+        fun searchModeWithResultsNoManualEntry() = InstitutionPickerState(
+            payload = Success(payload()),
+            searchInstitutions = Success(institutionResponse().copy(showManualEntry = false)),
             searchMode = true,
         )
 
         // Search mode: No results
         fun searchModeNoResults() = InstitutionPickerState(
             payload = Success(payload()),
-            searchInstitutions = Success(InstitutionResponse(emptyList())),
+            searchInstitutions = Success(
+                InstitutionResponse(
+                    data = emptyList(),
+                    showManualEntry = true
+                )
+            ),
             searchMode = true,
         )
 
-        // Search mode: failed
-        fun searchModeFailed() = InstitutionPickerState(
+        fun searchModeNoResultsNoManualEntry() = InstitutionPickerState(
             payload = Success(payload()),
+            searchInstitutions = Success(
+                InstitutionResponse(
+                    data = emptyList(),
+                    showManualEntry = false
+                )
+            ),
+            searchMode = true,
+        )
+
+        fun searchModeFailed() = InstitutionPickerState(
+            payload = Success(payload().copy(allowManualEntry = true)),
             searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
             searchMode = true,
         )
 
-        // No search mode
+        fun searchModeFailedNoManualEntry() = InstitutionPickerState(
+            payload = Success(payload().copy(allowManualEntry = false)),
+            searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
+            searchMode = true,
+        )
+
         fun noSearchMode() = InstitutionPickerState(
             payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
@@ -63,10 +86,12 @@ internal class InstitutionPickerStates :
 
         private fun payload() = InstitutionPickerState.Payload(
             featuredInstitutions = institutionResponse().data,
-            allowManualEntry = true,
-            searchDisabled = false
+            searchDisabled = false,
+            allowManualEntry = false
         )
+
         private fun institutionResponse() = InstitutionResponse(
+            showManualEntry = true,
             listOf(
                 FinancialConnectionsInstitution(
                     id = "1",
