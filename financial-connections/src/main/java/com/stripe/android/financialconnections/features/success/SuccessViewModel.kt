@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.success
 
+import androidx.annotation.VisibleForTesting
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -55,16 +56,18 @@ internal class SuccessViewModel @Inject constructor(
         suspend {
             val manifest = getManifest()
             val accounts = getCachedAccounts()
+            val saveToLinkWithStripeSucceeded: Boolean? = saveToLinkWithStripeSucceeded.get()
             SuccessState.Payload(
                 skipSuccessPane = manifest.skipSuccessPane ?: false,
                 successMessage = getSuccessMessages(
                     isLinkWithStripe = manifest.isLinkWithStripe,
                     isNetworkingUserFlow = manifest.isNetworkingUserFlow,
-                    saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded.get(),
+                    saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
                     businessName = manifest.businessName,
                     connectedAccountName = manifest.connectedAccountName,
                     count = accounts.size
                 ),
+
                 accessibleData = AccessibleDataCalloutModel.fromManifest(manifest),
                 accounts = accounts,
                 institution = manifest.activeInstitution!!,
@@ -72,7 +75,12 @@ internal class SuccessViewModel @Inject constructor(
                 disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest),
                 showLinkAnotherAccount = manifest.singleAccount.not() &&
                     manifest.disableLinkMoreAccounts.not() &&
-                    manifest.isNetworkingUserFlow?.not() == true
+                    manifest.isNetworkingUserFlow?.not() == true,
+                accountFailedToLinkMessage = getFailedToLinkMessage(
+                    businessName = manifest.businessName,
+                    saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
+                    count = accounts.size
+                )
             )
         }.execute {
             copy(payload = it)
@@ -130,6 +138,26 @@ internal class SuccessViewModel @Inject constructor(
         )
     }
 
+    @VisibleForTesting
+    fun getFailedToLinkMessage(
+        businessName: String?,
+        saveToLinkWithStripeSucceeded: Boolean?,
+        count: Int
+    ): TextResource? = when {
+        saveToLinkWithStripeSucceeded != false -> null
+        businessName != null -> PluralId(
+            value = R.plurals.stripe_success_networking_save_to_link_failed,
+            count = count,
+            args = listOf(businessName)
+        )
+
+        else -> PluralId(
+            R.plurals.stripe_success_pane_networking_save_to_link_failed_no_business,
+            count,
+        )
+    }
+
+    @VisibleForTesting
     internal fun getSuccessMessages(
         isLinkWithStripe: Boolean?,
         isNetworkingUserFlow: Boolean?,
@@ -224,6 +252,7 @@ internal data class SuccessState(
     val payload: Async<Payload> = Uninitialized,
     val completeSession: Async<FinancialConnectionsSession> = Uninitialized
 ) : MavericksState {
+
     data class Payload(
         val accessibleData: AccessibleDataCalloutModel,
         val showLinkAnotherAccount: Boolean,
@@ -232,6 +261,7 @@ internal data class SuccessState(
         val disconnectUrl: String,
         val businessName: String?,
         val skipSuccessPane: Boolean,
-        val successMessage: TextResource
+        val successMessage: TextResource,
+        val accountFailedToLinkMessage: TextResource?
     )
 }

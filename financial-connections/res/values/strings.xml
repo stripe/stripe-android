@@ -136,6 +136,14 @@
     <string name="stripe_verification.codeExpiredSms">It looks like the verification code you provided is not valid anymore. Try again, or <annotation clickable="contact_us">Contact us</annotation>.</string>
     <string name="stripe_verification.maxAttemptsExceeded">We\'re experiencing high volumes. Try again in an hour and if you need immediate assistance, please contact us.</string>
     <string name="stripe_verification.unexpectedError">Something went wrong.</string>
+    <plurals name="stripe_success_networking_save_to_link_failed">
+        <item quantity="one">Your account was connected to %1$s but could not be saved to Link with Stripe at this time.</item>
+        <item quantity="other">Your accounts were connected to %1$s but could not be saved to Link with Stripe at this time.</item>
+    </plurals>
+    <plurals name="stripe_success_pane_networking_save_to_link_failed_no_business">
+        <item quantity="one">Your account was connected to this business but could not be saved to Link with Stripe at this time.</item>
+        <item quantity="other">Your accounts were connected to this business but could not be saved to Link with Stripe at this time.</item>
+    </plurals>
     <plurals name="stripe_success_pane_link_with_connected_account_name">
         <item quantity="one">Your account was successfully connected to %1$s and %2$s through Link.</item>
         <item quantity="other">Your accounts were successfully connected to %1$s and %2$s through Link.</item>
@@ -148,7 +156,6 @@
         <item quantity="one">Your account was successfully connected to Link.</item>
         <item quantity="other">Your accounts were successfully connected to Link.</item>
     </plurals>
-
     <plurals name="stripe_success_pane_has_connected_account_name">
         <item quantity="one">Your account was successfully linked to %1$s and %2$s through Stripe.</item>
         <item quantity="other">Your accounts were successfully linked to %1$s and %2$s through Stripe.</item>

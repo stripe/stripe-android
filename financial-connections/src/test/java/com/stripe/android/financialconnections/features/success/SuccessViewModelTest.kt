@@ -18,7 +18,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
-import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.ui.TextResource.PluralId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -155,7 +155,7 @@ internal class SuccessViewModelTest {
             connectedAccountName = "Connected Account Name",
             businessName = "Business Name",
             count = 2
-        ) as TextResource.PluralId
+        ) as PluralId
         assertEquals(R.plurals.stripe_success_pane_link_with_connected_account_name, result.value)
         assertEquals(listOf("Connected Account Name", "Business Name"), result.args)
         assertEquals(2, result.count)
@@ -170,7 +170,7 @@ internal class SuccessViewModelTest {
             connectedAccountName = null,
             businessName = "Business Name",
             count = 3
-        ) as TextResource.PluralId
+        ) as PluralId
         assertEquals(R.plurals.stripe_success_pane_link_with_business_name, result.value)
         assertEquals(listOf("Business Name"), result.args)
         assertEquals(3, result.count)
@@ -185,7 +185,7 @@ internal class SuccessViewModelTest {
             connectedAccountName = null,
             businessName = null,
             count = 1
-        ) as TextResource.PluralId
+        ) as PluralId
         assertEquals(R.plurals.stripe_success_pane_link_with_no_business_name, result.value)
         assertEquals(listOf<Any>(), result.args)
         assertEquals(1, result.count)
@@ -200,7 +200,7 @@ internal class SuccessViewModelTest {
             connectedAccountName = "Connected Account Name",
             businessName = "Business Name",
             count = 4
-        ) as TextResource.PluralId
+        ) as PluralId
         assertEquals(R.plurals.stripe_success_pane_link_with_connected_account_name, result.value)
         assertEquals(listOf("Connected Account Name", "Business Name"), result.args)
         assertEquals(4, result.count)
@@ -215,7 +215,7 @@ internal class SuccessViewModelTest {
             connectedAccountName = null,
             businessName = "Business Name",
             count = 5
-        ) as TextResource.PluralId
+        ) as PluralId
         assertEquals(R.plurals.stripe_success_pane_link_with_business_name, result.value)
         assertEquals(listOf("Business Name"), result.args)
         assertEquals(5, result.count)
@@ -230,7 +230,7 @@ internal class SuccessViewModelTest {
             connectedAccountName = "Connected Account Name",
             businessName = "Business Name",
             count = 6
-        ) as TextResource.PluralId
+        ) as PluralId
         assertEquals(R.plurals.stripe_success_pane_has_connected_account_name, result.value)
         assertEquals(listOf("Connected Account Name", "Business Name"), result.args)
         assertEquals(6, result.count)
@@ -245,7 +245,7 @@ internal class SuccessViewModelTest {
             connectedAccountName = null,
             businessName = "Business Name",
             count = 7
-        ) as TextResource.PluralId
+        ) as PluralId
         assertEquals(R.plurals.stripe_success_pane_has_business_name, result.value)
         assertEquals(listOf("Business Name"), result.args)
         assertEquals(7, result.count)
@@ -260,9 +260,48 @@ internal class SuccessViewModelTest {
             connectedAccountName = null,
             businessName = null,
             count = 8
-        ) as TextResource.PluralId
+        ) as PluralId
         assertEquals(R.plurals.stripe_success_pane_no_business_name, result.value)
         assertEquals(listOf<Any>(), result.args)
         assertEquals(8, result.count)
+    }
+
+    @Test
+    fun `getFailedToLinkMessage - saveToLinkWithStripeSucceeded is true, should return null`() {
+        val message = buildViewModel(SuccessState()).getFailedToLinkMessage(
+            businessName = "Business",
+            saveToLinkWithStripeSucceeded = true,
+            count = 1
+        )
+        assertThat(message).isNull()
+    }
+
+    @Test
+    fun `getFailedToLinkMessage - saveToLinkWithStripeSucceeded is false and businessName is not null`() {
+        val message = buildViewModel(SuccessState()).getFailedToLinkMessage(
+            businessName = "Business",
+            saveToLinkWithStripeSucceeded = false,
+            count = 1
+        )
+        require(message is PluralId)
+        assertEquals(R.plurals.stripe_success_networking_save_to_link_failed, message.value)
+        assertEquals(1, message.count)
+        assertEquals(listOf("Business"), message.args)
+    }
+
+    @Test
+    fun `getFailedToLinkMessage - saveToLinkWithStripeSucceeded is false and businessName is null`() {
+        val message = buildViewModel(SuccessState()).getFailedToLinkMessage(
+            businessName = null,
+            saveToLinkWithStripeSucceeded = false,
+            count = 2
+        )
+        require(message is PluralId)
+        assertEquals(
+            R.plurals.stripe_success_pane_networking_save_to_link_failed_no_business,
+            message.value
+        )
+        assertEquals(2, message.count)
+        assertEquals(emptyList(), message.args)
     }
 }
