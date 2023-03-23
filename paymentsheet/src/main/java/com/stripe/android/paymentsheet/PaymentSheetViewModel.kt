@@ -272,7 +272,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         lpmServerSpec = lpmRepository.serverSpecLoadingState.serverLpmSpecs
 
         savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
-        savedStateHandle[SAVE_SAVED_SELECTION] = state.savedSelection
+        updateSelection(state.paymentSelection)
 
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (state.isGooglePayReady) {
             GooglePayState.Available
@@ -529,7 +529,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     isGooglePay = true,
                 )
 
-                savedStateHandle[SAVE_SELECTION] = newPaymentSelection
+                updateSelection(newPaymentSelection)
                 confirmPaymentSelection(newPaymentSelection)
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {

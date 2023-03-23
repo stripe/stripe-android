@@ -199,15 +199,17 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `disables primary button when editing`() {
+        val viewModel = createViewModel(
+            initialPaymentSelection = PaymentSelection.Saved(PAYMENT_METHODS.last()),
+        )
+
         val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.buyButton.isEnabled)
-                .isTrue()
+            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
 
             viewModel.toggleEditing()
-
-            assertThat(activity.viewBinding.buyButton.isEnabled)
-                .isFalse()
+            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
         }
     }
 
@@ -958,6 +960,7 @@ internal class PaymentSheetActivityTest {
         loadDelay: Duration = Duration.ZERO,
         isGooglePayAvailable: Boolean = false,
         isLinkAvailable: Boolean = false,
+        initialPaymentSelection: PaymentSelection? = null,
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = mock<LpmRepository>()
         whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
@@ -989,6 +992,7 @@ internal class PaymentSheetActivityTest {
                         loginState = LinkState.LoginState.LoggedOut,
                     ).takeIf { isLinkAvailable },
                     delay = loadDelay,
+                    paymentSelection = initialPaymentSelection,
                 ),
                 FakeCustomerRepository(paymentMethods),
                 FakePrefsRepository(),

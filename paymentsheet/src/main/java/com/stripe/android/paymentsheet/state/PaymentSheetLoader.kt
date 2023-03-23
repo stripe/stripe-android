@@ -118,25 +118,48 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val isLinkAvailable = stripeIntent.paymentMethodTypes.contains(Link.code) &&
             stripeIntent.linkFundingSources.intersect(supportedFundingSources).isNotEmpty()
 
+        val savedSelection = async {
+            prefsRepository.getSavedSelection(
+                isGooglePayAvailable = isGooglePayReady,
+                isLinkAvailable = isLinkAvailable,
+            )
+        }
+
         val paymentMethods = async {
             if (customerConfig != null) {
                 retrieveCustomerPaymentMethods(
-                    stripeIntent,
-                    config,
-                    customerConfig
+                    stripeIntent = stripeIntent,
+                    config = config,
+                    customerConfig = customerConfig,
                 )
             } else {
                 emptyList()
             }
         }
 
-        val savedSelection = async {
-            retrieveSavedPaymentSelection(
-                prefsRepository,
-                isGooglePayReady,
-                isLinkAvailable,
-                paymentMethods.await()
+        val sortedPaymentMethods = async {
+            paymentMethods.await().withLastUsedPaymentMethodFirst(
+                savedSelection = savedSelection.await(),
             )
+        }
+
+        val initialPaymentSelection = async {
+            val desiredSelection = when (val selection = savedSelection.await()) {
+                is SavedSelection.GooglePay -> {
+                    PaymentSelection.GooglePay
+                }
+                is SavedSelection.Link -> {
+                    PaymentSelection.Link
+                }
+                is SavedSelection.PaymentMethod -> {
+                    paymentMethods.await().find { it.id == selection.id }?.toPaymentSelection()
+                }
+                is SavedSelection.None -> {
+                    null
+                }
+            }
+
+            desiredSelection ?: sortedPaymentMethods.await().firstOrNull()?.toPaymentSelection()
         }
 
         val linkState = async {
@@ -151,11 +174,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             PaymentSheetState.Full(
                 config = config,
                 stripeIntent = stripeIntent,
-                customerPaymentMethods = paymentMethods.await(),
-                savedSelection = savedSelection.await(),
+                customerPaymentMethods = sortedPaymentMethods.await(),
                 isGooglePayReady = isGooglePayReady,
                 linkState = linkState.await(),
-                newPaymentSelection = null,
+                paymentSelection = initialPaymentSelection.await(),
             )
         )
     }
@@ -163,7 +185,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun retrieveCustomerPaymentMethods(
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration?,
-        customerConfig: PaymentSheet.CustomerConfiguration
+        customerConfig: PaymentSheet.CustomerConfiguration,
     ): List<PaymentMethod> {
         val paymentMethodTypes = getSupportedSavedCustomerPMs(
             stripeIntent,
@@ -176,49 +198,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
 
         return customerRepository.getPaymentMethods(
-            customerConfig,
-            paymentMethodTypes
+            customerConfig = customerConfig,
+            types = paymentMethodTypes,
         ).filter { paymentMethod ->
             paymentMethod.hasExpectedDetails() &&
                 // PayPal isn't supported yet as a saved payment method (backend limitation).
                 paymentMethod.type != PaymentMethod.Type.PayPal
-        }
-    }
-
-    private suspend fun retrieveSavedPaymentSelection(
-        prefsRepository: PrefsRepository,
-        isGooglePayReady: Boolean,
-        isLinkReady: Boolean,
-        paymentMethods: List<PaymentMethod>
-    ): SavedSelection {
-        val savedSelection = prefsRepository.getSavedSelection(isGooglePayReady, isLinkReady)
-        if (savedSelection != SavedSelection.None) {
-            return savedSelection
-        }
-
-        // No saved selection has been set yet, so we'll initialize it with a default
-        // value based on which payment methods are available.
-        val paymentSelection = determineDefaultPaymentSelection(
-            isGooglePayReady,
-            isLinkReady,
-            paymentMethods
-        )
-
-        prefsRepository.savePaymentSelection(paymentSelection)
-
-        return prefsRepository.getSavedSelection(isGooglePayReady, isLinkReady)
-    }
-
-    private fun determineDefaultPaymentSelection(
-        isGooglePayReady: Boolean,
-        isLinkReady: Boolean,
-        paymentMethods: List<PaymentMethod>
-    ): PaymentSelection? {
-        return when {
-            paymentMethods.isNotEmpty() -> PaymentSelection.Saved(paymentMethods.first())
-            isLinkReady -> PaymentSelection.Link
-            isGooglePayReady -> PaymentSelection.GooglePay
-            else -> null
         }
     }
 
@@ -300,4 +285,23 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             shippingValues = shippingAddress
         )
     }
+}
+
+private fun List<PaymentMethod>.withLastUsedPaymentMethodFirst(
+    savedSelection: SavedSelection,
+): List<PaymentMethod> {
+    val defaultPaymentMethodIndex = (savedSelection as? SavedSelection.PaymentMethod)?.let {
+        indexOfFirst { it.id == savedSelection.id }.takeIf { it != -1 }
+    }
+
+    return if (defaultPaymentMethodIndex != null) {
+        val primaryPaymentMethod = get(defaultPaymentMethodIndex)
+        listOf(primaryPaymentMethod) + (this - primaryPaymentMethod)
+    } else {
+        this
+    }
+}
+
+private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
+    return PaymentSelection.Saved(this, isGooglePay = false)
 }

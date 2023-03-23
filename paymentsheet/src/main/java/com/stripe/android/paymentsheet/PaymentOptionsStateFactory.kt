@@ -19,15 +19,14 @@ internal object PaymentOptionsStateFactory {
         paymentMethods: List<PaymentMethod>,
         showGooglePay: Boolean,
         showLink: Boolean,
-        initialSelection: SavedSelection,
-        currentSelection: PaymentSelection? = null,
+        currentSelection: PaymentSelection?,
         nameProvider: (PaymentMethodCode?) -> String,
     ): PaymentOptionsState {
         val items = listOfNotNull(
             PaymentOptionsItem.AddCard,
             PaymentOptionsItem.GooglePay.takeIf { showGooglePay },
             PaymentOptionsItem.Link.takeIf { showLink }
-        ) + sortedPaymentMethods(paymentMethods, initialSelection).map {
+        ) + paymentMethods.map {
             PaymentOptionsItem.SavedPaymentMethod(
                 displayName = nameProvider(it.type?.code),
                 paymentMethod = it,
@@ -36,38 +35,12 @@ internal object PaymentOptionsStateFactory {
 
         val currentSelectionIndex = currentSelection?.let {
             items.findSelectedPosition(it)
-        }.takeIf { it != -1 }
-
-        val initialSelectionIndex = items.findInitialSelectedPosition(initialSelection)
+        } ?: -1
 
         return PaymentOptionsState(
             items = items,
-            selectedIndex = currentSelectionIndex ?: initialSelectionIndex,
+            selectedIndex = currentSelectionIndex,
         )
-    }
-
-    private fun sortedPaymentMethods(
-        paymentMethods: List<PaymentMethod>,
-        savedSelection: SavedSelection
-    ): List<PaymentMethod> {
-        val primaryPaymentMethodIndex = when (savedSelection) {
-            is SavedSelection.PaymentMethod -> {
-                paymentMethods.indexOfFirst {
-                    it.id == savedSelection.id
-                }
-            }
-            else -> -1
-        }
-        return if (primaryPaymentMethodIndex != -1) {
-            val mutablePaymentMethods = paymentMethods.toMutableList()
-            mutablePaymentMethods.removeAt(primaryPaymentMethodIndex)
-                .also { primaryPaymentMethod ->
-                    mutablePaymentMethods.add(0, primaryPaymentMethod)
-                }
-            mutablePaymentMethods
-        } else {
-            paymentMethods
-        }
     }
 }
 
