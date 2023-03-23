@@ -398,6 +398,7 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentOptionResult?.paymentMethods?.let {
             viewModel.state = viewModel.state?.copy(customerPaymentMethods = it)
         }
+
         when (paymentOptionResult) {
             is PaymentOptionResult.Succeeded -> {
                 val paymentSelection = paymentOptionResult.paymentSelection

@@ -52,6 +52,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.forms.MandateRequirement
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -1027,15 +1028,16 @@ internal class PaymentSheetActivityTest {
         val lpmRepository = mock<LpmRepository>().apply {
             whenever(fromCode(any())).thenReturn(
                 LpmRepository.SupportedPaymentMethod(
-                    PaymentMethod.Type.Card.code,
-                    false,
-                    com.stripe.android.ui.core.R.string.stripe_paymentsheet_payment_method_card,
-                    com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
-                    null,
-                    null,
-                    true,
-                    PaymentMethodRequirements(emptySet(), emptySet(), true),
-                    LayoutSpec.create(
+                    code = PaymentMethod.Type.Card.code,
+                    requiresMandate = false,
+                    mandateRequirement = MandateRequirement.Never,
+                    displayNameResource = com.stripe.android.ui.core.R.string.stripe_paymentsheet_payment_method_card,
+                    iconResource = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                    tintIconOnSelection = true,
+                    requirement = PaymentMethodRequirements(emptySet(), emptySet(), true),
+                    formSpec = LayoutSpec.create(
                         EmailSpec(),
                         SaveForFutureUseSpec()
                     )
