@@ -24,17 +24,18 @@ class PaymentSelectionUpdaterTest {
 
     @Test
     fun `Uses new payment selection if there's no existing one`() {
-        val newState = mockPaymentSheetState(paymentSelection = PaymentSelection.GooglePay)
+        val newState = mockPaymentSheetStateWithPaymentIntent(paymentSelection = PaymentSelection.GooglePay)
         val updater = createUpdater(stripeIntent = PAYMENT_INTENT)
         val result = updater(
             currentSelection = null,
+            previousConfig = null,
             newState = newState,
         )
         assertThat(result).isEqualTo(PaymentSelection.GooglePay)
     }
 
     @Test
-    fun `Can use existing new payment selection if it's still supported`() {
+    fun `Can use existing payment selection if it's still supported`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             labelResource = "Sofort",
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
@@ -44,7 +45,7 @@ class PaymentSelectionUpdaterTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
-        val newState = mockPaymentSheetState(
+        val newState = mockPaymentSheetStateWithPaymentIntent(
             paymentMethodTypes = listOf("card", "sofort"),
             config = PaymentSheet.Configuration(
                 merchantDisplayName = "Example, Inc.",
@@ -60,6 +61,10 @@ class PaymentSelectionUpdaterTest {
 
         val result = updater(
             currentSelection = existingSelection,
+            previousConfig = PaymentSheet.Configuration(
+                merchantDisplayName = "Example, Inc.",
+                allowsDelayedPaymentMethods = true,
+            ),
             newState = newState,
         )
         assertThat(result).isEqualTo(existingSelection)
@@ -70,7 +75,7 @@ class PaymentSelectionUpdaterTest {
         val paymentMethod = PaymentMethodFixtures.createCard()
         val existingSelection = PaymentSelection.Saved(paymentMethod)
 
-        val newState = mockPaymentSheetState(
+        val newState = mockPaymentSheetStateWithPaymentIntent(
             paymentMethodTypes = listOf("card", "cashapp"),
             customerPaymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
         )
@@ -78,6 +83,7 @@ class PaymentSelectionUpdaterTest {
 
         val result = updater(
             currentSelection = existingSelection,
+            previousConfig = null,
             newState = newState,
         )
         assertThat(result).isEqualTo(existingSelection)
@@ -86,11 +92,12 @@ class PaymentSelectionUpdaterTest {
     @Test
     fun `Can't use existing saved payment method if it's no longer allowed`() {
         val existing = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
-        val newState = mockPaymentSheetState(paymentMethodTypes = listOf("card", "cashapp"))
+        val newState = mockPaymentSheetStateWithPaymentIntent(paymentMethodTypes = listOf("card", "cashapp"))
         val updater = createUpdater(stripeIntent = PAYMENT_INTENT)
 
         val result = updater(
             currentSelection = existing,
+            previousConfig = null,
             newState = newState,
         )
         assertThat(result).isNull()
@@ -101,11 +108,12 @@ class PaymentSelectionUpdaterTest {
         // Cash App Pay is not supported for setup intents
         val existing = PaymentSelection.Saved(PaymentMethodFactory.cashAppPay())
 
-        val newState = mockPaymentSheetState(paymentMethodTypes = listOf("card", "cashapp"))
+        val newState = mockPaymentSheetStateWithPaymentIntent(paymentMethodTypes = listOf("card", "cashapp"))
         val updater = createUpdater(stripeIntent = SETUP_INTENT)
 
         val result = updater(
             currentSelection = existing,
+            previousConfig = null,
             newState = newState,
         )
         assertThat(result).isNull()
@@ -116,7 +124,7 @@ class PaymentSelectionUpdaterTest {
         val paymentMethod = PaymentMethodFixtures.createCard()
         val existingSelection = PaymentSelection.Saved(paymentMethod)
 
-        val newState = mockPaymentSheetState(
+        val newState = mockPaymentSheetStateWithPaymentIntent(
             paymentMethodTypes = listOf("card", "cashapp"),
             customerPaymentMethods = PaymentMethodFixtures.createCards(3),
         )
@@ -124,18 +132,141 @@ class PaymentSelectionUpdaterTest {
 
         val result = updater(
             currentSelection = existingSelection,
+            previousConfig = null,
             newState = newState,
         )
         assertThat(result).isNull()
     }
 
-    private fun mockPaymentSheetState(
+    @Test
+    fun `PaymentSelection is reset when payment method requires mandate after updating intent`() {
+        val existingSelection = PaymentSelection.New.GenericPaymentMethod(
+            labelResource = "paypal",
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        // Paypal PaymentIntent does not require a mandate, but paypal SetupIntent does
+        val newState = mockPaymentSheetStateWithSetupIntent(
+            paymentMethodTypes = listOf("card", "paypal"),
+            customerPaymentMethods = PaymentMethodFixtures.createCards(3),
+        )
+
+        val updater = createUpdater(
+            stripeIntent = SETUP_INTENT.copy(
+                countryCode = "de",
+                paymentMethodTypes = SETUP_INTENT.paymentMethodTypes + "paypal",
+            ),
+        )
+
+        val result = updater(
+            currentSelection = existingSelection,
+            previousConfig = null,
+            newState = newState,
+        )
+
+        assertThat(result).isEqualTo(null)
+    }
+
+    @Test
+    fun `PaymentSelection is preserved when payment method no longer requires mandate after updating intent`() {
+        val existingSelection = PaymentSelection.New.GenericPaymentMethod(
+            labelResource = "paypal",
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL.copy(
+                requiresMandate = true
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        // Paypal PaymentIntent does not require a mandate, but paypal SetupIntent does
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            paymentMethodTypes = listOf("paypal"),
+            customerPaymentMethods = PaymentMethodFixtures.createCards(3),
+        )
+
+        val updater = createUpdater(
+            stripeIntent = PAYMENT_INTENT.copy(
+                paymentMethodTypes = PAYMENT_INTENT.paymentMethodTypes + "paypal",
+            ),
+        )
+
+        val result = updater(
+            currentSelection = existingSelection,
+            previousConfig = null,
+            newState = newState,
+        )
+
+        assertThat(result).isEqualTo(existingSelection)
+    }
+
+    @Test
+    fun `PaymentSelection is preserved when payment method still requires mandate after updating intent`() {
+        val existingSelection = PaymentSelection.New.GenericPaymentMethod(
+            labelResource = "paypal",
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL.copy(
+                requiresMandate = true
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        // Paypal PaymentIntent does not require a mandate, but paypal SetupIntent does
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            paymentMethodTypes = listOf("paypal"),
+            customerPaymentMethods = PaymentMethodFixtures.createCards(3),
+        )
+
+        val updater = createUpdater(
+            stripeIntent = SETUP_INTENT.copy(
+                countryCode = "de",
+                paymentMethodTypes = PAYMENT_INTENT.paymentMethodTypes + "paypal",
+            ),
+        )
+
+        val result = updater(
+            currentSelection = existingSelection,
+            previousConfig = null,
+            newState = newState,
+        )
+
+        assertThat(result).isEqualTo(existingSelection)
+    }
+
+    private fun mockPaymentSheetStateWithPaymentIntent(
         paymentMethodTypes: List<String>? = null,
         paymentSelection: PaymentSelection? = null,
         customerPaymentMethods: List<PaymentMethod> = emptyList(),
         config: PaymentSheet.Configuration? = null,
     ): PaymentSheetState.Full {
-        val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        val intent = PAYMENT_INTENT
+
+        return PaymentSheetState.Full(
+            config = config,
+            stripeIntent = intent.copy(
+                paymentMethodTypes = paymentMethodTypes ?: intent.paymentMethodTypes,
+            ),
+            customerPaymentMethods = customerPaymentMethods,
+            isGooglePayReady = true,
+            linkState = null,
+            paymentSelection = paymentSelection,
+        )
+    }
+
+    private fun mockPaymentSheetStateWithSetupIntent(
+        paymentMethodTypes: List<String>? = null,
+        paymentSelection: PaymentSelection? = null,
+        customerPaymentMethods: List<PaymentMethod> = emptyList(),
+        config: PaymentSheet.Configuration? = null,
+    ): PaymentSheetState.Full {
+        val intent = SETUP_INTENT
 
         return PaymentSheetState.Full(
             config = config,

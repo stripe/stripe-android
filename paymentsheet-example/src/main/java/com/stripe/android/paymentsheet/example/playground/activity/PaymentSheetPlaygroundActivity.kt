@@ -576,7 +576,11 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             paymentSheet.presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = mode,
-                    paymentMethodTypes = viewModel.paymentMethodTypes.value,
+                    paymentMethodTypes = if (setAutomaticPaymentMethods) {
+                        emptyList()
+                    } else {
+                        viewModel.paymentMethodTypes.value
+                    },
                 ),
                 configuration = makeConfiguration(),
             )
@@ -692,7 +696,11 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             flowController.configureWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = mode,
-                    paymentMethodTypes = viewModel.paymentMethodTypes.value,
+                    paymentMethodTypes = if (setAutomaticPaymentMethods) {
+                        emptyList()
+                    } else {
+                        viewModel.paymentMethodTypes.value
+                    },
                 ),
                 configuration = makeConfiguration(),
                 callback = ::onConfigured,

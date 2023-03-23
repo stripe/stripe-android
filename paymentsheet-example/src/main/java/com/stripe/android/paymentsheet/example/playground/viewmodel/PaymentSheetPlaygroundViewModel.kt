@@ -255,7 +255,9 @@ class PaymentSheetPlaygroundViewModel(
                         clientSecret.postValue(checkoutResponse.intentClientSecret)
 
                         amount.value = checkoutResponse.amount
-                        paymentMethodTypes.value = checkoutResponse.paymentMethodTypes.orEmpty().split(",")
+                        paymentMethodTypes.value = checkoutResponse.paymentMethodTypes
+                            .orEmpty()
+                            .split(",")
                     }
                 }
                 inProgress.postValue(false)
