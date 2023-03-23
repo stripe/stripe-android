@@ -8,8 +8,6 @@ import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.validate
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import java.security.InvalidParameterException
 import javax.inject.Inject
@@ -27,51 +25,43 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     suspend fun configure(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
-        callback: PaymentSheet.FlowController.ConfigCallback,
-    ) {
+    ): Throwable? {
         try {
             initializationMode.validate()
             configuration?.validate()
         } catch (e: InvalidParameterException) {
-            callback.onConfigured(false, e)
-            return
+            return e
         }
 
         val elementsSessionParams = initializationMode.toElementsSessionParams(configuration)
         val previousElementsSessionParams = viewModel.previousElementsSessionParams
         if (elementsSessionParams == previousElementsSessionParams) {
-            callback.onConfigured(true, null)
-            return
+            return null
         }
         val result = paymentSheetLoader.load(initializationMode, configuration)
 
-        if (currentCoroutineContext().isActive) {
-            viewModel.initializationMode = initializationMode
-            dispatchResult(result, callback, elementsSessionParams)
-        } else {
-            callback.onConfigured(false, null)
-        }
+        viewModel.initializationMode = initializationMode
+        return dispatchResult(result, elementsSessionParams)
     }
 
     private suspend fun dispatchResult(
         result: PaymentSheetLoader.Result,
-        callback: PaymentSheet.FlowController.ConfigCallback,
         elementsSessionParams: ElementsSessionParams,
-    ) = withContext(uiContext) {
+    ): Throwable? = withContext(uiContext) {
         when (result) {
             is PaymentSheetLoader.Result.Success -> {
                 viewModel.previousElementsSessionParams = elementsSessionParams
-                onInitSuccess(result.state, callback)
+                onInitSuccess(result.state)
+                null
             }
             is PaymentSheetLoader.Result.Failure -> {
-                callback.onConfigured(false, result.throwable)
+                result.throwable
             }
         }
     }
 
     private fun onInitSuccess(
         state: PaymentSheetState.Full,
-        callback: PaymentSheet.FlowController.ConfigCallback,
     ) {
         eventReporter.onInit(state.config)
 
@@ -81,7 +71,5 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         )
 
         viewModel.state = state
-
-        callback.onConfigured(true, null)
     }
 }

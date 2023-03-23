@@ -61,6 +61,7 @@
     <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)</ID>
     <ID>NestedBlockDepth:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$private fun generatePaymentIntentScenarios(): List&lt;PaymentIntentTestInput></ID>
     <ID>ReturnCount:AddressUtils.kt$internal fun CharSequence.levenshtein(other: CharSequence): Int</ID>
+    <ID>ReturnCount:FlowControllerConfigurationHandler.kt$FlowControllerConfigurationHandler$suspend fun configure( initializationMode: PaymentSheet.InitializationMode, configuration: PaymentSheet.Configuration?, ): Throwable?</ID>
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
     <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowControllerNonFallbackInjector</ID>
     <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>

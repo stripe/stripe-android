@@ -23,6 +23,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentDetailsFixtures
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -74,14 +75,16 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
@@ -109,10 +112,6 @@ internal class DefaultFlowControllerTest {
         mock<ActivityResultLauncher<LinkActivityContract.Args>>()
 
     private val linkPaymentLauncher = mock<LinkPaymentLauncher>()
-
-    private val flowController: DefaultFlowController by lazy {
-        createFlowController()
-    }
 
     private val lifeCycleOwner = mock<LifecycleOwner>()
 
@@ -236,8 +235,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `getPaymentOption() when defaultPaymentMethodId is null should be null`() {
-        assertThat(flowController.getPaymentOption())
-            .isNull()
+        val flowController = createFlowController()
+        assertThat(flowController.getPaymentOption()).isNull()
     }
 
     @Test
@@ -355,12 +354,15 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `presentPaymentOptions() without successful init should fail`() {
         assertFailsWith<IllegalStateException> {
+            val flowController = createFlowController()
             flowController.presentPaymentOptions()
         }
     }
 
     @Test
     fun `onPaymentOptionResult() with saved payment method selection result should invoke callback with payment option`() {
+        val flowController = createFlowController()
+
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -449,6 +451,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `onPaymentOptionResult() with cancelled invoke callback when initial value is null`() {
+        val flowController = createFlowController()
+
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -485,17 +489,23 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPayment() without paymentSelection should not call paymentLauncher`() {
-        verifyNoMoreInteractions(paymentLauncher)
+        val flowController = createFlowController()
+        verify(paymentLauncher, never()).confirm(any<ConfirmPaymentIntentParams>())
+        verify(paymentLauncher, never()).confirm(any<ConfirmSetupIntentParams>())
+
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
         }
+
         flowController.confirm()
     }
 
     @Test
     fun `confirmPaymentSelection() with new card payment method should start paymentlauncher`() = runTest {
+        val flowController = createFlowController()
+
         flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             callback = { _, _ -> },
@@ -534,6 +544,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with generic payment method should start paymentLauncher`() {
+        val flowController = createFlowController()
+
         flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             callback = { _, _ -> },
@@ -571,6 +583,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with us_bank_account payment method should start paymentLauncher`() {
+        val flowController = createFlowController()
+
         flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             callback = { _, _ -> },
@@ -827,6 +841,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPayment() with GooglePay should launch GooglePayPaymentMethodLauncher`() {
+        val flowController = createFlowController()
+
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -842,6 +858,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `onGooglePayResult() when canceled should invoke callback with canceled result`() {
+        val flowController = createFlowController()
         verifyNoInteractions(eventReporter)
 
         flowController.configureWithPaymentIntent(
@@ -862,6 +879,8 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `onGooglePayResult() when PaymentData result should invoke confirm() with expected params`() =
         runTest {
+            val flowController = createFlowController()
+
             flowController.configureWithPaymentIntent(
                 PaymentSheetFixtures.CLIENT_SECRET,
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -890,7 +909,9 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `onPaymentResult when succeeded should invoke callback with Completed`() = runTest {
+        val flowController = createFlowController()
         var isReadyState = false
+
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET
         ) { isReady, _ ->
@@ -909,30 +930,33 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `onPaymentResult when canceled should invoke callback with Cancelled`() =
-        runTest {
-            var isReadyState = false
-            flowController.configureWithPaymentIntent(
-                PaymentSheetFixtures.CLIENT_SECRET
-            ) { isReady, _ ->
-                isReadyState = isReady
-            }
-            assertThat(isReadyState)
-                .isTrue()
+    fun `onPaymentResult when canceled should invoke callback with Cancelled`() = runTest {
+        val flowController = createFlowController()
+        var isReadyState = false
 
-            flowController.onPaymentResult(PaymentResult.Canceled)
-
-            verify(paymentResultCallback).onPaymentSheetResult(
-                argWhere { paymentResult ->
-                    paymentResult is PaymentSheetResult.Canceled
-                }
-            )
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET
+        ) { isReady, _ ->
+            isReadyState = isReady
         }
+        assertThat(isReadyState)
+            .isTrue()
+
+        flowController.onPaymentResult(PaymentResult.Canceled)
+
+        verify(paymentResultCallback).onPaymentSheetResult(
+            argWhere { paymentResult ->
+                paymentResult is PaymentSheetResult.Canceled
+            }
+        )
+    }
 
     @Test
     fun `onPaymentResult when error should invoke callback with Failed and relay error message`() =
         runTest {
             val errorMessage = "Original error message"
+            val flowController = createFlowController()
+
             flowController.onPaymentResult(PaymentResult.Failed(Throwable(errorMessage)))
 
             verify(paymentResultCallback).onPaymentSheetResult(
@@ -1055,6 +1079,45 @@ internal class DefaultFlowControllerTest {
         )
     }
 
+    @Test
+    fun `Cancels in-flight configure call if configure is called again`() = runTest {
+        val flowController = createFlowController(delay = 1.seconds)
+
+        val intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 12345,
+                currency = "usd"
+            )
+        )
+
+        val differentIntentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 123456,
+                currency = "usd"
+            )
+        )
+
+        var didSecondCallComplete = false
+
+        flowController.configureWithIntentConfiguration(
+            intentConfiguration = intentConfiguration,
+            callback = { _, _ ->
+                throw AssertionError("Not expected that this configure callback would be called")
+            },
+        )
+
+        testDispatcher.scheduler.advanceTimeBy(100)
+
+        flowController.configureWithIntentConfiguration(
+            intentConfiguration = differentIntentConfiguration,
+            callback = { _, _, -> didSecondCallComplete = true },
+        )
+
+        testDispatcher.scheduler.advanceTimeBy(1_001)
+
+        assertThat(didSecondCallComplete).isTrue()
+    }
+
     private fun createAndConfigureFlowControllerForDeferredIntent(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     ): DefaultFlowController {
@@ -1084,6 +1147,7 @@ internal class DefaultFlowControllerTest {
             loginState = LinkState.LoginState.LoggedIn,
         ),
         viewModel: FlowControllerViewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java],
+        delay: Duration = Duration.ZERO,
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentSheetLoader(
@@ -1091,6 +1155,7 @@ internal class DefaultFlowControllerTest {
                 stripeIntent = stripeIntent,
                 paymentSelection = paymentSelection,
                 linkState = linkState,
+                delay = delay,
             ),
             viewModel
         )

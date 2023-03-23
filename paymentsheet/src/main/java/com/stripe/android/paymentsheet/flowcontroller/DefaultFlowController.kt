@@ -54,7 +54,10 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import dagger.Lazy
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -100,6 +103,8 @@ internal class DefaultFlowController @Inject internal constructor(
     lateinit var flowControllerComponent: FlowControllerComponent
 
     private var paymentLauncher: StripePaymentLauncher? = null
+    private var configureJob: CompletableJob? = null
+    private var didLastConfigureFail: Boolean = false
 
     override var shippingDetails: AddressDetails?
         get() = viewModel.state?.config?.shippingDetails
@@ -207,8 +212,25 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
-        lifecycleScope.launch {
-            configurationHandler.configure(mode, configuration, callback)
+        configureJob?.cancel()
+
+        configureJob = Job().apply {
+            invokeOnCompletion { error ->
+                if (error !is CancellationException) {
+                    callback.onConfigured(success = error == null, error = error)
+                }
+            }
+        }
+
+        lifecycleScope.launch(configureJob!!) {
+            val error = configurationHandler.configure(mode, configuration)
+            didLastConfigureFail = error != null
+
+            if (error != null) {
+                configureJob?.completeExceptionally(error)
+            } else {
+                configureJob?.complete()
+            }
         }
     }
 
@@ -219,43 +241,60 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     override fun presentPaymentOptions() {
-        val state = runCatching {
-            requireNotNull(viewModel.state)
-        }.getOrElse {
-            error(
-                "FlowController must be successfully initialized using " +
-                    "configureWithPaymentIntent() or configureWithSetupIntent() " +
-                    "before calling presentPaymentOptions()"
+        withValidConfiguration { state ->
+            paymentOptionActivityLauncher.launch(
+                PaymentOptionContract.Args(
+                    state = state.copy(paymentSelection = viewModel.paymentSelection),
+                    statusBarColor = statusBarColor(),
+                    injectorKey = injectorKey,
+                    enableLogging = enableLogging,
+                    productUsage = productUsage,
+                )
             )
         }
-
-        paymentOptionActivityLauncher.launch(
-            PaymentOptionContract.Args(
-                state = state.copy(paymentSelection = viewModel.paymentSelection),
-                statusBarColor = statusBarColor(),
-                injectorKey = injectorKey,
-                enableLogging = enableLogging,
-                productUsage = productUsage,
-            )
-        )
     }
 
     override fun confirm() {
-        val state = runCatching {
-            requireNotNull(viewModel.state)
-        }.getOrElse {
-            error(
-                "FlowController must be successfully initialized using " +
-                    "configureWithPaymentIntent() or configureWithSetupIntent() " +
-                    "before calling confirm()"
+        withValidConfiguration { state ->
+            when (val paymentSelection = viewModel.paymentSelection) {
+                is PaymentSelection.GooglePay -> launchGooglePay(state)
+                is PaymentSelection.Link,
+                is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
+                else -> confirmPaymentSelection(paymentSelection, state)
+            }
+        }
+    }
+
+    private fun withValidConfiguration(block: (PaymentSheetState.Full) -> Unit) {
+        val state = runCatching { requireNotNull(viewModel.state) }.getOrElse {
+            throw IllegalStateException(
+                "FlowController must be successfully initialized using a " +
+                    "configureWith****() method before calling confirm()"
             )
         }
 
-        when (val paymentSelection = viewModel.paymentSelection) {
-            PaymentSelection.GooglePay -> launchGooglePay(state)
-            PaymentSelection.Link,
-            is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
-            else -> confirmPaymentSelection(paymentSelection, state)
+        val configError = ensureValidConfigurationState()
+
+        if (configError != null) {
+            paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Failed(configError))
+        } else {
+            block(state)
+        }
+    }
+
+    private fun ensureValidConfigurationState(): Throwable? {
+        return if (didLastConfigureFail) {
+            IllegalStateException(
+                "The last call to a configureWith****() method has failed. Therefore, " +
+                    "presentPaymentOptions() can't be called."
+            )
+        } else if (configureJob?.isCompleted != true) {
+            IllegalStateException(
+                "The last call to a configureWith****() method hasn't finished yet. Therefore, " +
+                    "presentPaymentOptions() can't be called."
+            )
+        } else {
+            null
         }
     }
 

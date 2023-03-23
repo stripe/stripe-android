@@ -19,11 +19,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -35,15 +31,11 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
 class FlowControllerConfigurationHandlerTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
     private val eventReporter = mock<EventReporter>()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
@@ -69,17 +61,14 @@ class FlowControllerConfigurationHandlerTest {
 
     @Test
     fun `configure() should run initial configuration`() = runTest {
-        val countDownLatch = CountDownLatch(1)
         val configurationHandler = createConfigurationHandler()
-        configurationHandler.configure(
+
+        val exception = configurationHandler.configure(
             PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.CLIENT_SECRET),
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) { success, exception ->
-            assertThat(success).isTrue()
-            assertThat(exception).isNull()
-            countDownLatch.countDown()
-        }
-        assertThat(countDownLatch.await(0, TimeUnit.SECONDS)).isTrue()
+        )
+
+        assertThat(exception).isNull()
         assertThat(viewModel.initializationMode).isNotNull()
         assertThat(viewModel.previousElementsSessionParams).isNotNull()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
@@ -90,7 +79,6 @@ class FlowControllerConfigurationHandlerTest {
 
     @Test
     fun `configure() should not re-run initial config during second config`() = runTest {
-        val countDownLatch = CountDownLatch(1)
         val elementsSessionParams = createElementsSessionParams()
         val configurationHandler = createConfigurationHandler()
 
@@ -98,15 +86,12 @@ class FlowControllerConfigurationHandlerTest {
         viewModel.previousElementsSessionParams = elementsSessionParams
         viewModel.paymentSelection = PaymentSelection.GooglePay
 
-        configurationHandler.configure(
+        val exception = configurationHandler.configure(
             PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.CLIENT_SECRET),
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) { success, exception ->
-            assertThat(success).isTrue()
-            assertThat(exception).isNull()
-            countDownLatch.countDown()
-        }
-        assertThat(countDownLatch.await(0, TimeUnit.SECONDS)).isTrue()
+        )
+
+        assertThat(exception).isNull()
         assertThat(viewModel.previousElementsSessionParams).isSameInstanceAs(elementsSessionParams)
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
 
@@ -117,7 +102,6 @@ class FlowControllerConfigurationHandlerTest {
 
     @Test
     fun `configure() should re-run CHANGED config during second config`() = runTest {
-        val countDownLatch = CountDownLatch(1)
         val elementsSessionParams = createElementsSessionParams()
         val differentElementsSessionParams = createElementsSessionParams(PaymentSheetFixtures.DIFFERENT_CLIENT_SECRET)
         val configurationHandler = createConfigurationHandler()
@@ -126,15 +110,12 @@ class FlowControllerConfigurationHandlerTest {
         viewModel.previousElementsSessionParams = elementsSessionParams
         viewModel.paymentSelection = PaymentSelection.GooglePay
 
-        configurationHandler.configure(
+        val exception = configurationHandler.configure(
             PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.DIFFERENT_CLIENT_SECRET),
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) { success, exception ->
-            assertThat(success).isTrue()
-            assertThat(exception).isNull()
-            countDownLatch.countDown()
-        }
-        assertThat(countDownLatch.await(0, TimeUnit.SECONDS)).isTrue()
+        )
+
+        assertThat(exception).isNull()
         assertThat(viewModel.initializationMode).isNotNull()
         assertThat(viewModel.previousElementsSessionParams).isNotSameInstanceAs(
             differentElementsSessionParams
@@ -148,101 +129,62 @@ class FlowControllerConfigurationHandlerTest {
 
     @Test
     fun `configure() with invalid paymentIntent`() = runTest {
-        var result = Pair<Boolean, Throwable?>(true, null)
         val configurationHandler = createConfigurationHandler()
-        configurationHandler.configure(
+
+        val exception = configurationHandler.configure(
             PaymentSheet.InitializationMode.PaymentIntent(" "),
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) { success, error ->
-            result = success to error
-        }
+        )
 
-        assertThat(result.first).isFalse()
-        assertThat(result.second?.message)
+        assertThat(exception?.message)
             .isEqualTo("The PaymentIntent client_secret cannot be an empty string.")
     }
 
     @Test
     fun `configure() with invalid merchant`() = runTest {
-        var result = Pair<Boolean, Throwable?>(true, null)
         val configurationHandler = createConfigurationHandler()
-        configurationHandler.configure(
+
+        val exception = configurationHandler.configure(
             PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.CLIENT_SECRET),
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(merchantDisplayName = "")
-        ) { success, error ->
-            result = success to error
-        }
+        )
 
-        assertThat(result.first).isFalse()
-        assertThat(result.second?.message)
+        assertThat(exception?.message)
             .isEqualTo("When a Configuration is passed to PaymentSheet, the Merchant display name cannot be an empty string.")
     }
 
     @Test
     fun `configure() with invalid customer id`() = runTest {
-        var result = Pair<Boolean, Throwable?>(true, null)
         val configurationHandler = createConfigurationHandler()
-        configurationHandler.configure(
+
+        val exception = configurationHandler.configure(
             PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.CLIENT_SECRET),
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
                 customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
                     id = " "
                 )
             )
-        ) { success, error ->
-            result = success to error
-        }
+        )
 
-        assertThat(result.first).isFalse()
-        assertThat(result.second?.message)
+        assertThat(exception?.message)
             .isEqualTo("When a CustomerConfiguration is passed to PaymentSheet, the Customer ID cannot be an empty string.")
     }
 
     @Test
     fun `configure() with invalid customer ephemeral key`() = runTest {
-        var result = Pair<Boolean, Throwable?>(true, null)
         val configurationHandler = createConfigurationHandler()
-        configurationHandler.configure(
+
+        val exception = configurationHandler.configure(
             PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.CLIENT_SECRET),
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
                 customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
                     ephemeralKeySecret = " "
                 )
             )
-        ) { success, error ->
-            result = success to error
-        }
-
-        assertThat(result.first).isFalse()
-        assertThat(result.second?.message)
+        )
+        assertThat(exception?.message)
             .isEqualTo("When a CustomerConfiguration is passed to PaymentSheet, the ephemeralKeySecret cannot be an empty string.")
     }
-
-    @Test
-    fun `configure() when scope is cancelled before completion should not call onInit lambda`() =
-        runTest {
-            var onInitCallbacks = 0
-
-            val configurationHandler = createConfigurationHandler(
-                FakePaymentSheetLoader(
-                    customerPaymentMethods = emptyList(),
-                    delay = 2.seconds,
-                )
-            )
-            testScope.launch {
-                configurationHandler.configure(
-                    PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.CLIENT_SECRET),
-                    null,
-                ) { _, _ ->
-                    onInitCallbacks++
-                }
-            }
-
-            testScope.advanceTimeBy(500L)
-            testScope.cancel()
-
-            assertThat(onInitCallbacks).isEqualTo(0)
-        }
 
     private fun defaultPaymentSheetLoader(): PaymentSheetLoader {
         return FakePaymentSheetLoader(
