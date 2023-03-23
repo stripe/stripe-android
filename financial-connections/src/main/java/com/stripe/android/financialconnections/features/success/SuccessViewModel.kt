@@ -7,6 +7,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickDisconnectLink
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickDone
@@ -31,6 +32,8 @@ import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.ui.TextResource.PluralId
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -51,10 +54,19 @@ internal class SuccessViewModel @Inject constructor(
         observeAsyncs()
         suspend {
             val manifest = getManifest()
+            val accounts = getCachedAccounts()
             SuccessState.Payload(
                 skipSuccessPane = manifest.skipSuccessPane ?: false,
+                successMessage = getSuccessMessages(
+                    isLinkWithStripe = manifest.isLinkWithStripe,
+                    isNetworkingUserFlow = manifest.isNetworkingUserFlow,
+                    saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded.get(),
+                    businessName = manifest.businessName,
+                    connectedAccountName = manifest.connectedAccountName,
+                    count = accounts.size
+                ),
                 accessibleData = AccessibleDataCalloutModel.fromManifest(manifest),
-                accounts = getCachedAccounts(),
+                accounts = accounts,
                 institution = manifest.activeInstitution!!,
                 businessName = manifest.businessName,
                 disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest),
@@ -118,6 +130,49 @@ internal class SuccessViewModel @Inject constructor(
         )
     }
 
+    internal fun getSuccessMessages(
+        isLinkWithStripe: Boolean?,
+        isNetworkingUserFlow: Boolean?,
+        saveToLinkWithStripeSucceeded: Boolean?,
+        connectedAccountName: String?,
+        businessName: String?,
+        count: Int
+    ): TextResource = when {
+        isLinkWithStripe == true ||
+            (isNetworkingUserFlow == true && saveToLinkWithStripeSucceeded == true) -> when {
+            businessName != null && connectedAccountName != null -> PluralId(
+                value = R.plurals.stripe_success_pane_link_with_connected_account_name,
+                count = count,
+                args = listOf(connectedAccountName, businessName)
+            )
+
+            businessName != null -> PluralId(
+                value = R.plurals.stripe_success_pane_link_with_business_name,
+                count = count,
+                args = listOf(businessName)
+            )
+
+            else -> PluralId(
+                R.plurals.stripe_success_pane_link_with_no_business_name,
+                count,
+            )
+        }
+
+        businessName != null && connectedAccountName != null -> PluralId(
+            R.plurals.stripe_success_pane_has_connected_account_name,
+            count = count,
+            args = listOf(connectedAccountName, businessName)
+        )
+
+        businessName != null -> PluralId(
+            R.plurals.stripe_success_pane_has_business_name,
+            count,
+            args = listOf(businessName)
+        )
+
+        else -> PluralId(R.plurals.stripe_success_pane_no_business_name, count)
+    }
+
     fun onDoneClick() {
         viewModelScope.launch { eventTracker.track(ClickDone(Pane.SUCCESS)) }
         completeSession()
@@ -176,6 +231,7 @@ internal data class SuccessState(
         val accounts: List<PartnerAccount>,
         val disconnectUrl: String,
         val businessName: String?,
-        val skipSuccessPane: Boolean
+        val skipSuccessPane: Boolean,
+        val successMessage: TextResource
     )
 }

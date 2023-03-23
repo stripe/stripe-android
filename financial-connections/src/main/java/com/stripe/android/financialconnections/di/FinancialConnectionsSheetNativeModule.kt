@@ -133,7 +133,6 @@ internal class FinancialConnectionsSheetNativeModule {
         apiRequestFactory = apiRequestFactory
     )
 
-
     @Singleton
     @Provides
     fun providesSaveToLinkWithStripeSucceededRepository() = SaveToLinkWithStripeSucceededRepository(

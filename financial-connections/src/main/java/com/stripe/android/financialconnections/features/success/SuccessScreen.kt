@@ -13,11 +13,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -55,7 +53,7 @@ internal fun SuccessScreen() {
             disconnectUrl = payload.disconnectUrl,
             accounts = payload.accounts,
             institution = payload.institution,
-            businessName = payload.businessName,
+            successMessage = payload.successMessage,
             loading = state.value.completeSession is Loading,
             skipSuccessPane = payload.skipSuccessPane,
             onDoneClick = viewModel::onDoneClick,
@@ -73,7 +71,7 @@ private fun SuccessContent(
     disconnectUrl: String,
     accounts: List<PartnerAccount>,
     institution: FinancialConnectionsInstitution,
-    businessName: String?,
+    successMessage: TextResource,
     loading: Boolean,
     skipSuccessPane: Boolean,
     onDoneClick: () -> Unit,
@@ -98,13 +96,13 @@ private fun SuccessContent(
         } else {
             SuccessLoaded(
                 scrollState = scrollState,
-                businessName = businessName,
                 accounts = accounts,
                 accessibleDataModel = accessibleDataModel,
                 disconnectUrl = disconnectUrl,
                 institution = institution,
                 loading = loading,
                 showLinkAnotherAccount = showLinkAnotherAccount,
+                successMessage = successMessage,
                 onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick,
                 onDisconnectLinkClick = onDisconnectLinkClick,
                 onLinkAnotherAccountClick = onLinkAnotherAccountClick,
@@ -126,10 +124,10 @@ private fun SuccessLoading() {
 @Suppress("LongMethod")
 private fun SuccessLoaded(
     scrollState: ScrollState,
-    businessName: String?,
     accounts: List<PartnerAccount>,
     accessibleDataModel: AccessibleDataCalloutModel,
     disconnectUrl: String,
+    successMessage: TextResource,
     institution: FinancialConnectionsInstitution,
     loading: Boolean,
     showLinkAnotherAccount: Boolean,
@@ -170,7 +168,7 @@ private fun SuccessLoaded(
             Text(
                 modifier = Modifier
                     .fillMaxWidth(),
-                text = getSubtitle(businessName, accounts),
+                text = successMessage.toText().toString(),
                 style = FinancialConnectionsTheme.typography.body
             )
             if (accounts.isNotEmpty()) {
@@ -246,24 +244,6 @@ private fun SuccessLoadedFooter(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-private fun getSubtitle(
-    businessName: String?,
-    accounts: List<PartnerAccount>
-) = when {
-    businessName != null -> pluralStringResource(
-        R.plurals.stripe_success_desc,
-        accounts.count(),
-        businessName
-    )
-
-    else -> pluralStringResource(
-        R.plurals.stripe_success_desc_no_business,
-        accounts.count()
-    )
-}
-
 @Composable
 @Preview
 @Suppress("LongMethod")
@@ -327,7 +307,7 @@ internal fun SuccessScreenPreview() {
                 logo = null,
                 mobileHandoffCapable = false
             ),
-            businessName = "Random business",
+            successMessage = TextResource.Text("Hola"),
             loading = false,
             skipSuccessPane = false,
             onDoneClick = {},
@@ -335,7 +315,6 @@ internal fun SuccessScreenPreview() {
             showLinkAnotherAccount = true,
             onLearnMoreAboutDataAccessClick = {},
             onDisconnectLinkClick = {},
-            onCloseClick = {},
-        )
+        ) {}
     }
 }

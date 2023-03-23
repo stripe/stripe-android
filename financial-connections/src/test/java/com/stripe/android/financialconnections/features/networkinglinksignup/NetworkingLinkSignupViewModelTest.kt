@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
+import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -31,6 +32,7 @@ class NetworkingLinkSignupViewModelTest {
     private val goNext = mock<GoNext>()
     private val lookupAccount = mock<LookupAccount>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
+    private val saveToLinkWithStripeSucceeded = mock<SaveToLinkWithStripeSucceededRepository>()
 
     private fun buildViewModel(
         state: NetworkingLinkSignupState
@@ -42,6 +44,7 @@ class NetworkingLinkSignupViewModelTest {
         goNext = goNext,
         getCachedAccounts = getAuthorizationSessionAccounts,
         lookupAccount = lookupAccount,
+        saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
         saveAccountToLink = saveAccountToLink
     )
 
