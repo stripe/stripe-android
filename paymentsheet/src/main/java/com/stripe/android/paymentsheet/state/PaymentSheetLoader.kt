@@ -138,7 +138,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
 
         val sortedPaymentMethods = async {
-            paymentMethods.await().sorted(
+            paymentMethods.await().withLastUsedPaymentMethodFirst(
                 savedSelection = savedSelection.await(),
             )
         }
@@ -174,7 +174,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             PaymentSheetState.Full(
                 config = config,
                 stripeIntent = stripeIntent,
-                customerPaymentMethods = paymentMethods.await(),
+                customerPaymentMethods = sortedPaymentMethods.await(),
                 isGooglePayReady = isGooglePayReady,
                 linkState = linkState.await(),
                 paymentSelection = initialPaymentSelection.await(),
@@ -287,18 +287,16 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 }
 
-private fun List<PaymentMethod>.sorted(
+private fun List<PaymentMethod>.withLastUsedPaymentMethodFirst(
     savedSelection: SavedSelection,
 ): List<PaymentMethod> {
     val defaultPaymentMethodIndex = (savedSelection as? SavedSelection.PaymentMethod)?.let {
-        indexOfFirst { it.id == savedSelection.id }
+        indexOfFirst { it.id == savedSelection.id }.takeIf { it != -1 }
     }
 
     return if (defaultPaymentMethodIndex != null) {
-        val mutablePaymentMethods = toMutableList()
-        val primaryPaymentMethod = mutablePaymentMethods.removeAt(defaultPaymentMethodIndex)
-        mutablePaymentMethods.add(0, primaryPaymentMethod)
-        mutablePaymentMethods
+        val primaryPaymentMethod = get(defaultPaymentMethodIndex)
+        listOf(primaryPaymentMethod) + (this - primaryPaymentMethod)
     } else {
         this
     }

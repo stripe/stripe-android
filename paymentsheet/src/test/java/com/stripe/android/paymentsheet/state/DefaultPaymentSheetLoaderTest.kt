@@ -491,6 +491,32 @@ internal class DefaultPaymentSheetLoaderTest {
             .isEqualTo("email@stripe.com")
     }
 
+    @Test
+    fun `Moves last-used customer payment method to the front of the list`() = runTest {
+        val paymentMethods = PaymentMethodFixtures.createCards(10)
+        val lastUsed = paymentMethods[6]
+        prefsRepository.savePaymentSelection(PaymentSelection.Saved(lastUsed))
+
+        val loader = createPaymentSheetLoader(
+            customerRepo = FakeCustomerRepository(paymentMethods = paymentMethods),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "id",
+                    ephemeralKeySecret = "key",
+                ),
+            ),
+        ) as PaymentSheetLoader.Result.Success
+
+        val observedElements = result.state.customerPaymentMethods
+        val expectedElements = listOf(lastUsed) + (paymentMethods - lastUsed)
+
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
     private fun createPaymentSheetLoader(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
