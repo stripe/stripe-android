@@ -100,8 +100,7 @@ fun createExpiryDateFormFieldValues(
     )
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun getExpiryMonthFormFieldEntry(entry: FormFieldEntry): FormFieldEntry {
+private fun getExpiryMonthFormFieldEntry(entry: FormFieldEntry): FormFieldEntry {
     var month = -1
     entry.value?.let { date ->
         val newString = convertTo4DigitDate(date)
@@ -115,8 +114,7 @@ fun getExpiryMonthFormFieldEntry(entry: FormFieldEntry): FormFieldEntry {
     )
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun getExpiryYearFormFieldEntry(entry: FormFieldEntry): FormFieldEntry {
+private fun getExpiryYearFormFieldEntry(entry: FormFieldEntry): FormFieldEntry {
     var year = -1
     entry.value?.let { date ->
         val newString = convertTo4DigitDate(date)
