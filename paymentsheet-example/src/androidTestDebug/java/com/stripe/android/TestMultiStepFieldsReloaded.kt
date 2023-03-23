@@ -6,6 +6,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
+import com.stripe.android.model.BillingDetailsCollectionConfiguration
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
@@ -65,7 +66,9 @@ class TestMultiStepFieldsReloaded {
     fun testCard() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = LpmRepository.HardcodedCard,
+                paymentMethod = LpmRepository.hardcodedCardSpec(
+                    BillingDetailsCollectionConfiguration()
+                ),
                 saveCheckboxValue = true,
                 saveForFutureUseCheckboxVisible = true,
             )

@@ -20,7 +20,7 @@ data class CardBillingSpec(
     @SerialName("allowed_country_codes")
     val allowedCountryCodes: Set<String> = supportedBillingCountries,
     @SerialName("collection_mode")
-    private val collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+    val collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,

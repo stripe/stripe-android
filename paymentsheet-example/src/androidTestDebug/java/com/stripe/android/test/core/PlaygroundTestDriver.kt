@@ -361,6 +361,13 @@ class PlaygroundTestDriver(
         // Can't guarantee that google pay will be on the phone
         selectors.googlePayState.click()
 
+        // Billing details collection.
+        selectors.attachDefaults.click()
+        selectors.collectName.click()
+        selectors.collectEmail.click()
+        selectors.collectPhone.click()
+        selectors.collectAddress.click()
+
         testParameters.customPrimaryButtonLabel?.let { customLabel ->
             selectors.enterCustomPrimaryButtonLabel(text = customLabel)
         }

@@ -27,7 +27,7 @@ class CardDetailsElementTest {
             context,
             initialValues = emptyMap(),
             viewOnlyFields = emptySet(),
-            cardController
+            controller = cardController
         )
 
         val flowValues = mutableListOf<List<Pair<IdentifierSpec, FormFieldEntry>>>()
@@ -36,6 +36,7 @@ class CardDetailsElementTest {
                 flowValues.add(it)
             }
 
+        Truth.assertThat(cardDetailsElement.controller.nameElement).isNull()
         cardDetailsElement.controller.numberElement.controller.onValueChange("4242424242424242")
         cardDetailsElement.controller.cvcElement.controller.onValueChange("321")
         cardDetailsElement.controller.expirationDateElement.controller.onValueChange("130")
@@ -71,6 +72,7 @@ class CardDetailsElementTest {
                 flowValues.add(it)
             }
 
+        Truth.assertThat(cardDetailsElement.controller.nameElement).isNull()
         cardDetailsElement.controller.cvcElement.controller.onValueChange("321")
         cardDetailsElement.controller.expirationDateElement.controller.onValueChange("1230")
 
@@ -82,6 +84,49 @@ class CardDetailsElementTest {
                 IdentifierSpec.CardCvc to FormFieldEntry("321", true),
                 IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
                 IdentifierSpec.CardExpMonth to FormFieldEntry("12", true),
+                IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
+            )
+        )
+    }
+
+    @Test
+    fun `test form field values returned when collecting name`() {
+        val cardController = CardDetailsController(
+            context = context,
+            initialValues = emptyMap(),
+            collectName = true,
+        )
+        val cardDetailsElement = CardDetailsElement(
+            IdentifierSpec.Generic("card_details"),
+            context,
+            initialValues = emptyMap(),
+            viewOnlyFields = emptySet(),
+            collectName = true,
+            controller = cardController,
+        )
+
+        val flowValues = mutableListOf<List<Pair<IdentifierSpec, FormFieldEntry>>>()
+        cardDetailsElement.getFormFieldValueFlow().asLiveData()
+            .observeForever {
+                flowValues.add(it)
+            }
+
+        Truth.assertThat(cardDetailsElement.controller.nameElement).isNotNull()
+        cardDetailsElement.controller.nameElement?.controller?.onValueChange("Jane Doe")
+        cardDetailsElement.controller.numberElement.controller.onValueChange("4242424242424242")
+        cardDetailsElement.controller.numberElement.controller.onValueChange("4242424242424242")
+        cardDetailsElement.controller.cvcElement.controller.onValueChange("321")
+        cardDetailsElement.controller.expirationDateElement.controller.onValueChange("130")
+
+        idleLooper()
+
+        Truth.assertThat(flowValues[flowValues.size - 1]).isEqualTo(
+            listOf(
+                IdentifierSpec.Name to FormFieldEntry("Jane Doe", true),
+                IdentifierSpec.CardNumber to FormFieldEntry("4242424242424242", true),
+                IdentifierSpec.CardCvc to FormFieldEntry("321", true),
+                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
+                IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
                 IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
             )
         )

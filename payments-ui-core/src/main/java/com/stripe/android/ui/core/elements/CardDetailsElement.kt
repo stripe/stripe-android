@@ -22,7 +22,7 @@ internal class CardDetailsElement(
     context: Context,
     initialValues: Map<IdentifierSpec, String?>,
     viewOnlyFields: Set<IdentifierSpec> = emptySet(),
-    val collectName: Boolean = false,
+    private val collectName: Boolean = false,
     val controller: CardDetailsController = CardDetailsController(
         context,
         initialValues,

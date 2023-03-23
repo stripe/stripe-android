@@ -4,6 +4,7 @@ import android.graphics.Color
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
+import com.stripe.android.model.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.test.core.Automatic
@@ -42,7 +43,7 @@ class TestPaymentSheetScreenshots {
     }
 
     private val testParams = TestParameters(
-        paymentMethod = LpmRepository.HardcodedCard,
+        paymentMethod = LpmRepository.hardcodedCardSpec(BillingDetailsCollectionConfiguration()),
         customer = Customer.New,
         linkState = LinkState.Off,
         googlePayState = GooglePayState.On,

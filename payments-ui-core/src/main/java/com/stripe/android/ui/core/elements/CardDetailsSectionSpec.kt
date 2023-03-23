@@ -16,7 +16,7 @@ data class CardDetailsSectionSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("card_details"),
     @SerialName("collect_name")
-    private val collectName: Boolean = false,
+    val collectName: Boolean = false,
 ) : FormItemSpec() {
     fun transform(
         context: Context,
