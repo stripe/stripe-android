@@ -75,20 +75,24 @@ def open_url(url)
   `open '#{url}'`
 end
 
+def execute_or_fail(command)
+    system(command) or raise "Failed to execute #{command}"
+end
+
 def pull_current_master
-  system("git checkout master")
-  system("git pull")
+  execute_or_fail("git checkout master")
+  execute_or_fail("git pull")
 end
 
 def update_changelog_on_new_branch(branch_name, version_number)
-  system("git checkout -b #{branch_name}")
+  execute_or_fail("git checkout -b #{branch_name}")
   update_changelog(version_number)
 end
 
 def push_changes(commit_title)
-  system("git add CHANGELOG.md")
-  system("git commit -m \"#{commit_title}\"")
-  system("git push -u origin")
+  execute_or_fail("git add CHANGELOG.md")
+  execute_or_fail("git commit -m \"#{commit_title}\"")
+  execute_or_fail("git push -u origin")
 end
 
 def create_pull_request_body(version_number)
