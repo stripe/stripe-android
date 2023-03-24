@@ -63,6 +63,7 @@ import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
+import kotlinx.coroutines.flow.first
 
 @Composable
 internal fun NetworkingLinkSignupScreen() {
@@ -263,8 +264,8 @@ private fun PhoneNumberSection(
     Column {
         StripeThemeForConnections {
             PhoneNumberCollectionSection(
-                phoneNumberController = payload.phoneController,
                 requestFocusWhenShown = payload.phoneController.initialPhoneNumber.isEmpty(),
+                phoneNumberController = payload.phoneController,
                 imeAction = ImeAction.Default,
                 enabled = true,
             )
@@ -305,10 +306,15 @@ private fun Title(title: String) {
 internal fun EmailSection(
     enabled: Boolean,
     emailController: TextFieldController,
-    focusRequester: FocusRequester = remember { FocusRequester() },
     showFullForm: Boolean,
     loading: Boolean
 ) {
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        if (emailController.fieldValue.first().isEmpty()) {
+            focusRequester.requestFocus()
+        }
+    }
     StripeThemeForConnections {
         Box(
             modifier = Modifier
