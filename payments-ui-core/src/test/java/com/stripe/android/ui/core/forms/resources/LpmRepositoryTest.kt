@@ -3,11 +3,11 @@ package com.stripe.android.ui.core.forms.resources
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
@@ -392,6 +392,7 @@ class LpmRepositoryTest {
         assertThat(cardSpec.collectName).isTrue()
 
         val addressSpec = card.formSpec.items[2] as CardBillingSpec
-        assertThat(addressSpec.collectionMode).isEqualTo(BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+        assertThat(addressSpec.collectionMode)
+            .isEqualTo(BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
     }
 }

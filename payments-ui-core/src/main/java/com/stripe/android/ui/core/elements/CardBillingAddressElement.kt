@@ -30,7 +30,8 @@ class CardBillingAddressElement(
     ),
     sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?,
-    private val collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+    private val collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode =
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
 ) : AddressElement(
     identifier,
     addressRepository,

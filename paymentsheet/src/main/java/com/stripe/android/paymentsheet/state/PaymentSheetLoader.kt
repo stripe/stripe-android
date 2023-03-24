@@ -7,7 +7,6 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentLauncher.Companion.supportedFundingSources
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
@@ -23,6 +22,7 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
 import kotlinx.coroutines.async
@@ -221,7 +221,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             stripeIntent = elementsSession.stripeIntent,
             serverLpmSpecs = elementsSession.paymentMethodSpecs,
             billingDetailsCollectionConfiguration =
-                configuration?.billingDetailsCollectionConfiguration ?: BillingDetailsCollectionConfiguration(),
+            configuration?.billingDetailsCollectionConfiguration ?: BillingDetailsCollectionConfiguration(),
         )
 
         if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {

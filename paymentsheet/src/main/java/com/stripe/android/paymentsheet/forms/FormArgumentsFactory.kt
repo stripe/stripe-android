@@ -53,7 +53,8 @@ internal object FormArgumentsFactory {
             billingDetails = config?.defaultBillingDetails,
             shippingDetails = config?.shippingDetails,
             initialPaymentMethodCreateParams = initialParams,
-            billingDetailsCollectionConfiguration = config?.billingDetailsCollectionConfiguration ?: BillingDetailsCollectionConfiguration()
+            billingDetailsCollectionConfiguration = config?.billingDetailsCollectionConfiguration
+                ?: BillingDetailsCollectionConfiguration()
         )
     }
 }
