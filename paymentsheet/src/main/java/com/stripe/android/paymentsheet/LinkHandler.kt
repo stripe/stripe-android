@@ -12,7 +12,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SELECTION
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -110,11 +109,6 @@ internal class LinkHandler @Inject constructor(
 
     fun prepareLink(state: LinkState?) {
         setupLink(state)
-
-        if (state?.isReadyForUse == true) {
-            // If account exists, select Link by default
-            savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
-        }
     }
 
     private suspend fun requestLinkVerification(): Boolean {

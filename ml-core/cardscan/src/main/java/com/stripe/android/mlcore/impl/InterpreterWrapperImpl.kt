@@ -5,10 +5,19 @@ import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
 import com.stripe.android.mlcore.base.InterpreterWrapper
 import org.tensorflow.lite.Interpreter
 import java.io.File
+import java.nio.ByteBuffer
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class InterpreterWrapperImpl(file: File, options: InterpreterOptionsWrapper) : InterpreterWrapper {
-    private val interpreter: Interpreter = Interpreter(file, options.toInterpreterOptions())
+class InterpreterWrapperImpl : InterpreterWrapper {
+    private val interpreter: Interpreter
+
+    constructor(byteBuffer: ByteBuffer, options: InterpreterOptionsWrapper) {
+        interpreter = Interpreter(byteBuffer, options.toInterpreterOptions())
+    }
+
+    constructor(file: File, options: InterpreterOptionsWrapper) {
+        interpreter = Interpreter(file, options.toInterpreterOptions())
+    }
 
     override fun runForMultipleInputsOutputs(inputs: Array<Any>, outputs: Map<Int, Any>) {
         interpreter.runForMultipleInputsOutputs(inputs, outputs)
@@ -16,6 +25,10 @@ class InterpreterWrapperImpl(file: File, options: InterpreterOptionsWrapper) : I
 
     override fun run(input: Any, output: Any) {
         interpreter.run(input, output)
+    }
+
+    override fun close() {
+        interpreter.close()
     }
 }
 

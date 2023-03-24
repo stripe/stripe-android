@@ -316,7 +316,7 @@ class Selectors(
 
     fun getCardExpiration() = composeTestRule.onNodeWithText(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            R.string.stripe_paymentsheet_expiration_date_hint
+            R.string.expiration_date_hint
         )
     )
 

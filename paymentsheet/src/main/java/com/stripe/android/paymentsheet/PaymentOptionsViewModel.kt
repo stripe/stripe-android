@@ -89,7 +89,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
-    override var newPaymentSelection = args.state.newPaymentSelection
+    override var newPaymentSelection: PaymentSelection.New? =
+        args.state.paymentSelection as? PaymentSelection.New
 
     override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow().stateIn(
         scope = viewModelScope,
@@ -112,7 +113,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
         }
 
-        linkHandler.linkInlineSelection.value = args.state.newPaymentSelection as? PaymentSelection.New.LinkInline
+        linkHandler.linkInlineSelection.value = args.state.paymentSelection as? PaymentSelection.New.LinkInline
         linkHandler.prepareLink(linkState)
 
         // After recovering from don't keep activities the stripe intent will be saved,
@@ -122,8 +123,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
             setStripeIntent(args.state.stripeIntent)
         }
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.state.customerPaymentMethods
-        savedStateHandle[SAVE_SAVED_SELECTION] = args.state.savedSelection
         savedStateHandle[SAVE_PROCESSING] = false
+
+        updateSelection(args.state.paymentSelection)
 
         lpmServerSpec = lpmRepository.serverSpecLoadingState.serverLpmSpecs
 
