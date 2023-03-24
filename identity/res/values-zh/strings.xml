@@ -27,6 +27,24 @@
   <string name="could_not_capture_title">无法拍摄图片</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="description_clock">时钟图标</string>
+  <!-- Content description for close button -->
+  <string name="description_close">关闭验证页面</string>
+  <!-- Content description for exclamation icon -->
+  <string name="description_exclamation">感叹号图标</string>
+  <!-- Content description for back button -->
+  <string name="description_go_back">返回上一界面</string>
+  <!-- Content description for merchant logo -->
+  <string name="description_merchant_logo">商家徽标</string>
+  <!-- Content description for plus icon -->
+  <string name="description_plus">加号图标</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="description_privacy_policy">隐私政策图标</string>
+  <!-- Content description for stripe logo -->
+  <string name="description_stripe_logo">Stripe 徽标</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="description_time_estimate">预计验证完成时间图标</string>
+  <!-- Label for Date of birth field -->
+  <string name="dob">出生日期</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="driver_license">驾驶证</string>
   <!-- Text for error labels -->
@@ -39,6 +57,8 @@
   <string name="file_upload_content_id">请上传您的身份证正反面的照片</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">请上传您的护照的照片</string>
+  <!-- Label for first (given) name field -->
+  <string name="first_name">名字</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="flash_mask">自拍动画蒙版</string>
   <!-- Description of front of driver's license image -->
@@ -57,10 +77,24 @@
   <string name="hold_still">保持不动，正在扫描</string>
   <!-- display name for ID -->
   <string name="id_card">身份证件</string>
+  <!-- Label for ID number section -->
+  <string name="id_number">证件号码</string>
+  <!-- An error message. -->
+  <string name="incomplete_id_number">您输入的证件号码不完整。</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="individual_cpf">个人 CPF</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="invalid_dob_error">出生日期看似无效</string>
   <!-- Continue button text -->
   <string name="kontinue">继续</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="last_4_of_ssn">社会保障号码后 4 位</string>
+  <!-- Label for last (family) name field -->
+  <string name="last_name">姓氏</string>
   <!-- Status while screen is loading -->
   <string name="loading">正在加载</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="nric_or_fin">NRIC 或 FIN</string>
   <!-- No comment provided by engineer. -->
   <string name="ok">确定</string>
   <!-- Label of the passport option for document type selection -->
@@ -79,6 +113,8 @@
   <string name="position_passport">将护照放在画面正中间</string>
   <!-- Instructional text for capturing selfie -->
   <string name="position_selfie">将脸放在画面正中间。</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="retake_photos">重新拍照</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">已扫描</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->

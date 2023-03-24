@@ -1,38 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <!-- Content description for plus icon -->
-    <string name="description_plus">plus icon</string>
-    <!-- Content description for stripe logo -->
-    <string name="description_stripe_logo">stripe logo</string>
-    <!-- Content description for merchant logo -->
-    <string name="description_merchant_logo">merchant logo</string>
-    <!-- Content description for the icon for estimated time to complete verification -->
-    <string name="description_time_estimate">estimated time to complete verification icon</string>
-    <!-- Content description for the icon for privacy policy -->
-    <string name="description_privacy_policy">privacy policy icon</string>
-    <!-- Content description for exclamation icon -->
-    <string name="description_exclamation">exclamation icon</string>
-    <!-- Content description for close button -->
-    <string name="description_close">close verification page</string>
-    <!-- Content description for back button -->
-    <string name="description_go_back">go back to the previous screen</string>
     <!-- Content description for camera icon -->
     <string name="description_camera">camera icon</string>
-    <!-- Section title of ID number collection -->
-    <string name="id_number">ID Number</string>
-    <!-- Label for the ID field to collect last 4 of social security number for US ID -->
-    <string name="last_4_of_ssn">Last 4 of Social Security Number</string>
-    <!-- Label for the ID field to collect individual CPF for brazilian ID -->
-    <string name="individual_cpf">Individual CPF</string>
-    <!-- Label for the ID field to collect NRIC or FIN for singaporean ID -->
-    <string name="nric_or_fin">NRIC or FIN</string>
-    <!-- date of birth -->
-    <string name="dob">Date of Birth</string>
-    <string name="first_name">First</string>
-    <string name="last_name">Last</string>
-    <!-- Error message when date of birth format is invalid -->
-    <string name="invalid_dob_error">Date of birth does not look valid</string>
-    <!-- Error message when ID number is incomplete -->
-    <string name="incomplete_id_number">The ID number you entered is incomplete</string>
-    <string name="retake_photos">Retake Photos</string>
 </resources>

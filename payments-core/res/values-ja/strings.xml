@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - オフライン</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">お客様の支払い方法が拒否されました。</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">カードの有効期限の日付に不備があります。</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">入力した IBAN が無効です。</string>
   <string name="invalid_card_number">カードの番号が無効です。</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">カードのセキュリティコードが無効です。</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">カードの有効期限の月が無効です。</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">カードの有効期限の年が無効です。</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">名前が無効です。</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">支払い方法の認証がタイムアウトしました。もう一度お試しください</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">内部エラーが発生しました。</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">月 / 年</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">支払いの確認</string>
   <string name="title_add_a_card">カードを追加</string>

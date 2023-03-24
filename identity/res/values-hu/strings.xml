@@ -27,6 +27,24 @@
   <string name="could_not_capture_title">Nem sikerült felvételt készíteni</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="description_clock">Óra ikon</string>
+  <!-- Content description for close button -->
+  <string name="description_close">ellenőrzési oldal bezárása</string>
+  <!-- Content description for exclamation icon -->
+  <string name="description_exclamation">felkiáltójel ikon</string>
+  <!-- Content description for back button -->
+  <string name="description_go_back">vissza az előző lapra</string>
+  <!-- Content description for merchant logo -->
+  <string name="description_merchant_logo">kereskedő embléma</string>
+  <!-- Content description for plus icon -->
+  <string name="description_plus">plusz ikon</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="description_privacy_policy">adatvédelmi szabályzat ikon</string>
+  <!-- Content description for stripe logo -->
+  <string name="description_stripe_logo">stripe embléma</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="description_time_estimate">ellenőrzés elvégzésének becsült ideje ikon</string>
+  <!-- Label for Date of birth field -->
+  <string name="dob">Születési idő</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="driver_license">Vezetői engedély</string>
   <!-- Text for error labels -->
@@ -39,6 +57,8 @@
   <string name="file_upload_content_id">Töltse fel a személyazonosító igazolványának előlapját és hátlapját</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Töltse fel az útlevele képét</string>
+  <!-- Label for first (given) name field -->
+  <string name="first_name">Utónév</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="flash_mask">Szelfi animációhoz maszk</string>
   <!-- Description of front of driver's license image -->
@@ -57,10 +77,24 @@
   <string name="hold_still">Ne mozgassa, beolvasás folyamatban</string>
   <!-- display name for ID -->
   <string name="id_card">Azonosító</string>
+  <!-- Label for ID number section -->
+  <string name="id_number">Azonosítószám</string>
+  <!-- An error message. -->
+  <string name="incomplete_id_number">A beírt azonosítószám hiányos.</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="individual_cpf">Személyes CPF</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="invalid_dob_error">A születési idő megadása kötelező</string>
   <!-- Continue button text -->
   <string name="kontinue">folytatás</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="last_4_of_ssn">A társadalombiztosítási szám utolsó 4 számjegye</string>
+  <!-- Label for last (family) name field -->
+  <string name="last_name">Vezetéknév</string>
   <!-- Status while screen is loading -->
   <string name="loading">Betöltés folyamatban</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="nric_or_fin">NRIC vagy FIN</string>
   <!-- No comment provided by engineer. -->
   <string name="ok">OK</string>
   <!-- Label of the passport option for document type selection -->
@@ -79,6 +113,8 @@
   <string name="position_passport">Igazítsa útlevelét a kép közepére</string>
   <!-- Instructional text for capturing selfie -->
   <string name="position_selfie">Igazítsa az arcát a kép közepére.</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="retake_photos">Fényképek megismétlése</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Beolvasva</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->

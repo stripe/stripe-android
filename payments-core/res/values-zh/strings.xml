@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - 线下</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">您的支付方式被拒绝了。</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">您的银行卡的不完整。</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">您输入的 IBAN 无效。</string>
   <string name="invalid_card_number">您的卡号无效。</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">您的银行卡安全码无效。</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">您的银行卡的到期月份无效。</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">您的银行卡的到期年份无效。</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">您的姓名无效。</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">验证您的支付方式时失败——请重试</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">发生了内部错误。</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">月份/年份</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">验证您的付款</string>
   <string name="title_add_a_card">添加卡</string>

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="stripe_paymentsheet_address_element_same_as_shipping">Billing address is same as shipping</string>
-
-    <string name="expiration_date_hint">MM / YY</string>
-    <string name="incomplete_expiry_date">Your card\'s expiration date is incomplete.</string>
-    <string name="invalid_expiry_year">Your card\'s expiration year is invalid.</string>
-    <string name="invalid_expiry_month">Your card\'s expiration month is invalid.</string>
-</resources>
