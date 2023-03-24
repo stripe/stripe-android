@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.appcompat.view.ContextThemeWrapper
-import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -9,7 +8,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
-import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
