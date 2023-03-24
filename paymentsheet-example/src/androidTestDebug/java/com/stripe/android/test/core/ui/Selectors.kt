@@ -20,7 +20,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.model.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic

@@ -1,4 +1,4 @@
-package com.stripe.android.model
+package com.stripe.android.ui.core
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
@@ -31,17 +31,18 @@ data class BillingDetailsCollectionConfiguration(
     val address: AddressCollectionMode = AddressCollectionMode.Automatic,
 
     /**
-     * Whether the values included in `Configuration.defaultBillingDetails` should be
-     * attached to the payment method, this includes fields that aren't displayed in the form.
+     * Whether the values included in `PaymentSheet.Configuration.defaultBillingDetails`
+     * should be attached to the payment method, this includes fields that aren't displayed in the form.
      *
      * If `false` (the default), those values will only be used to prefill the corresponding fields in the form.
      */
-    val attachDefaultsToPaymentMethod: Boolean = false
+    val attachDefaultsToPaymentMethod: Boolean = false,
 ) : Parcelable {
 
     /**
      * Billing details fields collection options.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class CollectionMode {
         /**
          * The field will be collected depending on the Payment Method's requirements.
@@ -57,12 +58,13 @@ data class BillingDetailsCollectionConfiguration(
         /**
          * The field will always be collected, even if it isn't required for the Payment Method.
          */
-        Always
+        Always,
     }
 
     /**
      * Billing address collection options.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class AddressCollectionMode {
         /**
          * Only the fields required by the Payment Method will be collected, this may be none.
@@ -78,6 +80,6 @@ data class BillingDetailsCollectionConfiguration(
         /**
          * Collect the full billing address, regardless of the Payment Method requirements.
          */
-        Full
+        Full,
     }
 }

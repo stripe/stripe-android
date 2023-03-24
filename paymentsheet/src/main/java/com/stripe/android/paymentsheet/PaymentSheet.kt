@@ -21,7 +21,7 @@ import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.model.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
@@ -248,7 +248,9 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration @JvmOverloads constructor(
+    data class Configuration @JvmOverloads
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         /**
          * Your customer-facing business name.
          *
@@ -266,7 +268,6 @@ class PaymentSheet internal constructor(
          *
          * If set, PaymentSheet displays Google Pay as a payment option.
          */
-
         val googlePay: GooglePayConfiguration? = null,
 
         /**
@@ -338,14 +339,40 @@ class PaymentSheet internal constructor(
         val primaryButtonLabel: String? = null,
 
         /**
+         * 🚧 Under construction.
          * Describes how billing details should be collected.
          * All values default to `automatic`.
          * If `never` is used for a required field for the Payment Method used during checkout,
-         * you **must** provide an appropriate value as part of `defaultBillingDetails`.
+         * you **must** provide an appropriate value as part of [defaultBillingDetails].
          */
-        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
+        internal var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
+    ) : Parcelable {
 
-        ) : Parcelable {
+        constructor(
+            merchantDisplayName: String,
+            customer: CustomerConfiguration? = null,
+            googlePay: GooglePayConfiguration? = null,
+            primaryButtonColor: ColorStateList? = null,
+            defaultBillingDetails: BillingDetails? = null,
+            shippingDetails: AddressDetails? = null,
+            allowsDelayedPaymentMethods: Boolean = false,
+            allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
+            appearance: Appearance = Appearance(),
+            primaryButtonLabel: String? = null,
+        ) : this(
+            merchantDisplayName = merchantDisplayName,
+            customer = customer,
+            googlePay = googlePay,
+            primaryButtonColor = primaryButtonColor,
+            defaultBillingDetails = defaultBillingDetails,
+            shippingDetails = shippingDetails,
+            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+            appearance = appearance,
+            primaryButtonLabel = primaryButtonLabel,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
+        )
+
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */

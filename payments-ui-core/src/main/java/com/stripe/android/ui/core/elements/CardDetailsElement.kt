@@ -53,40 +53,38 @@ internal class CardDetailsElement(
         val flows = buildList {
             if (controller.nameElement != null) {
                 add(
-                    controller.nameElement.controller.formFieldValue.transform {
-                        emit(controller.nameElement.identifier to it)
+                    controller.nameElement.controller.formFieldValue.map {
+                        controller.nameElement.identifier to it
                     }
                 )
             }
             add(
-                controller.numberElement.controller.formFieldValue.transform {
-                    emit(controller.numberElement.identifier to it)
+                controller.numberElement.controller.formFieldValue.map {
+                    controller.numberElement.identifier to it
                 }
             )
             add(
-                controller.cvcElement.controller.formFieldValue.transform {
-                    emit(controller.cvcElement.identifier to it)
+                controller.cvcElement.controller.formFieldValue.map {
+                    controller.cvcElement.identifier to it
                 }
             )
             add(
-                controller.numberElement.controller.cardBrandFlow.transform {
-                    emit(IdentifierSpec.CardBrand to FormFieldEntry(it.code, true))
+                controller.numberElement.controller.cardBrandFlow.map {
+                    IdentifierSpec.CardBrand to FormFieldEntry(it.code, true)
                 }
             )
             add(
-                controller.expirationDateElement.controller.formFieldValue.transform {
-                    emit(IdentifierSpec.CardExpMonth to getExpiryMonthFormFieldEntry(it))
+                controller.expirationDateElement.controller.formFieldValue.map {
+                    IdentifierSpec.CardExpMonth to getExpiryMonthFormFieldEntry(it)
                 }
             )
             add(
-                controller.expirationDateElement.controller.formFieldValue.transform {
-                    emit(IdentifierSpec.CardExpYear to getExpiryYearFormFieldEntry(it))
+                controller.expirationDateElement.controller.formFieldValue.map {
+                    IdentifierSpec.CardExpYear to getExpiryYearFormFieldEntry(it)
                 }
             )
         }
-        return combine(flows) { values ->
-            values.map { it.first to it.second }
-        }
+        return combine(flows) { it.toList() }
     }
 }
 
