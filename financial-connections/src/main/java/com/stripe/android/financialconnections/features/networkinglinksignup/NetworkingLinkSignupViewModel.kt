@@ -132,13 +132,23 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         if (validEmail != null) {
             logger.debug("VALID EMAIL ADDRESS $validEmail.")
             searchJob += suspend {
-                delay(SEARCH_DEBOUNCE_MS)
+                delay(getLookupDelayMs(validEmail))
                 lookupAccount(validEmail)
             }.execute { copy(lookupAccount = if (it.isCancellationError()) Uninitialized else it) }
         } else {
             setState { copy(lookupAccount = Uninitialized) }
         }
     }
+
+    /**
+     * A valid e-mail will transition the user to the phone number field (sometimes prematurely),
+     * so we increase debounce if there's a high chance the e-mail is not yet finished being typed
+     * (high chance of not finishing == not .com suffix)
+     *
+     * @return delay in milliseconds
+     */
+    private fun getLookupDelayMs(validEmail: String) =
+        if (validEmail.endsWith(".com")) SEARCH_DEBOUNCE_FINISHED_EMAIL_MS else SEARCH_DEBOUNCE_MS
 
     fun onSkipClick() = viewModelScope.launch {
         eventTracker.track(Click(eventName = "click.not_now", pane = PANE))
@@ -206,7 +216,8 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 .viewModel
         }
 
-        private const val SEARCH_DEBOUNCE_MS = 300L
+        private const val SEARCH_DEBOUNCE_MS = 1000L
+        private const val SEARCH_DEBOUNCE_FINISHED_EMAIL_MS = 300L
         internal val PANE = Pane.NETWORKING_LINK_SIGNUP_PANE
     }
 }
