@@ -27,6 +27,24 @@
   <string name="could_not_capture_title">Nismo uspjeli snimiti fotografiju</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="description_clock">Ikona sata</string>
+  <!-- Content description for close button -->
+  <string name="description_close">zatvori stranicu za provjeru</string>
+  <!-- Content description for exclamation icon -->
+  <string name="description_exclamation">ikona uskličnika</string>
+  <!-- Content description for back button -->
+  <string name="description_go_back">vrati se na prethodni zaslon</string>
+  <!-- Content description for merchant logo -->
+  <string name="description_merchant_logo">logotip trgovca</string>
+  <!-- Content description for plus icon -->
+  <string name="description_plus">ikona plus</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="description_privacy_policy">ikona pravila o privatnosti</string>
+  <!-- Content description for stripe logo -->
+  <string name="description_stripe_logo">Stripeov logotip</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="description_time_estimate">ikona procijenjenog vremena za dovršetak provjere</string>
+  <!-- Label for Date of birth field -->
+  <string name="dob">Datum rođenja</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="driver_license">Vozačka dozvola</string>
   <!-- Text for error labels -->
@@ -39,6 +57,8 @@
   <string name="file_upload_content_id">Molimo vas učitajte slike prednje i stražnje strane vaše osobne iskaznice</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Molimo učitajte sliku vaše putovnice</string>
+  <!-- Label for first (given) name field -->
+  <string name="first_name">Ime</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="flash_mask">Maska za selfie animaciju</string>
   <!-- Description of front of driver's license image -->
@@ -57,10 +77,24 @@
   <string name="hold_still">Ne pomičite se, skeniranje u tijeku</string>
   <!-- display name for ID -->
   <string name="id_card">Osobna iskaznica</string>
+  <!-- Label for ID number section -->
+  <string name="id_number">ID broj</string>
+  <!-- An error message. -->
+  <string name="incomplete_id_number">Uneseni identifikacijski broj nije potpun.</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="individual_cpf">CPF porezni broj</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="invalid_dob_error">Datum rođenja ne izgleda ispravno</string>
   <!-- Continue button text -->
   <string name="kontinue">Nastavi</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="last_4_of_ssn">4 zadnja broja socijalnog osiguranja</string>
+  <!-- Label for last (family) name field -->
+  <string name="last_name">Prezime</string>
   <!-- Status while screen is loading -->
   <string name="loading">Učitavanje</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="nric_or_fin">NRIC ili FIN</string>
   <!-- No comment provided by engineer. -->
   <string name="ok">U redu</string>
   <!-- Label of the passport option for document type selection -->
@@ -79,6 +113,8 @@
   <string name="position_passport">Postavite svoju putovnicu u sredinu okvira</string>
   <!-- Instructional text for capturing selfie -->
   <string name="position_selfie">Postavite svoje lice u središte okvira.</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="retake_photos">Ponovo snimi fotografije</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Skenirano</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->

@@ -27,6 +27,24 @@
   <string name="could_not_capture_title">Could not capture image</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="description_clock">Clock icon</string>
+  <!-- Content description for close button -->
+  <string name="description_close">close verification page</string>
+  <!-- Content description for exclamation icon -->
+  <string name="description_exclamation">exclamation icon</string>
+  <!-- Content description for back button -->
+  <string name="description_go_back">go back to the previous screen</string>
+  <!-- Content description for merchant logo -->
+  <string name="description_merchant_logo">merchant logo</string>
+  <!-- Content description for plus icon -->
+  <string name="description_plus">plus icon</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="description_privacy_policy">privacy policy icon</string>
+  <!-- Content description for stripe logo -->
+  <string name="description_stripe_logo">Stripe logo</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="description_time_estimate">estimated time to complete verification icon</string>
+  <!-- Label for Date of birth field -->
+  <string name="dob">Date of birth</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="driver_license">Driver\'s license</string>
   <!-- Text for error labels -->
@@ -39,6 +57,8 @@
   <string name="file_upload_content_id">Please upload images of the front and back of your identity card</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Please upload an image of your passport</string>
+  <!-- Label for first (given) name field -->
+  <string name="first_name">First</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="flash_mask">Mask for selfie animation</string>
   <!-- Description of front of driver's license image -->
@@ -57,10 +77,24 @@
   <string name="hold_still">Hold still, scanning</string>
   <!-- display name for ID -->
   <string name="id_card">ID</string>
+  <!-- Label for ID number section -->
+  <string name="id_number">ID Number</string>
+  <!-- An error message. -->
+  <string name="incomplete_id_number">The ID number you entered is incomplete.</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="individual_cpf">Individual CPF</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="invalid_dob_error">Date of birth does not look valid</string>
   <!-- Continue button text -->
   <string name="kontinue">continue</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="last_4_of_ssn">Last 4 of Social Security number</string>
+  <!-- Label for last (family) name field -->
+  <string name="last_name">Last</string>
   <!-- Status while screen is loading -->
   <string name="loading">Loading</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="nric_or_fin">NRIC or FIN</string>
   <!-- No comment provided by engineer. -->
   <string name="ok">OK</string>
   <!-- Label of the passport option for document type selection -->
@@ -79,6 +113,8 @@
   <string name="position_passport">Position your passport in the centre of the frame</string>
   <!-- Instructional text for capturing selfie -->
   <string name="position_selfie">Position your face in the centre of the frame.</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="retake_photos">Retake Photos</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Scanned</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->

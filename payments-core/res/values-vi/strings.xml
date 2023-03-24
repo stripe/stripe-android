@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - Ngoại tuyến</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">Phương thức thanh toán của quý vị đã bị từ chối.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">Ngày hết hạn trên thẻ không hợp lệ.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">IBAN quý vị đã nhập không hợp lệ.</string>
   <string name="invalid_card_number">Số thẻ của bạn không hợp lệ.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Mã bảo mật trên thẻ không hợp lệ.</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Tháng hết hạn trên thẻ của bạn không hợp lệ.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">Năm hết hạn trên thẻ của bạn không hợp lệ.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">Tên của quý vị không hợp lệ.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">Đã hết thời gian xác thực phương thức thanh toán -- hãy thử lại sau</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Đã xảy ra lỗi nội bộ.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">Tháng /Năm</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Xác minh thanh toán của quý vị</string>
   <string name="title_add_a_card">Thêm Thẻ</string>

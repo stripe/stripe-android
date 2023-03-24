@@ -48,6 +48,8 @@
   <string name="address_zip_invalid">Irányítószáma érvénytelen.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Irányítószáma érvénytelen.</string>
+  <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
+  <string name="billing_same_as_shipping">A számlázási cím megegyezik a szállítási címmel</string>
   <!-- Used when a required field is blank and submit is clicked. -->
   <string name="blank_and_required">Ez a mező nem lehet üres.</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
@@ -56,8 +58,16 @@
   <string name="email">E-mail</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">Érvénytelen e-mail-cím.</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiration_date_hint">HH / ÉÉ</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="form_label_optional">%s (nem kötelező)</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">A kártya lejárati dátuma hiányos.</string>
   <!-- Error description for incomplete phone number -->
   <string name="incomplete_phone_number">Hiányos telefonszám</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">Kártyájának lejárati hónapja érvénytelen.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">Kártyájának lejárati éve érvénytelen.</string>
 </resources>

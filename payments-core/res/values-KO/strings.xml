@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - 오프라인</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">결제 방식이 거부되었습니다.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">카드의 만료 날짜가 불완전합니다.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">입력한 IBAN이 잘못되었습니다.</string>
   <string name="invalid_card_number">카드 번호가 잘못되었습니다.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">카드의 보안 코드가 유효하지 않습니다.</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">카드의 만료 월이 유효하지 않습니다.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">카드의 만료 연도가 유효하지 않습니다.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">이름이 잘못되었습니다.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">결제 수단 인증 시간이 초과되었습니다. 다시 시도하십시오.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">내부 오류가 발생했습니다.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">MM/YY</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">결제 확인</string>
   <string name="title_add_a_card">카드 추가</string>

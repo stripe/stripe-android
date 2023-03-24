@@ -27,6 +27,24 @@
   <string name="could_not_capture_title">Nepodarilo sa nasnímať fotografiu</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="description_clock">Ikona hodín</string>
+  <!-- Content description for close button -->
+  <string name="description_close">zatvoriť stránku s overením</string>
+  <!-- Content description for exclamation icon -->
+  <string name="description_exclamation">ikona výkričníka</string>
+  <!-- Content description for back button -->
+  <string name="description_go_back">prejsť na predchádzajúcu stránku</string>
+  <!-- Content description for merchant logo -->
+  <string name="description_merchant_logo">logo obchodníka</string>
+  <!-- Content description for plus icon -->
+  <string name="description_plus">ikona plus</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="description_privacy_policy">ikona pre zásady ochrany osobných údajov</string>
+  <!-- Content description for stripe logo -->
+  <string name="description_stripe_logo">logo stripe</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="description_time_estimate">odhadovaný čas na dokončenie overenia ikony</string>
+  <!-- Label for Date of birth field -->
+  <string name="dob">Dátum narodenia</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="driver_license">Vodičský preukaz</string>
   <!-- Text for error labels -->
@@ -39,6 +57,8 @@
   <string name="file_upload_content_id">Nahrajte fotografie prednej a zadnej strany preukazu totožnosti</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Nahrajte fotografiu pasu</string>
+  <!-- Label for first (given) name field -->
+  <string name="first_name">Meno</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="flash_mask">Karta pre selfie animáciu</string>
   <!-- Description of front of driver's license image -->
@@ -57,10 +77,24 @@
   <string name="hold_still">Držte pokojne, skenuje sa</string>
   <!-- display name for ID -->
   <string name="id_card">ID</string>
+  <!-- Label for ID number section -->
+  <string name="id_number">Identifikačné číslo</string>
+  <!-- An error message. -->
+  <string name="incomplete_id_number">Zadané identifikačné číslo je neúplné.</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="individual_cpf">Individuálne CPF</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="invalid_dob_error">Zdá sa, že dátum narodenia je neplatný</string>
   <!-- Continue button text -->
   <string name="kontinue">pokračovať</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="last_4_of_ssn">Posledné 4 číslice čísla sociálneho poistenia</string>
+  <!-- Label for last (family) name field -->
+  <string name="last_name">Priezvisko</string>
   <!-- Status while screen is loading -->
   <string name="loading">Nahrávanie</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="nric_or_fin">NRIC alebo FIN</string>
   <!-- No comment provided by engineer. -->
   <string name="ok">OK</string>
   <!-- Label of the passport option for document type selection -->
@@ -79,6 +113,8 @@
   <string name="position_passport">Umiestnite svoj pas do stredu rámika</string>
   <!-- Instructional text for capturing selfie -->
   <string name="position_selfie">Umiestnite tvár do stredu rámika.</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="retake_photos">Znova odfotiť</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Naskenované</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->

@@ -27,6 +27,24 @@
   <string name="could_not_capture_title">이미지를 캡처할 수 없음</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="description_clock">시계 아이콘</string>
+  <!-- Content description for close button -->
+  <string name="description_close">확인 페이지 닫기</string>
+  <!-- Content description for exclamation icon -->
+  <string name="description_exclamation">경고 아이콘</string>
+  <!-- Content description for back button -->
+  <string name="description_go_back">이전 화면으로 돌아가기</string>
+  <!-- Content description for merchant logo -->
+  <string name="description_merchant_logo">상인 로고</string>
+  <!-- Content description for plus icon -->
+  <string name="description_plus">더하기 아이콘</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="description_privacy_policy">개인정보정책 아이콘</string>
+  <!-- Content description for stripe logo -->
+  <string name="description_stripe_logo">Stripe 로고</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="description_time_estimate">확인 아이콘 완료 예상 시간</string>
+  <!-- Label for Date of birth field -->
+  <string name="dob">생년월일</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="driver_license">운전 면허증</string>
   <!-- Text for error labels -->
@@ -39,6 +57,8 @@
   <string name="file_upload_content_id">신분증의 앞면과 뒷면 이미지를 업로드하십시오.</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">여권의 앞면과 뒷면 이미지를 업로드하십시오.</string>
+  <!-- Label for first (given) name field -->
+  <string name="first_name">이름</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="flash_mask">셀카 애니메이션 마스크</string>
   <!-- Description of front of driver's license image -->
@@ -57,10 +77,24 @@
   <string name="hold_still">움직이지 마십시오. 스캔하는 중입니다.</string>
   <!-- display name for ID -->
   <string name="id_card">신분증</string>
+  <!-- Label for ID number section -->
+  <string name="id_number">ID 번호</string>
+  <!-- An error message. -->
+  <string name="incomplete_id_number">입력한 ID 번호가 불완전합니다.</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="individual_cpf">개별 CPF</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="invalid_dob_error">생년월일이 유효하지 않습니다.</string>
   <!-- Continue button text -->
   <string name="kontinue">계속</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="last_4_of_ssn">사회 보장 번호의 마지막 4자리 숫자</string>
+  <!-- Label for last (family) name field -->
+  <string name="last_name">성</string>
   <!-- Status while screen is loading -->
   <string name="loading">로드 중</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="nric_or_fin">NRIC 또는 FIN</string>
   <!-- No comment provided by engineer. -->
   <string name="ok">확인</string>
   <!-- Label of the passport option for document type selection -->
@@ -79,6 +113,8 @@
   <string name="position_passport">프레임 중앙에 여권을 놓으십시오.</string>
   <!-- Instructional text for capturing selfie -->
   <string name="position_selfie">프레임 중앙에 얼굴을 놓으십시오.</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="retake_photos">사진 다시 찍기</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">스캔 완료</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
