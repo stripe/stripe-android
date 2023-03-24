@@ -248,9 +248,7 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration @JvmOverloads
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    constructor(
+    data class Configuration @JvmOverloads constructor(
         /**
          * Your customer-facing business name.
          *
@@ -345,33 +343,8 @@ class PaymentSheet internal constructor(
          * If `never` is used for a required field for the Payment Method used during checkout,
          * you **must** provide an appropriate value as part of [defaultBillingDetails].
          */
-        internal var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
+        var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
     ) : Parcelable {
-
-        constructor(
-            merchantDisplayName: String,
-            customer: CustomerConfiguration? = null,
-            googlePay: GooglePayConfiguration? = null,
-            primaryButtonColor: ColorStateList? = null,
-            defaultBillingDetails: BillingDetails? = null,
-            shippingDetails: AddressDetails? = null,
-            allowsDelayedPaymentMethods: Boolean = false,
-            allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
-            appearance: Appearance = Appearance(),
-            primaryButtonLabel: String? = null,
-        ) : this(
-            merchantDisplayName = merchantDisplayName,
-            customer = customer,
-            googlePay = googlePay,
-            primaryButtonColor = primaryButtonColor,
-            defaultBillingDetails = defaultBillingDetails,
-            shippingDetails = shippingDetails,
-            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
-            appearance = appearance,
-            primaryButtonLabel = primaryButtonLabel,
-            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
-        )
 
         /**
          * [Configuration] builder for cleaner object creation from Java.
