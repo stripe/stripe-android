@@ -2,7 +2,6 @@
 
 package com.stripe.android.financialconnections.features.networkinglinkverification
 
-import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
@@ -56,7 +55,6 @@ internal fun NetworkingLinkVerificationScreen() {
     val viewModel: NetworkingLinkVerificationViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
-    BackHandler(enabled = true) {}
     NetworkingLinkVerificationContent(
         state = state.value,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
@@ -74,7 +72,6 @@ private fun NetworkingLinkVerificationContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                showBack = false,
                 onCloseClick = onCloseClick
             )
         }
