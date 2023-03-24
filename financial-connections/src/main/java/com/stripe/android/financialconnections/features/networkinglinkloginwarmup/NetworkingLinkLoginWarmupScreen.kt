@@ -81,13 +81,18 @@ private fun NetworkingLinkLoginWarmupContent(
     ) {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> NetworkingLinkLoginWarmupLoading()
-            is Success -> when (state.disableNetworkingAsync) {
+            is Success -> when (val disableNetworking = state.disableNetworkingAsync) {
                 is Loading -> NetworkingLinkLoginWarmupLoading()
-                else -> NetworkingLinkLoginWarmupLoaded(
+                is Uninitialized,
+                is Success -> NetworkingLinkLoginWarmupLoaded(
                     scrollState = scrollState,
                     payload = payload(),
                     onClickableTextClick = onClickableTextClick,
                     onContinueClick = onContinueClick
+                )
+                is Fail -> UnclassifiedErrorContent(
+                    error = disableNetworking.error,
+                    onCloseFromErrorClick = onCloseFromErrorClick
                 )
             }
 
