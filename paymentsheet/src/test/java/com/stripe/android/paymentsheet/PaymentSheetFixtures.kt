@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import org.mockito.kotlin.mock
 
 internal object PaymentSheetFixtures {
@@ -83,6 +84,17 @@ internal object PaymentSheetFixtures {
         get() = CONFIG_CUSTOMER.copy(
             googlePay = ConfigFixtures.GOOGLE_PAY
         )
+
+    internal val CONFIG_BILLING_DETAILS_COLLECTION = PaymentSheet.Configuration(
+        merchantDisplayName = MERCHANT_DISPLAY_NAME,
+        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+    )
 
     internal val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
         state = PaymentSheetState.Full(

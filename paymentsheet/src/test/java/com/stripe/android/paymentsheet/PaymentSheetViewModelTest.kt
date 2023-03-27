@@ -54,6 +54,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMe
 import com.stripe.android.testing.FakeIntentConfirmationInterceptor
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeCustomerRepository
@@ -953,13 +954,14 @@ internal class PaymentSheetViewModelTest {
         )
 
         val observedArgs = viewModel.createFormArguments(
-            selectedItem = LpmRepository.HardcodedCard,
+            selectedItem = LpmRepository.hardcodedCardSpec(BillingDetailsCollectionConfiguration()),
             showLinkInlineSignup = false,
         )
 
         assertThat(observedArgs).isEqualTo(
             PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS.copy(
-                paymentMethodCode = LpmRepository.HardcodedCard.code,
+                paymentMethodCode =
+                    LpmRepository.hardcodedCardSpec(BillingDetailsCollectionConfiguration()).code,
                 amount = Amount(
                     value = 1099,
                     currencyCode = "usd",
