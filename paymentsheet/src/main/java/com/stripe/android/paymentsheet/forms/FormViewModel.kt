@@ -19,6 +19,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -40,7 +41,7 @@ import javax.inject.Provider
  */
 internal class FormViewModel @Inject internal constructor(
     context: Context,
-    formArguments: FormArguments,
+    val formArguments: FormArguments,
     lpmRepository: LpmRepository,
     addressRepository: AddressRepository,
     val showCheckboxFlow: Flow<Boolean>
@@ -173,8 +174,32 @@ internal class FormViewModel @Inject internal constructor(
             }.flattenConcat(),
             hiddenIdentifiers,
             showingMandate,
-            userRequestedReuse
+            userRequestedReuse,
+            defaultValuesToInclude,
         ).filterFlow()
+
+    private val defaultValuesToInclude get(): Map<IdentifierSpec, String> {
+        var defaults = mutableMapOf<IdentifierSpec, String>()
+
+        if (formArguments.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod) {
+            formArguments.billingDetails?.let { billingDetails ->
+                billingDetails.name?.let { defaults[IdentifierSpec.Name] = it }
+                billingDetails.email?.let { defaults[IdentifierSpec.Email] = it }
+                billingDetails.phone?.let { defaults[IdentifierSpec.Phone] = it }
+                billingDetails.address?.line1?.let { defaults[IdentifierSpec.Companion.Line1] = it }
+                billingDetails.address?.line2?.let { defaults[IdentifierSpec.Companion.Line2] = it }
+                billingDetails.address?.city?.let { defaults[IdentifierSpec.Companion.City] = it }
+                billingDetails.address?.state?.let { defaults[IdentifierSpec.Companion.State] = it }
+                billingDetails.address?.postalCode?.let {
+                    defaults[IdentifierSpec.Companion.PostalCode] = it
+                }
+                billingDetails.address?.country?.let {
+                    defaults[IdentifierSpec.Companion.Country] = it
+                }
+            }
+        }
+        return defaults
+    }
 
     private val textFieldControllerIdsFlow = elementsFlow.filterNotNull().map { elementsList ->
         combine(elementsList.map { it.getTextFieldIdentifiers() }) {
