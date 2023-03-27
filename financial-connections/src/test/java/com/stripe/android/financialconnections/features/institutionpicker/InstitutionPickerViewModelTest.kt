@@ -31,7 +31,7 @@ import kotlin.test.assertTrue
 internal class InstitutionPickerViewModelTest {
 
     @get:Rule
-    val mvrxRule = MavericksTestRule()
+    val mavericksTestRule = MavericksTestRule()
 
     private val searchInstitutions = mock<SearchInstitutions>()
     private val featuredInstitutions = mock<FeaturedInstitutions>()
@@ -63,7 +63,8 @@ internal class InstitutionPickerViewModelTest {
     @Test
     fun `init - featured institutions are fetched`() = runTest {
         val institutionResponse = InstitutionResponse(
-            listOf(
+            showManualEntry = false,
+            data = listOf(
                 FinancialConnectionsInstitution(
                     id = "id",
                     name = "name",
@@ -90,7 +91,8 @@ internal class InstitutionPickerViewModelTest {
     fun `onQueryChanged - institutions are searched and event sent`() = runTest {
         val query = "query"
         val searchResults = InstitutionResponse(
-            listOf(
+            showManualEntry = false,
+            data = listOf(
                 FinancialConnectionsInstitution(
                     id = "id",
                     name = "name",
@@ -102,7 +104,8 @@ internal class InstitutionPickerViewModelTest {
             )
         )
         val featuredResults = InstitutionResponse(
-            listOf(
+            showManualEntry = false,
+            data = listOf(
                 FinancialConnectionsInstitution(
                     id = "featured_id",
                     name = "featured_name",

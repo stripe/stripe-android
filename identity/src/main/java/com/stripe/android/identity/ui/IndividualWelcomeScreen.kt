@@ -39,6 +39,7 @@ import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentIndividualWelcomePage
 import com.stripe.android.identity.utils.isRemote
+import com.stripe.android.identity.utils.urlWithoutQuery
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -112,7 +113,7 @@ private fun WelcomeHeader(
                 StripeImageLoader(localContext)
             }
             StripeImage(
-                url = merchantLogoUri.toString(),
+                url = merchantLogoUri.urlWithoutQuery(),
                 imageLoader = imageLoader,
                 contentDescription = stringResource(id = R.string.description_merchant_logo),
                 modifier = Modifier
