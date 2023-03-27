@@ -960,8 +960,9 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(observedArgs).isEqualTo(
             PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS.copy(
-                paymentMethodCode =
-                    LpmRepository.hardcodedCardSpec(BillingDetailsCollectionConfiguration()).code,
+                paymentMethodCode = LpmRepository.hardcodedCardSpec(
+                    BillingDetailsCollectionConfiguration()
+                ).code,
                 amount = Amount(
                     value = 1099,
                     currencyCode = "usd",
