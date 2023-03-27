@@ -5,13 +5,12 @@
     <ID>ConstructorParameterNaming:CardNumberElement.kt$CardNumberElement$val _identifier: IdentifierSpec</ID>
     <ID>ConstructorParameterNaming:CvcElement.kt$CvcElement$val _identifier: IdentifierSpec</ID>
     <ID>CyclomaticComplexMethod:FormItemSpec.kt$FormItemSpecSerializer$override fun selectDeserializer(element: JsonElement): DeserializationStrategy&lt;out FormItemSpec></ID>
-    <ID>CyclomaticComplexMethod:FormUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun FormUI( hiddenIdentifiers: Set&lt;IdentifierSpec>, enabled: Boolean, elements: List&lt;FormElement>?, lastTextFieldIdentifier: IdentifierSpec?, loadingComposable: @Composable ColumnScope.() -> Unit, modifier: Modifier = Modifier )</ID>
-    <ID>CyclomaticComplexMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod( stripeIntent: StripeIntent, sharedDataSpec: SharedDataSpec, )</ID>
+    <ID>CyclomaticComplexMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod( stripeIntent: StripeIntent, sharedDataSpec: SharedDataSpec, billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration() )</ID>
     <ID>CyclomaticComplexMethod:TransformGoogleToStripeAddress.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Place.transformGoogleToStripeAddress( context: Context ): com.stripe.android.model.Address</ID>
     <ID>CyclomaticComplexMethod:TransformSpecToElements.kt$TransformSpecToElements$fun transform(list: List&lt;FormItemSpec>): List&lt;FormElement></ID>
     <ID>EmptyFunctionBlock:CardNumberViewOnlyController.kt$CardNumberViewOnlyController${}</ID>
     <ID>ForbiddenComment:Menu.kt$// TODO: Make sure this gets the rounded corner values</ID>
-    <ID>LongMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod( stripeIntent: StripeIntent, sharedDataSpec: SharedDataSpec, )</ID>
+    <ID>LongMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod( stripeIntent: StripeIntent, sharedDataSpec: SharedDataSpec, billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration() )</ID>
     <ID>LongMethod:Menu.kt$@Suppress("ModifierParameter") @Composable internal fun DropdownMenuContent( expandedStates: MutableTransitionState&lt;Boolean>, transformOriginState: MutableState&lt;TransformOrigin>, initialFirstVisibleItemIndex: Int, modifier: Modifier = Modifier, content: LazyListScope.() -> Unit )</ID>
     <ID>LongMethod:TransformGoogleToStripeAddress.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Place.transformGoogleToStripeAddress( context: Context ): com.stripe.android.model.Address</ID>
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test JP address`()</ID>
@@ -40,7 +39,6 @@
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$9</ID>
     <ID>MagicNumber:IbanConfig.kt$IbanConfig$10</ID>
     <ID>MagicNumber:IbanConfig.kt$IbanConfig$4</ID>
-    <ID>MagicNumber:LpmRepository.kt$LpmRepository$20</ID>
     <ID>MagicNumber:Menu.kt$0.8f</ID>
     <ID>MaxLineLength:AddressElementTest.kt$AddressElementTest$fun</ID>
     <ID>MaxLineLength:AndroidMenu.kt$*</ID>
@@ -68,9 +66,6 @@
     <ID>SpreadOperator:BsbElementUI.kt$( it.errorMessage, *args )</ID>
     <ID>TooGenericExceptionCaught:LpmSerializer.kt$LpmSerializer$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PlacesClientProxy.kt$DefaultPlacesClientProxy$e: Exception</ID>
-    <ID>UnnecessaryAbstractClass:FormControllerModule.kt$FormControllerModule$FormControllerModule</ID>
-    <ID>UnnecessaryAbstractClass:ResourceRepositoryModule.kt$ResourceRepositoryModule$ResourceRepositoryModule</ID>
     <ID>UtilityClassWithPublicConstructor:FieldValuesToParamsMapConverter.kt$FieldValuesToParamsMapConverter</ID>
-    <ID>UtilityClassWithPublicConstructor:FormControllerModule.kt$FormControllerModule</ID>
   </CurrentIssues>
 </SmellBaseline>
