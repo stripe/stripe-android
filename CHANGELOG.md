@@ -13,6 +13,7 @@
 
 ### StripeCardScan
 * [ADDED][6409](https://github.com/stripe/stripe-android/pull/6409) Support running Cardscan with TFLite in Google Play
+
 ## 20.21.0 - 2023-03-20
 
 ### Payments
