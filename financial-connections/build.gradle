@@ -51,7 +51,7 @@ dependencies {
 
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
-    kapt "com.airbnb.android:showkase-processor:$showkaseVersion"
+    kaptDebug "com.airbnb.android:showkase-processor:$showkaseVersion"
 
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
