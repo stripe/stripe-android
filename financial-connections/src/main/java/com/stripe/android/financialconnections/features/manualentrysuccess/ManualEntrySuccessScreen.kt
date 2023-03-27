@@ -309,7 +309,8 @@ internal fun ManualEntrySuccessScreenPreviewAmount() {
 @Preview(
     group = "Manual Entry Success",
     name = "Descriptor"
-)@Composable
+)
+@Composable
 internal fun ManualEntrySuccessDescriptor() {
     FinancialConnectionsPreview {
         ManualEntrySuccessContent(
