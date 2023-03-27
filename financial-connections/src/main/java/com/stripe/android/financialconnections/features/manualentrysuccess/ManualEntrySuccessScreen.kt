@@ -290,7 +290,10 @@ private fun RowScope.TableCell(
     )
 }
 
-@Preview
+@Preview(
+    group = "Manual Entry Success",
+    name = "Amount"
+)
 @Composable
 internal fun ManualEntrySuccessScreenPreviewAmount() {
     FinancialConnectionsPreview {
@@ -303,9 +306,12 @@ internal fun ManualEntrySuccessScreenPreviewAmount() {
     }
 }
 
-@Preview
+@Preview(
+    group = "Manual Entry Success",
+    name = "Descriptor"
+)
 @Composable
-internal fun ManualEntrySuccessScreenPreviewDescriptor() {
+internal fun ManualEntrySuccessDescriptor() {
     FinancialConnectionsPreview {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.DESCRIPTOR_CODE,
@@ -316,9 +322,12 @@ internal fun ManualEntrySuccessScreenPreviewDescriptor() {
     }
 }
 
-@Preview
+@Preview(
+    group = "Manual Entry Success",
+    name = "Amount no account"
+)
 @Composable
-internal fun ManualEntrySuccessScreenPreviewAmountNoAccount() {
+internal fun ManualEntrySuccessAmountNoAccount() {
     FinancialConnectionsPreview {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.AMOUNTS,
@@ -329,9 +338,12 @@ internal fun ManualEntrySuccessScreenPreviewAmountNoAccount() {
     }
 }
 
-@Preview
+@Preview(
+    group = "Manual Entry Success",
+    name = "Descriptor no account"
+)
 @Composable
-internal fun ManualEntrySuccessScreenPreviewDescriptorNoAccount() {
+internal fun ManualEntrySuccessDescriptorNoAccount() {
     FinancialConnectionsPreview {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.DESCRIPTOR_CODE,

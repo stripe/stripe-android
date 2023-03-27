@@ -186,8 +186,8 @@ internal object FinancialConnectionsButton {
     }
 }
 
-@Composable
 @Preview(group = "Components", name = "Button - primary - idle")
+@Composable
 internal fun FinancialConnectionsButtonPreview() {
     FinancialConnectionsPreview {
         Column(
