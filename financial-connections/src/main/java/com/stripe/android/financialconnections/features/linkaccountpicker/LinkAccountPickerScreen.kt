@@ -99,7 +99,7 @@ private fun LinkAccountPickerContent(
         }
     ) {
         when (val payload = state.payload) {
-            Uninitialized, is Loading -> LoadingContent()
+            Uninitialized, is Loading -> LinkAccountPickerLoading()
             is Success -> LinkAccountPickerLoaded(
                 scrollState = scrollState,
                 payload = payload(),
@@ -117,6 +117,14 @@ private fun LinkAccountPickerContent(
             )
         }
     }
+}
+
+@Composable
+private fun LinkAccountPickerLoading() {
+    LoadingContent(
+        title = stringResource(R.string.stripe_account_picker_loading_title),
+        content = stringResource(R.string.stripe_account_picker_loading_desc)
+    )
 }
 
 @Composable
@@ -242,14 +250,20 @@ private fun SelectNewAccount(
 
 @Composable
 private fun Title(
-    merchantName: String
+    merchantName: String?
 ) {
     AnnotatedText(
         text = TextResource.Text(
-            stringResource(
-                R.string.stripe_link_account_picker_title,
-                merchantName
-            )
+            when {
+                merchantName != null -> stringResource(
+                    R.string.stripe_link_account_picker_title,
+                    merchantName
+                )
+
+                else -> stringResource(
+                    R.string.stripe_link_account_picker_title_nobusiness
+                )
+            }
         ),
         defaultStyle = FinancialConnectionsTheme.typography.subtitle,
         annotationStyles = emptyMap(),

@@ -20,7 +20,6 @@ import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
-import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -56,9 +55,10 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 repairAuthorizationEnabled = accountsResponse.repairAuthorizationEnabled ?: false,
                 stepUpAuthenticationRequired = manifest.stepUpAuthenticationRequired ?: false,
                 consumerSessionClientSecret = consumerSession.clientSecret,
-                businessName = manifest.getBusinessName() ?: "",
+                businessName = manifest.businessName,
                 accounts = accounts,
-                accessibleData = accessibleData
+                // We always want to refer to Link rather than Stripe on Link panes.
+                accessibleData = accessibleData.copy(isStripeDirect = false)
             )
         }.execute { copy(payload = it) }
     }
@@ -73,6 +73,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             onFail = { error ->
                 logger.error("Error fetching payload", error)
                 eventTracker.track(Error(PANE, error))
+                goNext(Pane.INSTITUTION_PICKER)
             },
         )
         onAsync(
@@ -161,11 +162,11 @@ internal data class LinkAccountPickerState(
     data class Payload(
         val accounts: List<PartnerAccount>,
         val accessibleData: AccessibleDataCalloutModel,
-        val businessName: String,
+        val businessName: String?,
         val consumerSessionClientSecret: String,
         val repairAuthorizationEnabled: Boolean,
         val stepUpAuthenticationRequired: Boolean
     ) {
-        fun PartnerAccount.enabled() = status == Status.ACTIVE || repairAuthorizationEnabled
+        fun PartnerAccount.enabled() = status == Status.ACTIVE
     }
 }
