@@ -265,7 +265,10 @@ private fun getSubtitle(
 }
 
 @Composable
-@Preview
+@Preview(
+    group = "Success",
+    name = "Default"
+)
 @Suppress("LongMethod")
 internal fun SuccessScreenPreview() {
     FinancialConnectionsPreview {

@@ -445,10 +445,8 @@ private fun GifWebView(
 
 @Composable
 @Preview(
-    device = "id:4in WVGA (Nexus S)"
-)
-@Preview(
-    device = "spec:width=1280dp,height=800dp,dpi=240"
+    group = "Partner Auth",
+    name = "Institutional prepane"
 )
 internal fun InstitutionalPrepaneContentPreview() {
     FinancialConnectionsPreview {
