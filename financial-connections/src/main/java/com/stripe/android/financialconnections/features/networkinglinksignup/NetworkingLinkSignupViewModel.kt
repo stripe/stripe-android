@@ -25,6 +25,7 @@ import com.stripe.android.financialconnections.features.networkinglinksignup.Net
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
+import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -46,6 +47,7 @@ import javax.inject.Inject
 
 internal class NetworkingLinkSignupViewModel @Inject constructor(
     initialState: NetworkingLinkSignupState,
+    private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
     private val saveAccountToLink: SaveAccountToLink,
     private val lookupAccount: LookupAccount,
     private val uriUtils: UriUtils,
@@ -99,7 +101,11 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         )
         onAsync(
             NetworkingLinkSignupState::saveAccountToLink,
+            onSuccess = {
+                saveToLinkWithStripeSucceeded.set(true)
+            },
             onFail = { error ->
+                saveToLinkWithStripeSucceeded.set(false)
                 logger.error("Error saving account to Link", error)
                 eventTracker.track(Error(PANE, error))
                 goNext(nextPane = Pane.SUCCESS)
