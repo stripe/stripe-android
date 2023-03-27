@@ -12,11 +12,11 @@ import kotlinx.serialization.Serializable
 
 internal class PaymentSheetViewModel : ViewModel() {
     val inProgress = MutableLiveData<Boolean>()
-    val status = MutableLiveData<String>()
+    val status = MutableLiveData<String?>()
     val exampleCheckoutResponse = MutableLiveData<ExampleCheckoutResponse>()
 
     fun statusDisplayed() {
-        status.value = ""
+        status.value = null
     }
 
     fun prepareCheckout(backendUrl: String) {
