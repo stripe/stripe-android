@@ -443,11 +443,11 @@ private fun GifWebView(
     )
 }
 
-@Composable
 @Preview(
     group = "Partner Auth",
     name = "Institutional prepane"
 )
+@Composable
 internal fun InstitutionalPrepaneContentPreview() {
     FinancialConnectionsPreview {
         val sampleImage =

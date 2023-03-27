@@ -120,12 +120,12 @@ private fun ErrorContent(
     }
 }
 
-@Composable
 @Preview(
     showBackground = true,
     group = "Attach Payment Pane",
     name = "Default"
 )
+@Composable
 internal fun AttachPaymentScreenPreview() {
     FinancialConnectionsPreview {
         AttachPaymentContent(
