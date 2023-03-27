@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsAc
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
+import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -130,5 +131,11 @@ internal class FinancialConnectionsSheetNativeModule {
         requestExecutor = requestExecutor,
         apiOptions = apiOptions,
         apiRequestFactory = apiRequestFactory
+    )
+
+    @Singleton
+    @Provides
+    fun providesSaveToLinkWithStripeSucceededRepository() = SaveToLinkWithStripeSucceededRepository(
+        CoroutineScope(SupervisorJob() + Dispatchers.Default)
     )
 }
