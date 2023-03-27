@@ -2,6 +2,15 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.21.1 - 2023-03-27
+
+### PaymentSheet
+* [FIXED][6411](https://github.com/stripe/stripe-android/pull/6411) Fixed an issue in the expiry date field that could cause an exception.
+
+### Financial Connections
+* [FIXED][6403](https://github.com/stripe/stripe-android/pull/6403) Use light status bar and navigation bar.
+* [FIXED][6404](https://github.com/stripe/stripe-android/pull/6404) Update UI for no search results in institution picker.
+
 ## 20.21.0 - 2023-03-20
 
 ### Payments
