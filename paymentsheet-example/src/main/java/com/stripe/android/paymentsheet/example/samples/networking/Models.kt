@@ -65,3 +65,68 @@ data class ExampleCheckoutResponse(
         }
     }
 }
+
+@Serializable
+@Keep
+data class ExampleUpdateRequest(
+    @SerializedName("hot_dog_count")
+    val hotDogCount: Int,
+    @SerializedName("salad_count")
+    val saladCount: Int,
+    @SerializedName("is_subscribing")
+    val isSubscribing: Boolean,
+)
+
+fun CartState.toUpdateRequest(): ExampleUpdateRequest {
+    return ExampleUpdateRequest(
+        hotDogCount = countOf(CartProduct.Id.HotDog),
+        saladCount = countOf(CartProduct.Id.Salad),
+        isSubscribing = isSubscription,
+    )
+}
+
+@Serializable
+@Keep
+data class ExampleUpdateResponse(
+    @SerializedName("subtotal")
+    val subtotal: Float,
+    @SerializedName("tax")
+    val tax: Float,
+    @SerializedName("total")
+    val total: Float,
+)
+
+@Serializable
+@Keep
+data class ExampleCreateIntentRequest(
+    @SerializedName("payment_method_id")
+    val paymentMethodId: String,
+    @SerializedName("should_save_payment_method")
+    val shouldSavePaymentMethod: Boolean,
+    @SerializedName("hot_dog_count")
+    val hotDogCount: Int,
+    @SerializedName("salad_count")
+    val saladCount: Int,
+    @SerializedName("is_subscribing")
+    val isSubscribing: Boolean,
+)
+
+fun CartState.toCreateIntentRequest(
+    paymentMethodId: String,
+    shouldSavePaymentMethod: Boolean,
+): ExampleCreateIntentRequest {
+    return ExampleCreateIntentRequest(
+        paymentMethodId = paymentMethodId,
+        shouldSavePaymentMethod = shouldSavePaymentMethod,
+        hotDogCount = countOf(CartProduct.Id.HotDog),
+        saladCount = countOf(CartProduct.Id.Salad),
+        isSubscribing = isSubscription,
+    )
+}
+
+@Serializable
+@Keep
+data class ExampleCreateIntentResponse(
+    @SerializedName("intentClientSecret")
+    val clientSecret: String,
+)

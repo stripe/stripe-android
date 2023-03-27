@@ -2,6 +2,7 @@
     <string name="app_name">PaymentSheet Example</string>
     <string name="paymentsheet">PaymentSheet</string>
     <string name="paymentsheet_custom">PaymentSheet Custom</string>
+    <string name="paymentsheet_serverside_confirmation">PaymentSheet with server-side confirmation</string>
     <string name="playground">Playground</string>
     <string name="action_settings">Settings</string>
     <string name="product_subtitle">1 x Regular %s</string>

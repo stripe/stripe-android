@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.samples.ui.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.ServerSideConfirmationActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,6 +44,11 @@ class MainActivity : AppCompatActivity() {
                 title = "PaymentSheet with FlowController",
                 subtitle = "A more advanced integration with greater flexibility",
                 klass = CustomFlowActivity::class.java,
+            ),
+            MenuItem(
+                title = "PaymentSheet with server-side confirmation",
+                subtitle = "Create and confirm the payment or setup intent on your own backend",
+                klass = ServerSideConfirmationActivity::class.java,
             ),
             MenuItem(
                 title = "Playground",
