@@ -56,8 +56,8 @@ internal fun CloseDialog(
     )
 }
 
+@Preview(group = "Close Dialog", name = "Default")
 @Composable
-@Preview
 internal fun CloseDialogPreview() {
     FinancialConnectionsTheme {
         CloseDialog(
