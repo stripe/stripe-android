@@ -41,6 +41,7 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupViewModel.Companion.PANE
+import com.stripe.android.financialconnections.model.Bullet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupBody
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
@@ -421,9 +422,18 @@ internal fun NetworkingLinkSignupScreenEnteringPhonePreview() {
 
 @Composable
 private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(
-    aboveCta = "Above CTA",
-    body = NetworkingLinkSignupBody(emptyList()),
-    cta = "CTA",
-    skipCta = "Skip CTA",
-    title = "Title"
+    aboveCta = "By saving your account to Link, you agree to Link’s Terms and Privacy Policy",
+    body = NetworkingLinkSignupBody(
+        listOf(
+            Bullet(
+                title = "Connect your account faster on RandomBusiness and everywhere Link is accepted.",
+            ),
+            Bullet(
+                title = "Link encrypts your data and never shares your login details.",
+            ),
+        )
+    ),
+    cta = "Save to Link",
+    skipCta = "Not now",
+    title = "Save your account to Link"
 )
