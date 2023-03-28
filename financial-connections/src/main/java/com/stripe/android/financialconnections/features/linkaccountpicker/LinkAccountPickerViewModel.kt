@@ -20,6 +20,7 @@ import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -44,7 +45,13 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         observeAsyncs()
         suspend {
             val manifest = getManifest()
-            val accessibleData = AccessibleDataCalloutModel.fromManifest(manifest)
+            val accessibleData = AccessibleDataCalloutModel(
+                businessName = manifest.businessName,
+                permissions = manifest.permissions,
+                isNetworking = true,
+                isStripeDirect = manifest.isStripeDirect ?: false,
+                dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
+            )
             val consumerSession = requireNotNull(getCachedConsumerSession())
             val accountsResponse = pollNetworkedAccounts(consumerSession.clientSecret)
             val accounts = accountsResponse

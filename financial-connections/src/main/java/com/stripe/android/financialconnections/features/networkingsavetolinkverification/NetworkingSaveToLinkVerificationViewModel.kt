@@ -11,7 +11,8 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.*
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.ConfirmVerificationSessionError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.StartVerificationSessionError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationSuccess
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
