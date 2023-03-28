@@ -9,14 +9,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.ui.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.Receipt
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 internal class CompleteFlowActivity : AppCompatActivity() {
@@ -43,6 +41,12 @@ internal class CompleteFlowActivity : AppCompatActivity() {
             MaterialTheme {
                 val uiState by viewModel.state.collectAsState()
 
+                uiState.paymentInfo?.let { paymentInfo ->
+                    LaunchedEffect(paymentInfo) {
+                        presentPaymentSheet(paymentInfo)
+                    }
+                }
+
                 uiState.status?.let {
                     LaunchedEffect(it) {
                         snackbar.setText(it).show()
@@ -57,51 +61,34 @@ internal class CompleteFlowActivity : AppCompatActivity() {
                 ) {
                     BuyButton(
                         buyButtonEnabled = !uiState.isProcessing,
-                        onClick = ::handleBuyButtonClick,
+                        onClick = viewModel::checkout,
                     )
                 }
             }
         }
     }
 
-    private fun handleBuyButtonClick() {
-        lifecycleScope.launch {
-            val result = viewModel.prepareCheckout()
-
-            if (result != null) {
-                initializePaymentConfig(result.publishableKey)
-                presentPaymentSheet(result.customerConfig, result.clientSecret)
-            }
+    private suspend fun presentPaymentSheet(paymentInfo: CompleteFlowViewState.PaymentInfo) {
+        if (!paymentInfo.shouldPresent) {
+            return
         }
+
+        initializePaymentConfig(paymentInfo.publishableKey)
+
+        paymentSheet.presentWithPaymentIntent(
+            paymentIntentClientSecret = paymentInfo.clientSecret,
+            configuration = paymentInfo.paymentSheetConfig,
+        )
+
+        viewModel.paymentSheetPresented()
     }
 
     private suspend fun initializePaymentConfig(
         publishableKey: String,
     ) = withContext(Dispatchers.IO) {
         PaymentConfiguration.init(
-            context = this@CompleteFlowActivity,
+            context = applicationContext,
             publishableKey = publishableKey,
-        )
-    }
-
-    private fun presentPaymentSheet(
-        customerConfig: PaymentSheet.CustomerConfiguration?,
-        clientSecret: String,
-    ) {
-        paymentSheet.presentWithPaymentIntent(
-            clientSecret,
-            PaymentSheet.Configuration(
-                merchantDisplayName = "Example, Inc.",
-                customer = customerConfig,
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "US"
-                ),
-                // Set `allowsDelayedPaymentMethods` to true if your
-                // business can handle payment methods that complete payment
-                // after a delay, like SEPA Debit and Sofort.
-                allowsDelayedPaymentMethods = true,
-            )
         )
     }
 }

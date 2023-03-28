@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.example.samples.ui.custom_flow
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
@@ -21,8 +20,6 @@ import kotlin.coroutines.suspendCoroutine
 import com.github.kittinunf.result.Result as ApiResult
 
 internal class CustomFlowViewModel : ViewModel() {
-
-    val status = MutableLiveData<String?>()
 
     private val _state = MutableStateFlow(
         value = CustomFlowViewState(cartState = CartState.static),
@@ -98,13 +95,14 @@ internal class CustomFlowViewModel : ViewModel() {
         when (result) {
             is ApiResult.Success -> {
                 val response = Gson().fromJson(result.get(), ExampleCheckoutResponse::class.java)
+                val paymentInfo = CustomFlowViewState.PaymentInfo(
+                    publishableKey = response.publishableKey,
+                    clientSecret = response.paymentIntent,
+                    customerConfiguration = response.makeCustomerConfig(),
+                )
 
                 _state.update {
-                    it.copy(
-                        publishableKey = response.publishableKey,
-                        clientSecret = response.paymentIntent,
-                        customerConfig = response.makeCustomerConfig(),
-                    )
+                    it.copy(paymentInfo = paymentInfo)
                 }
             }
             is ApiResult.Failure -> {

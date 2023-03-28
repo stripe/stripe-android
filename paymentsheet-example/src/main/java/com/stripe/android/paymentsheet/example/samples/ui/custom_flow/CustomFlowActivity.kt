@@ -17,6 +17,8 @@ import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.PaymentMethodSelector
 import com.stripe.android.paymentsheet.example.samples.ui.Receipt
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 internal class CustomFlowActivity : AppCompatActivity() {
 
@@ -53,12 +55,10 @@ internal class CustomFlowActivity : AppCompatActivity() {
                     }
                 }
 
-                uiState.publishableKey?.let { publishableKey ->
-                    LaunchedEffect(publishableKey) {
-                        PaymentConfiguration.init(
-                            context = this@CustomFlowActivity,
-                            publishableKey = publishableKey,
-                        )
+                uiState.paymentInfo?.let { paymentInfo ->
+                    LaunchedEffect(paymentInfo) {
+                        initializePaymentConfiguration(paymentInfo)
+                        configureFlowController(paymentInfo)
                     }
                 }
 
@@ -66,16 +66,6 @@ internal class CustomFlowActivity : AppCompatActivity() {
                     LaunchedEffect(it) {
                         snackbar.setText(it).show()
                         viewModel.statusDisplayed()
-                    }
-                }
-
-                if (uiState.clientSecret != null) {
-                    LaunchedEffect(uiState.clientSecret) {
-                        flowController.configureWithPaymentIntent(
-                            paymentIntentClientSecret = uiState.clientSecret!!,
-                            configuration = uiState.paymentSheetConfig,
-                            callback = viewModel::handleFlowControllerConfigured,
-                        )
                     }
                 }
 
@@ -101,5 +91,22 @@ internal class CustomFlowActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private suspend fun initializePaymentConfiguration(
+        paymentInfo: CustomFlowViewState.PaymentInfo,
+    ) = withContext(Dispatchers.IO) {
+        PaymentConfiguration.init(
+            context = applicationContext,
+            publishableKey = paymentInfo.publishableKey,
+        )
+    }
+
+    private fun configureFlowController(paymentInfo: CustomFlowViewState.PaymentInfo) {
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = paymentInfo.clientSecret,
+            configuration = paymentInfo.paymentSheetConfig,
+            callback = viewModel::handleFlowControllerConfigured,
+        )
     }
 }

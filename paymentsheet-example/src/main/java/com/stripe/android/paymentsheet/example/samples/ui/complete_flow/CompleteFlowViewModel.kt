@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.example.samples.ui.complete_flow
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.google.gson.Gson
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
-import kotlin.Result
+import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.let
@@ -26,48 +26,44 @@ internal class CompleteFlowViewModel : ViewModel() {
     )
     val state: StateFlow<CompleteFlowViewState> = _state
 
-    suspend fun prepareCheckout(): PrepareCheckoutResult? {
-        val currentState = _state.updateAndGet {
-            it.copy(isProcessing = true)
-        }
+    fun checkout() {
+        viewModelScope.launch {
+            val currentState = _state.updateAndGet {
+                it.copy(isProcessing = true)
+            }
 
-        val request = currentState.cartState.toCheckoutRequest()
-        val requestBody = Gson().toJson(request)
+            val request = currentState.cartState.toCheckoutRequest()
+            val requestBody = Gson().toJson(request)
 
-        val result = suspendCoroutine { continuation ->
-            Fuel.post("$backendUrl/checkout")
-                .jsonBody(requestBody)
-                .responseString { _, _, result ->
-                    continuation.resume(result)
-                }
-        }
+            val apiResult = suspendCoroutine { continuation ->
+                Fuel.post("$backendUrl/checkout")
+                    .jsonBody(requestBody)
+                    .responseString { _, _, result ->
+                        continuation.resume(result)
+                    }
+            }
 
-        val error = (result as? ApiResult.Failure)?.let {
-            "Failed to prepare checkout\n${it.error.exception}"
-        }
+            val error = (apiResult as? ApiResult.Failure)?.let {
+                "Failed to prepare checkout\n${it.error.exception}"
+            }
 
-        _state.update {
-            it.copy(isProcessing = false, status = error)
-        }
-
-        return when (result) {
-            is ApiResult.Success -> {
+            val paymentInfo = (apiResult as? ApiResult.Success)?.let { result ->
                 val response = Gson().fromJson(result.get(), ExampleCheckoutResponse::class.java)
-                PrepareCheckoutResult(
-                    customerConfig = response.makeCustomerConfig(),
-                    clientSecret = response.paymentIntent,
+                CompleteFlowViewState.PaymentInfo(
                     publishableKey = response.publishableKey,
+                    clientSecret = response.paymentIntent,
+                    customerConfiguration = response.makeCustomerConfig(),
+                    shouldPresent = true,
                 )
             }
-            is ApiResult.Failure -> {
-                null
-            }
-        }
-    }
 
-    fun statusDisplayed() {
-        _state.update {
-            it.copy(status = null)
+            _state.update {
+                it.copy(
+                    isProcessing = false,
+                    paymentInfo = paymentInfo,
+                    status = error,
+                )
+            }
         }
     }
 
@@ -83,11 +79,19 @@ internal class CompleteFlowViewModel : ViewModel() {
         }
     }
 
-    data class PrepareCheckoutResult(
-        val customerConfig: PaymentSheet.CustomerConfiguration?,
-        val clientSecret: String,
-        val publishableKey: String,
-    )
+    fun statusDisplayed() {
+        _state.update {
+            it.copy(status = null)
+        }
+    }
+
+    fun paymentSheetPresented() {
+        _state.update {
+            it.copy(
+                paymentInfo = it.paymentInfo?.copy(shouldPresent = false)
+            )
+        }
+    }
 
     private companion object {
         const val backendUrl = "https://stripe-mobile-payment-sheet.glitch.me"
