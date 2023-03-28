@@ -34,13 +34,13 @@ class SupportedPaymentMethodTest {
             null
         )
     }
-    private val card = LpmRepository.hardcodedCardSpec(BillingDetailsCollectionConfiguration())
+    private val card = LpmRepository.HardcodedCard
     private val eps = lpmRepository.fromCode("eps")!!
 
     @Test
     fun `If the intent has SFU set on top level or on LPM`() {
         assertThat(
-            LpmRepository.hardcodedCardSpec(BillingDetailsCollectionConfiguration())
+            LpmRepository.HardcodedCard
                 .getSpecWithFullfilledRequirements(
                     PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET,
                     CONFIG_CUSTOMER

@@ -145,9 +145,7 @@ class FormArgumentsFactoryTest {
         )
 
         val actualArgs = FormArgumentsFactory.create(
-            paymentMethod = LpmRepository.hardcodedCardSpec(
-                BillingDetailsCollectionConfiguration()
-            ),
+            paymentMethod = LpmRepository.HardcodedCard,
             stripeIntent = paymentIntent,
             config = config,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,

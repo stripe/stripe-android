@@ -954,15 +954,13 @@ internal class PaymentSheetViewModelTest {
         )
 
         val observedArgs = viewModel.createFormArguments(
-            selectedItem = LpmRepository.hardcodedCardSpec(BillingDetailsCollectionConfiguration()),
+            selectedItem = LpmRepository.HardcodedCard,
             showLinkInlineSignup = false,
         )
 
         assertThat(observedArgs).isEqualTo(
             PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS.copy(
-                paymentMethodCode = LpmRepository.hardcodedCardSpec(
-                    BillingDetailsCollectionConfiguration()
-                ).code,
+                paymentMethodCode = LpmRepository.HardcodedCard.code,
                 amount = Amount(
                     value = 1099,
                     currencyCode = "usd",

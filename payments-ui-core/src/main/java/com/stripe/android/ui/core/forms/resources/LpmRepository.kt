@@ -538,6 +538,9 @@ class LpmRepository constructor(
             }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val HardcodedCard = hardcodedCardSpec(BillingDetailsCollectionConfiguration())
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun hardcodedCardSpec(
             billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
         ): SupportedPaymentMethod {

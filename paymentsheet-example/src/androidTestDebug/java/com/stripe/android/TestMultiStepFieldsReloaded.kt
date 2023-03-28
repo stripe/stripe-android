@@ -66,9 +66,7 @@ class TestMultiStepFieldsReloaded {
     fun testCard() {
         testDriver.confirmCustom(
             newUser.copy(
-                paymentMethod = LpmRepository.hardcodedCardSpec(
-                    BillingDetailsCollectionConfiguration()
-                ),
+                paymentMethod = LpmRepository.HardcodedCard,
                 saveCheckboxValue = true,
                 saveForFutureUseCheckboxVisible = true,
             )

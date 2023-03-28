@@ -66,7 +66,7 @@ class TestFieldPopulation {
     )
 
     private val card = TestParameters(
-        paymentMethod = LpmRepository.hardcodedCardSpec(BillingDetailsCollectionConfiguration()),
+        paymentMethod = LpmRepository.HardcodedCard,
         customer = Customer.New,
         linkState = LinkState.Off,
         googlePayState = GooglePayState.On,

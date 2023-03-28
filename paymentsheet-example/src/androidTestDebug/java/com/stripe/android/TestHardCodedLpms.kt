@@ -78,9 +78,7 @@ class TestHardCodedLpms {
             newUser.copy(
                 customer = Customer.New,
                 billing = Billing.On,
-                paymentMethod = LpmRepository.hardcodedCardSpec(
-                    BillingDetailsCollectionConfiguration()
-                ),
+                paymentMethod = LpmRepository.HardcodedCard,
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
                 saveCheckboxValue = false,
@@ -94,9 +92,7 @@ class TestHardCodedLpms {
             newUser.copy(
                 customer = Customer.New,
                 billing = Billing.On,
-                paymentMethod = LpmRepository.hardcodedCardSpec(
-                    BillingDetailsCollectionConfiguration()
-                ),
+                paymentMethod = LpmRepository.HardcodedCard,
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
                 saveCheckboxValue = false,

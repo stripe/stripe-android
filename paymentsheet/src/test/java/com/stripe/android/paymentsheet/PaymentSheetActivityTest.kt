@@ -964,8 +964,7 @@ internal class PaymentSheetActivityTest {
         initialPaymentSelection: PaymentSelection? = null,
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = mock<LpmRepository>()
-        whenever(lpmRepository.fromCode(any()))
-            .thenReturn(LpmRepository.hardcodedCardSpec(BillingDetailsCollectionConfiguration()))
+        whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
         whenever(lpmRepository.serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
 
         val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {

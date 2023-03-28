@@ -202,7 +202,7 @@ internal class TransformSpecToElementTest {
             )
 
         val formElements = transformSpecToElements.transform(
-            LpmRepository.hardcodedCardSpec(BillingDetailsCollectionConfiguration()).formSpec.items
+            LpmRepository.HardcodedCard.formSpec.items
         )
         val cardDetailsSection = formElements.first() as CardDetailsSectionElement
         val cardNumberElement =
