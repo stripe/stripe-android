@@ -12,7 +12,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import kotlinx.serialization.Serializable

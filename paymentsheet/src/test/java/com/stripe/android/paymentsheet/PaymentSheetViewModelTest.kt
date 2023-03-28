@@ -54,7 +54,6 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMe
 import com.stripe.android.testing.FakeIntentConfirmationInterceptor
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeCustomerRepository
