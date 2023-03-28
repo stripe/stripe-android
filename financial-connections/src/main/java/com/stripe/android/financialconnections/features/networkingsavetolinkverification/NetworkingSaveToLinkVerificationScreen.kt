@@ -202,7 +202,7 @@ private fun Title() {
 }
 
 @Composable
-@Preview(group = "NetworkingSaveToLinkVerification Pane", name = "Entering email")
+@Preview(group = "NetworkingVerification", name = "Default")
 internal fun NetworkingSaveToLinkVerificationScreenPreview() {
     FinancialConnectionsPreview {
         NetworkingSaveToLinkVerificationContent(

@@ -98,7 +98,7 @@ class LinkAccountPickerViewModelTest {
                 consumerSessionClientSecret = any(),
                 selectedAccountId = any()
             )
-        ).thenReturn(InstitutionResponse(listOf(institution())))
+        ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
 
         val viewModel = buildViewModel(LinkAccountPickerState())
 
@@ -124,7 +124,7 @@ class LinkAccountPickerViewModelTest {
                 consumerSessionClientSecret = any(),
                 selectedAccountId = any()
             )
-        ).thenReturn(InstitutionResponse(listOf(institution())))
+        ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
 
         val viewModel = buildViewModel(LinkAccountPickerState())
 
