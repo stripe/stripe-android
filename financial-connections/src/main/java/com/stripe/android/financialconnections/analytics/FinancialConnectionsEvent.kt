@@ -209,6 +209,7 @@ internal sealed class FinancialConnectionsEvent(
             ConsumerNotFoundError("ConsumerNotFoundError"),
             LookupConsumerSession("LookupConsumerSession"),
             StartVerificationSessionError("StartVerificationSessionError"),
+            ConfirmVerificationSessionError("ConfirmVerificationSessionError"),
             NetworkedAccountsRetrieveMethodError("NetworkedAccountsRetrieveMethodError"),
         }
     }

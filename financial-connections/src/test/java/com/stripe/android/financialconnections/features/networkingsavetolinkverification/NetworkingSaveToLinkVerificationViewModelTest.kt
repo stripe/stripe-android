@@ -16,15 +16,19 @@ import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.SUCCESS
+import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
+@ExperimentalCoroutinesApi
 class NetworkingSaveToLinkVerificationViewModelTest {
 
     @get:Rule
@@ -34,6 +38,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     private val confirmVerification = mock<ConfirmVerification>()
     private val startVerification = mock<StartVerification>()
     private val markLinkVerified = mock<MarkLinkVerified>()
+    private val saveToLinkWithStripeSucceeded = mock<SaveToLinkWithStripeSucceededRepository>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
@@ -50,6 +55,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         getCachedAccounts = getCachedAccounts,
         saveAccountToLink = saveAccountToLink,
         getCachedConsumerSession = getCachedConsumerSession,
+        saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
         logger = Logger.noop(),
         initialState = state
     )
@@ -95,7 +101,49 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 verificationCode = "111111"
             )
+            eventTracker.assertContainsEvent(
+                "linked_accounts.networking.verification.success",
+                mapOf("pane" to "networking_save_to_link_verification")
+            )
             verify(goNext).invoke(SUCCESS)
+        }
+
+    @Test
+    fun `otpEntered - on valid OTP fails, sends event and navigates to terminal error`() =
+        runTest {
+            val consumerSession = consumerSession()
+            val selectedAccount = partnerAccount()
+            val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
+            whenever(getCachedConsumerSession()).thenReturn(consumerSession)
+            whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
+            whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
+            whenever(saveAccountToLink.existing(any(), any())).thenThrow(RuntimeException("error"))
+
+            val viewModel = buildViewModel()
+
+            val otpController = viewModel.awaitState().payload()!!.otpElement.controller
+
+            // enters valid OTP
+            for (i in 0 until otpController.otpLength) {
+                otpController.onValueChanged(i, "1")
+            }
+
+            val state = viewModel.awaitState()
+            verify(saveAccountToLink).existing(
+                eq(state.payload()!!.consumerSessionClientSecret),
+                eq(listOf(selectedAccount.id))
+            )
+            verify(confirmVerification).sms(
+                consumerSessionClientSecret = consumerSession.clientSecret,
+                verificationCode = "111111"
+            )
+            eventTracker.assertContainsEvent(
+                "linked_accounts.networking.verification.error",
+                mapOf(
+                    "pane" to "networking_save_to_link_verification",
+                    "error" to "ConfirmVerificationSessionError"
+                )
+            )
         }
 
     @Test
