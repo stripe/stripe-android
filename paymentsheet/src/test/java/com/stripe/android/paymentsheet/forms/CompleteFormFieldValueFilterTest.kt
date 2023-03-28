@@ -33,7 +33,8 @@ class CompleteFormFieldValueFilterTest {
         fieldFlow,
         hiddenIdentifersFlow,
         showingMandate = MutableStateFlow(true),
-        userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest)
+        userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest),
+        defaultValues = emptyMap(),
     )
 
     init {

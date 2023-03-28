@@ -53,7 +53,7 @@ internal class CompleteFormFieldValueFilter(
         // Apply defaults for fields with no value.
         // Default values are added even if the field is hidden.
         for (entry in defaultValues) {
-            val formValue = idFieldSnapshotMap[entry.key]
+            val formValue = processedFieldsMap[entry.key]
             if (formValue?.value.isNullOrBlank() && !entry.value.isNullOrBlank()) {
                 processedFieldsMap[entry.key] = FormFieldEntry(entry.value, true)
             }

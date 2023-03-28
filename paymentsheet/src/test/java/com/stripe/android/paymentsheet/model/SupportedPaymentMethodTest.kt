@@ -12,6 +12,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import kotlinx.serialization.Serializable
@@ -33,13 +34,13 @@ class SupportedPaymentMethodTest {
             null
         )
     }
-    private val card = LpmRepository.HardcodedCard
+    private val card = LpmRepository.hardcodedCardSpec(BillingDetailsCollectionConfiguration())
     private val eps = lpmRepository.fromCode("eps")!!
 
     @Test
     fun `If the intent has SFU set on top level or on LPM`() {
         assertThat(
-            LpmRepository.HardcodedCard
+            LpmRepository.hardcodedCardSpec(BillingDetailsCollectionConfiguration())
                 .getSpecWithFullfilledRequirements(
                     PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET,
                     CONFIG_CUSTOMER
