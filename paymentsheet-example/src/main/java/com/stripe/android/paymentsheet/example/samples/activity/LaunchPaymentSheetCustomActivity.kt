@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.example.samples.activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.res.stringResource
@@ -11,6 +12,9 @@ import androidx.lifecycle.map
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.samples.ui.BuyButton
+import com.stripe.android.paymentsheet.example.samples.ui.PaymentMethodSelector
+import com.stripe.android.paymentsheet.example.samples.ui.Receipt
 import com.stripe.android.paymentsheet.model.PaymentOption
 
 internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
@@ -40,13 +44,15 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
             MaterialTheme {
                 val isLoadingState by isLoading.observeAsState(true)
                 val paymentCompletedState by paymentCompleted.observeAsState(false)
-                val status by viewModel.status.observeAsState("")
+                val status by viewModel.status.observeAsState()
                 val paymentMethodLabel by selectedPaymentMethodLabel.observeAsState(stringResource(R.string.loading))
                 val paymentMethodIcon by selectedPaymentMethodIcon.observeAsState()
 
-                if (status.isNotBlank()) {
-                    snackbar.setText(status).show()
-                    viewModel.statusDisplayed()
+                status?.let {
+                    LaunchedEffect(it) {
+                        snackbar.setText(it).show()
+                        viewModel.statusDisplayed()
+                    }
                 }
 
                 Receipt(isLoadingState) {

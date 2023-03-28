@@ -511,8 +511,8 @@ private fun FeaturedInstitutionsGrid(
     )
 }
 
-@Composable
 @Preview(group = "Institutions Pane", name = "initialLoading")
+@Composable
 internal fun InitialLoading(
     state: InstitutionPickerState = InstitutionPickerStates.initialLoading()
 ) {
@@ -531,8 +531,8 @@ internal fun InitialLoading(
     }
 }
 
-@Composable
 @Preview(group = "Institutions Pane", name = "searchModeSearchingInstitutions")
+@Composable
 internal fun SearchModeSearchingInstitutions(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeSearchingInstitutions()
 ) {
@@ -551,8 +551,8 @@ internal fun SearchModeSearchingInstitutions(
     }
 }
 
-@Composable
 @Preview(group = "Institutions Pane", name = "searchModeWithResults")
+@Composable
 internal fun SearchModeWithResults(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeWithResults()
 ) {
@@ -571,8 +571,8 @@ internal fun SearchModeWithResults(
     }
 }
 
-@Composable
 @Preview(group = "Institutions Pane", name = "searchModeWithResultsNoManualEntry")
+@Composable
 internal fun SearchModeWithResultsNoManualEntry(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeWithResultsNoManualEntry()
 ) {
@@ -591,8 +591,8 @@ internal fun SearchModeWithResultsNoManualEntry(
     }
 }
 
-@Composable
 @Preview(group = "Institutions Pane", name = "searchModeNoResults")
+@Composable
 internal fun SearchModeNoResults(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeNoResults()
 ) {
@@ -611,8 +611,8 @@ internal fun SearchModeNoResults(
     }
 }
 
-@Composable
 @Preview(group = "Institutions Pane", name = "searchModeNoResultsNoManualEntry")
+@Composable
 internal fun SearchModeNoResultsNoManualEntry(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeNoResultsNoManualEntry()
 ) {
@@ -631,8 +631,8 @@ internal fun SearchModeNoResultsNoManualEntry(
     }
 }
 
-@Composable
 @Preview(group = "Institutions Pane", name = "searchModeFailed")
+@Composable
 internal fun SearchModeFailed(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeFailed()
 ) {
@@ -651,8 +651,8 @@ internal fun SearchModeFailed(
     }
 }
 
-@Composable
 @Preview(group = "Institutions Pane", name = "searchModeFailedNoManualEntry")
+@Composable
 internal fun SearchModeFailedNoManualEntry(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeFailedNoManualEntry()
 ) {
@@ -671,8 +671,8 @@ internal fun SearchModeFailedNoManualEntry(
     }
 }
 
-@Composable
 @Preview(group = "Institutions Pane", name = "noSearchMode")
+@Composable
 internal fun NoSearchMode(
     state: InstitutionPickerState = InstitutionPickerStates.noSearchMode()
 ) {

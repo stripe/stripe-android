@@ -443,13 +443,11 @@ private fun GifWebView(
     )
 }
 
+@Preview(
+    group = "Partner Auth",
+    name = "Institutional prepane"
+)
 @Composable
-@Preview(
-    device = "id:4in WVGA (Nexus S)"
-)
-@Preview(
-    device = "spec:width=1280dp,height=800dp,dpi=240"
-)
 internal fun InstitutionalPrepaneContentPreview() {
     FinancialConnectionsPreview {
         val sampleImage =

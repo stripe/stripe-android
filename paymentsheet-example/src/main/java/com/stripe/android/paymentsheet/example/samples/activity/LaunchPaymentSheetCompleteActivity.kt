@@ -3,9 +3,12 @@ package com.stripe.android.paymentsheet.example.samples.activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.samples.ui.BuyButton
+import com.stripe.android.paymentsheet.example.samples.ui.Receipt
 
 internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,11 +19,13 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
         setContent {
             MaterialTheme {
                 val inProgress by viewModel.inProgress.observeAsState(false)
-                val status by viewModel.status.observeAsState("")
+                val status by viewModel.status.observeAsState()
 
-                if (status.isNotBlank()) {
-                    snackbar.setText(status).show()
-                    viewModel.statusDisplayed()
+                status?.let {
+                    LaunchedEffect(it) {
+                        snackbar.setText(it).show()
+                        viewModel.statusDisplayed()
+                    }
                 }
 
                 Receipt(inProgress) {
