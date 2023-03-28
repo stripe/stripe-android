@@ -223,11 +223,8 @@ constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
         return isTopLevelSetupFutureUsageSet() || paymentMethodOptionsJsonString?.let {
-            JSONObject(paymentMethodOptionsJsonString)
-                .optJSONObject(code)
-                ?.optString("setup_future_usage")?.let {
-                    true
-                } ?: false
+            val pmOptions = JSONObject(paymentMethodOptionsJsonString).optJSONObject(code)
+            pmOptions?.has("setup_future_usage") ?: false
         } ?: false
     }
 
