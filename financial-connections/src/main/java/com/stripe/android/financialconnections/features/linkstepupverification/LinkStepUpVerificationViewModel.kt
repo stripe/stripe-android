@@ -60,13 +60,14 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     }
 
     private suspend fun lookupAndStartVerification() = runCatching {
-        requireNotNull(getManifest().accountholderCustomerEmailAddress)
+        getManifest().also { requireNotNull(it.accountholderCustomerEmailAddress) }
     }
         .onFailure { setState { copy(payload = Fail(it)) } }
-        .onSuccess { email ->
+        .onSuccess { manifest ->
             setState { copy(payload = Loading()) }
             lookupConsumerAndStartVerification(
-                email = email,
+                email = requireNotNull(manifest.accountholderCustomerEmailAddress),
+                businessName = manifest.businessName,
                 verificationType = VerificationType.EMAIL,
                 onConsumerNotFound = {
                     eventTracker.track(VerificationStepUpError(PANE, ConsumerNotFoundError))
@@ -159,13 +160,14 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     }
 
     private suspend fun onResendOtp() = runCatching {
-        requireNotNull(getManifest().accountholderCustomerEmailAddress)
+        getManifest().also { requireNotNull(it.accountholderCustomerEmailAddress) }
     }
         .onFailure { setState { copy(resendOtp = Fail(it)) } }
-        .onSuccess { email ->
+        .onSuccess { manifest ->
             setState { copy(resendOtp = Loading()) }
             lookupConsumerAndStartVerification(
-                email = email,
+                email = requireNotNull(manifest.accountholderCustomerEmailAddress),
+                businessName = manifest.businessName,
                 verificationType = VerificationType.EMAIL,
                 onConsumerNotFound = {
                     eventTracker.track(VerificationStepUpError(PANE, ConsumerNotFoundError))

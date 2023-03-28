@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.VerificationType
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
@@ -12,6 +13,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
+@ExperimentalCoroutinesApi
 class LookupConsumerAndStartVerificationTest {
 
     private val lookupAccount = mock<LookupAccount>()
@@ -37,6 +39,7 @@ class LookupConsumerAndStartVerificationTest {
         // Act
         lookupConsumerAndStartVerification(
             email = email,
+            businessName = "Test Business",
             verificationType = VerificationType.EMAIL,
             onConsumerNotFound = { onConsumerNotFoundCalled = true },
             onLookupError = { fail("onLookupError should not be called") },
@@ -64,7 +67,12 @@ class LookupConsumerAndStartVerificationTest {
             val expectedVerificationType = VerificationType.EMAIL
 
             whenever(lookupAccount(email)).thenReturn(lookup)
-            whenever(startVerification.email(consumerSession.clientSecret)).thenReturn(
+            whenever(
+                startVerification.email(
+                    consumerSessionClientSecret = consumerSession.clientSecret,
+                    businessName = "Test Business"
+                )
+            ).thenReturn(
                 consumerSession
             )
 
@@ -74,6 +82,7 @@ class LookupConsumerAndStartVerificationTest {
             // Act
             lookupConsumerAndStartVerification(
                 email = email,
+                businessName = "Test Business",
                 verificationType = expectedVerificationType,
                 onConsumerNotFound = { fail("onConsumerNotFound should not be called") },
                 onLookupError = { fail("onLookupError should not be called") },
@@ -85,7 +94,10 @@ class LookupConsumerAndStartVerificationTest {
             // Assert
             assertEquals(true, onStartVerificationCalled)
             assertEquals(true, onVerificationStartedCalled)
-            verify(startVerification).email(consumerSession.clientSecret)
+            verify(startVerification).email(
+                consumerSessionClientSecret = consumerSession.clientSecret,
+                businessName = "Test Business"
+            )
         }
 
     @Test
@@ -99,6 +111,7 @@ class LookupConsumerAndStartVerificationTest {
         // Act
         lookupConsumerAndStartVerification(
             email = email,
+            businessName = "Test Business",
             verificationType = VerificationType.EMAIL,
             onConsumerNotFound = { fail("onConsumerNotFound should not be called") },
             onLookupError = { onLookupErrorCalled = true },
@@ -125,12 +138,18 @@ class LookupConsumerAndStartVerificationTest {
         val expectedException = RuntimeException("Mock startVerification exception")
 
         whenever(lookupAccount(email)).thenReturn(lookup)
-        whenever(startVerification.email(consumerSession.clientSecret)).thenThrow(expectedException)
+        whenever(
+            startVerification.email(
+                consumerSessionClientSecret = consumerSession.clientSecret,
+                businessName = "Test Business"
+            )
+        ).thenThrow(expectedException)
         var onStartVerificationErrorCalled = false
 
         // Act
         lookupConsumerAndStartVerification(
             email = email,
+            businessName = "Test Business",
             verificationType = expectedVerificationType,
             onConsumerNotFound = { fail("onConsumerNotFound should not be called") },
             onLookupError = { fail("onLookupError should not be called") },
@@ -141,6 +160,9 @@ class LookupConsumerAndStartVerificationTest {
 
         // Assert
         assertEquals(true, onStartVerificationErrorCalled)
-        verify(startVerification).email(consumerSession.clientSecret)
+        verify(startVerification).email(
+            consumerSessionClientSecret = consumerSession.clientSecret,
+            businessName = "Test Business"
+        )
     }
 }

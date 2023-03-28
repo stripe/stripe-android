@@ -32,6 +32,7 @@ interface ConsumersApiService {
         requestSurface: String,
         type: VerificationType,
         customEmailType: CustomEmailType?,
+        connectionsMerchantName: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession
 
@@ -107,6 +108,7 @@ class ConsumersApiServiceImpl(
         requestSurface: String,
         type: VerificationType,
         customEmailType: CustomEmailType?,
+        connectionsMerchantName: String?,
         requestOptions: ApiRequest.Options,
     ): ConsumerSession {
         return executeRequestWithModelJsonParser(
@@ -122,6 +124,7 @@ class ConsumersApiServiceImpl(
                     ),
                     "type" to type.value,
                     "custom_email_type" to customEmailType?.value,
+                    "connections_merchant_name" to connectionsMerchantName,
                     "locale" to locale.toLanguageTag()
                 )
                     .filterValues { it != null }

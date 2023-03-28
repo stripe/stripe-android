@@ -20,6 +20,7 @@ internal class LookupConsumerAndStartVerification @Inject constructor(
      */
     suspend operator fun invoke(
         email: String,
+        businessName: String?,
         verificationType: VerificationType,
         onConsumerNotFound: suspend () -> Unit,
         onLookupError: suspend (Throwable) -> Unit,
@@ -34,8 +35,13 @@ internal class LookupConsumerAndStartVerification @Inject constructor(
                     kotlin.runCatching {
                         val consumerSecret = session.consumerSession!!.clientSecret
                         when (verificationType) {
-                            VerificationType.EMAIL -> startVerification.email(consumerSecret)
-                            VerificationType.SMS -> startVerification.sms(consumerSecret)
+                            VerificationType.EMAIL -> startVerification.email(
+                                consumerSessionClientSecret = consumerSecret,
+                                businessName = businessName
+                            )
+                            VerificationType.SMS -> startVerification.sms(
+                                consumerSessionClientSecret = consumerSecret
+                            )
                         }
                     }
                         .onSuccess { onVerificationStarted(it) }

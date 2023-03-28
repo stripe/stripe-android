@@ -56,10 +56,11 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         observeAsyncs()
         viewModelScope.launch {
             setState { copy(payload = Loading()) }
-            runCatching { requireNotNull(getManifest().accountholderCustomerEmailAddress) }
-                .onSuccess { email ->
+            runCatching { getManifest().also { requireNotNull(it.accountholderCustomerEmailAddress) } }
+                .onSuccess { manifest ->
                     lookupConsumerAndStartVerification(
-                        email = email,
+                        email = requireNotNull(manifest.accountholderCustomerEmailAddress),
+                        businessName = manifest.businessName,
                         verificationType = VerificationType.SMS,
                         onConsumerNotFound = {
                             analyticsTracker.track(VerificationError(PANE, ConsumerNotFoundError))
