@@ -219,4 +219,36 @@ class PaymentIntentTest {
         assertThat(PaymentIntent.ClientSecret("pi_a1b2c3_secret_x7y8z9").value)
             .isEqualTo("pi_a1b2c3_secret_x7y8z9")
     }
+
+    @Test
+    fun `Determines LPM-level SFU correctly if setup_future_usage exists`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsJsonString = """
+                {
+                  "card": {
+                    "setup_future_usage": ""
+                  }
+                }
+            """.trimIndent()
+        )
+
+        val result = paymentIntent.isLpmLevelSetupFutureUsageSet("card")
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `Determines LPM-level SFU correctly if setup_future_usage does not exist`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsJsonString = """
+                {
+                  "card": {
+                    "some_other_key_that_has_nothing_to_do_with_sfu": ""
+                  }
+                }
+            """.trimIndent()
+        )
+
+        val result = paymentIntent.isLpmLevelSetupFutureUsageSet("card")
+        assertThat(result).isFalse()
+    }
 }

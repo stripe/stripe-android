@@ -212,7 +212,7 @@ constructor(
      * SetupFutureUsage is considered to be set if it is on or off session.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    private fun isTopLevelSetupFutureUsageSet() =
+    fun isTopLevelSetupFutureUsageSet() =
         when (setupFutureUsage) {
             StripeIntent.Usage.OnSession -> true
             StripeIntent.Usage.OffSession -> true
@@ -222,7 +222,7 @@ constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
-        return isTopLevelSetupFutureUsageSet() || paymentMethodOptionsJsonString?.let {
+        return paymentMethodOptionsJsonString?.let {
             val pmOptions = JSONObject(paymentMethodOptionsJsonString).optJSONObject(code)
             pmOptions?.has("setup_future_usage") ?: false
         } ?: false
