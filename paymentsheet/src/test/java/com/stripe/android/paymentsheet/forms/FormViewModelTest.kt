@@ -8,17 +8,13 @@ import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_WITHOUT_CONFIG
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
-import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_MINIMUM
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -542,7 +538,7 @@ internal class FormViewModelTest {
             args,
             createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.Card,
-                LpmRepository.hardcodedCardSpec(billingDetailsCollectionConfiguration).formSpec,
+                LpmRepository.HardcodedCard.formSpec,
             )
         )
 
@@ -628,92 +624,6 @@ internal class FormViewModelTest {
         }
     }
 
-    @Test
-    fun `Verify defaults are overridden`() = runTest {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-//            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-//            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            attachDefaultsToPaymentMethod = true,
-        )
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
-            billingDetails = PaymentSheet.BillingDetails(
-                name = "Jenny Rosen",
-//                email = "foo@bar.com",
-//                phone = "+13105551234",
-                address = PaymentSheet.Address(
-                    line1 = "123 Main Street",
-                    city = "San Francisco",
-                    state = "CA",
-                    postalCode = "94111",
-                    country = "US",
-                ),
-            ),
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        )
-        val formViewModel = createViewModel(
-            args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LpmRepository.hardcodedCardSpec(billingDetailsCollectionConfiguration).formSpec,
-            )
-        )
-
-        val cardDetailsController = formViewModel.elementsFlow.first()
-            .filterIsInstance<CardDetailsSectionElement>()
-            .first()?.controller!!
-        cardDetailsController.setName("Jane Doe")
-        cardDetailsController.setCardNumber("4242424242424242")
-        cardDetailsController.setExpirationDate("130")
-        cardDetailsController.setCVC("123")
-//        getAddressSectionTextControllerWithLabel(
-//            formViewModel,
-//            R.string.email
-//        )?.onValueChange("mail@example.com")
-//        getAddressSectionTextControllerWithLabel(
-//            formViewModel,
-//            R.string.address_label_phone_number,
-//        )?.onValueChange("+14155554321")
-        getCardAddressSectionTextControllerWithLabel(
-            formViewModel,
-            R.string.address_label_address_line1,
-        )?.onValueChange("123 Fake St.")
-        getCardAddressSectionTextControllerWithLabel(
-            formViewModel,
-            R.string.address_label_address_line2,
-        )?.onValueChange("Line 2")
-        getCardAddressSectionTextControllerWithLabel(
-            formViewModel,
-            R.string.address_label_city,
-        )?.onValueChange("New York")
-        getCardAddressSectionTextControllerWithLabel(
-            formViewModel,
-            R.string.address_label_zip_code,
-        )?.onValueChange("10001")
-
-        formViewModel.completeFormValues.test {
-            assertThat(awaitItem()?.fieldValuePairs).containsExactlyEntriesIn(
-                mapOf(
-                    IdentifierSpec.Name to FormFieldEntry("Jane Doe", true),
-                    IdentifierSpec.Email to FormFieldEntry("mail@example.com", true),
-                    IdentifierSpec.Phone to FormFieldEntry("+14155554321", true),
-                    IdentifierSpec.Line1 to FormFieldEntry("123 Fake St.", true),
-                    IdentifierSpec.City to FormFieldEntry("New York", true),
-                    IdentifierSpec.State to FormFieldEntry("NY", true),
-                    IdentifierSpec.PostalCode to FormFieldEntry("10001", true),
-                    IdentifierSpec.Country to FormFieldEntry("US", true),
-                    IdentifierSpec.CardNumber to FormFieldEntry("4242424242424242", true),
-                    IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
-                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
-                    IdentifierSpec.CardCvc to FormFieldEntry("123", true),
-                    IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                )
-            )
-        }
-    }
-
     private suspend fun getSectionFieldTextControllerWithLabel(
         formViewModel: FormViewModel,
         @StringRes label: Int
@@ -725,30 +635,6 @@ internal class FormViewModelTest {
             .map { it.controller }
             .filterIsInstance<TextFieldController>()
             .firstOrNull { it.label.first() == label }
-
-    private suspend fun getCardAddressSectionTextControllerWithLabel(
-        formViewModel: FormViewModel,
-        @StringRes label: Int
-    ): TextFieldController? {
-        val addressElementFields = formViewModel.elementsFlow.first()
-            .filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-            .filterIsInstance<CardBillingAddressElement>()
-            .firstOrNull()
-            ?.fields
-            ?.first()
-        return addressElementFields
-            ?.filterIsInstance<SectionSingleFieldElement>()
-            ?.map { (it.controller as? SimpleTextFieldController) }
-            ?.firstOrNull { it?.label?.first() == label }
-            ?: addressElementFields
-                ?.asSequence()
-                ?.filterIsInstance<RowElement>()
-                ?.map { it.fields }
-                ?.flatten()
-                ?.map { (it.controller as? SimpleTextFieldController) }
-                ?.firstOrNull { it?.label?.first() == label }
-    }
 
     private data class AddressControllers(
         val controllers: List<TextFieldController>

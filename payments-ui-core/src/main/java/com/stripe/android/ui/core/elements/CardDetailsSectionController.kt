@@ -5,7 +5,6 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldErrorController
-import kotlin.math.exp
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardDetailsSectionController(
@@ -46,5 +45,4 @@ class CardDetailsSectionController(
     @RestrictTo(RestrictTo.Scope.TESTS)
     fun setCVC(cvc: String) =
         cardDetailsElement.controller.cvcElement?.controller?.onValueChange(cvc)
-
 }

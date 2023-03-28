@@ -68,7 +68,6 @@ import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.FakeIntentConfirmationInterceptor
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
@@ -964,9 +963,7 @@ internal class PaymentSheetActivityTest {
         initialPaymentSelection: PaymentSelection? = null,
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = mock<LpmRepository>()
-        whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.hardcodedCardSpec(
-            BillingDetailsCollectionConfiguration()
-        ))
+        whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
         whenever(lpmRepository.serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
 
         val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
