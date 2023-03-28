@@ -348,10 +348,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         disableViews()
 
         addMenuProvider(menuProvider)
-    }
 
-    override fun onResume() {
-        super.onResume()
         lifecycleScope.launch {
             val savedToggles = viewModel.getSavedToggleState()
             setToggles(
