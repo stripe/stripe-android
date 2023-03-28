@@ -42,6 +42,7 @@ sealed class RequestHeadersFactory {
     protected fun defaultXStripeUserAgentMap() = mutableMapOf<String, String?>(
         LANG to KOTLIN,
         AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
+        AnalyticsFields.OS_NAME to "android",
         AnalyticsFields.OS_VERSION to "${Build.VERSION.SDK_INT}",
         TYPE to "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}",
         MODEL to Build.MODEL
