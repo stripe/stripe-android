@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.PartnerAccount
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -29,6 +30,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
+@ExperimentalCoroutinesApi
 class LinkAccountPickerViewModelTest {
 
     @get:Rule
@@ -72,9 +74,13 @@ class LinkAccountPickerViewModelTest {
     }
 
     @Test
-    fun `onNewBankAccountClick - navigates to Institution picker`() {
-        val viewModel = buildViewModel(LinkAccountPickerState())
+    fun `onNewBankAccountClick - navigates to Institution picker`() = runTest {
+        val accounts = twoAccounts()
+        whenever(getManifest()).thenReturn(sessionManifest())
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+        whenever(pollNetworkedAccounts(any())).thenReturn(accounts)
 
+        val viewModel = buildViewModel(LinkAccountPickerState())
         viewModel.onNewBankAccountClick()
 
         verify(goNext).invoke(Pane.INSTITUTION_PICKER)
