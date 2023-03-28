@@ -305,7 +305,10 @@ private fun InputWithError(
     }
 }
 
-@Preview
+@Preview(
+    group = "Manual Entry",
+    name = "Default"
+)
 @Composable
 internal fun ManualEntryScreenPreview() {
     FinancialConnectionsPreview {
@@ -329,7 +332,10 @@ internal fun ManualEntryScreenPreview() {
     }
 }
 
-@Preview
+@Preview(
+    group = "Manual Entry",
+    name = "Error"
+)
 @Composable
 internal fun ManualEntryScreenErrorPreview() {
     FinancialConnectionsPreview {

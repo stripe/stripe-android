@@ -103,8 +103,11 @@ internal fun LoadingSpinner() {
 
 private const val LOADING_SPINNER_ROTATION_MS = 1000
 
+@Preview(
+    group = "Loading",
+    name = "Default"
+)
 @Composable
-@Preview
 internal fun LoadingSpinnerPreview() {
     LoadingSpinner()
 }

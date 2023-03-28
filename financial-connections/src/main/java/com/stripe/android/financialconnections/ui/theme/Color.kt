@@ -20,8 +20,9 @@ internal val Attention400 = Color(0xffED6704)
 internal val Attention100 = Color(0xffFCEDB9)
 internal val Attention50 = Color(0xffFEF9DA)
 
-internal val Brand500 = Color(0xff625AFA)
+internal val Brand100 = Color(0xffF2EBFF)
 internal val Brand400 = Color(0xff8D7FFA)
+internal val Brand500 = Color(0xff625AFA)
 
 internal val Blue500 = Color(0xff0570DE)
 internal val Blue400 = Color(0xFF0196ED)

@@ -1,6 +1,6 @@
 ext.versions = [
         detekt: "1.22.0",
-        mavericks: "3.0.1",
+        mavericks: "3.0.2",
         okhttp: '4.10.0',
 ]
 

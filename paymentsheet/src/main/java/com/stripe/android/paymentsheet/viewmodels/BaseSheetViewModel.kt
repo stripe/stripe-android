@@ -15,17 +15,14 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
-import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -114,15 +111,6 @@ internal abstract class BaseSheetViewModel(
     private val _amount = MutableStateFlow<Amount?>(null)
     internal val amount: StateFlow<Amount?> = _amount
 
-    /**
-     * Request to retrieve the value from the repository happens when initialize any fragment
-     * and any fragment will re-update when the result comes back.
-     * Represents what the user last selects (add or buy) on the
-     * [PaymentOptionsActivity]/[PaymentSheetActivity], and saved/restored from the preferences.
-     */
-    private val savedSelection: StateFlow<SavedSelection?> = savedStateHandle
-        .getStateFlow<SavedSelection?>(SAVE_SAVED_SELECTION, null)
-
     protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
         value = listOf(PaymentSheetScreen.Loading),
     )
@@ -192,7 +180,6 @@ internal abstract class BaseSheetViewModel(
             currentSelection = selection,
             googlePayState = googlePayState,
             isLinkEnabled = linkHandler.isLinkEnabled,
-            initialSelection = savedSelection,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
             nameProvider = { code ->
                 val paymentMethod = lpmRepository.fromCode(code)
@@ -418,7 +405,7 @@ internal abstract class BaseSheetViewModel(
             if (didRemoveSelectedItem) {
                 // Remove the current selection. The new selection will be set when we're computing
                 // the next PaymentOptionsState.
-                savedStateHandle[SAVE_SELECTION] = null
+                updateSelection(null)
             }
 
             savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value?.filter {
@@ -519,7 +506,6 @@ internal abstract class BaseSheetViewModel(
     companion object {
         internal const val SAVE_PAYMENT_METHODS = "customer_payment_methods"
         internal const val SAVE_SELECTION = "selection"
-        internal const val SAVE_SAVED_SELECTION = "saved_selection"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
     }

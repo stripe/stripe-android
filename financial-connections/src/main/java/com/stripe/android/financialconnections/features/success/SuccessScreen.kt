@@ -293,9 +293,12 @@ private fun SuccessLoadedFooter(
     }
 }
 
-@Composable
-@Preview
+@Preview(
+    group = "Success",
+    name = "Default"
+)
 @Suppress("LongMethod")
+@Composable
 internal fun SuccessScreenPreview() {
     FinancialConnectionsPreview {
         SuccessContent(

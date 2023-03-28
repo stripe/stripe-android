@@ -17,6 +17,8 @@
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL 银行</string>
   <string name="invalid_email_address">邮箱地址无效：%s</string>
+  <!-- Error message when UPI ID is invalid -->
+  <string name="invalid_upi_id">UPI ID 无效</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">用 Klarna 先买后付。</string>
   <!-- Klarna pay later copy -->
@@ -39,6 +41,8 @@
   <string name="stripe_payment_method_bank">银行</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">银行卡信息</string>
+  <!-- Header text shown above a UPI ID text field -->
+  <string name="stripe_paymentsheet_buy_using_upi_id">用 UPI ID 购买</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS 直接借记</string>
   <!-- Title for credit card number entry field -->
@@ -47,4 +51,6 @@
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA 借记</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">设置</string>
+  <!-- Label for UPI ID number field on form -->
+  <string name="upi_id_label">UPI ID</string>
 </resources>

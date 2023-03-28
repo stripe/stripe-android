@@ -78,8 +78,8 @@ private fun TextRange.adjustForFilter(
     end = text.subSequence(0, end).count(predicate),
 )
 
-@Composable
 @Preview(group = "Components", name = "TextField - idle")
+@Composable
 internal fun FinancialConnectionsOutlinedTextFieldPreview() {
     FinancialConnectionsPreview {
         Column {

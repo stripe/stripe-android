@@ -27,6 +27,24 @@
   <string name="could_not_capture_title">Hindi makunan ng imahe</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="description_clock">Icon ng orasan</string>
+  <!-- Content description for close button -->
+  <string name="description_close">pahina ng close verification</string>
+  <!-- Content description for exclamation icon -->
+  <string name="description_exclamation">exclamation icon</string>
+  <!-- Content description for back button -->
+  <string name="description_go_back">bumalik sa nakaraang screen</string>
+  <!-- Content description for merchant logo -->
+  <string name="description_merchant_logo">logo ng mangangalakal</string>
+  <!-- Content description for plus icon -->
+  <string name="description_plus">plus icon</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="description_privacy_policy">icon ng patakaran sa privacy</string>
+  <!-- Content description for stripe logo -->
+  <string name="description_stripe_logo">logo ng stripe</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="description_time_estimate">icon ng tinantyang panahon para makumpleto ang pag-verify</string>
+  <!-- Label for Date of birth field -->
+  <string name="dob">Petsa ng kapanganakan</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="driver_license">Lisensya sa pagmamaneho</string>
   <!-- Text for error labels -->
@@ -39,6 +57,8 @@
   <string name="file_upload_content_id">Mangyaring i-upload ang mga imahe ng harap at likod ng iyong card ng pagkakakilanlan</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Mangyaring i-upload ang imahe ng iyong pasaporte</string>
+  <!-- Label for first (given) name field -->
+  <string name="first_name">Pangalan</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="flash_mask">Mask para sa selfie na animasyon</string>
   <!-- Description of front of driver's license image -->
@@ -57,10 +77,24 @@
   <string name="hold_still">Huwag gumalaw, ini-iscan</string>
   <!-- display name for ID -->
   <string name="id_card">ID</string>
+  <!-- Label for ID number section -->
+  <string name="id_number">Numero ng ID</string>
+  <!-- An error message. -->
+  <string name="incomplete_id_number">Ang numero ng ID na inilagay mo ay kulang.</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="individual_cpf">Indibidwal na CPF</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="invalid_dob_error">Mukhang hindi balido ang petsa ng kapanganakan</string>
   <!-- Continue button text -->
   <string name="kontinue">magpatuloy</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="last_4_of_ssn">Huling 4 ng numero ng Social Security</string>
+  <!-- Label for last (family) name field -->
+  <string name="last_name">Apelyido</string>
   <!-- Status while screen is loading -->
   <string name="loading">Niloload</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="nric_or_fin">NRIC o FIN</string>
   <!-- No comment provided by engineer. -->
   <string name="ok">OK</string>
   <!-- Label of the passport option for document type selection -->
@@ -79,6 +113,8 @@
   <string name="position_passport">Iposisyon ang iyong pasaporte sa gitna ng frame</string>
   <!-- Instructional text for capturing selfie -->
   <string name="position_selfie">Iposisyon ang iyong mukha sa gitna ng frame.</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="retake_photos">Kunan Muli Ang Mga Larawan</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Na-scan na</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->

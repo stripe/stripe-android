@@ -8,6 +8,8 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.camera.framework.image.cropCameraPreviewToViewFinder
 import com.stripe.android.camera.framework.image.hasOpenGl31
 import com.stripe.android.camera.framework.image.scale
+import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
+import com.stripe.android.mlcore.base.InterpreterWrapper
 import com.stripe.android.stripecardscan.framework.FetchedData
 import com.stripe.android.stripecardscan.framework.image.MLImage
 import com.stripe.android.stripecardscan.framework.image.toMLImage
@@ -23,7 +25,6 @@ import com.stripe.android.stripecardscan.payment.ml.ssd.combinePriors
 import com.stripe.android.stripecardscan.payment.ml.ssd.determineLayoutAndFilter
 import com.stripe.android.stripecardscan.payment.ml.ssd.extractPredictions
 import com.stripe.android.stripecardscan.payment.ml.ssd.rearrangeOCRArray
-import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 
 /** Training images are normalized with mean 127.5 and std 128.5. */
@@ -89,7 +90,7 @@ private val PRIORS = combinePriors(SSDOcr.Factory.TRAINED_IMAGE_SIZE)
 /**
  * This model performs SSD OCR recognition on a card.
  */
-internal class SSDOcr private constructor(interpreter: Interpreter) :
+internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
     TensorFlowLiteAnalyzer<
         SSDOcr.Input,
         Array<ByteBuffer>,
@@ -178,7 +179,7 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
     }
 
     override suspend fun executeInference(
-        tfInterpreter: Interpreter,
+        tfInterpreter: InterpreterWrapper,
         data: Array<ByteBuffer>
     ): Map<Int, Array<FloatArray>> {
         val mlOutput = mapOf(
@@ -186,7 +187,8 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
             1 to arrayOf(FloatArray(NUM_LOC))
         )
 
-        tfInterpreter.runForMultipleInputsOutputs(data, mlOutput)
+        @Suppress("UNCHECKED_CAST")
+        tfInterpreter.runForMultipleInputsOutputs(data as Array<Any>, mlOutput)
         return mlOutput
     }
 
@@ -205,10 +207,10 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
             val TRAINED_IMAGE_SIZE = Size(600, 375)
         }
 
-        override val tfOptions: Interpreter.Options = Interpreter
-            .Options()
-            .setUseNNAPI(USE_GPU && hasOpenGl31(context.applicationContext))
-            .setNumThreads(threads)
+        override val tfOptions = InterpreterOptionsWrapper.Builder()
+            .useNNAPI(USE_GPU && hasOpenGl31(context.applicationContext))
+            .numThreads(threads)
+            .build()
 
         override suspend fun newInstance(): SSDOcr? = createInterpreter()?.let { SSDOcr(it) }
     }

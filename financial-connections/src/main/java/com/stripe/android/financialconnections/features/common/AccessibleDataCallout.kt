@@ -238,7 +238,10 @@ internal data class AccessibleDataCalloutModel(
     }
 }
 
-@Preview
+@Preview(
+    group = "Data Callout",
+    name = "Default"
+)
 @Composable
 internal fun AccessibleDataCalloutPreview() {
     FinancialConnectionsPreview {
@@ -261,7 +264,10 @@ internal fun AccessibleDataCalloutPreview() {
     }
 }
 
-@Preview
+@Preview(
+    group = "Data Callout",
+    name = "Many Accounts"
+)
 @Composable
 @Suppress("LongMethod")
 internal fun AccessibleDataCalloutWithManyAccountsPreview() {
@@ -295,7 +301,10 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
     }
 }
 
-@Preview
+@Preview(
+    group = "Data Callout",
+    name = "Many Accounts and Stripe Direct"
+)
 @Composable
 @Suppress("LongMethod")
 internal fun AccessibleDataCalloutStripeDirectPreview() {
@@ -329,7 +338,10 @@ internal fun AccessibleDataCalloutStripeDirectPreview() {
     }
 }
 
-@Preview
+@Preview(
+    group = "Data Callout",
+    name = "Networking"
+)
 @Composable
 @Suppress("LongMethod")
 internal fun AccessibleDataCalloutNetworkingPreview() {
@@ -363,7 +375,10 @@ internal fun AccessibleDataCalloutNetworkingPreview() {
     }
 }
 
-@Preview
+@Preview(
+    group = "Data Callout",
+    name = "Multiple accounts"
+)
 @Composable
 internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
     FinancialConnectionsPreview {
@@ -421,7 +436,10 @@ internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
     }
 }
 
-@Preview
+@Preview(
+    group = "Data Callout",
+    name = "One account"
+)
 @Composable
 internal fun AccessibleDataCalloutWithOneAccountPreview() {
     FinancialConnectionsPreview {

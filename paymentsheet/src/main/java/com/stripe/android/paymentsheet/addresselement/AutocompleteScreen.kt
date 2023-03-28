@@ -35,12 +35,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.core.injection.NonFallbackInjector
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.darken
@@ -197,21 +195,8 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                                     )
                                 }
                             }
-                        } else {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(
-                                        R.string.stripe_paymentsheet_autocomplete_no_results_found
-                                    ),
-                                    color = MaterialTheme.stripeColors.onComponent,
-                                    style = MaterialTheme.typography.body1
-                                )
-                            }
                         }
+
                         attributionDrawable?.let { drawable ->
                             Image(
                                 painter = painterResource(

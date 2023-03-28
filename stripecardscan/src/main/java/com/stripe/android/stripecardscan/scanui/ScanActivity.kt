@@ -12,11 +12,13 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.framework.Stats
+import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.camera.getCameraAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -249,7 +251,17 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
             onSupportsMultipleCameras(it)
         }
 
-        launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
+        lifecycleScope.launch(Dispatchers.IO) {
+            InterpreterInitializerImpl.initialize(
+                context = this@ScanActivity,
+                onSuccess = {
+                    lifecycleScope.launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
+                },
+                onFailure = {
+                    scanFailure(it)
+                }
+            )
+        }
     }
 
     /**
