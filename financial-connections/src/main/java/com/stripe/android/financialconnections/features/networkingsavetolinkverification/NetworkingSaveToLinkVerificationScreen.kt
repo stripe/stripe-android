@@ -114,6 +114,7 @@ private fun NetworkingSaveToLinkVerificationLoaded(
             keyboardController?.hide()
         }
     }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
     Column(
         modifier = Modifier
             .fillMaxSize()
