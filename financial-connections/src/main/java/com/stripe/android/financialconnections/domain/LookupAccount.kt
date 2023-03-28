@@ -12,7 +12,7 @@ internal class LookupAccount @Inject constructor(
         email: String
     ): ConsumerSessionLookup = requireNotNull(
         consumerSessionRepository.lookupConsumerSession(
-            email = email,
+            email = email.lowercase().trim(),
         )
     )
 }

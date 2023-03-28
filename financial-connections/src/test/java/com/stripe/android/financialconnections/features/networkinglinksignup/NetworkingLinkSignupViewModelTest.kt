@@ -4,13 +4,20 @@ import com.airbnb.mvrx.test.MavericksTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
+import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
+import com.stripe.android.financialconnections.model.NetworkingLinkSignupBody
+import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
+import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
+import com.stripe.android.financialconnections.utils.UriUtils
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -19,6 +26,7 @@ import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class NetworkingLinkSignupViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -32,6 +40,7 @@ class NetworkingLinkSignupViewModelTest {
     private val goNext = mock<GoNext>()
     private val lookupAccount = mock<LookupAccount>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
+    private val sync = mock<SynchronizeFinancialConnectionsSession>()
     private val saveToLinkWithStripeSucceeded = mock<SaveToLinkWithStripeSucceededRepository>()
 
     private fun buildViewModel(
@@ -44,6 +53,8 @@ class NetworkingLinkSignupViewModelTest {
         goNext = goNext,
         getCachedAccounts = getAuthorizationSessionAccounts,
         lookupAccount = lookupAccount,
+        uriUtils = UriUtils(Logger.noop()),
+        sync = sync,
         saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
         saveAccountToLink = saveAccountToLink
     )
@@ -54,6 +65,14 @@ class NetworkingLinkSignupViewModelTest {
             businessName = "Business",
             accountholderCustomerEmailAddress = "test@test.com"
         )
+        whenever(sync()).thenReturn(
+            syncResponse().copy(
+                text = TextUpdate(
+                    consent = null,
+                    networkingLinkSignupPane = networkingLinkSignupPane()
+                )
+            )
+        )
         whenever(getManifest()).thenReturn(manifest)
 
         val viewModel = buildViewModel(NetworkingLinkSignupState())
@@ -61,4 +80,12 @@ class NetworkingLinkSignupViewModelTest {
         val payload = requireNotNull(state.payload())
         assertThat(payload.emailController.fieldValue.first()).isEqualTo("test@test.com")
     }
+
+    private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(
+        aboveCta = "Above CTA",
+        body = NetworkingLinkSignupBody(emptyList()),
+        cta = "CTA",
+        skipCta = "Skip CTA",
+        title = "Title"
+    )
 }
