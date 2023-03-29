@@ -4,7 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.fuel.core.extensions.jsonBody
+import com.github.kittinunf.fuel.core.requests.suspendable
 import com.google.gson.Gson
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheetResult
@@ -12,13 +14,12 @@ import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
 import com.stripe.android.paymentsheet.example.samples.networking.toCheckoutRequest
 import com.stripe.android.paymentsheet.model.PaymentOption
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import com.github.kittinunf.result.Result as ApiResult
 
 internal class CustomFlowViewModel(
@@ -31,7 +32,7 @@ internal class CustomFlowViewModel(
     val state: StateFlow<CustomFlowViewState> = _state
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             prepareCheckout()
         }
     }
@@ -84,21 +85,18 @@ internal class CustomFlowViewModel(
         val request = currentState.cartState.toCheckoutRequest()
         val requestBody = Gson().toJson(request)
 
-        val result = suspendCoroutine { continuation ->
-            Fuel.post("$backendUrl/checkout")
-                .jsonBody(requestBody)
-                .responseString { _, _, result ->
-                    continuation.resume(result)
-                }
-        }
+        val apiResult = Fuel
+            .post("${backendUrl}/checkout")
+            .jsonBody(requestBody)
+            .suspendable()
+            .awaitResult(ExampleCheckoutResponse.Deserializer)
 
-        when (result) {
+        when (apiResult) {
             is ApiResult.Success -> {
-                val response = Gson().fromJson(result.get(), ExampleCheckoutResponse::class.java)
                 val paymentInfo = CustomFlowViewState.PaymentInfo(
-                    publishableKey = response.publishableKey,
-                    clientSecret = response.paymentIntent,
-                    customerConfiguration = response.makeCustomerConfig(),
+                    publishableKey = apiResult.value.publishableKey,
+                    clientSecret = apiResult.value.paymentIntent,
+                    customerConfiguration = apiResult.value.makeCustomerConfig(),
                 )
 
                 PaymentConfiguration.init(
@@ -111,7 +109,7 @@ internal class CustomFlowViewModel(
                 }
             }
             is ApiResult.Failure -> {
-                val status = "Preparing checkout failed\n${result.error.message}"
+                val status = "Preparing checkout failed\n${apiResult.error.message}"
                 _state.update {
                     it.copy(isProcessing = false, status = status)
                 }

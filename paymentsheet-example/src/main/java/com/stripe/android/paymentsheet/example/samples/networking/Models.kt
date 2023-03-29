@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet.example.samples.networking
 
 import androidx.annotation.Keep
+import com.github.kittinunf.fuel.core.Deserializable
+import com.github.kittinunf.fuel.core.Response
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartProduct
@@ -44,13 +47,21 @@ data class ExampleCheckoutResponse(
     @SerializedName("total")
     val total: Float,
 ) {
-    internal fun makeCustomerConfig() =
-        if (customer != null && ephemeralKey != null) {
-            PaymentSheet.CustomerConfiguration(
-                id = customer,
-                ephemeralKeySecret = ephemeralKey
-            )
-        } else {
-            null
+
+    internal fun makeCustomerConfig() = if (customer != null && ephemeralKey != null) {
+        PaymentSheet.CustomerConfiguration(
+            id = customer,
+            ephemeralKeySecret = ephemeralKey
+        )
+    } else {
+        null
+    }
+
+    object Deserializer : Deserializable<ExampleCheckoutResponse> {
+
+        override fun deserialize(response: Response): ExampleCheckoutResponse {
+            val body = response.body().asString("application/json")
+            return Gson().fromJson(body, ExampleCheckoutResponse::class.java)
         }
+    }
 }

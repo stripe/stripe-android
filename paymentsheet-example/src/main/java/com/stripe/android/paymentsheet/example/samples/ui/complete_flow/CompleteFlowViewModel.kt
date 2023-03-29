@@ -4,22 +4,21 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.fuel.core.extensions.jsonBody
+import com.github.kittinunf.fuel.core.requests.suspendable
+import com.github.kittinunf.result.Result
 import com.google.gson.Gson
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
 import com.stripe.android.paymentsheet.example.samples.networking.toCheckoutRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
-import kotlin.let
-import com.github.kittinunf.result.Result as ApiResult
 
 internal class CompleteFlowViewModel(
     application: Application,
@@ -31,7 +30,7 @@ internal class CompleteFlowViewModel(
     val state: StateFlow<CompleteFlowViewState> = _state
 
     fun checkout() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val currentState = _state.updateAndGet {
                 it.copy(isProcessing = true)
             }
@@ -39,41 +38,38 @@ internal class CompleteFlowViewModel(
             val request = currentState.cartState.toCheckoutRequest()
             val requestBody = Gson().toJson(request)
 
-            val apiResult = suspendCoroutine { continuation ->
-                Fuel.post("$backendUrl/checkout")
-                    .jsonBody(requestBody)
-                    .responseString { _, _, result ->
-                        continuation.resume(result)
+            val apiResult = Fuel
+                .post("$backendUrl/checkout")
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitResult(ExampleCheckoutResponse.Deserializer)
+
+            when (apiResult) {
+                is Result.Success -> {
+                    val paymentInfo = CompleteFlowViewState.PaymentInfo(
+                        publishableKey = apiResult.value.publishableKey,
+                        clientSecret = apiResult.value.paymentIntent,
+                        customerConfiguration = apiResult.value.makeCustomerConfig(),
+                        shouldPresent = true,
+                    )
+
+                    _state.update {
+                        it.copy(
+                            isProcessing = false,
+                            paymentInfo = paymentInfo,
+                            status = null,
+                        )
                     }
-            }
-
-            val error = (apiResult as? ApiResult.Failure)?.let {
-                "Failed to prepare checkout\n${it.error.exception}"
-            }
-
-            val paymentInfo = (apiResult as? ApiResult.Success)?.let { result ->
-                val response = Gson().fromJson(result.get(), ExampleCheckoutResponse::class.java)
-                CompleteFlowViewState.PaymentInfo(
-                    publishableKey = response.publishableKey,
-                    clientSecret = response.paymentIntent,
-                    customerConfiguration = response.makeCustomerConfig(),
-                    shouldPresent = true,
-                )
-            }
-
-            paymentInfo?.let {
-                PaymentConfiguration.init(
-                    context = getApplication(),
-                    publishableKey = it.publishableKey,
-                )
-            }
-
-            _state.update {
-                it.copy(
-                    isProcessing = false,
-                    paymentInfo = paymentInfo,
-                    status = error,
-                )
+                }
+                is Result.Failure -> {
+                    _state.update {
+                        it.copy(
+                            isProcessing = false,
+                            paymentInfo = null,
+                            status = "Failed to prepare checkout\n${apiResult.error.exception}",
+                        )
+                    }
+                }
             }
         }
     }
