@@ -6,6 +6,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.convertToFormValuesMap
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
@@ -19,7 +20,9 @@ internal data class FormArguments(
     val amount: Amount? = null,
     val billingDetails: PaymentSheet.BillingDetails? = null,
     val shippingDetails: AddressDetails? = null,
-    val initialPaymentMethodCreateParams: PaymentMethodCreateParams? = null
+    val initialPaymentMethodCreateParams: PaymentMethodCreateParams? = null,
+    val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+        BillingDetailsCollectionConfiguration(),
 ) : Parcelable
 
 internal fun FormArguments.getInitialValuesMap(): Map<IdentifierSpec, String?> {

@@ -20,6 +20,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
@@ -105,6 +106,36 @@ class Selectors(
         composeTestRule,
         testParameters.paymentMethod.displayNameResource
     )
+
+    val attachDefaults = if (testParameters.attachDefaults) {
+        EspressoIdButton(R.id.attach_defaults_on_button)
+    } else {
+        EspressoIdButton(R.id.attach_defaults_off_button)
+    }
+
+    val collectName = when (testParameters.collectName) {
+        BillingDetailsCollectionConfiguration.CollectionMode.Automatic -> EspressoIdButton(R.id.collect_name_radio_auto)
+        BillingDetailsCollectionConfiguration.CollectionMode.Always -> EspressoIdButton(R.id.collect_name_radio_always)
+        BillingDetailsCollectionConfiguration.CollectionMode.Never -> EspressoIdButton(R.id.collect_name_radio_never)
+    }
+
+    val collectEmail = when (testParameters.collectEmail) {
+        BillingDetailsCollectionConfiguration.CollectionMode.Automatic -> EspressoIdButton(R.id.collect_email_radio_auto)
+        BillingDetailsCollectionConfiguration.CollectionMode.Always -> EspressoIdButton(R.id.collect_email_radio_always)
+        BillingDetailsCollectionConfiguration.CollectionMode.Never -> EspressoIdButton(R.id.collect_email_radio_never)
+    }
+
+    val collectPhone = when (testParameters.collectPhone) {
+        BillingDetailsCollectionConfiguration.CollectionMode.Automatic -> EspressoIdButton(R.id.collect_phone_radio_auto)
+        BillingDetailsCollectionConfiguration.CollectionMode.Always -> EspressoIdButton(R.id.collect_phone_radio_always)
+        BillingDetailsCollectionConfiguration.CollectionMode.Never -> EspressoIdButton(R.id.collect_phone_radio_never)
+    }
+
+    val collectAddress = when (testParameters.collectAddress) {
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> EspressoIdButton(R.id.collect_address_radio_auto)
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> EspressoIdButton(R.id.collect_address_radio_full)
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> EspressoIdButton(R.id.collect_address_radio_never)
+    }
 
     val baseScreenshotFilenamePrefix = "info-" +
         getResourceString(paymentSelection.label) +

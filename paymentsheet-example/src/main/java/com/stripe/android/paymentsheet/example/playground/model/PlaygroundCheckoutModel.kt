@@ -4,6 +4,7 @@ import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.serialization.Serializable
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 
 enum class InitializationType(val value: String) {
     Normal("normal"),
@@ -20,6 +21,26 @@ enum class Shipping(val value: String) {
     On("on"),
     OnWithDefaults("on_with_defaults"),
     Off("off"),
+}
+
+enum class BillingCollectionMode(val value: String) {
+    Auto("auto"),
+    Never("never"),
+    Always("always");
+
+    val asBillingDetailsCollectionConfigurationMode: BillingDetailsCollectionConfiguration.CollectionMode
+        get() = when (this) {
+            Always -> BillingDetailsCollectionConfiguration.CollectionMode.Always
+            Never -> BillingDetailsCollectionConfiguration.CollectionMode.Never
+            Auto -> BillingDetailsCollectionConfiguration.CollectionMode.Automatic
+        }
+
+    val asBillingAddressCollectionConfigurationMode: BillingDetailsCollectionConfiguration.AddressCollectionMode
+        get() = when (this) {
+            Always -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            Never -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+            Auto -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+        }
 }
 
 data class CheckoutCurrency(val value: String) {
@@ -39,6 +60,11 @@ data class SavedToggles(
     val merchantCountryCode: String,
     val mode: String,
     val shippingAddress: String,
+    val attachDefaults: Boolean,
+    val collectName: String,
+    val collectEmail: String,
+    val collectPhone: String,
+    val collectAddress: String,
     val setAutomaticPaymentMethods: Boolean,
     val setDelayedPaymentMethods: Boolean,
     val setDefaultBillingAddress: Boolean,
@@ -54,6 +80,11 @@ enum class Toggle(val key: String, val default: Any) {
     MerchantCountryCode("merchantCountry", "US"),
     Mode("mode", CheckoutMode.Payment.value),
     ShippingAddress("shippingAddress", Shipping.On.value),
+    AttachDefaults("attachDefaults", false),
+    CollectName("collectName", BillingCollectionMode.Auto.value),
+    CollectEmail("collectEmail", BillingCollectionMode.Auto.value),
+    CollectPhone("collectPhone", BillingCollectionMode.Auto.value),
+    CollectAddress("collectAddress", BillingCollectionMode.Auto.value),
     SetDefaultBillingAddress("setDefaultBillingAddress", true),
     SetAutomaticPaymentMethods("setAutomaticPaymentMethods", true),
     SetDelayedPaymentMethods("setDelayedPaymentMethods", false)

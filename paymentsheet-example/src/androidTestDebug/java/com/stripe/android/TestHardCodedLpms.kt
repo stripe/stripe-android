@@ -5,6 +5,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
@@ -82,6 +83,25 @@ class TestHardCodedLpms {
                 saveForFutureUseCheckboxVisible = true,
                 saveCheckboxValue = false,
             )
+        )
+    }
+
+    @Test
+    fun testCardWithCustomBillingDetailsCollection() {
+        testDriver.confirmNewOrGuestComplete(
+            newUser.copy(
+                customer = Customer.New,
+                billing = Billing.On,
+                paymentMethod = LpmRepository.HardcodedCard,
+                authorizationAction = null,
+                saveForFutureUseCheckboxVisible = true,
+                saveCheckboxValue = false,
+                attachDefaults = false,
+                collectName = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                collectEmail = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                collectPhone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                collectAddress = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            ),
         )
     }
 
