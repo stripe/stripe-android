@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.example
 
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
@@ -12,8 +14,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Chip
+import androidx.compose.material.ChipDefaults
 import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +35,8 @@ import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetP
 import com.stripe.android.paymentsheet.example.samples.ui.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.ServerSideConfirmationActivity
+
+private const val SurfaceOverlayOpacity = 0.12f
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,6 +60,7 @@ class MainActivity : AppCompatActivity() {
                 title = "PaymentSheet with server-side confirmation",
                 subtitle = "Create and confirm the payment or setup intent on your own backend",
                 klass = ServerSideConfirmationActivity::class.java,
+                isBeta = true,
             ),
             MenuItem(
                 title = "Playground",
@@ -73,6 +85,7 @@ private data class MenuItem(
     val title: String,
     val subtitle: String,
     val klass: Class<out ComponentActivity>,
+    val isBeta: Boolean = false,
 )
 
 @Composable
@@ -98,6 +111,7 @@ private fun MainScreen(items: List<MenuItem>) {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun MenuItemRow(item: MenuItem) {
     val context = LocalContext.current
@@ -113,6 +127,35 @@ private fun MenuItemRow(item: MenuItem) {
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 4.dp),
         )
+
         Text(text = item.subtitle)
+
+        if (item.isBeta) {
+            Chip(
+                colors = ChipDefaults.chipColors(
+                    backgroundColor = MaterialTheme.colors.secondary.copy(
+                        alpha = SurfaceOverlayOpacity,
+                    ),
+                ),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                    )
+                },
+                onClick = context::openDecouplingBetaLink,
+                modifier = Modifier.padding(top = 4.dp),
+            ) {
+                Text(text = "This is currently in beta.")
+            }
+        }
     }
+}
+
+private fun Context.openDecouplingBetaLink() {
+    val url = "https://stripe.com/docs/payments/finalize-payments-on-the-server?platform=mobile"
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        data = Uri.parse(url)
+    }
+    startActivity(intent)
 }
