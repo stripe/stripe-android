@@ -115,8 +115,6 @@ internal class PaymentSheetBillingConfigurationTest {
 
         networkRule.enqueue(
             method("POST"),
-            method("POST"),
-            method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart("payment_method_data%5Bbilling_details%5D%5Bname%5D", "Jane+Doe"),
             bodyPart("payment_method_data%5Bbilling_details%5D%5Bemail%5D", "mail%40mail.com"),
