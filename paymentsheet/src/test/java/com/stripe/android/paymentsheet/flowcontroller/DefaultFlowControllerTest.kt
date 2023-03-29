@@ -265,7 +265,7 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `getPaymentOption() for new customer without saved payment methods returns null`() {
+    fun `getPaymentOption() for new customer without saved payment methods returns null`() = runTest {
         val paymentMethods = PaymentMethodFixtures.createCards(5)
         val last4 = paymentMethods.first().card?.last4.orEmpty()
 

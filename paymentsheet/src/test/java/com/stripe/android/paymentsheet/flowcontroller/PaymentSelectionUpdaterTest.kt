@@ -16,11 +16,15 @@ import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSelectionUpdaterTest {
+
+    private val lpmRepository: LpmRepository
+        get() = LpmRepository.getInstance(args = mock())
 
     @Test
     fun `Uses new payment selection if there's no existing one`() {
@@ -127,6 +131,121 @@ class PaymentSelectionUpdaterTest {
             newState = newState,
         )
         assertThat(result).isNull()
+    }
+
+    @Test
+    fun `PaymentSelection is reset when payment method requires mandate after updating intent`() {
+        val existingSelection = PaymentSelection.New.GenericPaymentMethod(
+            labelResource = "paypal",
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        // Paypal PaymentIntent does not require a mandate, but paypal SetupIntent does
+        val newState = mockPaymentSheetState(
+            paymentMethodTypes = listOf("paypal"),
+            customerPaymentMethods = PaymentMethodFixtures.createCards(3),
+        )
+
+        lpmRepository.update(
+            stripeIntent = SETUP_INTENT.copy(paymentMethodTypes = listOf("card", "paypal")),
+            serverLpmSpecs = null,
+        )
+
+        val updater = createUpdater(stripeIntent = SETUP_INTENT)
+
+        val result = updater(
+            currentSelection = existingSelection,
+            newState = newState,
+        )
+
+        assertThat(result).isEqualTo(null)
+    }
+
+    @Test
+    fun `PaymentSelection is preserved when payment method no longer requires mandate after updating intent`() {
+        lpmRepository.update(
+            SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "paypal")
+            ),
+            null
+        )
+
+        val existingSelection = PaymentSelection.New.GenericPaymentMethod(
+            labelResource = "paypal",
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL.copy(
+                requiresMandate = true
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        // Paypal PaymentIntent does not require a mandate, but paypal SetupIntent does
+        val newState = mockPaymentSheetState(
+            paymentMethodTypes = listOf("paypal"),
+            customerPaymentMethods = PaymentMethodFixtures.createCards(3),
+        )
+
+        lpmRepository.update(PAYMENT_INTENT, null)
+
+        val updater = createUpdater(stripeIntent = PAYMENT_INTENT)
+
+        val result = updater(
+            currentSelection = existingSelection,
+            newState = newState,
+        )
+
+        assertThat(result).isEqualTo(existingSelection)
+    }
+
+    @Test
+    fun `PaymentSelection is preserved when payment method still requires mandate after updating intent`() {
+        lpmRepository.update(
+            SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                countryCode = "ca",
+                paymentMethodTypes = listOf("card", "paypal"),
+            ),
+            null
+        )
+
+        val existingSelection = PaymentSelection.New.GenericPaymentMethod(
+            labelResource = "paypal",
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL.copy(
+                requiresMandate = true
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        // Paypal PaymentIntent does not require a mandate, but paypal SetupIntent does
+        val newState = mockPaymentSheetState(
+            paymentMethodTypes = listOf("paypal"),
+            customerPaymentMethods = PaymentMethodFixtures.createCards(3),
+        )
+
+        lpmRepository.update(
+            SETUP_INTENT.copy(
+                countryCode = "de",
+                paymentMethodTypes = listOf("card", "paypal"),
+            ),
+            null
+        )
+
+        val updater = createUpdater(stripeIntent = PAYMENT_INTENT)
+
+        val result = updater(
+            currentSelection = existingSelection,
+            newState = newState,
+        )
+
+        assertThat(result).isEqualTo(existingSelection)
     }
 
     private fun mockPaymentSheetState(

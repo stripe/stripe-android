@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.forms.requiresMandateFor
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -46,13 +44,7 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor(
         return when (selection) {
             is PaymentSelection.New -> {
                 val code = selection.paymentMethodCreateParams.typeCode
-
-                val requiresNoNewMandate = !shouldAskForMandate(
-                    code = code,
-                    stripeIntent = state.stripeIntent,
-                    currentSelection = selection,
-                )
-
+                val requiresNoNewMandate = !shouldAskForMandate(selection)
                 code in allowedTypes && code in availableTypes && requiresNoNewMandate
             }
             is PaymentSelection.Saved -> {
@@ -70,24 +62,15 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor(
     }
 
     private fun shouldAskForMandate(
-        code: String,
-        stripeIntent: StripeIntent,
-        currentSelection: PaymentSelection?,
+        currentSelection: PaymentSelection.New,
     ): Boolean {
-        val newSelection = lpmRepository.fromCode(code)!!
-        val newSelectionRequiresMandate = newSelection.requiresMandateFor(stripeIntent)
+        val code = currentSelection.paymentMethodCreateParams.typeCode
 
-        return if (newSelectionRequiresMandate) {
-            // If the new selection requires a mandate, we should check if the same mandate has
-            // been displayed before for the current selection. We can only avoid asking for the
-            // mandate if the current selection is of the same type and already required a mandate.
-            val oldSelection = currentSelection as? PaymentSelection.New
+        // This is the SupportedPaymentMethod based on the most recently fetched StripeIntent
+        val paymentMethodRequiresMandate = lpmRepository.fromCode(code)!!.requiresMandate
 
-            if (oldSelection != null && oldSelection.code == newSelection.code) {
-                !oldSelection.requiresMandate
-            } else {
-                true
-            }
+        return if (paymentMethodRequiresMandate) {
+            !currentSelection.customerAcknowledgedMandate
         } else {
             false
         }
@@ -98,5 +81,5 @@ private val PaymentSelection.New.code: String
     get() = paymentMethodCreateParams.typeCode
 
 
-private val PaymentSelection.New.requiresMandate: Boolean
+private val PaymentSelection.New.customerAcknowledgedMandate: Boolean
     get() = paymentMethodCreateParams.requiresMandate()
