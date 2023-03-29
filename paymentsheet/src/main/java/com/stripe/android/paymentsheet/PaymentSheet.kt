@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.CreateIntentCallback
 import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.PaymentIntent
@@ -44,6 +45,7 @@ class PaymentSheet internal constructor(
         DefaultPaymentSheetLauncher(activity, callback)
     )
 
+    @ExperimentalPaymentSheetDecouplingApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         activity: ComponentActivity,
@@ -55,6 +57,7 @@ class PaymentSheet internal constructor(
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
     }
 
+    @ExperimentalPaymentSheetDecouplingApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         activity: ComponentActivity,
@@ -79,6 +82,7 @@ class PaymentSheet internal constructor(
         DefaultPaymentSheetLauncher(fragment, callback)
     )
 
+    @ExperimentalPaymentSheetDecouplingApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         fragment: Fragment,
@@ -90,6 +94,7 @@ class PaymentSheet internal constructor(
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
     }
 
+    @ExperimentalPaymentSheetDecouplingApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         fragment: Fragment,
@@ -145,6 +150,7 @@ class PaymentSheet internal constructor(
      * @param intentConfiguration The [IntentConfiguration] to use.
      * @param configuration An optional [PaymentSheet] configuration.
      */
+    @ExperimentalPaymentSheetDecouplingApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @JvmOverloads
     fun presentWithIntentConfiguration(
@@ -181,6 +187,7 @@ class PaymentSheet internal constructor(
             }
         }
 
+        @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
         @Parcelize
         internal data class DeferredIntent(
             val intentConfiguration: IntentConfiguration,
@@ -192,6 +199,7 @@ class PaymentSheet internal constructor(
         }
     }
 
+    @ExperimentalPaymentSheetDecouplingApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     class IntentConfiguration(
@@ -205,12 +213,14 @@ class PaymentSheet internal constructor(
         internal val setupFutureUse: SetupFutureUse?
             get() = mode.setupFutureUse
 
+        @ExperimentalPaymentSheetDecouplingApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         sealed class Mode : Parcelable {
 
             internal abstract val setupFutureUse: SetupFutureUse?
             internal abstract val captureMethod: CaptureMethod?
 
+            @ExperimentalPaymentSheetDecouplingApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
             class Payment(
@@ -220,6 +230,7 @@ class PaymentSheet internal constructor(
                 override val captureMethod: CaptureMethod = CaptureMethod.Automatic,
             ) : Mode()
 
+            @ExperimentalPaymentSheetDecouplingApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
             class Setup(
@@ -232,12 +243,14 @@ class PaymentSheet internal constructor(
             }
         }
 
+        @ExperimentalPaymentSheetDecouplingApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class SetupFutureUse {
             OnSession,
             OffSession,
         }
 
+        @ExperimentalPaymentSheetDecouplingApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class CaptureMethod {
             Automatic,
@@ -919,6 +932,7 @@ class PaymentSheet internal constructor(
          * @param configuration An optional [PaymentSheet] configuration.
          * @param callback called with the result of configuring the FlowController.
          */
+        @ExperimentalPaymentSheetDecouplingApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun configureWithIntentConfiguration(
             intentConfiguration: IntentConfiguration,
@@ -982,6 +996,7 @@ class PaymentSheet internal constructor(
                 ).create()
             }
 
+            @ExperimentalPaymentSheetDecouplingApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
             fun create(
@@ -998,6 +1013,7 @@ class PaymentSheet internal constructor(
                 ).create()
             }
 
+            @ExperimentalPaymentSheetDecouplingApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
             fun create(
@@ -1034,6 +1050,7 @@ class PaymentSheet internal constructor(
                 ).create()
             }
 
+            @ExperimentalPaymentSheetDecouplingApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
             fun create(
@@ -1050,6 +1067,7 @@ class PaymentSheet internal constructor(
                 ).create()
             }
 
+            @ExperimentalPaymentSheetDecouplingApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
             fun create(

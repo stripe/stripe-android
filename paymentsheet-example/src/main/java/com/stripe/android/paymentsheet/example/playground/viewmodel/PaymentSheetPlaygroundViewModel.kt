@@ -11,6 +11,7 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.stripe.android.CreateIntentCallback
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -27,10 +28,10 @@ import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlinx.coroutines.withContext
 
 class PaymentSheetPlaygroundViewModel(
     application: Application
@@ -226,6 +227,7 @@ class PaymentSheetPlaygroundViewModel(
             }
     }
 
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Suppress("UNUSED_PARAMETER")
     fun createIntent(
         paymentMethodId: String,
@@ -239,6 +241,7 @@ class PaymentSheetPlaygroundViewModel(
         return CreateIntentCallback.Result.Success(clientSecret = clientSecret.value!!)
     }
 
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     suspend fun createAndConfirmIntent(
         paymentMethodId: String,
         shouldSavePaymentMethod: Boolean,

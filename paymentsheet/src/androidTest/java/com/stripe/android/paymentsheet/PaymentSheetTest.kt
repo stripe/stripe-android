@@ -10,6 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CreateIntentCallback
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -128,6 +129,7 @@ internal class PaymentSheetTest {
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun testDeferredIntentCardPayment() {
         networkRule.enqueue(
@@ -204,6 +206,7 @@ internal class PaymentSheetTest {
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun testDeferredIntentFailedCardPayment() {
         networkRule.enqueue(

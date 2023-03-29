@@ -58,6 +58,7 @@ interface IntentConfirmationInterceptor {
     }
 }
 
+@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val context: Context,

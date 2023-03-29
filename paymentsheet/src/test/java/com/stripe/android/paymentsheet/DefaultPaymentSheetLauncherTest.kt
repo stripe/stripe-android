@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CreateIntentCallback
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import org.junit.runner.RunWith
@@ -55,6 +56,7 @@ class DefaultPaymentSheetLauncherTest {
         }
     }
 
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
         IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback {

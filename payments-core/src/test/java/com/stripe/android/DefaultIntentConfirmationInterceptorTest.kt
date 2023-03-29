@@ -22,6 +22,7 @@ import java.util.Objects
 import kotlin.test.BeforeTest
 import kotlin.test.assertFailsWith
 
+@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 @RunWith(RobolectricTestRunner::class)
 class DefaultIntentConfirmationInterceptorTest {
 
