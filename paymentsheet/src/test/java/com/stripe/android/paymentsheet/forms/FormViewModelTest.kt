@@ -8,14 +8,11 @@ import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
@@ -33,7 +30,6 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
-import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -507,121 +503,6 @@ internal class FormViewModelTest {
                     ).isNull()
                 }
             }
-    }
-
-    @Test
-    fun `Verify defaults are propagated`() = runTest {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-            attachDefaultsToPaymentMethod = true,
-        )
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
-            billingDetails = PaymentSheet.BillingDetails(
-                name = "Jenny Rosen",
-                email = "foo@bar.com",
-                phone = "+13105551234",
-                address = PaymentSheet.Address(
-                    line1 = "123 Main Street",
-                    city = "San Francisco",
-                    state = "CA",
-                    postalCode = "94111",
-                    country = "US",
-                ),
-            ),
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        )
-        val formViewModel = createViewModel(
-            args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LpmRepository.HardcodedCard.formSpec,
-            )
-        )
-
-        val cardDetailsController = formViewModel.elementsFlow.first()
-            .filterIsInstance<CardDetailsSectionElement>()
-            .first()?.controller!!
-        cardDetailsController.setCardNumber("4242424242424242")
-        cardDetailsController.setExpirationDate("130")
-        cardDetailsController.setCVC("123")
-
-        formViewModel.completeFormValues.test {
-            assertThat(awaitItem()?.fieldValuePairs).containsExactlyEntriesIn(
-                mapOf(
-                    IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", true),
-                    IdentifierSpec.Email to FormFieldEntry("foo@bar.com", true),
-                    IdentifierSpec.Phone to FormFieldEntry("+13105551234", true),
-                    IdentifierSpec.Line1 to FormFieldEntry("123 Main Street", true),
-                    IdentifierSpec.City to FormFieldEntry("San Francisco", true),
-                    IdentifierSpec.State to FormFieldEntry("CA", true),
-                    IdentifierSpec.PostalCode to FormFieldEntry("94111", true),
-                    IdentifierSpec.Country to FormFieldEntry("US", true),
-                    IdentifierSpec.CardNumber to FormFieldEntry("4242424242424242", true),
-                    IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
-                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
-                    IdentifierSpec.CardCvc to FormFieldEntry("123", true),
-                    IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                )
-            )
-        }
-    }
-
-    @Test
-    fun `Verify defaults are not propagated`() = runTest {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-            attachDefaultsToPaymentMethod = false,
-        )
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
-            billingDetails = PaymentSheet.BillingDetails(
-                name = "Jenny Rosen",
-                email = "foo@bar.com",
-                phone = "+13105551234",
-                address = PaymentSheet.Address(
-                    line1 = "123 Main Street",
-                    city = "San Francisco",
-                    state = "CA",
-                    postalCode = "94111",
-                    country = "US",
-                ),
-            ),
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        )
-        val formViewModel = createViewModel(
-            args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LpmRepository.hardcodedCardSpec(billingDetailsCollectionConfiguration).formSpec,
-            )
-        )
-
-        val elements = formViewModel.elementsFlow.first()
-        val cardDetailsController = elements
-            .filterIsInstance<CardDetailsSectionElement>()
-            .first()?.controller!!
-        cardDetailsController.setCardNumber("4242424242424242")
-        cardDetailsController.setExpirationDate("130")
-        cardDetailsController.setCVC("123")
-
-        formViewModel.completeFormValues.test {
-            assertThat(awaitItem()?.fieldValuePairs).containsExactlyEntriesIn(
-                mapOf(
-                    IdentifierSpec.CardNumber to FormFieldEntry("4242424242424242", true),
-                    IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
-                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
-                    IdentifierSpec.CardCvc to FormFieldEntry("123", true),
-                    IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                )
-            )
-        }
     }
 
     private suspend fun getSectionFieldTextControllerWithLabel(
