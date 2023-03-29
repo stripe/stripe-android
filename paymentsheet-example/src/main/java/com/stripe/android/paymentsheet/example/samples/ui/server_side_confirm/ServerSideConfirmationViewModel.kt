@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
+import com.github.kittinunf.fuel.core.requests.suspendable
 import com.google.gson.Gson
 import com.stripe.android.CreateIntentCallback
 import com.stripe.android.PaymentConfiguration
@@ -13,12 +14,14 @@ import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.model.updateWithResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
-import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateIntentResponse
+import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateAndConfirmIntentResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleUpdateResponse
+import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.example.samples.networking.toCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.toCreateIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.toUpdateRequest
 import com.stripe.android.paymentsheet.model.PaymentOption
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,9 +31,8 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.Result
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlin.time.Duration.Companion.milliseconds
 import com.github.kittinunf.result.Result as ApiResult
 
@@ -44,7 +46,7 @@ internal class ServerSideConfirmationViewModel(
     val state: StateFlow<ServerSideConfirmationViewState> = _state
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             prepareCheckout()
         }
 
@@ -81,31 +83,29 @@ internal class ServerSideConfirmationViewModel(
     suspend fun createAndConfirmIntent(
         paymentMethodId: String,
         shouldSavePaymentMethod: Boolean,
-    ): CreateIntentCallback.Result {
-
+    ): CreateIntentCallback.Result = withContext(Dispatchers.IO) {
         val request = state.value.cartState.toCreateIntentRequest(
             paymentMethodId = paymentMethodId,
             shouldSavePaymentMethod = shouldSavePaymentMethod,
+            returnUrl = "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
         )
 
         val requestBody = Gson().toJson(request)
 
-        val result = suspendCoroutine { continuation ->
-            Fuel.post("$backendUrl/create_intent")
-                .jsonBody(requestBody)
-                .responseString { _, _, result ->
-                    continuation.resume(result)
-                }
-        }
+        val apiResult = Fuel
+            .post("$backendUrl/confirm_intent")
+            .jsonBody(requestBody)
+            .suspendable()
+            .awaitModel<ExampleCreateAndConfirmIntentResponse>()
 
-        return when (result) {
+        when (apiResult) {
             is ApiResult.Success -> {
-                val response = Gson().fromJson(result.get(), ExampleCreateIntentResponse::class.java)
-                CreateIntentCallback.Result.Success(response.clientSecret)
+                CreateIntentCallback.Result.Success(apiResult.value.clientSecret)
             }
             is ApiResult.Failure -> {
+                val errorMessage = "Unable to create intent\n${apiResult.error.exception}"
                 CreateIntentCallback.Result.Failure(
-                    cause = RuntimeException("Unable to create intent"),
+                    cause = RuntimeException(errorMessage),
                     displayMessage = "Something went wrong…",
                 )
             }
@@ -159,22 +159,19 @@ internal class ServerSideConfirmationViewModel(
         val request = currentState.cartState.toCheckoutRequest()
         val requestBody = Gson().toJson(request)
 
-        val result = suspendCoroutine { continuation ->
-            Fuel.post("$backendUrl/checkout")
-                .jsonBody(requestBody)
-                .responseString { _, _, result ->
-                    continuation.resume(result)
-                }
-        }
+        val apiResult = Fuel
+            .post("$backendUrl/checkout")
+            .jsonBody(requestBody)
+            .suspendable()
+            .awaitModel<ExampleCheckoutResponse>()
 
-        when (result) {
+        when (apiResult) {
             is ApiResult.Success -> {
-                val response = Gson().fromJson(result.get(), ExampleCheckoutResponse::class.java)
-                val newCartState = currentState.cartState.updateWithResponse(response)
+                val newCartState = currentState.cartState.updateWithResponse(apiResult.value)
 
                 PaymentConfiguration.init(
                     context = getApplication(),
-                    publishableKey = response.publishableKey,
+                    publishableKey = apiResult.value.publishableKey,
                 )
 
                 _state.update {
@@ -188,7 +185,7 @@ internal class ServerSideConfirmationViewModel(
                 }
             }
             is ApiResult.Failure -> {
-                val status = "Preparing checkout failed\n${result.error.message}"
+                val status = "Preparing checkout failed\n${apiResult.error.message}"
                 _state.update {
                     it.copy(isProcessing = false, isError = true, status = status)
                 }
@@ -223,28 +220,27 @@ internal class ServerSideConfirmationViewModel(
         }
     }
 
-    private suspend fun updateCart(currentState: CartState): Result<CartState> {
+    private suspend fun updateCart(
+        currentState: CartState,
+    ): Result<CartState> = withContext(Dispatchers.IO) {
         _state.update { it.copy(isProcessing = true) }
 
         val request = currentState.toUpdateRequest()
         val requestBody = Gson().toJson(request)
 
-        val result = suspendCoroutine { continuation ->
-            Fuel.post("$backendUrl/compute_totals")
-                .jsonBody(requestBody)
-                .responseString { _, _, result ->
-                    continuation.resume(result)
-                }
-        }
+        val apiResult = Fuel
+            .post("$backendUrl/compute_totals")
+            .jsonBody(requestBody)
+            .suspendable()
+            .awaitModel<ExampleUpdateResponse>()
 
-        return when (result) {
+        when (apiResult) {
             is ApiResult.Success -> {
-                val response = Gson().fromJson(result.get(), ExampleUpdateResponse::class.java)
-                val newCartState = currentState.updateWithResponse(response)
+                val newCartState = currentState.updateWithResponse(apiResult.value)
                 Result.success(newCartState)
             }
             is ApiResult.Failure -> {
-                Result.failure(result.error.exception)
+                Result.failure(apiResult.error.exception)
             }
         }
     }

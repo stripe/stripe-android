@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
@@ -12,6 +11,7 @@ import com.google.gson.Gson
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
+import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.example.samples.networking.toCheckoutRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +42,7 @@ internal class CompleteFlowViewModel(
                 .post("$backendUrl/checkout")
                 .jsonBody(requestBody)
                 .suspendable()
-                .awaitResult(ExampleCheckoutResponse.Deserializer)
+                .awaitModel<ExampleCheckoutResponse>()
 
             when (apiResult) {
                 is Result.Success -> {

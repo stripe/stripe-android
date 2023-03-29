@@ -100,7 +100,7 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
 private fun determinePaymentMethodLabel(uiState: ServerSideConfirmationViewState): String {
     val context = LocalContext.current
     return remember(uiState) {
-        if (uiState.paymentOption?.label  != null) {
+        if (uiState.paymentOption?.label != null) {
             uiState.paymentOption.label
         } else if (!uiState.isProcessing) {
             context.getString(R.string.select)
