@@ -349,7 +349,7 @@ class PaymentSheet internal constructor(
         val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     ) : Parcelable {
 
-        constructor(
+        @JvmOverloads constructor(
             merchantDisplayName: String,
             customer: CustomerConfiguration? = null,
             googlePay: GooglePayConfiguration? = null,
