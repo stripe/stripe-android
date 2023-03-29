@@ -119,19 +119,19 @@ private fun AccountRow(
                     errorContent = { InstitutionPlaceholder(modifier) }
                 )
             }
+            Text(
+                text,
+                style = typography.captionTightEmphasized,
+                color = colors.textSecondary
+            )
         }
-        Text(
-            text,
-            style = typography.captionTightEmphasized,
-            color = colors.textSecondary
-        )
-    }
-    if (subText != null) {
-        Text(
-            subText,
-            style = typography.captionTightEmphasized,
-            color = colors.textSecondary
-        )
+        if (subText != null) {
+            Text(
+                subText,
+                style = typography.captionTightEmphasized,
+                color = colors.textSecondary
+            )
+        }
     }
 }
 
