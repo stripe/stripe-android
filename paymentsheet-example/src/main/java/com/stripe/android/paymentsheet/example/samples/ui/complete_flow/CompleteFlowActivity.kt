@@ -57,7 +57,6 @@ internal class CompleteFlowActivity : AppCompatActivity() {
                 Receipt(
                     isLoading = uiState.isProcessing,
                     cartState = uiState.cartState,
-                    isEditable = false,
                 ) {
                     BuyButton(
                         buyButtonEnabled = !uiState.isProcessing,

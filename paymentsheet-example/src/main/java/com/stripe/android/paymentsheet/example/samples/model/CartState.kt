@@ -27,7 +27,7 @@ data class CartState(
             isSubscription = false,
         )
 
-        val static: CartState = CartState(
+        val defaultWithHardcodedPrices: CartState = CartState(
             products = listOf(CartProduct.hotDog, CartProduct.salad),
             isSubscription = false,
             subtotal = 899,

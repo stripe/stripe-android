@@ -22,7 +22,7 @@ import com.github.kittinunf.result.Result as ApiResult
 internal class CustomFlowViewModel : ViewModel() {
 
     private val _state = MutableStateFlow(
-        value = CustomFlowViewState(cartState = CartState.static),
+        value = CustomFlowViewState(cartState = CartState.defaultWithHardcodedPrices),
     )
     val state: StateFlow<CustomFlowViewState> = _state
 
@@ -43,19 +43,15 @@ internal class CustomFlowViewModel : ViewModel() {
         _state.update {
             it.copy(
                 isProcessing = false,
-                status = error?.let { "Failed to configure\n$it" },
+                status = error?.let { e -> "Failed to configure\n$e" },
             )
         }
     }
 
     fun handlePaymentOptionChanged(paymentOption: PaymentOption?) {
         viewModelScope.launch {
-            val icon = paymentOption?.icon()
             _state.update {
-                it.copy(
-                    paymentOptionLabel = paymentOption?.label,
-                    paymentOptionIcon = icon,
-                )
+                it.copy(paymentOption = paymentOption,)
             }
         }
     }

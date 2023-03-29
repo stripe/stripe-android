@@ -6,10 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -44,16 +46,7 @@ internal class CustomFlowActivity : AppCompatActivity() {
         setContent {
             MaterialTheme {
                 val uiState by viewModel.state.collectAsState()
-
-                val paymentMethodLabel = remember(uiState) {
-                    if (uiState.paymentOptionLabel  != null) {
-                        uiState.paymentOptionLabel!!
-                    } else if (!uiState.isProcessing) {
-                        getString(R.string.select)
-                    } else {
-                        getString(R.string.loading)
-                    }
-                }
+                val paymentMethodLabel = determinePaymentMethodLabel(uiState)
 
                 uiState.paymentInfo?.let { paymentInfo ->
                     LaunchedEffect(paymentInfo) {
@@ -76,10 +69,8 @@ internal class CustomFlowActivity : AppCompatActivity() {
                     PaymentMethodSelector(
                         isEnabled = uiState.isPaymentMethodButtonEnabled,
                         paymentMethodLabel = paymentMethodLabel,
-                        paymentMethodIcon = uiState.paymentOptionIcon,
-                        onClick = {
-                            flowController.presentPaymentOptions()
-                        }
+                        paymentMethodIcon = uiState.paymentOption?.icon(),
+                        onClick = flowController::presentPaymentOptions,
                     )
                     BuyButton(
                         buyButtonEnabled = uiState.isBuyButtonEnabled,
@@ -108,5 +99,19 @@ internal class CustomFlowActivity : AppCompatActivity() {
             configuration = paymentInfo.paymentSheetConfig,
             callback = viewModel::handleFlowControllerConfigured,
         )
+    }
+}
+
+@Composable
+private fun determinePaymentMethodLabel(uiState: CustomFlowViewState): String {
+    val context = LocalContext.current
+    return remember(uiState) {
+        if (uiState.paymentOption?.label  != null) {
+            uiState.paymentOption.label
+        } else if (!uiState.isProcessing) {
+            context.getString(R.string.select)
+        } else {
+            context.getString(R.string.loading)
+        }
     }
 }

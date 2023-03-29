@@ -22,7 +22,7 @@ import com.github.kittinunf.result.Result as ApiResult
 internal class CompleteFlowViewModel : ViewModel() {
 
     private val _state = MutableStateFlow(
-        value = CompleteFlowViewState(cartState = CartState.static),
+        value = CompleteFlowViewState(cartState = CartState.defaultWithHardcodedPrices),
     )
     val state: StateFlow<CompleteFlowViewState> = _state
 
