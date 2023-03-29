@@ -34,10 +34,10 @@ class PaymentSheet internal constructor(
     private val paymentSheetLauncher: PaymentSheetLauncher
 ) {
     /**
-     * Constructor to be used when launching the payment sheet from an Activity.
+     * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity].
      *
-     * @param activity  the Activity that is presenting the payment sheet.
-     * @param callback  called with the result of the payment after the payment sheet is dismissed.
+     * @param activity The Activity that is presenting [PaymentSheet].
+     * @param callback Called with the result of the payment after [PaymentSheet] is dismissed.
      */
     constructor(
         activity: ComponentActivity,
@@ -46,6 +46,15 @@ class PaymentSheet internal constructor(
         DefaultPaymentSheetLauncher(activity, callback)
     )
 
+    /**
+     * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and intending
+     * to create the [PaymentIntent] or [SetupIntent] on your server.
+     *
+     * @param activity The Activity that is presenting [PaymentSheet].
+     * @param createIntentCallback Called when the customer confirms the payment or setup.
+     * @param paymentResultCallback Called with the result of the payment or setup after
+     * [PaymentSheet] is dismissed.
+     */
     @ExperimentalPaymentSheetDecouplingApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
@@ -58,6 +67,16 @@ class PaymentSheet internal constructor(
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
     }
 
+    /**
+     * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and intending
+     * to create and confirm the [PaymentIntent] or [SetupIntent] on your server.
+     *
+     * @param activity The Activity that is presenting [PaymentSheet].
+     * @param createIntentCallbackForServerSideConfirmation Called when the customer confirms the
+     * payment or setup.
+     * @param paymentResultCallback Called with the result of the payment or setup after
+     * [PaymentSheet] is dismissed.
+     */
     @ExperimentalPaymentSheetDecouplingApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
@@ -83,6 +102,15 @@ class PaymentSheet internal constructor(
         DefaultPaymentSheetLauncher(fragment, callback)
     )
 
+    /**
+     * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and intending
+     * to create the [PaymentIntent] or [SetupIntent] on your server.
+     *
+     * @param fragment The Fragment that is presenting [PaymentSheet].
+     * @param createIntentCallback Called when the customer confirms the payment or setup.
+     * @param paymentResultCallback Called with the result of the payment or setup after
+     * [PaymentSheet] is dismissed.
+     */
     @ExperimentalPaymentSheetDecouplingApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
@@ -95,6 +123,16 @@ class PaymentSheet internal constructor(
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
     }
 
+    /**
+     * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and intending
+     * to create and confirm the [PaymentIntent] or [SetupIntent] on your server.
+     *
+     * @param fragment The Fragment that is presenting [PaymentSheet].
+     * @param createIntentCallbackForServerSideConfirmation Called when the customer confirms the
+     * payment or setup.
+     * @param paymentResultCallback Called with the result of the payment or setup after
+     * [PaymentSheet] is dismissed.
+     */
     @ExperimentalPaymentSheetDecouplingApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
@@ -108,12 +146,13 @@ class PaymentSheet internal constructor(
     }
 
     /**
-     * Present the payment sheet to process a [PaymentIntent].
+     * Present [PaymentSheet] to process a [PaymentIntent].
+     *
      * If the [PaymentIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
      * with [PaymentSheetResult.Completed].
      *
-     * @param paymentIntentClientSecret the client secret for the [PaymentIntent].
-     * @param configuration optional [PaymentSheet] settings.
+     * @param paymentIntentClientSecret The client secret of the [PaymentIntent].
+     * @param configuration An optional [PaymentSheet] configuration.
      */
     @JvmOverloads
     fun presentWithPaymentIntent(
@@ -127,12 +166,13 @@ class PaymentSheet internal constructor(
     }
 
     /**
-     * Present the payment sheet to process a [SetupIntent].
+     * Present [PaymentSheet] to process a [SetupIntent].
+     *
      * If the [SetupIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
      * with [PaymentSheetResult.Completed].
      *
-     * @param setupIntentClientSecret the client secret for the [SetupIntent].
-     * @param configuration optional [PaymentSheet] settings.
+     * @param setupIntentClientSecret The client secret of the [SetupIntent].
+     * @param configuration An optional [PaymentSheet] configuration.
      */
     @JvmOverloads
     fun presentWithSetupIntent(
@@ -146,7 +186,7 @@ class PaymentSheet internal constructor(
     }
 
     /**
-     * Present the payment sheet with an [IntentConfiguration].
+     * Present [PaymentSheet] with an [IntentConfiguration].
      *
      * @param intentConfiguration The [IntentConfiguration] to use.
      * @param configuration An optional [PaymentSheet] configuration.
@@ -200,6 +240,17 @@ class PaymentSheet internal constructor(
         }
     }
 
+    /**
+     * Contains information needed to render [PaymentSheet]. The values are used to calculate
+     * the payment methods displayed and influence the UI.
+     *
+     * **Note**: The [PaymentIntent] or [SetupIntent] you create on your server must have the same
+     * values or the payment/setup will fail.
+     *
+     * @param mode Whether [PaymentSheet] should present a payment or setup flow.
+     * @param paymentMethodTypes The payment methods types to display. If empty, we dynamically
+     * determine the payment method types using your [Stripe Dashboard settings](https://dashboard.stripe.com/settings/payment_methods).
+     */
     @ExperimentalPaymentSheetDecouplingApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -214,6 +265,9 @@ class PaymentSheet internal constructor(
         internal val setupFutureUse: SetupFutureUse?
             get() = mode.setupFutureUse
 
+        /**
+         * Contains information about the desired payment or setup flow.
+         */
         @ExperimentalPaymentSheetDecouplingApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         sealed class Mode : Parcelable {
@@ -221,6 +275,19 @@ class PaymentSheet internal constructor(
             internal abstract val setupFutureUse: SetupFutureUse?
             internal abstract val captureMethod: CaptureMethod?
 
+            /**
+             * Use this if your integration creates a [PaymentIntent].
+             *
+             * @param amount Amount intended to be collected in the smallest currency unit
+             * (e.g. 100 cents to charge $1.00). Shown in Google Pay, Buy now pay later UIs, the Pay
+             * button, and influences available payment methods. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-amount) for more info.
+             * @param currency Three-letter ISO currency code. Filters out payment methods based on
+             * supported currency. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-currency) for more info.
+             * @param setupFutureUse Indicates that you intend to make future payments. See
+             * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
+             * @param captureMethod Controls when the funds will be captured from the customer's
+             * account. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method) for more info.
+             */
             @ExperimentalPaymentSheetDecouplingApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
@@ -231,6 +298,14 @@ class PaymentSheet internal constructor(
                 override val captureMethod: CaptureMethod = CaptureMethod.Automatic,
             ) : Mode()
 
+            /**
+             * Use this if your integration creates a [SetupIntent].
+             *
+             * @param currency Three-letter ISO currency code. Filters out payment methods based on
+             * supported currency. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-currency) for more info.
+             * @param setupFutureUse Indicates that you intend to make future payments. See
+             * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
+             */
             @ExperimentalPaymentSheetDecouplingApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
@@ -244,17 +319,46 @@ class PaymentSheet internal constructor(
             }
         }
 
+        /**
+         * Indicates that you intend to make future payments with this [PaymentIntent]'s payment
+         * method. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
+         */
         @ExperimentalPaymentSheetDecouplingApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class SetupFutureUse {
+
+            /**
+             * Use this if you intend to only reuse the payment method when your customer is present
+             * in your checkout flow.
+             */
             OnSession,
+
+            /**
+             * Use this if your customer may or may not be present in your checkout flow.
+             */
             OffSession,
         }
 
+        /**
+         * Controls when the funds will be captured.
+         *
+         * See [docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method).
+         */
         @ExperimentalPaymentSheetDecouplingApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class CaptureMethod {
+
+            /**
+             * Stripe automatically captures funds when the customer authorizes the payment.
+             */
             Automatic,
+
+            /**
+             * Place a hold on the funds when the customer authorizes the payment, but don't capture
+             * the funds until later.
+             *
+             * **Note**: Not all payment methods support this.
+             */
             Manual,
         }
     }
@@ -1015,12 +1119,13 @@ class PaymentSheet internal constructor(
         companion object {
 
             /**
-             * Create the FlowController when launching the payment sheet from an Activity.
+             * Create the [FlowController] when launching [PaymentSheet] from a [ComponentActivity].
              *
-             * @param activity  the Activity that is presenting the payment sheet.
-             * @param paymentOptionCallback called when the customer's desired payment method
-             *      changes.  Called in response to the [PaymentSheet#presentPaymentOptions()]
-             * @param paymentResultCallback called when a [PaymentSheetResult] is available.
+             * @param activity The Activity that is presenting [PaymentSheet].
+             * @param paymentOptionCallback Called when the customer's selected payment method
+             * changes.
+             * @param paymentResultCallback Called with the result of the payment after
+             * [PaymentSheet] is dismissed.
              */
             @JvmStatic
             fun create(
@@ -1035,6 +1140,17 @@ class PaymentSheet internal constructor(
                 ).create()
             }
 
+            /**
+             * Create the [FlowController] when launching [PaymentSheet] from a [ComponentActivity]
+             * and intending to create the [PaymentIntent] or [SetupIntent] on your server.
+             *
+             * @param activity The Activity that is presenting [PaymentSheet].
+             * @param paymentOptionCallback Called when the customer's selected payment method
+             * changes.
+             * @param createIntentCallback Called when the customer confirms the payment or setup.
+             * @param paymentResultCallback Called with the result of the payment after
+             * [PaymentSheet] is dismissed.
+             */
             @ExperimentalPaymentSheetDecouplingApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
@@ -1052,6 +1168,19 @@ class PaymentSheet internal constructor(
                 ).create()
             }
 
+            /**
+             * Create the [FlowController] when launching [PaymentSheet] from a [ComponentActivity]
+             * and intending to create and confirm the [PaymentIntent] or [SetupIntent] on your
+             * server.
+             *
+             * @param activity The Activity that is presenting [PaymentSheet].
+             * @param paymentOptionCallback Called when the customer's selected payment method
+             * changes.
+             * @param createIntentCallbackForServerSideConfirmation Called when the customer
+             * confirms the payment or setup.
+             * @param paymentResultCallback Called with the result of the payment after
+             * [PaymentSheet] is dismissed.
+             */
             @ExperimentalPaymentSheetDecouplingApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
@@ -1070,9 +1199,9 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Create the FlowController when launching the payment sheet from a Fragment.
+             * Create the [FlowController] when launching [PaymentSheet] from a [Fragment].
              *
-             * @param fragment the Fragment that is presenting the payment sheet.
+             * @param fragment The Fragment that is presenting [PaymentSheet].
              * @param paymentOptionCallback called when the customer's [PaymentOption] selection changes.
              * @param paymentResultCallback called when a [PaymentSheetResult] is available.
              */
@@ -1089,6 +1218,17 @@ class PaymentSheet internal constructor(
                 ).create()
             }
 
+            /**
+             * Create the [FlowController] when launching [PaymentSheet] from a [Fragment] and
+             * intending to create the [PaymentIntent] or [SetupIntent] on your server.
+             *
+             * @param fragment The Fragment that is presenting [PaymentSheet].
+             * @param paymentOptionCallback Called when the customer's selected payment method
+             * changes.
+             * @param createIntentCallback Called when the customer confirms the payment or setup.
+             * @param paymentResultCallback Called with the result of the payment after
+             * [PaymentSheet] is dismissed.
+             */
             @ExperimentalPaymentSheetDecouplingApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
@@ -1106,6 +1246,18 @@ class PaymentSheet internal constructor(
                 ).create()
             }
 
+            /**
+             * Create the [FlowController] when launching [PaymentSheet] from a [Fragment] and
+             * intending to create and confirm the [PaymentIntent] or [SetupIntent] on your server.
+             *
+             * @param fragment The Fragment that is presenting [PaymentSheet].
+             * @param paymentOptionCallback Called when the customer's selected payment method
+             * changes.
+             * @param createIntentCallbackForServerSideConfirmation Called when the customer
+             * confirms the payment or setup.
+             * @param paymentResultCallback Called with the result of the payment after
+             * [PaymentSheet] is dismissed.
+             */
             @ExperimentalPaymentSheetDecouplingApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
