@@ -54,13 +54,15 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import dagger.Lazy
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -103,8 +105,11 @@ internal class DefaultFlowController @Inject internal constructor(
     lateinit var flowControllerComponent: FlowControllerComponent
 
     private var paymentLauncher: StripePaymentLauncher? = null
-    private var configureJob: CompletableJob? = null
     private var didLastConfigureFail: Boolean = false
+
+    private val configureRequests = MutableSharedFlow<ConfigureRequest>()
+    private val configureResults = Channel<Throwable?>(capacity = 1)
+    private var isConfiguring = AtomicBoolean(false)
 
     override var shippingDetails: AddressDetails?
         get() = viewModel.state?.config?.shippingDetails
@@ -131,6 +136,12 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     init {
+        lifecycleScope.launch {
+            configureRequests.mapLatest {
+                configurationHandler.configure(it.mode, it.config)
+            }.collect(configureResults::trySend)
+        }
+
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onCreate(owner: LifecycleOwner) {
@@ -212,24 +223,18 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
-        configureJob?.cancel()
+        lifecycleScope.launch {
+            isConfiguring.set(true)
 
-        configureJob = Job().apply {
-            invokeOnCompletion { error ->
-                if (error !is CancellationException) {
-                    callback.onConfigured(success = error == null, error = error)
-                }
-            }
-        }
+            val configureRequest = ConfigureRequest(mode, configuration)
+            configureRequests.tryEmit(configureRequest)
 
-        lifecycleScope.launch(configureJob!!) {
-            val error = configurationHandler.configure(mode, configuration)
-            didLastConfigureFail = error != null
+            val resultingError = configureResults.receive()
+            isConfiguring.set(false)
 
-            if (error != null) {
-                configureJob?.completeExceptionally(error)
-            } else {
-                configureJob?.complete()
+            if (isActive) {
+                didLastConfigureFail = resultingError != null
+                callback.onConfigured(success = resultingError == null, error = resultingError)
             }
         }
     }
@@ -288,7 +293,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 "The last call to a configureWith****() method has failed. Therefore, " +
                     "presentPaymentOptions() can't be called."
             )
-        } else if (configureJob?.isCompleted != true) {
+        } else if (isConfiguring.get()) {
             IllegalStateException(
                 "The last call to a configureWith****() method hasn't finished yet. Therefore, " +
                     "presentPaymentOptions() can't be called."
@@ -574,6 +579,11 @@ internal class DefaultFlowController @Inject internal constructor(
         val clientSecret: String,
         val config: PaymentSheet.Configuration?
     ) : Parcelable
+
+    private data class ConfigureRequest(
+        val mode: PaymentSheet.InitializationMode,
+        val config: PaymentSheet.Configuration?,
+    )
 
     companion object {
         fun getInstance(
