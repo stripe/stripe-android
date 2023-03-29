@@ -13,14 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.snackbar.Snackbar
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.PaymentMethodSelector
 import com.stripe.android.paymentsheet.example.samples.ui.Receipt
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 internal class CustomFlowActivity : AppCompatActivity() {
 
@@ -50,7 +47,6 @@ internal class CustomFlowActivity : AppCompatActivity() {
 
                 uiState.paymentInfo?.let { paymentInfo ->
                     LaunchedEffect(paymentInfo) {
-                        initializePaymentConfiguration(paymentInfo)
                         configureFlowController(paymentInfo)
                     }
                 }
@@ -82,15 +78,6 @@ internal class CustomFlowActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    private suspend fun initializePaymentConfiguration(
-        paymentInfo: CustomFlowViewState.PaymentInfo,
-    ) = withContext(Dispatchers.IO) {
-        PaymentConfiguration.init(
-            context = applicationContext,
-            publishableKey = paymentInfo.publishableKey,
-        )
     }
 
     private fun configureFlowController(paymentInfo: CustomFlowViewState.PaymentInfo) {

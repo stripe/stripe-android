@@ -10,12 +10,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.google.android.material.snackbar.Snackbar
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.ui.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.Receipt
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 internal class CompleteFlowActivity : AppCompatActivity() {
 
@@ -67,12 +64,10 @@ internal class CompleteFlowActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun presentPaymentSheet(paymentInfo: CompleteFlowViewState.PaymentInfo) {
+    private fun presentPaymentSheet(paymentInfo: CompleteFlowViewState.PaymentInfo) {
         if (!paymentInfo.shouldPresent) {
             return
         }
-
-        initializePaymentConfig(paymentInfo.publishableKey)
 
         paymentSheet.presentWithPaymentIntent(
             paymentIntentClientSecret = paymentInfo.clientSecret,
@@ -80,14 +75,5 @@ internal class CompleteFlowActivity : AppCompatActivity() {
         )
 
         viewModel.paymentSheetPresented()
-    }
-
-    private suspend fun initializePaymentConfig(
-        publishableKey: String,
-    ) = withContext(Dispatchers.IO) {
-        PaymentConfiguration.init(
-            context = applicationContext,
-            publishableKey = publishableKey,
-        )
     }
 }

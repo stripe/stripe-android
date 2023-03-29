@@ -1,10 +1,12 @@
 package com.stripe.android.paymentsheet.example.samples.ui.custom_flow
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.google.gson.Gson
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
@@ -19,7 +21,9 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import com.github.kittinunf.result.Result as ApiResult
 
-internal class CustomFlowViewModel : ViewModel() {
+internal class CustomFlowViewModel(
+    application: Application,
+) : AndroidViewModel(application) {
 
     private val _state = MutableStateFlow(
         value = CustomFlowViewState(cartState = CartState.defaultWithHardcodedPrices),
@@ -95,6 +99,11 @@ internal class CustomFlowViewModel : ViewModel() {
                     publishableKey = response.publishableKey,
                     clientSecret = response.paymentIntent,
                     customerConfiguration = response.makeCustomerConfig(),
+                )
+
+                PaymentConfiguration.init(
+                    context = getApplication(),
+                    publishableKey = paymentInfo.publishableKey,
                 )
 
                 _state.update {

@@ -1,10 +1,12 @@
 package com.stripe.android.paymentsheet.example.samples.ui.complete_flow
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.google.gson.Gson
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
@@ -19,7 +21,9 @@ import kotlin.coroutines.suspendCoroutine
 import kotlin.let
 import com.github.kittinunf.result.Result as ApiResult
 
-internal class CompleteFlowViewModel : ViewModel() {
+internal class CompleteFlowViewModel(
+    application: Application,
+) : AndroidViewModel(application) {
 
     private val _state = MutableStateFlow(
         value = CompleteFlowViewState(cartState = CartState.defaultWithHardcodedPrices),
@@ -54,6 +58,13 @@ internal class CompleteFlowViewModel : ViewModel() {
                     clientSecret = response.paymentIntent,
                     customerConfiguration = response.makeCustomerConfig(),
                     shouldPresent = true,
+                )
+            }
+
+            paymentInfo?.let {
+                PaymentConfiguration.init(
+                    context = getApplication(),
+                    publishableKey = it.publishableKey,
                 )
             }
 
