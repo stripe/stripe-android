@@ -8,10 +8,12 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
@@ -32,13 +34,15 @@ internal class PaymentSheetBillingConfigurationTest {
     @Test
     fun testPayloadWithDefaultsAndOverrides() {
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/consumers/sessions/lookup"),
-        ) { _ -> }
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.setResponseCode(200)
+        }
 
         networkRule.enqueue(
-            RequestMatchers.method("GET"),
-            RequestMatchers.path("/v1/elements/sessions"),
+            method("GET"),
+            path("/v1/elements/sessions"),
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
@@ -51,7 +55,7 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
             paymentSheet = PaymentSheet(it) { result ->
-                Truth.assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
+                assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()
             }
         }
@@ -103,27 +107,29 @@ internal class PaymentSheetBillingConfigurationTest {
             .performTextReplacement("123")
 
         networkRule.enqueue(
-            RequestMatchers.method("GET"),
-            RequestMatchers.path("/v1/elements/sessions"),
+            method("GET"),
+            path("/v1/elements/sessions"),
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/payment_intents/pi_example/confirm"),
-            RequestMatchers.bodyPart("payment_method_data%5Bbilling_details%5D%5Bname%5D", "Jane+Doe"),
-            RequestMatchers.bodyPart("payment_method_data%5Bbilling_details%5D%5Bemail%5D", "mail%40mail.com"),
-            RequestMatchers.bodyPart("payment_method_data%5Bbilling_details%5D%5Bphone%5D", "%2B13105551234"),
-            RequestMatchers.bodyPart("payment_method_data%5Bbilling_details%5D%5Baddress%5D%5Bcountry%5D", "US"),
-            RequestMatchers.bodyPart("payment_method_data%5Bbilling_details%5D%5Baddress%5D%5Bpostal_code%5D", "94111"),
+            method("POST"),
+            method("POST"),
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart("payment_method_data%5Bbilling_details%5D%5Bname%5D", "Jane+Doe"),
+            bodyPart("payment_method_data%5Bbilling_details%5D%5Bemail%5D", "mail%40mail.com"),
+            bodyPart("payment_method_data%5Bbilling_details%5D%5Bphone%5D", "%2B13105551234"),
+            bodyPart("payment_method_data%5Bbilling_details%5D%5Baddress%5D%5Bcountry%5D", "US"),
+            bodyPart("payment_method_data%5Bbilling_details%5D%5Baddress%5D%5Bpostal_code%5D", "94111"),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
         networkRule.enqueue(
-            RequestMatchers.method("GET"),
-            RequestMatchers.path("/v1/payment_intents/pi_example"),
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
         ) { response ->
             response.testBodyFromFile("payment-intent-get-success.json")
         }
@@ -132,6 +138,6 @@ internal class PaymentSheetBillingConfigurationTest {
             .performScrollTo()
             .performClick()
 
-        Truth.assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 }
