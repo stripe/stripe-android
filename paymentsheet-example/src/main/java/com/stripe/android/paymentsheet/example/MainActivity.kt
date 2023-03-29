@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
@@ -47,24 +48,27 @@ class MainActivity : AppCompatActivity() {
     private val items: List<MenuItem> by lazy {
         listOf(
             MenuItem(
-                title = "Basic PaymentSheet",
-                subtitle = "Our simplest integration",
+                titleResId = R.string.paymentsheet_title,
+                subtitleResId = R.string.paymentsheet_subtitle,
                 klass = CompleteFlowActivity::class.java,
             ),
             MenuItem(
-                title = "PaymentSheet with FlowController",
-                subtitle = "A more advanced integration with greater flexibility",
+                titleResId = R.string.paymentsheet_custom_title,
+                subtitleResId = R.string.paymentsheet_custom_subtitle,
                 klass = CustomFlowActivity::class.java,
             ),
             MenuItem(
-                title = "PaymentSheet with server-side confirmation",
-                subtitle = "Create and confirm the payment or setup intent on your own backend",
+                titleResId = R.string.paymentsheet_serverside_confirmation_title,
+                subtitleResId = R.string.paymentsheet_serverside_confirmation_subtitle,
                 klass = ServerSideConfirmationActivity::class.java,
-                isBeta = true,
+                badge = MenuItem.Badge(
+                    labelResId = R.string.beta_badge_label,
+                    onClick = this::openDecouplingBetaLink,
+                ),
             ),
             MenuItem(
-                title = "Playground",
-                subtitle = "Testing playground for Stripe engineers",
+                titleResId = R.string.playground_title,
+                subtitleResId = R.string.playground_subtitle,
                 klass = PaymentSheetPlaygroundActivity::class.java,
             ),
         )
@@ -82,11 +86,16 @@ class MainActivity : AppCompatActivity() {
 }
 
 private data class MenuItem(
-    val title: String,
-    val subtitle: String,
+    val titleResId: Int,
+    val subtitleResId: Int,
     val klass: Class<out ComponentActivity>,
-    val isBeta: Boolean = false,
-)
+    val badge: Badge? = null,
+) {
+    data class Badge(
+        val labelResId: Int,
+        val onClick: () -> Unit,
+    )
+}
 
 @Composable
 private fun MainScreen(items: List<MenuItem>) {
@@ -123,14 +132,14 @@ private fun MenuItemRow(item: MenuItem) {
             .padding(16.dp),
     ) {
         Text(
-            text = item.title,
+            text = stringResource(item.titleResId),
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 4.dp),
         )
 
-        Text(text = item.subtitle)
+        Text(text = stringResource(item.subtitleResId))
 
-        if (item.isBeta) {
+        if (item.badge != null) {
             Chip(
                 colors = ChipDefaults.chipColors(
                     backgroundColor = MaterialTheme.colors.secondary.copy(
@@ -143,10 +152,10 @@ private fun MenuItemRow(item: MenuItem) {
                         contentDescription = null,
                     )
                 },
-                onClick = context::openDecouplingBetaLink,
+                onClick = item.badge.onClick,
                 modifier = Modifier.padding(top = 4.dp),
             ) {
-                Text(text = "This is currently in beta.")
+                Text(text = stringResource(item.badge.labelResId))
             }
         }
     }
