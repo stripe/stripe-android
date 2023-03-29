@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -22,8 +23,8 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
-import com.stripe.android.paymentsheet.example.samples.activity.LaunchPaymentSheetCompleteActivity
-import com.stripe.android.paymentsheet.example.samples.activity.LaunchPaymentSheetCustomActivity
+import com.stripe.android.paymentsheet.example.samples.ui.complete_flow.CompleteFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlowActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,12 +37,12 @@ class MainActivity : AppCompatActivity() {
             MenuItem(
                 title = "Basic PaymentSheet",
                 subtitle = "Our simplest integration",
-                klass = LaunchPaymentSheetCompleteActivity::class.java,
+                klass = CompleteFlowActivity::class.java,
             ),
             MenuItem(
                 title = "PaymentSheet with FlowController",
                 subtitle = "A more advanced integration with greater flexibility",
-                klass = LaunchPaymentSheetCustomActivity::class.java,
+                klass = CustomFlowActivity::class.java,
             ),
             MenuItem(
                 title = "Playground",
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 private data class MenuItem(
     val title: String,
     val subtitle: String,
-    val klass: Class<out AppCompatActivity>,
+    val klass: Class<out ComponentActivity>,
 )
 
 @Composable

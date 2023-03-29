@@ -24,11 +24,13 @@ import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRes
 import com.stripe.android.paymentsheet.example.playground.model.InitializationType
 import com.stripe.android.paymentsheet.example.playground.model.SavedToggles
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.withContext
 
 class PaymentSheetPlaygroundViewModel(
     application: Application
@@ -58,7 +60,7 @@ class PaymentSheetPlaygroundViewModel(
 
     private val sharedPreferencesName = "playgroundToggles"
 
-    fun storeToggleState(
+    suspend fun storeToggleState(
         initializationType: String,
         customer: String,
         link: Boolean,
@@ -75,7 +77,7 @@ class PaymentSheetPlaygroundViewModel(
         collectEmail: String,
         collectPhone: String,
         collectAddress: String,
-    ) {
+    ) = withContext(Dispatchers.IO) {
         val sharedPreferences = getApplication<Application>().getSharedPreferences(
             sharedPreferencesName,
             AppCompatActivity.MODE_PRIVATE
@@ -101,7 +103,7 @@ class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    fun getSavedToggleState(): SavedToggles {
+    suspend fun getSavedToggleState(): SavedToggles = withContext(Dispatchers.IO) {
         val sharedPreferences = getApplication<Application>().getSharedPreferences(
             sharedPreferencesName,
             AppCompatActivity.MODE_PRIVATE
@@ -172,7 +174,7 @@ class PaymentSheetPlaygroundViewModel(
             Toggle.CollectAddress.default as String
         )
 
-        return SavedToggles(
+        SavedToggles(
             initialization = initialization.toString(),
             customer= customer.toString(),
             googlePay = googlePay,
@@ -190,7 +192,6 @@ class PaymentSheetPlaygroundViewModel(
             collectPhone = collectPhone.toString(),
             collectAddress = collectAddress.toString(),
         )
-
     }
 
     /**

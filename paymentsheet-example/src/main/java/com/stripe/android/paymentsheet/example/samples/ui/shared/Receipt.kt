@@ -32,8 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
-import com.stripe.android.paymentsheet.example.samples.model.toAmountString
 
 @Composable
 fun Receipt(
@@ -53,8 +53,8 @@ fun Receipt(
 fun Receipt(
     isLoading: Boolean,
     cartState: CartState,
-    isEditable: Boolean,
-    onQuantityChanged: (Long, Int?) -> Unit,
+    isEditable: Boolean = false,
+    onQuantityChanged: (CartProduct.Id, Int) -> Unit = { _, _ -> },
     bottomContent: @Composable () -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -104,10 +104,10 @@ fun Receipt(
                     .fillMaxWidth(1f)
                     .padding(vertical = PADDING)
             ) {
-                ReceiptRow(stringResource(R.string.subtotal), cartState.subtotal.toAmountString())
-                ReceiptRow(stringResource(R.string.sales_tax), cartState.salesTax.toAmountString())
+                ReceiptRow(stringResource(R.string.subtotal), cartState.formattedSubtotal)
+                ReceiptRow(stringResource(R.string.sales_tax), cartState.formattedTax)
                 TotalLine(Modifier.align(Alignment.CenterHorizontally))
-                ReceiptRow(stringResource(R.string.total), cartState.total.toAmountString())
+                ReceiptRow(stringResource(R.string.total), cartState.formattedTotal)
                 bottomContent()
             }
         }
@@ -121,7 +121,7 @@ fun ProductRow(
     priceString: String,
     quantity: Int?,
     isEditable: Boolean,
-    onQuantityChanged: (Int?) -> Unit,
+    onQuantityChanged: (Int) -> Unit,
 ) {
     Row(
         modifier = Modifier

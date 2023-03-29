@@ -5,23 +5,25 @@ import com.stripe.android.paymentsheet.example.samples.ui.HOT_DOG_EMOJI
 import com.stripe.android.paymentsheet.example.samples.ui.SALAD_EMOJI
 
 data class CartProduct(
-    val id: Long,
+    val id: Id,
     val icon: String,
     val nameResId: Int,
     val unitPrice: Long,
-    val quantity: Int?,
+    val quantity: Int,
 ) {
-
-    val total: Long
-        get() = unitPrice * (quantity ?: 0)
 
     val unitPriceString: String
         get() = unitPrice.toAmountString()
 
+    enum class Id(val value: Int) {
+        HotDog(1),
+        Salad(2),
+    }
+
     companion object {
 
         val hotDog = CartProduct(
-            id = 1,
+            id = Id.HotDog,
             icon = HOT_DOG_EMOJI,
             nameResId = R.string.hot_dog,
             unitPrice = 99,
@@ -29,7 +31,7 @@ data class CartProduct(
         )
 
         val salad = CartProduct(
-            id = 2,
+            id = Id.Salad,
             icon = SALAD_EMOJI,
             nameResId = R.string.salad,
             unitPrice = 800,

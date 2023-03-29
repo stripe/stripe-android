@@ -292,26 +292,26 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewBinding.reloadButton.setOnClickListener {
             val initializationType = viewModel.initializationType.value
 
-            viewModel.storeToggleState(
-                initializationType = initializationType.value,
-                customer = customer.value,
-                link = linkEnabled,
-                googlePay = googlePayConfig != null,
-                currency = currency.value,
-                merchantCountryCode = merchantCountryCode.value,
-                mode = mode.value,
-                shipping = shipping.value,
-                setDefaultBillingAddress = setDefaultBillingAddress,
-                setAutomaticPaymentMethods = setAutomaticPaymentMethods,
-                setDelayedPaymentMethods = setDelayedPaymentMethods,
-                attachDefaultBillingAddress = attachDefaultBillingAddress,
-                collectName = collectName.value,
-                collectEmail = collectEmail.value,
-                collectPhone = collectPhone.value,
-                collectAddress = collectAddress.value,
-            )
-
             lifecycleScope.launch {
+                viewModel.storeToggleState(
+                    initializationType = initializationType.value,
+                    customer = customer.value,
+                    link = linkEnabled,
+                    googlePay = googlePayConfig != null,
+                    currency = currency.value,
+                    merchantCountryCode = merchantCountryCode.value,
+                    mode = mode.value,
+                    shipping = shipping.value,
+                    setDefaultBillingAddress = setDefaultBillingAddress,
+                    setAutomaticPaymentMethods = setAutomaticPaymentMethods,
+                    setDelayedPaymentMethods = setDelayedPaymentMethods,
+                    attachDefaultBillingAddress = attachDefaultBillingAddress,
+                    collectName = collectName.value,
+                    collectEmail = collectEmail.value,
+                    collectPhone = collectPhone.value,
+                    collectAddress = collectAddress.value,
+                )
+
                 viewModel.prepareCheckout(
                     initializationType = initializationType,
                     customer = customer,
@@ -400,29 +400,28 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         disableViews()
 
         addMenuProvider(menuProvider)
-    }
 
-    override fun onResume() {
-        super.onResume()
-        val savedToggles = viewModel.getSavedToggleState()
-        setToggles(
-            initialization = savedToggles.initialization,
-            customer = savedToggles.customer,
-            link = savedToggles.link,
-            googlePay = savedToggles.googlePay,
-            currency = savedToggles.currency,
-            merchantCountryCode = savedToggles.merchantCountryCode,
-            mode = savedToggles.mode,
-            shippingAddress = savedToggles.shippingAddress,
-            setAutomaticPaymentMethods = savedToggles.setAutomaticPaymentMethods,
-            setDelayedPaymentMethods = savedToggles.setDelayedPaymentMethods,
-            setDefaultBillingAddress = savedToggles.setDefaultBillingAddress,
-            attachDefaultBillingAddress = savedToggles.attachDefaults,
-            collectName = savedToggles.collectName,
-            collectEmail = savedToggles.collectEmail,
-            collectPhone = savedToggles.collectPhone,
-            collectAddress = savedToggles.collectAddress,
-        )
+        lifecycleScope.launch {
+            val savedToggles = viewModel.getSavedToggleState()
+            setToggles(
+                initialization = savedToggles.initialization,
+                customer = savedToggles.customer,
+                link = savedToggles.link,
+                googlePay = savedToggles.googlePay,
+                currency = savedToggles.currency,
+                merchantCountryCode = savedToggles.merchantCountryCode,
+                mode = savedToggles.mode,
+                shippingAddress = savedToggles.shippingAddress,
+                setAutomaticPaymentMethods = savedToggles.setAutomaticPaymentMethods,
+                setDelayedPaymentMethods = savedToggles.setDelayedPaymentMethods,
+                setDefaultBillingAddress = savedToggles.setDefaultBillingAddress,
+                attachDefaultBillingAddress = savedToggles.attachDefaults,
+                collectName = savedToggles.collectName,
+                collectEmail = savedToggles.collectEmail,
+                collectPhone = savedToggles.collectPhone,
+                collectAddress = savedToggles.collectAddress,
+            )
+        }
     }
 
     private fun setToggles(

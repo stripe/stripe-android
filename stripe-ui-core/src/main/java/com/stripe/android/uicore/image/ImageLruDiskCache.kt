@@ -34,11 +34,9 @@ class ImageLruDiskCache(
     cacheFolder: String,
     maxSizeBytes: Long = 10L * 1024 * 1024, // 10MB
 ) {
-    private lateinit var diskLruCache: DiskLruCache
-
-    init {
+    private val diskLruCache: DiskLruCache? by lazy {
         try {
-            diskLruCache = DiskLruCache.open(
+            DiskLruCache.open(
                 /* directory = */ getDiskCacheDir(context, cacheFolder),
                 /* appVersion = */ APP_VERSION,
                 /* valueCount = */ VALUE_COUNT,
@@ -46,6 +44,7 @@ class ImageLruDiskCache(
             )
         } catch (e: IOException) {
             Log.e(TAG, "error opening cache", e)
+            null
         }
     }
 
@@ -56,7 +55,7 @@ class ImageLruDiskCache(
             debug("Image already cached")
         } else {
             try {
-                editor = diskLruCache.edit(hashedKey)
+                editor = diskLruCache?.edit(hashedKey)
                 if (editor == null) return
                 val compressFormat = compressFormatFromUrl(key)
                 if (writeBitmapToFile(
@@ -66,7 +65,7 @@ class ImageLruDiskCache(
                         compressQuality = compressFormat.quality()
                     )
                 ) {
-                    diskLruCache.flush()
+                    diskLruCache?.flush()
                     editor.commit()
                     debug("image put on disk cache $hashedKey")
                 } else {
@@ -96,7 +95,7 @@ class ImageLruDiskCache(
         var snapshot: DiskLruCache.Snapshot? = null
         val hashedKey = key.toKey()
         try {
-            snapshot = diskLruCache.get(hashedKey)
+            snapshot = diskLruCache?.get(hashedKey)
             if (snapshot == null) {
                 debug(
                     "image not in cache: $hashedKey"
@@ -125,7 +124,7 @@ class ImageLruDiskCache(
         var contained = false
         var snapshot: DiskLruCache.Snapshot? = null
         try {
-            snapshot = diskLruCache.get(key.toKey())
+            snapshot = diskLruCache?.get(key.toKey())
             contained = snapshot != null
         } catch (e: IOException) {
             Log.e(TAG, "error reading from cache", e)
@@ -138,7 +137,7 @@ class ImageLruDiskCache(
     fun clearCache() {
         debug("disk cache CLEARED")
         try {
-            diskLruCache.delete()
+            diskLruCache?.delete()
         } catch (e: IOException) {
             Log.e(TAG, "error clearing cache", e)
         }

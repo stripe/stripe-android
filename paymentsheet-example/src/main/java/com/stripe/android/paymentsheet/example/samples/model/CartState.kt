@@ -1,42 +1,24 @@
 package com.stripe.android.paymentsheet.example.samples.model
 
-import com.stripe.android.paymentsheet.PaymentSheet
-import kotlin.math.roundToLong
-
 data class CartState(
     val products: List<CartProduct>,
     val isSubscription: Boolean,
+    val subtotal: Long? = null,
+    val salesTax: Long? = null,
+    val total: Long? = null,
 ) {
 
-    val subtotal: Long
-        get() = products.sumOf { it.total }
+    val formattedSubtotal: String
+        get() = subtotal?.toAmountString() ?: "…"
 
-    val salesTax: Long
-        get() = (subtotal * 0.0825f).roundToLong()
+    val formattedTax: String
+        get() = salesTax?.toAmountString() ?: "…"
 
-    private val totalBeforeDiscount: Long
-        get() = subtotal + salesTax
+    val formattedTotal: String
+        get() = total?.toAmountString() ?: "…"
 
-    private val subscriptionDiscount: Long
-        get() = if (isSubscription) {
-            (totalBeforeDiscount * 0.05).roundToLong()
-        } else {
-            0
-        }
-
-    val total: Long
-        get() = totalBeforeDiscount - subscriptionDiscount
-
-    fun updateQuantity(productId: Long, newQuantity: Int?): CartState {
-        return copy(
-            products = products.map { product ->
-                if (product.id == productId) {
-                    product.copy(quantity = newQuantity)
-                } else {
-                    product
-                }
-            }
-        )
+    fun countOf(id: CartProduct.Id): Int {
+        return products.filter { it.id == id }.sumOf { it.quantity }
     }
 
     companion object {
@@ -44,17 +26,13 @@ data class CartState(
             products = listOf(CartProduct.hotDog, CartProduct.salad),
             isSubscription = false,
         )
-    }
-}
 
-fun CartState.toIntentConfiguration(): PaymentSheet.IntentConfiguration {
-    return PaymentSheet.IntentConfiguration(
-        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-            amount = total,
-            currency = "usd",
-            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession.takeIf {
-                isSubscription
-            },
+        val defaultWithHardcodedPrices: CartState = CartState(
+            products = listOf(CartProduct.hotDog, CartProduct.salad),
+            isSubscription = false,
+            subtotal = 899,
+            salesTax = 74,
+            total = 973,
         )
-    )
+    }
 }
