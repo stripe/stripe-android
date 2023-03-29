@@ -16,7 +16,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.example.samples.model.toIntentConfiguration
 import com.stripe.android.paymentsheet.example.samples.ui.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.PaymentMethodSelector
 import com.stripe.android.paymentsheet.example.samples.ui.Receipt
@@ -36,17 +35,25 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
     private val viewModel by viewModels<ServerSideConfirmationViewModel>()
 
     private lateinit var flowController: PaymentSheet.FlowController
+    private lateinit var paymentSheet: PaymentSheet
 
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        flowController = PaymentSheet.FlowController.create(
-            activity = this,
-            paymentOptionCallback = viewModel::handlePaymentOptionChanged,
-            createIntentCallbackForServerSideConfirmation = viewModel::createAndConfirmIntent,
-            paymentResultCallback = viewModel::handlePaymentSheetResult,
-        )
+        // Hints
+        val activity = this
+        val paymentOptionCallback = viewModel::handlePaymentOptionChanged
+        val paymentResultCallback = viewModel::handlePaymentSheetResult
+        val createAndConfirmIntent: suspend (String, Boolean) -> Unit = { paymentMethodId, shouldSavePM ->
+            viewModel.createAndConfirmIntent(paymentMethodId, shouldSavePM)
+        }
+
+        // TODO: create FlowController
+        // flowController = FlowController.create(...)
+
+        // or TODO: create PaymentSheet
+        // paymentSheet = PaymentSheet(...)
 
         setContent {
             PaymentSheetExampleTheme {
@@ -75,7 +82,13 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
                             isEnabled = uiState.isPaymentMethodButtonEnabled,
                             paymentMethodLabel = paymentMethodLabel,
                             paymentMethodIcon = uiState.paymentOption?.icon(),
-                            onClick = flowController::presentPaymentOptions,
+                            onClick = {
+                                // TODO present payment options
+                                flowController::presentPaymentOptions
+
+                                // or TODO present PaymentSheet
+                                // paymentSheet.presentWithIntentConfiguration(...)
+                            },
                         )
 
                         SubscriptionToggle(
@@ -87,6 +100,8 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
                             buyButtonEnabled = uiState.isBuyButtonEnabled,
                             onClick = {
                                 viewModel.handleBuyButtonPressed()
+
+                                // TODO no code, if using PaymentSheet, don't press buy button
                                 flowController.confirm()
                             }
                         )
@@ -104,11 +119,17 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
         DisposableEffect(Unit) {
             viewModel.registerFlowControllerConfigureHandler { cartState ->
                 val completable = CompletableDeferred<Throwable?>()
-                flowController.configureWithIntentConfiguration(
-                    intentConfiguration = cartState.toIntentConfiguration(),
-                    configuration = uiState.paymentSheetConfig,
-                    callback = { _, error -> completable.complete(error) },
-                )
+
+                // Hints
+                val amount = cartState.total ?: 0L
+                val currency = "usd"
+                val shouldSetupFutureUse = cartState.isSubscription
+                val configuration = uiState.paymentSheetConfig
+                val callback: (Boolean, Throwable) -> Unit = { _, error -> completable.complete(error) }
+
+                // TODO configure FlowController
+                // flowController.configureWithIntentConfiguration(...)
+
                 completable.await()
             }
 

@@ -73,16 +73,3 @@ internal fun CartState.updateWithResponse(
         total = response.total,
     )
 }
-
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
-internal fun CartState.toIntentConfiguration(): PaymentSheet.IntentConfiguration {
-    return PaymentSheet.IntentConfiguration(
-        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-            amount = total ?: 0L,
-            currency = "usd",
-            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession.takeIf {
-                isSubscription
-            },
-        )
-    )
-}
