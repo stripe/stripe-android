@@ -59,13 +59,6 @@ internal class PaymentSheetTest {
         page.fillOutCardDetails()
 
         networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-        }
-
-        networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
         ) { response ->
@@ -164,13 +157,6 @@ internal class PaymentSheetTest {
         }
 
         page.fillOutCardDetails()
-
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
-        }
 
         networkRule.enqueue(
             method("POST"),
