@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.snackbar.Snackbar
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.model.toIntentConfiguration
@@ -36,6 +37,7 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
 
     private lateinit var flowController: PaymentSheet.FlowController
 
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -94,6 +96,7 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
         }
     }
 
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Composable
     fun AttachFlowControllerToViewModel(
         uiState: ServerSideConfirmationViewState,

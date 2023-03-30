@@ -8,6 +8,7 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.google.gson.Gson
 import com.stripe.android.CreateIntentCallback
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartProduct
@@ -82,6 +83,7 @@ internal class ServerSideConfirmationViewModel(
         }
     }
 
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     suspend fun createAndConfirmIntent(
         paymentMethodId: String,
         shouldSavePaymentMethod: Boolean,
