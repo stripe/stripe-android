@@ -12,7 +12,6 @@ data class CompleteFlowViewState(
 ) {
 
     data class PaymentInfo(
-        val publishableKey: String,
         val clientSecret: String,
         val customerConfiguration: PaymentSheet.CustomerConfiguration?,
         val shouldPresent: Boolean,

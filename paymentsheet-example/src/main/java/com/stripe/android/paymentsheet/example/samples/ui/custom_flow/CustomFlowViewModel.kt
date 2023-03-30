@@ -6,10 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
-import com.google.gson.Gson
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartState
+import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.example.samples.networking.toCheckoutRequest
@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as ApiResult
 
 internal class CustomFlowViewModel(
@@ -89,25 +90,24 @@ internal class CustomFlowViewModel(
         }
 
         val request = currentState.cartState.toCheckoutRequest()
-        val requestBody = Gson().toJson(request)
+        val requestBody = Json.encodeToString(ExampleCheckoutRequest.serializer(), request)
 
         val apiResult = Fuel
             .post("${backendUrl}/checkout")
             .jsonBody(requestBody)
             .suspendable()
-            .awaitModel<ExampleCheckoutResponse>()
+            .awaitModel(ExampleCheckoutResponse.serializer())
 
         when (apiResult) {
             is ApiResult.Success -> {
-                val paymentInfo = CustomFlowViewState.PaymentInfo(
-                    publishableKey = apiResult.value.publishableKey,
-                    clientSecret = apiResult.value.paymentIntent,
-                    customerConfiguration = apiResult.value.makeCustomerConfig(),
-                )
-
                 PaymentConfiguration.init(
                     context = getApplication(),
-                    publishableKey = paymentInfo.publishableKey,
+                    publishableKey = apiResult.value.publishableKey,
+                )
+
+                val paymentInfo = CustomFlowViewState.PaymentInfo(
+                    clientSecret = apiResult.value.paymentIntent,
+                    customerConfiguration = apiResult.value.makeCustomerConfig(),
                 )
 
                 _state.update {

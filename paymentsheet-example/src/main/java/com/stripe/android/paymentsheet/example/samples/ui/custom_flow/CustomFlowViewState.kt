@@ -21,7 +21,6 @@ data class CustomFlowViewState(
         get() = !isProcessing && !didComplete && paymentOption != null
 
     data class PaymentInfo(
-        val publishableKey: String,
         val clientSecret: String,
         val customerConfiguration: PaymentSheet.CustomerConfiguration?,
     ) {
