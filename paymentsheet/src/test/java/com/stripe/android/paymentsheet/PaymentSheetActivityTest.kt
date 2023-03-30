@@ -148,7 +148,7 @@ internal class PaymentSheetActivityTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = "pi_1234_secret_5678",
             ),
-            config = PaymentSheetFixtures.CONFIG_CUSTOMER,
+            config = PaymentSheetFixtures.CONFIG_CUSTOMER.toInternalConfiguration(),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
         )
     )
@@ -677,7 +677,7 @@ internal class PaymentSheetActivityTest {
                     initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                         clientSecret = "pi_1234_secret_9876",
                     ),
-                    PaymentSheetFixtures.CONFIG_CUSTOMER
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER.toInternalConfiguration()
                 )
             )
 
@@ -841,7 +841,7 @@ internal class PaymentSheetActivityTest {
             config = PaymentSheet.Configuration(
                 merchantDisplayName = "Some name",
                 customer = invalidCustomerConfig,
-            ),
+            ).toInternalConfiguration(),
         )
 
         val intent = contract.createIntent(context, args)

@@ -13,6 +13,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Usage
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
@@ -22,7 +23,7 @@ internal sealed class ElementsSessionRepository {
 
     abstract suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
-        configuration: PaymentSheet.Configuration?,
+        configuration: PaymentSheetConfiguration?,
     ): ElementsSession
 
     /**
@@ -33,7 +34,7 @@ internal sealed class ElementsSessionRepository {
     ) : ElementsSessionRepository() {
         override suspend fun get(
             initializationMode: PaymentSheet.InitializationMode,
-            configuration: PaymentSheet.Configuration?,
+            configuration: PaymentSheetConfiguration?,
         ): ElementsSession {
             return ElementsSession(
                 linkSettings = null,
@@ -62,7 +63,7 @@ internal sealed class ElementsSessionRepository {
 
         override suspend fun get(
             initializationMode: PaymentSheet.InitializationMode,
-            configuration: PaymentSheet.Configuration?,
+            configuration: PaymentSheetConfiguration?,
         ): ElementsSession {
             val params = initializationMode.toElementsSessionParams(configuration)
 
@@ -117,7 +118,7 @@ internal sealed class ElementsSessionRepository {
 
 @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
-    configuration: PaymentSheet.Configuration?,
+    configuration: PaymentSheetConfiguration?,
 ): ElementsSessionParams {
     return when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> {

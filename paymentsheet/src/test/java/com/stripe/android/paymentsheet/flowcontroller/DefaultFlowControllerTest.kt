@@ -53,6 +53,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.toInternalConfiguration
 import com.stripe.android.testing.FakeIntentConfirmationInterceptor
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
@@ -517,7 +518,7 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             NEW_CARD_PAYMENT_SELECTION,
             PaymentSheetState.Full(
-                PaymentSheetFixtures.CONFIG_CUSTOMER,
+                PaymentSheetFixtures.CONFIG_CUSTOMER.toInternalConfiguration(),
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
                 isGooglePayReady = false,
@@ -555,7 +556,7 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             GENERIC_PAYMENT_SELECTION,
             PaymentSheetState.Full(
-                PaymentSheetFixtures.CONFIG_CUSTOMER,
+                PaymentSheetFixtures.CONFIG_CUSTOMER.toInternalConfiguration(),
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
                 isGooglePayReady = false,
@@ -596,7 +597,7 @@ internal class DefaultFlowControllerTest {
         flowController.confirmPaymentSelection(
             paymentSelection,
             PaymentSheetState.Full(
-                PaymentSheetFixtures.CONFIG_CUSTOMER,
+                PaymentSheetFixtures.CONFIG_CUSTOMER.toInternalConfiguration(),
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
                 isGooglePayReady = false,

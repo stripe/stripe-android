@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.analytics
 
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal interface EventReporter {
-    fun onInit(configuration: PaymentSheet.Configuration?)
+    fun onInit(configuration: PaymentSheetConfiguration?)
 
     fun onDismiss()
 

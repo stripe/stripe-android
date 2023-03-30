@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.model
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.paymentsheet.forms.PIRequirement
 import com.stripe.android.paymentsheet.forms.SIRequirement
@@ -25,16 +25,16 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPayment
  */
 internal fun SupportedPaymentMethod.getPMAddForm(
     stripeIntent: StripeIntent,
-    config: PaymentSheet.Configuration?
+    config: PaymentSheetConfiguration?
 ) = requireNotNull(getSpecWithFullfilledRequirements(stripeIntent, config))
 
 /**
  * This function will determine if there is a valid for the payment method
- * given the [PaymentSheet.Configuration] and the [StripeIntent]
+ * given the [PaymentSheetConfiguration] and the [StripeIntent]
  */
 internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
     stripeIntent: StripeIntent,
-    config: PaymentSheet.Configuration?
+    config: PaymentSheetConfiguration?
 ): LayoutFormDescriptor? {
     val formSpec = formSpec
     val oneTimeUse = LayoutFormDescriptor(
@@ -95,7 +95,7 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
  * This checks to see if the payment method is supported from a SetupIntent.
  */
 private fun SupportedPaymentMethod.supportsSetupIntent(
-    config: PaymentSheet.Configuration?
+    config: PaymentSheetConfiguration?
 ) = requirement.getConfirmPMFromCustomer(code) &&
     checkSetupIntentRequirements(requirement.siRequirements, config)
 
@@ -107,7 +107,7 @@ private fun SupportedPaymentMethod.supportsSetupIntent(
  */
 private fun SupportedPaymentMethod.supportsPaymentIntentSfuSet(
     paymentIntent: PaymentIntent,
-    config: PaymentSheet.Configuration?
+    config: PaymentSheetConfiguration?
 ) = requirement.getConfirmPMFromCustomer(code) &&
     checkSetupIntentRequirements(requirement.siRequirements, config) &&
     checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config)
@@ -118,7 +118,7 @@ private fun SupportedPaymentMethod.supportsPaymentIntentSfuSet(
  */
 private fun SupportedPaymentMethod.supportsPaymentIntentSfuNotSettable(
     paymentIntent: PaymentIntent,
-    config: PaymentSheet.Configuration?
+    config: PaymentSheetConfiguration?
 ) = checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config)
 
 /**
@@ -133,7 +133,7 @@ private fun SupportedPaymentMethod.supportsPaymentIntentSfuNotSettable(
  */
 private fun SupportedPaymentMethod.supportsPaymentIntentSfuSettable(
     paymentIntent: PaymentIntent,
-    config: PaymentSheet.Configuration?
+    config: PaymentSheetConfiguration?
 ) = config?.customer != null &&
     requirement.getConfirmPMFromCustomer(code) &&
     checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config) &&
@@ -144,7 +144,7 @@ private fun SupportedPaymentMethod.supportsPaymentIntentSfuSettable(
  */
 private fun checkSetupIntentRequirements(
     requirements: Set<SIRequirement>?,
-    config: PaymentSheet.Configuration?
+    config: PaymentSheetConfiguration?
 ): Boolean {
     return requirements?.map { requirement ->
         when (requirement) {
@@ -159,7 +159,7 @@ private fun checkSetupIntentRequirements(
 private fun checkPaymentIntentRequirements(
     requirements: Set<PIRequirement>?,
     paymentIntent: PaymentIntent,
-    config: PaymentSheet.Configuration?
+    config: PaymentSheetConfiguration?
 ): Boolean {
     return requirements?.map { requirement ->
         when (requirement) {
@@ -186,7 +186,7 @@ private val PaymentIntent.containsValidShippingInfo: Boolean
  */
 internal fun getSupportedSavedCustomerPMs(
     stripeIntent: StripeIntent?,
-    config: PaymentSheet.Configuration?,
+    config: PaymentSheetConfiguration?,
     lpmRepository: LpmRepository
 ) = stripeIntent?.paymentMethodTypes?.mapNotNull {
     lpmRepository.fromCode(it)
@@ -197,11 +197,11 @@ internal fun getSupportedSavedCustomerPMs(
 
 /**
  * This will return a list of payment methods that have a supported form given
- * the [PaymentSheet.Configuration] and [StripeIntent].
+ * the [PaymentSheetConfiguration] and [StripeIntent].
  */
 internal fun getPMsToAdd(
     stripeIntent: StripeIntent?,
-    config: PaymentSheet.Configuration?,
+    config: PaymentSheetConfiguration?,
     lpmRepository: LpmRepository
 ) = stripeIntent?.paymentMethodTypes?.mapNotNull {
     lpmRepository.fromCode(it)

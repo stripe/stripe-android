@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -54,6 +55,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.toInternalConfiguration
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -174,7 +176,7 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         configure(
             mode = PaymentSheet.InitializationMode.PaymentIntent(paymentIntentClientSecret),
-            configuration = configuration,
+            configuration = configuration?.toInternalConfiguration(),
             callback = callback,
         )
     }
@@ -186,7 +188,7 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         configure(
             mode = PaymentSheet.InitializationMode.SetupIntent(setupIntentClientSecret),
-            configuration = configuration,
+            configuration = configuration?.toInternalConfiguration(),
             callback = callback,
         )
     }
@@ -199,14 +201,14 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         configure(
             mode = PaymentSheet.InitializationMode.DeferredIntent(intentConfiguration),
-            configuration = configuration,
+            configuration = configuration?.toInternalConfiguration(),
             callback = callback,
         )
     }
 
     private fun configure(
         mode: PaymentSheet.InitializationMode,
-        configuration: PaymentSheet.Configuration?,
+        configuration: PaymentSheetConfiguration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         lifecycleScope.launch {

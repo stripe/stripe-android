@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.toInternalConfiguration
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.Dispatchers
@@ -73,7 +74,7 @@ class FlowControllerConfigurationHandlerTest {
         val configurationHandler = createConfigurationHandler()
         configurationHandler.configure(
             PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.CLIENT_SECRET),
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
         ) { success, exception ->
             assertThat(success).isTrue()
             assertThat(exception).isNull()
@@ -85,7 +86,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
         assertThat(viewModel.state).isNotNull()
         verify(eventReporter)
-            .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+            .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration())
     }
 
     @Test
@@ -100,7 +101,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.CLIENT_SECRET),
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
         ) { success, exception ->
             assertThat(success).isTrue()
             assertThat(exception).isNull()
@@ -112,7 +113,7 @@ class FlowControllerConfigurationHandlerTest {
 
         // We're running ONLY the second config run, so we don't expect any interactions.
         verify(eventReporter, never())
-            .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+            .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration())
     }
 
     @Test
@@ -128,7 +129,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.DIFFERENT_CLIENT_SECRET),
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
         ) { success, exception ->
             assertThat(success).isTrue()
             assertThat(exception).isNull()
@@ -143,7 +144,7 @@ class FlowControllerConfigurationHandlerTest {
 
         // We're running a new config, so we DO expect an interaction.
         verify(eventReporter)
-            .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+            .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration())
     }
 
     @Test
@@ -152,7 +153,7 @@ class FlowControllerConfigurationHandlerTest {
         val configurationHandler = createConfigurationHandler()
         configurationHandler.configure(
             PaymentSheet.InitializationMode.PaymentIntent(" "),
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
         ) { success, error ->
             result = success to error
         }
@@ -168,7 +169,7 @@ class FlowControllerConfigurationHandlerTest {
         val configurationHandler = createConfigurationHandler()
         configurationHandler.configure(
             PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.CLIENT_SECRET),
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(merchantDisplayName = "")
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(merchantDisplayName = "").toInternalConfiguration()
         ) { success, error ->
             result = success to error
         }
@@ -188,7 +189,7 @@ class FlowControllerConfigurationHandlerTest {
                 customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
                     id = " "
                 )
-            )
+            ).toInternalConfiguration()
         ) { success, error ->
             result = success to error
         }
@@ -208,7 +209,7 @@ class FlowControllerConfigurationHandlerTest {
                 customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
                     ephemeralKeySecret = " "
                 )
-            )
+            ).toInternalConfiguration()
         ) { success, error ->
             result = success to error
         }
@@ -261,7 +262,7 @@ class FlowControllerConfigurationHandlerTest {
         configuration: PaymentSheet.Configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
     ): ElementsSessionParams {
         val initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret)
-        return initializationMode.toElementsSessionParams(configuration)
+        return initializationMode.toElementsSessionParams(configuration.toInternalConfiguration())
     }
 
     private fun createConfigurationHandler(

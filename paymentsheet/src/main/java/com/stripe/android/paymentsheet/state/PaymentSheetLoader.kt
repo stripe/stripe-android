@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
@@ -42,7 +43,7 @@ internal interface PaymentSheetLoader {
 
     suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration? = null
+        paymentSheetConfiguration: PaymentSheetConfiguration? = null
     ): Result
 
     sealed class Result {
@@ -68,7 +69,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration?
+        paymentSheetConfiguration: PaymentSheetConfiguration?
     ): PaymentSheetLoader.Result = withContext(workContext) {
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
 
@@ -94,7 +95,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private suspend fun isGooglePayReady(
-        paymentSheetConfiguration: PaymentSheet.Configuration?
+        paymentSheetConfiguration: PaymentSheetConfiguration?
     ): Boolean {
         return paymentSheetConfiguration?.googlePay?.environment?.let { environment ->
             googlePayRepositoryFactory(
@@ -111,7 +112,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun create(
         stripeIntent: StripeIntent,
         customerConfig: PaymentSheet.CustomerConfiguration?,
-        config: PaymentSheet.Configuration?,
+        config: PaymentSheetConfiguration?,
         isGooglePayReady: Boolean,
     ): PaymentSheetLoader.Result = coroutineScope {
         val prefsRepository = prefsRepositoryFactory(customerConfig)
@@ -185,7 +186,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun retrieveCustomerPaymentMethods(
         stripeIntent: StripeIntent,
-        config: PaymentSheet.Configuration?,
+        config: PaymentSheetConfiguration?,
         customerConfig: PaymentSheet.CustomerConfiguration,
     ): List<PaymentMethod> {
         val paymentMethodTypes = getSupportedSavedCustomerPMs(
@@ -210,7 +211,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
-        configuration: PaymentSheet.Configuration?,
+        configuration: PaymentSheetConfiguration?,
     ): StripeIntent {
         val elementsSession = elementsSessionRepository.get(
             initializationMode = initializationMode,
@@ -232,7 +233,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private suspend fun loadLinkState(
-        config: PaymentSheet.Configuration?,
+        config: PaymentSheetConfiguration?,
         stripeIntent: StripeIntent,
     ): LinkState {
         val linkConfig = createLinkConfiguration(config, stripeIntent)
@@ -252,7 +253,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private suspend fun createLinkConfiguration(
-        config: PaymentSheet.Configuration?,
+        config: PaymentSheetConfiguration?,
         stripeIntent: StripeIntent,
     ): LinkPaymentLauncher.Configuration {
         val shippingDetails: AddressDetails? = config?.shippingDetails

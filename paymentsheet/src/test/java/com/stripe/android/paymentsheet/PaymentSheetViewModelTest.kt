@@ -136,7 +136,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `init should fire analytics event`() {
         createViewModel()
-        verify(eventReporter).onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+        verify(eventReporter).onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration())
     }
 
     @Test
@@ -736,7 +736,7 @@ internal class PaymentSheetViewModelTest {
                 config = PaymentSheet.Configuration(
                     merchantDisplayName = "Example, Inc.",
                     allowsDelayedPaymentMethods = true
-                )
+                ).toInternalConfiguration()
             ),
             stripeIntent = PAYMENT_INTENT.copy(
                 paymentMethodTypes = listOf(

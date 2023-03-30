@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -186,7 +186,7 @@ class PrimaryButtonUiStateMapperTest {
 
     private fun createMapper(
         isProcessingPayment: Boolean,
-        config: PaymentSheet.Configuration? = null,
+        config: PaymentSheetConfiguration? = null,
         currentScreenFlow: Flow<PaymentSheetScreen>,
         buttonsEnabledFlow: Flow<Boolean>,
         amountFlow: Flow<Amount?> = flowOf(null),

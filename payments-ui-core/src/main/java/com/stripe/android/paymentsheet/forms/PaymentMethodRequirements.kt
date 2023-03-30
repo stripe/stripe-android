@@ -204,7 +204,7 @@ internal val SepaDebitRequirement = PaymentMethodRequirements(
      *
      * Even with mandate support, in order to make sure that any payment method added can
      * also be used when attached to a customer, this LPM will require
-     * [PaymentSheet.Configuration].allowsDelayedPaymentMethods support as indicated in
+     * [PaymentSheetConfiguration].allowsDelayedPaymentMethods support as indicated in
      * the configuration.
      */
     confirmPMFromCustomer = false

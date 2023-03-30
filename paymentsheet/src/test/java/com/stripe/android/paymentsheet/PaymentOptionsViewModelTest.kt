@@ -442,7 +442,7 @@ internal class PaymentOptionsViewModelTest {
             state = PaymentSheetState.Full(
                 stripeIntent = PAYMENT_INTENT,
                 customerPaymentMethods = emptyList(),
-                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration(),
                 isGooglePayReady = true,
                 paymentSelection = null,
                 linkState = null,

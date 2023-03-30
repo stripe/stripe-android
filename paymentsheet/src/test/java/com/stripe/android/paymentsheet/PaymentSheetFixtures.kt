@@ -100,7 +100,7 @@ internal object PaymentSheetFixtures {
         state = PaymentSheetState.Full(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             customerPaymentMethods = emptyList(),
-            config = CONFIG_GOOGLEPAY,
+            config = CONFIG_GOOGLEPAY.toInternalConfiguration(),
             isGooglePayReady = false,
             paymentSelection = null,
             linkState = null,
@@ -115,7 +115,7 @@ internal object PaymentSheetFixtures {
         paymentMethods: List<PaymentMethod> = state.customerPaymentMethods,
         isGooglePayReady: Boolean = state.isGooglePayReady,
         stripeIntent: StripeIntent = state.stripeIntent,
-        config: PaymentSheet.Configuration? = state.config,
+        config: PaymentSheetConfiguration? = state.config,
         paymentSelection: PaymentSelection? = state.paymentSelection,
         linkState: LinkState? = state.linkState,
     ): PaymentOptionContract.Args {
@@ -134,7 +134,7 @@ internal object PaymentSheetFixtures {
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         get() = PaymentSheetContractV2.Args(
             initializationMode = PaymentSheet.InitializationMode.SetupIntent("seti_1234_secret_1234"),
-            CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            config = CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration(),
             STATUS_BAR_COLOR
         )
 
@@ -143,7 +143,7 @@ internal object PaymentSheetFixtures {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            config = CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration(),
             STATUS_BAR_COLOR
         )
 
@@ -152,7 +152,7 @@ internal object PaymentSheetFixtures {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            CONFIG_CUSTOMER,
+            config = CONFIG_CUSTOMER.toInternalConfiguration(),
             STATUS_BAR_COLOR
         )
 

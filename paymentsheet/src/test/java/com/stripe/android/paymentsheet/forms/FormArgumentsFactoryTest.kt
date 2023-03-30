@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.toInternalConfiguration
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
@@ -63,7 +64,7 @@ class FormArgumentsFactoryTest {
         val actualArgs = FormArgumentsFactory.create(
             paymentMethod = lpmRepository.fromCode("bancontact")!!,
             stripeIntent = paymentIntent,
-            config = PaymentSheetFixtures.CONFIG_MINIMUM,
+            config = PaymentSheetFixtures.CONFIG_MINIMUM.toInternalConfiguration(),
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             amount = Amount(50, "USD"),
             newLpm = PaymentSelection.New.GenericPaymentMethod(
@@ -147,7 +148,7 @@ class FormArgumentsFactoryTest {
         val actualArgs = FormArgumentsFactory.create(
             paymentMethod = LpmRepository.HardcodedCard,
             stripeIntent = paymentIntent,
-            config = config,
+            config = config.toInternalConfiguration(),
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             amount = Amount(50, "USD"),
             newLpm = PaymentSelection.New.Card(

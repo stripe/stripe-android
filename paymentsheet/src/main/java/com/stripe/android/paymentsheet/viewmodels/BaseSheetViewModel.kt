@@ -17,7 +17,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -60,7 +60,7 @@ import kotlin.coroutines.CoroutineContext
 @Suppress("TooManyFunctions")
 internal abstract class BaseSheetViewModel(
     application: Application,
-    internal val config: PaymentSheet.Configuration?,
+    internal val config: PaymentSheetConfiguration?,
     internal val eventReporter: EventReporter,
     protected val customerRepository: CustomerRepository,
     protected val prefsRepository: PrefsRepository,

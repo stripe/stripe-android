@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -21,7 +21,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 ) : EventReporter {
     private var paymentSheetShownMillis: Long? = null
 
-    override fun onInit(configuration: PaymentSheet.Configuration?) {
+    override fun onInit(configuration: PaymentSheetConfiguration?) {
         fireEvent(
             PaymentSheetEvent.Init(
                 mode = mode,

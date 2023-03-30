@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
@@ -26,7 +27,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
     suspend fun configure(
         initializationMode: PaymentSheet.InitializationMode,
-        configuration: PaymentSheet.Configuration?,
+        configuration: PaymentSheetConfiguration?,
         callback: PaymentSheet.FlowController.ConfigCallback,
     ) {
         try {

@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -22,6 +23,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.toInternalConfiguration
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeCustomerRepository
@@ -102,12 +104,12 @@ internal class DefaultPaymentSheetLoaderTest {
                 initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
-                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
             )
         ).isEqualTo(
             PaymentSheetLoader.Result.Success(
                 PaymentSheetState.Full(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration(),
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     customerPaymentMethods = PAYMENT_METHODS,
                     isGooglePayReady = true,
@@ -134,7 +136,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
         ) as PaymentSheetLoader.Result.Success
 
         assertThat(result.state.paymentSelection).isEqualTo(
@@ -156,7 +158,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
         ) as PaymentSheetLoader.Result.Success
 
         assertThat(result.state.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
@@ -176,7 +178,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
         ) as PaymentSheetLoader.Result.Success
 
         assertThat(result.state.paymentSelection).isNull()
@@ -206,7 +208,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
-                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
             )
 
             verify(customerRepository).getPaymentMethods(
@@ -239,7 +241,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
-                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
             )
 
             verify(customerRepository).getPaymentMethods(
@@ -264,7 +266,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
-                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
             ) as PaymentSheetLoader.Result.Success
 
             assertThat(result.state.customerPaymentMethods)
@@ -286,7 +288,7 @@ internal class DefaultPaymentSheetLoaderTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
         ) as PaymentSheetLoader.Result.Success
 
         assertThat(result.state.customerPaymentMethods)
@@ -304,7 +306,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
-                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
             )
             assertThat(result)
                 .isInstanceOf(PaymentSheetLoader.Result::class.java)
@@ -545,7 +547,7 @@ internal class DefaultPaymentSheetLoaderTest {
         isGooglePayEnabled: Boolean = true,
         shippingDetails: AddressDetails? = null,
         defaultBillingDetails: PaymentSheet.BillingDetails? = null,
-    ): PaymentSheet.Configuration {
+    ): PaymentSheetConfiguration {
         return PaymentSheet.Configuration(
             merchantDisplayName = "Merchant",
             customer = customer,
@@ -555,7 +557,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                 countryCode = CountryCode.US.value
             ).takeIf { isGooglePayEnabled }
-        )
+        ).toInternalConfiguration()
     }
 
     private companion object {

@@ -26,6 +26,7 @@ import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
+import java.util.Objects
 
 /**
  * A drop-in class that presents a bottom sheet to collect and process a customer's payment.
@@ -122,7 +123,7 @@ class PaymentSheet internal constructor(
     ) {
         paymentSheetLauncher.present(
             mode = InitializationMode.PaymentIntent(paymentIntentClientSecret),
-            configuration = configuration,
+            configuration = configuration?.toInternalConfiguration(),
         )
     }
 
@@ -141,7 +142,7 @@ class PaymentSheet internal constructor(
     ) {
         paymentSheetLauncher.present(
             mode = InitializationMode.SetupIntent(setupIntentClientSecret),
-            configuration = configuration,
+            configuration = configuration?.toInternalConfiguration(),
         )
     }
 
@@ -160,7 +161,7 @@ class PaymentSheet internal constructor(
     ) {
         paymentSheetLauncher.present(
             mode = InitializationMode.DeferredIntent(intentConfiguration),
-            configuration = configuration,
+            configuration = configuration?.toInternalConfiguration(),
         )
     }
 
@@ -261,8 +262,9 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration @JvmOverloads
+    class Configuration
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @JvmOverloads
     constructor(
         /**
          * Your customer-facing business name.
@@ -362,7 +364,8 @@ class PaymentSheet internal constructor(
         val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     ) : Parcelable {
 
-        @JvmOverloads constructor(
+        @JvmOverloads
+        constructor(
             merchantDisplayName: String,
             customer: CustomerConfiguration? = null,
             googlePay: GooglePayConfiguration? = null,
@@ -386,6 +389,128 @@ class PaymentSheet internal constructor(
             primaryButtonLabel = primaryButtonLabel,
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
         )
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun copy(
+            merchantDisplayName: String = this.merchantDisplayName,
+            customer: CustomerConfiguration? = this.customer,
+            googlePay: GooglePayConfiguration? = this.googlePay,
+            primaryButtonColor: ColorStateList? = this.primaryButtonColor,
+            defaultBillingDetails: BillingDetails? = this.defaultBillingDetails,
+            shippingDetails: AddressDetails? = this.shippingDetails,
+            allowsDelayedPaymentMethods: Boolean = this.allowsDelayedPaymentMethods,
+            allowsPaymentMethodsRequiringShippingAddress: Boolean = this.allowsPaymentMethodsRequiringShippingAddress,
+            appearance: Appearance = this.appearance,
+            primaryButtonLabel: String? = this.primaryButtonLabel,
+        ): Configuration {
+            return Configuration(
+                merchantDisplayName = merchantDisplayName,
+                customer = customer,
+                googlePay = googlePay,
+                primaryButtonColor = primaryButtonColor,
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = shippingDetails,
+                allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+                appearance = appearance,
+                primaryButtonLabel = primaryButtonLabel,
+            )
+        }
+
+        override fun hashCode(): Int {
+            return Objects.hash(
+                merchantDisplayName,
+                customer,
+                googlePay,
+                primaryButtonColor,
+                defaultBillingDetails,
+                shippingDetails,
+                allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress,
+                appearance,
+                primaryButtonLabel,
+            )
+        }
+
+        override fun equals(other: Any?): Boolean {
+            return other is Configuration &&
+                merchantDisplayName == other.merchantDisplayName &&
+                customer == other.customer &&
+                googlePay == other.googlePay &&
+                primaryButtonColor == other.primaryButtonColor &&
+                defaultBillingDetails == other.defaultBillingDetails &&
+                shippingDetails == other.shippingDetails &&
+                allowsDelayedPaymentMethods == other.allowsDelayedPaymentMethods &&
+                allowsPaymentMethodsRequiringShippingAddress == other.allowsPaymentMethodsRequiringShippingAddress &&
+                appearance == other.appearance &&
+                primaryButtonLabel == other.primaryButtonLabel
+        }
+
+        override fun toString(): String {
+            return "PaymentSheet.Configuration(" +
+                "merchantDisplayName=$merchantDisplayName, " +
+                "customer=$customer, " +
+                "googlePay=$googlePay, " +
+                "primaryButtonColor=$primaryButtonColor, " +
+                "defaultBillingDetails=$defaultBillingDetails, " +
+                "shippingDetails=$shippingDetails, " +
+                "allowsDelayedPaymentMethods=$allowsDelayedPaymentMethods, " +
+                "allowsPaymentMethodsRequiringShippingAddress=$allowsPaymentMethodsRequiringShippingAddress, " +
+                "appearance=$appearance, " +
+                "primaryButtonLabel=$primaryButtonLabel)"
+        }
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component1(): String = merchantDisplayName
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component2(): CustomerConfiguration? = customer
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component3(): GooglePayConfiguration? = googlePay
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component4(): ColorStateList? = primaryButtonColor
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component5(): BillingDetails? = defaultBillingDetails
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component6(): AddressDetails? = shippingDetails
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component7(): Boolean = allowsDelayedPaymentMethods
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component8(): Boolean = allowsPaymentMethodsRequiringShippingAddress
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component9(): Appearance = appearance
+
+        @Deprecated(
+            message = "This isn't meant for public usage and will be removed in a future release",
+        )
+        fun component10(): String? = primaryButtonLabel
 
         /**
          * [Configuration] builder for cleaner object creation from Java.

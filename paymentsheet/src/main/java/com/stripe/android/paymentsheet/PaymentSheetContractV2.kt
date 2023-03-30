@@ -38,7 +38,7 @@ internal class PaymentSheetContractV2 :
     @Parcelize
     data class Args(
         internal val initializationMode: PaymentSheet.InitializationMode,
-        internal val config: PaymentSheet.Configuration?,
+        internal val config: PaymentSheetConfiguration?,
         @ColorInt internal val statusBarColor: Int? = null,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     ) : ActivityStarter.Args {

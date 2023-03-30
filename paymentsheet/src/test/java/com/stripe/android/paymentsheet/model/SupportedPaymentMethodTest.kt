@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER
+import com.stripe.android.paymentsheet.toInternalConfiguration
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
@@ -42,7 +43,7 @@ class SupportedPaymentMethodTest {
             LpmRepository.HardcodedCard
                 .getSpecWithFullfilledRequirements(
                     PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET,
-                    CONFIG_CUSTOMER
+                    CONFIG_CUSTOMER.toInternalConfiguration()
                 )?.showCheckbox
         ).isFalse()
     }

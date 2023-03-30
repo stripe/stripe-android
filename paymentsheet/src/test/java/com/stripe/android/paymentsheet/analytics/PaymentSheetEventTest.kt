@@ -7,6 +7,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.toInternalConfiguration
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
@@ -19,7 +20,7 @@ class PaymentSheetEventTest {
     fun `Init event with full config should return expected toString()`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.toInternalConfiguration()
         )
         assertThat(
             event.eventName
@@ -35,7 +36,7 @@ class PaymentSheetEventTest {
     fun `Init event with minimum config should return expected toString()`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            configuration = PaymentSheetFixtures.CONFIG_MINIMUM
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.toInternalConfiguration()
         )
         assertThat(
             event.eventName
@@ -369,7 +370,7 @@ class PaymentSheetEventTest {
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                configuration = PaymentSheetFixtures.CONFIG_MINIMUM
+                configuration = PaymentSheetFixtures.CONFIG_MINIMUM.toInternalConfiguration()
             ).additionalParams
         ).isEqualTo(
             mapOf(
@@ -409,7 +410,7 @@ class PaymentSheetEventTest {
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
+                configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING.toInternalConfiguration()
             ).additionalParams
         ).isEqualTo(
             mapOf(

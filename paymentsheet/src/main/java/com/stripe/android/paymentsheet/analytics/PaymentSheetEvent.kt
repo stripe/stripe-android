@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.analytics
 
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.StripeThemeDefaults
 import java.util.Locale
@@ -11,7 +12,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class Init(
         private val mode: EventReporter.Mode,
-        private val configuration: PaymentSheet.Configuration?
+        private val configuration: PaymentSheetConfiguration?
     ) : PaymentSheetEvent() {
         override val eventName: String
             get() {

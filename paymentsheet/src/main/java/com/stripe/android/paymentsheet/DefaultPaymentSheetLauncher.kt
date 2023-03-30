@@ -94,7 +94,7 @@ internal class DefaultPaymentSheetLauncher(
 
     override fun present(
         mode: PaymentSheet.InitializationMode,
-        configuration: PaymentSheet.Configuration?
+        configuration: PaymentSheetConfiguration?,
     ) {
         val args = PaymentSheetContractV2.Args(
             initializationMode = mode,

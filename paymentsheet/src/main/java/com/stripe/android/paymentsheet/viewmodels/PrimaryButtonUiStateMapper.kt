@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.content.Context
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.combine
 
 internal class PrimaryButtonUiStateMapper(
     private val context: Context,
-    private val config: PaymentSheet.Configuration?,
+    private val config: PaymentSheetConfiguration?,
     private val isProcessingPayment: Boolean,
     private val currentScreenFlow: Flow<PaymentSheetScreen>,
     private val buttonsEnabledFlow: Flow<Boolean>,

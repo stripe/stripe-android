@@ -57,7 +57,7 @@ class PaymentSheetContract :
                         PaymentSheet.InitializationMode.SetupIntent(clientSecret.value)
                     }
                 },
-                config = config,
+                config = config?.toInternalConfiguration(),
                 statusBarColor = statusBarColor,
                 injectorKey = injectorKey,
             )

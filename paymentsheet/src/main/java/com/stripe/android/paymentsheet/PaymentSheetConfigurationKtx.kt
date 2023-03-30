@@ -11,7 +11,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import java.security.InvalidParameterException
 
-internal fun PaymentSheet.Configuration.validate() {
+internal fun PaymentSheetConfiguration.validate() {
     // These are not localized as they are not intended to be displayed to a user.
     when {
         merchantDisplayName.isBlank() -> {

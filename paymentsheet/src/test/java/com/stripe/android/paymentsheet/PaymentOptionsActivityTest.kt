@@ -335,7 +335,7 @@ internal class PaymentOptionsActivityTest {
                                 typography = PaymentSheet.PrimaryButtonTypography()
                             )
                         )
-                    )
+                    ).toInternalConfiguration()
                 )
             )
         ).use {
