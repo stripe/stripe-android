@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
-import com.google.gson.Gson
 import com.stripe.android.CreateIntentCallback
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
@@ -14,8 +13,11 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.model.updateWithResponse
+import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
+import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateAndConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateAndConfirmIntentResponse
+import com.stripe.android.paymentsheet.example.samples.networking.ExampleUpdateRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleUpdateResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.example.samples.networking.toCheckoutRequest
@@ -35,6 +37,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import kotlin.Result
 import kotlin.time.Duration.Companion.milliseconds
 import com.github.kittinunf.result.Result as ApiResult
@@ -95,13 +98,14 @@ internal class ServerSideConfirmationViewModel(
             returnUrl = "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
         )
 
-        val requestBody = Gson().toJson(request)
+        val requestSerializer = ExampleCreateAndConfirmIntentRequest.serializer()
+        val requestBody = Json.encodeToString(requestSerializer, request)
 
         val apiResult = Fuel
             .post("$backendUrl/confirm_intent")
             .jsonBody(requestBody)
             .suspendable()
-            .awaitModel<ExampleCreateAndConfirmIntentResponse>()
+            .awaitModel(ExampleCreateAndConfirmIntentResponse.serializer())
 
         when (apiResult) {
             is ApiResult.Success -> {
@@ -167,13 +171,13 @@ internal class ServerSideConfirmationViewModel(
         }
 
         val request = currentState.cartState.toCheckoutRequest()
-        val requestBody = Gson().toJson(request)
+        val requestBody = Json.encodeToString(ExampleCheckoutRequest.serializer(), request)
 
         val apiResult = Fuel
             .post("$backendUrl/checkout")
             .jsonBody(requestBody)
             .suspendable()
-            .awaitModel<ExampleCheckoutResponse>()
+            .awaitModel(ExampleCheckoutResponse.serializer())
 
         when (apiResult) {
             is ApiResult.Success -> {
@@ -264,13 +268,13 @@ internal class ServerSideConfirmationViewModel(
         currentState: CartState,
     ): Result<CartState> = withContext(Dispatchers.IO) {
         val request = currentState.toUpdateRequest()
-        val requestBody = Gson().toJson(request)
+        val requestBody = Json.encodeToString(ExampleUpdateRequest.serializer(), request)
 
         val apiResult = Fuel
             .post("$backendUrl/compute_totals")
             .jsonBody(requestBody)
             .suspendable()
-            .awaitModel<ExampleUpdateResponse>()
+            .awaitModel(ExampleUpdateResponse.serializer())
 
         when (apiResult) {
             is ApiResult.Success -> {

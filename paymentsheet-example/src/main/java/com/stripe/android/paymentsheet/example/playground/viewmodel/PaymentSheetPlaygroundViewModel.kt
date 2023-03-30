@@ -9,7 +9,6 @@ import androidx.lifecycle.asFlow
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
-import com.google.gson.Gson
 import com.stripe.android.CreateIntentCallback
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
@@ -29,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -229,16 +229,16 @@ class PaymentSheetPlaygroundViewModel(
         )
 
         Fuel.post(backendUrl + "checkout")
-            .jsonBody(Gson().toJson(requestBody))
+            .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))
             .responseString { _, _, result ->
                 when (result) {
                     is Result.Failure -> {
                         status.postValue("Preparing checkout failed:\n${result.getException().message}")
                     }
                     is Result.Success -> {
-                        val checkoutResponse = Gson().fromJson(
+                        val checkoutResponse = Json.decodeFromString(
+                            CheckoutResponse.serializer(),
                             result.get(),
-                            CheckoutResponse::class.java
                         )
                         checkoutMode.value = mode
                         temporaryCustomerId = if (customer == CheckoutCustomer.New) {
@@ -299,7 +299,7 @@ class PaymentSheetPlaygroundViewModel(
 
         return suspendCoroutine { continuation ->
             Fuel.post(backendUrl + "confirm_intent")
-                .jsonBody(Gson().toJson(request))
+                .jsonBody(Json.encodeToString(ConfirmIntentRequest.serializer(), request))
                 .responseString { _, _, result ->
                     when (result) {
                         is Result.Failure -> {
@@ -320,9 +320,9 @@ class PaymentSheetPlaygroundViewModel(
                             )
                         }
                         is Result.Success -> {
-                            val confirmIntentResponse = Gson().fromJson(
+                            val confirmIntentResponse = Json.decodeFromString(
+                                ConfirmIntentResponse.serializer(),
                                 result.get(),
-                                ConfirmIntentResponse::class.java,
                             )
 
                             continuation.resume(

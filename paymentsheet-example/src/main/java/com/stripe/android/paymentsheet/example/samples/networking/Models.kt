@@ -1,27 +1,26 @@
 package com.stripe.android.paymentsheet.example.samples.networking
 
-import androidx.annotation.Keep
 import com.github.kittinunf.fuel.core.Deserializable
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
-import com.google.gson.Gson
-import com.google.gson.annotations.SerializedName
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as ApiResult
 
 @Serializable
-@Keep
 data class ExampleCheckoutRequest(
-    @SerializedName("hot_dog_count")
+    @SerialName("hot_dog_count")
     val hotDogCount: Int,
-    @SerializedName("salad_count")
+    @SerialName("salad_count")
     val saladCount: Int,
-    @SerializedName("is_subscribing")
+    @SerialName("is_subscribing")
     val isSubscribing: Boolean,
 )
 
@@ -34,22 +33,21 @@ fun CartState.toCheckoutRequest(): ExampleCheckoutRequest {
 }
 
 @Serializable
-@Keep
 data class ExampleCheckoutResponse(
-    @SerializedName("publishableKey")
+    @SerialName("publishableKey")
     val publishableKey: String,
-    @SerializedName("paymentIntent")
-    val paymentIntent: String,
-    @SerializedName("customer")
+    @SerialName("paymentIntent")
+    val paymentIntent: String = "",
+    @SerialName("customer")
     val customer: String? = null,
-    @SerializedName("ephemeralKey")
+    @SerialName("ephemeralKey")
     val ephemeralKey: String? = null,
-    @SerializedName("subtotal")
-    val subtotal: Long,
-    @SerializedName("tax")
-    val tax: Long,
-    @SerializedName("total")
-    val total: Long,
+    @SerialName("subtotal")
+    val subtotal: Long = 0,
+    @SerialName("tax")
+    val tax: Long = 0,
+    @SerialName("total")
+    val total: Long = 0,
 ) {
 
     internal fun makeCustomerConfig() = if (customer != null && ephemeralKey != null) {
@@ -63,13 +61,12 @@ data class ExampleCheckoutResponse(
 }
 
 @Serializable
-@Keep
 data class ExampleUpdateRequest(
-    @SerializedName("hot_dog_count")
+    @SerialName("hot_dog_count")
     val hotDogCount: Int,
-    @SerializedName("salad_count")
+    @SerialName("salad_count")
     val saladCount: Int,
-    @SerializedName("is_subscribing")
+    @SerialName("is_subscribing")
     val isSubscribing: Boolean,
 )
 
@@ -82,32 +79,30 @@ fun CartState.toUpdateRequest(): ExampleUpdateRequest {
 }
 
 @Serializable
-@Keep
 data class ExampleUpdateResponse(
-    @SerializedName("subtotal")
+    @SerialName("subtotal")
     val subtotal: Long,
-    @SerializedName("tax")
+    @SerialName("tax")
     val tax: Long,
-    @SerializedName("total")
+    @SerialName("total")
     val total: Long,
 )
 
 @Serializable
-@Keep
 data class ExampleCreateAndConfirmIntentRequest(
-    @SerializedName("payment_method_id")
+    @SerialName("payment_method_id")
     val paymentMethodId: String,
-    @SerializedName("should_save_payment_method")
+    @SerialName("should_save_payment_method")
     val shouldSavePaymentMethod: Boolean,
-    @SerializedName("currency")
+    @SerialName("currency")
     val currency: String,
-    @SerializedName("hot_dog_count")
+    @SerialName("hot_dog_count")
     val hotDogCount: Int,
-    @SerializedName("salad_count")
+    @SerialName("salad_count")
     val saladCount: Int,
-    @SerializedName("is_subscribing")
+    @SerialName("is_subscribing")
     val isSubscribing: Boolean,
-    @SerializedName("return_url")
+    @SerialName("return_url")
     val returnUrl: String,
 )
 
@@ -128,21 +123,22 @@ fun CartState.toCreateIntentRequest(
 }
 
 @Serializable
-@Keep
 data class ExampleCreateAndConfirmIntentResponse(
-    @SerializedName("intentClientSecret")
+    @SerialName("intentClientSecret")
     val clientSecret: String,
 )
 
 /**
  * Awaits the [ApiResult] and deserializes it into the desired type [T].
  */
-suspend inline fun <reified T : Any> Request.awaitModel(): ApiResult<T, FuelError> {
+suspend fun <T : Any> Request.awaitModel(
+    serializer: DeserializationStrategy<T>
+): ApiResult<T, FuelError> {
     val deserializer = object : Deserializable<T> {
 
         override fun deserialize(response: Response): T {
             val body = response.body().asString("application/json")
-            return Gson().fromJson(body, T::class.java)
+            return Json.decodeFromString(serializer, body)
         }
     }
 
