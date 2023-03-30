@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -13,6 +12,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.ui.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.Receipt
+import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 internal class CompleteFlowActivity : AppCompatActivity() {
 
@@ -35,7 +35,7 @@ internal class CompleteFlowActivity : AppCompatActivity() {
         )
 
         setContent {
-            MaterialTheme {
+            PaymentSheetExampleTheme {
                 val uiState by viewModel.state.collectAsState()
 
                 uiState.paymentInfo?.let { paymentInfo ->

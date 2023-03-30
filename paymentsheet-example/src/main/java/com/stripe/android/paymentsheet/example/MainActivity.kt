@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetP
 import com.stripe.android.paymentsheet.example.samples.ui.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.ServerSideConfirmationActivity
+import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 private const val SurfaceOverlayOpacity = 0.12f
 
@@ -80,7 +81,9 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(viewBinding.toolbar)
 
         viewBinding.content.setContent {
-            MainScreen(items = items)
+            PaymentSheetExampleTheme {
+                MainScreen(items = items)
+            }
         }
     }
 }
@@ -135,9 +138,13 @@ private fun MenuItemRow(item: MenuItem) {
             text = stringResource(item.titleResId),
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 4.dp),
+            color = MaterialTheme.colors.onSurface,
         )
 
-        Text(text = stringResource(item.subtitleResId))
+        Text(
+            text = stringResource(item.subtitleResId),
+            color = MaterialTheme.colors.onSurface,
+        )
 
         if (item.badge != null) {
             Chip(
