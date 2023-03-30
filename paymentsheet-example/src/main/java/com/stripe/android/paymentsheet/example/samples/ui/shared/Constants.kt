@@ -9,7 +9,7 @@ val MAIN_FONT_SIZE = 18.sp
 val SUB_FONT_SIZE = 14.sp
 val PADDING = 12.dp
 const val ROW_START = .7f
-val BACKGROUND_COLOR = Color(0xfff2f2f7)
+
 val BUTTON_COLOR = Color(0xff635BFF)
 
 const val SALAD_EMOJI = "\uD83E\uDD57"
