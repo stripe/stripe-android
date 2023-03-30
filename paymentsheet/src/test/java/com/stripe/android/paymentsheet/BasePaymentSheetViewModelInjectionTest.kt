@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.testing.FakeIntentConfirmationInterceptor
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
@@ -89,7 +88,6 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                 args,
                 eventReporter,
                 { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-                ElementsSessionRepository.Static(stripeIntent),
                 StripeIntentValidator(),
                 FakePaymentSheetLoader(
                     stripeIntent = stripeIntent,

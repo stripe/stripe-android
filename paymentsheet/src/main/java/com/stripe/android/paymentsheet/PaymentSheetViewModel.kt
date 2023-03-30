@@ -49,7 +49,6 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -83,7 +82,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     eventReporter: EventReporter,
     // Properties provided through injection
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
-    private val elementsSessionRepository: ElementsSessionRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val paymentSheetLoader: PaymentSheetLoader,
     customerRepository: CustomerRepository,
@@ -466,13 +464,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
             runCatching {
-                elementsSessionRepository.get(
-                    initializationMode = args.initializationMode,
-                    configuration = args.config,
-                )
+                requireNotNull(stripeIntent.value)
             }.fold(
-                onSuccess = { session ->
-                    processPayment(session.stripeIntent, paymentResult)
+                onSuccess = { stripeIntent ->
+                    processPayment(stripeIntent, paymentResult)
                 },
                 onFailure = ::onFatal
             )

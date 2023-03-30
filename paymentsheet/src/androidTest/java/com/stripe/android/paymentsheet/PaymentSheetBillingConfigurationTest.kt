@@ -88,13 +88,6 @@ internal class PaymentSheetBillingConfigurationTest {
         page.fillOutCardDetails(fillOutZipCode = false)
 
         networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-        }
-
-        networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart("payment_method_data%5Bbilling_details%5D%5Bname%5D", "Jane+Doe"),
@@ -170,13 +163,6 @@ internal class PaymentSheetBillingConfigurationTest {
         }
 
         page.fillOutCardDetails(fillOutZipCode = false)
-
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-        }
 
         networkRule.enqueue(
             method("POST"),

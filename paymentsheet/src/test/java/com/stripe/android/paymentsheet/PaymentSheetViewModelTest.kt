@@ -46,7 +46,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPay
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -527,7 +526,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onPaymentResult() with non-success outcome should report failure event`() = runTest {
-        val viewModel = createViewModel(shouldFailLoad = true)
+        val viewModel = createViewModel()
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(selection)
 
@@ -540,7 +539,7 @@ internal class PaymentSheetViewModelTest {
                 )
 
             val stripeIntent = awaitItem()
-            assertThat(stripeIntent).isNull()
+            assertThat(stripeIntent).isEqualTo(PAYMENT_INTENT)
         }
     }
 
@@ -1315,7 +1314,6 @@ internal class PaymentSheetViewModelTest {
                 args,
                 eventReporter,
                 { paymentConfiguration },
-                ElementsSessionRepository.Static(stripeIntent),
                 StripeIntentValidator(),
                 FakePaymentSheetLoader(
                     stripeIntent = stripeIntent,
