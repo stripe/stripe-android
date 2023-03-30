@@ -1,8 +1,5 @@
 package com.stripe.android.paymentsheet.example.samples.model
 
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
-import com.stripe.android.paymentsheet.PaymentSheet
-
 data class CartState(
     val products: List<CartProduct>,
     val isSubscription: Boolean,
@@ -38,17 +35,4 @@ data class CartState(
             total = 973,
         )
     }
-}
-
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
-fun CartState.toIntentConfiguration(): PaymentSheet.IntentConfiguration {
-    return PaymentSheet.IntentConfiguration(
-        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-            amount = total ?: 0L,
-            currency = "usd",
-            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession.takeIf {
-                isSubscription
-            },
-        )
-    )
 }
