@@ -526,7 +526,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onPaymentResult() with non-success outcome should report failure event`() = runTest {
-        val viewModel = createViewModel(shouldFailLoad = true)
+        val viewModel = createViewModel()
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(selection)
 
@@ -539,7 +539,7 @@ internal class PaymentSheetViewModelTest {
                 )
 
             val stripeIntent = awaitItem()
-            assertThat(stripeIntent).isNull()
+            assertThat(stripeIntent).isEqualTo(PAYMENT_INTENT)
         }
     }
 
