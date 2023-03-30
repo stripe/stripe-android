@@ -12,7 +12,6 @@ data class ServerSideConfirmationViewState(
     val status: String? = null,
     val paymentOption: PaymentOption? = null,
     val didComplete: Boolean = false,
-    val requiresFlowControllerConfigure: Boolean = false,
 ) {
 
     val cartState: CartState

@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.PaymentMethodSelector
 import com.stripe.android.paymentsheet.example.samples.ui.Receipt
+import com.stripe.android.paymentsheet.example.samples.ui.shared.ErrorScreen
 
 internal class CustomFlowActivity : AppCompatActivity() {
 
@@ -58,23 +59,27 @@ internal class CustomFlowActivity : AppCompatActivity() {
                     }
                 }
 
-                Receipt(
-                    isLoading = uiState.isProcessing,
-                    cartState = uiState.cartState,
-                ) {
-                    PaymentMethodSelector(
-                        isEnabled = uiState.isPaymentMethodButtonEnabled,
-                        paymentMethodLabel = paymentMethodLabel,
-                        paymentMethodIcon = uiState.paymentOption?.icon(),
-                        onClick = flowController::presentPaymentOptions,
-                    )
-                    BuyButton(
-                        buyButtonEnabled = uiState.isBuyButtonEnabled,
-                        onClick = {
-                            viewModel.handleBuyButtonPressed()
-                            flowController.confirm()
-                        }
-                    )
+                if (uiState.isError) {
+                    ErrorScreen(onRetry = viewModel::retry)
+                } else {
+                    Receipt(
+                        isLoading = uiState.isProcessing,
+                        cartState = uiState.cartState,
+                    ) {
+                        PaymentMethodSelector(
+                            isEnabled = uiState.isPaymentMethodButtonEnabled,
+                            paymentMethodLabel = paymentMethodLabel,
+                            paymentMethodIcon = uiState.paymentOption?.icon(),
+                            onClick = flowController::presentPaymentOptions,
+                        )
+                        BuyButton(
+                            buyButtonEnabled = uiState.isBuyButtonEnabled,
+                            onClick = {
+                                viewModel.handleBuyButtonPressed()
+                                flowController.confirm()
+                            }
+                        )
+                    }
                 }
             }
         }

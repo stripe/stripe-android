@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
@@ -35,6 +36,8 @@ import kotlinx.coroutines.withContext
 import kotlin.Result
 import kotlin.time.Duration.Companion.milliseconds
 import com.github.kittinunf.result.Result as ApiResult
+
+private typealias ConfigureHandler = suspend (CartState) -> Throwable?
 
 internal class ServerSideConfirmationViewModel(
     application: Application,
@@ -44,6 +47,8 @@ internal class ServerSideConfirmationViewModel(
         value = ServerSideConfirmationViewState(confirmedCartState = CartState.default),
     )
     val state: StateFlow<ServerSideConfirmationViewState> = _state
+
+    private var configureHandler: ConfigureHandler? = null
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -55,20 +60,17 @@ internal class ServerSideConfirmationViewModel(
         }
     }
 
+    fun registerFlowControllerConfigureHandler(handler: ConfigureHandler) {
+        this.configureHandler = handler
+    }
+
+    fun unregisterFlowControllerConfigureHandler() {
+        this.configureHandler = null
+    }
+
     fun statusDisplayed() {
         _state.update {
             it.copy(status = null)
-        }
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    fun handleFlowControllerConfigured(success: Boolean, error: Throwable?) {
-        _state.update {
-            it.copy(
-                isProcessing = false,
-                requiresFlowControllerConfigure = false,
-                status = error?.let { "Failed to configure\n$it" },
-            )
         }
     }
 
@@ -138,7 +140,6 @@ internal class ServerSideConfirmationViewModel(
     fun updateSubscription(isSubscription: Boolean) {
         val dirtyCartState = state.value.cartState.copy(
             isSubscription = isSubscription,
-            requiresCalculation = true,
         )
         _state.update {
             it.copy(dirtyCartState = dirtyCartState)
@@ -151,9 +152,15 @@ internal class ServerSideConfirmationViewModel(
         }
     }
 
+    fun retry() {
+        viewModelScope.launch(Dispatchers.IO) {
+            prepareCheckout()
+        }
+    }
+
     private suspend fun prepareCheckout() {
         val currentState = _state.updateAndGet {
-            it.copy(isProcessing = true)
+            it.copy(isProcessing = true, isError = false)
         }
 
         val request = currentState.cartState.toCheckoutRequest()
@@ -176,18 +183,13 @@ internal class ServerSideConfirmationViewModel(
 
                 _state.update {
                     it.copy(
-                        isProcessing = false,
-                        isError = false,
-                        confirmedCartState = newCartState,
-                        dirtyCartState = null,
-                        requiresFlowControllerConfigure = true,
+                        dirtyCartState = newCartState,
                     )
                 }
             }
             is ApiResult.Failure -> {
-                val status = "Preparing checkout failed\n${apiResult.error.message}"
                 _state.update {
-                    it.copy(isProcessing = false, isError = true, status = status)
+                    it.copy(isProcessing = false, isError = true)
                 }
             }
         }
@@ -197,34 +199,66 @@ internal class ServerSideConfirmationViewModel(
     private suspend fun observeCartUpdates() {
         state
             .mapNotNull { it.dirtyCartState }
+            .onEach { renderProcessing() }
             .debounce(300.milliseconds)
             .map(::updateCart)
             .collect(::handleCartUpdated)
     }
 
-    private fun handleCartUpdated(result: Result<CartState>) {
-        val currentState = state.value
+    private suspend fun configureFlowControllerWithNewCart(
+        cartState: CartState,
+    ): Result<CartState> {
+        return configureHandler?.let { configure ->
+            val configureError = configure(cartState)
+            if (configureError != null) {
+                Result.failure(configureError)
+            } else {
+                Result.success(cartState)
+            }
+        } ?: Result.failure(IllegalStateException("Failed to update cart"))
+    }
 
-        val newCartState = result.getOrNull() ?: currentState.confirmedCartState
-        val status = result.exceptionOrNull()?.let { "Failed to update cart\n$it" }
+    private suspend fun handleCartUpdated(result: Result<CartState>) {
+        val cartUpdateResult = result.fold(
+            onSuccess = { updatedCartState ->
+                configureFlowControllerWithNewCart(updatedCartState)
+            },
+            onFailure = { error ->
+                Result.failure(error)
+            },
+        )
 
+        cartUpdateResult.fold(
+            onSuccess = { finalCartState ->
+                _state.update {
+                    it.copy(
+                        isProcessing = false,
+                        confirmedCartState = finalCartState,
+                        dirtyCartState = null,
+                    )
+                }
+            },
+            onFailure = { error ->
+                _state.update {
+                    it.copy(
+                        isProcessing = false,
+                        dirtyCartState = null,
+                        status = "Failed to update cart\n$error",
+                    )
+                }
+            }
+        )
+    }
+
+    private fun renderProcessing() {
         _state.update {
-            it.copy(
-                // Keep processing on success, because we'll re-configure FlowController
-                isProcessing = result.isSuccess,
-                confirmedCartState = newCartState,
-                dirtyCartState = null,
-                status = status,
-                requiresFlowControllerConfigure = result.isSuccess,
-            )
+            it.copy(isProcessing = true, isError = false)
         }
     }
 
     private suspend fun updateCart(
         currentState: CartState,
     ): Result<CartState> = withContext(Dispatchers.IO) {
-        _state.update { it.copy(isProcessing = true) }
-
         val request = currentState.toUpdateRequest()
         val requestBody = Gson().toJson(request)
 

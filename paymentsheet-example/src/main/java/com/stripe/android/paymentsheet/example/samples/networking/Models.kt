@@ -45,11 +45,11 @@ data class ExampleCheckoutResponse(
     @SerializedName("ephemeralKey")
     val ephemeralKey: String? = null,
     @SerializedName("subtotal")
-    val subtotal: Float,
+    val subtotal: Long,
     @SerializedName("tax")
-    val tax: Float,
+    val tax: Long,
     @SerializedName("total")
-    val total: Float,
+    val total: Long,
 ) {
 
     internal fun makeCustomerConfig() = if (customer != null && ephemeralKey != null) {
@@ -85,11 +85,11 @@ fun CartState.toUpdateRequest(): ExampleUpdateRequest {
 @Keep
 data class ExampleUpdateResponse(
     @SerializedName("subtotal")
-    val subtotal: Float,
+    val subtotal: Long,
     @SerializedName("tax")
-    val tax: Float,
+    val tax: Long,
     @SerializedName("total")
-    val total: Float,
+    val total: Long,
 )
 
 @Serializable

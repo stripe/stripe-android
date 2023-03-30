@@ -43,6 +43,12 @@ internal class CustomFlowViewModel(
         }
     }
 
+    fun retry() {
+        viewModelScope.launch(Dispatchers.IO) {
+            prepareCheckout()
+        }
+    }
+
     @Suppress("UNUSED_PARAMETER")
     fun handleFlowControllerConfigured(success: Boolean, error: Throwable?) {
         _state.update {
@@ -79,7 +85,7 @@ internal class CustomFlowViewModel(
 
     private suspend fun prepareCheckout() {
         val currentState = _state.updateAndGet {
-            it.copy(isProcessing = true)
+            it.copy(isProcessing = true, isError = false)
         }
 
         val request = currentState.cartState.toCheckoutRequest()
@@ -109,9 +115,8 @@ internal class CustomFlowViewModel(
                 }
             }
             is ApiResult.Failure -> {
-                val status = "Preparing checkout failed\n${apiResult.error.message}"
                 _state.update {
-                    it.copy(isProcessing = false, status = status)
+                    it.copy(isProcessing = false, isError = false)
                 }
             }
         }

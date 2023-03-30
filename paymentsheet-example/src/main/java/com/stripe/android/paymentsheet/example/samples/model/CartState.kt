@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.example.samples.model
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleUpdateResponse
-import kotlin.math.roundToLong
 
 data class CartState(
     val products: List<CartProduct>,
@@ -11,7 +10,6 @@ data class CartState(
     val subtotal: Long? = null,
     val salesTax: Long? = null,
     val total: Long? = null,
-    val requiresCalculation: Boolean = false,
 ) {
 
     val formattedSubtotal: String
@@ -32,7 +30,6 @@ data class CartState(
                     product
                 }
             },
-            requiresCalculation = true,
         )
     }
 
@@ -60,10 +57,9 @@ internal fun CartState.updateWithResponse(
     response: ExampleUpdateResponse,
 ): CartState {
     return copy(
-        subtotal = response.subtotal.roundToLong(),
-        salesTax = response.tax.roundToLong(),
-        total = response.total.roundToLong(),
-        requiresCalculation = false,
+        subtotal = response.subtotal,
+        salesTax = response.tax,
+        total = response.total,
     )
 }
 
@@ -71,10 +67,9 @@ internal fun CartState.updateWithResponse(
     response: ExampleCheckoutResponse,
 ): CartState {
     return copy(
-        subtotal = response.subtotal.roundToLong(),
-        salesTax = response.tax.roundToLong(),
-        total = response.total.roundToLong(),
-        requiresCalculation = false,
+        subtotal = response.subtotal,
+        salesTax = response.tax,
+        total = response.total,
     )
 }
 

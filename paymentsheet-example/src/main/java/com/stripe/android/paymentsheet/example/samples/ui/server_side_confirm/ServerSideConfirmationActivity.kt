@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,6 +21,8 @@ import com.stripe.android.paymentsheet.example.samples.ui.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.PaymentMethodSelector
 import com.stripe.android.paymentsheet.example.samples.ui.Receipt
 import com.stripe.android.paymentsheet.example.samples.ui.SubscriptionToggle
+import com.stripe.android.paymentsheet.example.samples.ui.shared.ErrorScreen
+import kotlinx.coroutines.CompletableDeferred
 
 internal class ServerSideConfirmationActivity : AppCompatActivity() {
 
@@ -48,6 +51,8 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
                 val uiState by viewModel.state.collectAsState()
                 val paymentMethodLabel = determinePaymentMethodLabel(uiState)
 
+                AttachFlowControllerToViewModel(uiState)
+
                 uiState.status?.let {
                     LaunchedEffect(it) {
                         snackbar.setText(it).show()
@@ -55,42 +60,57 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
                     }
                 }
 
-                LaunchedEffect(uiState.requiresFlowControllerConfigure) {
-                    if (uiState.requiresFlowControllerConfigure) {
-                        flowController.configureWithIntentConfiguration(
-                            intentConfiguration = uiState.cartState.toIntentConfiguration(),
-                            configuration = uiState.paymentSheetConfig,
-                            callback = viewModel::handleFlowControllerConfigured,
+                if (uiState.isError) {
+                    ErrorScreen(onRetry = viewModel::retry)
+                } else {
+                    Receipt(
+                        isLoading = uiState.isProcessing,
+                        cartState = uiState.cartState,
+                        isEditable = true,
+                        onQuantityChanged = viewModel::updateQuantity,
+                    ) {
+                        PaymentMethodSelector(
+                            isEnabled = uiState.isPaymentMethodButtonEnabled,
+                            paymentMethodLabel = paymentMethodLabel,
+                            paymentMethodIcon = uiState.paymentOption?.icon(),
+                            onClick = flowController::presentPaymentOptions,
+                        )
+
+                        SubscriptionToggle(
+                            checked = uiState.cartState.isSubscription,
+                            onCheckedChange = viewModel::updateSubscription,
+                        )
+
+                        BuyButton(
+                            buyButtonEnabled = uiState.isBuyButtonEnabled,
+                            onClick = {
+                                viewModel.handleBuyButtonPressed()
+                                flowController.confirm()
+                            }
                         )
                     }
                 }
+            }
+        }
+    }
 
-                Receipt(
-                    isLoading = uiState.isProcessing,
-                    cartState = uiState.cartState,
-                    isEditable = true,
-                    onQuantityChanged = viewModel::updateQuantity,
-                ) {
-                    PaymentMethodSelector(
-                        isEnabled = uiState.isPaymentMethodButtonEnabled,
-                        paymentMethodLabel = paymentMethodLabel,
-                        paymentMethodIcon = uiState.paymentOption?.icon(),
-                        onClick = flowController::presentPaymentOptions,
-                    )
+    @Composable
+    fun AttachFlowControllerToViewModel(
+        uiState: ServerSideConfirmationViewState,
+    ) {
+        DisposableEffect(Unit) {
+            viewModel.registerFlowControllerConfigureHandler { cartState ->
+                val completable = CompletableDeferred<Throwable?>()
+                flowController.configureWithIntentConfiguration(
+                    intentConfiguration = cartState.toIntentConfiguration(),
+                    configuration = uiState.paymentSheetConfig,
+                    callback = { _, error -> completable.complete(error) },
+                )
+                completable.await()
+            }
 
-                    SubscriptionToggle(
-                        checked = uiState.cartState.isSubscription,
-                        onCheckedChange = viewModel::updateSubscription,
-                    )
-
-                    BuyButton(
-                        buyButtonEnabled = uiState.isBuyButtonEnabled,
-                        onClick = {
-                            viewModel.handleBuyButtonPressed()
-                            flowController.confirm()
-                        }
-                    )
-                }
+            onDispose {
+                viewModel.unregisterFlowControllerConfigureHandler()
             }
         }
     }
