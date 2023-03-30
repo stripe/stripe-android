@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.content.Context
-import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.internal.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PrimaryButton

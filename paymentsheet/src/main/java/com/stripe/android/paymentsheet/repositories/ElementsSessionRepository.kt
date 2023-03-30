@@ -12,8 +12,8 @@ import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Usage
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.internal.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider

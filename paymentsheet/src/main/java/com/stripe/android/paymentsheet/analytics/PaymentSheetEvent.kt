@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.analytics
 
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetConfiguration
+import com.stripe.android.paymentsheet.internal.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.StripeThemeDefaults
 import java.util.Locale

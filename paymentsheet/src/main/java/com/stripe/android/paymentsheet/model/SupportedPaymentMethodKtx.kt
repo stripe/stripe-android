@@ -3,11 +3,11 @@ package com.stripe.android.paymentsheet.model
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.paymentsheet.forms.PIRequirement
 import com.stripe.android.paymentsheet.forms.SIRequirement
 import com.stripe.android.paymentsheet.forms.ShippingAddress
+import com.stripe.android.paymentsheet.internal.PaymentSheetConfiguration
 import com.stripe.android.ui.core.elements.LayoutFormDescriptor
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod

@@ -9,31 +9,6 @@ import com.stripe.android.uicore.PrimaryButtonShape
 import com.stripe.android.uicore.PrimaryButtonTypography
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
-import java.security.InvalidParameterException
-
-internal fun PaymentSheetConfiguration.validate() {
-    // These are not localized as they are not intended to be displayed to a user.
-    when {
-        merchantDisplayName.isBlank() -> {
-            throw InvalidParameterException(
-                "When a Configuration is passed to PaymentSheet," +
-                    " the Merchant display name cannot be an empty string."
-            )
-        }
-        customer?.id?.isBlank() == true -> {
-            throw InvalidParameterException(
-                "When a CustomerConfiguration is passed to PaymentSheet," +
-                    " the Customer ID cannot be an empty string."
-            )
-        }
-        customer?.ephemeralKeySecret?.isBlank() == true -> {
-            throw InvalidParameterException(
-                "When a CustomerConfiguration is passed to PaymentSheet, " +
-                    "the ephemeralKeySecret cannot be an empty string."
-            )
-        }
-    }
-}
 
 internal fun PaymentSheet.Appearance.parseAppearance() {
     StripeTheme.colorsLightMutable = StripeThemeDefaults.colorsLight.copy(

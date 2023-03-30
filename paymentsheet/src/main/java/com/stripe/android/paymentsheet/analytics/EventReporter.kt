@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
-import com.stripe.android.paymentsheet.PaymentSheetConfiguration
+import com.stripe.android.paymentsheet.internal.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal interface EventReporter {

@@ -15,6 +15,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetLauncherComponent
+import com.stripe.android.paymentsheet.internal.PaymentSheetConfiguration
 import org.jetbrains.annotations.TestOnly
 
 /**

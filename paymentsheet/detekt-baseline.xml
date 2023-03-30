@@ -23,7 +23,7 @@
     <ID>LongMethod:InputAddressScreen.kt$@Composable internal fun InputAddressScreen( injector: NonFallbackInjector )</ID>
     <ID>LongMethod:PaymentElement.kt$@Composable internal fun PaymentElement( sheetViewModel: BaseSheetViewModel, enabled: Boolean, supportedPaymentMethods: List&lt;LpmRepository.SupportedPaymentMethod>, selectedItem: LpmRepository.SupportedPaymentMethod, showLinkInlineSignup: Boolean, linkPaymentLauncher: LinkPaymentLauncher, showCheckboxFlow: Flow&lt;Boolean>, onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit, onLinkSignupStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit, formArguments: FormArguments, onFormFieldValuesChanged: (FormFieldValues?) -> Unit, )</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
-    <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
+    <ID>LongMethod:PaymentSheetAppearanceKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( stripeIntent: StripeIntent, customerConfig: PaymentSheet.CustomerConfiguration?, config: PaymentSheetConfiguration?, isGooglePayReady: Boolean, ): PaymentSheetLoader.Result</ID>
     <ID>LongMethod:USBankAccountFormFragment.kt$USBankAccountFormFragment$@Composable private fun AccountDetailsForm( bankName: String?, last4: String?, saveForFutureUsage: Boolean )</ID>
     <ID>LongMethod:USBankAccountFormFragment.kt$USBankAccountFormFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? ): View</ID>
@@ -61,7 +61,6 @@
     <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)</ID>
     <ID>NestedBlockDepth:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$private fun generatePaymentIntentScenarios(): List&lt;PaymentIntentTestInput></ID>
     <ID>ReturnCount:AddressUtils.kt$internal fun CharSequence.levenshtein(other: CharSequence): Int</ID>
-    <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheetConfiguration.validate()</ID>
     <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowControllerNonFallbackInjector</ID>
     <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>
     <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet$Configuration : Parcelable</ID>

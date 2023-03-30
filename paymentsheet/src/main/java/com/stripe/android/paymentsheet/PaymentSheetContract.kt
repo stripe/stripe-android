@@ -10,6 +10,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.paymentsheet.internal.toInternalConfiguration
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret

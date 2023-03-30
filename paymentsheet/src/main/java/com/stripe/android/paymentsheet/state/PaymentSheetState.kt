@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.state
 import android.os.Parcelable
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheetConfiguration
+import com.stripe.android.paymentsheet.internal.PaymentSheetConfiguration
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.parcelize.Parcelize
 
