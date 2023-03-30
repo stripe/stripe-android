@@ -16,26 +16,32 @@ import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CountrySpec
+import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
+import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
+import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -618,6 +624,57 @@ internal class FormViewModelTest {
         )
 
         assertThat(viewModel.defaultValuesToInclude).isEmpty()
+    }
+
+    @Test
+    fun `Test billing details elements are added where they should`(): Unit = runBlocking {
+        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = false,
+        )
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+        )
+        val formViewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Bancontact,
+                LayoutSpec(
+                    listOf(
+                        NameSpec(),
+                        PlaceholderSpec(
+                            field = PlaceholderSpec.PlaceholderField.Email,
+                        ),
+                        SimpleTextSpec(
+                            apiPath = IdentifierSpec.Generic("dummy"),
+                            label = R.string.affirm_buy_now_pay_later,
+                        ),
+                    ),
+                ),
+            )
+        )
+
+        val formElement = formViewModel.elementsFlow.first()
+
+        // Email should replace the placeholder, phone and address should be added at the end.
+        val expectedElementTypes = listOf(
+            SimpleTextElement::class.java,
+            EmailElement::class.java,
+            SimpleTextElement::class.java,
+            PhoneNumberElement::class.java,
+            AddressElement::class.java,
+        )
+
+        val receivedElementTypes = formElement.map {
+            it as SectionElement
+        }.map {
+            it.fields.first()::class.java
+        }
+
+        assertThat(receivedElementTypes).containsExactlyElementsIn(expectedElementTypes)
     }
 
     private suspend fun getSectionFieldTextControllerWithLabel(

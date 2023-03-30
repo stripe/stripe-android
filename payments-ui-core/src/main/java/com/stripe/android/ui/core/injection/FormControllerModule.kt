@@ -7,6 +7,7 @@ import com.stripe.android.core.injection.SHIPPING_VALUES
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -25,7 +26,8 @@ object FormControllerModule {
         stripeIntent: StripeIntent?,
         @Named(INITIAL_VALUES) initialValues: Map<IdentifierSpec, String?>,
         @Named(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?,
-        viewOnlyFields: Set<IdentifierSpec>
+        viewOnlyFields: Set<IdentifierSpec>,
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     ) = TransformSpecToElements(
         addressRepository = addressRepository,
         initialValues = initialValues,
@@ -41,6 +43,7 @@ object FormControllerModule {
         saveForFutureUseInitialValue = false,
         merchantName = merchantName,
         context = context,
-        viewOnlyFields = viewOnlyFields
+        viewOnlyFields = viewOnlyFields,
+        billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
     )
 }

@@ -6,13 +6,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.NonFallbackInjector
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
+import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.ui.core.elements.NameSpec
+import com.stripe.android.ui.core.elements.PhoneSpec
+import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -63,20 +70,59 @@ internal class FormViewModel @Inject internal constructor(
         }
     }
 
-    val elementsFlow = flowOf(
-        TransformSpecToElements(
-            addressRepository = addressRepository,
-            initialValues = formArguments.getInitialValuesMap(),
-            amount = formArguments.amount,
-            saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
-            merchantName = formArguments.merchantName,
-            context = context,
-            shippingValues = formArguments.shippingDetails
-                ?.toIdentifierMap(formArguments.billingDetails)
-        ).transform(
-            requireNotNull(lpmRepository.fromCode(formArguments.paymentMethodCode)).formSpec.items
+    val elementsFlow = run {
+        var specs = requireNotNull(
+            lpmRepository.fromCode(formArguments.paymentMethodCode)
+        ).formSpec.items.toMutableList()
+
+        // Add billing details fields as placeholders if necessary.
+        if (formArguments.paymentMethodCode != PaymentMethod.Type.Card.code) {
+            var billingDetailsPlaceholders = mutableListOf(
+                PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name),
+                PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Email),
+                PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Phone),
+                PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.BillingAddress),
+            )
+
+            for (fieldSpec in specs) {
+                placeholderFieldFrom(fieldSpec).let { field ->
+                    val index = billingDetailsPlaceholders.indexOfFirst { it.field == field }
+                    if (index >= 0) {
+                        billingDetailsPlaceholders.removeAt(index)
+                    }
+                }
+            }
+
+            specs += billingDetailsPlaceholders
+        }
+
+        flowOf(
+            TransformSpecToElements(
+                addressRepository = addressRepository,
+                initialValues = formArguments.getInitialValuesMap(),
+                amount = formArguments.amount,
+                saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
+                merchantName = formArguments.merchantName,
+                context = context,
+                shippingValues = formArguments.shippingDetails
+                    ?.toIdentifierMap(formArguments.billingDetails),
+                billingDetailsCollectionConfiguration = formArguments.billingDetailsCollectionConfiguration,
+            ).transform(specs)
         )
-    )
+    }
+
+    private fun placeholderFieldFrom(fieldSpec: FormItemSpec) = when (fieldSpec) {
+        is NameSpec -> PlaceholderSpec.PlaceholderField.Name
+        is EmailSpec -> PlaceholderSpec.PlaceholderField.Email
+        is PhoneSpec -> PlaceholderSpec.PlaceholderField.Phone
+        is AddressSpec -> PlaceholderSpec.PlaceholderField.BillingAddress
+        is PlaceholderSpec -> when (fieldSpec.field) {
+            PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry ->
+                PlaceholderSpec.PlaceholderField.BillingAddress
+            else -> fieldSpec.field
+        }
+        else -> null
+    }
 
     private val saveForFutureUseElement = elementsFlow
         .map { elementsList ->

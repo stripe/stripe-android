@@ -47,8 +47,10 @@ data class AddressSpec(
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
         addressRepository: AddressRepository,
-        shippingValues: Map<IdentifierSpec, String?>?
-    ): SectionElement {
+        shippingValues: Map<IdentifierSpec, String?>?,
+        /** Some LPMs collect country separately, so it should be hidden here. */
+        hideCountry: Boolean = false,
+    ): SectionElement? {
         val label = if (showLabel) R.string.billing_details else null
         return if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
             createSectionElement(
@@ -60,7 +62,7 @@ data class AddressSpec(
                     )
                 ),
                 label = label
-            )
+            ).takeUnless { hideCountry }
         } else {
             val sameAsShippingElement =
                 shippingValues?.get(IdentifierSpec.SameAsShipping)
@@ -78,7 +80,8 @@ data class AddressSpec(
                 countryCodes = allowedCountryCodes,
                 addressType = type,
                 sameAsShippingElement = sameAsShippingElement,
-                shippingValuesMap = shippingValues
+                shippingValuesMap = shippingValues,
+                hideCountry = hideCountry,
             )
             createSectionElement(
                 sectionFieldElements = listOfNotNull(
