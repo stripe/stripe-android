@@ -27,6 +27,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
@@ -201,6 +202,7 @@ internal class ServerSideConfirmationViewModel(
     private suspend fun observeCartUpdates() {
         state
             .mapNotNull { it.dirtyCartState }
+            .distinctUntilChanged()
             .debounce(300.milliseconds)
             .onEach { renderProcessing() }
             .map(::updateCart)
