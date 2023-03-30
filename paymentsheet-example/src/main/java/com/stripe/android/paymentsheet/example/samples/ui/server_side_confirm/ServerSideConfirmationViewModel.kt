@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
-import com.stripe.android.CreateIntentCallback
+import com.stripe.android.CreateIntentResult
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheetResult
@@ -91,7 +91,7 @@ internal class ServerSideConfirmationViewModel(
     suspend fun createAndConfirmIntent(
         paymentMethodId: String,
         shouldSavePaymentMethod: Boolean,
-    ): CreateIntentCallback.Result = withContext(Dispatchers.IO) {
+    ): CreateIntentResult = withContext(Dispatchers.IO) {
         val request = state.value.cartState.toCreateIntentRequest(
             paymentMethodId = paymentMethodId,
             shouldSavePaymentMethod = shouldSavePaymentMethod,
@@ -109,11 +109,11 @@ internal class ServerSideConfirmationViewModel(
 
         when (apiResult) {
             is ApiResult.Success -> {
-                CreateIntentCallback.Result.Success(apiResult.value.clientSecret)
+                CreateIntentResult.Success(apiResult.value.clientSecret)
             }
             is ApiResult.Failure -> {
                 val errorMessage = "Unable to create intent\n${apiResult.error.exception}"
-                CreateIntentCallback.Result.Failure(
+                CreateIntentResult.Failure(
                     cause = RuntimeException(errorMessage),
                     displayMessage = "Something went wrong…",
                 )
