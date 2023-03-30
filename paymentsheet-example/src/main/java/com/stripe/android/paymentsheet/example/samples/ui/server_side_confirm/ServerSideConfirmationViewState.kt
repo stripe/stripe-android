@@ -34,5 +34,5 @@ data class ServerSideConfirmationViewState(
         get() = !isProcessing && !didComplete && !isError
 
     val isBuyButtonEnabled: Boolean
-        get() = isPaymentMethodButtonEnabled && paymentOption != null
+        get() = dirtyCartState == null && isPaymentMethodButtonEnabled && paymentOption != null
 }

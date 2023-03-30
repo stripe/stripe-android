@@ -87,6 +87,7 @@ fun Receipt(
                 Column(Modifier.fillMaxWidth(1f)) {
                     for (product in cartState.products) {
                         ProductRow(
+                            isProcessing = isLoading,
                             productEmoji = product.icon,
                             productResId = product.nameResId,
                             priceString = product.unitPriceString,
@@ -116,6 +117,7 @@ fun Receipt(
 
 @Composable
 fun ProductRow(
+    isProcessing: Boolean,
     productEmoji: String,
     productResId: Int,
     priceString: String,
@@ -156,7 +158,7 @@ fun ProductRow(
                     val currentQuantity = quantity ?: 0
                     onQuantityChanged(currentQuantity - 1)
                 },
-                enabled = isEditable && (quantity ?: 0) > 0,
+                enabled = !isProcessing && isEditable && (quantity ?: 0) > 0,
             ) {
                 Icon(imageVector = Icons.Default.Remove, contentDescription = null)
             }
@@ -171,7 +173,7 @@ fun ProductRow(
                     val currentQuantity = quantity ?: 0
                     onQuantityChanged(currentQuantity + 1)
                 },
-                enabled = isEditable,
+                enabled = !isProcessing && isEditable,
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = null)
             }

@@ -9,9 +9,11 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.example.R
 
 @Composable
 fun ErrorScreen(
@@ -20,16 +22,18 @@ fun ErrorScreen(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize().padding(32.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
     ) {
         Text(
-            text = "Unable to load checkout",
+            text = stringResource(R.string.unable_to_load_checkout_title),
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
         )
 
         Text(
-            text = "Maybe wait a few seconds, have some tea, read a book… then try again.",
+            text = stringResource(R.string.unable_to_load_checkout_subtitle),
             textAlign = TextAlign.Center,
         )
 
@@ -37,7 +41,7 @@ fun ErrorScreen(
             onClick = onRetry,
             modifier = Modifier.padding(top = 8.dp),
         ) {
-            Text(text = "Try again")
+            Text(text = stringResource(R.string.unable_to_load_checkout_button))
         }
     }
 }

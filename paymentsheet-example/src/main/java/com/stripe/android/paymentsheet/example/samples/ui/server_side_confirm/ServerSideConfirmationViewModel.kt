@@ -199,8 +199,8 @@ internal class ServerSideConfirmationViewModel(
     private suspend fun observeCartUpdates() {
         state
             .mapNotNull { it.dirtyCartState }
-            .onEach { renderProcessing() }
             .debounce(300.milliseconds)
+            .onEach { renderProcessing() }
             .map(::updateCart)
             .collect(::handleCartUpdated)
     }
