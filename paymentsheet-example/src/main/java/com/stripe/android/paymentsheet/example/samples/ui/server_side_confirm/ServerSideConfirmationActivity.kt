@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +22,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.PaymentMethodSelector
 import com.stripe.android.paymentsheet.example.samples.ui.Receipt
 import com.stripe.android.paymentsheet.example.samples.ui.SubscriptionToggle
 import com.stripe.android.paymentsheet.example.samples.ui.shared.ErrorScreen
+import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import kotlinx.coroutines.CompletableDeferred
 
 internal class ServerSideConfirmationActivity : AppCompatActivity() {
@@ -49,7 +49,7 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
         )
 
         setContent {
-            MaterialTheme {
+            PaymentSheetExampleTheme {
                 val uiState by viewModel.state.collectAsState()
                 val paymentMethodLabel = determinePaymentMethodLabel(uiState)
 
