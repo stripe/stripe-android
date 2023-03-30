@@ -177,7 +177,8 @@ internal class FormViewModel @Inject internal constructor(
             defaultValuesToInclude,
         ).filterFlow()
 
-    private val defaultValuesToInclude get(): Map<IdentifierSpec, String> {
+    @VisibleForTesting
+    val defaultValuesToInclude get(): Map<IdentifierSpec, String> {
         var defaults = mutableMapOf<IdentifierSpec, String>()
 
         if (formArguments.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod) {
