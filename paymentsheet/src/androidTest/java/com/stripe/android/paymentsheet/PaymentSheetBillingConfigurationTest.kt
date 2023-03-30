@@ -82,9 +82,10 @@ internal class PaymentSheetBillingConfigurationTest {
             )
         }
 
-        page.fillOutCardDetails(fillOutZipCode = false)
+        page.waitForText("Email")
         page.replaceText("Email", "mail@mail.com")
         page.replaceText("Name on card", "Jane Doe")
+        page.fillOutCardDetails(fillOutZipCode = false)
 
         networkRule.enqueue(
             method("GET"),
