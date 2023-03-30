@@ -8,9 +8,11 @@ import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -503,6 +505,119 @@ internal class FormViewModelTest {
                     ).isNull()
                 }
             }
+    }
+
+    @Test
+    fun `Test default values are filled`() {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            billingDetails = PaymentSheet.BillingDetails(
+                name = "Jenny Rosen",
+                email = "mail@mail.com",
+                phone = "+13105551234",
+                address = PaymentSheet.Address(
+                    line1 = "123 Main Street",
+                    line2 = "456",
+                    city = "San Francisco",
+                    state = "CA",
+                    country = "US",
+                    postalCode = "94111"
+                ),
+            ),
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                attachDefaultsToPaymentMethod = true,
+            )
+        )
+
+        val viewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LpmRepository.HardcodedCard.formSpec,
+            )
+        )
+
+        assertThat(viewModel.defaultValuesToInclude).containsExactlyEntriesIn(
+            mapOf(
+                IdentifierSpec.Name to "Jenny Rosen",
+                IdentifierSpec.Email to "mail@mail.com",
+                IdentifierSpec.Phone to "+13105551234",
+                IdentifierSpec.Line1 to "123 Main Street",
+                IdentifierSpec.Line2 to "456",
+                IdentifierSpec.City to "San Francisco",
+                IdentifierSpec.State to "CA",
+                IdentifierSpec.Country to "US",
+                IdentifierSpec.PostalCode to "94111",
+            )
+        )
+    }
+
+    @Test
+    fun `Test only provided default values are filled`() {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            billingDetails = PaymentSheet.BillingDetails(
+                name = "Jenny Rosen",
+                email = "mail@mail.com",
+                address = PaymentSheet.Address(
+                    country = "US",
+                    postalCode = "94111"
+                ),
+            ),
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                attachDefaultsToPaymentMethod = true,
+            )
+        )
+
+        val viewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LpmRepository.HardcodedCard.formSpec,
+            )
+        )
+
+        assertThat(viewModel.defaultValuesToInclude).containsExactlyEntriesIn(
+            mapOf(
+                IdentifierSpec.Name to "Jenny Rosen",
+                IdentifierSpec.Email to "mail@mail.com",
+                IdentifierSpec.Country to "US",
+                IdentifierSpec.PostalCode to "94111",
+            )
+        )
+    }
+
+    @Test
+    fun `Test default values are not filled`() {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            billingDetails = PaymentSheet.BillingDetails(
+                name = "Jenny Rosen",
+                email = "mail@mail.com",
+                phone = "+13105551234",
+                address = PaymentSheet.Address(
+                    line1 = "123 Main Street",
+                    line2 = "456",
+                    city = "San Francisco",
+                    state = "CA",
+                    country = "US",
+                    postalCode = "94111"
+                ),
+            ),
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                attachDefaultsToPaymentMethod = false,
+            )
+        )
+
+        val viewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LpmRepository.HardcodedCard.formSpec,
+            )
+        )
+
+        assertThat(viewModel.defaultValuesToInclude).isEmpty()
     }
 
     private suspend fun getSectionFieldTextControllerWithLabel(
