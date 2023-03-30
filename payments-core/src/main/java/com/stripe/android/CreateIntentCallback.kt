@@ -16,10 +16,11 @@ fun interface CreateIntentCallback : AbsCreateIntentCallback {
     /**
      * Called when the customer confirms the payment or setup.
      *
-     * Your implementation should create a [PaymentIntent] or [SetupIntent] on your server and return
-     * its client secret an error if one was occurred.
+     * Your implementation should create a [PaymentIntent] or [SetupIntent] on your server and
+     * return its client secret or an error if one occurred.
      *
-     * @param paymentMethodId The ID of the PaymentMethod representing the customer's payment details
+     * @param paymentMethodId The ID of the [PaymentMethod] representing the customer's payment
+     * details
      */
     suspend fun onCreateIntent(paymentMethodId: String): Result
 
@@ -56,12 +57,13 @@ fun interface CreateIntentCallbackForServerSideConfirmation : AbsCreateIntentCal
      * Called when the customer confirms the payment or setup.
      *
      * Your implementation should create and confirm a [PaymentIntent] or [SetupIntent] on your
-     * server and return its client secret an error if one was occurred.
+     * server and return its client secret or an error if one occurred.
      *
-     * @param paymentMethodId The ID of the PaymentMethod representing the customer's payment details
-     * @param shouldSavePaymentMethod This is [true] if the customer selected the
+     * @param paymentMethodId The ID of the [PaymentMethod] representing the customer's payment
+     * details
+     * @param shouldSavePaymentMethod This is `true` if the customer selected the
      * "Save this payment method for future use" checkbox. Set `setup_future_usage` on the
-     * [PaymentIntent] to `off_session` if this is [true].
+     * [PaymentIntent] to `off_session` if this is `true`.
      */
     suspend fun onCreateIntent(
         paymentMethodId: String,

@@ -90,7 +90,7 @@ class PaymentSheet internal constructor(
     }
 
     /**
-     * Constructor to be used when launching the payment sheet from a Fragment.
+     * Constructor to be used when launching the payment sheet from a [Fragment].
      *
      * @param fragment the Fragment that is presenting the payment sheet.
      * @param callback called with the result of the payment after the payment sheet is dismissed.
@@ -103,8 +103,8 @@ class PaymentSheet internal constructor(
     )
 
     /**
-     * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and intending
-     * to create the [PaymentIntent] or [SetupIntent] on your server.
+     * Constructor to be used when launching [PaymentSheet] from a [Fragment] and intending to
+     * create the [PaymentIntent] or [SetupIntent] on your server.
      *
      * @param fragment The Fragment that is presenting [PaymentSheet].
      * @param createIntentCallback Called when the customer confirms the payment or setup.
@@ -124,8 +124,8 @@ class PaymentSheet internal constructor(
     }
 
     /**
-     * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and intending
-     * to create and confirm the [PaymentIntent] or [SetupIntent] on your server.
+     * Constructor to be used when launching [PaymentSheet] from a [Fragment] and intending to
+     * create and confirm the [PaymentIntent] or [SetupIntent] on your server.
      *
      * @param fragment The Fragment that is presenting [PaymentSheet].
      * @param createIntentCallbackForServerSideConfirmation Called when the customer confirms the
@@ -1119,7 +1119,8 @@ class PaymentSheet internal constructor(
         companion object {
 
             /**
-             * Create the [FlowController] when launching [PaymentSheet] from a [ComponentActivity].
+             * Create a [FlowController] that you configure with the client secret of a
+             * [PaymentIntent] or [SetupIntent].
              *
              * @param activity The Activity that is presenting [PaymentSheet].
              * @param paymentOptionCallback Called when the customer's selected payment method
@@ -1141,8 +1142,9 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Create the [FlowController] when launching [PaymentSheet] from a [ComponentActivity]
-             * and intending to create the [PaymentIntent] or [SetupIntent] on your server.
+             * Create a [FlowController] that you configure with an [IntentConfiguration]. The
+             * resulting [PaymentIntent] or [SetupIntent] is created on your server, but confirmed
+             * on the client.
              *
              * @param activity The Activity that is presenting [PaymentSheet].
              * @param paymentOptionCallback Called when the customer's selected payment method
@@ -1169,9 +1171,8 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Create the [FlowController] when launching [PaymentSheet] from a [ComponentActivity]
-             * and intending to create and confirm the [PaymentIntent] or [SetupIntent] on your
-             * server.
+             * Create a [FlowController] that you configure with an [IntentConfiguration]. The
+             * resulting [PaymentIntent] or [SetupIntent] is created and confirmed on your server.
              *
              * @param activity The Activity that is presenting [PaymentSheet].
              * @param paymentOptionCallback Called when the customer's selected payment method
@@ -1199,7 +1200,8 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Create the [FlowController] when launching [PaymentSheet] from a [Fragment].
+             * Create a [FlowController] that you configure with the client secret of a
+             * [PaymentIntent] or [SetupIntent].
              *
              * @param fragment The Fragment that is presenting [PaymentSheet].
              * @param paymentOptionCallback called when the customer's [PaymentOption] selection changes.
@@ -1219,8 +1221,9 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Create the [FlowController] when launching [PaymentSheet] from a [Fragment] and
-             * intending to create the [PaymentIntent] or [SetupIntent] on your server.
+             * Create a [FlowController] that you configure with an [IntentConfiguration]. The
+             * resulting [PaymentIntent] or [SetupIntent] is created on your server, but confirmed
+             * on the client.
              *
              * @param fragment The Fragment that is presenting [PaymentSheet].
              * @param paymentOptionCallback Called when the customer's selected payment method
@@ -1247,8 +1250,8 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Create the [FlowController] when launching [PaymentSheet] from a [Fragment] and
-             * intending to create and confirm the [PaymentIntent] or [SetupIntent] on your server.
+             * Create a [FlowController] that you configure with an [IntentConfiguration]. The
+             * resulting [PaymentIntent] or [SetupIntent] is created and confirmed on your server.
              *
              * @param fragment The Fragment that is presenting [PaymentSheet].
              * @param paymentOptionCallback Called when the customer's selected payment method
