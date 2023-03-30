@@ -1,11 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextReplacement
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
@@ -16,7 +11,6 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import org.junit.Rule
 import org.junit.Test
@@ -28,6 +22,8 @@ import java.util.concurrent.TimeUnit
 internal class PaymentSheetBillingConfigurationTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
     @get:Rule
     val networkRule = NetworkRule()
@@ -86,26 +82,9 @@ internal class PaymentSheetBillingConfigurationTest {
             )
         }
 
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule.onAllNodes(hasText("Card number"))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNode(hasText("Email"))
-            .performScrollTo()
-            .performTextReplacement("mail@mail.com")
-        composeTestRule.onNode(hasText("Name on card"))
-            .performScrollTo()
-            .performTextReplacement("Jane Doe")
-        composeTestRule.onNode(hasText("Card number"))
-            .performScrollTo()
-            .performTextReplacement("4242424242424242")
-        composeTestRule.onNode(hasText("MM / YY"))
-            .performScrollTo()
-            .performTextReplacement("12/34")
-        composeTestRule.onNode(hasText("CVC"))
-            .performScrollTo()
-            .performTextReplacement("123")
+        page.fillOutCardDetails(fillOutZipCode = false)
+        page.replaceText("Email", "mail@mail.com")
+        page.replaceText("Name on card", "Jane Doe")
 
         networkRule.enqueue(
             method("GET"),
@@ -133,9 +112,7 @@ internal class PaymentSheetBillingConfigurationTest {
             response.testBodyFromFile("payment-intent-get-success.json")
         }
 
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-            .performScrollTo()
-            .performClick()
+        page.clickPrimaryButton()
 
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
@@ -191,20 +168,7 @@ internal class PaymentSheetBillingConfigurationTest {
             )
         }
 
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule.onAllNodes(hasText("Card number"))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNode(hasText("Card number"))
-            .performScrollTo()
-            .performTextReplacement("4242424242424242")
-        composeTestRule.onNode(hasText("MM / YY"))
-            .performScrollTo()
-            .performTextReplacement("12/34")
-        composeTestRule.onNode(hasText("CVC"))
-            .performScrollTo()
-            .performTextReplacement("123")
+        page.fillOutCardDetails(fillOutZipCode = false)
 
         networkRule.enqueue(
             method("GET"),
@@ -232,9 +196,7 @@ internal class PaymentSheetBillingConfigurationTest {
             response.testBodyFromFile("payment-intent-get-success.json")
         }
 
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-            .performScrollTo()
-            .performClick()
+        page.clickPrimaryButton()
 
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
