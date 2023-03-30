@@ -146,7 +146,7 @@ internal class PaymentSheetBillingConfigurationTest {
             method("POST"),
             path("/v1/consumers/sessions/lookup"),
         ) { response ->
-            response.setResponseCode(200)
+            response.setResponseCode(500)
         }
 
         networkRule.enqueue(
