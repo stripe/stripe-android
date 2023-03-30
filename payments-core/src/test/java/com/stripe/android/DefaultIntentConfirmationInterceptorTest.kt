@@ -446,7 +446,7 @@ class DefaultIntentConfirmationInterceptorTest {
             IntentConfirmationInterceptor.createIntentCallback =
                 CreateIntentCallbackForServerSideConfirmation { paymentMethodId, shouldSavePaymentMethod ->
                     observedValues += shouldSavePaymentMethod
-                    CreateIntentCallback.Result.Success("pi_123_secret_456")
+                    CreateIntentResult.Success("pi_123_secret_456")
                 }
             interceptor.intercept(
                 clientSecret = null,
@@ -464,7 +464,7 @@ class DefaultIntentConfirmationInterceptorTest {
     ): CreateIntentCallback {
         return CreateIntentCallback { paymentMethodId ->
             assertThat(paymentMethodId).isEqualTo(expectedPaymentMethodId)
-            CreateIntentCallback.Result.Success(clientSecret = "pi_123_secret_456")
+            CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
         }
     }
 
@@ -473,7 +473,7 @@ class DefaultIntentConfirmationInterceptorTest {
     ): CreateIntentCallbackForServerSideConfirmation {
         return CreateIntentCallbackForServerSideConfirmation { paymentMethodId, _ ->
             assertThat(paymentMethodId).isEqualTo(expectedPaymentMethodId)
-            CreateIntentCallback.Result.Success(clientSecret = "pi_123_secret_456")
+            CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
         }
     }
 
@@ -481,7 +481,7 @@ class DefaultIntentConfirmationInterceptorTest {
         message: String? = null
     ): CreateIntentCallback {
         return CreateIntentCallback {
-            CreateIntentCallback.Result.Failure(
+            CreateIntentResult.Failure(
                 cause = TestException(message),
                 displayMessage = message
             )
@@ -492,7 +492,7 @@ class DefaultIntentConfirmationInterceptorTest {
         message: String? = null
     ): CreateIntentCallbackForServerSideConfirmation {
         return CreateIntentCallbackForServerSideConfirmation { _, _ ->
-            CreateIntentCallback.Result.Failure(
+            CreateIntentResult.Failure(
                 cause = TestException(message),
                 displayMessage = message
             )

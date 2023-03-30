@@ -9,7 +9,7 @@ import androidx.lifecycle.asFlow
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
-import com.stripe.android.CreateIntentCallback
+import com.stripe.android.CreateIntentResult
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
@@ -270,10 +270,10 @@ class PaymentSheetPlaygroundViewModel(
         mode: String,
         returnUrl: String,
         backendUrl: String,
-    ): CreateIntentCallback.Result {
+    ): CreateIntentResult {
         // Note: This is not how you'd do this in a real application. Instead, your app would
         // call your backend and create (and optionally confirm) a payment or setup intent.
-        return CreateIntentCallback.Result.Success(clientSecret = clientSecret.value!!)
+        return CreateIntentResult.Success(clientSecret = clientSecret.value!!)
     }
 
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
@@ -284,7 +284,7 @@ class PaymentSheetPlaygroundViewModel(
         mode: String,
         returnUrl: String,
         backendUrl: String,
-    ): CreateIntentCallback.Result {
+    ): CreateIntentResult {
         // Note: This is not how you'd do this in a real application. You wouldn't have a client
         // secret available at this point, but you'd call your backend to create (and optionally
         // confirm) a payment or setup intent.
@@ -313,7 +313,7 @@ class PaymentSheetPlaygroundViewModel(
                             }
 
                             continuation.resume(
-                                CreateIntentCallback.Result.Failure(
+                                CreateIntentResult.Failure(
                                     cause = error,
                                     displayMessage = message
                                 )
@@ -326,7 +326,7 @@ class PaymentSheetPlaygroundViewModel(
                             )
 
                             continuation.resume(
-                                CreateIntentCallback.Result.Success(
+                                CreateIntentResult.Success(
                                     clientSecret = confirmIntentResponse.clientSecret,
                                 )
                             )

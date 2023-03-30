@@ -4,7 +4,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.CreateIntentCallback
+import com.stripe.android.CreateIntentResult
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.NetworkRule
@@ -369,7 +369,7 @@ internal class FlowControllerTest {
                     flowController.confirm()
                 },
                 createIntentCallback = {
-                    CreateIntentCallback.Result.Success(
+                    CreateIntentResult.Success(
                         clientSecret = "pi_example_secret_example"
                     )
                 },
@@ -451,7 +451,7 @@ internal class FlowControllerTest {
                     flowController.confirm()
                 },
                 createIntentCallback = {
-                    CreateIntentCallback.Result.Failure(
+                    CreateIntentResult.Failure(
                         cause = Exception("We don't accept visa"),
                         displayMessage = "We don't accept visa"
                     )

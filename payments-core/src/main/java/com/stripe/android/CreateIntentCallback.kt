@@ -1,6 +1,9 @@
 package com.stripe.android
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface AbsCreateIntentCallback
@@ -22,27 +25,27 @@ fun interface CreateIntentCallback : AbsCreateIntentCallback {
      * @param paymentMethodId The ID of the [PaymentMethod] representing the customer's payment
      * details
      */
-    suspend fun onCreateIntent(paymentMethodId: String): Result
+    suspend fun onCreateIntent(paymentMethodId: String): CreateIntentResult
+}
 
-    /**
-     * Represents the result of a [CreateIntentCallback] or
-     * [CreateIntentCallbackForServerSideConfirmation].
-     */
+/**
+ * Represents the result of a [CreateIntentCallback] or
+ * [CreateIntentCallbackForServerSideConfirmation].
+ */
+@ExperimentalPaymentSheetDecouplingApi
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface CreateIntentResult {
+
     @ExperimentalPaymentSheetDecouplingApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    sealed interface Result {
+    data class Success(val clientSecret: String) : CreateIntentResult
 
-        @ExperimentalPaymentSheetDecouplingApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Success(val clientSecret: String) : Result
-
-        @ExperimentalPaymentSheetDecouplingApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Failure(
-            internal val cause: Exception,
-            internal val displayMessage: String? = null
-        ) : Result
-    }
+    @ExperimentalPaymentSheetDecouplingApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Failure(
+        internal val cause: Exception,
+        internal val displayMessage: String? = null,
+    ) : CreateIntentResult
 }
 
 /**
@@ -68,5 +71,5 @@ fun interface CreateIntentCallbackForServerSideConfirmation : AbsCreateIntentCal
     suspend fun onCreateIntent(
         paymentMethodId: String,
         shouldSavePaymentMethod: Boolean,
-    ): CreateIntentCallback.Result
+    ): CreateIntentResult
 }

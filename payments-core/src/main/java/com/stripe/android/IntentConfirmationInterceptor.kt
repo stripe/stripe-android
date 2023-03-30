@@ -163,10 +163,10 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         return when (
             val result = createIntentCallback.onCreateIntent(paymentMethodId = paymentMethod.id!!)
         ) {
-            is CreateIntentCallback.Result.Success -> {
+            is CreateIntentResult.Success -> {
                 createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
             }
-            is CreateIntentCallback.Result.Failure -> {
+            is CreateIntentResult.Failure -> {
                 IntentConfirmationInterceptor.NextStep.Fail(
                     cause = result.cause,
                     message = result.displayMessage ?: genericErrorMessage,
@@ -187,7 +187,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         )
 
         return when (result) {
-            is CreateIntentCallback.Result.Success -> {
+            is CreateIntentResult.Success -> {
                 retrieveStripeIntent(result.clientSecret).fold(
                     onSuccess = { intent ->
                         if (intent.isConfirmed) {
@@ -206,7 +206,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                     }
                 )
             }
-            is CreateIntentCallback.Result.Failure -> {
+            is CreateIntentResult.Failure -> {
                 IntentConfirmationInterceptor.NextStep.Fail(
                     cause = result.cause,
                     message = result.displayMessage ?: genericErrorMessage,
