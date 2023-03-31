@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.Companion.removeCorrespondingPlaceholder
-import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.Companion.specForPlaceholderField
-import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.Companion.specsForConfiguration
+import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.removeCorrespondingPlaceholder
+import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.specForPlaceholderField
+import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.specsForConfiguration
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
@@ -102,9 +102,10 @@ class BillingDetailsHelpersTest {
         )
     }
 
+    @Suppress("LongMethod")
     @Test
     fun `Test correct spec is returned for placeholder fields`() = runBlocking {
-        var billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
             name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
             email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
             phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
@@ -142,8 +143,11 @@ class BillingDetailsHelpersTest {
                 billingDetailsCollectionConfiguration,
             )
         ).isEqualTo(AddressSpec(hideCountry = true))
+    }
 
-        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+    @Test
+    fun `Test null specs returned when not collecting field`() = runBlocking {
+        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
             name = BillingDetailsCollectionConfiguration.CollectionMode.Never,
             email = BillingDetailsCollectionConfiguration.CollectionMode.Never,
             phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
@@ -184,17 +188,9 @@ class BillingDetailsHelpersTest {
     }
 
     @Test
-    fun `Test correct placeholder is removed`(): Unit = runBlocking {
+    fun `Test correct placeholder is removed for normal spec`(): Unit = runBlocking {
         var placeholders = basePlaceholders()
         removeCorrespondingPlaceholder(placeholders, NameSpec())
-        assertThat(placeholders).containsExactly(
-            PlaceholderField.Email,
-            PlaceholderField.Phone,
-            PlaceholderField.BillingAddress,
-        )
-
-        placeholders = basePlaceholders()
-        removeCorrespondingPlaceholder(placeholders, PlaceholderSpec(field = PlaceholderField.Name))
         assertThat(placeholders).containsExactly(
             PlaceholderField.Email,
             PlaceholderField.Phone,
@@ -205,6 +201,33 @@ class BillingDetailsHelpersTest {
         removeCorrespondingPlaceholder(placeholders, EmailSpec())
         assertThat(placeholders).containsExactly(
             PlaceholderField.Name,
+            PlaceholderField.Phone,
+            PlaceholderField.BillingAddress,
+        )
+
+        placeholders = basePlaceholders()
+        removeCorrespondingPlaceholder(placeholders, PhoneSpec())
+        assertThat(placeholders).containsExactly(
+            PlaceholderField.Name,
+            PlaceholderField.Email,
+            PlaceholderField.BillingAddress,
+        )
+
+        placeholders = basePlaceholders()
+        removeCorrespondingPlaceholder(placeholders, AddressSpec())
+        assertThat(placeholders).containsExactly(
+            PlaceholderField.Name,
+            PlaceholderField.Email,
+            PlaceholderField.Phone,
+        )
+    }
+
+    @Test
+    fun `Test correct placeholder is removed for placeholder spec`(): Unit = runBlocking {
+        var placeholders = basePlaceholders()
+        removeCorrespondingPlaceholder(placeholders, PlaceholderSpec(field = PlaceholderField.Name))
+        assertThat(placeholders).containsExactly(
+            PlaceholderField.Email,
             PlaceholderField.Phone,
             PlaceholderField.BillingAddress,
         )
@@ -221,14 +244,6 @@ class BillingDetailsHelpersTest {
         )
 
         placeholders = basePlaceholders()
-        removeCorrespondingPlaceholder(placeholders, PhoneSpec())
-        assertThat(placeholders).containsExactly(
-            PlaceholderField.Name,
-            PlaceholderField.Email,
-            PlaceholderField.BillingAddress,
-        )
-
-        placeholders = basePlaceholders()
         removeCorrespondingPlaceholder(
             placeholders,
             PlaceholderSpec(field = PlaceholderField.Phone)
@@ -237,14 +252,6 @@ class BillingDetailsHelpersTest {
             PlaceholderField.Name,
             PlaceholderField.Email,
             PlaceholderField.BillingAddress,
-        )
-
-        placeholders = basePlaceholders()
-        removeCorrespondingPlaceholder(placeholders, AddressSpec())
-        assertThat(placeholders).containsExactly(
-            PlaceholderField.Name,
-            PlaceholderField.Email,
-            PlaceholderField.Phone,
         )
 
         placeholders = basePlaceholders()

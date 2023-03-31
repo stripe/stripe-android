@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
-import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.Companion.specsForConfiguration
+import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.specsForConfiguration
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
