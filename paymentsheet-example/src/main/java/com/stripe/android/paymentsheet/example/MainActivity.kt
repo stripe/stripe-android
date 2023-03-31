@@ -35,7 +35,8 @@ import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.samples.ui.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlowActivity
-import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.ServerSideConfirmationActivity
+import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 private const val SurfaceOverlayOpacity = 0.12f
@@ -61,7 +62,16 @@ class MainActivity : AppCompatActivity() {
             MenuItem(
                 titleResId = R.string.paymentsheet_serverside_confirmation_title,
                 subtitleResId = R.string.paymentsheet_serverside_confirmation_subtitle,
-                klass = ServerSideConfirmationActivity::class.java,
+                klass = ServerSideConfirmationCompleteFlowActivity::class.java,
+                badge = MenuItem.Badge(
+                    labelResId = R.string.beta_badge_label,
+                    onClick = this::openDecouplingBetaLink,
+                ),
+            ),
+            MenuItem(
+                titleResId = R.string.flow_controller_serverside_confirmation_title,
+                subtitleResId = R.string.paymentsheet_serverside_confirmation_subtitle,
+                klass = ServerSideConfirmationCustomFlowActivity::class.java,
                 badge = MenuItem.Badge(
                     labelResId = R.string.beta_badge_label,
                     onClick = this::openDecouplingBetaLink,

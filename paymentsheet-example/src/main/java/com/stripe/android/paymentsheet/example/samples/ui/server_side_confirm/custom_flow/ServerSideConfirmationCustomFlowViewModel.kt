@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm
+package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -44,14 +44,14 @@ import com.github.kittinunf.result.Result as ApiResult
 
 private typealias ConfigureHandler = suspend (CartState) -> Throwable?
 
-internal class ServerSideConfirmationViewModel(
+internal class ServerSideConfirmationCustomFlowViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
 
     private val _state = MutableStateFlow(
-        value = ServerSideConfirmationViewState(confirmedCartState = CartState.default),
+        value = ServerSideConfirmationCustomFlowViewState(confirmedCartState = CartState.default),
     )
-    val state: StateFlow<ServerSideConfirmationViewState> = _state
+    val state: StateFlow<ServerSideConfirmationCustomFlowViewState> = _state
 
     private var configureHandler: ConfigureHandler? = null
 
