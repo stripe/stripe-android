@@ -105,7 +105,7 @@ internal class PaymentSheetTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
         ) { response ->
-            response.testBodyFromFile("payment-intent-confirm_with-processing-status.json")
+            response.testBodyFromFile("payment-intent-confirm_with-requires_action-status.json")
         }
 
         networkRule.enqueue(

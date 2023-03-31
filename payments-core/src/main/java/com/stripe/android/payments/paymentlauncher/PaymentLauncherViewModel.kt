@@ -120,7 +120,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                             }
                         }
                     }
-                    if (intent.status == StripeIntent.Status.Succeeded) {
+                    if (!intent.requiresAction()) {
                         paymentLauncherResult.postValue(PaymentResult.Completed)
                     } else {
                         authenticatorRegistry.getAuthenticator(intent).authenticate(
