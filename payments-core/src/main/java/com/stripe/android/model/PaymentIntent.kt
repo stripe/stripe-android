@@ -208,22 +208,26 @@ constructor(
         return status === StripeIntent.Status.RequiresConfirmation
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun isSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
+        return isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)
+    }
+
     /**
      * SetupFutureUsage is considered to be set if it is on or off session.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun isTopLevelSetupFutureUsageSet() =
-        when (setupFutureUsage) {
+    private fun isTopLevelSetupFutureUsageSet(): Boolean {
+        return when (setupFutureUsage) {
             StripeIntent.Usage.OnSession -> true
             StripeIntent.Usage.OffSession -> true
             StripeIntent.Usage.OneTime -> false
             null -> false
         }
+    }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
-        return paymentMethodOptionsJsonString?.let {
-            val pmOptions = JSONObject(paymentMethodOptionsJsonString).optJSONObject(code)
+    private fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
+        return paymentMethodOptionsJsonString?.let { json ->
+            val pmOptions = JSONObject(json).optJSONObject(code)
             pmOptions?.has("setup_future_usage") ?: false
         } ?: false
     }

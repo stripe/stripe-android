@@ -221,7 +221,30 @@ class PaymentIntentTest {
     }
 
     @Test
-    fun `Determines LPM-level SFU correctly if setup_future_usage exists`() {
+    fun `Determines SFU correctly if it's set on the intent itself`() {
+        val offSession = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            setupFutureUsage = StripeIntent.Usage.OffSession,
+        )
+        assertThat(offSession.isSetupFutureUsageSet("card")).isTrue()
+
+        val onSession = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            setupFutureUsage = StripeIntent.Usage.OnSession,
+        )
+        assertThat(onSession.isSetupFutureUsageSet("card")).isTrue()
+
+        val oneTime = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            setupFutureUsage = StripeIntent.Usage.OneTime,
+        )
+        assertThat(oneTime.isSetupFutureUsageSet("card")).isFalse()
+
+        val none = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            setupFutureUsage = null,
+        )
+        assertThat(none.isSetupFutureUsageSet("card")).isFalse()
+    }
+
+    @Test
+    fun `Determines SFU correctly if setup_future_usage exists in payment method options`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodOptionsJsonString = """
                 {
@@ -232,12 +255,12 @@ class PaymentIntentTest {
             """.trimIndent()
         )
 
-        val result = paymentIntent.isLpmLevelSetupFutureUsageSet("card")
+        val result = paymentIntent.isSetupFutureUsageSet("card")
         assertThat(result).isTrue()
     }
 
     @Test
-    fun `Determines LPM-level SFU correctly if setup_future_usage does not exist`() {
+    fun `Determines SFU correctly if setup_future_usage does not exist in payment method options`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodOptionsJsonString = """
                 {
@@ -248,7 +271,7 @@ class PaymentIntentTest {
             """.trimIndent()
         )
 
-        val result = paymentIntent.isLpmLevelSetupFutureUsageSet("card")
+        val result = paymentIntent.isSetupFutureUsageSet("card")
         assertThat(result).isFalse()
     }
 }
