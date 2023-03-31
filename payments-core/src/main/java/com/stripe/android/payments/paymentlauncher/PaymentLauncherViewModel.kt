@@ -120,11 +120,15 @@ internal class PaymentLauncherViewModel @Inject constructor(
                             }
                         }
                     }
-                    authenticatorRegistry.getAuthenticator(intent).authenticate(
-                        host,
-                        intent,
-                        apiRequestOptionsProvider.get()
-                    )
+                    if (intent.status == StripeIntent.Status.Succeeded) {
+                        paymentLauncherResult.postValue(PaymentResult.Completed)
+                    } else {
+                        authenticatorRegistry.getAuthenticator(intent).authenticate(
+                            host,
+                            intent,
+                            apiRequestOptionsProvider.get()
+                        )
+                    }
                 },
                 onFailure = {
                     paymentLauncherResult.postValue(PaymentResult.Failed(it))

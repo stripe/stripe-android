@@ -99,13 +99,6 @@ internal class PaymentSheetBillingConfigurationTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-success.json")
-        }
-
         page.clickPrimaryButton()
 
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
@@ -174,13 +167,6 @@ internal class PaymentSheetBillingConfigurationTest {
             not(bodyPart("payment_method_data%5Bbilling_details%5D%5Baddress%5D%5Bpostal_code%5D", "94111")),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
-        }
-
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-success.json")
         }
 
         page.clickPrimaryButton()
