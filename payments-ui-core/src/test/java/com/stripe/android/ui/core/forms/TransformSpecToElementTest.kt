@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.forms
 
-import android.app.Application
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.test.core.app.ApplicationProvider
@@ -27,7 +26,6 @@ import com.stripe.android.ui.core.elements.TranslationId
 import com.stripe.android.ui.core.elements.UpiElement
 import com.stripe.android.ui.core.elements.UpiSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailConfig
@@ -36,7 +34,6 @@ import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -69,7 +66,7 @@ internal class TransformSpecToElementTest {
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
                 context = context,
-                shippingValues = null,
+                shippingValues = null
             )
     }
 
@@ -200,7 +197,7 @@ internal class TransformSpecToElementTest {
                 merchantName = "Merchant, Inc.",
                 context = context,
                 viewOnlyFields = setOf(IdentifierSpec.CardNumber),
-                shippingValues = null,
+                shippingValues = null
             )
 
         val formElements = transformSpecToElements.transform(
@@ -328,12 +325,5 @@ internal class TransformSpecToElementTest {
                 )
             )
         )
-
-        private fun createAddressRepository(): AddressRepository {
-            return AddressRepository(
-                resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                workContext = Dispatchers.Unconfined,
-            )
-        }
     }
 }

@@ -73,26 +73,24 @@ internal class FormViewModel @Inject internal constructor(
         }
     }
 
-    val elementsFlow = run {
-        flowOf(
-            TransformSpecToElements(
-                addressRepository = addressRepository,
-                initialValues = formArguments.getInitialValuesMap(),
-                amount = formArguments.amount,
-                saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
-                merchantName = formArguments.merchantName,
-                context = context,
-                shippingValues = formArguments.shippingDetails
-                    ?.toIdentifierMap(formArguments.billingDetails),
-            ).transform(
-                modifiedSpecsWithBillingDetails(
-                    requireNotNull(
-                        lpmRepository.fromCode(formArguments.paymentMethodCode)
-                    ).formSpec.items
-                )
+    val elementsFlow = flowOf(
+        TransformSpecToElements(
+            addressRepository = addressRepository,
+            initialValues = formArguments.getInitialValuesMap(),
+            amount = formArguments.amount,
+            saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
+            merchantName = formArguments.merchantName,
+            context = context,
+            shippingValues = formArguments.shippingDetails
+                ?.toIdentifierMap(formArguments.billingDetails),
+        ).transform(
+            modifiedSpecsWithBillingDetails(
+                requireNotNull(
+                    lpmRepository.fromCode(formArguments.paymentMethodCode)
+                ).formSpec.items
             )
         )
-    }
+    )
 
     private fun modifiedSpecsWithBillingDetails(specs: List<FormItemSpec>): List<FormItemSpec> {
         // Cards are a special case and don't need to be modified.

@@ -25,7 +25,7 @@ object FormControllerModule {
         stripeIntent: StripeIntent?,
         @Named(INITIAL_VALUES) initialValues: Map<IdentifierSpec, String?>,
         @Named(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?,
-        viewOnlyFields: Set<IdentifierSpec>,
+        viewOnlyFields: Set<IdentifierSpec>
     ) = TransformSpecToElements(
         addressRepository = addressRepository,
         initialValues = initialValues,
@@ -41,6 +41,6 @@ object FormControllerModule {
         saveForFutureUseInitialValue = false,
         merchantName = merchantName,
         context = context,
-        viewOnlyFields = viewOnlyFields,
+        viewOnlyFields = viewOnlyFields
     )
 }
