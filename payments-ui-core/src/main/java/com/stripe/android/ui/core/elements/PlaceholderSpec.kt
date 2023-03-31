@@ -13,6 +13,7 @@ data class PlaceholderSpec(
     @SerialName("for")
     val field: PlaceholderField = PlaceholderField.Unknown,
 ) : FormItemSpec() {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Serializable
     enum class PlaceholderField {
         @SerialName("name")
