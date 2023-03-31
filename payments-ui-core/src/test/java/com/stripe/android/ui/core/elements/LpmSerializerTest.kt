@@ -67,21 +67,22 @@ class LpmSerializerTest {
         val result = lpmSerializer.deserializeList(serializedString)
 
         val dropdownSpec = result.first { it.type == "eps" }
-            .fields[1] as DropdownSpec
+            .fields[3] as DropdownSpec
 
         assertThat(dropdownSpec.apiPath.v1).isEqualTo("eps[bank]")
         assertThat(dropdownSpec.labelTranslationId).isEqualTo(TranslationId.EpsBank)
-        assertThat(dropdownSpec.items.size).isEqualTo(28)
+        assertThat(dropdownSpec.items.size).isEqualTo(27)
         assertThat(dropdownSpec.items[0]).isEqualTo(
             DropdownItemSpec(
                 displayText = "Ärzte- und Apothekerbank",
                 apiValue = "arzte_und_apotheker_bank"
             )
         )
-        assertThat(dropdownSpec.items[27]).isEqualTo(
+
+        assertThat(dropdownSpec.items[26]).isEqualTo(
             DropdownItemSpec(
-                displayText = "Other",
-                apiValue = null
+                displayText = "VR-Bank Braunau",
+                apiValue = "vr_bank_braunau"
             )
         )
     }
@@ -561,6 +562,33 @@ class LpmSerializerTest {
                     succeeded = PostConfirmHandlingPiStatusSpecs.FinishedSpec,
                     requiresAction = PostConfirmHandlingPiStatusSpecs.CanceledSpec
                 )
+            )
+        }
+    }
+
+    @Test
+    fun `Test placeholder parses correctly`() {
+        val serializedString =
+            """
+            {
+                "type": "au_becs_debit",
+                "fields": [
+                  {
+                    "type": "placeholder",
+                    "for": "name"
+                  }
+                ]
+            }
+            """.trimIndent()
+
+        val result = lpmSerializer.deserialize(serializedString)
+        result.onFailure {
+            println(it.message)
+        }
+        assertThat(result.isSuccess).isTrue()
+        result.onSuccess {
+            assertThat(it.fields.first()).isEqualTo(
+                PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name)
             )
         }
     }
