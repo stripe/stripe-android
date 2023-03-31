@@ -18,16 +18,13 @@ import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
-import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
@@ -51,7 +48,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
-@Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
     private val emailSection = EmailSpec()
@@ -711,119 +707,6 @@ internal class FormViewModelTest {
         val identifiers = addressElement.fields.first().map { it.identifier }
         // Check that the address element doesn't contain country.
         assertThat(identifiers).doesNotContain(IdentifierSpec.Country)
-    }
-
-    @Test
-    fun `Test unused elements are removed`(): Unit = runBlocking {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-            attachDefaultsToPaymentMethod = false,
-        )
-
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        )
-        val formViewModel = createViewModel(
-            args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Bancontact,
-                LayoutSpec(
-                    listOf(
-                        NameSpec(),
-                        EmailSpec(),
-                        PhoneSpec(),
-                        AddressSpec(),
-                    )
-                ),
-            )
-        )
-        val formElement = formViewModel.elementsFlow.first()
-        assertThat(formElement).containsExactly(EmptyFormElement())
-    }
-
-    @Test
-    fun `Test placeholders are not added in Automatic collection mode`(): Unit = runBlocking {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-            attachDefaultsToPaymentMethod = false,
-        )
-
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        )
-        val formViewModel = createViewModel(
-            args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Bancontact,
-                LayoutSpec(
-                    listOf(
-                        PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name),
-                        PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Email),
-                        PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Phone),
-                        PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.BillingAddress),
-                    )
-                ),
-            )
-        )
-        val formElement = formViewModel.elementsFlow.first()
-        assertThat(formElement).containsExactly(EmptyFormElement())
-    }
-
-    @Test
-    fun `Test billing details elements are added where they should`(): Unit = runBlocking {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            attachDefaultsToPaymentMethod = false,
-        )
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        )
-        val formViewModel = createViewModel(
-            args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Bancontact,
-                LayoutSpec(
-                    listOf(
-                        NameSpec(),
-                        PlaceholderSpec(
-                            field = PlaceholderSpec.PlaceholderField.Email,
-                        ),
-                        SimpleTextSpec(
-                            apiPath = IdentifierSpec.Generic("dummy"),
-                            label = R.string.affirm_buy_now_pay_later,
-                        ),
-                    ),
-                ),
-            )
-        )
-
-        val formElement = formViewModel.elementsFlow.first()
-
-        // Email should replace the placeholder, phone and address should be added at the end.
-        val expectedElementTypes = listOf(
-            SimpleTextElement::class.java,
-            EmailElement::class.java,
-            SimpleTextElement::class.java,
-            PhoneNumberElement::class.java,
-            AddressElement::class.java,
-        )
-
-        val receivedElementTypes = formElement.map {
-            it as SectionElement
-        }.map {
-            it.fields.first()::class.java
-        }
-
-        assertThat(receivedElementTypes).containsExactlyElementsIn(expectedElementTypes)
     }
 
     private suspend fun getSectionFieldTextControllerWithLabel(

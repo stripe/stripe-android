@@ -66,7 +66,6 @@
     <ID>SpreadOperator:BsbElementUI.kt$( it.errorMessage, *args )</ID>
     <ID>TooGenericExceptionCaught:LpmSerializer.kt$LpmSerializer$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PlacesClientProxy.kt$DefaultPlacesClientProxy$e: Exception</ID>
-    <ID>UnusedPrivateMember:TransformSpecToElementTest.kt$TransformSpecToElementTest.Companion$private fun createAddressRepository(): AddressRepository</ID>
     <ID>UtilityClassWithPublicConstructor:FieldValuesToParamsMapConverter.kt$FieldValuesToParamsMapConverter</ID>
   </CurrentIssues>
 </SmellBaseline>

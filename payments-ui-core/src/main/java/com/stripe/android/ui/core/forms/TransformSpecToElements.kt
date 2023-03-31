@@ -94,12 +94,8 @@ class TransformSpecToElements(
                 is SepaMandateTextSpec -> it.transform(merchantName)
                 is UpiSpec -> it.transform()
                 is ContactInformationSpec -> it.transform(initialValues)
-                is PlaceholderSpec -> {
-                    assert(false) {
-                        "Placeholders should be processed before calling transform."
-                    }
-                    null
-                }
+                is PlaceholderSpec ->
+                    error("Placeholders should be processed before calling transform.")
             }
         }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
 }
