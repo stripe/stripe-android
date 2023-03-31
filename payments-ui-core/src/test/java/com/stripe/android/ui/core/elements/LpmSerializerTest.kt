@@ -27,9 +27,7 @@ class LpmSerializerTest {
 
         val result = lpmSerializer.deserializeList(serializedString)
 
-        val countrySpec = result.first { it.type == "sofort" }
-            .fields
-            .first() as CountrySpec
+        val countrySpec = result.first { it.type == "sofort" }.fields[3] as CountrySpec
 
         assertThat(countrySpec.apiPath.v1).isEqualTo("sofort[country]")
         assertThat(countrySpec.allowedCountryCodes).isEqualTo(
