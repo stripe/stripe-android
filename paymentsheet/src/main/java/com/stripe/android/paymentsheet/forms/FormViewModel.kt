@@ -12,6 +12,8 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -20,6 +22,7 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
+import com.stripe.android.ui.core.elements.PlaceholderSpec.PlaceholderField
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -71,31 +74,6 @@ internal class FormViewModel @Inject internal constructor(
     }
 
     val elementsFlow = run {
-        var specs = requireNotNull(
-            lpmRepository.fromCode(formArguments.paymentMethodCode)
-        ).formSpec.items.toMutableList()
-
-        // Add billing details fields as placeholders if necessary.
-        if (formArguments.paymentMethodCode != PaymentMethod.Type.Card.code) {
-            var billingDetailsPlaceholders = mutableListOf(
-                PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name),
-                PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Email),
-                PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Phone),
-                PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.BillingAddress),
-            )
-
-            for (fieldSpec in specs) {
-                placeholderFieldFrom(fieldSpec).let { field ->
-                    val index = billingDetailsPlaceholders.indexOfFirst { it.field == field }
-                    if (index >= 0) {
-                        billingDetailsPlaceholders.removeAt(index)
-                    }
-                }
-            }
-
-            specs += billingDetailsPlaceholders
-        }
-
         flowOf(
             TransformSpecToElements(
                 addressRepository = addressRepository,
@@ -106,23 +84,93 @@ internal class FormViewModel @Inject internal constructor(
                 context = context,
                 shippingValues = formArguments.shippingDetails
                     ?.toIdentifierMap(formArguments.billingDetails),
-                billingDetailsCollectionConfiguration = formArguments.billingDetailsCollectionConfiguration,
-            ).transform(specs)
+            ).transform(
+                modifiedSpecsWithBillingDetails(
+                    requireNotNull(
+                        lpmRepository.fromCode(formArguments.paymentMethodCode)
+                    ).formSpec.items
+                )
+            )
         )
     }
 
-    private fun placeholderFieldFrom(fieldSpec: FormItemSpec) = when (fieldSpec) {
-        is NameSpec -> PlaceholderSpec.PlaceholderField.Name
-        is EmailSpec -> PlaceholderSpec.PlaceholderField.Email
-        is PhoneSpec -> PlaceholderSpec.PlaceholderField.Phone
-        is AddressSpec -> PlaceholderSpec.PlaceholderField.BillingAddress
-        is PlaceholderSpec -> when (fieldSpec.field) {
-            PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry ->
-                PlaceholderSpec.PlaceholderField.BillingAddress
-            else -> fieldSpec.field
-        }
-        else -> null
+    private fun modifiedSpecsWithBillingDetails(specs: List<FormItemSpec>): List<FormItemSpec> {
+        // Cards are a special case and don't need to be modified.
+        if (formArguments.paymentMethodCode == PaymentMethod.Type.Card.code) return specs
+
+        var billingDetailsPlaceholders = mutableListOf(
+            PlaceholderSpec.PlaceholderField.Name,
+            PlaceholderSpec.PlaceholderField.Email,
+            PlaceholderSpec.PlaceholderField.Phone,
+            PlaceholderSpec.PlaceholderField.BillingAddress,
+        )
+
+        val config = formArguments.billingDetailsCollectionConfiguration
+        val modifiedSpecs = specs.mapNotNull {
+            removeCorrespondingPlaceholder(billingDetailsPlaceholders, it)
+            when (it) {
+                is NameSpec -> it.takeUnless {
+                    config.name == CollectionMode.Never
+                }
+                is EmailSpec -> it.takeUnless {
+                    config.email == CollectionMode.Never
+                }
+                is PhoneSpec -> it.takeUnless {
+                    config.phone == CollectionMode.Never
+                }
+                is AddressSpec -> it.takeUnless {
+                    config.address == AddressCollectionMode.Never
+                }
+                is PlaceholderSpec -> specForPlaceholderField(it.field)
+                else -> it
+            }
+        }.plus(
+            // Add additional fields that don't have a placeholder, if necessary.
+            billingDetailsPlaceholders.mapNotNull { specForPlaceholderField(it) }
+        )
+
+        return modifiedSpecs
     }
+
+    private fun removeCorrespondingPlaceholder(
+        placeholderFields: MutableList<PlaceholderField>,
+        spec: FormItemSpec
+    ) {
+        when (spec) {
+            is NameSpec -> placeholderFields.remove(PlaceholderField.Name)
+            is EmailSpec -> placeholderFields.remove(PlaceholderField.Email)
+            is PhoneSpec -> placeholderFields.remove(PlaceholderField.Phone)
+            is AddressSpec -> placeholderFields.remove(PlaceholderField.BillingAddress)
+            is PlaceholderSpec -> when (spec.field) {
+                PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry ->
+                    placeholderFields.remove(PlaceholderField.BillingAddress)
+                else -> placeholderFields.remove(spec.field)
+            }
+            else -> Unit
+        }
+    }
+    private fun specForPlaceholderField(field: PlaceholderField) =
+        with(formArguments.billingDetailsCollectionConfiguration) {
+            when (field) {
+                PlaceholderField.Name -> NameSpec().takeIf {
+                    name == CollectionMode.Always
+                }
+                PlaceholderField.Email -> EmailSpec().takeIf {
+                    email == CollectionMode.Always
+                }
+                PlaceholderField.Phone -> PhoneSpec().takeIf {
+                    phone == CollectionMode.Always
+                }
+                PlaceholderField.BillingAddress -> AddressSpec().takeIf {
+                    address == AddressCollectionMode.Full
+                }
+                PlaceholderField.BillingAddressWithoutCountry ->
+                    AddressSpec(hideCountry = true).takeIf {
+                        address == AddressCollectionMode.Full
+                    }
+                else -> null
+            }
+        }
 
     private val saveForFutureUseElement = elementsFlow
         .map { elementsList ->

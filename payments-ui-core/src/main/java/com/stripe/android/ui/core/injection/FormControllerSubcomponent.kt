@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.INITIAL_VALUES
 import com.stripe.android.core.injection.SHIPPING_VALUES
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -50,11 +49,6 @@ interface FormControllerSubcomponent {
 
         @BindsInstance
         fun merchantName(merchantName: String): Builder
-
-        @BindsInstance
-        fun billingDetailsCollectionConfiguration(
-            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
-        ): Builder
 
         fun build(): FormControllerSubcomponent
     }

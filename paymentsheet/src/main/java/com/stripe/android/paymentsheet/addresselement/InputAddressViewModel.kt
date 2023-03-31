@@ -9,7 +9,6 @@ import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
@@ -68,7 +67,6 @@ internal class InputAddressViewModel @Inject constructor(
                     .shippingValues(null)
                     .formSpec(buildFormSpec(addressDetails?.address?.line1 == null))
                     .initialValues(initialValues)
-                    .billingDetailsCollectionConfiguration(BillingDetailsCollectionConfiguration())
                     .build().formController
             }
         }

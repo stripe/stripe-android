@@ -42,14 +42,19 @@ data class AddressSpec(
      * This field is not deserialized, this field is used for the Address Element
      */
     @Transient
-    val type: AddressType = AddressType.Normal()
+    val type: AddressType = AddressType.Normal(),
+
+    /**
+     * This field is not deserialized, it is used for the special case where the address element
+     * shouldn't show country.
+     */
+    @Transient
+    val hideCountry: Boolean = false,
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
         addressRepository: AddressRepository,
         shippingValues: Map<IdentifierSpec, String?>?,
-        /** Some LPMs collect country separately, so it should be hidden here. */
-        hideCountry: Boolean = false,
     ): SectionElement? {
         val label = if (showLabel) R.string.billing_details else null
         return if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {

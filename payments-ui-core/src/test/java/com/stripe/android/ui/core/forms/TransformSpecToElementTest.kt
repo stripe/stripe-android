@@ -5,7 +5,6 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
@@ -20,7 +19,6 @@ import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
-import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
@@ -30,7 +28,6 @@ import com.stripe.android.ui.core.elements.UpiElement
 import com.stripe.android.ui.core.elements.UpiSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
-import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailConfig
@@ -73,7 +70,6 @@ internal class TransformSpecToElementTest {
                 merchantName = "Merchant, Inc.",
                 context = context,
                 shippingValues = null,
-                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
             )
     }
 
@@ -205,7 +201,6 @@ internal class TransformSpecToElementTest {
                 context = context,
                 viewOnlyFields = setOf(IdentifierSpec.CardNumber),
                 shippingValues = null,
-                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
             )
 
         val formElements = transformSpecToElements.transform(
@@ -272,88 +267,6 @@ internal class TransformSpecToElementTest {
         // Verify the correct config is setup for the controller
         assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
         assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
-    }
-
-    @Test
-    fun `Test placeholder specs are transformed correctly`() = runBlocking {
-        val specs = listOf(
-            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name),
-            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Email),
-            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Phone),
-            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.BillingAddress),
-        )
-        val transformSpecToElements =
-            TransformSpecToElements(
-                addressRepository = createAddressRepository(),
-                initialValues = mapOf(),
-                amount = null,
-                saveForFutureUseInitialValue = true,
-                merchantName = "Merchant, Inc.",
-                context = context,
-                shippingValues = null,
-                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-                    name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-                ),
-            )
-        val formElement = transformSpecToElements.transform(specs)
-
-        val nameSection = formElement[0] as SectionElement
-        val nameElement = nameSection.fields[0] as SimpleTextElement
-        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_full_name)
-        assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
-
-        val emailSection = formElement[1] as SectionElement
-        val emailElement = emailSection.fields[0] as EmailElement
-        assertThat(emailElement.controller.label.first()).isEqualTo(R.string.email)
-        assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
-
-        val phoneSection = formElement[2] as SectionElement
-        val phoneElement = phoneSection.fields[0] as PhoneNumberElement
-        assertThat(phoneElement.controller.label.first()).isEqualTo(R.string.address_label_phone_number)
-        assertThat(phoneElement.identifier.v1).isEqualTo("billing_details[phone]")
-
-        val addressSection = formElement[3] as SectionElement
-        val addressElement = addressSection.fields[0] as AddressElement
-
-        val identifiers = addressElement.fields.first().map { it.identifier }
-        // Check that the address element contains country.
-        assertThat(identifiers).contains(IdentifierSpec.Country)
-    }
-
-    @Test
-    fun `Test address without country placeholder produces correct element`() = runBlocking {
-        val transformSpecToElements =
-            TransformSpecToElements(
-                addressRepository = createAddressRepository(),
-                initialValues = mapOf(),
-                amount = null,
-                saveForFutureUseInitialValue = true,
-                merchantName = "Merchant, Inc.",
-                context = context,
-                shippingValues = null,
-                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-                    name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-                ),
-            )
-        val formElement = transformSpecToElements.transform(
-            listOf(
-                PlaceholderSpec(
-                    field = PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry
-                )
-            )
-        )
-
-        val addressSection = formElement.first() as SectionElement
-        val addressElement = addressSection.fields[0] as AddressElement
-        val identifiers = addressElement.fields.first().map { it.identifier }
-        // Check that the address element doesn't contain country.
-        assertThat(identifiers).doesNotContain(IdentifierSpec.Country)
     }
 
     companion object {

@@ -3,9 +3,6 @@ package com.stripe.android.ui.core.forms
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.AddressCollectionMode
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
@@ -48,7 +45,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
  * Currently only [IdentifierSpec.CardNumber] is supported and any other identifier is ignored.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class TransformSpecToElements constructor(
+class TransformSpecToElements(
     private val addressRepository: AddressRepository,
     private val initialValues: Map<IdentifierSpec, String?>,
     private val shippingValues: Map<IdentifierSpec, String?>?,
@@ -57,7 +54,6 @@ class TransformSpecToElements constructor(
     private val merchantName: String,
     private val context: Context,
     private val viewOnlyFields: Set<IdentifierSpec> = emptySet(),
-    private val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
 ) {
     fun transform(list: List<FormItemSpec>): List<FormElement> =
         list.mapNotNull {
@@ -75,15 +71,9 @@ class TransformSpecToElements constructor(
                 is CardDetailsSectionSpec -> it.transform(context, initialValues, viewOnlyFields)
                 is BsbSpec -> it.transform(initialValues)
                 is OTPSpec -> it.transform()
-                is NameSpec -> it.transform(initialValues).takeUnless {
-                    billingDetailsCollectionConfiguration.name == CollectionMode.Never
-                }
-                is EmailSpec -> it.transform(initialValues).takeUnless {
-                    billingDetailsCollectionConfiguration.email == CollectionMode.Never
-                }
-                is PhoneSpec -> it.transform(initialValues).takeUnless {
-                    billingDetailsCollectionConfiguration.phone == CollectionMode.Never
-                }
+                is NameSpec -> it.transform(initialValues)
+                is EmailSpec -> it.transform(initialValues)
+                is PhoneSpec -> it.transform(initialValues)
                 is SimpleTextSpec -> it.transform(initialValues)
                 is AuBankAccountNumberSpec -> it.transform(initialValues)
                 is IbanSpec -> it.transform(initialValues)
@@ -95,25 +85,22 @@ class TransformSpecToElements constructor(
                     initialValues,
                     addressRepository,
                     shippingValues
-                ).takeUnless {
-                    billingDetailsCollectionConfiguration.address == AddressCollectionMode.Never
-                }
+                )
                 is CardBillingSpec -> it.transform(
                     initialValues,
                     addressRepository,
                     shippingValues,
-                ).takeUnless {
-                    billingDetailsCollectionConfiguration.address == AddressCollectionMode.Never
-                }
+                )
                 is SepaMandateTextSpec -> it.transform(merchantName)
                 is UpiSpec -> it.transform()
                 is ContactInformationSpec -> it.transform(initialValues)
-                is PlaceholderSpec -> it.transform(
-                    initialValues,
-                    addressRepository,
-                    shippingValues,
-                    billingDetailsCollectionConfiguration,
-                )
+                // Placeholders should be replaced before this step.
+                is PlaceholderSpec -> {
+                    assert(false) {
+                        "Placeholders should be processed before calling transform."
+                    }
+                    null
+                }
             }
         }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
 }
