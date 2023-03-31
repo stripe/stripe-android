@@ -20,6 +20,7 @@ import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -27,9 +28,11 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -38,10 +41,19 @@ import com.stripe.android.paymentsheet.model.create
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
+import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.NameConfig
+import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.SameAsShippingController
+import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,9 +72,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val application: Application,
     private val stripeRepository: StripeRepository,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val addressRepository: AddressRepository,
 ) : ViewModel() {
-
     val nameController: TextFieldController = NameConfig
         .createController(args.formArgs.billingDetails?.name)
 
@@ -77,14 +89,53 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         formFieldEntry.takeIf { it.isComplete }?.value
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    val phoneController = PhoneNumberController(
+        initiallySelectedCountryCode = args.formArgs.billingDetails?.address?.country,
+        initialPhoneNumber = args.formArgs.billingDetails?.phone ?: "",
+    )
+
+    val phone: StateFlow<String?> = phoneController.formFieldValue.map { formFieldEntry ->
+        formFieldEntry.takeIf { it.isComplete }?.value
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val sameAsShippingElement = args.formArgs.shippingDetails
+        ?.toIdentifierMap(args.formArgs.billingDetails)
+        ?.get(IdentifierSpec.SameAsShipping)
+        ?.toBooleanStrictOrNull()
+        ?.let {
+            SameAsShippingElement(
+                identifier = IdentifierSpec.SameAsShipping,
+                controller = SameAsShippingController(it)
+            )
+        }
+
+    val addressElement = AddressElement(
+        _identifier = IdentifierSpec.Generic("billing_details[address]"),
+        addressRepository = addressRepository,
+        rawValuesMap = args.formArgs.getInitialValuesMap(),
+        sameAsShippingElement = sameAsShippingElement,
+        shippingValuesMap = args.formArgs.shippingDetails
+            ?.toIdentifierMap(args.formArgs.billingDetails),
+    )
+    val address = addressElement.getFormFieldValueFlow().map { formFieldValues ->
+        val rawMap = formFieldValues.associate { it.first to it.second.value }
+        Address.fromFormFieldValues(rawMap)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val lastTextFieldIdentifier = addressElement.getTextFieldIdentifiers().map {
+        it.last()
+    }
+
     private val _currentScreenState: MutableStateFlow<USBankAccountFormScreenState> =
         MutableStateFlow(
-            USBankAccountFormScreenState.NameAndEmailCollection(
+            USBankAccountFormScreenState.BillingDetailsCollection(
                 name = name.value,
                 email = email.value,
+                phone = phone.value,
+                address = address.value,
                 primaryButtonText = application.getString(
                     R.string.stripe_continue_button_label
-                )
+                ),
             )
         )
     val currentScreenState: StateFlow<USBankAccountFormScreenState>
@@ -98,14 +149,19 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         .stateIn(viewModelScope, SharingStarted.Lazily, args.formArgs.showCheckbox)
 
     val requiredFields = combine(
-        nameController.formFieldValue.map { formFieldEntry ->
-            formFieldEntry.isComplete
-        },
-        emailController.formFieldValue.map { formFieldEntry ->
-            formFieldEntry.isComplete
+        nameController.formFieldValue.map { it.isComplete },
+        emailController.formFieldValue.map { it.isComplete },
+        phoneController.formFieldValue.map { it.isComplete },
+        addressElement.getFormFieldValueFlow().map { formFieldValues ->
+            formFieldValues.all { it.second.isComplete }
         }
-    ) { validName, validEmail ->
-        validName && validEmail
+    ) { validName, validEmail, validPhone, validAddress ->
+        with(args.formArgs.billingDetailsCollectionConfiguration) {
+            (validName || name == CollectionMode.Never) &&
+                (validEmail || email == CollectionMode.Never) &&
+                (validPhone || phone != CollectionMode.Always) &&
+                (validAddress || address != AddressCollectionMode.Full)
+        }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
@@ -125,6 +181,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 USBankAccountFormScreenState.SavedAccount(
                     params.billingDetails?.name ?: name.value,
                     params.billingDetails?.email ?: email.value,
+                    params.billingDetails?.phone ?: phone.value,
+                    params.billingDetails?.address ?: address.value,
                     args.savedPaymentMethod.financialConnectionsSessionId,
                     args.savedPaymentMethod.intentId,
                     args.savedPaymentMethod.bankName,
@@ -163,6 +221,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                 USBankAccountFormScreenState.VerifyWithMicrodeposits(
                                     name = name.value,
                                     email = email.value,
+                                    phone = phone.value,
+                                    address = address.value,
                                     paymentAccount = paymentAccount,
                                     financialConnectionsSessionId =
                                     result.response.financialConnectionsSession.id,
@@ -180,6 +240,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                 USBankAccountFormScreenState.MandateCollection(
                                     name = name.value,
                                     email = email.value,
+                                    phone = phone.value,
+                                    address = address.value,
                                     paymentAccount = paymentAccount,
                                     financialConnectionsSessionId =
                                     result.response.financialConnectionsSession.id,
@@ -209,10 +271,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         _currentScreenState.value = _currentScreenState.value.updateInputs(
             name.value,
             email.value,
-            saveForFutureUse.value
+            phone.value,
+            address.value,
+            saveForFutureUse.value,
         )
         when (screenState) {
-            is USBankAccountFormScreenState.NameAndEmailCollection -> {
+            is USBankAccountFormScreenState.BillingDetailsCollection -> {
                 args.clientSecret?.let {
                     collectBankAccount(it)
                 }
@@ -257,13 +321,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         hasLaunched = false
         saveForFutureUseElement.controller.onValueChange(true)
         _currentScreenState.update {
-            USBankAccountFormScreenState.NameAndEmailCollection(
+            USBankAccountFormScreenState.BillingDetailsCollection(
                 error = error,
                 name = name.value,
                 email = email.value,
+                phone = phone.value,
+                address = address.value,
                 primaryButtonText = application.getString(
                     R.string.stripe_continue_button_label
-                )
+                ),
             )
         }
     }
@@ -274,6 +340,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             it.updateInputs(
                 name.value,
                 email.value,
+                phone.value,
+                address.value,
                 saveForFutureUse.value
             )
         }
@@ -370,7 +438,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             ),
                             billingDetails = PaymentMethod.BillingDetails(
                                 name = name.value,
-                                email = email.value
+                                email = email.value,
+                                phone = phone.value,
+                                address = address.value,
                             )
                         ),
                         customerRequestedSave = if (args.formArgs.showCheckbox) {
@@ -505,3 +575,32 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         private const val HAS_LAUNCHED_KEY = "has_launched"
     }
 }
+
+fun Address.asFormFieldValues(): Map<IdentifierSpec, String?> = mapOf(
+    IdentifierSpec.Line1 to line1,
+    IdentifierSpec.Line2 to line2,
+    IdentifierSpec.City to city,
+    IdentifierSpec.State to state,
+    IdentifierSpec.Country to country,
+    IdentifierSpec.PostalCode to postalCode,
+)
+
+fun Address.Companion.fromFormFieldValues(formFieldValues: Map<IdentifierSpec, String?>) =
+    Address(
+        line1 = formFieldValues[IdentifierSpec.Line1],
+        line2 = formFieldValues[IdentifierSpec.Line2],
+        city = formFieldValues[IdentifierSpec.City],
+        state = formFieldValues[IdentifierSpec.State],
+        country = formFieldValues[IdentifierSpec.Country],
+        postalCode = formFieldValues[IdentifierSpec.PostalCode],
+    )
+
+fun PaymentSheet.Address.asAddressModel() =
+    Address(
+        line1 = line1,
+        line2 = line2,
+        city = city,
+        state = state,
+        country = country,
+        postalCode = postalCode,
+    )

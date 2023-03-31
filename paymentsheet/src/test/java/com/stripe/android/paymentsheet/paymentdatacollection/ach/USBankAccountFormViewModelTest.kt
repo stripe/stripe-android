@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
@@ -21,6 +22,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -125,10 +127,12 @@ class USBankAccountFormViewModelTest {
             assertThat(
                 currentScreenState
             ).isInstanceOf(
-                USBankAccountFormScreenState.NameAndEmailCollection::class.java
+                USBankAccountFormScreenState.BillingDetailsCollection::class.java
             )
 
-            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection)
+            viewModel.handlePrimaryButtonClick(
+                currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
+            )
 
             verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
@@ -253,7 +257,9 @@ class USBankAccountFormViewModelTest {
             val currentScreenState =
                 viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
 
-            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection)
+            viewModel.handlePrimaryButtonClick(
+                currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
+            )
 
             verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
@@ -322,7 +328,8 @@ class USBankAccountFormViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             stripeRepository = stripeRepository,
             lazyPaymentConfig = { paymentConfiguration },
-            savedStateHandle = savedStateHandle
+            savedStateHandle = savedStateHandle,
+            addressRepository = createAddressRepository(),
         )
     }
 
@@ -396,4 +403,11 @@ class USBankAccountFormViewModelTest {
         const val CUSTOMER_EMAIL = "email@email.com"
         const val STRIPE_ACCOUNT_ID = "stripe_account_id"
     }
+}
+
+private fun createAddressRepository(): AddressRepository {
+    return AddressRepository(
+        resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        workContext = Dispatchers.Unconfined,
+    )
 }

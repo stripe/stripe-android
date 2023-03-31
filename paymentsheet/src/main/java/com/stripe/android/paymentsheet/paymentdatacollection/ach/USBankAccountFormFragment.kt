@@ -36,6 +36,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -46,15 +47,21 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.NameAndEmailCollection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.BillingDetailsCollection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.AddressElementUI
 import com.stripe.android.uicore.elements.H6Text
+import com.stripe.android.uicore.elements.PhoneNumberElementUI
+import com.stripe.android.uicore.elements.SameAsShippingElementUI
+import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.stripeColors
@@ -182,7 +189,7 @@ internal class USBankAccountFormFragment : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.saveForFutureUse
-                    .filterNot { viewModel.currentScreenState.value is NameAndEmailCollection }
+                    .filterNot { viewModel.currentScreenState.value is BillingDetailsCollection }
                     .collect { saved ->
                         updateMandateText(
                             if (saved) {
@@ -207,8 +214,8 @@ internal class USBankAccountFormFragment : Fragment() {
                 }
 
                 when (val screenState = currentScreenState) {
-                    is NameAndEmailCollection -> {
-                        NameAndEmailCollectionScreen(screenState)
+                    is BillingDetailsCollection -> {
+                        BillingDetailsCollectionScreen(screenState)
                     }
                     is USBankAccountFormScreenState.MandateCollection -> {
                         MandateCollectionScreen(screenState)
@@ -227,8 +234,8 @@ internal class USBankAccountFormFragment : Fragment() {
     private fun handleScreenStateChanged(screenState: USBankAccountFormScreenState) {
         sheetViewModel?.onError(screenState.error)
 
-        val showProcessingWhenClicked = screenState is NameAndEmailCollection || completePayment
-        val enabled = if (screenState is NameAndEmailCollection) {
+        val showProcessingWhenClicked = screenState is BillingDetailsCollection || completePayment
+        val enabled = if (screenState is BillingDetailsCollection) {
             viewModel.requiredFields.value
         } else {
             true
@@ -251,11 +258,16 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     @Composable
-    private fun NameAndEmailCollectionScreen(
-        screenState: NameAndEmailCollection
+    private fun BillingDetailsCollectionScreen(
+        screenState: BillingDetailsCollection
     ) {
         Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm(screenState.name, screenState.email)
+            BillingDetailsForm(
+                screenState.name,
+                screenState.email,
+                screenState.phone,
+                screenState.address,
+            )
         }
     }
 
@@ -264,7 +276,12 @@ internal class USBankAccountFormFragment : Fragment() {
         screenState: USBankAccountFormScreenState.MandateCollection
     ) {
         Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm(screenState.name, screenState.email)
+            BillingDetailsForm(
+                screenState.name,
+                screenState.email,
+                screenState.phone,
+                screenState.address,
+            )
             AccountDetailsForm(
                 screenState.paymentAccount.institutionName,
                 screenState.paymentAccount.last4,
@@ -278,7 +295,12 @@ internal class USBankAccountFormFragment : Fragment() {
         screenState: USBankAccountFormScreenState.VerifyWithMicrodeposits
     ) {
         Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm(screenState.name, screenState.email)
+            BillingDetailsForm(
+                screenState.name,
+                screenState.email,
+                screenState.phone,
+                screenState.address,
+            )
             AccountDetailsForm(
                 screenState.paymentAccount.bankName,
                 screenState.paymentAccount.last4,
@@ -292,7 +314,12 @@ internal class USBankAccountFormFragment : Fragment() {
         screenState: USBankAccountFormScreenState.SavedAccount
     ) {
         Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm(screenState.name, screenState.email)
+            BillingDetailsForm(
+                screenState.name,
+                screenState.email,
+                screenState.phone,
+                screenState.address,
+            )
             AccountDetailsForm(
                 screenState.bankName,
                 screenState.last4,
@@ -302,9 +329,11 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     @Composable
-    private fun NameAndEmailForm(
+    private fun BillingDetailsForm(
         name: String,
-        email: String?
+        email: String?,
+        phone: String?,
+        address: Address?,
     ) {
         val processing = viewModel.processing.collectAsState(false)
         Column(Modifier.fillMaxWidth()) {
@@ -312,33 +341,110 @@ internal class USBankAccountFormFragment : Fragment() {
                 text = stringResource(R.string.stripe_paymentsheet_pay_with_bank_title),
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(0.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                TextFieldSection(
-                    textFieldController = viewModel.nameController.apply {
-                        onRawValueChange(name)
-                    },
+            if (formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    TextFieldSection(
+                        textFieldController = viewModel.nameController.apply {
+                            onRawValueChange(name)
+                        },
+                        imeAction = ImeAction.Next,
+                        enabled = !processing.value
+                    )
+                }
+            }
+            if (formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    TextFieldSection(
+                        textFieldController = viewModel.emailController.apply {
+                            onRawValueChange(email ?: "")
+                        },
+                        imeAction = ImeAction.Next,
+                        enabled = !processing.value
+                    )
+                }
+            }
+            if (formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always) {
+                phoneSection()
+            }
+            if (formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full) {
+                addressSection()
+            }
+        }
+    }
+
+    @Suppress("SpreadOperator")
+    @Composable
+    private fun phoneSection() {
+        val processing = viewModel.processing.collectAsState(false)
+        val error by viewModel.phoneController.error.collectAsState(null)
+        val sectionErrorString = error?.let {
+            it.formatArgs?.let { args ->
+                stringResource(
+                    it.errorMessage,
+                    *args
+                )
+            } ?: stringResource(it.errorMessage)
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Section(null, sectionErrorString) {
+                PhoneNumberElementUI(
+                    enabled = !processing.value,
+                    controller = viewModel.phoneController,
                     imeAction = ImeAction.Next,
-                    enabled = !processing.value
                 )
             }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(0.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                TextFieldSection(
-                    textFieldController = viewModel.emailController.apply {
-                        onRawValueChange(email ?: "")
-                    },
-                    imeAction = ImeAction.Done,
-                    enabled = !processing.value
+        }
+    }
+
+    @Suppress("SpreadOperator")
+    @Composable
+    fun addressSection() {
+        val processing = viewModel.processing.collectAsState(false)
+        val error by viewModel.addressElement.controller.error.collectAsState(null)
+        val sectionErrorString = error?.let {
+            it.formatArgs?.let { args ->
+                stringResource(
+                    it.errorMessage,
+                    *args
                 )
+            } ?: stringResource(it.errorMessage)
+        }
+        val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState(
+            null
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Column {
+                Section(R.string.billing_details, sectionErrorString) {
+                    AddressElementUI(
+                        enabled = !processing.value,
+                        controller = viewModel.addressElement.controller,
+                        hiddenIdentifiers = emptySet(),
+                        lastTextFieldIdentifier = lastTextFieldIdentifier,
+                    )
+                }
+                viewModel.sameAsShippingElement?.let {
+                    SameAsShippingElementUI(it.controller)
+                }
             }
         }
     }

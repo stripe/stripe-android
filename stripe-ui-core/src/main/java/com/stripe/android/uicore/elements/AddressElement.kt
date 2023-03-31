@@ -60,7 +60,7 @@ open class AddressElement constructor(
         )
     )
 
-    private val currentValuesMap = mutableMapOf<IdentifierSpec, String?>()
+    private val currentValuesMap = rawValuesMap.toMutableMap()
 
     private val otherFields = countryElement.controller.rawFieldValue
         .distinctUntilChanged()
@@ -75,7 +75,7 @@ open class AddressElement constructor(
                     addressType = addressType,
                     isPlacesAvailable = isPlacesAvailable,
                 )
-                field.setRawValue(rawValuesMap)
+                field.setRawValue(currentValuesMap)
             }
         }
 
