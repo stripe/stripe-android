@@ -7,6 +7,8 @@ import com.stripe.android.ui.core.R
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
+import kotlin.test.fail
 
 @RunWith(RobolectricTestRunner::class)
 class LpmSerializerTest {
@@ -581,13 +583,16 @@ class LpmSerializerTest {
 
         val result = lpmSerializer.deserialize(serializedString)
         result.onFailure {
-            println(it.message)
+            fail("Failed to deserialize payload.", result.exceptionOrNull())
         }
         assertThat(result.isSuccess).isTrue()
+        val countDownLatch = CountDownLatch(1)
         result.onSuccess {
+            countDownLatch.countDown()
             assertThat(it.fields.first()).isEqualTo(
                 PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name)
             )
         }
+        assertThat(countDownLatch.count).isEqualTo(0)
     }
 }

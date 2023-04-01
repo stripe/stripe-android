@@ -14,7 +14,6 @@ import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec.PlaceholderField
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.uicore.elements.IdentifierSpec
-import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -22,7 +21,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class BillingDetailsHelpersTest {
     @Test
-    fun `Test unused elements are removed`() = runBlocking {
+    fun `Test unused elements are removed`() {
         val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
             name = BillingDetailsCollectionConfiguration.CollectionMode.Never,
             email = BillingDetailsCollectionConfiguration.CollectionMode.Never,
@@ -44,7 +43,7 @@ class BillingDetailsHelpersTest {
     }
 
     @Test
-    fun `Test placeholders are not added in Automatic collection mode`() = runBlocking {
+    fun `Test placeholders are not added in Automatic collection mode`() {
         val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
             name = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
             email = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
@@ -66,7 +65,7 @@ class BillingDetailsHelpersTest {
     }
 
     @Test
-    fun `Test billing details elements are added where they should`(): Unit = runBlocking {
+    fun `Test billing details elements are added where they should`() {
         val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
             name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
             email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
@@ -104,7 +103,7 @@ class BillingDetailsHelpersTest {
 
     @Suppress("LongMethod")
     @Test
-    fun `Test correct spec is returned for placeholder fields`() = runBlocking {
+    fun `Test correct spec is returned for placeholder fields`() {
         val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
             name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
             email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
@@ -146,7 +145,7 @@ class BillingDetailsHelpersTest {
     }
 
     @Test
-    fun `Test null specs returned when not collecting field`() = runBlocking {
+    fun `Test null specs returned when not collecting field`() {
         val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
             name = BillingDetailsCollectionConfiguration.CollectionMode.Never,
             email = BillingDetailsCollectionConfiguration.CollectionMode.Never,
@@ -188,7 +187,7 @@ class BillingDetailsHelpersTest {
     }
 
     @Test
-    fun `Test correct placeholder is removed for normal spec`(): Unit = runBlocking {
+    fun `Test correct placeholder is removed for normal spec`() {
         var placeholders = basePlaceholders()
         removeCorrespondingPlaceholder(placeholders, NameSpec())
         assertThat(placeholders).containsExactly(
@@ -223,7 +222,7 @@ class BillingDetailsHelpersTest {
     }
 
     @Test
-    fun `Test correct placeholder is removed for placeholder spec`(): Unit = runBlocking {
+    fun `Test correct placeholder is removed for placeholder spec`() {
         var placeholders = basePlaceholders()
         removeCorrespondingPlaceholder(placeholders, PlaceholderSpec(field = PlaceholderField.Name))
         assertThat(placeholders).containsExactly(
