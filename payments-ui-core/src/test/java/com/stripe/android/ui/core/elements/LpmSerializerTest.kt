@@ -8,6 +8,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.test.fail
 
 @RunWith(RobolectricTestRunner::class)
@@ -581,6 +582,7 @@ class LpmSerializerTest {
             }
             """.trimIndent()
 
+        val countDownLatch = CountDownLatch(1)
         val result = lpmSerializer.deserialize(serializedString)
         result.onFailure {
             fail("Failed to deserialize payload.", result.exceptionOrNull())
@@ -593,6 +595,6 @@ class LpmSerializerTest {
                 PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name)
             )
         }
-        assertThat(countDownLatch.count).isEqualTo(0)
+        assertThat(countDownLatch.await(2, TimeUnit.SECONDS)).isTrue()
     }
 }
