@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui
+package com.stripe.android.paymentsheet.example.samples.ui.shared
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,20 +32,11 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
-
-@Composable
-fun Receipt(
-    isLoading: Boolean,
-    bottomContent: @Composable () -> Unit
-) {
-    Receipt(
-        isLoading = isLoading,
-        cartState = CartState.default,
-        isEditable = false,
-        onQuantityChanged = { _, _ -> },
-        bottomContent = bottomContent,
-    )
-}
+import com.stripe.android.paymentsheet.example.samples.ui.EMOJI_FONT_SIZE
+import com.stripe.android.paymentsheet.example.samples.ui.MAIN_FONT_SIZE
+import com.stripe.android.paymentsheet.example.samples.ui.PADDING
+import com.stripe.android.paymentsheet.example.samples.ui.ROW_START
+import com.stripe.android.paymentsheet.example.samples.ui.SUB_FONT_SIZE
 
 @Composable
 fun Receipt(
@@ -107,7 +98,9 @@ fun Receipt(
             ) {
                 ReceiptRow(stringResource(R.string.subtotal), cartState.formattedSubtotal)
                 ReceiptRow(stringResource(R.string.sales_tax), cartState.formattedTax)
-                Divider(modifier = Modifier.fillMaxWidth().padding(vertical = PADDING))
+                Divider(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = PADDING))
                 ReceiptRow(stringResource(R.string.total), cartState.formattedTotal)
                 bottomContent()
             }
@@ -121,7 +114,7 @@ fun ProductRow(
     productEmoji: String,
     productResId: Int,
     priceString: String,
-    quantity: Int?,
+    quantity: Int,
     isEditable: Boolean,
     onQuantityChanged: (Int) -> Unit,
 ) {
@@ -153,29 +146,31 @@ fun ProductRow(
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(
-                onClick = {
-                    val currentQuantity = quantity ?: 0
-                    onQuantityChanged(currentQuantity - 1)
-                },
-                enabled = !isProcessing && isEditable && (quantity ?: 0) > 0,
-            ) {
-                Icon(imageVector = Icons.Default.Remove, contentDescription = null)
+            if (isEditable) {
+                IconButton(
+                    onClick = { onQuantityChanged(quantity - 1) },
+                    enabled = !isProcessing && quantity > 0,
+                ) {
+                    Icon(imageVector = Icons.Default.Remove, contentDescription = null)
+                }
             }
 
             Text(
-                text = quantity?.toString().orEmpty(),
+                text = if (isEditable) {
+                    quantity.toString()
+                } else {
+                    "${quantity}x"
+                },
                 fontSize = MAIN_FONT_SIZE,
             )
 
-            IconButton(
-                onClick = {
-                    val currentQuantity = quantity ?: 0
-                    onQuantityChanged(currentQuantity + 1)
-                },
-                enabled = !isProcessing && isEditable,
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = null)
+            if (isEditable) {
+                IconButton(
+                    onClick = { onQuantityChanged(quantity + 1) },
+                    enabled = !isProcessing,
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                }
             }
         }
     }

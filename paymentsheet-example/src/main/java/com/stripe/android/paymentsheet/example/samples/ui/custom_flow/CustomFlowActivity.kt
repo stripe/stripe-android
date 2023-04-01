@@ -14,9 +14,9 @@ import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.example.samples.ui.BuyButton
-import com.stripe.android.paymentsheet.example.samples.ui.PaymentMethodSelector
-import com.stripe.android.paymentsheet.example.samples.ui.Receipt
+import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
+import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
+import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
 import com.stripe.android.paymentsheet.example.samples.ui.shared.ErrorScreen
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
