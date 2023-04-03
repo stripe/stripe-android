@@ -10,8 +10,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentIntentResult
-import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkPaymentLauncher
@@ -470,9 +468,9 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `onPaymentResult() should update ViewState and save new payment method`() =
+    fun `onPaymentResult() should update ViewState and not save new payment method`() =
         runTest {
-            val viewModel = createViewModel(stripeIntent = PAYMENT_INTENT_WITH_PM)
+            val viewModel = createViewModel(stripeIntent = PAYMENT_INTENT)
 
             val selection = PaymentSelection.New.Card(
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -503,22 +501,13 @@ internal class PaymentSheetViewModelTest {
                     currency = "usd"
                 )
 
-            assertThat(prefsRepository.paymentSelectionArgs)
-                .containsExactly(
-                    PaymentSelection.Saved(
-                        PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!
-                    )
-                )
+            assertThat(prefsRepository.paymentSelectionArgs).isEmpty()
             assertThat(
                 prefsRepository.getSavedSelection(
                     isGooglePayAvailable = true,
                     isLinkAvailable = true
                 )
-            ).isEqualTo(
-                SavedSelection.PaymentMethod(
-                    PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!.id!!
-                )
-            )
+            ).isEqualTo(SavedSelection.None)
 
             resultTurbine.cancel()
             viewStateTurbine.cancel()
@@ -1363,13 +1352,5 @@ internal class PaymentSheetViewModelTest {
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-
-        val PAYMENT_INTENT_WITH_PM = PaymentIntentFixtures.PI_SUCCEEDED.copy(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        )
-        val PAYMENT_INTENT_RESULT_WITH_PM = PaymentIntentResult(
-            intent = PAYMENT_INTENT_WITH_PM,
-            outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
-        )
     }
 }

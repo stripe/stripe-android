@@ -479,12 +479,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is PaymentResult.Completed -> {
                 eventReporter.onPaymentSuccess(selection.value, stripeIntent.currency)
 
-                // SavedSelection needs to happen after new cards have been saved.
+                // Default future payments to the selected payment method. New payment methods won't
+                // be the default because we don't know if the user selected save for future use.
                 when (selection.value) {
-                    is PaymentSelection.New.LinkInline -> PaymentSelection.Link
-                    is PaymentSelection.New -> stripeIntent.paymentMethod?.let {
-                        PaymentSelection.Saved(it)
-                    }
+                    is PaymentSelection.New -> null
                     else -> selection.value
                 }?.let {
                     prefsRepository.savePaymentSelection(it)
