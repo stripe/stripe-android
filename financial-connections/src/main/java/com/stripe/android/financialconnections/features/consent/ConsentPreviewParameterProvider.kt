@@ -11,19 +11,20 @@ import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.LegalDetailsBody
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
 
-internal class ConsentStates : PreviewParameterProvider<ConsentState> {
+internal class ConsentPreviewParameterProvider : PreviewParameterProvider<ConsentState> {
     override val values = sequenceOf(
         canonical(),
+        withNoLogos(),
+        withPlatformLogos(),
+        withConnectedAccountLogos(),
         manualEntryPlusMicrodeposits(),
-        withPlatformLogos()
     )
 
     override val count: Int
         get() = super.count
 
-    // TODO@carlosmuvi migrate to PreviewParameterProvider when showkase adds support.
     companion object {
-        fun canonical() =
+        private fun canonical() =
             ConsentState(
                 consent = Success(
                     ConsentState.Payload(
@@ -34,7 +35,7 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
                 )
             )
 
-        fun withNoLogos() =
+        private fun withNoLogos() =
             ConsentState(
                 consent = Success(
                     ConsentState.Payload(
@@ -45,7 +46,7 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
                 )
             )
 
-        fun withPlatformLogos() =
+        private fun withPlatformLogos() =
             ConsentState(
                 consent = Success(
                     ConsentState.Payload(
@@ -59,7 +60,7 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
                 )
             )
 
-        fun withConnectedAccountLogos() =
+        private fun withConnectedAccountLogos() =
             ConsentState(
                 consent = Success(
                     ConsentState.Payload(
@@ -74,7 +75,7 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
                 )
             )
 
-        fun manualEntryPlusMicrodeposits() = ConsentState(
+        private fun manualEntryPlusMicrodeposits() = ConsentState(
             consent = Success(
                 ConsentState.Payload(
                     consent = sampleConsent(),
