@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - Offline</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">Il-metodu tal-pagament tiegħek m\'għaddiex.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">Id-data tal-iskadenza tal-kard tiegħek mhijiex kompluta.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">L-IBAN li daħħalt mhux tajjeb.</string>
   <string name="invalid_card_number">In-numru tal-kard tiegħek mhux validu.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Il-kodiċi tas-sigurtà tal-kard tiegħek mhux validu.</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Ix-xahar tal-iskadenza tal-kard tiegħek mhux validu.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">Is-sena tal-iskadenza tal-kard tiegħek mhijiex valida.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">L-isem li daħħalt mhux tajjeb.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">Skada l-ħin tal-awtentikazzjoni tal-metodu tal-ħlas tiegħek -- erġa\' pprova</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Seħħ żball intern.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">XX / SS</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Ivverifika l-pagament tiegħek</string>
   <string name="title_add_a_card">Żid Kard</string>

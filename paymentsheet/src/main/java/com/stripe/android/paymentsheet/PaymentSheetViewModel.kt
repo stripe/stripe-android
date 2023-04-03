@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
@@ -48,7 +49,6 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -82,7 +82,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     eventReporter: EventReporter,
     // Properties provided through injection
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
-    private val elementsSessionRepository: ElementsSessionRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val paymentSheetLoader: PaymentSheetLoader,
     customerRepository: CustomerRepository,
@@ -272,7 +271,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         lpmServerSpec = lpmRepository.serverSpecLoadingState.serverLpmSpecs
 
         savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
-        savedStateHandle[SAVE_SAVED_SELECTION] = state.savedSelection
+        updateSelection(state.paymentSelection)
 
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (state.isGooglePayReady) {
             GooglePayState.Available
@@ -465,13 +464,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
             runCatching {
-                elementsSessionRepository.get(
-                    initializationMode = args.initializationMode,
-                    configuration = args.config,
-                )
+                requireNotNull(stripeIntent.value)
             }.fold(
-                onSuccess = { session ->
-                    processPayment(session.stripeIntent, paymentResult)
+                onSuccess = { stripeIntent ->
+                    processPayment(stripeIntent, paymentResult)
                 },
                 onFailure = ::onFatal
             )
@@ -483,12 +479,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is PaymentResult.Completed -> {
                 eventReporter.onPaymentSuccess(selection.value, stripeIntent.currency)
 
-                // SavedSelection needs to happen after new cards have been saved.
+                // Default future payments to the selected payment method. New payment methods won't
+                // be the default because we don't know if the user selected save for future use.
                 when (selection.value) {
-                    is PaymentSelection.New.LinkInline -> PaymentSelection.Link
-                    is PaymentSelection.New -> stripeIntent.paymentMethod?.let {
-                        PaymentSelection.Saved(it)
-                    }
+                    is PaymentSelection.New -> null
                     else -> selection.value
                 }?.let {
                     prefsRepository.savePaymentSelection(it)
@@ -529,7 +523,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     isGooglePay = true,
                 )
 
-                savedStateHandle[SAVE_SELECTION] = newPaymentSelection
+                updateSelection(newPaymentSelection)
                 confirmPaymentSelection(newPaymentSelection)
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
@@ -632,6 +626,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 }
 
+@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
     get() = when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> true

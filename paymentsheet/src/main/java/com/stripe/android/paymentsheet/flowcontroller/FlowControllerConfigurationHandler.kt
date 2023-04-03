@@ -23,6 +23,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
 ) {
+
     suspend fun configure(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
@@ -74,7 +75,11 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     ) {
         eventReporter.onInit(state.config)
 
-        viewModel.paymentSelection = state.initialPaymentSelection
+        viewModel.paymentSelection = PaymentSelectionUpdater.process(
+            currentSelection = viewModel.paymentSelection,
+            newState = state,
+        )
+
         viewModel.state = state
 
         callback.onConfigured(true, null)

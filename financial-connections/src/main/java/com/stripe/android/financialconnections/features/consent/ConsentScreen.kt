@@ -425,8 +425,8 @@ private fun ConsentFooter(
     }
 }
 
-@Composable
 @Preview(group = "Consent Pane", name = "canonical")
+@Composable
 internal fun ContentPreview(
     state: ConsentState = ConsentStates.canonical()
 ) {
@@ -444,8 +444,8 @@ internal fun ContentPreview(
     }
 }
 
-@Composable
 @Preview(group = "Consent Pane", name = "No Logos")
+@Composable
 internal fun ContentWithNoLogosPreview(
     state: ConsentState = ConsentStates.withNoLogos()
 ) {
@@ -463,8 +463,8 @@ internal fun ContentWithNoLogosPreview(
     }
 }
 
-@Composable
 @Preview(group = "Consent Pane", name = "Logos: platform or institution")
+@Composable
 internal fun ContentWithPlatformLogosPreview(
     state: ConsentState = ConsentStates.withPlatformLogos()
 ) {
@@ -482,8 +482,8 @@ internal fun ContentWithPlatformLogosPreview(
     }
 }
 
-@Composable
 @Preview(group = "Consent Pane", name = "Logos: Connected Account")
+@Composable
 internal fun ContentWithConnectedAccountLogosPreview(
     state: ConsentState = ConsentStates.withConnectedAccountLogos()
 ) {
@@ -501,8 +501,8 @@ internal fun ContentWithConnectedAccountLogosPreview(
     }
 }
 
-@Composable
 @Preview(group = "Consent Pane", name = "requested data")
+@Composable
 // TODO@carlosmuvi add proper preview with expanded bottom sheet once related Compose bug gets fixed.
 // https://issuetracker.google.com/issues/241895902
 internal fun ContentRequestedDataPreview() {
@@ -519,8 +519,8 @@ internal fun ContentRequestedDataPreview() {
     }
 }
 
-@Composable
 @Preview(group = "Consent Pane", name = "requested data")
+@Composable
 // TODO@carlosmuvi add proper preview with expanded bottom sheet once related Compose bug gets fixed.
 // https://issuetracker.google.com/issues/241895902
 internal fun ContentLegalDetailsPreview() {
@@ -537,8 +537,8 @@ internal fun ContentLegalDetailsPreview() {
     }
 }
 
-@Composable
 @Preview(group = "Consent Pane", name = "manual entry + microdeposits")
+@Composable
 internal fun ContentManualEntryPlusMicrodeposits(
     state: ConsentState = ConsentStates.manualEntryPlusMicrodeposits()
 ) {

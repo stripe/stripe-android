@@ -17,6 +17,8 @@
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL 은행</string>
   <string name="invalid_email_address">잘못된 이메일 주소: %s</string>
+  <!-- Error message when UPI ID is invalid -->
+  <string name="invalid_upi_id">잘못된 UPI ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">지금 구매하거나 Klarna로 나중에 결제</string>
   <!-- Klarna pay later copy -->
@@ -39,6 +41,8 @@
   <string name="stripe_payment_method_bank">은행</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">카드 정보</string>
+  <!-- Header text shown above a UPI ID text field -->
+  <string name="stripe_paymentsheet_buy_using_upi_id">UPI ID를 사용하여 구매</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS 자동 이체</string>
   <!-- Title for credit card number entry field -->
@@ -47,4 +51,6 @@
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">설정</string>
+  <!-- Label for UPI ID number field on form -->
+  <string name="upi_id_label">UPI ID</string>
 </resources>

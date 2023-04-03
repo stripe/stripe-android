@@ -60,7 +60,6 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -199,15 +198,17 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `disables primary button when editing`() {
+        val viewModel = createViewModel(
+            initialPaymentSelection = PaymentSelection.Saved(PAYMENT_METHODS.last()),
+        )
+
         val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.buyButton.isEnabled)
-                .isTrue()
+            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
 
             viewModel.toggleEditing()
-
-            assertThat(activity.viewBinding.buyButton.isEnabled)
-                .isFalse()
+            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
         }
     }
 
@@ -958,6 +959,7 @@ internal class PaymentSheetActivityTest {
         loadDelay: Duration = Duration.ZERO,
         isGooglePayAvailable: Boolean = false,
         isLinkAvailable: Boolean = false,
+        initialPaymentSelection: PaymentSelection? = null,
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = mock<LpmRepository>()
         whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
@@ -978,7 +980,6 @@ internal class PaymentSheetActivityTest {
                 PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
                 eventReporter,
                 { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-                ElementsSessionRepository.Static(paymentIntent),
                 StripeIntentValidator(),
                 FakePaymentSheetLoader(
                     stripeIntent = paymentIntent,
@@ -989,6 +990,7 @@ internal class PaymentSheetActivityTest {
                         loginState = LinkState.LoginState.LoggedOut,
                     ).takeIf { isLinkAvailable },
                     delay = loadDelay,
+                    paymentSelection = initialPaymentSelection,
                 ),
                 FakeCustomerRepository(paymentMethods),
                 FakePrefsRepository(),

@@ -6,9 +6,6 @@
     <!-- Error string displayed to user when they enter in an invalid account number. Account number refers to a US bank account number -->
     <string name="becs_widget_account_number_invalid">The account number you entered is invalid.</string>
 
-    <!-- UPI -->
-    <string name="invalid_upi_id">Invalid UPI ID.</string>
-
     <!-- Unable to complete operation -->
     <string name="unable_to_complete_operation">Unable to complete operation</string>
 </resources>

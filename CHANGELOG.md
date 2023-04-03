@@ -2,6 +2,21 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [FIXED][6434](https://github.com/stripe/stripe-android/pull/6434) Fixed an issue where the `Save this card for future payments` checkbox wasn't displayed in some cases even though it should have been.
+
+## 20.21.1 - 2023-03-27
+
+### PaymentSheet
+* [FIXED][6411](https://github.com/stripe/stripe-android/pull/6411) Fixed an issue in the expiry date field that could cause an exception.
+
+### Financial Connections
+* [CHANGED][6403](https://github.com/stripe/stripe-android/pull/6403) Use light status bar and navigation bar.
+* [CHANGED][6404](https://github.com/stripe/stripe-android/pull/6404) Update UI for no search results in institution picker.
+
+### StripeCardScan
+* [ADDED][6409](https://github.com/stripe/stripe-android/pull/6409) Support running Cardscan with TFLite in Google Play.
+
 ## 20.21.0 - 2023-03-20
 
 ### Payments

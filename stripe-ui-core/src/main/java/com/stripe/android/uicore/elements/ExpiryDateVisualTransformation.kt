@@ -17,39 +17,54 @@ class ExpiryDateVisualTransformation : VisualTransformation {
          * 2, if the first number is 11 or 12 it will be after the second digit,
          * if the number is 01 it will be after the second digit.
          */
-        var separatorAfterIndex = 1
-        if (text.isNotBlank() && !(text[0] == '0' || text[0] == '1')) {
-            separatorAfterIndex = 0
-        } else if (text.length > 1 &&
-            (text[0] == '1' && requireNotNull(text[1].digitToInt()) > 2)
-        ) {
-            separatorAfterIndex = 0
-        }
+        val canOnlyBeSingleDigitMonth = text.isNotBlank() && !(text[0] == '0' || text[0] == '1')
+        val canOnlyBeJanuary = text.length > 1 && text.text.take(2).toInt() > 12
+        val isSingleDigitMonth = canOnlyBeSingleDigitMonth || canOnlyBeJanuary
 
-        var out = ""
-        for (i in text.indices) {
-            out += text[i]
-            if (i == separatorAfterIndex) {
-                out += separator
+        val lastIndexOfMonth = if (isSingleDigitMonth) 0 else 1
+
+        val output = buildString {
+            for ((index, char) in text.withIndex()) {
+                append(char)
+                if (index == lastIndexOfMonth) {
+                    append(separator)
+                }
             }
         }
 
-        val offsetTranslator = object : OffsetMapping {
-            override fun originalToTransformed(offset: Int) =
-                if (offset <= separatorAfterIndex) {
-                    offset
-                } else {
-                    offset + separator.length
-                }
+        val outputOffsets = calculateOutputOffsets(output)
+        val separatorIndices = calculateSeparatorOffsets(output)
 
-            override fun transformedToOriginal(offset: Int) =
-                if (offset <= separatorAfterIndex + 1) {
-                    offset
-                } else {
-                    offset - separator.length
-                }
+        val offsetTranslator = object : OffsetMapping {
+
+            override fun originalToTransformed(offset: Int): Int {
+                return outputOffsets[offset]
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                val separatorCharactersBeforeOffset = separatorIndices.count { it < offset }
+                return offset - separatorCharactersBeforeOffset
+            }
         }
 
-        return TransformedText(AnnotatedString(out), offsetTranslator)
+        return TransformedText(AnnotatedString(output), offsetTranslator)
+    }
+
+    private fun calculateOutputOffsets(output: String): List<Int> {
+        val digitOffsets = output.mapIndexedNotNull { index, char ->
+            // +1 because we're looking for offsets, not indices
+            index.takeIf { char.isDigit() }?.plus(1)
+        }
+
+        // We're adding 0 so that the cursor can be placed at the start of the text,
+        // and replace the last digit offset with the length of the output. The latter
+        // is so that the offsets are set correctly for text such as "4 / ".
+        return listOf(0) + digitOffsets.dropLast(1) + output.length
+    }
+
+    private fun calculateSeparatorOffsets(output: String): List<Int> {
+        return output.mapIndexedNotNull { index, c ->
+            index.takeUnless { c.isDigit() }
+        }
     }
 }

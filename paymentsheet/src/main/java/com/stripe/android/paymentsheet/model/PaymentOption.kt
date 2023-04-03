@@ -30,7 +30,7 @@ constructor(
     /**
      * The drawable resource id of the icon that represents the payment option.
      */
-    @Deprecated("Please use fetchIcon instead.")
+    @Deprecated("Please use icon() instead.")
     @DrawableRes
     val drawableResourceId: Int,
 

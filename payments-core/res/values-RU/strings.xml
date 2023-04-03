@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - не в сети</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">Не удалось выполнить оплату этим способом.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">Дата истечения срока действия карты введена не полностью.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">Введенный код IBAN содержит ошибку.</string>
   <string name="invalid_card_number">Номер карты недействителен.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Код CVV/CVC карты недействителен.</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Недопустимый месяц окончания действия карты.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">Недопустимый год окончания действия карты.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">Недействительное имя.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">Лимит времени для аутентификации метода оплаты истек. Попробуйте еще раз</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Произошла внутренняя ошибка.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">ММ / ГГ</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Подтвердите платеж</string>
   <string name="title_add_a_card">Добавить карту</string>

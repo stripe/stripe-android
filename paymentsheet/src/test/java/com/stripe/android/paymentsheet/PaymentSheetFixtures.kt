@@ -9,10 +9,10 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import org.mockito.kotlin.mock
 
 internal object PaymentSheetFixtures {
@@ -85,15 +85,25 @@ internal object PaymentSheetFixtures {
             googlePay = ConfigFixtures.GOOGLE_PAY
         )
 
+    internal val CONFIG_BILLING_DETAILS_COLLECTION = PaymentSheet.Configuration(
+        merchantDisplayName = MERCHANT_DISPLAY_NAME,
+        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+    )
+
     internal val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
         state = PaymentSheetState.Full(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             customerPaymentMethods = emptyList(),
             config = CONFIG_GOOGLEPAY,
             isGooglePayReady = false,
-            newPaymentSelection = null,
+            paymentSelection = null,
             linkState = null,
-            savedSelection = SavedSelection.None,
         ),
         statusBarColor = STATUS_BAR_COLOR,
         injectorKey = DUMMY_INJECTOR_KEY,
@@ -106,7 +116,7 @@ internal object PaymentSheetFixtures {
         isGooglePayReady: Boolean = state.isGooglePayReady,
         stripeIntent: StripeIntent = state.stripeIntent,
         config: PaymentSheet.Configuration? = state.config,
-        newPaymentSelection: PaymentSelection.New? = state.newPaymentSelection,
+        paymentSelection: PaymentSelection? = state.paymentSelection,
         linkState: LinkState? = state.linkState,
     ): PaymentOptionContract.Args {
         return copy(
@@ -115,7 +125,7 @@ internal object PaymentSheetFixtures {
                 isGooglePayReady = isGooglePayReady,
                 stripeIntent = stripeIntent,
                 config = config,
-                newPaymentSelection = newPaymentSelection,
+                paymentSelection = paymentSelection,
                 linkState = linkState,
             ),
         )

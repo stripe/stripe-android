@@ -48,6 +48,8 @@
   <string name="address_zip_invalid">El código postal no es válido.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">El código postal no es válido.</string>
+  <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
+  <string name="billing_same_as_shipping">La dirección de facturación es la misma que la de envío.</string>
   <!-- Used when a required field is blank and submit is clicked. -->
   <string name="blank_and_required">Este campo no puede estar en blanco.</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
@@ -56,8 +58,16 @@
   <string name="email">Correo electrónico</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">El correo electrónico no es válido.</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiration_date_hint">MM / AA</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="form_label_optional">%s (opcional)</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">La fecha de caducidad de la tarjeta está incompleta.</string>
   <!-- Error description for incomplete phone number -->
   <string name="incomplete_phone_number">Número de teléfono incompleto</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">El mes de caducidad de la tarjeta no es válido.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">El año de caducidad de la tarjeta no es válido.</string>
 </resources>

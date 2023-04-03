@@ -7,12 +7,14 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -97,8 +99,27 @@ class FormArgumentsFactoryTest {
         assertThat(actualFromArguments.showCheckboxControlledFields).isFalse()
     }
 
+    @Test
+    fun `Create correct FormArguments with custom billing details collection`() {
+        val actualFromArguments = testCardFormArguments(
+            customerReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+            config = PaymentSheetFixtures.CONFIG_BILLING_DETAILS_COLLECTION,
+        )
+
+        assertThat(actualFromArguments.billingDetailsCollectionConfiguration).isEqualTo(
+            BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                attachDefaultsToPaymentMethod = true,
+            )
+        )
+    }
+
     private fun testCardFormArguments(
         customerReuse: PaymentSelection.CustomerRequestedSave,
+        config: PaymentSheet.Configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
     ): FormArguments {
         val paymentIntent = mock<PaymentIntent>().also {
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
@@ -126,7 +147,7 @@ class FormArgumentsFactoryTest {
         val actualArgs = FormArgumentsFactory.create(
             paymentMethod = LpmRepository.HardcodedCard,
             stripeIntent = paymentIntent,
-            config = PaymentSheetFixtures.CONFIG_MINIMUM,
+            config = config,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             amount = Amount(50, "USD"),
             newLpm = PaymentSelection.New.Card(

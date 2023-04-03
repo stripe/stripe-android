@@ -9,6 +9,7 @@
         tools:ignore="ScopedStorage" />
 
     <application
+        android:name=".ExampleApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -39,8 +40,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".samples.activity.LaunchPaymentSheetCompleteActivity" />
-        <activity android:name=".samples.activity.LaunchPaymentSheetCustomActivity" />
+        <activity android:name=".samples.ui.complete_flow.CompleteFlowActivity" />
+        <activity android:name=".samples.ui.custom_flow.CustomFlowActivity" />
+        <activity android:name=".samples.ui.server_side_confirm.ServerSideConfirmationActivity" />
         <activity android:name=".playground.activity.PaymentSheetPlaygroundActivity" />
     </application>
 

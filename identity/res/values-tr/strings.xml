@@ -27,6 +27,24 @@
   <string name="could_not_capture_title">Fotoğraf alınamadı</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="description_clock">Saat simgesi</string>
+  <!-- Content description for close button -->
+  <string name="description_close">doğrulama sayfasını kapat</string>
+  <!-- Content description for exclamation icon -->
+  <string name="description_exclamation">ünlem simgesi</string>
+  <!-- Content description for back button -->
+  <string name="description_go_back">önceki ekrana dön</string>
+  <!-- Content description for merchant logo -->
+  <string name="description_merchant_logo">satıcı logosu</string>
+  <!-- Content description for plus icon -->
+  <string name="description_plus">artı simgesi</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="description_privacy_policy">gizlilik politikası simgesi</string>
+  <!-- Content description for stripe logo -->
+  <string name="description_stripe_logo">stripe logosu</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="description_time_estimate">doğrulama simgesini tamamlamak için tahmini süre</string>
+  <!-- Label for Date of birth field -->
+  <string name="dob">Doğum tarihi</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="driver_license">Sürücü belgesi</string>
   <!-- Text for error labels -->
@@ -39,6 +57,8 @@
   <string name="file_upload_content_id">Lütfen kimlik belgenizin ön ve arka yüzlerinin fotoğraflarını yükleyin</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Lütfen pasaportunuzun bir fotoğrafını yükleyin</string>
+  <!-- Label for first (given) name field -->
+  <string name="first_name">Ad</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="flash_mask">Özçekim animasyonu için maske</string>
   <!-- Description of front of driver's license image -->
@@ -57,10 +77,24 @@
   <string name="hold_still">Bekleyin, taranıyor</string>
   <!-- display name for ID -->
   <string name="id_card">Kimlik belgesi</string>
+  <!-- Label for ID number section -->
+  <string name="id_number">Kimlik Numarası</string>
+  <!-- An error message. -->
+  <string name="incomplete_id_number">Girdiğiniz kimlik numarası eksik.</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="individual_cpf">Bireysel CPF</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="invalid_dob_error">Doğum tarihi geçerli görünmüyor</string>
   <!-- Continue button text -->
   <string name="kontinue">devam et</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="last_4_of_ssn">Sosyal Güvenlik numarasının son 4 hanesi</string>
+  <!-- Label for last (family) name field -->
+  <string name="last_name">Soyadı</string>
   <!-- Status while screen is loading -->
   <string name="loading">Yükleniyor</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="nric_or_fin">NRIC veya FIN</string>
   <!-- No comment provided by engineer. -->
   <string name="ok">TAMAM</string>
   <!-- Label of the passport option for document type selection -->
@@ -79,6 +113,8 @@
   <string name="position_passport">Pasaportunuzu çerçevenin ortasına yerleştirin</string>
   <!-- Instructional text for capturing selfie -->
   <string name="position_selfie">Yüzünüzü çerçevenin ortasına yerleştirin.</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="retake_photos">Fotoğrafları Tekrar Çek</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Tarandı</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->

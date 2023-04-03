@@ -353,8 +353,8 @@ private fun BadgedInstitutionImage(
     }
 }
 
-@Composable
 @Preview(group = "Errors", name = "unclassified error")
+@Composable
 internal fun UnclassifiedErrorContentPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
@@ -365,8 +365,8 @@ internal fun UnclassifiedErrorContentPreview() {
     }
 }
 
-@Composable
 @Preview(group = "Errors", name = "institution down planned error")
+@Composable
 internal fun InstitutionPlannedDowntimeErrorContentPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
@@ -396,8 +396,8 @@ internal fun InstitutionPlannedDowntimeErrorContentPreview() {
     }
 }
 
-@Composable
 @Preview(group = "Errors", name = "no accounts available error")
+@Composable
 internal fun NoAccountsAvailableErrorContentPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsScaffold(

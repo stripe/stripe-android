@@ -48,6 +48,8 @@
   <string name="address_zip_invalid">Postinumero ei kelpaa.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Postinumero ei kelpaa</string>
+  <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
+  <string name="billing_same_as_shipping">Laskutusosoite on sama kuin toimitusosoite</string>
   <!-- Used when a required field is blank and submit is clicked. -->
   <string name="blank_and_required">Tämä kenttä ei voi olla tyhjä</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
@@ -56,8 +58,16 @@
   <string name="email">Sähköposti</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">Sähköposti on virheellinen.</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiration_date_hint">KK/VV</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="form_label_optional">%s (valinnainen)</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">Kortin voimassaoloaika on puutteellinen.</string>
   <!-- Error description for incomplete phone number -->
   <string name="incomplete_phone_number">Puutteellinen puhelinnumero</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">Kortin erääntymiskuukausi ei kelpaa.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">Kortin voimassaolovuosi ei kelpaa.</string>
 </resources>

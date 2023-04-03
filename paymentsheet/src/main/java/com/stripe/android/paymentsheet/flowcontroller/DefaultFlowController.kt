@@ -9,6 +9,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -190,6 +191,7 @@ internal class DefaultFlowController @Inject internal constructor(
         )
     }
 
+    @ExperimentalPaymentSheetDecouplingApi
     override fun configureWithIntentConfiguration(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: PaymentSheet.Configuration?,
@@ -231,9 +233,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
         paymentOptionActivityLauncher.launch(
             PaymentOptionContract.Args(
-                state = state.copy(
-                    newPaymentSelection = viewModel.paymentSelection as? PaymentSelection.New,
-                ),
+                state = state.copy(paymentSelection = viewModel.paymentSelection),
                 statusBarColor = statusBarColor(),
                 injectorKey = injectorKey,
                 enableLogging = enableLogging,

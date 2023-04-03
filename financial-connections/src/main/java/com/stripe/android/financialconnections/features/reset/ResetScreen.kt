@@ -55,8 +55,11 @@ private fun ResetContent(
     }
 }
 
+@Preview(
+    group = "Reset",
+    name = "Default"
+)
 @Composable
-@Preview
 internal fun ResetScreenPreview() {
     FinancialConnectionsPreview {
         ResetContent(

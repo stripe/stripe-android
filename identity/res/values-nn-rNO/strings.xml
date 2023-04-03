@@ -27,6 +27,24 @@
   <string name="could_not_capture_title">Kunne ikkje ta bilete</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="description_clock">Klokkeikon</string>
+  <!-- Content description for close button -->
+  <string name="description_close">lukk verifiseringsside</string>
+  <!-- Content description for exclamation icon -->
+  <string name="description_exclamation">utropsteikn-ikon</string>
+  <!-- Content description for back button -->
+  <string name="description_go_back">gå attende til førre skjermbilete</string>
+  <!-- Content description for merchant logo -->
+  <string name="description_merchant_logo">seljar-logo</string>
+  <!-- Content description for plus icon -->
+  <string name="description_plus">pluss-ikon</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="description_privacy_policy">ikon for retningsliner for personvern</string>
+  <!-- Content description for stripe logo -->
+  <string name="description_stripe_logo">stripe-logo</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="description_time_estimate">ikon for estimert tid til å fullføre verifisering</string>
+  <!-- Label for Date of birth field -->
+  <string name="dob">Fødselsdato</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="driver_license">Førarkort</string>
   <!-- Text for error labels -->
@@ -39,6 +57,8 @@
   <string name="file_upload_content_id">Last opp bilete av framsida og bakside av identifikasjonskortet ditt</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Last opp eit bilete av passet ditt</string>
+  <!-- Label for first (given) name field -->
+  <string name="first_name">Fornamn</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="flash_mask">Maske til selfieanimasjon</string>
   <!-- Description of front of driver's license image -->
@@ -57,10 +77,24 @@
   <string name="hold_still">Hold i ro, skannar</string>
   <!-- display name for ID -->
   <string name="id_card">ID</string>
+  <!-- Label for ID number section -->
+  <string name="id_number">ID-nummer</string>
+  <!-- An error message. -->
+  <string name="incomplete_id_number">ID-nummeret du skrev inn, er ufullstendig.</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="individual_cpf">Individuell CPF</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="invalid_dob_error">Fødselsdato ser ikkje gyldig ut</string>
   <!-- Continue button text -->
   <string name="kontinue">fortsett</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="last_4_of_ssn">Siste 4 tak i personnummeret</string>
+  <!-- Label for last (family) name field -->
+  <string name="last_name">Etternamn</string>
   <!-- Status while screen is loading -->
   <string name="loading">Lastar</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="nric_or_fin">NRIC eller FIN</string>
   <!-- No comment provided by engineer. -->
   <string name="ok">OK</string>
   <!-- Label of the passport option for document type selection -->
@@ -79,6 +113,8 @@
   <string name="position_passport">Posisjoner passet ditt i midten av biletet</string>
   <!-- Instructional text for capturing selfie -->
   <string name="position_selfie">Posisjoner andletet ditt i midten av biletet</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="retake_photos">Ta bilete på nytt</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Skanna</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->

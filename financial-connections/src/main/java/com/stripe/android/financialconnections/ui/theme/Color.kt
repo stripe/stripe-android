@@ -15,8 +15,9 @@ internal val Neutral300 = Color(0xffA3ACBA)
 internal val Neutral500 = Color(0xff6A7383)
 internal val Neutral800 = Color(0xff30313D)
 
-internal val Brand500 = Color(0xff625AFA)
+internal val Brand100 = Color(0xffF2EBFF)
 internal val Brand400 = Color(0xff8D7FFA)
+internal val Brand500 = Color(0xff625AFA)
 
 internal val Blue500 = Color(0xff0570DE)
 internal val Blue400 = Color(0xFF0196ED)

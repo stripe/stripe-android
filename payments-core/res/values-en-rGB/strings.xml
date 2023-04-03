@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - Offline</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">Your payment method was declined.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">Your card\'s expiration date is incomplete.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">The IBAN you entered is invalid.</string>
   <string name="invalid_card_number">Your card number is invalid.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Your card\'s security code is invalid.</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Your card expiry month is invalid.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">Your card\'s expiry year is invalid.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">Your name is invalid.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">Timed out authenticating your payment method - please try again</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">An internal error occurred.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">MM / YY</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verify your payment</string>
   <string name="title_add_a_card">Add a Card</string>

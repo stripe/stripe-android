@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s – Luar Talian</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">Kaedah pembayaran anda ditolak.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">Tarikh tamat tempoh kad anda tidak lengkap.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">IBAN yang anda masukkan tidak sah.</string>
   <string name="invalid_card_number">Nombor kad anda tidak sah.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Kod keselamatan kad anda tidak sah.</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Bulan tamat tempoh kad anda tidak sah.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">Tahun tamat tempoh kad anda tidak sah.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">Nama anda tidak sah.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">Masa tamat ketika mensahihkan kaedah pembayaran anda -- cuba lagi</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Ada ralat dalaman berlaku.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">BB / TT</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Tentusahkan pembayaran anda</string>
   <string name="title_add_a_card">Tambah Kad</string>

@@ -124,8 +124,6 @@ class LinkHandlerTest {
         assertThat(handler.activeLinkSession.first()).isTrue()
         assertThat(handler.linkConfiguration.first()).isEqualTo(configuration)
         assertThat(handler.showLinkVerificationDialog.first()).isFalse()
-        assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION))
-            .isEqualTo(PaymentSelection.Link)
         verifyNoInteractions(linkLauncher)
     }
 

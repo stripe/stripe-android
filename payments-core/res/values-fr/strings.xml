@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - Hors ligne</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">Votre moyen de paiement a été refusé.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">La date d\'expiration de votre carte bancaire est incomplète.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">L\'IBAN que vous avez saisi n\'est pas valide.</string>
   <string name="invalid_card_number">Le numéro de votre carte bancaire n\'est pas valide.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Le code de sécurité de votre carte bancaire n\'est pas valide.</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Le mois d\'expiration de votre carte n\'est pas valide.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">L\'année d\'expiration de votre carte n\'est pas valide.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">Votre nom n\'est pas valide.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">La tentative d\'identification de votre moyen de paiement a été interrompue, veuillez réessayer.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Une erreur interne s\'est produite.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">MM / AA</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Vérifier votre paiement</string>
   <string name="title_add_a_card">Ajouter une carte</string>
