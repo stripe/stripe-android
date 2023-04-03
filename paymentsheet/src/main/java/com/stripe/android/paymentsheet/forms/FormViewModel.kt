@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.NonFallbackInjector
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
+import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.specsForConfiguration
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -63,20 +65,32 @@ internal class FormViewModel @Inject internal constructor(
         }
     }
 
-    val elementsFlow = flowOf(
-        TransformSpecToElements(
-            addressRepository = addressRepository,
-            initialValues = formArguments.getInitialValuesMap(),
-            amount = formArguments.amount,
-            saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
-            merchantName = formArguments.merchantName,
-            context = context,
-            shippingValues = formArguments.shippingDetails
-                ?.toIdentifierMap(formArguments.billingDetails)
-        ).transform(
-            requireNotNull(lpmRepository.fromCode(formArguments.paymentMethodCode)).formSpec.items
+    val elementsFlow = run {
+        var specs = requireNotNull(
+            lpmRepository.fromCode(formArguments.paymentMethodCode)
+        ).formSpec.items
+
+        // Cards are a special case and already contain specs based on the configuration.
+        if (formArguments.paymentMethodCode != PaymentMethod.Type.Card.code) {
+            specs = specsForConfiguration(
+                configuration = formArguments.billingDetailsCollectionConfiguration,
+                specs = specs,
+            )
+        }
+
+        flowOf(
+            TransformSpecToElements(
+                addressRepository = addressRepository,
+                initialValues = formArguments.getInitialValuesMap(),
+                amount = formArguments.amount,
+                saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
+                merchantName = formArguments.merchantName,
+                context = context,
+                shippingValues = formArguments.shippingDetails
+                    ?.toIdentifierMap(formArguments.billingDetails),
+            ).transform(specs)
         )
-    )
+    }
 
     private val saveForFutureUseElement = elementsFlow
         .map { elementsList ->

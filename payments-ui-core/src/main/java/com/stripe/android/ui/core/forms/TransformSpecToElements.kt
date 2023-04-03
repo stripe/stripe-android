@@ -26,6 +26,7 @@ import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
+import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
@@ -93,6 +94,8 @@ class TransformSpecToElements(
                 is SepaMandateTextSpec -> it.transform(merchantName)
                 is UpiSpec -> it.transform()
                 is ContactInformationSpec -> it.transform(initialValues)
+                is PlaceholderSpec ->
+                    error("Placeholders should be processed before calling transform.")
             }
         }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
 }
