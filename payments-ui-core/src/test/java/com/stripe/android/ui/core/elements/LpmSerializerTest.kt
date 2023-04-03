@@ -588,7 +588,6 @@ class LpmSerializerTest {
             fail("Failed to deserialize payload.", result.exceptionOrNull())
         }
         assertThat(result.isSuccess).isTrue()
-        val countDownLatch = CountDownLatch(1)
         result.onSuccess {
             countDownLatch.countDown()
             assertThat(it.fields.first()).isEqualTo(
