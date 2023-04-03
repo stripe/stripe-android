@@ -37,7 +37,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             return
         }
 
-        val elementsSessionParams = initializationMode.toElementsSessionParams(configuration)
+        val elementsSessionParams = initializationMode.toElementsSessionParams()
         val previousElementsSessionParams = viewModel.previousElementsSessionParams
         if (elementsSessionParams == previousElementsSessionParams) {
             callback.onConfigured(true, null)

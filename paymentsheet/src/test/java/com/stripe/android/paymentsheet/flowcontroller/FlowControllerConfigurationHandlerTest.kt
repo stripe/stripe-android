@@ -258,10 +258,9 @@ class FlowControllerConfigurationHandlerTest {
 
     private fun createElementsSessionParams(
         clientSecret: String = PaymentSheetFixtures.CLIENT_SECRET,
-        configuration: PaymentSheet.Configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
     ): ElementsSessionParams {
         val initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret)
-        return initializationMode.toElementsSessionParams(configuration)
+        return initializationMode.toElementsSessionParams()
     }
 
     private fun createConfigurationHandler(

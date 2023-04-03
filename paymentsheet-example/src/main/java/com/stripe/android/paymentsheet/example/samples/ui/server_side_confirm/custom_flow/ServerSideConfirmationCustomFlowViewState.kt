@@ -1,10 +1,10 @@
-package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm
+package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow
 
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.model.PaymentOption
 
-data class ServerSideConfirmationViewState(
+data class ServerSideConfirmationCustomFlowViewState(
     val isProcessing: Boolean = false,
     val isError: Boolean = false,
     val confirmedCartState: CartState = CartState.default,
