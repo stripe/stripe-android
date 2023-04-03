@@ -56,7 +56,7 @@ internal class ConfirmPaymentIntentParamsFactory(
             paymentMethodOptions = when (paymentMethod.type) {
                 PaymentMethod.Type.Card -> {
                     PaymentMethodOptionsParams.Card(
-                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                        setupFutureUsage = null
                     )
                 }
                 PaymentMethod.Type.USBankAccount -> {
