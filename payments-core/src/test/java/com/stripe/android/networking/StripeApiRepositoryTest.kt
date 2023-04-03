@@ -2394,8 +2394,6 @@ internal class StripeApiRepositoryTest {
             assertEquals("usd", this["deferred_intent[currency]"])
             assertEquals(null, this["deferred_intent[setup_future_usage]"])
             assertEquals(null, this["deferred_intent[capture_method]"])
-            assertEquals(null, this["deferred_intent[customer]"])
-            assertEquals(null, this["deferred_intent[on_behalf_of]"])
             assertEquals("card", this["deferred_intent[payment_method_types][0]"])
             assertEquals("link", this["deferred_intent[payment_method_types][1]"])
         }

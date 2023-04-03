@@ -22,7 +22,6 @@ internal sealed class ElementsSessionRepository {
 
     abstract suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
-        configuration: PaymentSheet.Configuration?,
     ): ElementsSession
 
     /**
@@ -33,7 +32,6 @@ internal sealed class ElementsSessionRepository {
     ) : ElementsSessionRepository() {
         override suspend fun get(
             initializationMode: PaymentSheet.InitializationMode,
-            configuration: PaymentSheet.Configuration?,
         ): ElementsSession {
             return ElementsSession(
                 linkSettings = null,
@@ -62,9 +60,8 @@ internal sealed class ElementsSessionRepository {
 
         override suspend fun get(
             initializationMode: PaymentSheet.InitializationMode,
-            configuration: PaymentSheet.Configuration?,
         ): ElementsSession {
-            val params = initializationMode.toElementsSessionParams(configuration)
+            val params = initializationMode.toElementsSessionParams()
 
             val elementsSession = runCatching {
                 stripeRepository.retrieveElementsSession(
@@ -116,9 +113,7 @@ internal sealed class ElementsSessionRepository {
 }
 
 @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
-internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
-    configuration: PaymentSheet.Configuration?,
-): ElementsSessionParams {
+internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): ElementsSessionParams {
     return when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> {
             ElementsSessionParams.PaymentIntentType(clientSecret = clientSecret)
@@ -132,7 +127,6 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
                     mode = intentConfiguration.mode.toElementsSessionParam(),
                     setupFutureUsage = intentConfiguration.setupFutureUse?.toElementsSessionParam(),
                     captureMethod = intentConfiguration.captureMethod?.toElementsSessionParam(),
-                    customer = configuration?.customer?.id,
                     paymentMethodTypes = intentConfiguration.paymentMethodTypes.toSet(),
                 ),
             )
