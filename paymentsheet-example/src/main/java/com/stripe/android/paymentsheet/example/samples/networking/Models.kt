@@ -1,23 +1,26 @@
 package com.stripe.android.paymentsheet.example.samples.networking
 
-import androidx.annotation.Keep
 import com.github.kittinunf.fuel.core.Deserializable
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
-import com.google.gson.Gson
-import com.google.gson.annotations.SerializedName
+import com.github.kittinunf.fuel.core.awaitResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import com.github.kittinunf.result.Result as ApiResult
 
 @Serializable
-@Keep
 data class ExampleCheckoutRequest(
-    @SerializedName("hot_dog_count")
+    @SerialName("hot_dog_count")
     val hotDogCount: Int,
-    @SerializedName("salad_count")
+    @SerialName("salad_count")
     val saladCount: Int,
-    @SerializedName("is_subscribing")
+    @SerialName("is_subscribing")
     val isSubscribing: Boolean,
 )
 
@@ -30,22 +33,21 @@ fun CartState.toCheckoutRequest(): ExampleCheckoutRequest {
 }
 
 @Serializable
-@Keep
 data class ExampleCheckoutResponse(
-    @SerializedName("publishableKey")
+    @SerialName("publishableKey")
     val publishableKey: String,
-    @SerializedName("paymentIntent")
-    val paymentIntent: String,
-    @SerializedName("customer")
+    @SerialName("paymentIntent")
+    val paymentIntent: String = "",
+    @SerialName("customer")
     val customer: String? = null,
-    @SerializedName("ephemeralKey")
+    @SerialName("ephemeralKey")
     val ephemeralKey: String? = null,
-    @SerializedName("subtotal")
-    val subtotal: Float,
-    @SerializedName("tax")
-    val tax: Float,
-    @SerializedName("total")
-    val total: Float,
+    @SerialName("subtotal")
+    val subtotal: Long = 0,
+    @SerialName("tax")
+    val tax: Long = 0,
+    @SerialName("total")
+    val total: Long = 0,
 ) {
 
     internal fun makeCustomerConfig() = if (customer != null && ephemeralKey != null) {
@@ -56,12 +58,89 @@ data class ExampleCheckoutResponse(
     } else {
         null
     }
+}
 
-    object Deserializer : Deserializable<ExampleCheckoutResponse> {
+@Serializable
+data class ExampleUpdateRequest(
+    @SerialName("hot_dog_count")
+    val hotDogCount: Int,
+    @SerialName("salad_count")
+    val saladCount: Int,
+    @SerialName("is_subscribing")
+    val isSubscribing: Boolean,
+)
 
-        override fun deserialize(response: Response): ExampleCheckoutResponse {
+fun CartState.toUpdateRequest(): ExampleUpdateRequest {
+    return ExampleUpdateRequest(
+        hotDogCount = countOf(CartProduct.Id.HotDog),
+        saladCount = countOf(CartProduct.Id.Salad),
+        isSubscribing = isSubscription,
+    )
+}
+
+@Serializable
+data class ExampleUpdateResponse(
+    @SerialName("subtotal")
+    val subtotal: Long,
+    @SerialName("tax")
+    val tax: Long,
+    @SerialName("total")
+    val total: Long,
+)
+
+@Serializable
+data class ExampleCreateAndConfirmIntentRequest(
+    @SerialName("payment_method_id")
+    val paymentMethodId: String,
+    @SerialName("should_save_payment_method")
+    val shouldSavePaymentMethod: Boolean,
+    @SerialName("currency")
+    val currency: String,
+    @SerialName("hot_dog_count")
+    val hotDogCount: Int,
+    @SerialName("salad_count")
+    val saladCount: Int,
+    @SerialName("is_subscribing")
+    val isSubscribing: Boolean,
+    @SerialName("return_url")
+    val returnUrl: String,
+)
+
+fun CartState.toCreateIntentRequest(
+    paymentMethodId: String,
+    shouldSavePaymentMethod: Boolean,
+    returnUrl: String,
+): ExampleCreateAndConfirmIntentRequest {
+    return ExampleCreateAndConfirmIntentRequest(
+        paymentMethodId = paymentMethodId,
+        shouldSavePaymentMethod = shouldSavePaymentMethod,
+        currency = "usd",
+        hotDogCount = countOf(CartProduct.Id.HotDog),
+        saladCount = countOf(CartProduct.Id.Salad),
+        isSubscribing = isSubscription,
+        returnUrl = returnUrl,
+    )
+}
+
+@Serializable
+data class ExampleCreateAndConfirmIntentResponse(
+    @SerialName("intentClientSecret")
+    val clientSecret: String,
+)
+
+/**
+ * Awaits the [ApiResult] and deserializes it into the desired type [T].
+ */
+suspend fun <T : Any> Request.awaitModel(
+    serializer: DeserializationStrategy<T>
+): ApiResult<T, FuelError> {
+    val deserializer = object : Deserializable<T> {
+
+        override fun deserialize(response: Response): T {
             val body = response.body().asString("application/json")
-            return Gson().fromJson(body, ExampleCheckoutResponse::class.java)
+            return Json.decodeFromString(serializer, body)
         }
     }
+
+    return awaitResult(deserializer)
 }

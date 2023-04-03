@@ -1,10 +1,9 @@
 package com.stripe.android.paymentsheet.example.playground.model
 
-import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
 import com.stripe.android.paymentsheet.PaymentSheet
-import kotlinx.serialization.Serializable
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 enum class InitializationType(val value: String) {
     Normal("normal"),
@@ -99,42 +98,40 @@ sealed class CheckoutCustomer(val value: String) {
 }
 
 @Serializable
-@Keep
 data class CheckoutRequest(
-    @SerializedName("initialization")
+    @SerialName("initialization")
     val initialization: String,
-    @SerializedName("customer")
+    @SerialName("customer")
     val customer: String,
-    @SerializedName("currency")
+    @SerialName("currency")
     val currency: String,
-    @SerializedName("mode")
+    @SerialName("mode")
     val mode: String,
-    @SerializedName("set_shipping_address")
+    @SerialName("set_shipping_address")
     val set_shipping_address: Boolean,
-    @SerializedName("automatic_payment_methods")
+    @SerialName("automatic_payment_methods")
     val automatic_payment_methods: Boolean,
-    @SerializedName("use_link")
+    @SerialName("use_link")
     val use_link: Boolean,
-    @SerializedName("merchant_country_code")
+    @SerialName("merchant_country_code")
     val merchant_country_code: String,
-    @SerializedName("supported_payment_methods")
-    val supported_payment_methods: List<String>?
+    @SerialName("supported_payment_methods")
+    val supported_payment_methods: List<String>? = null,
 )
 
 @Serializable
-@Keep
 data class CheckoutResponse(
-    @SerializedName("publishableKey")
+    @SerialName("publishableKey")
     val publishableKey: String,
-    @SerializedName("intentClientSecret")
+    @SerialName("intentClientSecret")
     val intentClientSecret: String,
-    @SerializedName("customerId")
+    @SerialName("customerId")
     val customerId: String? = null,
-    @SerializedName("customerEphemeralKeySecret")
+    @SerialName("customerEphemeralKeySecret")
     val customerEphemeralKeySecret: String? = null,
-    @SerializedName("amount")
+    @SerialName("amount")
     val amount: Long,
-    @SerializedName("paymentMethodTypes")
+    @SerialName("paymentMethodTypes")
     val paymentMethodTypes: String? = null,
 ) {
     fun makeCustomerConfig() =
@@ -149,25 +146,23 @@ data class CheckoutResponse(
 }
 
 @Serializable
-@Keep
 data class ConfirmIntentRequest(
-    @SerializedName("client_secret")
+    @SerialName("client_secret")
     val clientSecret: String,
-    @SerializedName("payment_method_id")
+    @SerialName("payment_method_id")
     val paymentMethodId: String,
-    @SerializedName("should_save_payment_method")
+    @SerialName("should_save_payment_method")
     val shouldSavePaymentMethod: Boolean,
-    @SerializedName("merchant_country_code")
+    @SerialName("merchant_country_code")
     val merchantCountryCode: String,
-    @SerializedName("mode")
+    @SerialName("mode")
     val mode: String,
-    @SerializedName("return_url")
+    @SerialName("return_url")
     val returnUrl: String,
 )
 
 @Serializable
-@Keep
 data class ConfirmIntentResponse(
-    @SerializedName("client_secret")
+    @SerialName("client_secret")
     val clientSecret: String,
 )

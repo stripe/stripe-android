@@ -6,6 +6,7 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 
 data class CustomFlowViewState(
     val isProcessing: Boolean = false,
+    val isError: Boolean = false,
     val cartState: CartState = CartState.default,
     val paymentInfo: PaymentInfo? = null,
     val status: String? = null,
@@ -20,7 +21,6 @@ data class CustomFlowViewState(
         get() = !isProcessing && !didComplete && paymentOption != null
 
     data class PaymentInfo(
-        val publishableKey: String,
         val clientSecret: String,
         val customerConfiguration: PaymentSheet.CustomerConfiguration?,
     ) {

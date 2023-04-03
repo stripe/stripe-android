@@ -50,6 +50,10 @@
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.BillingDetails$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.Configuration$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.GooglePayConfiguration$*</ID>
+    <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.IntentConfiguration$*</ID>
+    <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.IntentConfiguration.Mode.Payment$*</ID>
+    <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.IntentConfiguration.Mode.Setup$*</ID>
+    <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.IntentConfiguration.SetupFutureUse$*</ID>
     <ID>MaxLineLength:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$fun</ID>
     <ID>MaxLineLength:PrimaryButtonTest.kt$PrimaryButtonTest$primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$* This will generate payment intent scenarios for all combinations of customers, lpm types in the intent, shipping, and SFU states</ID>

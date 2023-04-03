@@ -29,8 +29,6 @@ appId: com.stripe.android.financialconnections.example
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
-    env:
-      APP_ID: com.stripe.android.financialconnections.example
 ###############################################
 # SELECT ALL ACCOUNTS
 - extendedWaitUntil:

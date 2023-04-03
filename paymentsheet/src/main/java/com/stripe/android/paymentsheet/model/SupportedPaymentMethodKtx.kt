@@ -59,7 +59,9 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
 
     return when (stripeIntent) {
         is PaymentIntent -> {
-            if (stripeIntent.isLpmLevelSetupFutureUsageSet(code)) {
+            val isSetupFutureUsageSet = stripeIntent.isSetupFutureUsageSet(code)
+
+            if (isSetupFutureUsageSet) {
                 if (supportsPaymentIntentSfuSet(stripeIntent, config)) {
                     merchantRequestedSave
                 } else {
@@ -70,8 +72,7 @@ internal fun SupportedPaymentMethod.getSpecWithFullfilledRequirements(
                     supportsPaymentIntentSfuSettable(
                         stripeIntent,
                         config
-                    )
-                    -> userSelectableSave
+                    ) -> userSelectableSave
                     supportsPaymentIntentSfuNotSettable(
                         stripeIntent,
                         config
