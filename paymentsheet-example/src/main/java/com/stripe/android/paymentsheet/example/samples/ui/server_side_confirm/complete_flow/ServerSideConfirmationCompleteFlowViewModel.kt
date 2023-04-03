@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm
+package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -23,7 +23,6 @@ import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.example.samples.networking.toCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.toCreateIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.toUpdateRequest
-import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,18 +41,14 @@ import kotlin.Result
 import kotlin.time.Duration.Companion.milliseconds
 import com.github.kittinunf.result.Result as ApiResult
 
-private typealias ConfigureHandler = suspend (CartState) -> Throwable?
-
-internal class ServerSideConfirmationViewModel(
+internal class ServerSideConfirmationCompleteFlowViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
 
     private val _state = MutableStateFlow(
-        value = ServerSideConfirmationViewState(confirmedCartState = CartState.default),
+        value = ServerSideConfirmationCompleteFlowViewState(confirmedCartState = CartState.default),
     )
-    val state: StateFlow<ServerSideConfirmationViewState> = _state
-
-    private var configureHandler: ConfigureHandler? = null
+    val state: StateFlow<ServerSideConfirmationCompleteFlowViewState> = _state
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -65,25 +60,9 @@ internal class ServerSideConfirmationViewModel(
         }
     }
 
-    fun registerFlowControllerConfigureHandler(handler: ConfigureHandler) {
-        this.configureHandler = handler
-    }
-
-    fun unregisterFlowControllerConfigureHandler() {
-        this.configureHandler = null
-    }
-
     fun statusDisplayed() {
         _state.update {
             it.copy(status = null)
-        }
-    }
-
-    fun handlePaymentOptionChanged(paymentOption: PaymentOption?) {
-        viewModelScope.launch {
-            _state.update {
-                it.copy(paymentOption = paymentOption)
-            }
         }
     }
 
@@ -153,12 +132,6 @@ internal class ServerSideConfirmationViewModel(
         }
     }
 
-    fun handleBuyButtonPressed() {
-        _state.update {
-            it.copy(isProcessing = true)
-        }
-    }
-
     fun retry() {
         viewModelScope.launch(Dispatchers.IO) {
             prepareCheckout()
@@ -213,30 +186,8 @@ internal class ServerSideConfirmationViewModel(
             .collect(::handleCartUpdated)
     }
 
-    private suspend fun configureFlowControllerWithNewCart(
-        cartState: CartState,
-    ): Result<CartState> {
-        return configureHandler?.let { configure ->
-            val configureError = configure(cartState)
-            if (configureError != null) {
-                Result.failure(configureError)
-            } else {
-                Result.success(cartState)
-            }
-        } ?: Result.failure(IllegalStateException("Failed to update cart"))
-    }
-
-    private suspend fun handleCartUpdated(result: Result<CartState>) {
-        val cartUpdateResult = result.fold(
-            onSuccess = { updatedCartState ->
-                configureFlowControllerWithNewCart(updatedCartState)
-            },
-            onFailure = { error ->
-                Result.failure(error)
-            },
-        )
-
-        cartUpdateResult.fold(
+    private fun handleCartUpdated(result: Result<CartState>) {
+        result.fold(
             onSuccess = { finalCartState ->
                 _state.update {
                     it.copy(

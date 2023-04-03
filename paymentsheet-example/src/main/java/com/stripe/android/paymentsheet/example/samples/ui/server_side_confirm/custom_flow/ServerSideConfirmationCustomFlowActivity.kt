@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm
+package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow
 
 import android.graphics.Color
 import android.os.Bundle
@@ -25,7 +25,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.ErrorScreen
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import kotlinx.coroutines.CompletableDeferred
 
-internal class ServerSideConfirmationActivity : AppCompatActivity() {
+internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
 
     private val snackbar by lazy {
         Snackbar.make(findViewById(android.R.id.content), "", Snackbar.LENGTH_SHORT)
@@ -33,7 +33,7 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
             .setTextColor(Color.WHITE)
     }
 
-    private val viewModel by viewModels<ServerSideConfirmationViewModel>()
+    private val viewModel by viewModels<ServerSideConfirmationCustomFlowViewModel>()
 
     private lateinit var flowController: PaymentSheet.FlowController
 
@@ -99,7 +99,7 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Composable
     fun AttachFlowControllerToViewModel(
-        uiState: ServerSideConfirmationViewState,
+        uiState: ServerSideConfirmationCustomFlowViewState,
     ) {
         DisposableEffect(Unit) {
             viewModel.registerFlowControllerConfigureHandler { cartState ->
@@ -120,7 +120,7 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
 }
 
 @Composable
-private fun determinePaymentMethodLabel(uiState: ServerSideConfirmationViewState): String {
+private fun determinePaymentMethodLabel(uiState: ServerSideConfirmationCustomFlowViewState): String {
     val context = LocalContext.current
     return remember(uiState) {
         if (uiState.paymentOption?.label != null) {

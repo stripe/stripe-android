@@ -42,7 +42,8 @@
 
         <activity android:name=".samples.ui.complete_flow.CompleteFlowActivity" />
         <activity android:name=".samples.ui.custom_flow.CustomFlowActivity" />
-        <activity android:name=".samples.ui.server_side_confirm.ServerSideConfirmationActivity" />
+        <activity android:name=".samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity" />
+        <activity android:name=".samples.ui.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity" />
         <activity android:name=".playground.activity.PaymentSheetPlaygroundActivity" />
     </application>
 
