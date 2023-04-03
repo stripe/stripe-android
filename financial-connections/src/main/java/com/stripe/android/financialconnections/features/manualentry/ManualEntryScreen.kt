@@ -32,6 +32,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -40,7 +41,6 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingContent
@@ -306,53 +306,20 @@ private fun InputWithError(
 }
 
 @Preview(
-    group = "Manual Entry",
-    name = "Default"
+    group = "Manual Entry Pane",
 )
 @Composable
-internal fun ManualEntryScreenPreview() {
+internal fun ManualEntryPreview(
+    @PreviewParameter(ManualEntryPreviewParameterProvider::class) state: ManualEntryState
+) {
     FinancialConnectionsPreview {
         ManualEntryContent(
             routing = "" to null,
             account = "" to null,
             accountConfirm = "" to null,
             isValidForm = true,
-            payload = Success(
-                Payload(
-                    verifyWithMicrodeposits = true,
-                    customManualEntry = false
-                )
-            ),
-            linkPaymentAccountStatus = Uninitialized,
-            onRoutingEntered = {},
-            onAccountEntered = {},
-            onAccountConfirmEntered = {},
-            onSubmit = {},
-        ) {}
-    }
-}
-
-@Preview(
-    group = "Manual Entry",
-    name = "Error"
-)
-@Composable
-internal fun ManualEntryScreenErrorPreview() {
-    FinancialConnectionsPreview {
-        ManualEntryContent(
-            routing = "" to null,
-            account = "" to null,
-            accountConfirm = "" to null,
-            isValidForm = true,
-            payload = Success(
-                Payload(
-                    verifyWithMicrodeposits = true,
-                    customManualEntry = false
-                )
-            ),
-            linkPaymentAccountStatus = Fail(
-                APIException(message = "Error linking accounts")
-            ),
+            payload = state.payload,
+            linkPaymentAccountStatus = state.linkPaymentAccount,
             onRoutingEntered = {},
             onAccountEntered = {},
             onAccountConfirmEntered = {},
