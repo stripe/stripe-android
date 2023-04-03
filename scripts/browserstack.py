@@ -136,7 +136,7 @@ def executeTests(appUrl, testUrl):
     response = requests.post(url, json={
          "app": appUrl,
          "devices": [
-            "Google Pixel 7-13.0",
+            "Samsung Galaxy S23-13.0",
             "Samsung Galaxy S22-12.0",
             "Google Pixel 2-8.0",
          ],
