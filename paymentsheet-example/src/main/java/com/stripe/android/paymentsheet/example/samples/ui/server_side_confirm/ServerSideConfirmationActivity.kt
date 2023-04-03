@@ -84,7 +84,7 @@ internal class ServerSideConfirmationActivity : AppCompatActivity() {
                             paymentMethodIcon = uiState.paymentOption?.icon(),
                             onClick = {
                                 // TODO present payment options
-                                flowController::presentPaymentOptions
+                                flowController.presentPaymentOptions()
 
                                 // or TODO present PaymentSheet
                                 // paymentSheet.presentWithIntentConfiguration(...)
