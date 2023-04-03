@@ -65,6 +65,49 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
+        page.clickPrimaryButton()
+
+        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    }
+
+    @Test
+    fun testSuccessfulDelayedSuccessPayment() {
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        val countDownLatch = CountDownLatch(1)
+        val activityScenarioRule = composeTestRule.activityRule
+        val scenario = activityScenarioRule.scenario
+        scenario.moveToState(Lifecycle.State.CREATED)
+        lateinit var paymentSheet: PaymentSheet
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            paymentSheet = PaymentSheet(it) { result ->
+                assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
+                countDownLatch.countDown()
+            }
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        scenario.onActivity {
+            paymentSheet.presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = null,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm_with-requires_action-status.json")
+        }
+
         networkRule.enqueue(
             method("GET"),
             path("/v1/payment_intents/pi_example"),
@@ -170,13 +213,6 @@ internal class PaymentSheetTest {
             path("/v1/payment_intents/pi_example/confirm"),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
-        }
-
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-success.json")
         }
 
         page.clickPrimaryButton()

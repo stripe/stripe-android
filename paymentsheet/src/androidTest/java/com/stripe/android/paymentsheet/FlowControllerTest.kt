@@ -79,13 +79,6 @@ internal class FlowControllerTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-success.json")
-        }
-
         page.clickPrimaryButton()
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
@@ -146,13 +139,6 @@ internal class FlowControllerTest {
             path("/v1/payment_intents/pi_example/confirm"),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
-        }
-
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-success.json")
         }
 
         page.clickPrimaryButton()
@@ -412,13 +398,6 @@ internal class FlowControllerTest {
             path("/v1/payment_intents/pi_example/confirm"),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
-        }
-
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-success.json")
         }
 
         page.clickPrimaryButton()
