@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
                 ),
             ),
             MenuItem(
-                titleResId = R.string.flow_controller_serverside_confirmation_title,
+                titleResId = R.string.paymentsheet_custom_serverside_confirmation_title,
                 subtitleResId = R.string.paymentsheet_serverside_confirmation_subtitle,
                 klass = ServerSideConfirmationCustomFlowActivity::class.java,
                 badge = MenuItem.Badge(

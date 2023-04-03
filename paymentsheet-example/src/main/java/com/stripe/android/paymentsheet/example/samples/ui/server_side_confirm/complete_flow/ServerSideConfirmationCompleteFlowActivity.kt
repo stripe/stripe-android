@@ -68,9 +68,8 @@ internal class ServerSideConfirmationCompleteFlowActivity : AppCompatActivity() 
                         BuyButton(
                             buyButtonEnabled = uiState.isBuyButtonEnabled,
                             onClick = {
-                                viewModel.handleBuyButtonPressed()
                                 paymentSheet.presentWithIntentConfiguration(
-                                    intentConfiguration = viewModel.state.value.cartState.toIntentConfiguration(),
+                                    intentConfiguration = uiState.cartState.toIntentConfiguration(),
                                     configuration = uiState.paymentSheetConfig,
                                 )
                             }

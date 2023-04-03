@@ -132,12 +132,6 @@ internal class ServerSideConfirmationCompleteFlowViewModel(
         }
     }
 
-    fun handleBuyButtonPressed() {
-        _state.update {
-            it.copy(isProcessing = true)
-        }
-    }
-
     fun retry() {
         viewModelScope.launch(Dispatchers.IO) {
             prepareCheckout()
