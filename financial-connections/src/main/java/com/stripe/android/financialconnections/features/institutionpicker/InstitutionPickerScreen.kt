@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -404,14 +405,17 @@ private fun InstitutionResultTile(
         val modifier = Modifier
             .size(36.dp)
             .clip(RoundedCornerShape(6.dp))
-        StripeImage(
-            url = institution.icon?.default ?: "",
-            imageLoader = LocalImageLoader.current,
-            contentDescription = null,
-            modifier = modifier,
-            contentScale = ContentScale.Crop,
-            errorContent = { InstitutionPlaceholder(modifier) }
-        )
+        when {
+            institution.icon?.default.isNullOrEmpty() -> InstitutionPlaceholder(modifier)
+            else -> StripeImage(
+                url = requireNotNull(institution.icon?.default),
+                imageLoader = LocalImageLoader.current,
+                contentDescription = null,
+                modifier = modifier,
+                contentScale = ContentScale.Crop,
+                errorContent = { InstitutionPlaceholder(modifier) }
+            )
+        }
         Spacer(modifier = Modifier.size(8.dp))
         Column {
             Text(
@@ -474,40 +478,51 @@ private fun FeaturedInstitutionsGrid(
                                 ),
                             ) { onInstitutionSelected(institution, true) }
                     ) {
-                        StripeImage(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(8.dp),
-                            url = institution.logo?.default ?: "",
-                            imageLoader = LocalImageLoader.current,
-                            contentScale = ContentScale.Fit,
-                            loadingContent = {
-                                LoadingShimmerEffect { shimmer ->
-                                    Spacer(
-                                        modifier = Modifier
-                                            .align(Alignment.Center)
-                                            .height(20.dp)
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .fillMaxWidth(fraction = 0.5f)
-                                            .background(shimmer)
-                                    )
-                                }
-                            },
-                            errorContent = {
-                                Text(
-                                    modifier = Modifier.align(Alignment.Center),
-                                    text = institution.name,
-                                    color = FinancialConnectionsTheme.colors.textPrimary,
-                                    style = FinancialConnectionsTheme.typography.bodyEmphasized,
-                                    textAlign = TextAlign.Center
-                                )
-                            },
-                            contentDescription = "Institution logo"
-                        )
+                        when {
+                            institution.logo?.default.isNullOrBlank() ->
+                                FeaturedInstitutionPlaceholder(institution)
+
+                            else -> StripeImage(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp),
+                                url = requireNotNull(institution.logo?.default),
+                                imageLoader = LocalImageLoader.current,
+                                contentScale = ContentScale.Fit,
+                                loadingContent = { FeaturedInstitutionLoading() },
+                                errorContent = { FeaturedInstitutionPlaceholder(institution) },
+                                contentDescription = "Institution logo"
+                            )
+                        }
                     }
                 }
             }
         }
+    )
+}
+
+@Composable
+private fun BoxScope.FeaturedInstitutionLoading() {
+    LoadingShimmerEffect { shimmer ->
+        Spacer(
+            modifier = Modifier.Companion
+                .align(Alignment.Center)
+                .height(20.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .fillMaxWidth(fraction = 0.5f)
+                .background(shimmer)
+        )
+    }
+}
+
+@Composable
+private fun BoxScope.FeaturedInstitutionPlaceholder(institution: FinancialConnectionsInstitution) {
+    Text(
+        modifier = Modifier.Companion.align(Alignment.Center),
+        text = institution.name,
+        color = FinancialConnectionsTheme.colors.textPrimary,
+        style = FinancialConnectionsTheme.typography.bodyEmphasized,
+        textAlign = TextAlign.Center
     )
 }
 
