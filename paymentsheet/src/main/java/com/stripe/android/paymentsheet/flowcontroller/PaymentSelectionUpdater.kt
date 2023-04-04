@@ -6,11 +6,18 @@ import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import javax.inject.Inject
 
-internal class PaymentSelectionUpdater @Inject constructor(
-    private val lpmRepository: LpmRepository,
-) {
-
+internal fun interface PaymentSelectionUpdater {
     operator fun invoke(
+        currentSelection: PaymentSelection?,
+        newState: PaymentSheetState.Full,
+    ): PaymentSelection?
+}
+
+internal class DefaultPaymentSelectionUpdater @Inject constructor(
+    private val lpmRepository: LpmRepository,
+) : PaymentSelectionUpdater {
+
+    override operator fun invoke(
         currentSelection: PaymentSelection?,
         newState: PaymentSheetState.Full,
     ): PaymentSelection? {
