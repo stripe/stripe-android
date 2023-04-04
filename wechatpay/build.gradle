@@ -18,8 +18,6 @@ dependencies {
     testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
     testImplementation "androidx.test:core-ktx:$androidTestVersion"
     testImplementation "androidx.lifecycle:lifecycle-runtime-testing:$androidxLifecycleVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 ext {

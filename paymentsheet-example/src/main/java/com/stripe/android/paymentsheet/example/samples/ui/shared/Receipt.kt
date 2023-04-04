@@ -70,12 +70,14 @@ fun Receipt(
                 LinearProgressIndicator(
                     Modifier
                         .fillMaxWidth()
-                        .height(4.dp))
+                        .height(4.dp)
+                )
             } else {
                 Spacer(
                     Modifier
                         .fillMaxWidth()
-                        .height(4.dp))
+                        .height(4.dp)
+                )
             }
             Text(
                 stringResource(R.string.cart_title),
@@ -190,7 +192,6 @@ fun ReceiptRow(
         Modifier.padding(vertical = PADDING),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         Text(
             text = description,
             modifier = Modifier.fillMaxWidth(ROW_START),

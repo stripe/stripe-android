@@ -93,7 +93,7 @@ internal class CustomFlowViewModel(
         val requestBody = Json.encodeToString(ExampleCheckoutRequest.serializer(), request)
 
         val apiResult = Fuel
-            .post("${backendUrl}/checkout")
+            .post("$backendUrl/checkout")
             .jsonBody(requestBody)
             .suspendable()
             .awaitModel(ExampleCheckoutResponse.serializer())

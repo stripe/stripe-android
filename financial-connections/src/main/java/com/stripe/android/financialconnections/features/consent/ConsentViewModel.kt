@@ -51,7 +51,7 @@ internal class ConsentViewModel @Inject constructor(
             ConsentState.Payload(
                 consent = sync.text!!.consent!!,
                 shouldShowMerchantLogos = shouldShowMerchantLogos,
-                merchantLogos = sync.visual?.merchantLogos ?: emptyList()
+                merchantLogos = sync.visual.merchantLogos
             )
         }.execute { copy(consent = it) }
     }

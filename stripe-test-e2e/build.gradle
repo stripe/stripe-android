@@ -1,11 +1,4 @@
-plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
-}
-
-configurations {
-    ktlint
-}
+apply from: configs.androidApplication
 
 // Read values from gradle.properties or system environment variable
 def getBackendUrl() {
@@ -22,13 +15,7 @@ private def readProperty(name) {
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion rootProject.ext.compileSdkVersion
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // From https://developer.android.com/training/testing/junit-runner:
@@ -47,14 +34,6 @@ android {
             // Note: without this, all Robolectric tests using BuildConfig will fail.
             includeAndroidResources = true
         }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
     }
 }
 
@@ -76,24 +55,4 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
-}
-
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "src/**/*.kt"
-    // to generate report in checkstyle format prepend following args:
-    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
-    // see https://github.com/pinterest/ktlint#usage for more
-}
-check.dependsOn ktlint
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
 }

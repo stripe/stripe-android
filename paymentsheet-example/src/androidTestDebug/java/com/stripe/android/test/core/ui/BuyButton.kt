@@ -28,7 +28,7 @@ class BuyButton(private val composeTestRule: ComposeTestRule) {
             .assertIsEnabled()
     }
 
-    fun isDisplayed(){
+    fun isDisplayed() {
         composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
             .assertIsDisplayed()
     }
