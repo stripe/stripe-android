@@ -70,7 +70,7 @@ internal sealed class ElementsSessionRepository {
                 options = requestOptions,
             )
 
-            return elementsSession.takeIfSuccessOrElse { elementsSessionFailure ->
+            return elementsSession.getResultOrElse { elementsSessionFailure ->
                 fallback(params, elementsSessionFailure)
             }
         }
@@ -169,7 +169,7 @@ private fun PaymentSheet.IntentConfiguration.CaptureMethod.toElementsSessionPara
     }
 }
 
-private inline fun <T> Result<T>.takeIfSuccessOrElse(
+private inline fun <T> Result<T>.getResultOrElse(
     transform: (Throwable) -> Result<T>,
 ): Result<T> {
     return exceptionOrNull()?.let(transform) ?: this
