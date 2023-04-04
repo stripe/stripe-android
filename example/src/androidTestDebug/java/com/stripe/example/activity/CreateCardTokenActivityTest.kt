@@ -3,7 +3,7 @@ package com.stripe.example.activity
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.typeText
+import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -47,11 +47,11 @@ class CreateCardTokenActivityTest {
 
         // fill out card details
         onView(withId(R.id.card_number_edit_text))
-            .perform(typeText("4242424242424242"))
+            .perform(replaceText("4242424242424242"))
         onView(withId(R.id.expiry_date_edit_text))
-            .perform(typeText("01/25"))
+            .perform(replaceText("01/25"))
         onView(withId(R.id.cvc_edit_text))
-            .perform(typeText("111"))
+            .perform(replaceText("111"))
 
         // click create card button
         onView(withId(R.id.create_token_button))
