@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -283,27 +284,14 @@ private fun Title(
 }
 
 @Composable
-@Preview(group = "LinkAccountPicker Pane", name = "No account selected")
-internal fun LinkAccountPickerScreenPreview() {
+@Preview(group = "LinkAccountPicker Pane")
+internal fun LinkAccountPickerScreenPreview(
+    @PreviewParameter(LinkAccountPickerPreviewParameterProvider::class)
+    state: LinkAccountPickerState
+) {
     FinancialConnectionsPreview {
         LinkAccountPickerContent(
-            state = LinkedAccountPickerStates.canonical(),
-            onCloseClick = {},
-            onCloseFromErrorClick = {},
-            onLearnMoreAboutDataAccessClick = {},
-            onNewBankAccountClick = {},
-            onSelectAccountClick = {},
-            onAccountClick = {}
-        )
-    }
-}
-
-@Composable
-@Preview(group = "LinkAccountPicker Pane", name = "No account selected")
-internal fun LinkAccountPickerScreenAccountSelectedPreview() {
-    FinancialConnectionsPreview {
-        LinkAccountPickerContent(
-            state = LinkedAccountPickerStates.accountSelected(),
+            state = state,
             onCloseClick = {},
             onCloseFromErrorClick = {},
             onLearnMoreAboutDataAccessClick = {},
