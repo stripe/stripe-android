@@ -422,8 +422,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options
-    ): ElementsSession? {
-        return null
+    ): Result<ElementsSession> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveCardMetadata(

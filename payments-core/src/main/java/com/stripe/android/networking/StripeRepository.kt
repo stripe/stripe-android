@@ -512,7 +512,7 @@ abstract class StripeRepository {
     abstract suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options,
-    ): ElementsSession?
+    ): Result<ElementsSession>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun retrieveCardMetadata(

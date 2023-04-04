@@ -212,7 +212,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
     ): StripeIntent {
-        val elementsSession = elementsSessionRepository.get(initializationMode)
+        val elementsSession = elementsSessionRepository.get(initializationMode).getOrThrow()
 
         lpmRepository.update(
             stripeIntent = elementsSession.stripeIntent,
