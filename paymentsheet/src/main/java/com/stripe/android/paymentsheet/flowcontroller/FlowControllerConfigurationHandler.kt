@@ -1,10 +1,8 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.core.injection.UIContext
-import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.validate
@@ -37,17 +35,17 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             return
         }
 
-        val elementsSessionParams = initializationMode.toElementsSessionParams()
-        val previousElementsSessionParams = viewModel.previousElementsSessionParams
-        if (elementsSessionParams == previousElementsSessionParams) {
+        val canSkip = viewModel.canSkipLoad(initializationMode, configuration)
+
+        if (canSkip) {
             callback.onConfigured(true, null)
             return
         }
+
         val result = paymentSheetLoader.load(initializationMode, configuration)
 
         if (currentCoroutineContext().isActive) {
-            viewModel.initializationMode = initializationMode
-            dispatchResult(result, callback, elementsSessionParams)
+            dispatchResult(result, initializationMode, callback)
         } else {
             callback.onConfigured(false, null)
         }
@@ -55,13 +53,12 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
     private suspend fun dispatchResult(
         result: PaymentSheetLoader.Result,
+        initializationMode: PaymentSheet.InitializationMode,
         callback: PaymentSheet.FlowController.ConfigCallback,
-        elementsSessionParams: ElementsSessionParams,
     ) = withContext(uiContext) {
         when (result) {
             is PaymentSheetLoader.Result.Success -> {
-                viewModel.previousElementsSessionParams = elementsSessionParams
-                onInitSuccess(result.state, callback)
+                onInitSuccess(result.state, initializationMode, callback)
             }
             is PaymentSheetLoader.Result.Failure -> {
                 callback.onConfigured(false, result.throwable)
@@ -71,9 +68,11 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
     private fun onInitSuccess(
         state: PaymentSheetState.Full,
+        initializationMode: PaymentSheet.InitializationMode,
         callback: PaymentSheet.FlowController.ConfigCallback,
     ) {
         eventReporter.onInit(state.config)
+        viewModel.storeLastInput(initializationMode, state.config)
 
         viewModel.paymentSelection = PaymentSelectionUpdater.process(
             currentSelection = viewModel.paymentSelection,
