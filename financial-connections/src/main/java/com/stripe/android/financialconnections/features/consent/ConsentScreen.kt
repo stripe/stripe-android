@@ -429,7 +429,8 @@ private fun ConsentFooter(
 @Preview(group = "Consent Pane")
 @Composable
 internal fun ContentPreview(
-    @PreviewParameter(provider = ConsentPreviewParameterProvider::class) state: Pair<ModalBottomSheetValue, ConsentState>
+    @PreviewParameter(provider = ConsentPreviewParameterProvider::class)
+    state: Pair<ModalBottomSheetValue, ConsentState>
 ) {
     FinancialConnectionsPreview {
         ConsentContent(
