@@ -89,4 +89,26 @@ class StripeIntentValidatorTest {
             )
         )
     }
+
+    @Test
+    fun `Considers PaymentIntent without amount invalid`() {
+        assertFails {
+            validator.requireValid(
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    amount = null,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `Considers PaymentIntent without currency invalid`() {
+        assertFails {
+            validator.requireValid(
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    currency = null,
+                )
+            )
+        }
+    }
 }
