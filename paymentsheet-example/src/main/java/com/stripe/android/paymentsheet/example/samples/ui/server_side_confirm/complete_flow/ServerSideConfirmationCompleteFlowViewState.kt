@@ -29,5 +29,5 @@ data class ServerSideConfirmationCompleteFlowViewState(
         )
 
     val isBuyButtonEnabled: Boolean
-        get() = dirtyCartState == null && !isProcessing && !isError
+        get() = dirtyCartState == null
 }
