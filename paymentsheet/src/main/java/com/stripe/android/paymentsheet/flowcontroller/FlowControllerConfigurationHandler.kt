@@ -22,6 +22,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
+    private val paymentSelectionUpdater: PaymentSelectionUpdater,
 ) {
 
     suspend fun configure(
@@ -75,7 +76,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     ) {
         eventReporter.onInit(state.config)
 
-        viewModel.paymentSelection = PaymentSelectionUpdater.process(
+        viewModel.paymentSelection = paymentSelectionUpdater(
             currentSelection = viewModel.paymentSelection,
             newState = state,
         )

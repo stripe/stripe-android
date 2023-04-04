@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.currency
+import com.stripe.android.paymentsheet.model.getAvailablePaymentMethods
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
@@ -258,9 +259,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
         _stripeIntent.value = stripeIntent
-
-        val pmsToAdd = getPMsToAdd(stripeIntent, config, lpmRepository)
-        supportedPaymentMethods = pmsToAdd
+        supportedPaymentMethods = lpmRepository.getAvailablePaymentMethods(stripeIntent, config)
 
         if (stripeIntent is PaymentIntent) {
             _amount.value = Amount(
