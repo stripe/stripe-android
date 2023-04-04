@@ -75,4 +75,6 @@
     <string name="unable_to_load_checkout_title">Unable to load checkout</string>
     <string name="unable_to_load_checkout_subtitle">Maybe wait a few seconds, have some tea, read a book… then try again.</string>
     <string name="unable_to_load_checkout_button">Try again</string>
+    <string name="success">Success</string>
+    <string name="finish">Finish</string>
 </resources>
