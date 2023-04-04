@@ -72,12 +72,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     ): PaymentSheetLoader.Result = withContext(workContext) {
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
 
-        runCatching {
-            retrieveElementsSession(
-                initializationMode = initializationMode,
-                configuration = paymentSheetConfiguration,
-            )
-        }.fold(
+        retrieveElementsSession(
+            initializationMode = initializationMode,
+            configuration = paymentSheetConfiguration,
+        ).fold(
             onSuccess = { stripeIntent ->
                 create(
                     stripeIntent = stripeIntent,
@@ -211,21 +209,22 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
-    ): StripeIntent {
-        val elementsSession = elementsSessionRepository.get(initializationMode).getOrThrow()
+    ): Result<StripeIntent> {
+        return elementsSessionRepository.get(initializationMode).map { elementsSession ->
+            lpmRepository.update(
+                stripeIntent = elementsSession.stripeIntent,
+                serverLpmSpecs = elementsSession.paymentMethodSpecs,
+                billingDetailsCollectionConfiguration =
+                configuration?.billingDetailsCollectionConfiguration
+                    ?: BillingDetailsCollectionConfiguration(),
+            )
 
-        lpmRepository.update(
-            stripeIntent = elementsSession.stripeIntent,
-            serverLpmSpecs = elementsSession.paymentMethodSpecs,
-            billingDetailsCollectionConfiguration =
-            configuration?.billingDetailsCollectionConfiguration ?: BillingDetailsCollectionConfiguration(),
-        )
+            if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
+                eventReporter.onLpmSpecFailure()
+            }
 
-        if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
-            eventReporter.onLpmSpecFailure()
+            stripeIntentValidator.requireValid(elementsSession.stripeIntent)
         }
-
-        return stripeIntentValidator.requireValid(elementsSession.stripeIntent)
     }
 
     private suspend fun loadLinkState(
