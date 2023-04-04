@@ -1,8 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">PaymentSheet Example</string>
-    <string name="paymentsheet_title">Basic PaymentSheet</string>
+    <string name="paymentsheet_title">PaymentSheet</string>
     <string name="paymentsheet_subtitle">Our simplest integration</string>
-    <string name="paymentsheet_custom_title">PaymentSheet with FlowController</string>
+    <string name="paymentsheet_custom_title">FlowController</string>
     <string name="paymentsheet_custom_subtitle">A more advanced integration with greater flexibility</string>
     <string name="paymentsheet_serverside_confirmation_title">PaymentSheet with server-side confirmation</string>
     <string name="paymentsheet_custom_serverside_confirmation_title">FlowController with server-side confirmation</string>
@@ -75,4 +75,6 @@
     <string name="unable_to_load_checkout_title">Unable to load checkout</string>
     <string name="unable_to_load_checkout_subtitle">Maybe wait a few seconds, have some tea, read a book… then try again.</string>
     <string name="unable_to_load_checkout_button">Try again</string>
+    <string name="success">Success</string>
+    <string name="finish">Finish</string>
 </resources>

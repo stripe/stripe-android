@@ -49,7 +49,6 @@ class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-
     private fun startWithPaymentIntent(mode: Mode, email: String?) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")

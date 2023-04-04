@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -425,128 +426,17 @@ private fun ConsentFooter(
     }
 }
 
-@Preview(group = "Consent Pane", name = "canonical")
+@Preview(group = "Consent Pane")
 @Composable
 internal fun ContentPreview(
-    state: ConsentState = ConsentStates.canonical()
+    @PreviewParameter(provider = ConsentPreviewParameterProvider::class)
+    state: Pair<ModalBottomSheetValue, ConsentState>
 ) {
     FinancialConnectionsPreview {
         ConsentContent(
-            state = state,
+            state = state.second,
             bottomSheetState = rememberModalBottomSheetState(
-                ModalBottomSheetValue.Hidden,
-                skipHalfExpanded = true
-            ),
-            onContinueClick = {},
-            onClickableTextClick = {},
-            onConfirmModalClick = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Consent Pane", name = "No Logos")
-@Composable
-internal fun ContentWithNoLogosPreview(
-    state: ConsentState = ConsentStates.withNoLogos()
-) {
-    FinancialConnectionsPreview {
-        ConsentContent(
-            state = state,
-            bottomSheetState = rememberModalBottomSheetState(
-                ModalBottomSheetValue.Hidden,
-                skipHalfExpanded = true
-            ),
-            onContinueClick = {},
-            onClickableTextClick = {},
-            onConfirmModalClick = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Consent Pane", name = "Logos: platform or institution")
-@Composable
-internal fun ContentWithPlatformLogosPreview(
-    state: ConsentState = ConsentStates.withPlatformLogos()
-) {
-    FinancialConnectionsPreview {
-        ConsentContent(
-            state = state,
-            bottomSheetState = rememberModalBottomSheetState(
-                ModalBottomSheetValue.Hidden,
-                skipHalfExpanded = true
-            ),
-            onContinueClick = {},
-            onClickableTextClick = {},
-            onConfirmModalClick = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Consent Pane", name = "Logos: Connected Account")
-@Composable
-internal fun ContentWithConnectedAccountLogosPreview(
-    state: ConsentState = ConsentStates.withConnectedAccountLogos()
-) {
-    FinancialConnectionsPreview {
-        ConsentContent(
-            state = state,
-            bottomSheetState = rememberModalBottomSheetState(
-                ModalBottomSheetValue.Hidden,
-                skipHalfExpanded = true
-            ),
-            onContinueClick = {},
-            onClickableTextClick = {},
-            onConfirmModalClick = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Consent Pane", name = "requested data")
-@Composable
-// TODO@carlosmuvi add proper preview with expanded bottom sheet once related Compose bug gets fixed.
-// https://issuetracker.google.com/issues/241895902
-internal fun ContentRequestedDataPreview() {
-    FinancialConnectionsPreview {
-        Box(
-            Modifier.background(colors.backgroundSurface)
-        ) {
-            DataAccessBottomSheetContent(
-                dataDialog = ConsentStates.sampleConsent().dataAccessNotice,
-                onClickableTextClick = {},
-                onConfirmModalClick = {},
-            )
-        }
-    }
-}
-
-@Preview(group = "Consent Pane", name = "requested data")
-@Composable
-// TODO@carlosmuvi add proper preview with expanded bottom sheet once related Compose bug gets fixed.
-// https://issuetracker.google.com/issues/241895902
-internal fun ContentLegalDetailsPreview() {
-    FinancialConnectionsPreview {
-        Box(
-            Modifier.background(colors.backgroundSurface)
-        ) {
-            LegalDetailsBottomSheetContent(
-                legalDetails = ConsentStates.sampleConsent().legalDetailsNotice,
-                onClickableTextClick = {},
-                onConfirmModalClick = {},
-            )
-        }
-    }
-}
-
-@Preview(group = "Consent Pane", name = "manual entry + microdeposits")
-@Composable
-internal fun ContentManualEntryPlusMicrodeposits(
-    state: ConsentState = ConsentStates.manualEntryPlusMicrodeposits()
-) {
-    FinancialConnectionsPreview {
-        ConsentContent(
-            state = state,
-            bottomSheetState = rememberModalBottomSheetState(
-                ModalBottomSheetValue.Hidden,
+                state.first,
                 skipHalfExpanded = true
             ),
             onContinueClick = {},

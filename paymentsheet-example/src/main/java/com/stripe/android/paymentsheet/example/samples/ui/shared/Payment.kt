@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui
+package com.stripe.android.paymentsheet.example.samples.ui.shared
 
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.clickable
@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.samples.ui.MAIN_FONT_SIZE
+import com.stripe.android.paymentsheet.example.samples.ui.PADDING
 import com.stripe.android.paymentsheet.example.utils.rememberDrawablePainter
 
 @Composable

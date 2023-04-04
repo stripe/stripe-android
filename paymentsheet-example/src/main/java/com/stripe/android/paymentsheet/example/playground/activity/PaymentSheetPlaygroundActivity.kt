@@ -24,7 +24,6 @@ import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -44,6 +43,7 @@ import com.stripe.android.paymentsheet.example.playground.viewmodel.ConfirmInten
 import com.stripe.android.paymentsheet.example.playground.viewmodel.ConfirmIntentNetworkException
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -351,9 +351,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         viewModel.status.observe(this) {
-            Snackbar.make(
-                findViewById(android.R.id.content), it, Snackbar.LENGTH_SHORT
-            )
+            Snackbar.make(findViewById(android.R.id.content), it, Snackbar.LENGTH_SHORT)
                 .setBackgroundTint(resources.getColor(R.color.black))
                 .setTextColor(resources.getColor(R.color.white))
                 .show()
@@ -589,7 +587,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         val builder = AddressLauncher.Configuration.Builder()
         builder.googlePlacesApiKey(settings.googlePlacesApiKey)
         if (viewBinding.shippingAddressDefaultRadioGroup.checkedRadioButtonId ==
-            viewBinding.shippingAddressDefaultOnButton.id) {
+            viewBinding.shippingAddressDefaultOnButton.id
+        ) {
             builder.address(
                 AddressDetails(
                     name = "Theo Parker",
@@ -606,7 +605,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             )
         }
         if (viewBinding.shippingAddressCountriesGroup.checkedRadioButtonId ==
-            viewBinding.shippingAddressCountriesPartialButton.id) {
+            viewBinding.shippingAddressCountriesPartialButton.id
+        ) {
             builder.allowedCountries(
                 setOf("US", "CA", "AU", "GB", "FR", "JP", "KR")
             )
@@ -870,8 +870,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         // List was created from: https://stripe.com/docs/currencies
         /** Modify this list if you want to change the currencies displayed in the playground **/
-        private val stripeSupportedCurrencies = listOf(
-            "AUD", "EUR", "GBP", "USD", "INR"
+        private val stripeSupportedCurrencies = listOf("AUD", "EUR", "GBP", "USD", "INR")
 //            "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS",  "AWG", "AZN", "BAM",
 //            "BBD", "BDT", "BGN", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BWP", "BYN", "BZD",
 //            "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CVE", "CZK", "DJF", "DKK", "DOP",
@@ -884,6 +883,5 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 //            "SGD", "SHP", "SLL", "SOS", "SRD", "STD", "SZL", "THB", "TJS", "TOP", "TRY", "TTD",
 //            "TWD", "TZS", "UAH", "UGX", "UYU", "UZS", "VND", "VUV", "WST", "XAF", "XCD", "XOF",
 //            "XPF", "YER", "ZAR", "ZMW"
-        )
     }
 }

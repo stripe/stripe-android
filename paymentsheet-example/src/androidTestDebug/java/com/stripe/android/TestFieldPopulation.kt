@@ -6,7 +6,6 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
@@ -107,7 +106,6 @@ class TestFieldPopulation {
 
     @Ignore("Testing of dropdowns is not yet supported")
     fun testDropdowns() {
-
     }
 
     @Test

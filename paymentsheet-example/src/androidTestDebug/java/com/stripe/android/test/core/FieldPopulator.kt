@@ -175,7 +175,6 @@ class FieldPopulator(
                         .performTextInput(values.cardExpiration)
                     selectors.getCardCvc().apply {
                         performTextInput(values.cardCvc)
-
                     }
                 }
                 is EmailSpec -> {

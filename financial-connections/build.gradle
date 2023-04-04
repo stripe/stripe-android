@@ -83,13 +83,18 @@ dependencies {
 
     // Test rules and transitive dependencies:
     androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 android {
     buildFeatures {
         compose true
+    }
+
+    kotlinOptions {
+        freeCompilerArgs += [
+                "-Xopt-in=kotlin.RequiresOptIn",
+                "-Xopt-in=androidx.compose.material.ExperimentalMaterialApi"
+        ]
     }
 
     composeOptions {

@@ -6,8 +6,6 @@ dependencies {
     implementation project(":payments-core")
     implementation testLibs.okhttpTls
     implementation "junit:junit:$junitVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 android {

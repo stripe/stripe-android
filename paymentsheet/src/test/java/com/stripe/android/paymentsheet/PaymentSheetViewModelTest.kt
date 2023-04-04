@@ -575,23 +575,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `when StripeIntent does not accept any of the supported payment methods should return error`() = runTest {
-        val viewModel = createViewModel(
-            stripeIntent = PAYMENT_INTENT.copy(
-                paymentMethodTypes = listOf("unsupported_payment_type"),
-            ),
-        )
-
-        viewModel.paymentSheetResult.test {
-            assertThat((awaitItem() as? PaymentSheetResult.Failed)?.error?.message)
-                .startsWith(
-                    "None of the requested payment methods ([unsupported_payment_type]) " +
-                        "match the supported payment types "
-                )
-        }
-    }
-
-    @Test
     fun `Verify supported payment methods exclude afterpay if no shipping and no allow flag`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(

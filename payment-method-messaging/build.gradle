@@ -53,8 +53,6 @@ dependencies {
     testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
 
     androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 ext {
