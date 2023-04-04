@@ -8,8 +8,6 @@ apply plugin: 'maven-publish'
 dependencies {
     api project(':payments-core')
     api project(':paymentsheet')
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 ext {

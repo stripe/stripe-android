@@ -59,8 +59,6 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeUiVersion"
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeUiVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 android {

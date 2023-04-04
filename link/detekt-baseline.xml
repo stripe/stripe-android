@@ -36,6 +36,5 @@
     <ID>TopLevelPropertyNaming:PrimaryButton.kt$internal const val completedIconTestTag = "CompletedIcon"</ID>
     <ID>TopLevelPropertyNaming:PrimaryButton.kt$internal const val progressIndicatorTestTag = "CircularProgressIndicator"</ID>
     <ID>UnnecessaryAbstractClass:LinkComponent.kt$LinkComponent$LinkComponent</ID>
-    <ID>UnusedPrivateMember:PaymentMethodViewModelTest.kt$PaymentMethodViewModelTest$private fun createFinancialConnectionsAccount(id: String = "id")</ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -43,5 +43,5 @@ data class CartProduct(
 fun Long.toAmountString(): String {
     val dollars = this / 100
     val cents = (this % 100).toString().padStart(length = 2, padChar = '0')
-    return "$$dollars.${cents}"
+    return "$$dollars.$cents"
 }

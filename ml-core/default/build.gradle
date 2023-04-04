@@ -12,7 +12,6 @@ dependencies {
     api 'org.tensorflow:tensorflow-lite-support:0.4.3'
     implementation 'org.tensorflow:tensorflow-lite:2.11.0'
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 ext {

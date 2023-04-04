@@ -20,7 +20,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
@@ -35,6 +34,7 @@ import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import java.util.Locale
 
@@ -175,7 +175,6 @@ class Selectors(
             }
         }
 
-
     fun onGooglePayAvailable(availableCallable: () -> Unit, unavailableCallable: () -> Unit) {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val googlePayJsonFactory = GooglePayJsonFactory(context)
@@ -210,7 +209,6 @@ class Selectors(
                     unavailableCallable()
                 }
             }
-
     }
 
     private fun getInstalledPackages() = InstrumentationRegistry.getInstrumentation()

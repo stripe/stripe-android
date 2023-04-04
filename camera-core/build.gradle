@@ -31,8 +31,6 @@ dependencies {
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
     androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 ext {

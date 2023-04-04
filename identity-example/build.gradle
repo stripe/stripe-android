@@ -4,10 +4,6 @@ apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
 assemble.dependsOn('lint')
 
-configurations {
-    ktlint
-}
-
 android {
     defaultConfig {
         applicationId "com.stripe.android.identity.example"
@@ -63,8 +59,6 @@ dependencies {
 
     testImplementation "junit:junit:$junitVersion"
 
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
-
     // compose
     // Integration with activities
     implementation "androidx.activity:activity-compose:$androidxActivityVersion"
@@ -80,22 +74,4 @@ dependencies {
 
     // TODO(ccen) re-enable and investigate leak in Camera
     // debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
-}
-
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "src/**/*.kt"
-    // to generate report in checkstyle format prepend following args:
-    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
-    // see https://github.com/pinterest/ktlint#usage for more
-}
-check.dependsOn ktlint
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
 }
