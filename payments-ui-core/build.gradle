@@ -61,8 +61,6 @@ dependencies {
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
     testImplementation "com.google.android.libraries.places:places:$placesVersion"
     testImplementation testLibs.turbine
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 android {

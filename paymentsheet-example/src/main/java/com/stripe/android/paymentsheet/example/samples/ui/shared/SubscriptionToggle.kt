@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui
+package com.stripe.android.paymentsheet.example.samples.ui.shared
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

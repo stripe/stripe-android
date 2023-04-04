@@ -2,6 +2,10 @@ configurations {
     ktlint
 }
 
+dependencies {
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
+}
+
 task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
     mainClass = "com.pinterest.ktlint.Main"

@@ -63,8 +63,6 @@ dependencies {
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"

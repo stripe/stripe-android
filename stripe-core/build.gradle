@@ -35,8 +35,6 @@ dependencies {
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
     testImplementation "androidx.test:runner:$androidTestRunnerVersion"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"

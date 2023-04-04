@@ -9,11 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Chip
 import androidx.compose.material.ChipDefaults
 import androidx.compose.material.Divider
@@ -24,8 +24,10 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,10 +35,11 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
+import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlowActivity
-import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 private const val SurfaceOverlayOpacity = 0.12f
@@ -53,11 +56,13 @@ class MainActivity : AppCompatActivity() {
                 titleResId = R.string.paymentsheet_title,
                 subtitleResId = R.string.paymentsheet_subtitle,
                 klass = CompleteFlowActivity::class.java,
+                section = MenuItem.Section.CompleteFlow,
             ),
             MenuItem(
                 titleResId = R.string.paymentsheet_custom_title,
                 subtitleResId = R.string.paymentsheet_custom_subtitle,
                 klass = CustomFlowActivity::class.java,
+                section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(
                 titleResId = R.string.paymentsheet_serverside_confirmation_title,
@@ -67,6 +72,7 @@ class MainActivity : AppCompatActivity() {
                     labelResId = R.string.beta_badge_label,
                     onClick = this::openDecouplingBetaLink,
                 ),
+                section = MenuItem.Section.CompleteFlow,
             ),
             MenuItem(
                 titleResId = R.string.paymentsheet_custom_serverside_confirmation_title,
@@ -76,11 +82,13 @@ class MainActivity : AppCompatActivity() {
                     labelResId = R.string.beta_badge_label,
                     onClick = this::openDecouplingBetaLink,
                 ),
+                section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(
                 titleResId = R.string.playground_title,
                 subtitleResId = R.string.playground_subtitle,
                 klass = PaymentSheetPlaygroundActivity::class.java,
+                section = MenuItem.Section.Internal,
             ),
         )
     }
@@ -103,32 +111,77 @@ private data class MenuItem(
     val subtitleResId: Int,
     val klass: Class<out ComponentActivity>,
     val badge: Badge? = null,
+    val section: Section,
 ) {
     data class Badge(
         val labelResId: Int,
         val onClick: () -> Unit,
     )
+
+    enum class Section {
+        CompleteFlow,
+        CustomFlow,
+        Internal,
+    }
 }
 
 @Composable
 private fun MainScreen(items: List<MenuItem>) {
-    Column {
-        LazyColumn {
-            items(items) { item ->
-                MenuItemRow(item)
-                Divider(startIndent = 16.dp)
+    val groupedItems = remember(items) {
+        items.groupBy(MenuItem::section)
+    }
+
+    LazyColumn {
+        Section(
+            title = "Complete flow",
+            items = groupedItems.getOrElse(MenuItem.Section.CompleteFlow) { emptyList() },
+        )
+
+        Section(
+            title = "Custom flow",
+            items = groupedItems.getOrElse(MenuItem.Section.CustomFlow) { emptyList() },
+        )
+
+        Section(
+            title = "Internal",
+            items = groupedItems.getOrElse(MenuItem.Section.Internal) { emptyList() },
+        )
+
+        item {
+            Box(
+                contentAlignment = Alignment.CenterEnd,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            ) {
+                Text(
+                    text = "Version ${StripeSdkVersion.VERSION_NAME}",
+                    style = MaterialTheme.typography.caption,
+                )
             }
         }
+    }
+}
 
-        Spacer(modifier = Modifier.weight(1f))
-
-        Box(
-            contentAlignment = Alignment.CenterEnd,
+private fun LazyListScope.Section(
+    title: String,
+    items: List<MenuItem>,
+) {
+    item {
+        Text(
+            text = title,
+            color = MaterialTheme.colors.onSurface,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        ) {
-            Text(text = StripeSdkVersion.VERSION_NAME)
+                .alpha(SECTION_ALPHA)
+                .padding(top = 16.dp, start = 16.dp),
+        )
+    }
+
+    itemsIndexed(items) { index, item ->
+        MenuItemRow(item)
+
+        if (index < items.lastIndex) {
+            Divider(startIndent = 16.dp)
         }
     }
 }
@@ -147,13 +200,13 @@ private fun MenuItemRow(item: MenuItem) {
         Text(
             text = stringResource(item.titleResId),
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(bottom = 4.dp),
+            modifier = Modifier.padding(bottom = 2.dp),
             color = MaterialTheme.colors.onSurface,
         )
 
         Text(
             text = stringResource(item.subtitleResId),
-            color = MaterialTheme.colors.onSurface,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
         )
 
         if (item.badge != null) {

@@ -67,7 +67,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         collectBankAccountLauncher = CollectBankAccountLauncher.create(
-            this, viewModel::onCollectBankAccountLauncherResult
+            this,
+            viewModel::onCollectBankAccountLauncherResult
         )
         setContent {
             FinancialConnectionsScreen()
@@ -93,7 +94,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         val financialConnectionsSheetForToken = rememberFinancialConnectionsSheetForToken(
             viewModel::onFinancialConnectionsSheetForTokenResult
         )
-
 
         LaunchedEffect(viewEffect) {
             viewEffect?.let {
@@ -186,7 +186,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 }
             }
         )
-
     }
 
     @Composable
@@ -250,10 +249,11 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             text = "Mode",
             style = MaterialTheme.typography.h6.merge(),
         )
-        val icon = if (expanded)
+        val icon = if (expanded) {
             Icons.Filled.KeyboardArrowUp
-        else
+        } else {
             Icons.Filled.KeyboardArrowDown
+        }
         Box {
             OutlinedTextField(
                 readOnly = true,
@@ -262,8 +262,11 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 modifier = Modifier
                     .fillMaxWidth(),
                 trailingIcon = {
-                    Icon(icon, "Mode_Dropdown_Icon",
-                        Modifier.clickable { expanded = !expanded })
+                    Icon(
+                        icon,
+                        "Mode_Dropdown_Icon",
+                        Modifier.clickable { expanded = !expanded }
+                    )
                 }
             )
             DropdownMenu(
@@ -280,9 +283,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                         onClick = {
                             onOptionSelected(items[index])
                             expanded = false
-                        }) {
+                        }
+                    ) {
                         Text(text = mode.name)
-
                     }
                 }
             }

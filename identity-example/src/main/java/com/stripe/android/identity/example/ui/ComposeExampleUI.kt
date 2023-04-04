@@ -146,8 +146,8 @@ internal fun ExampleScreen(
             }
             Column(
                 modifier = Modifier
-                .verticalScroll(scrollState)
-                .weight(weight = 1f, fill = true)
+                    .verticalScroll(scrollState)
+                    .weight(weight = 1f, fill = true)
             ) {
                 if (submissionState.verificationType == VerificationType.DOCUMENT) {
                     DocumentUI(submissionState, onSubmissionStateChanged)

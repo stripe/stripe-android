@@ -119,7 +119,9 @@ internal class ServerSideConfirmationCompleteFlowViewModel(
     fun updateQuantity(productId: CartProduct.Id, newQuantity: Int) {
         val dirtyCartState = state.value.cartState.updateQuantity(productId, newQuantity)
         _state.update {
-            it.copy(dirtyCartState = dirtyCartState)
+            it.copy(
+                dirtyCartState = dirtyCartState,
+            )
         }
     }
 
@@ -128,7 +130,9 @@ internal class ServerSideConfirmationCompleteFlowViewModel(
             isSubscription = isSubscription,
         )
         _state.update {
-            it.copy(dirtyCartState = dirtyCartState)
+            it.copy(
+                dirtyCartState = dirtyCartState,
+            )
         }
     }
 
