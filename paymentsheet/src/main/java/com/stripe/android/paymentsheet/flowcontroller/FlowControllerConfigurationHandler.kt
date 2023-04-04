@@ -35,7 +35,8 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             return
         }
 
-        val canSkip = viewModel.canSkipLoad(initializationMode, configuration)
+        val configureRequest = ConfigureRequest(initializationMode, configuration)
+        val canSkip = viewModel.previousConfigureRequest == configureRequest
 
         if (canSkip) {
             callback.onConfigured(true, null)
@@ -45,7 +46,8 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         val result = paymentSheetLoader.load(initializationMode, configuration)
 
         if (currentCoroutineContext().isActive) {
-            dispatchResult(result, initializationMode, callback)
+            viewModel.previousConfigureRequest = configureRequest
+            dispatchResult(result, callback)
         } else {
             callback.onConfigured(false, null)
         }
@@ -53,12 +55,11 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
     private suspend fun dispatchResult(
         result: PaymentSheetLoader.Result,
-        initializationMode: PaymentSheet.InitializationMode,
         callback: PaymentSheet.FlowController.ConfigCallback,
     ) = withContext(uiContext) {
         when (result) {
             is PaymentSheetLoader.Result.Success -> {
-                onInitSuccess(result.state, initializationMode, callback)
+                onInitSuccess(result.state, callback)
             }
             is PaymentSheetLoader.Result.Failure -> {
                 callback.onConfigured(false, result.throwable)
@@ -68,11 +69,9 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
     private fun onInitSuccess(
         state: PaymentSheetState.Full,
-        initializationMode: PaymentSheet.InitializationMode,
         callback: PaymentSheet.FlowController.ConfigCallback,
     ) {
         eventReporter.onInit(state.config)
-        viewModel.storeLastInput(initializationMode, state.config)
 
         viewModel.paymentSelection = PaymentSelectionUpdater.process(
             currentSelection = viewModel.paymentSelection,
@@ -83,4 +82,9 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         callback.onConfigured(true, null)
     }
+
+    data class ConfigureRequest(
+        val initializationMode: PaymentSheet.InitializationMode,
+        val configuration: PaymentSheet.Configuration?,
+    )
 }

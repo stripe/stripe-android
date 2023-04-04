@@ -78,8 +78,7 @@ class FlowControllerConfigurationHandlerTest {
             countDownLatch.countDown()
         }
         assertThat(countDownLatch.await(0, TimeUnit.SECONDS)).isTrue()
-        assertThat(viewModel.previousInitializationMode).isNotNull()
-        assertThat(viewModel.previousConfiguration).isNotNull()
+        assertThat(viewModel.previousConfigureRequest).isNotNull()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
         assertThat(viewModel.state).isNotNull()
         verify(eventReporter)
@@ -89,14 +88,16 @@ class FlowControllerConfigurationHandlerTest {
     @Test
     fun `configure() should not re-run initial config during second config`() = runTest {
         val countDownLatch = CountDownLatch(1)
-        val initializationMode = createInitializationMode()
         val configurationHandler = createConfigurationHandler()
 
-        // Signaling we previously loaded elements session here.
-        viewModel.storeLastInput(
+        val initializationMode = createInitializationMode()
+        val configureRequest = FlowControllerConfigurationHandler.ConfigureRequest(
             initializationMode = initializationMode,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
         )
+
+        // Signaling we previously loaded elements session here.
+        viewModel.previousConfigureRequest = configureRequest
         viewModel.paymentSelection = PaymentSelection.GooglePay
 
         configurationHandler.configure(
@@ -108,7 +109,7 @@ class FlowControllerConfigurationHandlerTest {
             countDownLatch.countDown()
         }
         assertThat(countDownLatch.await(0, TimeUnit.SECONDS)).isTrue()
-        assertThat(viewModel.previousInitializationMode).isSameInstanceAs(initializationMode)
+        assertThat(viewModel.previousConfigureRequest).isSameInstanceAs(configureRequest)
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
 
         // We're running ONLY the second config run, so we don't expect any interactions.
@@ -121,27 +122,28 @@ class FlowControllerConfigurationHandlerTest {
         val countDownLatch = CountDownLatch(1)
         val configurationHandler = createConfigurationHandler()
 
-        val initializationMode = createInitializationMode()
-        val differentInitializationMode = createInitializationMode(PaymentSheetFixtures.DIFFERENT_CLIENT_SECRET)
-
         // Signaling we previously loaded elements session here.
-        viewModel.storeLastInput(
-            initializationMode = initializationMode,
-            configuration = null,
+        viewModel.previousConfigureRequest = FlowControllerConfigurationHandler.ConfigureRequest(
+            initializationMode = createInitializationMode(),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
         )
         viewModel.paymentSelection = PaymentSelection.GooglePay
 
+        val newConfigureRequest = FlowControllerConfigurationHandler.ConfigureRequest(
+            initializationMode = createInitializationMode(PaymentSheetFixtures.DIFFERENT_CLIENT_SECRET),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+        )
+
         configurationHandler.configure(
-            PaymentSheet.InitializationMode.PaymentIntent(PaymentSheetFixtures.DIFFERENT_CLIENT_SECRET),
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            initializationMode = newConfigureRequest.initializationMode,
+            configuration = newConfigureRequest.configuration,
         ) { success, exception ->
             assertThat(success).isTrue()
             assertThat(exception).isNull()
             countDownLatch.countDown()
         }
         assertThat(countDownLatch.await(0, TimeUnit.SECONDS)).isTrue()
-        assertThat(viewModel.previousConfiguration).isEqualTo(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
-        assertThat(viewModel.previousInitializationMode).isNotSameInstanceAs(differentInitializationMode)
+        assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
 
         // We're running a new config, so we DO expect an interaction.
