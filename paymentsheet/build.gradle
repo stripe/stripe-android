@@ -139,6 +139,9 @@ android {
 
     kotlinOptions {
         freeCompilerArgs += ["-opt-in=kotlinx.coroutines.FlowPreview"]
+        if (gradle.ext.isCi) {
+            kotlinOptions.allWarningsAsErrors = true
+        }
     }
 }
 

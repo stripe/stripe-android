@@ -34,6 +34,7 @@ internal class PollingContract :
 
         internal companion object {
             fun fromIntent(intent: Intent): Args? {
+                @Suppress("DEPRECATION")
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
         }

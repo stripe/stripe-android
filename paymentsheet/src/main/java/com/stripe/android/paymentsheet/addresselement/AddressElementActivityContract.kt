@@ -20,6 +20,7 @@ internal class AddressElementActivityContract :
             .putExtra(EXTRA_ARGS, input.copy(statusBarColor = statusBarColor))
     }
 
+    @Suppress("DEPRECATION")
     override fun parseResult(resultCode: Int, intent: Intent?) =
         intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.addressOptionsResult
             ?: AddressLauncherResult.Canceled
@@ -42,6 +43,7 @@ internal class AddressElementActivityContract :
 
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {
+                @Suppress("DEPRECATION")
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
         }

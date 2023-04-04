@@ -26,6 +26,7 @@ class AddressElementActivityContractTest {
 
         parcel.setDataPosition(0)
         val unparceledBundle = requireNotNull(parcel.readBundle())
+        @Suppress("DEPRECATION")
         val unparceledArgs = unparceledBundle.getParcelable<AddressElementActivityContract.Args>("args")
 
         assertEquals(unparceledArgs, args)
