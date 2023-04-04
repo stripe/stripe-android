@@ -17,6 +17,7 @@ import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.model.toIntentConfiguration
+import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowViewModel.ConfigureResult
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog
 import com.stripe.android.paymentsheet.example.samples.ui.shared.ErrorScreen
@@ -116,7 +117,9 @@ internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
                     configuration = uiState.paymentSheetConfig,
                     callback = { _, error -> completable.complete(error) },
                 )
-                completable.await()
+                val error = completable.await()
+                val paymentOption = flowController.getPaymentOption()
+                ConfigureResult(paymentOption, error)
             }
 
             onDispose {
