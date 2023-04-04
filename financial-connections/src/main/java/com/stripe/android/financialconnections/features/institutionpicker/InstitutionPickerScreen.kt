@@ -54,6 +54,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -84,7 +85,7 @@ import com.stripe.android.uicore.image.StripeImage
 internal fun InstitutionPickerScreen() {
     val viewModel: InstitutionPickerViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
-    val state by viewModel.collectAsState()
+    val state: InstitutionPickerState by viewModel.collectAsState()
 
     // when in search mode, back closes search.
     val focusManager = LocalFocusManager.current
@@ -98,7 +99,7 @@ internal fun InstitutionPickerScreen() {
         institutionsProvider = { state.searchInstitutions },
         searchMode = state.searchMode,
         // This is just used to provide a text in Compose previews
-        previewText = null,
+        previewText = state.previewText,
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCancelSearchClick = viewModel::onCancelSearchClick,
@@ -526,14 +527,15 @@ private fun BoxScope.FeaturedInstitutionPlaceholder(institution: FinancialConnec
     )
 }
 
-@Preview(group = "Institutions Pane", name = "initialLoading")
+@Preview(group = "Institution Picker Pane")
 @Composable
-internal fun InitialLoading(
-    state: InstitutionPickerState = InstitutionPickerStates.initialLoading()
+internal fun InstitutionPickerPreview(
+    @PreviewParameter(InstitutionPickerPreviewParameterProvider::class)
+    state: InstitutionPickerState
 ) {
     FinancialConnectionsPreview {
         InstitutionPickerContent(
-            previewText = "",
+            previewText = state.previewText,
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
@@ -542,166 +544,6 @@ internal fun InitialLoading(
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {}
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeSearchingInstitutions")
-@Composable
-internal fun SearchModeSearchingInstitutions(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeSearchingInstitutions()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeWithResults")
-@Composable
-internal fun SearchModeWithResults(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeWithResults()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeWithResultsNoManualEntry")
-@Composable
-internal fun SearchModeWithResultsNoManualEntry(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeWithResultsNoManualEntry()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeNoResults")
-@Composable
-internal fun SearchModeNoResults(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeNoResults()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeNoResultsNoManualEntry")
-@Composable
-internal fun SearchModeNoResultsNoManualEntry(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeNoResultsNoManualEntry()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeFailed")
-@Composable
-internal fun SearchModeFailed(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeFailed()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeFailedNoManualEntry")
-@Composable
-internal fun SearchModeFailedNoManualEntry(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeFailedNoManualEntry()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "noSearchMode")
-@Composable
-internal fun NoSearchMode(
-    state: InstitutionPickerState = InstitutionPickerStates.noSearchMode()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
         ) {}
     }
 }

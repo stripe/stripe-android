@@ -34,6 +34,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
@@ -455,57 +456,14 @@ private fun getAccountTexts(
 @Preview(
     showBackground = true,
     group = "Account Picker Pane",
-    name = "Multiselect - account selected"
 )
 @Composable
-internal fun AccountPickerPreviewMultiSelect() {
+internal fun AccountPickerPreview(
+    @PreviewParameter(AccountPickerPreviewParameterProvider::class) state: AccountPickerState
+) {
     FinancialConnectionsPreview {
         AccountPickerContent(
-            AccountPickerStates.multiSelect(),
-            onAccountClicked = {},
-            onSubmit = {},
-            onSelectAllAccountsClicked = {},
-            onSelectAnotherBank = {},
-            onEnterDetailsManually = {},
-            onLoadAccountsAgain = {},
-            onCloseClick = {},
-            onLearnMoreAboutDataAccessClick = {}
-        ) {}
-    }
-}
-
-@Preview(
-    showBackground = true,
-    group = "Account Picker Pane",
-    name = "Single select - account selected"
-)
-@Composable
-internal fun AccountPickerPreviewSingleSelect() {
-    FinancialConnectionsPreview {
-        AccountPickerContent(
-            AccountPickerStates.singleSelect(),
-            onAccountClicked = {},
-            onSubmit = {},
-            onSelectAllAccountsClicked = {},
-            onSelectAnotherBank = {},
-            onEnterDetailsManually = {},
-            onLoadAccountsAgain = {},
-            onCloseClick = {},
-            onLearnMoreAboutDataAccessClick = {}
-        ) {}
-    }
-}
-
-@Preview(
-    showBackground = true,
-    group = "Account Picker Pane",
-    name = "Single select - confirm"
-)
-@Composable
-internal fun AccountPickerPreviewSingleSelectWithConfirm() {
-    FinancialConnectionsPreview {
-        AccountPickerContent(
-            AccountPickerStates.singleSelectWithConfirm(),
+            state = state,
             onAccountClicked = {},
             onSubmit = {},
             onSelectAllAccountsClicked = {},
