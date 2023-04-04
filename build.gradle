@@ -4,7 +4,7 @@ import java.time.Duration
 buildscript {
     apply from: 'dependencies.gradle'
     apply from: './build-configuration/build-environment.gradle'
-    ext.kotlinVersion = '1.8.0'
+    ext.kotlinVersion = '1.8.20'
     // until Dokka 1.8.0 is released and we no longer need dev builds
     ext.dokkaVersion = '1.8.0-dev-194'
 
