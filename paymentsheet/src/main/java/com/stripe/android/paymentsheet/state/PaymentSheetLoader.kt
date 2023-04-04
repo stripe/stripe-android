@@ -210,7 +210,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
     ): Result<StripeIntent> {
-        return elementsSessionRepository.get(initializationMode).map { elementsSession ->
+        return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
             lpmRepository.update(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
