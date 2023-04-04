@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.c
 
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartState
-import com.stripe.android.paymentsheet.model.PaymentOption
 
 data class ServerSideConfirmationCompleteFlowViewState(
     val isProcessing: Boolean = false,

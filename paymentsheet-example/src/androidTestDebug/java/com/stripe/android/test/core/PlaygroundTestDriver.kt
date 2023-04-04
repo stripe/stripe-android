@@ -457,7 +457,6 @@ class PlaygroundTestDriver(
                     assertThat(Selectors.browserWindow(device, it)?.exists() == true).isFalse()
                 }
             }
-
         }
 
         val isDone = testParameters.authorizationAction in setOf(AuthorizeAction.Authorize, null)

@@ -615,9 +615,7 @@ private fun ColorPicker(
 @Composable
 private fun ColorIcon(innerColor: Color) {
     val brush = Brush.verticalGradient(
-        listOf(
-            Color.Red, Color.Yellow, Color.Green, Color.Blue, Color.Magenta
-        )
+        listOf(Color.Red, Color.Yellow, Color.Green, Color.Blue, Color.Magenta)
     )
     Box(
         modifier = Modifier

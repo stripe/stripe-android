@@ -177,7 +177,7 @@ class PaymentSheetPlaygroundViewModel(
 
         SavedToggles(
             initialization = initialization.toString(),
-            customer= customer.toString(),
+            customer = customer.toString(),
             googlePay = googlePay,
             currency = currency.toString(),
             merchantCountryCode = merchantCountryCode.toString(),

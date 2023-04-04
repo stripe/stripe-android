@@ -59,8 +59,6 @@ dependencies {
     androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
 
     androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 android {

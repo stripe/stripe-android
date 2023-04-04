@@ -97,8 +97,6 @@ dependencies {
 
     // Test rules and transitive dependencies:
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion")
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 shot {

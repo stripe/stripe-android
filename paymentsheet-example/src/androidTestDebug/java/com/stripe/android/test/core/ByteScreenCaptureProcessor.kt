@@ -16,7 +16,7 @@ class ByteScreenCaptureProcessor : BasicScreenCaptureProcessor() {
         return byteArrayOutputStream.toByteArray()
     }
 
-    fun compare(screenCaptureProcessor: ByteScreenCaptureProcessor){
+    fun compare(screenCaptureProcessor: ByteScreenCaptureProcessor) {
         assertThat(getBytes()).isEqualTo(screenCaptureProcessor.getBytes())
     }
 }
