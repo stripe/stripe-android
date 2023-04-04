@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.model.toIntentConfiguration
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
+import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog
 import com.stripe.android.paymentsheet.example.samples.ui.shared.ErrorScreen
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
@@ -55,10 +56,16 @@ internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
 
                 AttachFlowControllerToViewModel(uiState)
 
-                uiState.status?.let {
-                    LaunchedEffect(it) {
-                        snackbar.setText(it).show()
-                        viewModel.statusDisplayed()
+                uiState.status?.let { status ->
+                    if (uiState.didComplete) {
+                        CompletedPaymentAlertDialog(
+                            onDismiss = ::finish
+                        )
+                    } else {
+                        LaunchedEffect(status) {
+                            snackbar.setText(status).show()
+                            viewModel.statusDisplayed()
+                        }
                     }
                 }
 
