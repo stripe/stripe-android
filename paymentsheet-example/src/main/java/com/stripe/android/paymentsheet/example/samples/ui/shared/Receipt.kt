@@ -100,11 +100,9 @@ fun Receipt(
             ) {
                 ReceiptRow(stringResource(R.string.subtotal), cartState.formattedSubtotal)
                 ReceiptRow(stringResource(R.string.sales_tax), cartState.formattedTax)
-                Divider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = PADDING)
-                )
+                Divider(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = PADDING))
                 ReceiptRow(stringResource(R.string.total), cartState.formattedTotal)
                 bottomContent()
             }
