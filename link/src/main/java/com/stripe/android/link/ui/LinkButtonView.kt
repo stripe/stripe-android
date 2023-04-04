@@ -43,7 +43,7 @@ import com.stripe.android.link.theme.linkColors
 
 private val LinkButtonVerticalPadding = 6.dp
 private val LinkButtonHorizontalPadding = 10.dp
-private val LinkButtonShape = RoundedCornerShape(22.dp)
+private val LinkButtonShape = RoundedCornerShape(4.dp)
 private val LinkButtonEmailShape = RoundedCornerShape(16.dp) // Button corner radius - padding
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -77,7 +77,6 @@ fun LinkButton(
                     .clip(LinkButtonShape)
                     .testTag(LinkButtonTestTag),
                 enabled = enabled,
-                elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = LinkButtonShape,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = MaterialTheme.colors.primary,

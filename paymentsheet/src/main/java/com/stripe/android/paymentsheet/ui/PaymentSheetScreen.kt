@@ -151,37 +151,42 @@ internal fun Wallet(
     val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     if (containerState.shouldShow) {
-        Column(modifier = modifier.padding(horizontal = padding)) {
-            if (containerState.showGooglePay) {
-                GooglePayButton(
-                    state = googlePayButtonState?.convert(),
-                    isEnabled = buttonsEnabled,
-                    onPressed = viewModel::checkoutWithGooglePay,
-                    modifier = Modifier.padding(top = 7.dp),
-                )
+        Column {
+            Column(modifier = modifier.padding(horizontal = padding - 4.dp)) {
+                if (containerState.showGooglePay) {
+                    GooglePayButton(
+                        state = googlePayButtonState?.convert(),
+                        isEnabled = buttonsEnabled,
+                        onPressed = viewModel::checkoutWithGooglePay,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 7.dp),
+                    )
+                }
             }
+            Column(modifier = modifier.padding(horizontal = padding)) {
+                if (containerState.showLink) {
+                    LinkButton(
+                        email = email,
+                        enabled = buttonsEnabled,
+                        onClick = viewModel::handleLinkPressed,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 6.dp)
+                            .requiredHeight(42.dp),
+                    )
+                }
 
-            if (containerState.showLink) {
-                LinkButton(
-                    email = email,
-                    enabled = buttonsEnabled,
-                    onClick = viewModel::handleLinkPressed,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 6.dp)
-                        .requiredHeight(48.dp),
-                )
+                googlePayButtonState?.errorMessage?.let { error ->
+                    ErrorMessage(
+                        error = error.message,
+                        modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
+                    )
+                }
+
+                val text = stringResource(containerState.dividerTextResource)
+                GooglePayDividerUi(text)
             }
-
-            googlePayButtonState?.errorMessage?.let { error ->
-                ErrorMessage(
-                    error = error.message,
-                    modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
-                )
-            }
-
-            val text = stringResource(containerState.dividerTextResource)
-            GooglePayDividerUi(text)
         }
     }
 }
