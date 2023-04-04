@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.getAvailablePaymentMethods
+import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import javax.inject.Inject
@@ -34,9 +34,10 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor(
         val allowedTypes = state.stripeIntent.paymentMethodTypes
 
         // The types that we actually do support for this intent and configuration
-        val availableTypes = lpmRepository.getAvailablePaymentMethods(
+        val availableTypes = getPMsToAdd(
             stripeIntent = state.stripeIntent,
             config = state.config,
+            lpmRepository = lpmRepository,
         ).map { it.code }
 
         return when (selection) {

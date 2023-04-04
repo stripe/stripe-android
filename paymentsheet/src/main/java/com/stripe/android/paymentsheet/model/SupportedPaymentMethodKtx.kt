@@ -196,28 +196,6 @@ internal fun getSupportedSavedCustomerPMs(
         paymentMethod.getSpecWithFullfilledRequirements(stripeIntent, config) != null
 } ?: emptyList()
 
-internal fun LpmRepository.getAvailablePaymentMethods(
-    stripeIntent: StripeIntent?,
-    config: PaymentSheet.Configuration?,
-): List<SupportedPaymentMethod> {
-    return values().filter { it.isAvailable(stripeIntent, config) }
-}
-
-private fun SupportedPaymentMethod.isAvailable(
-    stripeIntent: StripeIntent?,
-    config: PaymentSheet.Configuration?,
-): Boolean {
-    return stripeIntent?.let { intent ->
-        val fulfillsRequirements = getSpecWithFullfilledRequirements(stripeIntent, config) != null
-        val isActive = !intent.isLiveMode || code !in stripeIntent.unactivatedPaymentMethods
-        fulfillsRequirements && isActive
-    } ?: false
-}
-
-/**
- * This will return a list of payment methods that have a supported form given
- * the [PaymentSheet.Configuration] and [StripeIntent].
- */
 internal fun getPMsToAdd(
     stripeIntent: StripeIntent?,
     config: PaymentSheet.Configuration?,

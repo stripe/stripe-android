@@ -5,10 +5,11 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -35,18 +36,25 @@ class PaymentSelectionUpdaterTest {
     @Test
     fun `Can use existing new payment selection if it's still supported`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
-            labelResource = "Cash App",
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_cash_app_pay,
+            labelResource = "Sofort",
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
-            paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.SOFORT,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
-        val newState = mockPaymentSheetState(paymentMethodTypes = listOf("card", "cashapp"))
+        val newState = mockPaymentSheetState(
+            paymentMethodTypes = listOf("card", "sofort"),
+            config = PaymentSheet.Configuration(
+                merchantDisplayName = "Example, Inc.",
+                allowsDelayedPaymentMethods = true,
+            )
+        )
+
         val updater = createUpdater(
             stripeIntent = PAYMENT_INTENT.copy(
-                paymentMethodTypes = PAYMENT_INTENT.paymentMethodTypes + "cashapp",
+                paymentMethodTypes = PAYMENT_INTENT.paymentMethodTypes + "sofort",
             ),
         )
 
@@ -125,11 +133,12 @@ class PaymentSelectionUpdaterTest {
         paymentMethodTypes: List<String>? = null,
         paymentSelection: PaymentSelection? = null,
         customerPaymentMethods: List<PaymentMethod> = emptyList(),
+        config: PaymentSheet.Configuration? = null,
     ): PaymentSheetState.Full {
         val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         return PaymentSheetState.Full(
-            config = null,
+            config = config,
             stripeIntent = intent.copy(
                 paymentMethodTypes = paymentMethodTypes ?: intent.paymentMethodTypes,
             ),
