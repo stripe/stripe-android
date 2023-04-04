@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
 import kotlinx.coroutines.async
@@ -211,14 +212,13 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
     ): StripeIntent {
-        val elementsSession = elementsSessionRepository.get(
-            initializationMode = initializationMode,
-            configuration = configuration,
-        )
+        val elementsSession = elementsSessionRepository.get(initializationMode)
 
         lpmRepository.update(
             stripeIntent = elementsSession.stripeIntent,
             serverLpmSpecs = elementsSession.paymentMethodSpecs,
+            billingDetailsCollectionConfiguration =
+            configuration?.billingDetailsCollectionConfiguration ?: BillingDetailsCollectionConfiguration(),
         )
 
         if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {

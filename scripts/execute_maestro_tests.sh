@@ -15,7 +15,7 @@ maestro -v
 retry=1
 while [ $retry -le 3 ]; do
   echo "Running Maestro tests. Attempt $retry"
-  maestro test --format junit --output maestroReport.xml maestro/financial-connections
+  maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections
   if [ $? -eq 0 ]; then
     break
   fi

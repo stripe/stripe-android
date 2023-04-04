@@ -1,11 +1,11 @@
 package com.stripe.android.financialconnections.navigation
 
-import android.util.Log
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.NavType.EnumType
 import androidx.navigation.navArgument
+import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -131,12 +131,15 @@ internal object NavigationDirections {
     }
 }
 
-internal class NavigationManager(private val externalScope: CoroutineScope) {
+internal class NavigationManager(
+    private val logger: Logger,
+    private val externalScope: CoroutineScope
+) {
     var commands = MutableSharedFlow<NavigationCommand>()
     fun navigate(
         directions: NavigationCommand
     ) {
-        Log.e("NavigationManager", "navigate: $directions")
+        logger.debug("NavigationManager navigating to: $directions")
         externalScope.launch {
             commands.emit(directions)
         }

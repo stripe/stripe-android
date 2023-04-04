@@ -47,6 +47,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -132,6 +134,9 @@ class PaymentLauncherViewModelTest {
 
     @Before
     fun setUpMocks() = runTest {
+        reset(paymentIntent)
+        reset(setupIntent)
+
         whenever(
             stripeApiRepository.confirmPaymentIntent(any(), any(), any())
         ).thenReturn(paymentIntent)
@@ -162,6 +167,8 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify confirm PaymentIntent without returnUrl invokes StripeRepository and calls correct authenticator`() =
         runTest {
+            whenever(paymentIntent.requiresAction()).thenReturn(true)
+
             createViewModel().confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
             verify(analyticsRequestFactory).createRequest(
@@ -187,6 +194,8 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify confirm PaymentIntent with returnUrl invokes StripeRepository and calls correct authenticator`() =
         runTest {
+            whenever(paymentIntent.requiresAction()).thenReturn(true)
+
             createViewModel().confirmStripeIntent(
                 confirmPaymentIntentParams.also {
                     it.returnUrl = RETURN_URL
@@ -216,8 +225,47 @@ class PaymentLauncherViewModelTest {
         }
 
     @Test
+    fun `verify confirm PaymentIntent when no action is required does not invoke authenticator`() =
+        runTest {
+            whenever(paymentIntent.requiresAction()).thenReturn(false)
+
+            val viewModel = createViewModel()
+            viewModel.confirmStripeIntent(
+                confirmPaymentIntentParams.also {
+                    it.returnUrl = RETURN_URL
+                },
+                authHost
+            )
+
+            verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
+            verify(analyticsRequestFactory).createRequest(
+                PaymentAnalyticsEvent.ConfirmReturnUrlCustom
+            )
+            verify(stripeApiRepository).confirmPaymentIntent(
+                argWhere {
+                    it.returnUrl == RETURN_URL &&
+                        it.paymentMethodId == PM_ID &&
+                        it.clientSecret == CLIENT_SECRET &&
+                        it.shouldUseStripeSdk()
+                },
+                eq(apiRequestOptions),
+                eq(EXPAND_PAYMENT_METHOD)
+            )
+            verify(piAuthenticator, never()).authenticate(
+                eq(authHost),
+                eq(paymentIntent),
+                eq(apiRequestOptions)
+            )
+
+            assertThat(viewModel.paymentLauncherResult.value)
+                .isEqualTo(PaymentResult.Completed)
+        }
+
+    @Test
     fun `verify confirm SetupIntent without returnUrl invokes StripeRepository and calls correct authenticator`() =
         runTest {
+            whenever(setupIntent.requiresAction()).thenReturn(true)
+
             createViewModel().confirmStripeIntent(confirmSetupIntentParams, authHost)
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
@@ -244,6 +292,8 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify confirm SetupIntent with returnUrl invokes StripeRepository and calls correct authenticator`() =
         runTest {
+            whenever(setupIntent.requiresAction()).thenReturn(true)
+
             createViewModel().confirmStripeIntent(
                 confirmSetupIntentParams.also {
                     it.returnUrl = RETURN_URL

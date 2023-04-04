@@ -1,8 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">PaymentSheet Example</string>
-    <string name="paymentsheet">PaymentSheet</string>
-    <string name="paymentsheet_custom">PaymentSheet Custom</string>
-    <string name="playground">Playground</string>
+    <string name="paymentsheet_title">Basic PaymentSheet</string>
+    <string name="paymentsheet_subtitle">Our simplest integration</string>
+    <string name="paymentsheet_custom_title">PaymentSheet with FlowController</string>
+    <string name="paymentsheet_custom_subtitle">A more advanced integration with greater flexibility</string>
+    <string name="paymentsheet_serverside_confirmation_title">PaymentSheet with server-side confirmation</string>
+    <string name="paymentsheet_custom_serverside_confirmation_title">FlowController with server-side confirmation</string>
+    <string name="paymentsheet_serverside_confirmation_subtitle">Create and confirm the payment or setup intent on your own backend</string>
+    <string name="beta_badge_label">This is currently in beta</string>
+    <string name="playground_title">Playground</string>
+    <string name="playground_subtitle">Testing playground for Stripe engineers</string>
     <string name="action_settings">Settings</string>
     <string name="product_subtitle">1 x Regular %s</string>
     <string name="subtotal">Subtotal</string>
@@ -56,4 +63,16 @@
     <string name="currency_aud">AUD</string>
     <string name="show_sheet">Show Sheet</string>
     <string name="merchant_country">Merchant</string>
+    <string name="attach_default_billing_address">Attach Default Billing Address</string>
+    <string name="collect_name">Collect Name</string>
+    <string name="collect_email">Collect Email</string>
+    <string name="collect_phone">Collect Phone</string>
+    <string name="collect_address">Collect Address</string>
+    <string name="never">Never</string>
+    <string name="auto">Auto</string>
+    <string name="always">Always</string>
+    <string name="full">Full</string>
+    <string name="unable_to_load_checkout_title">Unable to load checkout</string>
+    <string name="unable_to_load_checkout_subtitle">Maybe wait a few seconds, have some tea, read a book… then try again.</string>
+    <string name="unable_to_load_checkout_button">Try again</string>
 </resources>

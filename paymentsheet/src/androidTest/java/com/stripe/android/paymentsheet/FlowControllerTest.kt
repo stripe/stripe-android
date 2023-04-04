@@ -1,23 +1,17 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onParent
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextReplacement
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.CreateIntentCallback
+import com.stripe.android.CreateIntentResult
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,6 +22,8 @@ import java.util.concurrent.TimeUnit
 internal class FlowControllerTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
     @get:Rule
     val networkRule = NetworkRule()
@@ -73,17 +69,8 @@ internal class FlowControllerTest {
             )
         }
 
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(hasText("+ Add"))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNode(hasText("+ Add"))
-            .onParent()
-            .onParent()
-            .performClick()
-
-        fillOutCard()
+        page.addPaymentMethod()
+        page.fillOutCardDetails()
 
         networkRule.enqueue(
             method("POST"),
@@ -92,16 +79,7 @@ internal class FlowControllerTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-success.json")
-        }
-
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-            .performScrollTo()
-            .performClick()
+        page.clickPrimaryButton()
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
@@ -154,7 +132,7 @@ internal class FlowControllerTest {
             )
         }
 
-        fillOutCard()
+        page.fillOutCardDetails()
 
         networkRule.enqueue(
             method("POST"),
@@ -163,16 +141,7 @@ internal class FlowControllerTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-success.json")
-        }
-
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-            .performScrollTo()
-            .performClick()
+        page.clickPrimaryButton()
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
@@ -218,17 +187,8 @@ internal class FlowControllerTest {
             )
         }
 
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(hasText("+ Add"))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNode(hasText("+ Add"))
-            .onParent()
-            .onParent()
-            .performClick()
-
-        fillOutCard()
+        page.addPaymentMethod()
+        page.fillOutCardDetails()
 
         networkRule.enqueue(
             method("POST"),
@@ -237,9 +197,7 @@ internal class FlowControllerTest {
             response.setResponseCode(400)
         }
 
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-            .performScrollTo()
-            .performClick()
+        page.clickPrimaryButton()
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
@@ -289,21 +247,9 @@ internal class FlowControllerTest {
             )
         }
 
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(hasText("+ Add"))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNode(hasText("+ Add"))
-            .onParent()
-            .onParent()
-            .performClick()
-
-        fillOutCard()
-
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-            .performScrollTo()
-            .performClick()
+        page.addPaymentMethod()
+        page.fillOutCardDetails()
+        page.clickPrimaryButton()
 
         assertThat(paymentOptionCallbackCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
 
@@ -385,6 +331,7 @@ internal class FlowControllerTest {
         configureFlowController("pi_example2_secret_example2")
     }
 
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun testDeferredIntentCardPayment() {
         networkRule.enqueue(
@@ -408,7 +355,7 @@ internal class FlowControllerTest {
                     flowController.confirm()
                 },
                 createIntentCallback = {
-                    CreateIntentCallback.Result.Success(
+                    CreateIntentResult.Success(
                         clientSecret = "pi_example_secret_example"
                     )
                 },
@@ -436,17 +383,8 @@ internal class FlowControllerTest {
             )
         }
 
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(hasText("+ Add"))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNode(hasText("+ Add"))
-            .onParent()
-            .onParent()
-            .performClick()
-
-        fillOutCard()
+        page.addPaymentMethod()
+        page.fillOutCardDetails()
 
         networkRule.enqueue(
             method("POST"),
@@ -462,20 +400,12 @@ internal class FlowControllerTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-success.json")
-        }
-
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-            .performScrollTo()
-            .performClick()
+        page.clickPrimaryButton()
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun testDeferredIntentFailedCardPayment() {
         networkRule.enqueue(
@@ -500,7 +430,7 @@ internal class FlowControllerTest {
                     flowController.confirm()
                 },
                 createIntentCallback = {
-                    CreateIntentCallback.Result.Failure(
+                    CreateIntentResult.Failure(
                         cause = Exception("We don't accept visa"),
                         displayMessage = "We don't accept visa"
                     )
@@ -530,17 +460,8 @@ internal class FlowControllerTest {
             )
         }
 
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(hasText("+ Add"))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNode(hasText("+ Add"))
-            .onParent()
-            .onParent()
-            .performClick()
-
-        fillOutCard()
+        page.addPaymentMethod()
+        page.fillOutCardDetails()
 
         networkRule.enqueue(
             method("POST"),
@@ -549,28 +470,10 @@ internal class FlowControllerTest {
             response.testBodyFromFile("payment-methods-create.json")
         }
 
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-            .performScrollTo()
-            .performClick()
+        page.clickPrimaryButton()
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
         assertThat((paymentSheetResult as PaymentSheetResult.Failed).error.message)
             .isEqualTo("We don't accept visa")
-    }
-
-    private fun fillOutCard() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule.onAllNodes(hasText("Card number"))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNode(hasText("Card number"))
-            .performTextReplacement("4242424242424242")
-        composeTestRule.onNode(hasText("MM / YY"))
-            .performTextReplacement("12/34")
-        composeTestRule.onNode(hasText("CVC"))
-            .performTextReplacement("123")
-        composeTestRule.onNode(hasText("ZIP Code"))
-            .performTextReplacement("12345")
     }
 }

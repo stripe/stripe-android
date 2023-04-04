@@ -7,6 +7,9 @@ import com.stripe.android.ui.core.R
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.test.fail
 
 @RunWith(RobolectricTestRunner::class)
 class LpmSerializerTest {
@@ -27,9 +30,7 @@ class LpmSerializerTest {
 
         val result = lpmSerializer.deserializeList(serializedString)
 
-        val countrySpec = result.first { it.type == "sofort" }
-            .fields
-            .first() as CountrySpec
+        val countrySpec = result.first { it.type == "sofort" }.fields[3] as CountrySpec
 
         assertThat(countrySpec.apiPath.v1).isEqualTo("sofort[country]")
         assertThat(countrySpec.allowedCountryCodes).isEqualTo(
@@ -67,21 +68,22 @@ class LpmSerializerTest {
         val result = lpmSerializer.deserializeList(serializedString)
 
         val dropdownSpec = result.first { it.type == "eps" }
-            .fields[1] as DropdownSpec
+            .fields[3] as DropdownSpec
 
         assertThat(dropdownSpec.apiPath.v1).isEqualTo("eps[bank]")
         assertThat(dropdownSpec.labelTranslationId).isEqualTo(TranslationId.EpsBank)
-        assertThat(dropdownSpec.items.size).isEqualTo(28)
+        assertThat(dropdownSpec.items.size).isEqualTo(27)
         assertThat(dropdownSpec.items[0]).isEqualTo(
             DropdownItemSpec(
                 displayText = "Ärzte- und Apothekerbank",
                 apiValue = "arzte_und_apotheker_bank"
             )
         )
-        assertThat(dropdownSpec.items[27]).isEqualTo(
+
+        assertThat(dropdownSpec.items[26]).isEqualTo(
             DropdownItemSpec(
-                displayText = "Other",
-                apiValue = null
+                displayText = "VR-Bank Braunau",
+                apiValue = "vr_bank_braunau"
             )
         )
     }
@@ -563,5 +565,35 @@ class LpmSerializerTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun `Test placeholder parses correctly`() {
+        val serializedString =
+            """
+            {
+                "type": "au_becs_debit",
+                "fields": [
+                  {
+                    "type": "placeholder",
+                    "for": "name"
+                  }
+                ]
+            }
+            """.trimIndent()
+
+        val countDownLatch = CountDownLatch(1)
+        val result = lpmSerializer.deserialize(serializedString)
+        result.onFailure {
+            fail("Failed to deserialize payload.", result.exceptionOrNull())
+        }
+        assertThat(result.isSuccess).isTrue()
+        result.onSuccess {
+            countDownLatch.countDown()
+            assertThat(it.fields.first()).isEqualTo(
+                PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name)
+            )
+        }
+        assertThat(countDownLatch.await(2, TimeUnit.SECONDS)).isTrue()
     }
 }

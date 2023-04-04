@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet.example.samples.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
@@ -24,7 +23,6 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -32,8 +30,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
-import com.stripe.android.paymentsheet.example.samples.model.toAmountString
 
 @Composable
 fun Receipt(
@@ -53,12 +51,14 @@ fun Receipt(
 fun Receipt(
     isLoading: Boolean,
     cartState: CartState,
-    isEditable: Boolean,
-    onQuantityChanged: (Long, Int?) -> Unit,
+    isEditable: Boolean = false,
+    onQuantityChanged: (CartProduct.Id, Int) -> Unit = { _, _ -> },
     bottomContent: @Composable () -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    Surface(color = BACKGROUND_COLOR) {
+    Surface(
+        color = MaterialTheme.colors.background,
+    ) {
         Column(
             Modifier
                 .fillMaxSize()
@@ -87,6 +87,7 @@ fun Receipt(
                 Column(Modifier.fillMaxWidth(1f)) {
                     for (product in cartState.products) {
                         ProductRow(
+                            isProcessing = isLoading,
                             productEmoji = product.icon,
                             productResId = product.nameResId,
                             priceString = product.unitPriceString,
@@ -104,10 +105,10 @@ fun Receipt(
                     .fillMaxWidth(1f)
                     .padding(vertical = PADDING)
             ) {
-                ReceiptRow(stringResource(R.string.subtotal), cartState.subtotal.toAmountString())
-                ReceiptRow(stringResource(R.string.sales_tax), cartState.salesTax.toAmountString())
-                TotalLine(Modifier.align(Alignment.CenterHorizontally))
-                ReceiptRow(stringResource(R.string.total), cartState.total.toAmountString())
+                ReceiptRow(stringResource(R.string.subtotal), cartState.formattedSubtotal)
+                ReceiptRow(stringResource(R.string.sales_tax), cartState.formattedTax)
+                Divider(modifier = Modifier.fillMaxWidth().padding(vertical = PADDING))
+                ReceiptRow(stringResource(R.string.total), cartState.formattedTotal)
                 bottomContent()
             }
         }
@@ -116,12 +117,13 @@ fun Receipt(
 
 @Composable
 fun ProductRow(
+    isProcessing: Boolean,
     productEmoji: String,
     productResId: Int,
     priceString: String,
     quantity: Int?,
     isEditable: Boolean,
-    onQuantityChanged: (Int?) -> Unit,
+    onQuantityChanged: (Int) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -156,7 +158,7 @@ fun ProductRow(
                     val currentQuantity = quantity ?: 0
                     onQuantityChanged(currentQuantity - 1)
                 },
-                enabled = isEditable && (quantity ?: 0) > 0,
+                enabled = !isProcessing && isEditable && (quantity ?: 0) > 0,
             ) {
                 Icon(imageVector = Icons.Default.Remove, contentDescription = null)
             }
@@ -171,7 +173,7 @@ fun ProductRow(
                     val currentQuantity = quantity ?: 0
                     onQuantityChanged(currentQuantity + 1)
                 },
-                enabled = isEditable,
+                enabled = !isProcessing && isEditable,
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = null)
             }
@@ -183,7 +185,6 @@ fun ProductRow(
 fun ReceiptRow(
     description: String,
     priceString: String,
-    color: Color = Color.Unspecified
 ) {
     Row(
         Modifier.padding(vertical = PADDING),
@@ -194,27 +195,16 @@ fun ReceiptRow(
             text = description,
             modifier = Modifier.fillMaxWidth(ROW_START),
             fontSize = MAIN_FONT_SIZE,
-            color = color
+            color = MaterialTheme.colors.onSurface,
         )
         Text(
             text = priceString,
-            Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             style = TextStyle.Default.copy(textAlign = TextAlign.End),
             fontSize = MAIN_FONT_SIZE,
-            color = color
+            color = MaterialTheme.colors.onSurface,
         )
     }
-}
-
-@Composable
-fun TotalLine(modifier: Modifier) {
-    Box(
-        modifier
-            .fillMaxWidth()
-            .padding(vertical = PADDING)
-            .height(1.dp)
-            .background(Color.LightGray)
-    )
 }
 
 @Preview
