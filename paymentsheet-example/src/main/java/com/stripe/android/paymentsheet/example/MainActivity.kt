@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
+import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
@@ -171,7 +172,7 @@ private fun LazyListScope.Section(
             text = title,
             color = MaterialTheme.colors.onSurface,
             modifier = Modifier
-                .alpha(0.7f)
+                .alpha(SECTION_ALPHA)
                 .padding(top = 16.dp, start = 16.dp),
         )
     }
