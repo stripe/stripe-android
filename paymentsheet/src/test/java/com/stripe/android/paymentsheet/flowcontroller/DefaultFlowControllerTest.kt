@@ -1123,7 +1123,7 @@ internal class DefaultFlowControllerTest {
             uiContext = testDispatcher,
             eventReporter = eventReporter,
             viewModel = viewModel,
-            paymentSelectionUpdater = { currentSelection, _ -> currentSelection },
+            paymentSelectionUpdater = { _, newState -> newState.paymentSelection },
         ),
         intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
     )
