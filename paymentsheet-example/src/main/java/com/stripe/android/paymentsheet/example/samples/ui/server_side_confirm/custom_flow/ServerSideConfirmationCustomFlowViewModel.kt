@@ -141,7 +141,6 @@ internal class ServerSideConfirmationCustomFlowViewModel(
         val dirtyCartState = state.value.cartState.updateQuantity(productId, newQuantity)
         _state.update {
             it.copy(
-                isProcessing = true,
                 dirtyCartState = dirtyCartState
             )
         }
@@ -154,7 +153,6 @@ internal class ServerSideConfirmationCustomFlowViewModel(
         _state.update {
             it.copy(
                 dirtyCartState = dirtyCartState,
-                isProcessing = true
             )
         }
     }

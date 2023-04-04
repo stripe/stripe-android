@@ -121,7 +121,6 @@ internal class ServerSideConfirmationCompleteFlowViewModel(
         _state.update {
             it.copy(
                 dirtyCartState = dirtyCartState,
-                isProcessing = true
             )
         }
     }
@@ -133,7 +132,6 @@ internal class ServerSideConfirmationCompleteFlowViewModel(
         _state.update {
             it.copy(
                 dirtyCartState = dirtyCartState,
-                isProcessing = true
             )
         }
     }

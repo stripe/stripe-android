@@ -31,7 +31,7 @@ data class ServerSideConfirmationCustomFlowViewState(
         )
 
     val isPaymentMethodButtonEnabled: Boolean
-        get() = !isProcessing && !didComplete && !isError
+        get() = dirtyCartState == null
 
     val isBuyButtonEnabled: Boolean
         get() = dirtyCartState == null && isPaymentMethodButtonEnabled && paymentOption != null
