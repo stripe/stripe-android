@@ -28,7 +28,7 @@ workflows:
     steps:
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@6: {}
+      - git-clone@8: {}
       - cache-pull@2: {}
       - script@1:
           title: Restore gradle.properties
@@ -42,7 +42,7 @@ workflows:
     steps:
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@6: {}
+      - git-clone@8: {}
       - cache-pull@2: {}
       - script@1:
           title: Restore gradle.properties
@@ -57,7 +57,7 @@ workflows:
       - avd-manager@1: {}
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@7.0: {}
+      - git-clone@8: {}
       - cache-pull@2: {}
       - script@1:
           title: Restore gradle.properties
@@ -84,7 +84,7 @@ workflows:
       - avd-manager@1: { }
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@7.0: { }
+      - git-clone@8: { }
       - cache-pull@2: { }
       - script@1:
           inputs:
@@ -93,14 +93,14 @@ workflows:
       - script@1:
           inputs:
             - content: ./gradlew connectedAndroidTest executeScreenshotTests
-      - custom-test-results-export@0:
+      - custom-test-results-export@1:
           inputs:
             - test_name: Test Results
-            - search_pattern: |-
-                '*/build/reports/tests/'
-                '*/out/failures/'
-                '*/build/reports/shot/'
-                '*/build/tmp/shot/screenshot/'
+            - search_pattern:
+              - '*/build/reports/tests/*'
+              - '*/out/failures/*'
+              - '*/build/reports/shot/*'
+              - '*/build/tmp/shot/screenshot/*'
       - deploy-to-bitrise-io@2: {}
       - cache-push@2: { }
 meta:
