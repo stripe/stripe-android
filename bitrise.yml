@@ -54,7 +54,7 @@ workflows:
       - custom-test-results-export@1:
           inputs:
             - search_pattern:
-              - '**/build/reports/tests/*'
+              - '*/build/reports/tests/*'
             - test_name: Test results
       - deploy-to-bitrise-io@2: {}
       - cache-push@2: {}
