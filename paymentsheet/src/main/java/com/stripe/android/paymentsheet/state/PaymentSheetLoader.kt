@@ -320,10 +320,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration?,
     ): Boolean {
-        val supportedPaymentMethods = getPMsToAdd(stripeIntent, config, lpmRepository)
+        val availablePaymentMethods = getPMsToAdd(stripeIntent, config, lpmRepository)
         val requestedTypes = stripeIntent.paymentMethodTypes.toSet()
-        val supportedTypes = supportedPaymentMethods.map { it.code }.toSet()
-        return supportedTypes.intersect(requestedTypes).isNotEmpty()
+        val availableTypes = availablePaymentMethods.map { it.code }.toSet()
+        return availableTypes.intersect(requestedTypes).isNotEmpty()
     }
 }
 

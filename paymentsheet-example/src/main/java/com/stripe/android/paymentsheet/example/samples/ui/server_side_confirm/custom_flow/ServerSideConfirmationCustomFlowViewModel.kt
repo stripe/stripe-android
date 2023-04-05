@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.example.samples.networking.toCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.toCreateIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.toUpdateRequest
+import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowViewModel.ConfigureResult
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -42,7 +43,7 @@ import kotlin.Result
 import kotlin.time.Duration.Companion.milliseconds
 import com.github.kittinunf.result.Result as ApiResult
 
-private typealias ConfigureHandler = suspend (CartState) -> Throwable?
+private typealias ConfigureHandler = suspend (CartState) -> ConfigureResult
 
 internal class ServerSideConfirmationCustomFlowViewModel(
     application: Application,
@@ -221,9 +222,14 @@ internal class ServerSideConfirmationCustomFlowViewModel(
         cartState: CartState,
     ): Result<CartState> {
         return configureHandler?.let { configure ->
-            val configureError = configure(cartState)
-            if (configureError != null) {
-                Result.failure(configureError)
+            val result = configure(cartState)
+
+            _state.update {
+                it.copy(paymentOption = result.paymentOption)
+            }
+
+            if (result.error != null) {
+                Result.failure(result.error)
             } else {
                 Result.success(cartState)
             }
@@ -290,6 +296,11 @@ internal class ServerSideConfirmationCustomFlowViewModel(
             }
         }
     }
+
+    data class ConfigureResult(
+        val paymentOption: PaymentOption?,
+        val error: Throwable?,
+    )
 
     companion object {
         const val backendUrl = "https://stripe-mobile-payment-sheet-custom-deferred.glitch.me"

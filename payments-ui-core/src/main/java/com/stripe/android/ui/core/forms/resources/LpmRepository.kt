@@ -69,7 +69,7 @@ class LpmRepository constructor(
 
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
 
-    val supportedPaymentMethods: List<String> by lazy {
+    val supportedPaymentMethodTypes: List<String> by lazy {
         listOf(
             PaymentMethod.Type.Card.code,
             PaymentMethod.Type.Bancontact.code,
@@ -201,7 +201,7 @@ class LpmRepository constructor(
     }
 
     private fun supportsPaymentMethod(paymentMethodCode: String): Boolean {
-        return supportedPaymentMethods.contains(paymentMethodCode)
+        return supportedPaymentMethodTypes.contains(paymentMethodCode)
     }
 
     private fun parseLpms(inputStream: InputStream?) =

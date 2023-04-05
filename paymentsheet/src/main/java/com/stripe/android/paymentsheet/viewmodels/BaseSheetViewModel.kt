@@ -258,9 +258,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
         _stripeIntent.value = stripeIntent
-
-        val pmsToAdd = getPMsToAdd(stripeIntent, config, lpmRepository)
-        supportedPaymentMethods = pmsToAdd
+        supportedPaymentMethods = getPMsToAdd(stripeIntent, config, lpmRepository)
 
         if (stripeIntent is PaymentIntent) {
             _amount.value = Amount(

@@ -168,7 +168,7 @@ class LpmRepositoryTest {
         lpmRepository.updateFromDisk(PaymentIntentFactory.create())
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
-        lpmRepository.supportedPaymentMethods.forEach { code ->
+        lpmRepository.supportedPaymentMethodTypes.forEach { code ->
             if (!hasEmptyForm(code)) {
                 assertThat(
                     lpmRepository.fromCode(code)!!.formSpec.items
