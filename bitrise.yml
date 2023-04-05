@@ -51,11 +51,10 @@ workflows:
       - script@1:
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
-      - custom-test-results-export@0:
+      - custom-test-results-export@1:
           inputs:
             - search_pattern:
               - '**/build/reports/tests/*'
-              - '**/out/failures/*'
             - test_name: Test results
       - deploy-to-bitrise-io@2: {}
       - cache-push@2: {}
