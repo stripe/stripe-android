@@ -22,6 +22,9 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.stateIn
@@ -316,6 +319,162 @@ class USBankAccountFormViewModelTest {
             )
         }
 
+    @Test
+    fun `Test defaults are used when not collecting fields if they are attached`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetails = PaymentSheet.BillingDetails(
+                            name = CUSTOMER_NAME,
+                            email = CUSTOMER_EMAIL,
+                            phone = CUSTOMER_PHONE,
+                            address = CUSTOMER_ADDRESS,
+                        ),
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                            attachDefaultsToPaymentMethod = true,
+                            name = CollectionMode.Never,
+                            email = CollectionMode.Never,
+                            phone = CollectionMode.Never,
+                            address = AddressCollectionMode.Never,
+                        )
+                    ),
+                ),
+            )
+
+            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_NAME)
+            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_EMAIL)
+            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_PHONE)
+            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_ADDRESS.asAddressModel())
+            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
+        }
+
+    @Test
+    fun `Test defaults are only used for fields that are being collected`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetails = PaymentSheet.BillingDetails(
+                            name = CUSTOMER_NAME,
+                            email = CUSTOMER_EMAIL,
+                            phone = CUSTOMER_PHONE,
+                            address = CUSTOMER_ADDRESS,
+                        ),
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                            attachDefaultsToPaymentMethod = false,
+                            name = CollectionMode.Always,
+                            email = CollectionMode.Always,
+                            phone = CollectionMode.Never,
+                            address = AddressCollectionMode.Never,
+                        )
+                    ),
+                ),
+            )
+
+            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_NAME)
+            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_EMAIL)
+            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
+        }
+
+    @Test
+    fun `Test form is invalid when name and email are not collected and don't have defaults`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetails = PaymentSheet.BillingDetails(
+                            phone = CUSTOMER_PHONE,
+                            address = CUSTOMER_ADDRESS,
+                        ),
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                            attachDefaultsToPaymentMethod = true,
+                            name = CollectionMode.Never,
+                            email = CollectionMode.Never,
+                            phone = CollectionMode.Always,
+                            address = AddressCollectionMode.Full,
+                        )
+                    ),
+                ),
+            )
+
+            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value).isEmpty()
+            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_PHONE)
+            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_ADDRESS.asAddressModel())
+            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
+        }
+
+    @Test
+    fun `Test defaults are not used when not collecting fields if not attached`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetails = PaymentSheet.BillingDetails(
+                            name = CUSTOMER_NAME,
+                            email = CUSTOMER_EMAIL,
+                            phone = CUSTOMER_PHONE,
+                            address = CUSTOMER_ADDRESS,
+                        ),
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                            attachDefaultsToPaymentMethod = false,
+                            name = CollectionMode.Never,
+                            email = CollectionMode.Never,
+                            phone = CollectionMode.Never,
+                            address = AddressCollectionMode.Never,
+                        )
+                    ),
+                ),
+            )
+
+            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value).isEmpty()
+            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
+        }
+
+    @Test
+    fun `Test all collected fields are required`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetails = PaymentSheet.BillingDetails(
+                            name = CUSTOMER_NAME,
+                            email = CUSTOMER_EMAIL,
+                        ),
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                            attachDefaultsToPaymentMethod = true,
+                            name = CollectionMode.Always,
+                            email = CollectionMode.Always,
+                            phone = CollectionMode.Always,
+                            address = AddressCollectionMode.Full,
+                        )
+                    ),
+                ),
+            )
+
+            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_NAME)
+            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_EMAIL)
+            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
+        }
+
     private fun createViewModel(
         args: USBankAccountFormViewModel.Args = defaultArgs
     ): USBankAccountFormViewModel {
@@ -402,6 +561,15 @@ class USBankAccountFormViewModelTest {
         const val CUSTOMER_NAME = "Jenny Rose"
         const val CUSTOMER_EMAIL = "email@email.com"
         const val STRIPE_ACCOUNT_ID = "stripe_account_id"
+        const val CUSTOMER_PHONE = "+13105551234"
+        val CUSTOMER_ADDRESS = PaymentSheet.Address(
+            line1 = "123 Main Street",
+            line2 = "Apt 456",
+            city = "San Francisco",
+            state = "CA",
+            postalCode = "94111",
+            country = "US",
+        )
     }
 }
 
