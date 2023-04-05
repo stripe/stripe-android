@@ -129,6 +129,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     }
 
     @Composable
+    @Suppress("LongMethod")
     private fun FinancialConnectionsContent(
         state: FinancialConnectionsPlaygroundState,
         onButtonClick: (Mode, Flow, Pair<String, String>) -> Unit

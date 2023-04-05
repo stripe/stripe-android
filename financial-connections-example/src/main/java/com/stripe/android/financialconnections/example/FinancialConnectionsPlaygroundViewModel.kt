@@ -65,7 +65,11 @@ class FinancialConnectionsPlaygroundViewModel(
                         current.copy(
                             publishableKey = it.publishableKey,
                             loading = true,
-                            status = current.status + "Payment Intent created ${it.intentSecret}, opening FinancialConnectionsSheet."
+                            status = current.status + buildString {
+                                append("Payment Intent created: ${it.intentSecret}")
+                                appendLine()
+                                append("Opening FinancialConnectionsSheet.")
+                            }
                         )
                     }
                     _viewEffect.emit(
