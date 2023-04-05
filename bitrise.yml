@@ -92,7 +92,7 @@ workflows:
       - wait-for-android-emulator@1: { }
       - script@1:
           inputs:
-            - content: ./gradlew connectedAndroidTest executeScreenshotTests
+            - content: ./gradlew connectedAndroidTest executeScreenshotTests --continue
       - custom-test-results-export@1:
           inputs:
             - test_name: Test Results
