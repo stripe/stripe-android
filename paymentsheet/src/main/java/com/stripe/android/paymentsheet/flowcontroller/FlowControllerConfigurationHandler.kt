@@ -32,7 +32,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     ) {
         job?.cancel()
 
-        val completableJob = Job().apply {
+        job = Job().apply {
             invokeOnCompletion { error ->
                 if (error !is CancellationException) {
                     callback.onConfigured(
@@ -44,14 +44,12 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             }
         }
 
-        scope.launch(completableJob) {
+        scope.launch(job!!) {
             configureInternal(
                 initializationMode = initializationMode,
                 configuration = configuration,
             )
         }
-
-        job = completableJob
     }
 
     private suspend fun configureInternal(
