@@ -35,6 +35,11 @@ class StripeImageLoaderTest {
     )
 
     @Test
+    fun testFailure() {
+        assertThat(false).isTrue()
+    }
+
+    @Test
     fun `load - if image available in memory cache, return it and don't reach other sources`() =
         runTest {
             memoryCacheReturns(key, mockBitmap)
