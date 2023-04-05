@@ -627,8 +627,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 }
 
-@VisibleForTesting
-fun Address.asFormFieldValues(): Map<IdentifierSpec, String?> = mapOf(
+internal fun Address.asFormFieldValues(): Map<IdentifierSpec, String?> = mapOf(
     IdentifierSpec.Line1 to line1,
     IdentifierSpec.Line2 to line2,
     IdentifierSpec.City to city,
@@ -637,8 +636,7 @@ fun Address.asFormFieldValues(): Map<IdentifierSpec, String?> = mapOf(
     IdentifierSpec.PostalCode to postalCode,
 )
 
-@VisibleForTesting
-fun Address.Companion.fromFormFieldValues(formFieldValues: Map<IdentifierSpec, String?>) =
+internal fun Address.Companion.fromFormFieldValues(formFieldValues: Map<IdentifierSpec, String?>) =
     Address(
         line1 = formFieldValues[IdentifierSpec.Line1],
         line2 = formFieldValues[IdentifierSpec.Line2],
@@ -648,8 +646,7 @@ fun Address.Companion.fromFormFieldValues(formFieldValues: Map<IdentifierSpec, S
         postalCode = formFieldValues[IdentifierSpec.PostalCode],
     )
 
-@VisibleForTesting
-fun PaymentSheet.Address.asAddressModel() =
+internal fun PaymentSheet.Address.asAddressModel() =
     Address(
         line1 = line1,
         line2 = line2,
