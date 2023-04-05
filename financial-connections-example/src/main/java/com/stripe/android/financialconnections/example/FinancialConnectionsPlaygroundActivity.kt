@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -132,9 +134,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     @Suppress("LongMethod")
     private fun FinancialConnectionsContent(
         state: FinancialConnectionsPlaygroundState,
-        onButtonClick: (Mode, Flow, Pair<String, String>) -> Unit
+        onButtonClick: (Merchant, Flow, Pair<String, String>) -> Unit
     ) {
-        val (selectedMode, onModeSelected) = remember { mutableStateOf(Mode.values()[0]) }
+        val (selectedMode, onModeSelected) = remember { mutableStateOf(Merchant.values()[0]) }
         val (selectedFlow, onFlowSelected) = remember { mutableStateOf(Flow.values()[0]) }
         val (publicKey, onPublicKeyChanged) = remember { mutableStateOf("") }
         val (secretKey, onSecretKeyChanged) = remember { mutableStateOf("") }
@@ -148,8 +150,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                         .padding(16.dp)
                 ) {
                     NativeOverrideSection()
-                    ModeSection(selectedMode, onModeSelected)
-                    if (selectedMode == Mode.Other) {
+                    MerchantSection(selectedMode, onModeSelected)
+                    if (selectedMode == Merchant.Other) {
                         OutlinedTextField(
                             value = publicKey,
                             onValueChange = onPublicKeyChanged,
@@ -167,6 +169,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                                 .fillMaxWidth()
                         )
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
                     FlowSection(selectedFlow, onFlowSelected)
                     if (state.loading) {
                         LinearProgressIndicator(
@@ -244,14 +247,14 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun ModeSection(
-        selectedOption: Mode,
-        onOptionSelected: (Mode) -> Unit
+    private fun MerchantSection(
+        selectedOption: Merchant,
+        onOptionSelected: (Merchant) -> Unit
     ) {
         var expanded by remember { mutableStateOf(false) }
-        val items = Mode.values()
+        val items = Merchant.values()
         Text(
-            text = "Mode",
+            text = "Merchant",
             style = MaterialTheme.typography.h6.merge(),
         )
         val icon = if (expanded) {
@@ -259,6 +262,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         } else {
             Icons.Filled.KeyboardArrowDown
         }
+        Spacer(modifier = Modifier.height(8.dp))
         Box {
             OutlinedTextField(
                 readOnly = true,

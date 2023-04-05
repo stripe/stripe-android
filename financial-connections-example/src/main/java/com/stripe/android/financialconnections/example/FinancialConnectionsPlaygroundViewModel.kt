@@ -37,25 +37,25 @@ class FinancialConnectionsPlaygroundViewModel(
     }
 
     fun startFinancialConnectionsSession(
-        mode: Mode,
+        merchant: Merchant,
         flow: Flow,
         keys: Pair<String, String>
     ) {
         _state.update { it.copy(status = emptyList()) }
         when (flow) {
-            Flow.Data -> startForData(mode, keys)
-            Flow.Token -> startForToken(mode, keys)
-            Flow.PaymentIntent -> startWithPaymentIntent(mode, keys)
+            Flow.Data -> startForData(merchant, keys)
+            Flow.Token -> startForToken(merchant, keys)
+            Flow.PaymentIntent -> startWithPaymentIntent(merchant, keys)
         }
     }
 
-    private fun startWithPaymentIntent(mode: Mode, keys: Pair<String, String>) {
+    private fun startWithPaymentIntent(merchant: Merchant, keys: Pair<String, String>) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createPaymentIntent(
                     country = "US",
-                    flow = mode.flow,
+                    flow = merchant.flow,
                     keys = keys
                 )
             }
@@ -84,12 +84,12 @@ class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForData(mode: Mode, keys: Pair<String, String>) {
+    private fun startForData(merchant: Merchant, keys: Pair<String, String>) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createLinkAccountSession(
-                    flow = mode.flow,
+                    flow = merchant.flow,
                     keys = keys
                 )
             }
@@ -111,12 +111,12 @@ class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun startForToken(mode: Mode, keys: Pair<String, String>) {
+    private fun startForToken(merchant: Merchant, keys: Pair<String, String>) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
                 repository.createLinkAccountSessionForToken(
-                    flow = mode.flow,
+                    flow = merchant.flow,
                     keys = keys
                 )
             }
@@ -214,7 +214,7 @@ class FinancialConnectionsPlaygroundViewModel(
     )
 }
 
-enum class Mode(val flow: String) {
+enum class Merchant(val flow: String) {
     Test("testmode"), Live("mx"), App2App("app2app"), Other("other")
 }
 
