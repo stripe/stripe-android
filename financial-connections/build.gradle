@@ -5,6 +5,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'app.cash.paparazzi'
+apply plugin: 'com.google.devtools.ksp'
 
 android {
     defaultConfig {
@@ -51,7 +52,7 @@ dependencies {
 
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
-    kaptDebug "com.airbnb.android:showkase-processor:$showkaseVersion"
+    kspDebug "com.airbnb.android:showkase-processor:$showkaseVersion"
 
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
