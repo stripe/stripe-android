@@ -41,7 +41,6 @@ import com.stripe.android.paymentsheet.model.create
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
-import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -211,7 +210,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             formFieldValues.all { it.second.isComplete }
         }
     ) { validName, validEmail, validPhone, validAddress ->
-            validName && validEmail &&
+        validName && validEmail &&
             (validPhone || collectionConfiguration.phone != CollectionMode.Always) &&
             (validAddress || collectionConfiguration.address != AddressCollectionMode.Full)
     }.stateIn(
