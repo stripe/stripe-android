@@ -38,16 +38,12 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
@@ -87,25 +83,6 @@ internal class PaymentOptionsActivityTest {
 
     private val eventReporter = mock<EventReporter>()
     private lateinit var injector: NonFallbackInjector
-    private val lpmRepository = mock<LpmRepository>().apply {
-        whenever(fromCode(any())).thenReturn(
-            LpmRepository.SupportedPaymentMethod(
-                PaymentMethod.Type.Card.code,
-                false,
-                com.stripe.android.ui.core.R.string.stripe_paymentsheet_payment_method_card,
-                com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
-                null,
-                null,
-                true,
-                PaymentMethodRequirements(emptySet(), emptySet(), true),
-                LayoutSpec.create(
-                    EmailSpec(),
-                    SaveForFutureUseSpec()
-                )
-            )
-        )
-        whenever(serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
-    }
 
     private val ActivityPaymentOptionsBinding.continueButton: PrimaryButton
         get() = root.findViewById(R.id.primary_button)
@@ -125,7 +102,7 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `click outside of bottom sheet should return cancel result`() {
+    fun `click outside of bottom sheet before selection should return cancel result without selection`() {
         runActivityScenario {
             it.onActivity { activity ->
                 activity.viewBinding.root.performClick()
@@ -142,22 +119,34 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `click outside of bottom sheet should return cancel result even if there is a selection`() {
-        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(isGooglePayReady = true)
+        val initialSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.createCard(),
+        )
+
+        val usBankAccount = PaymentMethodFixtures.US_BANK_ACCOUNT
+        val paymentMethods = listOf(initialSelection.paymentMethod, usBankAccount)
+
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentSelection = initialSelection,
+            paymentMethods = paymentMethods,
+        )
 
         runActivityScenario(args) {
             it.onActivity { activity ->
+                // We use US Bank Account because they don't dismiss PaymentSheet upon selection
+                // due to their mandate requirement.
+                val usBankAccountLabel = usBankAccount.getLabel(context.resources)
                 composeTestRule
-                    .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_Google Pay")
+                    .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_$usBankAccountLabel")
                     .performClick()
 
                 activity.viewBinding.root.performClick()
                 activity.finish()
             }
 
-            assertThat(
-                PaymentOptionResult.fromIntent(it.getResult().resultData)
-            ).isEqualTo(
-                PaymentOptionResult.Canceled(null, PaymentSelection.GooglePay, listOf())
+            val result = PaymentOptionResult.fromIntent(it.getResult().resultData)
+            assertThat(result).isEqualTo(
+                PaymentOptionResult.Canceled(null, initialSelection, paymentMethods)
             )
         }
     }
@@ -346,10 +335,22 @@ internal class PaymentOptionsActivityTest {
             onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
         }
 
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Context>().resources,
+            ),
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+        ).apply {
+            update(
+                stripeIntent = args.state.stripeIntent,
+                serverLpmSpecs = null,
+            )
+        }
+
         val viewModel = TestViewModelFactory.create(
             linkLauncher = linkPaymentLauncher,
         ) { linkHandler, savedStateHandle ->
-            registerFormViewModelInjector()
+            registerFormViewModelInjector(lpmRepository)
             PaymentOptionsViewModel(
                 args = args,
                 prefsRepositoryFactory = { FakePrefsRepository() },
@@ -375,7 +376,9 @@ internal class PaymentOptionsActivityTest {
         scenario.launchForResult(intent).use(block)
     }
 
-    private fun registerFormViewModelInjector() {
+    private fun registerFormViewModelInjector(
+        lpmRepository: LpmRepository,
+    ) {
         val formViewModel = FormViewModel(
             context = context,
             formArguments = FormArguments(
