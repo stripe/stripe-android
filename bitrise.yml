@@ -90,10 +90,18 @@ workflows:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
       - wait-for-android-emulator@1: { }
-      - script-runner@0:
-          title: Execute instrumentation tests
+      - script@1:
           inputs:
-            - file_path: ./scripts/execute_instrumentation_tests.sh
+            - content: ./gradlew connectedAndroidTest executeScreenshotTests
+      - custom-test-results-export@0:
+          inputs:
+            - test_name: Test Results
+            - search_pattern: |-
+                '*/build/reports/tests/'
+                '*/out/failures/'
+                '*/build/reports/shot/'
+                '*/build/tmp/shot/screenshot/'
+      - deploy-to-bitrise-io@2: {}
       - cache-push@2: { }
 meta:
   bitrise.io:
