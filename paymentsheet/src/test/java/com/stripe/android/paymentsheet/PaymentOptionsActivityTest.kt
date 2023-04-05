@@ -358,7 +358,7 @@ internal class PaymentOptionsActivityTest {
     @Test
     fun `Clears error on user selection`() {
         val scenario = activityScenario()
-        scenario.launch(createIntent()).onActivity { activity ->
+        scenario.launch(createIntent()).onActivity {
             val text = "some error"
             viewModel.onError(text)
 

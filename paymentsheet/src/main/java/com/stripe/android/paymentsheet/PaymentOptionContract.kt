@@ -36,6 +36,7 @@ internal class PaymentOptionContract :
     ) : ActivityStarter.Args {
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {
+                @Suppress("DEPRECATION")
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
         }

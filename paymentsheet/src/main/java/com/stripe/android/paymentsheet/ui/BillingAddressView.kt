@@ -399,6 +399,7 @@ internal class BillingAddressView @JvmOverloads constructor(
                 InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER
 
             override fun getKeyListener(): KeyListener {
+                @Suppress("DEPRECATION")
                 return DigitsKeyListener.getInstance(false, true)
             }
         }

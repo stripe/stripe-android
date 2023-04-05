@@ -75,6 +75,7 @@ internal class USBankAccountFormFragment : Fragment() {
     private val paymentSheetViewModelFactory: ViewModelProvider.Factory by lazy {
         PaymentSheetViewModel.Factory {
             requireNotNull(
+                @Suppress("DEPRECATION")
                 requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
             )
         }
@@ -83,6 +84,7 @@ internal class USBankAccountFormFragment : Fragment() {
     private val paymentOptionsViewModelFactory: ViewModelProvider.Factory by lazy {
         PaymentOptionsViewModel.Factory {
             requireNotNull(
+                @Suppress("DEPRECATION")
                 requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
             )
         }
