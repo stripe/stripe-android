@@ -4,7 +4,7 @@ set -o pipefail
 set -x
 
 # Install Maestro
-curl -Ls "https://get.maestro.mobile.dev" | bash
+export MAESTRO_VERSION=1.21.3; curl -Ls "https://get.maestro.mobile.dev" | bash
 export PATH="$PATH":"$HOME/.maestro/bin"
 maestro -v
 
