@@ -98,6 +98,7 @@ workflows:
             - test_name: Test Results
             - search_pattern:
               - '*/build/reports/tests/*'
+              - '*/build/reports/androidTests/*'
               - '*/out/failures/*'
               - '*/build/reports/shot/*'
               - '*/build/tmp/shot/screenshot/*'
