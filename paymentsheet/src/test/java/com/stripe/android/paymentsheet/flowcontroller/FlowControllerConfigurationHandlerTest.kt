@@ -118,7 +118,7 @@ class FlowControllerConfigurationHandlerTest {
     }
 
     @Test
-    fun `configure() should re-run CHANGED config during second config`() = runTest {
+    fun `configure() should re-run CHANGED config if the initialization mode changed`() = runTest {
         val countDownLatch = CountDownLatch(1)
         val configurationHandler = createConfigurationHandler()
 
@@ -147,8 +147,41 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
 
         // We're running a new config, so we DO expect an interaction.
-        verify(eventReporter)
-            .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+        verify(eventReporter).onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+    }
+
+    @Test
+    fun `configure() should re-run CHANGED config if the payment sheet config changed`() = runTest {
+        val countDownLatch = CountDownLatch(1)
+        val configurationHandler = createConfigurationHandler()
+        val initializationMode = createInitializationMode()
+
+        // Signaling we previously loaded elements session here.
+        viewModel.previousConfigureRequest = FlowControllerConfigurationHandler.ConfigureRequest(
+            initializationMode = initializationMode,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+        )
+        viewModel.paymentSelection = PaymentSelection.GooglePay
+
+        val newConfigureRequest = FlowControllerConfigurationHandler.ConfigureRequest(
+            initializationMode = initializationMode,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+        )
+
+        configurationHandler.configure(
+            initializationMode = newConfigureRequest.initializationMode,
+            configuration = newConfigureRequest.configuration,
+        ) { success, exception ->
+            assertThat(success).isTrue()
+            assertThat(exception).isNull()
+            countDownLatch.countDown()
+        }
+        assertThat(countDownLatch.await(0, TimeUnit.SECONDS)).isTrue()
+        assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
+
+        // We're running a new config, so we DO expect an interaction.
+        verify(eventReporter).onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
     }
 
     @Test
