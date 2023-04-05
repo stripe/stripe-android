@@ -36,7 +36,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -265,8 +264,6 @@ internal class USBankAccountFormFragment : Fragment() {
             BillingDetailsForm(
                 screenState.name,
                 screenState.email,
-                screenState.phone,
-                screenState.address,
             )
         }
     }
@@ -279,8 +276,6 @@ internal class USBankAccountFormFragment : Fragment() {
             BillingDetailsForm(
                 screenState.name,
                 screenState.email,
-                screenState.phone,
-                screenState.address,
             )
             AccountDetailsForm(
                 screenState.paymentAccount.institutionName,
@@ -298,8 +293,6 @@ internal class USBankAccountFormFragment : Fragment() {
             BillingDetailsForm(
                 screenState.name,
                 screenState.email,
-                screenState.phone,
-                screenState.address,
             )
             AccountDetailsForm(
                 screenState.paymentAccount.bankName,
@@ -317,8 +310,6 @@ internal class USBankAccountFormFragment : Fragment() {
             BillingDetailsForm(
                 screenState.name,
                 screenState.email,
-                screenState.phone,
-                screenState.address,
             )
             AccountDetailsForm(
                 screenState.bankName,
@@ -329,12 +320,7 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     @Composable
-    private fun BillingDetailsForm(
-        name: String,
-        email: String?,
-        phone: String?,
-        address: Address?,
-    ) {
+    private fun BillingDetailsForm(name: String, email: String?) {
         val processing = viewModel.processing.collectAsState(false)
         Column(Modifier.fillMaxWidth()) {
             H6Text(
