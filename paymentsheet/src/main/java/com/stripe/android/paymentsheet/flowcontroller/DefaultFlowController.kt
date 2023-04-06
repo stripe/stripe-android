@@ -224,14 +224,15 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     override fun presentPaymentOptions() {
-        val state = runCatching {
-            requireNotNull(viewModel.state)
-        }.getOrElse {
-            error(
-                "FlowController must be successfully initialized using " +
-                    "configureWithPaymentIntent() or configureWithSetupIntent() " +
-                    "before calling presentPaymentOptions()"
-            )
+        val state = viewModel.state ?: error(
+            "FlowController must be successfully initialized " +
+                "using ${formattedConfigureMethodNames()} before calling presentPaymentOptions()."
+        )
+
+        if (configurationHandler.isConfiguring || viewModel.didLastConfigurationFail) {
+            // "Cannot call presentPaymentOptions when the last update call
+            // has not yet finished or failed."
+            return
         }
 
         paymentOptionActivityLauncher.launch(
@@ -246,21 +247,27 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     override fun confirm() {
-        val state = runCatching {
-            requireNotNull(viewModel.state)
-        }.getOrElse {
-            error(
-                "FlowController must be successfully initialized using " +
-                    "configureWithPaymentIntent() or configureWithSetupIntent() " +
-                    "before calling confirm()"
+        val state = viewModel.state ?: error(
+            "FlowController must be successfully initialized " +
+                "using ${formattedConfigureMethodNames()} before calling confirm()."
+        )
+
+        if (configurationHandler.isConfiguring || viewModel.didLastConfigurationFail) {
+            val error = IllegalStateException(
+                "FlowController.confirm() can only be called if the most recent call " +
+                    "to ${formattedConfigureMethodNames()} has completed successfully."
             )
+            onPaymentResult(PaymentResult.Failed(error))
+            return
         }
 
         when (val paymentSelection = viewModel.paymentSelection) {
-            PaymentSelection.GooglePay -> launchGooglePay(state)
-            PaymentSelection.Link,
+            is PaymentSelection.GooglePay -> launchGooglePay(state)
+            is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
-            else -> confirmPaymentSelection(paymentSelection, state)
+            is PaymentSelection.New,
+            is PaymentSelection.Saved,
+            null -> confirmPaymentSelection(paymentSelection, state)
         }
     }
 
@@ -529,6 +536,26 @@ internal class DefaultFlowController @Inject internal constructor(
         is LinkActivityResult.Completed -> PaymentResult.Completed
         is LinkActivityResult.Canceled -> PaymentResult.Canceled
         is LinkActivityResult.Failed -> PaymentResult.Failed(error)
+    }
+
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
+    private fun formattedConfigureMethodNames(): String {
+        val configureMethods = listOf(
+            this::configureWithPaymentIntent,
+            this::configureWithSetupIntent,
+            this::configureWithIntentConfiguration,
+        ).map { it.name }
+
+        return buildString {
+            configureMethods.forEachIndexed { index, method ->
+                append("$method()")
+                if (index == configureMethods.lastIndex - 1) {
+                    append(" or ")
+                } else if (index < configureMethods.lastIndex) {
+                    append(", ")
+                }
+            }
+        }
     }
 
     class GooglePayException(

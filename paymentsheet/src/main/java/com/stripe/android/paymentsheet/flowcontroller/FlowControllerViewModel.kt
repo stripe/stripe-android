@@ -22,6 +22,7 @@ internal class FlowControllerViewModel(
 
     // Used to determine if we need to reload the flow controller configuration.
     var previousConfigureRequest: FlowControllerConfigurationHandler.ConfigureRequest? = null
+    var didLastConfigurationFail: Boolean = false
 
     var state: PaymentSheetState.Full?
         get() = handle[STATE_KEY]

@@ -27,6 +27,9 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
     private val job: AtomicReference<Job?> = AtomicReference(null)
 
+    val isConfiguring: Boolean
+        get() = job.get() != null
+
     fun configure(
         scope: CoroutineScope,
         initializationMode: PaymentSheet.InitializationMode,
@@ -52,6 +55,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     ) {
         suspend fun onConfigured(error: Throwable? = null) {
             withContext(uiContext) {
+                viewModel.didLastConfigurationFail = error != null
                 resetJob()
                 callback.onConfigured(success = error == null, error = error)
             }
