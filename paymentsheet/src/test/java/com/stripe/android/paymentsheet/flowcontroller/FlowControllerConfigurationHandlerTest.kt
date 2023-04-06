@@ -345,6 +345,31 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(completedCall).isEqualTo(amounts.last())
     }
 
+    @Test
+    fun `Cancels current configure job if coroutine scope is canceled`() = runTest {
+        val configurationHandler = createConfigurationHandler(
+            FakePaymentSheetLoader(
+                customerPaymentMethods = emptyList(),
+                delay = 1.seconds,
+            )
+        )
+
+        configurationHandler.configure(
+            scope = testScope,
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                ),
+            configuration = null,
+            callback = { _, _ ->
+                throw AssertionError("Shouldn't have called ConfigCallback")
+            },
+        )
+
+        testScope.advanceTimeBy(500L)
+        testScope.cancel()
+        testScope.advanceTimeBy(1_000L)
+    }
+
     private fun defaultPaymentSheetLoader(): PaymentSheetLoader {
         return FakePaymentSheetLoader(
             customerPaymentMethods = emptyList(),
