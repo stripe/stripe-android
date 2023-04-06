@@ -28,7 +28,6 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.forms.FormFieldEntry
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,10 +63,10 @@ internal class VerificationScreenTest {
     }
 
     @Test
-    @Ignore("Tests failing due to CI script. To be re-enabled in a follow up.")
     fun resend_code_button_triggers_action() {
         var count = 0
         setContent(
+            isSendingNewCode = false,
             onResendCodeClick = {
                 count++
             }
@@ -180,6 +179,7 @@ internal class VerificationScreenTest {
         email: String = "test@stripe.com",
         otpElement: OTPElement = OTPSpec.transform(),
         isProcessing: Boolean = false,
+        isSendingNewCode: Boolean = true,
         errorMessage: ErrorMessage? = null,
         onBack: () -> Unit = { },
         onChangeEmailClick: () -> Unit = { },
@@ -191,7 +191,7 @@ internal class VerificationScreenTest {
                 messageStringResId = R.string.verification_message,
                 showChangeEmailMessage = true,
                 redactedPhoneNumber = redactedPhoneNumber,
-                isSendingNewCode = true,
+                isSendingNewCode = isSendingNewCode,
                 email = email,
                 otpElement = otpElement,
                 isProcessing = isProcessing,
