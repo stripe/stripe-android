@@ -68,11 +68,11 @@ internal class AddressElementActivity : ComponentActivity() {
         setContent {
             val modalBottomSheetState = rememberModalBottomSheetState(
                 initialValue = ModalBottomSheetValue.Hidden,
-                skipHalfExpanded = true,
-                confirmStateChange = {
+                confirmValueChange = {
                     val route = navController.currentDestination?.route
                     route != AddressElementScreen.Autocomplete.route
-                }
+                },
+                skipHalfExpanded = false,
             )
 
             navController = rememberAnimatedNavController()

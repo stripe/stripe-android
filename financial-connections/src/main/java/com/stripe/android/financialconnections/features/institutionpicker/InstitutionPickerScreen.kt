@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -53,6 +54,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -83,7 +85,7 @@ import com.stripe.android.uicore.image.StripeImage
 internal fun InstitutionPickerScreen() {
     val viewModel: InstitutionPickerViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
-    val state by viewModel.collectAsState()
+    val state: InstitutionPickerState by viewModel.collectAsState()
 
     // when in search mode, back closes search.
     val focusManager = LocalFocusManager.current
@@ -97,7 +99,7 @@ internal fun InstitutionPickerScreen() {
         institutionsProvider = { state.searchInstitutions },
         searchMode = state.searchMode,
         // This is just used to provide a text in Compose previews
-        previewText = null,
+        previewText = state.previewText,
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCancelSearchClick = viewModel::onCancelSearchClick,
@@ -404,14 +406,17 @@ private fun InstitutionResultTile(
         val modifier = Modifier
             .size(36.dp)
             .clip(RoundedCornerShape(6.dp))
-        StripeImage(
-            url = institution.icon?.default ?: "",
-            imageLoader = LocalImageLoader.current,
-            contentDescription = null,
-            modifier = modifier,
-            contentScale = ContentScale.Crop,
-            errorContent = { InstitutionPlaceholder(modifier) }
-        )
+        when {
+            institution.icon?.default.isNullOrEmpty() -> InstitutionPlaceholder(modifier)
+            else -> StripeImage(
+                url = requireNotNull(institution.icon?.default),
+                imageLoader = LocalImageLoader.current,
+                contentDescription = null,
+                modifier = modifier,
+                contentScale = ContentScale.Crop,
+                errorContent = { InstitutionPlaceholder(modifier) }
+            )
+        }
         Spacer(modifier = Modifier.size(8.dp))
         Column {
             Text(
@@ -474,36 +479,22 @@ private fun FeaturedInstitutionsGrid(
                                 ),
                             ) { onInstitutionSelected(institution, true) }
                     ) {
-                        StripeImage(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(8.dp),
-                            url = institution.logo?.default ?: "",
-                            imageLoader = LocalImageLoader.current,
-                            contentScale = ContentScale.Fit,
-                            loadingContent = {
-                                LoadingShimmerEffect { shimmer ->
-                                    Spacer(
-                                        modifier = Modifier
-                                            .align(Alignment.Center)
-                                            .height(20.dp)
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .fillMaxWidth(fraction = 0.5f)
-                                            .background(shimmer)
-                                    )
-                                }
-                            },
-                            errorContent = {
-                                Text(
-                                    modifier = Modifier.align(Alignment.Center),
-                                    text = institution.name,
-                                    color = FinancialConnectionsTheme.colors.textPrimary,
-                                    style = FinancialConnectionsTheme.typography.bodyEmphasized,
-                                    textAlign = TextAlign.Center
-                                )
-                            },
-                            contentDescription = "Institution logo"
-                        )
+                        when {
+                            institution.logo?.default.isNullOrBlank() ->
+                                FeaturedInstitutionPlaceholder(institution)
+
+                            else -> StripeImage(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp),
+                                url = requireNotNull(institution.logo?.default),
+                                imageLoader = LocalImageLoader.current,
+                                contentScale = ContentScale.Fit,
+                                loadingContent = { FeaturedInstitutionLoading() },
+                                errorContent = { FeaturedInstitutionPlaceholder(institution) },
+                                contentDescription = "Institution logo"
+                            )
+                        }
                     }
                 }
             }
@@ -511,14 +502,40 @@ private fun FeaturedInstitutionsGrid(
     )
 }
 
-@Preview(group = "Institutions Pane", name = "initialLoading")
 @Composable
-internal fun InitialLoading(
-    state: InstitutionPickerState = InstitutionPickerStates.initialLoading()
+private fun BoxScope.FeaturedInstitutionLoading() {
+    LoadingShimmerEffect { shimmer ->
+        Spacer(
+            modifier = Modifier.Companion
+                .align(Alignment.Center)
+                .height(20.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .fillMaxWidth(fraction = 0.5f)
+                .background(shimmer)
+        )
+    }
+}
+
+@Composable
+private fun BoxScope.FeaturedInstitutionPlaceholder(institution: FinancialConnectionsInstitution) {
+    Text(
+        modifier = Modifier.Companion.align(Alignment.Center),
+        text = institution.name,
+        color = FinancialConnectionsTheme.colors.textPrimary,
+        style = FinancialConnectionsTheme.typography.bodyEmphasized,
+        textAlign = TextAlign.Center
+    )
+}
+
+@Preview(group = "Institution Picker Pane")
+@Composable
+internal fun InstitutionPickerPreview(
+    @PreviewParameter(InstitutionPickerPreviewParameterProvider::class)
+    state: InstitutionPickerState
 ) {
     FinancialConnectionsPreview {
         InstitutionPickerContent(
-            previewText = "",
+            previewText = state.previewText,
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
@@ -527,166 +544,6 @@ internal fun InitialLoading(
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {}
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeSearchingInstitutions")
-@Composable
-internal fun SearchModeSearchingInstitutions(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeSearchingInstitutions()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeWithResults")
-@Composable
-internal fun SearchModeWithResults(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeWithResults()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeWithResultsNoManualEntry")
-@Composable
-internal fun SearchModeWithResultsNoManualEntry(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeWithResultsNoManualEntry()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeNoResults")
-@Composable
-internal fun SearchModeNoResults(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeNoResults()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeNoResultsNoManualEntry")
-@Composable
-internal fun SearchModeNoResultsNoManualEntry(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeNoResultsNoManualEntry()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeFailed")
-@Composable
-internal fun SearchModeFailed(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeFailed()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "searchModeFailedNoManualEntry")
-@Composable
-internal fun SearchModeFailedNoManualEntry(
-    state: InstitutionPickerState = InstitutionPickerStates.searchModeFailedNoManualEntry()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "Some query",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
-        ) {}
-    }
-}
-
-@Preview(group = "Institutions Pane", name = "noSearchMode")
-@Composable
-internal fun NoSearchMode(
-    state: InstitutionPickerState = InstitutionPickerStates.noSearchMode()
-) {
-    FinancialConnectionsPreview {
-        InstitutionPickerContent(
-            previewText = "",
-            payload = state.payload,
-            institutionsProvider = { state.searchInstitutions },
-            searchMode = state.searchMode,
-            onQueryChanged = {},
-            onInstitutionSelected = { _, _ -> },
-            onCancelSearchClick = {},
-            onCloseClick = {},
-            onSearchFocused = {},
         ) {}
     }
 }

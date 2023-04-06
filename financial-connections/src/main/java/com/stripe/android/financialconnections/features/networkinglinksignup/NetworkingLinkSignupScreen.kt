@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -41,10 +42,7 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupViewModel.Companion.PANE
-import com.stripe.android.financialconnections.model.Bullet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.NetworkingLinkSignupBody
-import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
@@ -59,9 +57,7 @@ import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.model.ConsumerSessionLookup
-import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
-import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import kotlinx.coroutines.flow.first
@@ -353,27 +349,14 @@ internal fun EmailSection(
 }
 
 @Composable
-@Preview(group = "NetworkingLinkSignup Pane", name = "Entering email")
-internal fun NetworkingLinkSignupScreenEnteringEmailPreview() {
+@Preview(group = "NetworkingLinkSignup Pane")
+internal fun NetworkingLinkSignupScreenPreview(
+    @PreviewParameter(NetworkingLinkSignupPreviewParameterProvider::class)
+    state: NetworkingLinkSignupState
+) {
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
-            state = NetworkingLinkSignupState(
-                payload = Success(
-                    Payload(
-                        merchantName = "Test",
-                        emailController = EmailConfig.createController(""),
-                        phoneController = PhoneNumberController.createPhoneNumberController(
-                            initialValue = "",
-                            initiallySelectedCountryCode = null,
-                        ),
-                        content = networkingLinkSignupPane()
-                    )
-                ),
-                validEmail = null,
-                validPhone = null,
-                lookupAccount = Uninitialized,
-                saveAccountToLink = Uninitialized
-            ),
+            state = state,
             onCloseClick = {},
             onSaveToLink = {},
             onClickableTextClick = {},
@@ -382,58 +365,3 @@ internal fun NetworkingLinkSignupScreenEnteringEmailPreview() {
         )
     }
 }
-
-@Composable
-@Preview(group = "NetworkingLinkSignup Pane", name = "Entering phone")
-internal fun NetworkingLinkSignupScreenEnteringPhonePreview() {
-    FinancialConnectionsPreview {
-        NetworkingLinkSignupContent(
-            state = NetworkingLinkSignupState(
-                payload = Success(
-                    Payload(
-                        merchantName = "Test",
-                        emailController = EmailConfig.createController("email"),
-                        phoneController = PhoneNumberController.createPhoneNumberController(
-                            initialValue = "",
-                            initiallySelectedCountryCode = null,
-                        ),
-                        content = networkingLinkSignupPane()
-                    )
-                ),
-                validEmail = "test@test.com",
-                validPhone = null,
-                lookupAccount = Success(
-                    ConsumerSessionLookup(
-                        exists = false,
-                        consumerSession = null,
-                        errorMessage = null
-                    )
-                ),
-                saveAccountToLink = Uninitialized
-            ),
-            onCloseClick = {},
-            onSaveToLink = {},
-            onClickableTextClick = {},
-            onCloseFromErrorClick = {},
-            onSkipClick = {}
-        )
-    }
-}
-
-@Composable
-private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(
-    aboveCta = "By saving your account to Link, you agree to Link’s Terms and Privacy Policy",
-    body = NetworkingLinkSignupBody(
-        listOf(
-            Bullet(
-                title = "Connect your account faster on RandomBusiness and everywhere Link is accepted.",
-            ),
-            Bullet(
-                title = "Link encrypts your data and never shares your login details.",
-            ),
-        )
-    ),
-    cta = "Save to Link",
-    skipCta = "Not now",
-    title = "Save your account to Link"
-)

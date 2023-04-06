@@ -5,6 +5,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'app.cash.paparazzi'
+apply plugin: 'com.google.devtools.ksp'
 
 android {
     defaultConfig {
@@ -51,14 +52,14 @@ dependencies {
 
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
-    kaptDebug "com.airbnb.android:showkase-processor:$showkaseVersion"
+    kspDebug "com.airbnb.android:showkase-processor:$showkaseVersion"
 
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation 'com.google.testparameterinjector:test-parameter-injector:1.10'
+    testImplementation 'com.google.testparameterinjector:test-parameter-injector:1.11'
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
@@ -83,13 +84,18 @@ dependencies {
 
     // Test rules and transitive dependencies:
     androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 android {
     buildFeatures {
         compose true
+    }
+
+    kotlinOptions {
+        freeCompilerArgs += [
+                "-Xopt-in=kotlin.RequiresOptIn",
+                "-Xopt-in=androidx.compose.material.ExperimentalMaterialApi"
+        ]
     }
 
     composeOptions {

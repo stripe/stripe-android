@@ -106,7 +106,6 @@ class TestFieldPopulation {
 
     @Ignore("Testing of dropdowns is not yet supported")
     fun testDropdowns() {
-
     }
 
     @Test

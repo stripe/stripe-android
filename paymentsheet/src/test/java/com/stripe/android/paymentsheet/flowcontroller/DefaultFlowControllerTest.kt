@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
@@ -1055,6 +1056,7 @@ internal class DefaultFlowControllerTest {
         )
     }
 
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private fun createAndConfigureFlowControllerForDeferredIntent(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     ): DefaultFlowController {
@@ -1121,6 +1123,7 @@ internal class DefaultFlowControllerTest {
             uiContext = testDispatcher,
             eventReporter = eventReporter,
             viewModel = viewModel,
+            paymentSelectionUpdater = { _, newState -> newState.paymentSelection },
         ),
         intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
     )

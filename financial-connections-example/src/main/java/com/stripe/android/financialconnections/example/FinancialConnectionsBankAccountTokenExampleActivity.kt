@@ -4,9 +4,9 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.financialconnections.example.databinding.ActivityFinancialconnectionsExampleBinding
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetExample
+import com.stripe.android.financialconnections.example.databinding.ActivityFinancialconnectionsExampleBinding
 
 class FinancialConnectionsBankAccountTokenExampleActivity : AppCompatActivity() {
 

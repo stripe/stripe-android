@@ -7,8 +7,13 @@ import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.CardBillingSpec
+import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
+import com.stripe.android.ui.core.elements.ContactInformationSpec
 import com.stripe.android.ui.core.elements.EmptyFormSpec
+import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -163,7 +168,7 @@ class LpmRepositoryTest {
         lpmRepository.updateFromDisk(PaymentIntentFactory.create())
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
-        lpmRepository.supportedPaymentMethods.forEach { code ->
+        lpmRepository.supportedPaymentMethodTypes.forEach { code ->
             if (!hasEmptyForm(code)) {
                 assertThat(
                     lpmRepository.fromCode(code)!!.formSpec.items
@@ -346,5 +351,48 @@ class LpmRepositoryTest {
 
         val supportedPaymentMethods = lpmRepository.values().map { it.code }
         assertThat(supportedPaymentMethods).containsExactly(Card.code, CashAppPay.code)
+    }
+
+    @Test
+    fun `Card contains fields according to billing details collection configuration`() {
+        lpmRepository.update(
+            PaymentIntentFactory.create(paymentMethodTypes = listOf("card")),
+            """
+          [
+            {
+                "type": "card",
+                "async": false,
+                "fields": []
+            }
+         ]
+            """.trimIndent(),
+            BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            )
+        )
+
+        val card = lpmRepository.fromCode("card")!!
+        // Contact information, Card information, Billing address and Save for future use.
+        assertThat(card.formSpec.items.size).isEqualTo(4)
+        assertThat(card.formSpec.items[0]).isInstanceOf(ContactInformationSpec::class.java)
+        assertThat(card.formSpec.items[1]).isInstanceOf(CardDetailsSectionSpec::class.java)
+        assertThat(card.formSpec.items[2]).isInstanceOf(CardBillingSpec::class.java)
+        assertThat(card.formSpec.items[3]).isInstanceOf(SaveForFutureUseSpec::class.java)
+
+        val contactInfoSpec = card.formSpec.items[0] as ContactInformationSpec
+        // Name is collected in the card details section.
+        assertThat(contactInfoSpec.collectName).isFalse()
+        assertThat(contactInfoSpec.collectEmail).isTrue()
+        assertThat(contactInfoSpec.collectPhone).isFalse()
+
+        val cardSpec = card.formSpec.items[1] as CardDetailsSectionSpec
+        assertThat(cardSpec.collectName).isTrue()
+
+        val addressSpec = card.formSpec.items[2] as CardBillingSpec
+        assertThat(addressSpec.collectionMode)
+            .isEqualTo(BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
     }
 }

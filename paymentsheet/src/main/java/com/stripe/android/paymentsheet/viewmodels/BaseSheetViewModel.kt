@@ -258,58 +258,17 @@ internal abstract class BaseSheetViewModel(
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
         _stripeIntent.value = stripeIntent
-
-        val pmsToAdd = getPMsToAdd(stripeIntent, config, lpmRepository)
-        supportedPaymentMethods = pmsToAdd
-
-        if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
-            onFatal(
-                IllegalArgumentException(
-                    "None of the requested payment methods" +
-                        " (${stripeIntent.paymentMethodTypes})" +
-                        " match the supported payment types" +
-                        " (${
-                        lpmRepository.values()
-                            .map { it.code }.toList()
-                        })"
-                )
-            )
-        }
+        supportedPaymentMethods = getPMsToAdd(stripeIntent, config, lpmRepository)
 
         if (stripeIntent is PaymentIntent) {
-            runCatching {
-                _amount.value = Amount(
-                    requireNotNull(stripeIntent.amount),
-                    requireNotNull(stripeIntent.currency)
-                )
-            }.onFailure {
-                onFatal(
-                    IllegalStateException("PaymentIntent must contain amount and currency.")
-                )
-            }
-        }
-
-        if (stripeIntent != null) {
-            warnUnactivatedIfNeeded(stripeIntent.unactivatedPaymentMethods)
+            _amount.value = Amount(
+                requireNotNull(stripeIntent.amount),
+                requireNotNull(stripeIntent.currency)
+            )
         }
     }
 
     abstract fun clearErrorMessages()
-
-    private fun warnUnactivatedIfNeeded(unactivatedPaymentMethodTypes: List<String>) {
-        if (unactivatedPaymentMethodTypes.isEmpty()) {
-            return
-        }
-
-        val message = "[Stripe SDK] Warning: Your Intent contains the following payment method " +
-            "types which are activated for test mode but not activated for " +
-            "live mode: $unactivatedPaymentMethodTypes. These payment method types will not be " +
-            "displayed in live mode until they are activated. To activate these payment method " +
-            "types visit your Stripe dashboard." +
-            "More information: https://support.stripe.com/questions/activate-a-new-payment-method"
-
-        logger.warning(message)
-    }
 
     fun updatePrimaryButtonForLinkSignup(viewState: InlineSignupViewState) {
         val uiState = primaryButtonUiState.value ?: return

@@ -56,6 +56,7 @@ object FormItemSpecSerializer :
             "card_details" -> CardDetailsSectionSpec.serializer()
             "card_billing" -> CardBillingSpec.serializer()
             "upi" -> UpiSpec.serializer()
+            "placeholder" -> PlaceholderSpec.serializer()
             else -> EmptyFormSpec.serializer()
         }
     }

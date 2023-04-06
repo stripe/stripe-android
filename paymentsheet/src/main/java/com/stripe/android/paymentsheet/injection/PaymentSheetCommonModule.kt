@@ -16,6 +16,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
+import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -58,6 +60,11 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsIntentConfirmationInterceptor(
         impl: DefaultIntentConfirmationInterceptor,
     ): IntentConfirmationInterceptor
+
+    @Binds
+    abstract fun bindsPaymentSheetUpdater(
+        impl: DefaultPaymentSelectionUpdater,
+    ): PaymentSelectionUpdater
 
     companion object {
         /**

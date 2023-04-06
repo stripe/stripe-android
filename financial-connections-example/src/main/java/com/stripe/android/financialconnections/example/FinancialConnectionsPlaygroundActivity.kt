@@ -9,8 +9,12 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -67,7 +71,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         collectBankAccountLauncher = CollectBankAccountLauncher.create(
-            this, viewModel::onCollectBankAccountLauncherResult
+            this,
+            viewModel::onCollectBankAccountLauncherResult
         )
         setContent {
             FinancialConnectionsScreen()
@@ -93,7 +98,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         val financialConnectionsSheetForToken = rememberFinancialConnectionsSheetForToken(
             viewModel::onFinancialConnectionsSheetForTokenResult
         )
-
 
         LaunchedEffect(viewEffect) {
             viewEffect?.let {
@@ -128,12 +132,15 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     }
 
     @Composable
+    @Suppress("LongMethod")
     private fun FinancialConnectionsContent(
         state: FinancialConnectionsPlaygroundState,
-        onButtonClick: (Mode, Flow, String) -> Unit
+        onButtonClick: (Merchant, Flow, Pair<String, String>, String) -> Unit
     ) {
-        val (selectedMode, onModeSelected) = remember { mutableStateOf(Mode.values()[0]) }
+        val (selectedMode, onModeSelected) = remember { mutableStateOf(Merchant.values()[0]) }
         val (selectedFlow, onFlowSelected) = remember { mutableStateOf(Flow.values()[0]) }
+        val (publicKey, onPublicKeyChanged) = remember { mutableStateOf("") }
+        val (secretKey, onSecretKeyChanged) = remember { mutableStateOf("") }
         val (email, onEmailChange) = remember { mutableStateOf("") }
 
         Scaffold(
@@ -145,7 +152,26 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                         .padding(16.dp)
                 ) {
                     NativeOverrideSection()
-                    ModeSection(selectedMode, onModeSelected)
+                    MerchantSection(selectedMode, onModeSelected)
+                    if (selectedMode == Merchant.Other) {
+                        OutlinedTextField(
+                            value = publicKey,
+                            onValueChange = onPublicKeyChanged,
+                            placeholder = { Text("pk_...") },
+                            label = { Text("Public key") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                        OutlinedTextField(
+                            value = secretKey,
+                            onValueChange = onSecretKeyChanged,
+                            placeholder = { Text("sk_...") },
+                            label = { Text("Secret key") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                     FlowSection(selectedFlow, onFlowSelected)
                     EmailInputSection(email, onEmailChange)
                     if (state.loading) {
@@ -163,6 +189,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                             onButtonClick(
                                 selectedMode,
                                 selectedFlow,
+                                publicKey to secretKey,
                                 email
                             )
                         },
@@ -186,7 +213,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 }
             }
         )
-
     }
 
     @Composable
@@ -194,7 +220,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         email: String,
         onEmailChange: (String) -> Unit
     ) {
-
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = email,
@@ -240,20 +265,22 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun ModeSection(
-        selectedOption: Mode,
-        onOptionSelected: (Mode) -> Unit
+    private fun MerchantSection(
+        selectedOption: Merchant,
+        onOptionSelected: (Merchant) -> Unit
     ) {
         var expanded by remember { mutableStateOf(false) }
-        val items = Mode.values()
+        val items = Merchant.values()
         Text(
-            text = "Mode",
+            text = "Merchant",
             style = MaterialTheme.typography.h6.merge(),
         )
-        val icon = if (expanded)
+        val icon = if (expanded) {
             Icons.Filled.KeyboardArrowUp
-        else
+        } else {
             Icons.Filled.KeyboardArrowDown
+        }
+        Spacer(modifier = Modifier.height(8.dp))
         Box {
             OutlinedTextField(
                 readOnly = true,
@@ -262,8 +289,11 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 modifier = Modifier
                     .fillMaxWidth(),
                 trailingIcon = {
-                    Icon(icon, "Mode_Dropdown_Icon",
-                        Modifier.clickable { expanded = !expanded })
+                    Icon(
+                        icon,
+                        "Mode_Dropdown_Icon",
+                        Modifier.clickable { expanded = !expanded }
+                    )
                 }
             )
             DropdownMenu(
@@ -280,15 +310,16 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                         onClick = {
                             onOptionSelected(items[index])
                             expanded = false
-                        }) {
+                        }
+                    ) {
                         Text(text = mode.name)
-
                     }
                 }
             }
         }
     }
 
+    @OptIn(ExperimentalLayoutApi::class)
     @Composable
     private fun FlowSection(
         selectedOption: Flow,
@@ -298,7 +329,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             text = "Flow",
             style = MaterialTheme.typography.h6.merge(),
         )
-        Row(
+        FlowRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Flow.values().forEach { text ->
@@ -327,7 +358,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 publishableKey = "pk",
                 status = listOf("Result: Pending")
             ),
-            onButtonClick = { _, _, _ -> }
+            onButtonClick = { _, _, _, _ -> }
         )
     }
 }

@@ -8,9 +8,8 @@ import app.cash.turbine.testIn
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentIntentResult
-import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkPaymentLauncher
@@ -45,7 +44,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPay
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -470,9 +468,9 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `onPaymentResult() should update ViewState and save new payment method`() =
+    fun `onPaymentResult() should update ViewState and not save new payment method`() =
         runTest {
-            val viewModel = createViewModel(stripeIntent = PAYMENT_INTENT_WITH_PM)
+            val viewModel = createViewModel(stripeIntent = PAYMENT_INTENT)
 
             val selection = PaymentSelection.New.Card(
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -503,22 +501,13 @@ internal class PaymentSheetViewModelTest {
                     currency = "usd"
                 )
 
-            assertThat(prefsRepository.paymentSelectionArgs)
-                .containsExactly(
-                    PaymentSelection.Saved(
-                        PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!
-                    )
-                )
+            assertThat(prefsRepository.paymentSelectionArgs).isEmpty()
             assertThat(
                 prefsRepository.getSavedSelection(
                     isGooglePayAvailable = true,
                     isLinkAvailable = true
                 )
-            ).isEqualTo(
-                SavedSelection.PaymentMethod(
-                    PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!.id!!
-                )
-            )
+            ).isEqualTo(SavedSelection.None)
 
             resultTurbine.cancel()
             viewStateTurbine.cancel()
@@ -526,7 +515,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onPaymentResult() with non-success outcome should report failure event`() = runTest {
-        val viewModel = createViewModel(shouldFailLoad = true)
+        val viewModel = createViewModel()
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(selection)
 
@@ -539,7 +528,7 @@ internal class PaymentSheetViewModelTest {
                 )
 
             val stripeIntent = awaitItem()
-            assertThat(stripeIntent).isNull()
+            assertThat(stripeIntent).isEqualTo(PAYMENT_INTENT)
         }
     }
 
@@ -582,23 +571,6 @@ internal class PaymentSheetViewModelTest {
         viewModel.paymentSheetResult.test {
             assertThat(awaitItem())
                 .isInstanceOf(PaymentSheetResult.Failed::class.java)
-        }
-    }
-
-    @Test
-    fun `when StripeIntent does not accept any of the supported payment methods should return error`() = runTest {
-        val viewModel = createViewModel(
-            stripeIntent = PAYMENT_INTENT.copy(
-                paymentMethodTypes = listOf("unsupported_payment_type"),
-            ),
-        )
-
-        viewModel.paymentSheetResult.test {
-            assertThat((awaitItem() as? PaymentSheetResult.Failed)?.error?.message)
-                .startsWith(
-                    "None of the requested payment methods ([unsupported_payment_type]) " +
-                        "match the supported payment types "
-                )
         }
     }
 
@@ -1314,7 +1286,6 @@ internal class PaymentSheetViewModelTest {
                 args,
                 eventReporter,
                 { paymentConfiguration },
-                ElementsSessionRepository.Static(stripeIntent),
                 StripeIntentValidator(),
                 FakePaymentSheetLoader(
                     stripeIntent = stripeIntent,
@@ -1338,6 +1309,7 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private fun createViewModelForDeferredIntent(
         args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
@@ -1363,13 +1335,5 @@ internal class PaymentSheetViewModelTest {
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-
-        val PAYMENT_INTENT_WITH_PM = PaymentIntentFixtures.PI_SUCCEEDED.copy(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        )
-        val PAYMENT_INTENT_RESULT_WITH_PM = PaymentIntentResult(
-            intent = PAYMENT_INTENT_WITH_PM,
-            outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
-        )
     }
 }

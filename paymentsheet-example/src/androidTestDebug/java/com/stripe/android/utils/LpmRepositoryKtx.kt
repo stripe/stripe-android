@@ -11,7 +11,7 @@ internal fun initializedLpmRepository(context: Context): LpmRepository {
 
     repository.update(
         stripeIntent = PaymentIntentFactory.create(
-            paymentMethodTypes = repository.supportedPaymentMethods,
+            paymentMethodTypes = repository.supportedPaymentMethodTypes,
         ),
         serverLpmSpecs = null,
     )

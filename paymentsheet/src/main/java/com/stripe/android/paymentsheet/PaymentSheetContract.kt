@@ -31,6 +31,7 @@ class PaymentSheetContract :
         resultCode: Int,
         intent: Intent?
     ): PaymentSheetResult {
+        @Suppress("DEPRECATION")
         val paymentResult = intent?.getParcelableExtra<PaymentSheetContractV2.Result>(EXTRA_RESULT)?.paymentSheetResult
         return paymentResult ?: PaymentSheetResult.Failed(
             IllegalArgumentException("Failed to retrieve a PaymentSheetResult.")
@@ -65,6 +66,7 @@ class PaymentSheetContract :
 
         companion object {
             internal fun fromIntent(intent: Intent): Args? {
+                @Suppress("DEPRECATION")
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
 

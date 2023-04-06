@@ -1,10 +1,8 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.core.injection.UIContext
-import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.validate
@@ -22,6 +20,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
+    private val paymentSelectionUpdater: PaymentSelectionUpdater,
 ) {
 
     suspend fun configure(
@@ -37,17 +36,19 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             return
         }
 
-        val elementsSessionParams = initializationMode.toElementsSessionParams(configuration)
-        val previousElementsSessionParams = viewModel.previousElementsSessionParams
-        if (elementsSessionParams == previousElementsSessionParams) {
+        val configureRequest = ConfigureRequest(initializationMode, configuration)
+        val canSkip = viewModel.previousConfigureRequest == configureRequest
+
+        if (canSkip) {
             callback.onConfigured(true, null)
             return
         }
+
         val result = paymentSheetLoader.load(initializationMode, configuration)
 
         if (currentCoroutineContext().isActive) {
-            viewModel.initializationMode = initializationMode
-            dispatchResult(result, callback, elementsSessionParams)
+            viewModel.previousConfigureRequest = configureRequest
+            dispatchResult(result, callback)
         } else {
             callback.onConfigured(false, null)
         }
@@ -56,11 +57,9 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private suspend fun dispatchResult(
         result: PaymentSheetLoader.Result,
         callback: PaymentSheet.FlowController.ConfigCallback,
-        elementsSessionParams: ElementsSessionParams,
     ) = withContext(uiContext) {
         when (result) {
             is PaymentSheetLoader.Result.Success -> {
-                viewModel.previousElementsSessionParams = elementsSessionParams
                 onInitSuccess(result.state, callback)
             }
             is PaymentSheetLoader.Result.Failure -> {
@@ -75,7 +74,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     ) {
         eventReporter.onInit(state.config)
 
-        viewModel.paymentSelection = PaymentSelectionUpdater.process(
+        viewModel.paymentSelection = paymentSelectionUpdater(
             currentSelection = viewModel.paymentSelection,
             newState = state,
         )
@@ -84,4 +83,9 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         callback.onConfigured(true, null)
     }
+
+    data class ConfigureRequest(
+        val initializationMode: PaymentSheet.InitializationMode,
+        val configuration: PaymentSheet.Configuration?,
+    )
 }

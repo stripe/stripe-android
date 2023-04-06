@@ -9,8 +9,6 @@ android {
 
 dependencies {
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
-
 }
 
 ext {

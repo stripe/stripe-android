@@ -2,12 +2,6 @@ apply from: configs.androidApplication
 
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
-assemble.dependsOn('lint')
-
-configurations {
-    ktlint
-}
-
 // Read values from gradle.properties or system environment variable
 def getBackendUrl() {
     return findProperty('STRIPE_EXAMPLE_BACKEND_URL') ?: ""
@@ -64,8 +58,6 @@ dependencies {
     // MdcTheme
     implementation "com.google.accompanist:accompanist-themeadapter-material:$accompanistVersion"
     // end of Jetpack Compose
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 
     testImplementation "androidx.test:core:$androidTestVersion"
 
@@ -144,22 +136,4 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
     }
-}
-
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "src/**/*.kt"
-    // to generate report in checkstyle format prepend following args:
-    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
-    // see https://github.com/pinterest/ktlint#usage for more
-}
-check.dependsOn ktlint
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
 }

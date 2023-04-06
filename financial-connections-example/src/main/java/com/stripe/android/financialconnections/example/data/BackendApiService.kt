@@ -28,6 +28,10 @@ interface BackendApiService {
 data class LinkAccountSessionBody(
     @SerializedName("flow")
     val flow: String?,
+    @SerializedName("custom_pk")
+    val publishableKey: String?,
+    @SerializedName("custom_sk")
+    val secretKey: String?,
     @SerializedName("customer_email")
     val customerEmail: String?
 )
@@ -42,6 +46,10 @@ data class PaymentIntentBody(
     val customerId: String?,
     @SerializedName("supported_payment_methods")
     val supportedPaymentMethods: String?,
+    @SerializedName("custom_pk")
+    val publishableKey: String?,
+    @SerializedName("custom_sk")
+    val secretKey: String?,
     @SerializedName("customer_email")
     val customerEmail: String?
 )

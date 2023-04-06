@@ -49,7 +49,10 @@ internal class DefaultPaymentSheetLoaderTest {
 
     private val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
     private val lpmRepository = LpmRepository(
-        LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)
+        arguments = LpmRepository.LpmRepositoryArguments(
+            resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        ),
+        lpmInitialFormData = LpmRepository.LpmInitialFormData(),
     ).apply {
         this.update(
             PaymentIntentFactory.create(
@@ -515,6 +518,23 @@ internal class DefaultPaymentSheetLoaderTest {
         val expectedElements = listOf(lastUsed) + (paymentMethods - lastUsed)
 
         assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @Test
+    fun `Returns failure if StripeIntent does not contain any supported payment method type`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("gold", "silver", "bronze"),
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+        ) as? PaymentSheetLoader.Result.Failure
+
+        val expectedMessage = "None of the requested payment methods (gold, silver, bronze) " +
+            "match the supported payment types (card, us_bank_account)."
+        assertThat(result?.throwable?.message).isEqualTo(expectedMessage)
     }
 
     private fun createPaymentSheetLoader(

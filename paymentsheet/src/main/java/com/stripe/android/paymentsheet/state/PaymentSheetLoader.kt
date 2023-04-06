@@ -19,9 +19,11 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
 import kotlinx.coroutines.async
@@ -46,7 +48,7 @@ internal interface PaymentSheetLoader {
 
     sealed class Result {
         data class Success(val state: PaymentSheetState.Full) : Result()
-        class Failure(val throwable: Throwable) : Result()
+        data class Failure(val throwable: Throwable) : Result()
     }
 }
 
@@ -71,12 +73,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     ): PaymentSheetLoader.Result = withContext(workContext) {
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
 
-        runCatching {
-            retrieveElementsSession(
-                initializationMode = initializationMode,
-                configuration = paymentSheetConfiguration,
-            )
-        }.fold(
+        retrieveElementsSession(
+            initializationMode = initializationMode,
+            configuration = paymentSheetConfiguration,
+        ).fold(
             onSuccess = { stripeIntent ->
                 create(
                     stripeIntent = stripeIntent,
@@ -170,16 +170,30 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             }
         }
 
-        return@coroutineScope PaymentSheetLoader.Result.Success(
-            PaymentSheetState.Full(
-                config = config,
-                stripeIntent = stripeIntent,
-                customerPaymentMethods = sortedPaymentMethods.await(),
-                isGooglePayReady = isGooglePayReady,
-                linkState = linkState.await(),
-                paymentSelection = initialPaymentSelection.await(),
+        warnUnactivatedIfNeeded(stripeIntent)
+
+        if (supportsIntent(stripeIntent, config)) {
+            PaymentSheetLoader.Result.Success(
+                PaymentSheetState.Full(
+                    config = config,
+                    stripeIntent = stripeIntent,
+                    customerPaymentMethods = sortedPaymentMethods.await(),
+                    isGooglePayReady = isGooglePayReady,
+                    linkState = linkState.await(),
+                    paymentSelection = initialPaymentSelection.await(),
+                )
             )
-        )
+        } else {
+            val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
+            val supported = lpmRepository.values().joinToString(separator = ", ") { it.code }
+
+            PaymentSheetLoader.Result.Failure(
+                IllegalArgumentException(
+                    "None of the requested payment methods ($requested) " +
+                        "match the supported payment types ($supported)."
+                )
+            )
+        }
     }
 
     private suspend fun retrieveCustomerPaymentMethods(
@@ -210,22 +224,22 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
-    ): StripeIntent {
-        val elementsSession = elementsSessionRepository.get(
-            initializationMode = initializationMode,
-            configuration = configuration,
-        )
+    ): Result<StripeIntent> {
+        return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
+            lpmRepository.update(
+                stripeIntent = elementsSession.stripeIntent,
+                serverLpmSpecs = elementsSession.paymentMethodSpecs,
+                billingDetailsCollectionConfiguration =
+                configuration?.billingDetailsCollectionConfiguration
+                    ?: BillingDetailsCollectionConfiguration(),
+            )
 
-        lpmRepository.update(
-            stripeIntent = elementsSession.stripeIntent,
-            serverLpmSpecs = elementsSession.paymentMethodSpecs,
-        )
+            if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
+                eventReporter.onLpmSpecFailure()
+            }
 
-        if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
-            eventReporter.onLpmSpecFailure()
+            stripeIntentValidator.requireValid(elementsSession.stripeIntent)
         }
-
-        return stripeIntentValidator.requireValid(elementsSession.stripeIntent)
     }
 
     private suspend fun loadLinkState(
@@ -284,6 +298,31 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             customerBillingCountryCode = config?.defaultBillingDetails?.address?.country,
             shippingValues = shippingAddress
         )
+    }
+
+    private fun warnUnactivatedIfNeeded(stripeIntent: StripeIntent) {
+        if (stripeIntent.unactivatedPaymentMethods.isEmpty()) {
+            return
+        }
+
+        val message = "[Stripe SDK] Warning: Your Intent contains the following payment method " +
+            "types which are activated for test mode but not activated for " +
+            "live mode: ${stripeIntent.unactivatedPaymentMethods}. These payment method types " +
+            "will not be displayed in live mode until they are activated. To activate these " +
+            "payment method types visit your Stripe dashboard." +
+            "More information: https://support.stripe.com/questions/activate-a-new-payment-method"
+
+        logger.warning(message)
+    }
+
+    private fun supportsIntent(
+        stripeIntent: StripeIntent,
+        config: PaymentSheet.Configuration?,
+    ): Boolean {
+        val availablePaymentMethods = getPMsToAdd(stripeIntent, config, lpmRepository)
+        val requestedTypes = stripeIntent.paymentMethodTypes.toSet()
+        val availableTypes = availablePaymentMethods.map { it.code }.toSet()
+        return availableTypes.intersect(requestedTypes).isNotEmpty()
     }
 }
 

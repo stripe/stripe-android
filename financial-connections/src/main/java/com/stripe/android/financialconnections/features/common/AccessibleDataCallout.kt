@@ -106,13 +106,16 @@ private fun AccountRow(
             val modifier = Modifier
                 .size(24.dp)
                 .clip(RoundedCornerShape(4.dp))
-            StripeImage(
-                url = iconUrl ?: "",
-                imageLoader = LocalImageLoader.current,
-                contentDescription = null,
-                modifier = modifier,
-                errorContent = { InstitutionPlaceholder(modifier) }
-            )
+            when {
+                iconUrl.isNullOrEmpty() -> InstitutionPlaceholder(modifier)
+                else -> StripeImage(
+                    url = iconUrl,
+                    imageLoader = LocalImageLoader.current,
+                    contentDescription = null,
+                    modifier = modifier,
+                    errorContent = { InstitutionPlaceholder(modifier) }
+                )
+            }
             Text(
                 text,
                 style = typography.captionTightEmphasized,

@@ -186,6 +186,8 @@ internal class InstitutionPickerViewModel @Inject constructor(
 }
 
 internal data class InstitutionPickerState(
+    // This is just used to provide a text in Compose previews
+    val previewText: String? = null,
     val searchMode: Boolean = false,
     val payload: Async<Payload> = Uninitialized,
     val searchInstitutions: Async<InstitutionResponse> = Uninitialized

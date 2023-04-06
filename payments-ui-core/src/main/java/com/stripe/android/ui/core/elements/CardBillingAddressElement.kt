@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.address.FieldType
 import com.stripe.android.uicore.elements.AddressElement
@@ -28,7 +29,9 @@ class CardBillingAddressElement(
         rawValuesMap[IdentifierSpec.Country]
     ),
     sameAsShippingElement: SameAsShippingElement?,
-    shippingValuesMap: Map<IdentifierSpec, String?>?
+    shippingValuesMap: Map<IdentifierSpec, String?>?,
+    private val collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode =
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
 ) : AddressElement(
     identifier,
     addressRepository,
@@ -43,17 +46,34 @@ class CardBillingAddressElement(
     // card and achv2 uses save for future use
     val hiddenIdentifiers: Flow<Set<IdentifierSpec>> =
         countryDropdownFieldController.rawFieldValue.map { countryCode ->
-            when (countryCode) {
-                "US", "GB", "CA" -> {
+            when (collectionMode) {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
                     FieldType.values()
-                        .filterNot { it == FieldType.PostalCode }
                         .map { it.identifierSpec }
                         .toSet()
                 }
-                else -> {
-                    FieldType.values()
-                        .map { it.identifierSpec }
-                        .toSet()
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
+                    emptySet()
+                }
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
+                    when (countryCode) {
+                        "US", "GB", "CA" -> {
+                            FieldType.values()
+                                // Filtering name causes the field to be hidden even outside
+                                // of this form.
+                                .filterNot { it == FieldType.PostalCode || it == FieldType.Name }
+                                .map { it.identifierSpec }
+                                .toSet()
+                        }
+                        else -> {
+                            FieldType.values()
+                                // Filtering name causes the field to be hidden even outside
+                                // of this form.
+                                .filterNot { it == FieldType.Name }
+                                .map { it.identifierSpec }
+                                .toSet()
+                        }
+                    }
                 }
             }
         }

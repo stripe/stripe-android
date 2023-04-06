@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MaxLineLength:FinancialConnectionsPlaygroundViewModel.kt$FinancialConnectionsPlaygroundViewModel$status = current.status + "Payment Intent created ${it.intentSecret}, opening FinancialConnectionsSheet."</ID>
+    <ID>MaximumLineLength:com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewModel.kt:61</ID>
+  </CurrentIssues>
+</SmellBaseline>

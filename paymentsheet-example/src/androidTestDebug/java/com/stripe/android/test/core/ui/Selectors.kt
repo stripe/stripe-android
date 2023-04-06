@@ -34,6 +34,7 @@ import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import java.util.Locale
 
@@ -106,6 +107,36 @@ class Selectors(
         testParameters.paymentMethod.displayNameResource
     )
 
+    val attachDefaults = if (testParameters.attachDefaults) {
+        EspressoIdButton(R.id.attach_defaults_on_button)
+    } else {
+        EspressoIdButton(R.id.attach_defaults_off_button)
+    }
+
+    val collectName = when (testParameters.collectName) {
+        BillingDetailsCollectionConfiguration.CollectionMode.Automatic -> EspressoIdButton(R.id.collect_name_radio_auto)
+        BillingDetailsCollectionConfiguration.CollectionMode.Always -> EspressoIdButton(R.id.collect_name_radio_always)
+        BillingDetailsCollectionConfiguration.CollectionMode.Never -> EspressoIdButton(R.id.collect_name_radio_never)
+    }
+
+    val collectEmail = when (testParameters.collectEmail) {
+        BillingDetailsCollectionConfiguration.CollectionMode.Automatic -> EspressoIdButton(R.id.collect_email_radio_auto)
+        BillingDetailsCollectionConfiguration.CollectionMode.Always -> EspressoIdButton(R.id.collect_email_radio_always)
+        BillingDetailsCollectionConfiguration.CollectionMode.Never -> EspressoIdButton(R.id.collect_email_radio_never)
+    }
+
+    val collectPhone = when (testParameters.collectPhone) {
+        BillingDetailsCollectionConfiguration.CollectionMode.Automatic -> EspressoIdButton(R.id.collect_phone_radio_auto)
+        BillingDetailsCollectionConfiguration.CollectionMode.Always -> EspressoIdButton(R.id.collect_phone_radio_always)
+        BillingDetailsCollectionConfiguration.CollectionMode.Never -> EspressoIdButton(R.id.collect_phone_radio_never)
+    }
+
+    val collectAddress = when (testParameters.collectAddress) {
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> EspressoIdButton(R.id.collect_address_radio_auto)
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> EspressoIdButton(R.id.collect_address_radio_full)
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> EspressoIdButton(R.id.collect_address_radio_never)
+    }
+
     val baseScreenshotFilenamePrefix = "info-" +
         getResourceString(paymentSelection.label) +
         "-" +
@@ -144,7 +175,6 @@ class Selectors(
             }
         }
 
-
     fun onGooglePayAvailable(availableCallable: () -> Unit, unavailableCallable: () -> Unit) {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val googlePayJsonFactory = GooglePayJsonFactory(context)
@@ -179,7 +209,6 @@ class Selectors(
                     unavailableCallable()
                 }
             }
-
     }
 
     private fun getInstalledPackages() = InstrumentationRegistry.getInstrumentation()

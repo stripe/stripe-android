@@ -14,17 +14,20 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CardDetailsSectionSpec(
     @SerialName("api_path")
-    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("card_details")
+    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("card_details"),
+    @SerialName("collect_name")
+    val collectName: Boolean = false,
 ) : FormItemSpec() {
     fun transform(
         context: Context,
         initialValues: Map<IdentifierSpec, String?>,
-        viewOnlyFields: Set<IdentifierSpec>
+        viewOnlyFields: Set<IdentifierSpec>,
     ): FormElement =
         CardDetailsSectionElement(
             context = context,
             initialValues = initialValues,
             viewOnlyFields = viewOnlyFields,
-            identifier = apiPath
+            identifier = apiPath,
+            collectName = collectName,
         )
 }

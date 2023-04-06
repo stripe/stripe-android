@@ -43,6 +43,7 @@ internal abstract class BasePrimaryButtonContainerFragment : Fragment() {
     private fun setupPrimaryButton() {
         val viewBinding = viewBinding ?: return
 
+        @Suppress("DEPRECATION")
         viewBinding.primaryButton.setAppearanceConfiguration(
             StripeTheme.primaryButtonStyle,
             tintList = viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(

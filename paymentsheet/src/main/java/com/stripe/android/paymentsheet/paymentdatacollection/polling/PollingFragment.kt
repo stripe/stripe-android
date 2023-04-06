@@ -26,6 +26,7 @@ private const val KEY_POLLING_ARGS = "KEY_POLLING_ARGS"
 internal class PollingFragment : BottomSheetDialogFragment() {
 
     private val args: PollingContract.Args by lazy {
+        @Suppress("DEPRECATION")
         requireNotNull(arguments?.getParcelable(KEY_POLLING_ARGS))
     }
 

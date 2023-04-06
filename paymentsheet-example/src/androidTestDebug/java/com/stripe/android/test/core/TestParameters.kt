@@ -2,6 +2,7 @@ package com.stripe.android.test.core
 
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 
 /**
@@ -30,6 +31,11 @@ data class TestParameters(
     val merchantCountryCode: String,
     val supportedPaymentMethods: List<PaymentMethodCode> = listOf(),
     val customPrimaryButtonLabel: String? = null,
+    val attachDefaults: Boolean = false,
+    val collectName: BillingDetailsCollectionConfiguration.CollectionMode = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+    val collectEmail: BillingDetailsCollectionConfiguration.CollectionMode = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+    val collectPhone: BillingDetailsCollectionConfiguration.CollectionMode = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+    val collectAddress: BillingDetailsCollectionConfiguration.AddressCollectionMode = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
 )
 
 /**
@@ -103,7 +109,6 @@ sealed interface AuthorizeAction {
         override val text: String = ""
     }
 }
-
 
 /**
  * Indicates how the payment intent should be set: PaymentIntent, PaymentIntent with
