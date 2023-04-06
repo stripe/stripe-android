@@ -9,6 +9,8 @@
 # Exclude any modules with screenshot tests here. Then run them with the screenshot test package excluded.
 ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest
 
+echo "test dir: $BITRISE_TEST_RESULT_DIR"
+
 if [ -d "$BITRISE_TEST_RESULT_DIR" ]; then
   mkdir -p "$BITRISE_TEST_RESULT_DIR/test_results"
 
