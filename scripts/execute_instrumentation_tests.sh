@@ -4,15 +4,7 @@
 # adb logcat -c
 # adb logcat &
 
-#set -e # Fail on error.
+set -e # Fail on error.
 
 # Exclude any modules with screenshot tests here. Then run them with the screenshot test package excluded.
-./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest
-
-echo "test dir: $BITRISE_TEST_RESULT_DIR"
-
-if [ -d "$BITRISE_TEST_RESULT_DIR" ]; then
-  mkdir -p "$BITRISE_TEST_RESULT_DIR/test_results"
-
-  find . -type d -regex '.*/build/reports/androidTests/connected$' -exec cp -R {} $BITRISE_TEST_RESULT_DIR/test_results \;
-fi
+./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :example:connectedAndroidTest
