@@ -28,15 +28,14 @@ internal sealed class USBankAccountFormScreenState(
             phone: String?,
             address: Address?,
             saveForFutureUsage: Boolean,
-        ) =
-            BillingDetailsCollection(
-                error = error,
-                name = name,
-                email = email,
-                phone = phone,
-                address = address,
-                primaryButtonText = primaryButtonText,
-            )
+        ) = BillingDetailsCollection(
+            error = error,
+            name = name,
+            email = email,
+            phone = phone,
+            address = address,
+            primaryButtonText = primaryButtonText,
+        )
     }
 
     data class MandateCollection(
@@ -57,14 +56,13 @@ internal sealed class USBankAccountFormScreenState(
             phone: String?,
             address: Address?,
             saveForFutureUsage: Boolean,
-        ) =
-            this.copy(
-                name = name,
-                email = email,
-                phone = phone,
-                address = address,
-                saveForFutureUsage = saveForFutureUsage,
-            )
+        ) = this.copy(
+            name = name,
+            email = email,
+            phone = phone,
+            address = address,
+            saveForFutureUsage = saveForFutureUsage,
+        )
     }
 
     data class VerifyWithMicrodeposits(
@@ -85,14 +83,13 @@ internal sealed class USBankAccountFormScreenState(
             phone: String?,
             address: Address?,
             saveForFutureUsage: Boolean,
-        ) =
-            this.copy(
-                name = name,
-                email = email,
-                phone = phone,
-                address = address,
-                saveForFutureUsage = saveForFutureUsage,
-            )
+        ) = this.copy(
+            name = name,
+            email = email,
+            phone = phone,
+            address = address,
+            saveForFutureUsage = saveForFutureUsage,
+        )
     }
 
     data class SavedAccount(
@@ -114,14 +111,13 @@ internal sealed class USBankAccountFormScreenState(
             phone: String?,
             address: Address?,
             saveForFutureUsage: Boolean,
-        ) =
-            this.copy(
-                name = name,
-                email = email,
-                phone = phone,
-                address = address,
-                saveForFutureUsage = saveForFutureUsage,
-            )
+        ) = this.copy(
+            name = name,
+            email = email,
+            phone = phone,
+            address = address,
+            saveForFutureUsage = saveForFutureUsage,
+        )
     }
 
     abstract fun updateInputs(
