@@ -18,6 +18,8 @@ dependencies {
     testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
     testImplementation "androidx.test:core-ktx:$androidTestVersion"
     testImplementation "androidx.lifecycle:lifecycle-runtime-testing:$androidxLifecycleVersion"
+
+    androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
 }
 
 ext {

@@ -23,10 +23,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
-import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import org.junit.Rule
 import org.junit.Test
@@ -66,6 +66,7 @@ internal class VerificationScreenTest {
     fun resend_code_button_triggers_action() {
         var count = 0
         setContent(
+            isSendingNewCode = false,
             onResendCodeClick = {
                 count++
             }
@@ -178,6 +179,7 @@ internal class VerificationScreenTest {
         email: String = "test@stripe.com",
         otpElement: OTPElement = OTPSpec.transform(),
         isProcessing: Boolean = false,
+        isSendingNewCode: Boolean = true,
         errorMessage: ErrorMessage? = null,
         onBack: () -> Unit = { },
         onChangeEmailClick: () -> Unit = { },
@@ -189,7 +191,7 @@ internal class VerificationScreenTest {
                 messageStringResId = R.string.verification_message,
                 showChangeEmailMessage = true,
                 redactedPhoneNumber = redactedPhoneNumber,
-                isSendingNewCode = true,
+                isSendingNewCode = isSendingNewCode,
                 email = email,
                 otpElement = otpElement,
                 isProcessing = isProcessing,

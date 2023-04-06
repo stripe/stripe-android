@@ -6,6 +6,8 @@ dependencies {
     implementation project(":payments-core")
     implementation testLibs.okhttpTls
     implementation "junit:junit:$junitVersion"
+
+    androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
 }
 
 android {

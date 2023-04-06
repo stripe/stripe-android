@@ -82,7 +82,7 @@ internal class SignUpScreenTest {
     fun header_message_is_correct() {
         setContent(SignUpState.InputtingEmail)
 
-        composeTestRule.onNodeWithText("Secure 1-click checkout").assertExists()
+        composeTestRule.onNodeWithText("Secure 1\u2060-\u2060click checkout").assertExists()
     }
 
     @Test
