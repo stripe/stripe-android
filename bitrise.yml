@@ -94,7 +94,7 @@ workflows:
           title: Execute instrumentation tests
           inputs:
             - file_path: ./scripts/execute_instrumentation_tests.sh
-      - custom-test-results-export@1:
+      - custom-test-results-export@0:
           inputs:
             - search_pattern: '*/build/reports/androidTests/*'
             - test_name: Test results
