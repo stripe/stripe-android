@@ -116,7 +116,6 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     }
 
     private companion object {
-        // TODO@carlosmuvi update consumer surface to be android specific.
-        private const val CONSUMER_SURFACE: String = "web_connections"
+        private const val CONSUMER_SURFACE: String = "android_connections"
     }
 }
