@@ -4,6 +4,8 @@
 # adb logcat -c
 # adb logcat &
 
+set -e # Fail on error.
+
 # Exclude any modules with screenshot tests here. Then run them with the screenshot test package excluded.
 ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest
 
