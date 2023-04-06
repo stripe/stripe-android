@@ -28,7 +28,7 @@ workflows:
     steps:
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@6: {}
+      - git-clone@8: {}
       - cache-pull@2: {}
       - script@1:
           title: Restore gradle.properties
@@ -42,7 +42,7 @@ workflows:
     steps:
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@6: {}
+      - git-clone@8: {}
       - cache-pull@2: {}
       - script@1:
           title: Restore gradle.properties
@@ -57,7 +57,7 @@ workflows:
       - avd-manager@1: {}
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@7.0: {}
+      - git-clone@8: {}
       - cache-pull@2: {}
       - script@1:
           title: Restore gradle.properties
@@ -84,16 +84,15 @@ workflows:
       - avd-manager@1: { }
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@7.0: { }
+      - git-clone@8: { }
       - cache-pull@2: { }
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
       - wait-for-android-emulator@1: { }
-      - script-runner@0:
-          title: Execute instrumentation tests
+      - script@1:
           inputs:
-            - file_path: ./scripts/execute_instrumentation_tests.sh
+            - content: ./gradlew connectedAndroidTest executeScreenshotTests --continue -x :example:connectedAndroidTest
       - cache-push@2: { }
 meta:
   bitrise.io:
