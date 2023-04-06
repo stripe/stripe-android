@@ -128,6 +128,22 @@ data class ExampleCreateAndConfirmIntentResponse(
     val clientSecret: String,
 )
 
+@Serializable
+data class ExampleCreateAndConfirmErrorResponse(
+    @SerialName("error")
+    val error: String? = null,
+) {
+    companion object {
+        fun deserialize(response: Response): ExampleCreateAndConfirmErrorResponse {
+            val body = response.body().asString("application/json")
+            return Json.decodeFromString(
+                serializer(),
+                body
+            )
+        }
+    }
+}
+
 /**
  * Awaits the [ApiResult] and deserializes it into the desired type [T].
  */
