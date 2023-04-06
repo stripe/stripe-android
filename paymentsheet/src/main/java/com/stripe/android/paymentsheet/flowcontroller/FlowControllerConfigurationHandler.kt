@@ -1,28 +1,30 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.validate
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.security.InvalidParameterException
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Singleton
 internal class FlowControllerConfigurationHandler @Inject constructor(
     private val paymentSheetLoader: PaymentSheetLoader,
+    @UIContext private val uiContext: CoroutineContext,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val paymentSelectionUpdater: PaymentSelectionUpdater,
 ) {
 
-    private var job: CompletableJob? = null
+    private var job: Job? = null
 
     fun configure(
         scope: CoroutineScope,
@@ -32,22 +34,11 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     ) {
         job?.cancel()
 
-        job = Job().apply {
-            invokeOnCompletion { error ->
-                if (error !is CancellationException) {
-                    callback.onConfigured(
-                        success = error == null,
-                        error = error,
-                    )
-                    job = null
-                }
-            }
-        }
-
-        scope.launch(job!!) {
+        job = scope.launch {
             configureInternal(
                 initializationMode = initializationMode,
                 configuration = configuration,
+                callback = callback,
             )
         }
     }
@@ -55,12 +46,20 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private suspend fun configureInternal(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
+        callback: PaymentSheet.FlowController.ConfigCallback,
     ) {
+        suspend fun onConfigured(error: Throwable? = null) {
+            withContext(uiContext) {
+                resetJob()
+                callback.onConfigured(success = error == null, error = error)
+            }
+        }
+
         try {
             initializationMode.validate()
             configuration?.validate()
         } catch (e: InvalidParameterException) {
-            job?.completeExceptionally(e)
+            onConfigured(error = e)
             return
         }
 
@@ -68,7 +67,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         val canSkip = viewModel.previousConfigureRequest == configureRequest
 
         if (canSkip) {
-            job?.complete()
+            onConfigured()
             return
         }
 
@@ -76,10 +75,10 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             is PaymentSheetLoader.Result.Success -> {
                 viewModel.previousConfigureRequest = configureRequest
                 onInitSuccess(result.state)
-                job?.complete()
+                onConfigured()
             }
             is PaymentSheetLoader.Result.Failure -> {
-                job?.completeExceptionally(result.throwable)
+                onConfigured(error = result.throwable)
             }
         }
     }
@@ -93,6 +92,10 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         )
 
         viewModel.state = state
+    }
+
+    private fun resetJob() {
+        job = null
     }
 
     data class ConfigureRequest(

@@ -368,6 +368,7 @@ class FlowControllerConfigurationHandlerTest {
     ): FlowControllerConfigurationHandler {
         return FlowControllerConfigurationHandler(
             paymentSheetLoader = paymentSheetLoader,
+            uiContext = testDispatcher,
             eventReporter = eventReporter,
             viewModel = viewModel,
             paymentSelectionUpdater = { _, newState -> newState.paymentSelection },

@@ -1120,6 +1120,7 @@ internal class DefaultFlowControllerTest {
         linkLauncher = linkPaymentLauncher,
         configurationHandler = FlowControllerConfigurationHandler(
             paymentSheetLoader = paymentSheetLoader,
+            uiContext = testDispatcher,
             eventReporter = eventReporter,
             viewModel = viewModel,
             paymentSelectionUpdater = { _, newState -> newState.paymentSelection },
