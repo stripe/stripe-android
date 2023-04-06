@@ -106,7 +106,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         get() = BillingDetailsCollectionConfiguration(
             name = collectName.asBillingDetailsCollectionConfigurationMode,
             email = collectEmail.asBillingDetailsCollectionConfigurationMode,
-            phone = collectEmail.asBillingDetailsCollectionConfigurationMode,
+            phone = collectPhone.asBillingDetailsCollectionConfigurationMode,
             address = collectAddress.asBillingAddressCollectionConfigurationMode,
             attachDefaultsToPaymentMethod = attachDefaultBillingAddress
         )
