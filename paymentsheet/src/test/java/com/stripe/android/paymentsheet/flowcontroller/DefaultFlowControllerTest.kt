@@ -1102,7 +1102,7 @@ internal class DefaultFlowControllerTest {
         paymentSheetLoader: PaymentSheetLoader,
         viewModel: FlowControllerViewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
     ) = DefaultFlowController(
-        lifecycleScope = testScope,
+        viewModelScope = testScope,
         lifecycleOwner = lifeCycleOwner,
         statusBarColor = { activity.window.statusBarColor },
         paymentOptionFactory = PaymentOptionFactory(activity.resources, StripeImageLoader(activity)),

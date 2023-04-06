@@ -66,7 +66,7 @@ import javax.inject.Provider
 @FlowControllerScope
 internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
-    private val lifecycleScope: CoroutineScope,
+    private val viewModelScope: CoroutineScope,
     lifecycleOwner: LifecycleOwner,
     private val statusBarColor: () -> Int?,
     private val paymentOptionFactory: PaymentOptionFactory,
@@ -209,9 +209,12 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
-        lifecycleScope.launch {
-            configurationHandler.configure(mode, configuration, callback)
-        }
+        configurationHandler.configure(
+            scope = viewModelScope,
+            initializationMode = mode,
+            configuration = configuration,
+            callback = callback,
+        )
     }
 
     override fun getPaymentOption(): PaymentOption? {
@@ -266,7 +269,7 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
     ) {
-        lifecycleScope.launch {
+        viewModelScope.launch {
             val stripeIntent = requireNotNull(state.stripeIntent)
 
             val nextStep = intentConfirmationInterceptor.intercept(
@@ -431,7 +434,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
     internal fun onPaymentResult(paymentResult: PaymentResult) {
         logPaymentResult(paymentResult)
-        lifecycleScope.launch {
+        viewModelScope.launch {
             paymentResultCallback.onPaymentSheetResult(
                 paymentResult.convertToPaymentSheetResult()
             )
@@ -464,7 +467,7 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         val linkConfig = requireNotNull(state.linkState).configuration
 
-        lifecycleScope.launch {
+        viewModelScope.launch {
             val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
 
             val linkInline = (paymentSelection as? PaymentSelection.New.LinkInline)?.takeIf {
@@ -503,7 +506,7 @@ internal class DefaultFlowController @Inject internal constructor(
         )
 
         googlePayPaymentMethodLauncherFactory.create(
-            lifecycleScope = lifecycleScope,
+            lifecycleScope = viewModelScope,
             config = googlePayPaymentLauncherConfig,
             readyCallback = {},
             activityResultLauncher = googlePayActivityLauncher,
