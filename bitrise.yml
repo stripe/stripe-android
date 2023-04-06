@@ -96,7 +96,7 @@ workflows:
             - file_path: ./scripts/execute_instrumentation_tests.sh
       - custom-test-results-export@0:
           inputs:
-            - search_pattern: '*/build/reports/androidTests/*'
+            - search_pattern: '*/build/reports/androidTests/connected/*'
             - test_name: Test results
       - deploy-to-bitrise-io@2: { }
       - cache-push@2: { }
