@@ -11,6 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.security.InvalidParameterException
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -24,7 +25,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private val paymentSelectionUpdater: PaymentSelectionUpdater,
 ) {
 
-    private var job: Job? = null
+    private val job: AtomicReference<Job?> = AtomicReference(null)
 
     fun configure(
         scope: CoroutineScope,
@@ -32,15 +33,16 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback,
     ) {
-        job?.cancel()
-
-        job = scope.launch {
-            configureInternal(
-                initializationMode = initializationMode,
-                configuration = configuration,
-                callback = callback,
-            )
-        }
+        val oldJob = job.getAndSet(
+            scope.launch {
+                configureInternal(
+                    initializationMode = initializationMode,
+                    configuration = configuration,
+                    callback = callback,
+                )
+            }
+        )
+        oldJob?.cancel()
     }
 
     private suspend fun configureInternal(
@@ -95,7 +97,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     }
 
     private fun resetJob() {
-        job = null
+        job.set(null)
     }
 
     data class ConfigureRequest(
