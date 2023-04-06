@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="stripe_googlepay_color_dark">#3c4043</color>
 <!--    <color name="stripe_accent_color_default">#ff2296f3</color>-->
 <!--    <color name="stripe_control_normal_color_default">#ff90A4AE</color>-->
 <!--    <color name="stripe_toolbar_color_default">#ff3f51b5</color>-->

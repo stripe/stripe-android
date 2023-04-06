@@ -24,6 +24,7 @@ class GooglePayButtonTest {
             GooglePayButton(
                 state = null,
                 isEnabled = true,
+                isDark = false,
                 onPressed = { didCallOnPressed = true },
                 modifier = Modifier.testTag(testTag),
             )
@@ -47,6 +48,7 @@ class GooglePayButtonTest {
             GooglePayButton(
                 state = null,
                 isEnabled = false,
+                isDark = false,
                 onPressed = { didCallOnPressed = true },
                 modifier = Modifier.testTag(testTag),
             )

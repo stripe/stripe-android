@@ -9,18 +9,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 
 @Composable
 internal fun GooglePayButton(
     state: PrimaryButton.State?,
     isEnabled: Boolean,
+    isDark: Boolean,
     onPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     AndroidView(
-        factory = { context -> GooglePayButton(context) },
+        factory = { context -> GooglePayButton(context, isDark) },
         update = { googlePayButton ->
             googlePayButton.isEnabled = isEnabled
             googlePayButton.updateState(state)
@@ -32,6 +35,7 @@ internal fun GooglePayButton(
 
 internal class GooglePayButton @JvmOverloads constructor(
     context: Context,
+    isDark: Boolean = false,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
@@ -48,6 +52,34 @@ internal class GooglePayButton @JvmOverloads constructor(
         super.setEnabled(true)
         viewBinding.googlePayPrimaryButton.backgroundTintList = null
         viewBinding.googlePayPrimaryButton.finishedBackgroundColor = Color.TRANSPARENT
+
+        if (isDark) {
+            viewBinding.googlePayButtonLayout.background = ContextCompat.getDrawable(
+                context,
+                R.drawable.googlepay_button_background_light
+            )
+            viewBinding.googlePayButtonContent.setImageResource(
+                R.drawable.pay_with_googlepay_button_content_dark
+            )
+            viewBinding.googlePayPrimaryButton.setLockIconDrawable(
+                R.drawable.stripe_ic_lock_googlepay_dark
+            )
+            viewBinding.googlePayPrimaryButton.setIndicatorColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.stripe_googlepay_color_dark,
+                )
+            )
+            viewBinding.googlePayPrimaryButton.setConfirmedIconDrawable(
+                R.drawable.stripe_ic_paymentsheet_primary_button_googlepay_checkmark_dark
+            )
+            viewBinding.googlePayPrimaryButton.setDefaultLabelColor(
+                ContextCompat.getColor(
+                    context,
+                    R.color.stripe_googlepay_color_dark
+                )
+            )
+        }
     }
 
     private fun onReadyState() {

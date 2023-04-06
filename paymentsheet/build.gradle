@@ -125,7 +125,7 @@ android {
     }
 
     lintOptions {
-        disable "UnrememberedMutableState", "InvalidVectorPath", "MissingDefaultResource"
+        disable "UnrememberedMutableState", "InvalidVectorPath"
     }
 
     kotlinOptions {
