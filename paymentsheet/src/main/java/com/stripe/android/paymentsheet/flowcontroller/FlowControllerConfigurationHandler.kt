@@ -28,7 +28,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private val job: AtomicReference<Job?> = AtomicReference(null)
 
     val isConfiguring: Boolean
-        get() = job.get() != null
+        get() = job.get()?.let { !it.isCompleted } ?: false
 
     fun configure(
         scope: CoroutineScope,

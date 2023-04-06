@@ -56,6 +56,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.FakeIntentConfirmationInterceptor
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.RelayingPaymentSheetLoader
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,6 +67,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
@@ -1054,6 +1056,132 @@ internal class DefaultFlowControllerTest {
                 (it as PaymentSheetResult.Failed).error.message == "something went wrong"
             }
         )
+    }
+
+    @Test
+    fun `Returns failure if attempting to confirm while configure calls is in-flight`() = runTest {
+        val mockLoader = RelayingPaymentSheetLoader()
+        val flowController = createFlowController(paymentSheetLoader = mockLoader)
+
+        mockLoader.enqueueSuccess()
+
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET
+        ) { _, _ -> }
+
+        // Simulate that the user has selected a payment method
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
+        )
+
+        // Not enqueueing any loader response, so that the call is considered in-flight
+
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "Monsters, Inc.",
+            ),
+        ) { _, _ -> }
+
+        flowController.confirm()
+
+        val expectedError = "FlowController.confirm() can only be called if the most " +
+            "recent call to configureWithPaymentIntent(), configureWithSetupIntent() or " +
+            "configureWithIntentConfiguration() has completed successfully."
+
+        val argumentCaptor = argumentCaptor<PaymentSheetResult>()
+        verify(paymentResultCallback).onPaymentSheetResult(argumentCaptor.capture())
+
+        val result = argumentCaptor.firstValue as? PaymentSheetResult.Failed
+        assertThat(result?.error?.message).isEqualTo(expectedError)
+    }
+
+    @Test
+    fun `Returns failure if attempting to confirm if last configure call has failed`() = runTest {
+        val mockLoader = RelayingPaymentSheetLoader()
+        val flowController = createFlowController(paymentSheetLoader = mockLoader)
+
+        mockLoader.enqueueSuccess()
+
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET
+        ) { _, _ -> }
+
+        // Simulate that the user has selected a payment method
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
+        )
+
+        mockLoader.enqueueFailure()
+
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "Monsters, Inc.",
+            ),
+        ) { _, _ -> }
+
+        flowController.confirm()
+
+        val expectedError = "FlowController.confirm() can only be called if the most " +
+            "recent call to configureWithPaymentIntent(), configureWithSetupIntent() or " +
+            "configureWithIntentConfiguration() has completed successfully."
+
+        val argumentCaptor = argumentCaptor<PaymentSheetResult>()
+        verify(paymentResultCallback).onPaymentSheetResult(argumentCaptor.capture())
+
+        val result = argumentCaptor.firstValue as? PaymentSheetResult.Failed
+        assertThat(result?.error?.message).isEqualTo(expectedError)
+    }
+
+    @Test
+    fun `Does not present payment options if last configure call has failed`() = runTest {
+        val mockLoader = RelayingPaymentSheetLoader()
+        val flowController = createFlowController(paymentSheetLoader = mockLoader)
+
+        mockLoader.enqueueSuccess()
+
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+        ) { _, _ -> }
+
+        mockLoader.enqueueFailure()
+
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "Example, Inc.",
+            ),
+        ) { _, _ -> }
+
+        flowController.presentPaymentOptions()
+
+        verify(paymentOptionActivityLauncher, never()).launch(any())
+    }
+
+    @Test
+    fun `Does not present payment options if last configure call is in-flight`() = runTest {
+        val mockLoader = RelayingPaymentSheetLoader()
+        val flowController = createFlowController(paymentSheetLoader = mockLoader)
+
+        mockLoader.enqueueSuccess()
+
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+        ) { _, _ -> }
+
+        // Not enqueueing any loader response, so that the call is considered in-flight
+
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "Example, Inc.",
+            ),
+        ) { _, _ -> }
+
+        flowController.presentPaymentOptions()
+
+        verify(paymentOptionActivityLauncher, never()).launch(any())
     }
 
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
