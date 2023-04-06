@@ -47,7 +47,6 @@ import com.stripe.android.uicore.elements.TextFieldController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -323,7 +322,6 @@ internal class WalletScreenTest {
     }
 
     @Test
-    @Ignore("Tests failing due to CI script. To be re-enabled in a follow up.")
     fun delete_bank_account_shows_dialog_confirmation() {
         setContent()
         toggleListExpanded()
@@ -551,7 +549,7 @@ internal class WalletScreenTest {
         composeTestRule.onNodeWithText("Are you sure you want to remove this card?")
 
     private fun onRemoveBankAccountConfirmationDialog() =
-        composeTestRule.onNodeWithText("Are you sure you want to remove this account?")
+        composeTestRule.onNodeWithText("Are you sure you want to remove this linked account?")
 
     private fun onCancelButton() = composeTestRule.onNodeWithText("Cancel")
     private fun onRemoveButton() = composeTestRule.onNodeWithText("Remove")
