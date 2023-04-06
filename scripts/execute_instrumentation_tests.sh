@@ -7,6 +7,4 @@
 set -e # Fail on error.
 
 # Exclude any modules with screenshot tests here. Then run them with the screenshot test package excluded.
-./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest --continue
-
-./gradlew :paymentsheet:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.notPackage=com.stripe.android.paymentsheet.screenshot
+./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :example:connectedAndroidTest --continue
