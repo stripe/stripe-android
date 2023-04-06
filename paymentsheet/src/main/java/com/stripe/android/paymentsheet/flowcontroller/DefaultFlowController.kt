@@ -226,7 +226,8 @@ internal class DefaultFlowController @Inject internal constructor(
     override fun presentPaymentOptions() {
         val state = viewModel.state ?: error(
             "FlowController must be successfully initialized " +
-                "using ${formattedConfigureMethodNames()} before calling presentPaymentOptions()."
+                "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
+                "configureWithIntentConfiguration() before calling presentPaymentOptions()."
         )
 
         if (configurationHandler.isConfiguring || viewModel.didLastConfigurationFail) {
@@ -249,13 +250,15 @@ internal class DefaultFlowController @Inject internal constructor(
     override fun confirm() {
         val state = viewModel.state ?: error(
             "FlowController must be successfully initialized " +
-                "using ${formattedConfigureMethodNames()} before calling confirm()."
+                "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
+                "configureWithIntentConfiguration() before calling confirm()."
         )
 
         if (configurationHandler.isConfiguring || viewModel.didLastConfigurationFail) {
             val error = IllegalStateException(
                 "FlowController.confirm() can only be called if the most recent call " +
-                    "to ${formattedConfigureMethodNames()} has completed successfully."
+                    "to configureWithPaymentIntent(), configureWithSetupIntent() or " +
+                    "configureWithIntentConfiguration() has completed successfully."
             )
             onPaymentResult(PaymentResult.Failed(error))
             return
@@ -536,26 +539,6 @@ internal class DefaultFlowController @Inject internal constructor(
         is LinkActivityResult.Completed -> PaymentResult.Completed
         is LinkActivityResult.Canceled -> PaymentResult.Canceled
         is LinkActivityResult.Failed -> PaymentResult.Failed(error)
-    }
-
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
-    private fun formattedConfigureMethodNames(): String {
-        val configureMethods = listOf(
-            this::configureWithPaymentIntent,
-            this::configureWithSetupIntent,
-            this::configureWithIntentConfiguration,
-        ).map { it.name }
-
-        return buildString {
-            configureMethods.forEachIndexed { index, method ->
-                append("$method()")
-                if (index == configureMethods.lastIndex - 1) {
-                    append(" or ")
-                } else if (index < configureMethods.lastIndex) {
-                    append(", ")
-                }
-            }
-        }
     }
 
     class GooglePayException(
