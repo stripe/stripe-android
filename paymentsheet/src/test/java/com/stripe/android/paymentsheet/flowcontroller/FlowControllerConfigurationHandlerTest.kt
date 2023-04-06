@@ -16,12 +16,11 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.utils.DelayingPaymentSheetLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.view.ActivityScenarioFactory
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -37,7 +36,6 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
@@ -306,22 +304,16 @@ class FlowControllerConfigurationHandlerTest {
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Cancels current configure job if new call to configure comes in`() = runTest {
-        val configurationHandler = createConfigurationHandler(
-            FakePaymentSheetLoader(
-                customerPaymentMethods = emptyList(),
-                delay = 5.seconds,
-            )
-        )
+        val loader = DelayingPaymentSheetLoader()
+        val configurationHandler = createConfigurationHandler(paymentSheetLoader = loader)
 
         val amounts = (0 until 10).map { index ->
             1_000L + index * 200L
         }
 
-        val completable = CompletableDeferred<Long>()
+        val resultTurbine = Turbine<Long>()
 
         for (amount in amounts) {
-            delay(100.milliseconds)
-
             configurationHandler.configure(
                 scope = this,
                 initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
@@ -334,40 +326,41 @@ class FlowControllerConfigurationHandlerTest {
                 ),
                 configuration = null,
                 callback = { _, _ ->
-                    completable.complete(amount)
+                    resultTurbine.add(amount)
                 },
             )
         }
 
-        testScope.advanceTimeBy(6_000L)
+        loader.enqueueSuccess()
 
-        val completedCall = completable.await()
+        val completedCall = resultTurbine.awaitItem()
         assertThat(completedCall).isEqualTo(amounts.last())
+
+        resultTurbine.expectNoEvents()
     }
 
     @Test
     fun `Cancels current configure job if coroutine scope is canceled`() = runTest {
-        val configurationHandler = createConfigurationHandler(
-            FakePaymentSheetLoader(
-                customerPaymentMethods = emptyList(),
-                delay = 1.seconds,
-            )
-        )
+        val loader = DelayingPaymentSheetLoader()
+        val configurationHandler = createConfigurationHandler(paymentSheetLoader = loader)
+
+        val resultTurbine = Turbine<Unit>()
 
         configurationHandler.configure(
             scope = testScope,
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-                ),
+            ),
             configuration = null,
             callback = { _, _ ->
-                throw AssertionError("Shouldn't have called ConfigCallback")
+                resultTurbine.add(Unit)
             },
         )
 
-        testScope.advanceTimeBy(500L)
         testScope.cancel()
-        testScope.advanceTimeBy(1_000L)
+        loader.enqueueSuccess()
+
+        resultTurbine.expectNoEvents()
     }
 
     private fun defaultPaymentSheetLoader(): PaymentSheetLoader {
