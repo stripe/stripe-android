@@ -191,10 +191,26 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
                 mostRecentError = mostRecentError,
-                paymentSelection = selection.value,
+                paymentSelection = determinePaymentSelectionUponCancel(),
                 paymentMethods = paymentMethods.value,
             )
         )
+    }
+
+    private fun determinePaymentSelectionUponCancel(): PaymentSelection? {
+        val initialSelection = args.state.paymentSelection
+
+        return if (initialSelection is PaymentSelection.Saved) {
+            initialSelection.takeIfStillValid()
+        } else {
+            initialSelection
+        }
+    }
+
+    private fun PaymentSelection.Saved.takeIfStillValid(): PaymentSelection.Saved? {
+        val paymentMethods = paymentMethods.value.orEmpty()
+        val isStillAround = paymentMethods.any { it.id == paymentMethod.id }
+        return this.takeIf { isStillAround }
     }
 
     override fun onFinish() {
