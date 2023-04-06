@@ -10,7 +10,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.R
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.theme.DefaultLinkTheme
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,12 +38,11 @@ internal class LinkAppBarTest {
     }
 
     @Test
-    @Ignore("Tests failing due to CI script. To be re-enabled in a follow up.")
     fun on_overflow_button_click_callback_is_called() {
         var count = 0
         setContent(showBottomSheetContent = { count++ })
 
-        composeTestRule.onNodeWithContentDescription("Menu").performClick()
+        composeTestRule.onNodeWithContentDescription("Show menu").performClick()
 
         assertThat(count).isEqualTo(1)
     }
