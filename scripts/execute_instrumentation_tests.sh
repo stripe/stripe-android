@@ -7,4 +7,10 @@
 set -e # Fail on error.
 
 # Exclude any modules with screenshot tests here. Then run them with the screenshot test package excluded.
-./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :example:connectedAndroidTest --continue
+./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest
+
+if [ -d "$BITRISE_TEST_RESULT_DIR" ]; then
+  mkdir -p "$BITRISE_TEST_RESULT_DIR/test_results"
+
+  find . -type d -regex '.*/build/reports/androidTests/connected$' -exec cp -R {} ~/Desktop/test_results \;
+fi
