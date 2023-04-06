@@ -94,7 +94,7 @@ workflows:
           title: Execute instrumentation tests
           inputs:
             - file_path: ./scripts/execute_instrumentation_tests.sh
-      - deploy-to-bitrise-io@2: { }
+      - deploy-to-bitrise-io@2:
           inputs:
             - zip_name: 'Test Results'
             - is_compress: true
