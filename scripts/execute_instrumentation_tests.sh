@@ -12,5 +12,5 @@ set -e # Fail on error.
 if [ -d "$BITRISE_TEST_RESULT_DIR" ]; then
   mkdir -p "$BITRISE_TEST_RESULT_DIR/test_results"
 
-  find . -type d -regex '.*/build/reports/androidTests/connected$' -exec cp -R {} ~/Desktop/test_results \;
+  find . -type d -regex '.*/build/reports/androidTests/connected$' -exec cp -R {} $BITRISE_TEST_RESULT_DIR/test_results \;
 fi
