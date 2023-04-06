@@ -1,7 +1,6 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.address.AutocompleteCapableAddressType
@@ -30,7 +29,7 @@ open class AddressElement constructor(
     private val hideCountry: Boolean = false,
 ) : SectionMultiFieldElement(_identifier) {
 
-    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val countryElement = CountryElement(
         IdentifierSpec.Country,
         countryDropdownFieldController

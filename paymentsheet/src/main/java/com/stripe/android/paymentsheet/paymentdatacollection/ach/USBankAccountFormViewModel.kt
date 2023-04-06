@@ -179,6 +179,16 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         it.last()
     }
 
+    init {
+        viewModelScope.launch {
+            addressElement.countryElement.controller.rawFieldValue.collect {
+                it?.let {
+                    phoneController.countryDropdownController.onRawValueChange(it)
+                }
+            }
+        }
+    }
+
     private val _currentScreenState: MutableStateFlow<USBankAccountFormScreenState> =
         MutableStateFlow(
             USBankAccountFormScreenState.BillingDetailsCollection(
