@@ -3,7 +3,9 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.core.os.LocaleListCompat
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -33,10 +35,12 @@ internal class ElementsSessionRepositoryTest {
         whenever(
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(
-            ElementsSession(
-                linkSettings = null,
-                paymentMethodSpecs = null,
-                stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+            Result.success(
+                ElementsSession(
+                    linkSettings = null,
+                    paymentMethodSpecs = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                )
             )
         )
 
@@ -46,7 +50,7 @@ internal class ElementsSessionRepositoryTest {
                 initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret",
                 ),
-            )
+            ).getOrThrow()
         }
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
@@ -62,7 +66,7 @@ internal class ElementsSessionRepositoryTest {
         runTest {
             whenever(
                 stripeRepository.retrieveElementsSession(any(), any())
-            ).thenReturn(null)
+            ).thenReturn(Result.failure(APIException()))
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
@@ -72,7 +76,7 @@ internal class ElementsSessionRepositoryTest {
                     initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                         clientSecret = "client_secret",
                     ),
-                )
+                ).getOrThrow()
             }
 
             verify(stripeRepository).retrieveElementsSession(any(), any())
@@ -85,7 +89,7 @@ internal class ElementsSessionRepositoryTest {
         runTest {
             whenever(
                 stripeRepository.retrieveElementsSession(any(), any())
-            ).thenThrow(RuntimeException())
+            ).thenReturn(Result.failure(RuntimeException()))
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
@@ -95,7 +99,7 @@ internal class ElementsSessionRepositoryTest {
                     initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                         clientSecret = "client_secret",
                     ),
-                )
+                ).getOrThrow()
             }
 
             verify(stripeRepository).retrieveElementsSession(any(), any())
@@ -108,10 +112,12 @@ internal class ElementsSessionRepositoryTest {
         whenever(
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(
-            ElementsSession(
-                linkSettings = null,
-                paymentMethodSpecs = null,
-                stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+            Result.success(
+                ElementsSession(
+                    linkSettings = null,
+                    paymentMethodSpecs = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                )
             )
         )
 
@@ -123,7 +129,7 @@ internal class ElementsSessionRepositoryTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret",
             ),
-        )
+        ).getOrThrow()
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
 
@@ -133,6 +139,35 @@ internal class ElementsSessionRepositoryTest {
 
         val defaultLocale = LocaleListCompat.getAdjustedDefault()[0]?.toLanguageTag()
         assertThat(argumentCaptor.firstValue.locale).isEqualTo(defaultLocale)
+    }
+
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
+    @Test
+    fun `Returns the Elements Session endpoint's exception if there's no fallback`() = runTest {
+        val endpointException = APIException(message = "this didn't work")
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(
+            Result.failure(endpointException)
+        )
+
+        val session = ElementsSessionRepository.Api(
+            stripeRepository,
+            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            testDispatcher,
+        ).get(
+            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1234,
+                        currency = "cad",
+                    )
+                )
+            ),
+        )
+
+        assertThat(session.getOrNull()).isNull()
+        assertThat(session.exceptionOrNull()).isEqualTo(endpointException)
     }
 
     private fun createRepository() = ElementsSessionRepository.Api(

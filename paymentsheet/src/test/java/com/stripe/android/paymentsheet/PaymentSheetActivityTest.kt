@@ -278,7 +278,7 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel(isGooglePayAvailable = true)
         val scenario = activityScenario(viewModel = viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             val error = "some error"
 
             composeTestRule
@@ -373,7 +373,7 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel(paymentMethods = paymentMethods)
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             val error = "some error"
 
             composeTestRule
@@ -402,7 +402,7 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel(paymentMethods = paymentMethods)
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             val error = "some error"
 
             composeTestRule
@@ -680,6 +680,7 @@ internal class PaymentSheetActivityTest {
                 )
             )
 
+            @Suppress("DEPRECATION")
             val args = intent.extras?.get(PaymentSheetContractV2.EXTRA_ARGS) as PaymentSheetContractV2.Args
             assertThat(args.statusBarColor)
                 .isEqualTo(PaymentSheetFixtures.STATUS_BAR_COLOR)
@@ -711,7 +712,7 @@ internal class PaymentSheetActivityTest {
     fun `GPay button error message is displayed`() {
         val viewModel = createViewModel(isGooglePayAvailable = true)
         val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             val errorMessage = "Error message"
 
             composeTestRule
@@ -771,7 +772,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `notes visibility is visible`() {
         val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             val text = context.getString(R.string.stripe_paymentsheet_payment_method_us_bank_account)
             viewModel.updateBelowButtonText(text)
 
@@ -1023,7 +1024,7 @@ internal class PaymentSheetActivityTest {
             }
         }
 
-    fun registerFormViewModelInjector() {
+    private fun registerFormViewModelInjector() {
         val lpmRepository = mock<LpmRepository>().apply {
             whenever(fromCode(any())).thenReturn(
                 LpmRepository.SupportedPaymentMethod(

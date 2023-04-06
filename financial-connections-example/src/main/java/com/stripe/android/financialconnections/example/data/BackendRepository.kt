@@ -7,29 +7,48 @@ class BackendRepository(
 ) {
     private val backendService: BackendApiService = BackendApiFactory(settings).create()
 
-    suspend fun createLinkAccountSession(flow: String? = null, customerEmail: String? = null) =
-        backendService.createLinkAccountSession(
-            LinkAccountSessionBody(flow, customerEmail)
+    suspend fun createLinkAccountSession(
+        flow: String? = null,
+        keys: Pair<String, String>? = null,
+        customerEmail: String? = null
+    ) = backendService.createLinkAccountSession(
+        LinkAccountSessionBody(
+            flow = flow,
+            publishableKey = keys?.first,
+            secretKey = keys?.second,
+            customerEmail = customerEmail
         )
+    )
 
-    suspend fun createLinkAccountSessionForToken(flow: String? = null, customerEmail: String? = null) =
-        backendService.createLinkAccountSessionForToken(
-            LinkAccountSessionBody(flow, customerEmail)
+    suspend fun createLinkAccountSessionForToken(
+        flow: String? = null,
+        keys: Pair<String, String>? = null,
+        customerEmail: String? = null
+    ) = backendService.createLinkAccountSessionForToken(
+        LinkAccountSessionBody(
+            flow = flow,
+            publishableKey = keys?.first,
+            secretKey = keys?.second,
+            customerEmail = customerEmail,
         )
+    )
 
     suspend fun createPaymentIntent(
         country: String,
         flow: String? = null,
         customerId: String? = null,
         supportedPaymentMethods: String? = null,
+        keys: Pair<String, String>? = null,
         customerEmail: String? = null
     ): CreateIntentResponse = backendService.createPaymentIntent(
         PaymentIntentBody(
             flow = flow,
             country = country,
             customerId = customerId,
-            customerEmail = customerEmail,
-            supportedPaymentMethods = supportedPaymentMethods
+            supportedPaymentMethods = supportedPaymentMethods,
+            publishableKey = keys?.first,
+            secretKey = keys?.second,
+            customerEmail = customerEmail
         )
     )
 }

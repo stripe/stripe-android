@@ -143,6 +143,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             windowMetrics.bounds.width() - insets.left - insets.right
         } else {
             val displayMetrics = DisplayMetrics()
+            @Suppress("DEPRECATION")
             windowManager.defaultDisplay.getMetrics(displayMetrics)
 
             displayMetrics.widthPixels

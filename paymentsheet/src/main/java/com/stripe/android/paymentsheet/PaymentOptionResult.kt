@@ -46,6 +46,7 @@ internal sealed class PaymentOptionResult(
 
         @JvmSynthetic
         internal fun fromIntent(intent: Intent?): PaymentOptionResult? {
+            @Suppress("DEPRECATION")
             return intent?.getParcelableExtra(EXTRA_RESULT)
         }
     }

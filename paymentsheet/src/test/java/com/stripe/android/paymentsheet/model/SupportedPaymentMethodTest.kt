@@ -29,7 +29,7 @@ class SupportedPaymentMethodTest {
         )
     ).apply {
         this.update(
-            PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethods),
+            PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethodTypes),
             null
         )
     }

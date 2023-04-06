@@ -196,10 +196,6 @@ internal fun getSupportedSavedCustomerPMs(
         paymentMethod.getSpecWithFullfilledRequirements(stripeIntent, config) != null
 } ?: emptyList()
 
-/**
- * This will return a list of payment methods that have a supported form given
- * the [PaymentSheet.Configuration] and [StripeIntent].
- */
 internal fun getPMsToAdd(
     stripeIntent: StripeIntent?,
     config: PaymentSheet.Configuration?,

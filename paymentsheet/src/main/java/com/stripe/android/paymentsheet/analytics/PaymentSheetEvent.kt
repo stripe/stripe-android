@@ -69,6 +69,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 appearanceConfigMap[FIELD_APPEARANCE_USAGE] =
                     usedAppearanceApi || usedPrimaryButtonApi
 
+                @Suppress("DEPRECATION")
                 val configurationMap = mapOf(
                     FIELD_CUSTOMER to (configuration?.customer != null),
                     FIELD_GOOGLE_PAY to (configuration?.googlePay != null),

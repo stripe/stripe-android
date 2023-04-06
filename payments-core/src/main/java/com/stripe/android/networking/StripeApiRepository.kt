@@ -1585,7 +1585,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options,
-    ): ElementsSession? {
+    ): Result<ElementsSession> {
         return retrieveElementsSession(
             params = params,
             options = options,
@@ -1620,9 +1620,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
         params: ElementsSessionParams,
         options: ApiRequest.Options,
         analyticsEvent: PaymentAnalyticsEvent?,
-    ): ElementsSession? {
+    ): Result<ElementsSession> {
         // Unsupported for user key sessions.
-        if (options.apiKeyIsUserKey) return null
+        if (options.apiKeyIsUserKey) {
+            return Result.failure(IllegalArgumentException("Invalid API key"))
+        }
 
         fireFraudDetectionDataRequest()
 
@@ -1640,13 +1642,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
             }
         }
 
-        return fetchStripeModel(
-            apiRequestFactory.createGet(
-                getApiUrl("elements/sessions"),
-                options,
-                requestParams + createExpandParam(params.expandFields)
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getApiUrl("elements/sessions"),
+                options = options,
+                params = requestParams + createExpandParam(params.expandFields),
             ),
-            parser
+            jsonParser = parser,
         ) {
             analyticsEvent?.let {
                 fireAnalyticsRequest(paymentAnalyticsRequestFactory.createRequest(analyticsEvent))
@@ -1700,6 +1702,19 @@ class StripeApiRepository @JvmOverloads internal constructor(
         onResponse: () -> Unit
     ): ModelType? {
         return jsonParser.parse(makeApiRequest(apiRequest, onResponse).responseJson())
+    }
+
+    private suspend fun <ModelType : StripeModel> fetchStripeModelResult(
+        apiRequest: ApiRequest,
+        jsonParser: ModelJsonParser<ModelType>,
+        onResponse: () -> Unit
+    ): Result<ModelType> {
+        return runCatching {
+            val response = makeApiRequest(apiRequest, onResponse).responseJson()
+            jsonParser.parse(response) ?: throw APIException(
+                message = "Unable to parse response with ${jsonParser::class.java.simpleName}",
+            )
+        }
     }
 
     @VisibleForTesting

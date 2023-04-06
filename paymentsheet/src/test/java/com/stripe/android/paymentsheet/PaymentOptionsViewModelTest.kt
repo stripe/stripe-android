@@ -12,6 +12,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
@@ -385,6 +386,115 @@ internal class PaymentOptionsViewModelTest {
                 assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link)
             }
         }
+
+    @Test
+    fun `Falls back to initial saved payment selection if user cancels`() = runTest {
+        val paymentMethods = PaymentMethodFixtures.createCards(3)
+        val selection = PaymentSelection.Saved(paymentMethod = paymentMethods.random())
+
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
+                paymentSelection = selection,
+                customerPaymentMethods = paymentMethods,
+            )
+        )
+
+        val viewModel = createViewModel(args)
+
+        viewModel.paymentOptionResult.test {
+            viewModel.transitionToAddPaymentScreen()
+
+            // Simulate user filling out a different payment method, but not confirming it
+            viewModel.updateSelection(
+                PaymentSelection.New.Card(
+                    paymentMethodCreateParams = DEFAULT_CARD,
+                    brand = CardBrand.Visa,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                )
+            )
+
+            viewModel.onUserCancel()
+
+            assertThat(awaitItem()).isEqualTo(
+                PaymentOptionResult.Canceled(
+                    mostRecentError = null,
+                    paymentSelection = selection,
+                    paymentMethods = paymentMethods,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `Falls back to no payment selection if user cancels after deleting initial payment method`() = runTest {
+        val paymentMethods = PaymentMethodFixtures.createCards(3)
+        val selection = PaymentSelection.Saved(paymentMethod = paymentMethods.random())
+
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
+                paymentSelection = selection,
+                customerPaymentMethods = paymentMethods,
+            )
+        )
+
+        val viewModel = createViewModel(args)
+
+        viewModel.paymentOptionResult.test {
+            // Simulate user removing the selected payment method
+            viewModel.removePaymentMethod(selection.paymentMethod)
+
+            viewModel.onUserCancel()
+
+            assertThat(awaitItem()).isEqualTo(
+                PaymentOptionResult.Canceled(
+                    mostRecentError = null,
+                    paymentSelection = null,
+                    paymentMethods = paymentMethods - selection.paymentMethod,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `Falls back to initial new payment selection if user cancels`() = runTest {
+        val selection = PaymentSelection.New.Card(
+            paymentMethodCreateParams = DEFAULT_CARD,
+            brand = CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+        )
+
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
+                paymentSelection = selection,
+            )
+        )
+
+        val viewModel = createViewModel(args)
+
+        viewModel.paymentOptionResult.test {
+            // Simulate user filling out a different payment method, but not confirming it
+            viewModel.updateSelection(
+                PaymentSelection.New.GenericPaymentMethod(
+                    iconResource = 0,
+                    labelResource = "",
+                    paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                )
+            )
+
+            viewModel.onUserCancel()
+
+            assertThat(awaitItem()).isEqualTo(
+                PaymentOptionResult.Canceled(
+                    mostRecentError = null,
+                    paymentSelection = selection,
+                    paymentMethods = emptyList(),
+                )
+            )
+        }
+    }
 
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
