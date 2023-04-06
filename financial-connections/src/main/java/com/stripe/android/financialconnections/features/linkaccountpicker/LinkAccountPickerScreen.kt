@@ -31,9 +31,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -45,6 +46,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
 import com.stripe.android.financialconnections.features.common.AccountItem
+import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PaneFooter
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
@@ -53,6 +55,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -60,6 +63,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.image.StripeImage
 
 @Composable
 internal fun LinkAccountPickerScreen() {
@@ -197,13 +201,21 @@ private fun NetworkedAccountItem(
         onAccountClicked = onAccountClicked,
         account = account
     ) {
-        Image(
-            modifier = Modifier
-                .size(24.dp)
-                .clip(RoundedCornerShape(3.dp)),
-            painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
-            contentDescription = "Bank logo"
-        )
+        val modifier = Modifier
+            .size(24.dp)
+            .clip(RoundedCornerShape(3.dp))
+        val institutionIcon = account.institution?.icon?.default
+        when {
+            institutionIcon.isNullOrEmpty() -> InstitutionPlaceholder(modifier)
+            else -> StripeImage(
+                url = institutionIcon,
+                imageLoader = LocalImageLoader.current,
+                contentDescription = null,
+                modifier = modifier,
+                contentScale = ContentScale.Crop,
+                errorContent = { InstitutionPlaceholder(modifier) }
+            )
+        }
     }
 }
 
@@ -272,27 +284,14 @@ private fun Title(
 }
 
 @Composable
-@Preview(group = "LinkAccountPicker Pane", name = "No account selected")
-internal fun LinkAccountPickerScreenPreview() {
+@Preview(group = "LinkAccountPicker Pane")
+internal fun LinkAccountPickerScreenPreview(
+    @PreviewParameter(LinkAccountPickerPreviewParameterProvider::class)
+    state: LinkAccountPickerState
+) {
     FinancialConnectionsPreview {
         LinkAccountPickerContent(
-            state = LinkedAccountPickerStates.canonical(),
-            onCloseClick = {},
-            onCloseFromErrorClick = {},
-            onLearnMoreAboutDataAccessClick = {},
-            onNewBankAccountClick = {},
-            onSelectAccountClick = {},
-            onAccountClick = {}
-        )
-    }
-}
-
-@Composable
-@Preview(group = "LinkAccountPicker Pane", name = "No account selected")
-internal fun LinkAccountPickerScreenAccountSelectedPreview() {
-    FinancialConnectionsPreview {
-        LinkAccountPickerContent(
-            state = LinkedAccountPickerStates.accountSelected(),
+            state = state,
             onCloseClick = {},
             onCloseFromErrorClick = {},
             onLearnMoreAboutDataAccessClick = {},

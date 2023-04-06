@@ -106,7 +106,8 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             options = apiOptions,
             params = mapOf(
                 PARAMS_ID to sessionId,
-                PARAMS_CLIENT_SECRET to clientSecret
+                PARAMS_CLIENT_SECRET to clientSecret,
+                "expand" to listOf("data.institution"),
             )
         )
         return requestExecutor.execute(
@@ -126,7 +127,8 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             options = apiOptions,
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
-                PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret
+                PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
+                "expand" to listOf("data.institution"),
             )
         )
         return requestExecutor.execute(
@@ -187,7 +189,8 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             options = apiOptions,
             params = mapOf(
                 PARAMS_ID to sessionId,
-                PARAMS_CLIENT_SECRET to clientSecret
+                PARAMS_CLIENT_SECRET to clientSecret,
+                "expand" to listOf("data.institution"),
             ) + selectAccounts.mapIndexed { index, account -> "$PARAM_SELECTED_ACCOUNTS[$index]" to account }
         )
         return requestExecutor.execute(

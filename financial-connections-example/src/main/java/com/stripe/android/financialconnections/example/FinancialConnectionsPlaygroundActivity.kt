@@ -193,7 +193,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         email: String,
         onEmailChange: (String) -> Unit
     ) {
-
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = email,
