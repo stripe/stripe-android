@@ -608,6 +608,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val component = DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(arg.application)
+                .productUsageTokens(
+                    setOfNotNull(
+                        "PaymentSheet",
+                        "deferred-intent".takeIf {
+                            starterArgsSupplier().initializationMode is
+                            PaymentSheet.InitializationMode.DeferredIntent
+                        }
+                    )
+                )
                 .injectorKey(DUMMY_INJECTOR_KEY)
                 .build()
             component.inject(this)

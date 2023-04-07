@@ -69,6 +69,7 @@ class DefaultPaymentSheetLauncherTest {
             activityResultLauncher = mock(),
             lifecycleOwner = lifecycleOwner,
             application = ApplicationProvider.getApplicationContext(),
+            deferred = true
         )
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)

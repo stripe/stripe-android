@@ -25,6 +25,7 @@ internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
     lifecycleOwner: LifecycleOwner,
     application: Application,
+    deferred: Boolean,
 ) : PaymentSheetLauncher {
     @InjectorKey
     private val injectorKey: String =
@@ -34,6 +35,12 @@ internal class DefaultPaymentSheetLauncher(
         DaggerPaymentSheetLauncherComponent
             .builder()
             .application(application)
+            .productUsageTokens(
+                setOfNotNull(
+                    "PaymentSheet",
+                    "deferred-intent".takeIf { deferred }
+                )
+            )
             .injectorKey(injectorKey)
             .build()
 
@@ -52,7 +59,8 @@ internal class DefaultPaymentSheetLauncher(
 
     constructor(
         activity: ComponentActivity,
-        callback: PaymentSheetResultCallback
+        callback: PaymentSheetResultCallback,
+        deferred: Boolean,
     ) : this(
         activityResultLauncher = activity.registerForActivityResult(
             PaymentSheetContractV2()
@@ -61,11 +69,13 @@ internal class DefaultPaymentSheetLauncher(
         },
         lifecycleOwner = activity,
         application = activity.application,
+        deferred = deferred,
     )
 
     constructor(
         fragment: Fragment,
-        callback: PaymentSheetResultCallback
+        callback: PaymentSheetResultCallback,
+        deferred: Boolean,
     ) : this(
         activityResultLauncher = fragment.registerForActivityResult(
             PaymentSheetContractV2()
@@ -74,6 +84,7 @@ internal class DefaultPaymentSheetLauncher(
         },
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
+        deferred = deferred,
     )
 
     @TestOnly
@@ -90,6 +101,7 @@ internal class DefaultPaymentSheetLauncher(
         },
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
+        deferred = false
     )
 
     override fun present(

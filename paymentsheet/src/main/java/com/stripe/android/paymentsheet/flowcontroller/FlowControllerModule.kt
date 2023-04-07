@@ -28,7 +28,13 @@ internal object FlowControllerModule {
     @Provides
     @Singleton
     @Named(PRODUCT_USAGE)
-    fun provideProductUsageTokens() = setOf("PaymentSheet.FlowController")
+    fun provideProductUsageTokens(viewModel: FlowControllerViewModel): Set<String> {
+        val deferred = viewModel.state?.stripeIntent?.clientSecret == null
+        return setOfNotNull(
+            "PaymentSheet.FlowController",
+            "deferred-intent".takeIf { deferred }
+        )
+    }
 
     @Provides
     @Singleton
