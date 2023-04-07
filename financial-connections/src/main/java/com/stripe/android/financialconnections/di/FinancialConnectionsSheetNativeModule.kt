@@ -22,6 +22,7 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsCo
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
+import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -99,13 +100,11 @@ internal class FinancialConnectionsSheetNativeModule {
     @Singleton
     @Provides
     fun providesFinancialConnectionsConsumerSessionRepository(
-        consumersApiService: ConsumersApiService,
-        apiOptions: ApiRequest.Options,
+        consumersApiService: FinancialConnectionsConsumersApiService,
         locale: Locale?,
         logger: Logger,
     ) = FinancialConnectionsConsumerSessionRepository(
         consumersApiService = consumersApiService,
-        apiOptions = apiOptions,
         locale = locale ?: Locale.getDefault(),
         logger = logger,
     )
@@ -140,5 +139,16 @@ internal class FinancialConnectionsSheetNativeModule {
     @Provides
     fun providesSaveToLinkWithStripeSucceededRepository() = SaveToLinkWithStripeSucceededRepository(
         CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    )
+
+    @Provides
+    internal fun provideFinancialConnectionsConsumersApiService(
+        requestExecutor: FinancialConnectionsRequestExecutor,
+        apiOptions: ApiRequest.Options,
+        apiRequestFactory: ApiRequest.Factory,
+    ): FinancialConnectionsConsumersApiService = FinancialConnectionsConsumersApiService(
+        apiOptions = apiOptions,
+        apiRequestFactory = apiRequestFactory,
+        requestExecutor = requestExecutor
     )
 }

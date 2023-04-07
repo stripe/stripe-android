@@ -1,12 +1,11 @@
 package com.stripe.android.financialconnections.repository
 
 import com.stripe.android.core.Logger
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.VerificationType
-import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.Locale
@@ -30,23 +29,20 @@ internal interface FinancialConnectionsConsumerSessionRepository {
 
     companion object {
         operator fun invoke(
-            consumersApiService: ConsumersApiService,
-            apiOptions: ApiRequest.Options,
+            consumersApiService: FinancialConnectionsConsumersApiService,
             locale: Locale?,
             logger: Logger,
         ): FinancialConnectionsConsumerSessionRepository =
             FinancialConnectionsConsumerSessionRepositoryImpl(
-                consumersApiService,
-                apiOptions,
-                locale,
-                logger,
+                consumersApiService = consumersApiService,
+                locale = locale,
+                logger = logger,
             )
     }
 }
 
 private class FinancialConnectionsConsumerSessionRepositoryImpl(
-    private val consumersApiService: ConsumersApiService,
-    private val apiOptions: ApiRequest.Options,
+    private val consumersApiService: FinancialConnectionsConsumersApiService,
     private val locale: Locale?,
     private val logger: Logger,
 ) : FinancialConnectionsConsumerSessionRepository {
@@ -79,7 +75,6 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             requestSurface = CONSUMER_SURFACE,
             type = type,
             customEmailType = customEmailType,
-            requestOptions = apiOptions
         ).also { session ->
             updateCachedConsumerSession("startConsumerVerification", session)
         }
@@ -96,7 +91,6 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             verificationCode = verificationCode,
             type = type,
             requestSurface = CONSUMER_SURFACE,
-            requestOptions = apiOptions
         ).also { session ->
             updateCachedConsumerSession("confirmConsumerVerification", session)
         }
@@ -107,7 +101,6 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             email = email,
             authSessionCookie = null,
             requestSurface = CONSUMER_SURFACE,
-            requestOptions = apiOptions
         )
 
     private fun updateCachedConsumerSession(

@@ -4,12 +4,14 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 /**
  * The result of a call to Link consumer sign up.
  */
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Serializable
 data class ConsumerSession(
     val clientSecret: String,
     val emailAddress: String,
@@ -21,6 +23,7 @@ data class ConsumerSession(
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Serializable
     data class VerificationSession constructor(
         val type: SessionType,
         val state: SessionState
