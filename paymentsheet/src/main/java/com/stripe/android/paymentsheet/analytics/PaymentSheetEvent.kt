@@ -69,6 +69,28 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 appearanceConfigMap[FIELD_APPEARANCE_USAGE] =
                     usedAppearanceApi || usedPrimaryButtonApi
 
+                val billingDetailsCollectionConfigMap = mapOf(
+                    FIELD_ATTACH_DEFAULTS to configuration
+                        ?.billingDetailsCollectionConfiguration
+                        ?.attachDefaultsToPaymentMethod,
+                    FIELD_COLLECT_NAME to configuration
+                        ?.billingDetailsCollectionConfiguration
+                        ?.name
+                        ?.name,
+                    FIELD_COLLECT_EMAIL to configuration
+                        ?.billingDetailsCollectionConfiguration
+                        ?.email
+                        ?.name,
+                    FIELD_COLLECT_PHONE to configuration
+                        ?.billingDetailsCollectionConfiguration
+                        ?.phone
+                        ?.name,
+                    FIELD_COLLECT_ADDRESS to configuration
+                        ?.billingDetailsCollectionConfiguration
+                        ?.address
+                        ?.name,
+                )
+
                 @Suppress("DEPRECATION")
                 val configurationMap = mapOf(
                     FIELD_CUSTOMER to (configuration?.customer != null),
@@ -76,7 +98,9 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_PRIMARY_BUTTON_COLOR to (configuration?.primaryButtonColor != null),
                     FIELD_BILLING to (configuration?.defaultBillingDetails != null),
                     FIELD_DELAYED_PMS to (configuration?.allowsDelayedPaymentMethods),
-                    FIELD_APPEARANCE to appearanceConfigMap
+                    FIELD_APPEARANCE to appearanceConfigMap,
+                    FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
+                        billingDetailsCollectionConfigMap,
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -207,5 +231,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_FONT = "font"
         const val FIELD_SIZE_SCALE_FACTOR = "size_scale_factor"
         const val FIELD_PRIMARY_BUTTON = "primary_button"
+        const val FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION =
+            "billing_details_collection_configuration"
+        const val FIELD_ATTACH_DEFAULTS = "attach_defaults"
+        const val FIELD_COLLECT_NAME = "name"
+        const val FIELD_COLLECT_EMAIL = "email"
+        const val FIELD_COLLECT_PHONE = "phone"
+        const val FIELD_COLLECT_ADDRESS = "address"
     }
 }
