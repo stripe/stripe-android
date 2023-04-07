@@ -1081,7 +1081,9 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = "Monsters, Inc.",
             ),
-        ) { _, _ -> }
+        ) { _, _ ->
+            throw AssertionError("ConfirmCallback shouldn't have been called")
+        }
 
         flowController.confirm()
 

@@ -83,7 +83,7 @@ class FlowControllerConfigurationHandlerTest {
 
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isNotNull()
-        assertThat(viewModel.didLastConfigurationFail).isFalse()
+        assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
         assertThat(viewModel.state).isNotNull()
         verify(eventReporter)
@@ -115,7 +115,7 @@ class FlowControllerConfigurationHandlerTest {
 
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isSameInstanceAs(configureRequest)
-        assertThat(viewModel.didLastConfigurationFail).isFalse()
+        assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
 
         // We're running ONLY the second config run, so we don't expect any interactions.
@@ -150,7 +150,7 @@ class FlowControllerConfigurationHandlerTest {
 
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
-        assertThat(viewModel.didLastConfigurationFail).isFalse()
+        assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
 
         // We're running a new config, so we DO expect an interaction.
@@ -185,7 +185,7 @@ class FlowControllerConfigurationHandlerTest {
 
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
-        assertThat(viewModel.didLastConfigurationFail).isFalse()
+        assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
 
         // We're running a new config, so we DO expect an interaction.
@@ -385,7 +385,7 @@ class FlowControllerConfigurationHandlerTest {
         }
 
         assertThat(resultTurbine.awaitItem()).isNotNull()
-        assertThat(viewModel.didLastConfigurationFail).isTrue()
+        assertThat(configurationHandler.isConfigured).isFalse()
     }
 
     private fun defaultPaymentSheetLoader(): PaymentSheetLoader {

@@ -230,9 +230,9 @@ internal class DefaultFlowController @Inject internal constructor(
                 "configureWithIntentConfiguration() before calling presentPaymentOptions()."
         )
 
-        if (configurationHandler.isConfiguring || viewModel.didLastConfigurationFail) {
-            // "Cannot call presentPaymentOptions when the last update call
-            // has not yet finished or failed."
+        if (!configurationHandler.isConfigured) {
+            // For now, we fail silently in these situations. In the future, we should either log
+            // or emit an event in a to-be-added event listener.
             return
         }
 
@@ -254,7 +254,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 "configureWithIntentConfiguration() before calling confirm()."
         )
 
-        if (configurationHandler.isConfiguring || viewModel.didLastConfigurationFail) {
+        if (!configurationHandler.isConfigured) {
             val error = IllegalStateException(
                 "FlowController.confirm() can only be called if the most recent call " +
                     "to configureWithPaymentIntent(), configureWithSetupIntent() or " +
