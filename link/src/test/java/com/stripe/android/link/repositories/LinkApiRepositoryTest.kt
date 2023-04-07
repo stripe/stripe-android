@@ -200,6 +200,7 @@ class LinkApiRepositoryTest {
             requestSurface = CONSUMER_SURFACE,
             type = VerificationType.SMS,
             customEmailType = null,
+            connectionsMerchantName = null,
             requestOptions = ApiRequest.Options(consumerKey),
         )
     }
@@ -217,6 +218,7 @@ class LinkApiRepositoryTest {
             requestSurface = CONSUMER_SURFACE,
             type = VerificationType.SMS,
             customEmailType = null,
+            connectionsMerchantName = null,
             requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID),
         )
     }
@@ -232,6 +234,7 @@ class LinkApiRepositoryTest {
                 requestSurface = any(),
                 type = any(),
                 customEmailType = anyOrNull(),
+                connectionsMerchantName = anyOrNull(),
                 requestOptions = any(),
             )
         )
@@ -253,6 +256,7 @@ class LinkApiRepositoryTest {
                 requestSurface = any(),
                 type = any(),
                 customEmailType = anyOrNull(),
+                connectionsMerchantName = anyOrNull(),
                 requestOptions = any(),
             )
         )

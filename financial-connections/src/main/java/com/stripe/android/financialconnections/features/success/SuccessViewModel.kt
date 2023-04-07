@@ -67,8 +67,13 @@ internal class SuccessViewModel @Inject constructor(
                     connectedAccountName = manifest.connectedAccountName,
                     count = accounts.size
                 ),
-
-                accessibleData = AccessibleDataCalloutModel.fromManifest(manifest),
+                accessibleData = AccessibleDataCalloutModel(
+                    businessName = manifest.businessName,
+                    permissions = manifest.permissions,
+                    isNetworking = manifest.isNetworkingUserFlow == true && saveToLinkWithStripeSucceeded == true,
+                    isStripeDirect = manifest.isStripeDirect ?: false,
+                    dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
+                ),
                 accounts = accounts,
                 institution = manifest.activeInstitution!!,
                 businessName = manifest.businessName,

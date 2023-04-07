@@ -101,6 +101,7 @@ private fun NetworkingLinkVerificationLoaded(
 ) {
     val focusManager = LocalFocusManager.current
     val focusRequester: FocusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
     val keyboardController = LocalSoftwareKeyboardController.current
     LaunchedEffect(confirmVerificationAsync) {
         if (confirmVerificationAsync is Loading) {

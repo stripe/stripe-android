@@ -93,7 +93,7 @@ private fun getVerificationErrorMessage(
     error: Throwable,
     verificationType: VerificationType
 ): TextResource {
-    return when ((error as StripeException).stripeError?.code ?: "") {
+    return when ((error as? StripeException)?.stripeError?.code ?: "") {
         "consumer_verification_code_invalid" -> TextResource.StringId(
             R.string.stripe_verification_codeInvalid
         )

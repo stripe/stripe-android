@@ -118,6 +118,7 @@ class ConsumersApiServiceImplTest {
             requestSurface = "android_payment_element",
             type = VerificationType.SMS,
             customEmailType = null,
+            connectionsMerchantName = null,
             requestOptions = DEFAULT_OPTIONS
         )
 

@@ -21,16 +21,19 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+@ExperimentalCoroutinesApi
 class LinkStepUpVerificationViewModelTest {
     @get:Rule
     val mavericksTestRule = MavericksTestRule()
@@ -76,6 +79,7 @@ class LinkStepUpVerificationViewModelTest {
 
         verify(lookupConsumerAndStartVerification).invoke(
             email = eq(email),
+            businessName = anyOrNull(),
             verificationType = eq(VerificationType.EMAIL),
             onConsumerNotFound = any(),
             onLookupError = any(),
@@ -108,6 +112,7 @@ class LinkStepUpVerificationViewModelTest {
 
         verify(lookupConsumerAndStartVerification).invoke(
             email = eq(email),
+            businessName = anyOrNull(),
             verificationType = eq(VerificationType.EMAIL),
             onConsumerNotFound = onConsumerNotFoundCaptor.capture(),
             onLookupError = any(),
@@ -152,6 +157,7 @@ class LinkStepUpVerificationViewModelTest {
 
             verify(lookupConsumerAndStartVerification).invoke(
                 email = eq(email),
+                businessName = anyOrNull(),
                 verificationType = eq(VerificationType.EMAIL),
                 onConsumerNotFound = any(),
                 onLookupError = any(),

@@ -17,6 +17,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
     suspend fun lookupConsumerSession(email: String?): ConsumerSessionLookup
     suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
+        connectionsMerchantName: String?,
         type: VerificationType,
         customEmailType: CustomEmailType?
     ): ConsumerSession
@@ -66,6 +67,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
 
     override suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
+        connectionsMerchantName: String?,
         type: VerificationType,
         customEmailType: CustomEmailType?,
     ): ConsumerSession = mutex.withLock {
@@ -73,6 +75,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             consumerSessionClientSecret = consumerSessionClientSecret,
             locale = locale ?: Locale.getDefault(),
             authSessionCookie = null,
+            connectionsMerchantName = connectionsMerchantName,
             requestSurface = CONSUMER_SURFACE,
             type = type,
             customEmailType = customEmailType,

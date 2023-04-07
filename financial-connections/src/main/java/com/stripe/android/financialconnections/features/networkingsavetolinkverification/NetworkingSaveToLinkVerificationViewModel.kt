@@ -10,6 +10,10 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.ConfirmVerificationSessionError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.StartVerificationSessionError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationSuccess
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
@@ -18,6 +22,7 @@ import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
@@ -30,6 +35,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     initialState: NetworkingSaveToLinkVerificationState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
+    private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
     private val startVerification: StartVerification,
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
@@ -43,7 +49,11 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
         logErrors()
         suspend {
             val consumerSession = requireNotNull(getCachedConsumerSession())
-            startVerification.sms(consumerSession.clientSecret)
+            runCatching {
+                startVerification.sms(consumerSession.clientSecret)
+            }.onFailure {
+                eventTracker.track(VerificationError(PANE, StartVerificationSessionError))
+            }.getOrThrow()
             eventTracker.track(PaneLoaded(PANE))
             NetworkingSaveToLinkVerificationState.Payload(
                 email = consumerSession.emailAddress,
@@ -72,28 +82,39 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
         )
         onAsync(
             NetworkingSaveToLinkVerificationState::confirmVerification,
+            onSuccess = {
+                saveToLinkWithStripeSucceeded.set(true)
+                goNext(Pane.SUCCESS)
+            },
             onFail = { error ->
+                saveToLinkWithStripeSucceeded.set(false)
                 logger.error("Error confirming verification", error)
                 eventTracker.track(Error(PANE, error))
+                goNext(Pane.SUCCESS)
             },
         )
     }
 
     private fun onOTPEntered(otp: String) = suspend {
         val payload = requireNotNull(awaitState().payload())
-        confirmVerification.sms(
-            consumerSessionClientSecret = payload.consumerSessionClientSecret,
-            verificationCode = otp
-        )
-        // save accounts to link
-        val selectedAccounts = getCachedAccounts()
-        saveAccountToLink.existing(
-            consumerSessionClientSecret = payload.consumerSessionClientSecret,
-            selectedAccounts = selectedAccounts.map { it.id },
-        )
-        // Mark link verified
-        markLinkVerified()
-        goNext(Pane.SUCCESS)
+
+        runCatching {
+            confirmVerification.sms(
+                consumerSessionClientSecret = payload.consumerSessionClientSecret,
+                verificationCode = otp
+            )
+            saveAccountToLink.existing(
+                consumerSessionClientSecret = payload.consumerSessionClientSecret,
+                selectedAccounts = getCachedAccounts().map { it.id },
+            )
+        }
+            .onSuccess { eventTracker.track(VerificationSuccess(PANE)) }
+            .onFailure {
+                eventTracker.track(VerificationError(PANE, ConfirmVerificationSessionError))
+            }.getOrThrow()
+
+        // Mark link verified (ignore its result).
+        kotlin.runCatching { markLinkVerified() }
         Unit
     }.execute { copy(confirmVerification = it) }
 
