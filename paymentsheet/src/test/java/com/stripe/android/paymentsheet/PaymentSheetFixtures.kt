@@ -63,6 +63,13 @@ internal object PaymentSheetFixtures {
                     fontResId = 0
                 )
             )
+        ),
+        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
         )
     )
 

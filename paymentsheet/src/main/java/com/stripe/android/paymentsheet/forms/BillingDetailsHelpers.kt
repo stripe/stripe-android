@@ -121,32 +121,31 @@ internal object BillingDetailsHelpers {
             phoneNumberElement = it
         }
 
-        elementsFlow
-            .flatMapConcat { elementsList ->
-                // Look for a standalone CountryElement.
-                // Note that this should be done first, because AddressElement always has a
-                // CountryElement, but it might be hidden.
-                var countryElement = elementsList
+        elementsFlow.flatMapConcat { elementsList ->
+            // Look for a standalone CountryElement.
+            // Note that this should be done first, because AddressElement always has a
+            // CountryElement, but it might be hidden.
+            var countryElement = elementsList
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<CountryElement>()
+                .firstOrNull()
+
+            // If not found, look for one inside an AddressElement.
+            if (countryElement == null) {
+                countryElement = elementsList
                     .filterIsInstance<SectionElement>()
                     .flatMap { it.fields }
-                    .filterIsInstance<CountryElement>()
+                    .filterIsInstance<AddressElement>()
                     .firstOrNull()
-
-                // If not found, look for one inside an AddressElement.
-                if (countryElement == null) {
-                    countryElement = elementsList
-                        .filterIsInstance<SectionElement>()
-                        .flatMap { it.fields }
-                        .filterIsInstance<AddressElement>()
-                        .firstOrNull()
-                        ?.countryElement
-                }
-
-                countryElement?.controller?.rawFieldValue ?: emptyFlow()
-            }.collect {
-                it?.let {
-                    phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
-                }
+                    ?.countryElement
             }
+
+            countryElement?.controller?.rawFieldValue ?: emptyFlow()
+        }.collect {
+            it?.let {
+                phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
+            }
+        }
     }
 }
