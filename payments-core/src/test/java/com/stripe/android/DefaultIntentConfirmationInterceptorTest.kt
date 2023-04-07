@@ -44,7 +44,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
-        val nextStep = interceptor.intercept(
+        val nextStep = interceptor.interceptSavedPayment(
             clientSecret = "pi_1234_secret_4321",
             paymentMethod = paymentMethod,
             shippingValues = null,
@@ -69,7 +69,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 
-        val nextStep = interceptor.intercept(
+        val nextStep = interceptor.interceptNewPayment(
             clientSecret = "pi_1234_secret_4321",
             paymentMethodCreateParams = createParams,
             shippingValues = null,
@@ -93,7 +93,7 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         val error = assertFailsWith<IllegalStateException> {
-            interceptor.intercept(
+            interceptor.interceptSavedPayment(
                 clientSecret = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 shippingValues = null,
@@ -123,7 +123,7 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         val error = assertFailsWith<IllegalStateException> {
-            interceptor.intercept(
+            interceptor.interceptNewPayment(
                 clientSecret = null,
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 shippingValues = null,
@@ -158,7 +158,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeAccountIdProvider = { null },
         )
 
-        val nextStep = interceptor.intercept(
+        val nextStep = interceptor.interceptNewPayment(
             clientSecret = null,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             shippingValues = null,
@@ -198,7 +198,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         IntentConfirmationInterceptor.createIntentCallback = succeedingServerSideCallback("pm_123456789")
 
-        val nextStep = interceptor.intercept(
+        val nextStep = interceptor.interceptSavedPayment(
             clientSecret = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
@@ -226,7 +226,7 @@ class DefaultIntentConfirmationInterceptorTest {
             message = "that didn't work…"
         )
 
-        val nextStep = interceptor.intercept(
+        val nextStep = interceptor.interceptSavedPayment(
             clientSecret = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
@@ -252,7 +252,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         IntentConfirmationInterceptor.createIntentCallback = failingClientSideCallback()
 
-        val nextStep = interceptor.intercept(
+        val nextStep = interceptor.interceptSavedPayment(
             clientSecret = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
@@ -280,7 +280,7 @@ class DefaultIntentConfirmationInterceptorTest {
             message = "that didn't work…"
         )
 
-        val nextStep = interceptor.intercept(
+        val nextStep = interceptor.interceptSavedPayment(
             clientSecret = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
@@ -306,7 +306,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         IntentConfirmationInterceptor.createIntentCallback = failingServerSideCallback()
 
-        val nextStep = interceptor.intercept(
+        val nextStep = interceptor.interceptSavedPayment(
             clientSecret = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
@@ -335,7 +335,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         IntentConfirmationInterceptor.createIntentCallback = succeedingClientSideCallback(expectedPaymentMethodId)
 
-        val nextStep = interceptor.intercept(
+        val nextStep = interceptor.interceptSavedPayment(
             clientSecret = null,
             paymentMethod = paymentMethod,
             shippingValues = null,
@@ -367,7 +367,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         IntentConfirmationInterceptor.createIntentCallback = succeedingServerSideCallback(expectedPaymentMethodId)
 
-        val nextStep = interceptor.intercept(
+        val nextStep = interceptor.interceptSavedPayment(
             clientSecret = null,
             paymentMethod = paymentMethod,
             shippingValues = null,
@@ -403,7 +403,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         IntentConfirmationInterceptor.createIntentCallback = succeedingServerSideCallback(expectedPaymentMethodId)
 
-        val nextStep = interceptor.intercept(
+        val nextStep = interceptor.interceptSavedPayment(
             clientSecret = null,
             paymentMethod = paymentMethod,
             shippingValues = null,
@@ -448,7 +448,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     observedValues += shouldSavePaymentMethod
                     CreateIntentResult.Success("pi_123_secret_456")
                 }
-            interceptor.intercept(
+            interceptor.interceptSavedPayment(
                 clientSecret = null,
                 paymentMethod = paymentMethod,
                 shippingValues = null,

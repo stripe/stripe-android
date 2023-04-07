@@ -38,14 +38,14 @@ interface IntentConfirmationInterceptor {
         data class Complete(val stripeIntent: StripeIntent) : NextStep
     }
 
-    suspend fun intercept(
+    suspend fun interceptNewPayment(
         clientSecret: String?,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): NextStep
 
-    suspend fun intercept(
+    suspend fun interceptSavedPayment(
         clientSecret: String?,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -76,7 +76,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
             stripeAccount = stripeAccountIdProvider(),
         )
 
-    override suspend fun intercept(
+    override suspend fun interceptNewPayment(
         clientSecret: String?,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -92,11 +92,11 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         } else {
             createPaymentMethod(paymentMethodCreateParams).fold(
                 onSuccess = { paymentMethod ->
-                    intercept(
-                        clientSecret = null,
+                    createAndConfirmIntent(
+                        paymentMethodCreateParams = paymentMethodCreateParams,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues,
-                        setupForFutureUsage = setupForFutureUsage,
+                        setupForFutureUsage = setupForFutureUsage
                     )
                 },
                 onFailure = { error ->
@@ -109,7 +109,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         }
     }
 
-    override suspend fun intercept(
+    override suspend fun interceptSavedPayment(
         clientSecret: String?,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -118,29 +118,12 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         return if (clientSecret != null) {
             createConfirmStep(clientSecret, shippingValues, paymentMethod)
         } else {
-            when (val callback = IntentConfirmationInterceptor.createIntentCallback) {
-                is CreateIntentCallbackForServerSideConfirmation -> {
-                    handleServerSideConfirmation(
-                        createIntentCallback = callback,
-                        shouldSavePaymentMethod = setupForFutureUsage == OffSession,
-                        paymentMethod = paymentMethod,
-                        shippingValues = shippingValues
-                    )
-                }
-                is CreateIntentCallback -> {
-                    handleClientSideConfirmation(
-                        createIntentCallback = callback,
-                        paymentMethod = paymentMethod,
-                        shippingValues = shippingValues
-                    )
-                }
-                else -> {
-                    error(
-                        "${CreateIntentCallback::class.java.simpleName} must be implemented " +
-                            "when using IntentConfiguration with PaymentSheet"
-                    )
-                }
-            }
+            createAndConfirmIntent(
+                paymentMethodCreateParams = null,
+                paymentMethod = paymentMethod,
+                shippingValues = shippingValues,
+                setupForFutureUsage = setupForFutureUsage
+            )
         }
     }
 
@@ -155,16 +138,66 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         }
     }
 
+    private suspend fun createAndConfirmIntent(
+        paymentMethodCreateParams: PaymentMethodCreateParams?,
+        paymentMethod: PaymentMethod,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
+    ): IntentConfirmationInterceptor.NextStep {
+        return when (val callback = IntentConfirmationInterceptor.createIntentCallback) {
+            is CreateIntentCallbackForServerSideConfirmation -> {
+                handleServerSideConfirmation(
+                    createIntentCallback = callback,
+                    shouldSavePaymentMethod = setupForFutureUsage == OffSession,
+                    paymentMethodCreateParams = paymentMethodCreateParams,
+                    paymentMethod = paymentMethod,
+                    shippingValues = shippingValues,
+                    setupForFutureUsage = setupForFutureUsage
+                )
+            }
+            is CreateIntentCallback -> {
+                handleClientSideConfirmation(
+                    createIntentCallback = callback,
+                    paymentMethodCreateParams = paymentMethodCreateParams,
+                    paymentMethod = paymentMethod,
+                    shippingValues = shippingValues,
+                    setupForFutureUsage = setupForFutureUsage
+                )
+            }
+            else -> {
+                error(
+                    "${CreateIntentCallback::class.java.simpleName} must be implemented " +
+                        "when using IntentConfiguration with PaymentSheet"
+                )
+            }
+        }
+    }
+
     private suspend fun handleClientSideConfirmation(
         createIntentCallback: CreateIntentCallback,
+        paymentMethodCreateParams: PaymentMethodCreateParams?,
         paymentMethod: PaymentMethod,
-        shippingValues: ConfirmPaymentIntentParams.Shipping?
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
     ): IntentConfirmationInterceptor.NextStep {
         return when (
             val result = createIntentCallback.onCreateIntent(paymentMethodId = paymentMethod.id!!)
         ) {
             is CreateIntentResult.Success -> {
-                createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
+                if (paymentMethodCreateParams != null) {
+                    createConfirmStep(
+                        result.clientSecret,
+                        shippingValues,
+                        paymentMethodCreateParams,
+                        setupForFutureUsage,
+                    )
+                } else {
+                    createConfirmStep(
+                        result.clientSecret,
+                        shippingValues,
+                        paymentMethod
+                    )
+                }
             }
             is CreateIntentResult.Failure -> {
                 IntentConfirmationInterceptor.NextStep.Fail(
@@ -177,9 +210,11 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private suspend fun handleServerSideConfirmation(
         createIntentCallback: CreateIntentCallbackForServerSideConfirmation,
+        paymentMethodCreateParams: PaymentMethodCreateParams?,
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
     ): IntentConfirmationInterceptor.NextStep {
         val result = createIntentCallback.onCreateIntent(
             paymentMethodId = paymentMethod.id!!,
@@ -194,8 +229,19 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                             IntentConfirmationInterceptor.NextStep.Complete(intent)
                         } else if (intent.status == StripeIntent.Status.RequiresAction) {
                             IntentConfirmationInterceptor.NextStep.HandleNextAction(result.clientSecret)
+                        } else if (paymentMethodCreateParams != null) {
+                            createConfirmStep(
+                                result.clientSecret,
+                                shippingValues,
+                                paymentMethodCreateParams,
+                                setupForFutureUsage,
+                            )
                         } else {
-                            createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
+                            createConfirmStep(
+                                result.clientSecret,
+                                shippingValues,
+                                paymentMethod
+                            )
                         }
                     },
                     onFailure = { error ->

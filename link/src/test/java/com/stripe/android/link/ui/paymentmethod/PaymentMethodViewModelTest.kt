@@ -200,7 +200,7 @@ class PaymentMethodViewModelTest {
 
         val paramsCaptor = argumentCaptor<ConfirmPaymentIntentParams.Shipping>()
 
-        verify(mockInterceptor).intercept(
+        verify(mockInterceptor).interceptNewPayment(
             clientSecret = anyOrNull(),
             paymentMethodCreateParams = any(),
             shippingValues = paramsCaptor.capture(),

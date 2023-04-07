@@ -35,7 +35,7 @@ class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {
         channel.trySend(nextStep)
     }
 
-    override suspend fun intercept(
+    override suspend fun interceptNewPayment(
         clientSecret: String?,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -44,7 +44,7 @@ class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {
         return channel.receive()
     }
 
-    override suspend fun intercept(
+    override suspend fun interceptSavedPayment(
         clientSecret: String?,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,

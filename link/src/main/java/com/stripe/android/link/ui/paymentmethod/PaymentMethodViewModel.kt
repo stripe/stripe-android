@@ -205,7 +205,7 @@ internal class PaymentMethodViewModel @Inject constructor(
     }
 
     private suspend fun completePayment(linkPaymentDetails: LinkPaymentDetails) {
-        val nextStep = intentConfirmationInterceptor.intercept(
+        val nextStep = intentConfirmationInterceptor.interceptNewPayment(
             clientSecret = stripeIntent.clientSecret,
             paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams,
             shippingValues = args.shippingValues?.toConfirmPaymentIntentShipping(),

@@ -18,8 +18,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 CustomerRequestedSave.RequestNoReuse -> SetupFutureUsage.Blank
                 CustomerRequestedSave.NoRequest -> null
             }
-
-            intercept(
+            interceptNewPayment(
                 clientSecret = clientSecret,
                 paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
                 shippingValues = shippingValues,
@@ -27,7 +26,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
             )
         }
         is PaymentSelection.Saved -> {
-            intercept(
+            interceptSavedPayment(
                 clientSecret = clientSecret,
                 paymentMethod = paymentSelection.paymentMethod,
                 shippingValues = shippingValues,

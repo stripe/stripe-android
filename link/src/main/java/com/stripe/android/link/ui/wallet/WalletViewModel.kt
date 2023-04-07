@@ -155,7 +155,7 @@ internal class WalletViewModel @Inject constructor(
                 linkAccount = linkAccount,
             )
 
-            val nextStep = intentConfirmationInterceptor.intercept(
+            val nextStep = intentConfirmationInterceptor.interceptNewPayment(
                 clientSecret = stripeIntent.clientSecret,
                 paymentMethodCreateParams = params,
                 shippingValues = args.shippingValues?.toConfirmPaymentIntentShipping(),

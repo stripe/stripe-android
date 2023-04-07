@@ -98,6 +98,20 @@ object RequestMatchers {
         }
     }
 
+    fun bodyPart(name: String, regex: Regex): RequestMatcher {
+        return ToStringRequestMatcher("bodyPart($name, $regex)") { request ->
+            request.bodyText.substringAfter("?")
+                .split("&")
+                .associate {
+                    Pair(
+                        it.substringBefore("="),
+                        it.substringAfter("=")
+                    )
+                }.getOrElse(name) { "" }
+                .matches(regex)
+        }
+    }
+
     fun composite(vararg matchers: RequestMatcher): RequestMatcher {
         val friendlyName = "composite(${matchers.joinToString { it.toString() }})"
         return ToStringRequestMatcher(friendlyName) { request ->

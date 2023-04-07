@@ -198,7 +198,7 @@ class WalletViewModelTest {
 
         val paramsCaptor = argumentCaptor<ConfirmPaymentIntentParams.Shipping>()
 
-        verify(mockInterceptor).intercept(
+        verify(mockInterceptor).interceptNewPayment(
             clientSecret = anyOrNull(),
             paymentMethodCreateParams = any(),
             shippingValues = paramsCaptor.capture(),
@@ -467,7 +467,7 @@ class WalletViewModelTest {
 
         val paramsCaptor = argumentCaptor<PaymentMethodCreateParams>()
 
-        verify(mockInterceptor).intercept(
+        verify(mockInterceptor).interceptNewPayment(
             clientSecret = anyOrNull(),
             paymentMethodCreateParams = paramsCaptor.capture(),
             shippingValues = anyOrNull(),
@@ -496,7 +496,7 @@ class WalletViewModelTest {
         viewModel.onConfirmPayment()
 
         val paramsCaptor = argumentCaptor<PaymentMethodCreateParams>()
-        verify(mockInterceptor).intercept(
+        verify(mockInterceptor).interceptNewPayment(
             clientSecret = anyOrNull(),
             paymentMethodCreateParams = paramsCaptor.capture(),
             shippingValues = anyOrNull(),
