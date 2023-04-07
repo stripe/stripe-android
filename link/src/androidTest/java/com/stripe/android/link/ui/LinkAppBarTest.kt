@@ -42,7 +42,7 @@ internal class LinkAppBarTest {
         var count = 0
         setContent(showBottomSheetContent = { count++ })
 
-        composeTestRule.onNodeWithContentDescription("Menu").performClick()
+        composeTestRule.onNodeWithContentDescription("Show menu").performClick()
 
         assertThat(count).isEqualTo(1)
     }

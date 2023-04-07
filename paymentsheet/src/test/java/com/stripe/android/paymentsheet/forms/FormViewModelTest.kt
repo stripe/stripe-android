@@ -67,15 +67,16 @@ internal class FormViewModelTest {
 
         whenever(mockLpmRepository.fromCode(paymentMethodType.code)).thenReturn(
             LpmRepository.SupportedPaymentMethod(
-                paymentMethodType.code,
-                false,
-                R.string.stripe_paymentsheet_payment_method_card,
-                R.drawable.stripe_ic_paymentsheet_pm_card,
-                null,
-                null,
-                true,
-                PaymentMethodRequirements(emptySet(), emptySet(), true),
-                layoutSpec
+                code = paymentMethodType.code,
+                requiresMandate = false,
+                mandateRequirement = MandateRequirement.Never,
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                tintIconOnSelection = true,
+                requirement = PaymentMethodRequirements(emptySet(), emptySet(), true),
+                formSpec = layoutSpec
             )
         )
         return mockLpmRepository

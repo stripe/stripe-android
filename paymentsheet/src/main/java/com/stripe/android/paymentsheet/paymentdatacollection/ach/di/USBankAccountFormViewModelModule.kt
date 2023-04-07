@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach.di
 
 import android.app.Application
 import android.content.Context
+import android.content.res.Resources
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -21,6 +22,11 @@ internal class USBankAccountFormViewModelModule {
     @Provides
     fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
         return PaymentConfiguration.getInstance(appContext)
+    }
+
+    @Provides
+    fun providesResources(appContext: Context): Resources {
+        return appContext.resources
     }
 
     @Provides

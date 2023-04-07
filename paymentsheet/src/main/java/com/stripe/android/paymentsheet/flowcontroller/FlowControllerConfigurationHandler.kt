@@ -6,10 +6,12 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.validate
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.security.InvalidParameterException
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -23,16 +25,43 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private val paymentSelectionUpdater: PaymentSelectionUpdater,
 ) {
 
-    suspend fun configure(
+    private val job: AtomicReference<Job?> = AtomicReference(null)
+
+    fun configure(
+        scope: CoroutineScope,
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback,
     ) {
+        val oldJob = job.getAndSet(
+            scope.launch {
+                configureInternal(
+                    initializationMode = initializationMode,
+                    configuration = configuration,
+                    callback = callback,
+                )
+            }
+        )
+        oldJob?.cancel()
+    }
+
+    private suspend fun configureInternal(
+        initializationMode: PaymentSheet.InitializationMode,
+        configuration: PaymentSheet.Configuration?,
+        callback: PaymentSheet.FlowController.ConfigCallback,
+    ) {
+        suspend fun onConfigured(error: Throwable? = null) {
+            withContext(uiContext) {
+                resetJob()
+                callback.onConfigured(success = error == null, error = error)
+            }
+        }
+
         try {
             initializationMode.validate()
             configuration?.validate()
         } catch (e: InvalidParameterException) {
-            callback.onConfigured(false, e)
+            onConfigured(error = e)
             return
         }
 
@@ -40,48 +69,36 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         val canSkip = viewModel.previousConfigureRequest == configureRequest
 
         if (canSkip) {
-            callback.onConfigured(true, null)
+            onConfigured()
             return
         }
 
-        val result = paymentSheetLoader.load(initializationMode, configuration)
-
-        if (currentCoroutineContext().isActive) {
-            viewModel.previousConfigureRequest = configureRequest
-            dispatchResult(result, callback)
-        } else {
-            callback.onConfigured(false, null)
-        }
-    }
-
-    private suspend fun dispatchResult(
-        result: PaymentSheetLoader.Result,
-        callback: PaymentSheet.FlowController.ConfigCallback,
-    ) = withContext(uiContext) {
-        when (result) {
+        when (val result = paymentSheetLoader.load(initializationMode, configuration)) {
             is PaymentSheetLoader.Result.Success -> {
-                onInitSuccess(result.state, callback)
+                viewModel.previousConfigureRequest = configureRequest
+                onInitSuccess(result.state)
+                onConfigured()
             }
             is PaymentSheetLoader.Result.Failure -> {
-                callback.onConfigured(false, result.throwable)
+                onConfigured(error = result.throwable)
             }
         }
     }
 
-    private fun onInitSuccess(
-        state: PaymentSheetState.Full,
-        callback: PaymentSheet.FlowController.ConfigCallback,
-    ) {
+    private fun onInitSuccess(state: PaymentSheetState.Full) {
         eventReporter.onInit(state.config)
 
         viewModel.paymentSelection = paymentSelectionUpdater(
             currentSelection = viewModel.paymentSelection,
+            previousConfig = viewModel.state?.config,
             newState = state,
         )
 
         viewModel.state = state
+    }
 
-        callback.onConfigured(true, null)
+    private fun resetJob() {
+        job.set(null)
     }
 
     data class ConfigureRequest(

@@ -53,7 +53,7 @@ class SSDOcrTest {
         )
         assertNotNull(prediction)
 
-        assertEquals("3023334877861104", prediction.pan)
+        assertEquals("4242424242424242", prediction.pan)
     }
 
     /**
@@ -126,6 +126,6 @@ class SSDOcrTest {
             Unit
         )
 
-        assertEquals("3023334877861104", prediction.pan)
+        assertEquals("4242424242424242", prediction.pan)
     }
 }

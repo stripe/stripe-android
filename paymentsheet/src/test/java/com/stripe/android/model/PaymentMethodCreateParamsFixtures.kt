@@ -83,6 +83,8 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
+    internal val PAYPAL = PaymentMethodCreateParams.createPayPal()
+
     internal val BANCONTACT = PaymentMethodCreateParams.createBancontact(
         billingDetails = BILLING_DETAILS
     )

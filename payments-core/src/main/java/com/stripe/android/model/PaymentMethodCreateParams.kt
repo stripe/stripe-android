@@ -224,6 +224,11 @@ data class PaymentMethodCreateParams internal constructor(
         metadata = metadata,
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun requiresMandate(): Boolean {
+        return requiresMandate
+    }
+
     override fun toParamMap(): Map<String, Any> {
         return overrideParamMap
             ?: mapOf(

@@ -549,7 +549,7 @@ internal class WalletScreenTest {
         composeTestRule.onNodeWithText("Are you sure you want to remove this card?")
 
     private fun onRemoveBankAccountConfirmationDialog() =
-        composeTestRule.onNodeWithText("Are you sure you want to remove this account?")
+        composeTestRule.onNodeWithText("Are you sure you want to remove this linked account?")
 
     private fun onCancelButton() = composeTestRule.onNodeWithText("Cancel")
     private fun onRemoveButton() = composeTestRule.onNodeWithText("Remove")

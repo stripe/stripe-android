@@ -765,7 +765,7 @@ public final class com/stripe/android/ui/core/forms/resources/LpmRepository$LpmI
 	public final fun containsKey (Ljava/lang/String;)Z
 	public final fun fromCode (Ljava/lang/String;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository$SupportedPaymentMethod;
 	public final fun putAll (Ljava/util/Map;)V
-	public final fun values ()Ljava/util/Collection;
+	public final fun values ()Ljava/util/List;
 }
 
 public final class com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState$NoServerSpec : com/stripe/android/ui/core/forms/resources/LpmRepository$ServerSpecState {
