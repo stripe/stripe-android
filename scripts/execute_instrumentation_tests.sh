@@ -7,4 +7,4 @@
 set -e # Fail on error.
 
 # Exclude any modules with screenshot tests here. Then run them with the screenshot test package excluded.
-./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :example:connectedAndroidTest
+./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest
