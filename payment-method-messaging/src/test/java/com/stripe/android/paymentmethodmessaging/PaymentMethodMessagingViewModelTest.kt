@@ -3,7 +3,7 @@ package com.stripe.android.paymentmethodmessaging
 import androidx.lifecycle.viewModelScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodMessage
-import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingData
 import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingView
 import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingViewModel
@@ -24,7 +24,8 @@ import kotlin.test.BeforeTest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PaymentMethodMessagingViewModelTest {
-    private val stripeApiRepository = mock<StripeApiRepository>()
+
+    private val stripeRepository = mock<StripeRepository>()
 
     @BeforeTest
     fun setUp() {
@@ -58,7 +59,7 @@ class PaymentMethodMessagingViewModelTest {
             },
             isSystemDarkThemeProvider = { false },
             config = config,
-            stripeApiRepository = stripeApiRepository
+            stripeRepository = stripeRepository
         )
 
         returnsPaymentMethodMessage(
@@ -95,7 +96,7 @@ class PaymentMethodMessagingViewModelTest {
             },
             isSystemDarkThemeProvider = { false },
             config = config,
-            stripeApiRepository = stripeApiRepository
+            stripeRepository = stripeRepository
         )
 
         returnsPaymentMethodMessage(
@@ -130,7 +131,7 @@ class PaymentMethodMessagingViewModelTest {
             },
             isSystemDarkThemeProvider = { false },
             config = config,
-            stripeApiRepository = stripeApiRepository
+            stripeRepository = stripeRepository
         )
 
         returnsPaymentMethodMessage(
@@ -153,11 +154,13 @@ class PaymentMethodMessagingViewModelTest {
         displayHtml: String,
         learnMoreUrl: String
     ) {
-        val paymentMethodMessage = mock<PaymentMethodMessage>()
-        whenever(paymentMethodMessage.displayHtml).thenReturn(displayHtml)
-        whenever(paymentMethodMessage.learnMoreUrl).thenReturn(learnMoreUrl)
+        val paymentMethodMessage = PaymentMethodMessage(
+            displayHtml = displayHtml,
+            learnMoreUrl = learnMoreUrl,
+        )
+
         whenever(
-            stripeApiRepository.retrievePaymentMethodMessage(
+            stripeRepository.retrievePaymentMethodMessage(
                 paymentMethods = anyOrNull(),
                 amount = anyOrNull(),
                 currency = anyOrNull(),

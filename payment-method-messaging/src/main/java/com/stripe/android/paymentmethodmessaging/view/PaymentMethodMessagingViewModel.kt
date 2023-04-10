@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethodMessage
-import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentmethodmessaging.view.injection.DaggerPaymentMethodMessagingComponent
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.CoroutineScope
@@ -23,7 +23,7 @@ Deferred<PaymentMethodMessagingData>
 internal class PaymentMethodMessagingViewModel @Inject constructor(
     private val isSystemDarkThemeProvider: () -> Boolean,
     private val config: PaymentMethodMessagingView.Configuration,
-    private val stripeApiRepository: StripeApiRepository,
+    private val stripeRepository: StripeRepository,
     private val mapper: @JvmSuppressWildcards Mapper
 ) : ViewModel() {
 
@@ -45,7 +45,7 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
     }
 
     private suspend fun retrievePaymentMethodMessage(): Result<PaymentMethodMessage> {
-        return stripeApiRepository.retrievePaymentMethodMessage(
+        return stripeRepository.retrievePaymentMethodMessage(
             paymentMethods = config.paymentMethods.map { it.value },
             amount = config.amount,
             currency = config.currency,
