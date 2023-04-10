@@ -135,11 +135,17 @@ data class ExampleCreateAndConfirmErrorResponse(
 ) {
     companion object {
         fun deserialize(response: Response): ExampleCreateAndConfirmErrorResponse {
-            val body = response.body().asString("application/json")
-            return Json.decodeFromString(
-                serializer(),
-                body
-            )
+            return try {
+                val body = response.body().asString("application/json")
+                Json.decodeFromString(
+                    serializer(),
+                    body
+                )
+            } catch (ex: Exception) {
+                ExampleCreateAndConfirmErrorResponse(
+                    error = "Something went wrong"
+                )
+            }
         }
     }
 }
