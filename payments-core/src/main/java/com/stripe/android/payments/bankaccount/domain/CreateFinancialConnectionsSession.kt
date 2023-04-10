@@ -6,6 +6,7 @@ import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.utils.mapResultCatching
 import javax.inject.Inject
 
 internal class CreateFinancialConnectionsSession @Inject constructor(
@@ -21,19 +22,26 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         customerName: String,
         customerEmail: String?,
         stripeAccountId: String?
-    ): Result<FinancialConnectionsSession> =
-        stripeRepository.createPaymentIntentFinancialConnectionsSession(
-            paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId,
-            params = CreateFinancialConnectionsSessionParams(
-                clientSecret = clientSecret,
-                customerName = customerName,
-                customerEmailAddress = customerEmail
-            ),
-            requestOptions = ApiRequest.Options(
-                publishableKey,
-                stripeAccountId
+    ): Result<FinancialConnectionsSession> {
+        val paymentIntentClientSecretResult = runCatching {
+            PaymentIntent.ClientSecret(clientSecret)
+        }
+
+        return paymentIntentClientSecretResult.mapResultCatching { paymentIntentClientSecret ->
+            stripeRepository.createPaymentIntentFinancialConnectionsSession(
+                paymentIntentId = paymentIntentClientSecret.paymentIntentId,
+                params = CreateFinancialConnectionsSessionParams(
+                    clientSecret = clientSecret,
+                    customerName = customerName,
+                    customerEmailAddress = customerEmail
+                ),
+                requestOptions = ApiRequest.Options(
+                    publishableKey,
+                    stripeAccountId
+                )
             )
-        )
+        }
+    }
 
     /**
      * Creates a [FinancialConnectionsSession] for the given [SetupIntent] secret.
@@ -44,17 +52,24 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         customerName: String,
         customerEmail: String?,
         stripeAccountId: String?
-    ): Result<FinancialConnectionsSession> =
-        stripeRepository.createSetupIntentFinancialConnectionsSession(
-            setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId,
-            params = CreateFinancialConnectionsSessionParams(
-                clientSecret = clientSecret,
-                customerName = customerName,
-                customerEmailAddress = customerEmail
-            ),
-            requestOptions = ApiRequest.Options(
-                publishableKey,
-                stripeAccountId
+    ): Result<FinancialConnectionsSession> {
+        val setupIntentClientSecretResult = runCatching {
+            SetupIntent.ClientSecret(clientSecret)
+        }
+
+        return setupIntentClientSecretResult.mapResultCatching { setupIntentClientSecret ->
+            stripeRepository.createSetupIntentFinancialConnectionsSession(
+                setupIntentId = setupIntentClientSecret.setupIntentId,
+                params = CreateFinancialConnectionsSessionParams(
+                    clientSecret = clientSecret,
+                    customerName = customerName,
+                    customerEmailAddress = customerEmail
+                ),
+                requestOptions = ApiRequest.Options(
+                    publishableKey,
+                    stripeAccountId
+                )
             )
-        )
+        }
+    }
 }
