@@ -83,6 +83,7 @@ class FlowControllerConfigurationHandlerTest {
 
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isNotNull()
+        assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
         assertThat(viewModel.state).isNotNull()
         verify(eventReporter)
@@ -114,6 +115,7 @@ class FlowControllerConfigurationHandlerTest {
 
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isSameInstanceAs(configureRequest)
+        assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
 
         // We're running ONLY the second config run, so we don't expect any interactions.
@@ -148,6 +150,7 @@ class FlowControllerConfigurationHandlerTest {
 
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
+        assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
 
         // We're running a new config, so we DO expect an interaction.
@@ -182,6 +185,7 @@ class FlowControllerConfigurationHandlerTest {
 
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
+        assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
 
         // We're running a new config, so we DO expect an interaction.
@@ -361,6 +365,27 @@ class FlowControllerConfigurationHandlerTest {
         loader.enqueueSuccess()
 
         resultTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `Records configuration failure correctly in view model`() = runTest {
+        val resultTurbine = Turbine<Throwable?>()
+        val configurationHandler = createConfigurationHandler(
+            paymentSheetLoader = FakePaymentSheetLoader(shouldFail = true),
+        )
+
+        configurationHandler.configure(
+            scope = this,
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+            ),
+            configuration = null,
+        ) { _, exception ->
+            resultTurbine.add(exception)
+        }
+
+        assertThat(resultTurbine.awaitItem()).isNotNull()
+        assertThat(configurationHandler.isConfigured).isFalse()
     }
 
     private fun defaultPaymentSheetLoader(): PaymentSheetLoader {
