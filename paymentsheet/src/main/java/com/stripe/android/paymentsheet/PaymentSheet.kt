@@ -468,6 +468,7 @@ class PaymentSheet internal constructor(
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
+        @Suppress("TooManyFunctions")
         class Builder(
             private var merchantDisplayName: String
         ) {
