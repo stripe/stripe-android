@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.example.samples.model.CartState
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as ApiResult
 
@@ -135,6 +134,8 @@ data class ExampleCreateAndConfirmErrorResponse(
     val error: String? = null,
 ) {
     companion object {
+
+        @Suppress("TooGenericExceptionCaught", "SwallowedException")
         fun deserialize(response: Response): ExampleCreateAndConfirmErrorResponse {
             return try {
                 val body = response.body().asString("application/json")
@@ -142,7 +143,7 @@ data class ExampleCreateAndConfirmErrorResponse(
                     serializer(),
                     body
                 )
-            } catch (@Suppress("SwallowedException") ex: SerializationException) {
+            } catch (ex: Exception) {
                 ExampleCreateAndConfirmErrorResponse(
                     error = "Something went wrong"
                 )
