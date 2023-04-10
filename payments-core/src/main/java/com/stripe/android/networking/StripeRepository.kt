@@ -483,7 +483,7 @@ abstract class StripeRepository {
         locale: String,
         logoColor: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethodMessage?
+    ): Result<PaymentMethodMessage>?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun retrieveElementsSession(

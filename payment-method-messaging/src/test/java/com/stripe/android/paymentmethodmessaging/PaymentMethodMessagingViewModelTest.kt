@@ -167,7 +167,7 @@ class PaymentMethodMessagingViewModelTest {
                 requestOptions = anyOrNull()
             )
         ).thenReturn(
-            paymentMethodMessage
+            Result.success(paymentMethodMessage)
         )
     }
 }

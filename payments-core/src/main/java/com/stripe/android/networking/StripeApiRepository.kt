@@ -1532,8 +1532,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         locale: String,
         logoColor: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethodMessage? {
-        return fetchStripeModel(
+    ): Result<PaymentMethodMessage> {
+        return fetchStripeModelResult(
             apiRequestFactory.createGet(
                 url = "https://ppm.stripe.com/content",
                 options = requestOptions,

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.networking.StripeApiRepository
@@ -34,34 +33,31 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
     fun loadMessage() {
         viewModelScope.launch {
             _messageFlow.update {
-                try {
-                    val message = stripeApiRepository.retrievePaymentMethodMessage(
-                        paymentMethods = config.paymentMethods.map { it.value },
-                        amount = config.amount,
-                        currency = config.currency,
-                        country = config.countryCode,
-                        locale = config.locale.toLanguageTag(),
-                        logoColor = config.imageColor?.value ?: if (isSystemDarkThemeProvider()) {
-                            PaymentMethodMessagingView.Configuration.ImageColor.Light.value
-                        } else {
-                            PaymentMethodMessagingView.Configuration.ImageColor.Dark.value
-                        },
-                        requestOptions = ApiRequest.Options(config.publishableKey),
-                    )
-                    if (
-                        message == null ||
-                        message.displayHtml.isBlank() ||
-                        message.learnMoreUrl.isBlank()
-                    ) {
-                        Result.failure(Exception("Could not retrieve message"))
+                retrievePaymentMethodMessage().mapCatching { message ->
+                    if (message.displayHtml.isBlank() || message.learnMoreUrl.isBlank()) {
+                        throw Exception("Could not retrieve message")
                     } else {
-                        Result.success(mapper(this, message).await())
+                        mapper(this, message).await()
                     }
-                } catch (e: StripeException) {
-                    Result.failure(e)
                 }
             }
         }
+    }
+
+    private suspend fun retrievePaymentMethodMessage(): Result<PaymentMethodMessage> {
+        return stripeApiRepository.retrievePaymentMethodMessage(
+            paymentMethods = config.paymentMethods.map { it.value },
+            amount = config.amount,
+            currency = config.currency,
+            country = config.countryCode,
+            locale = config.locale.toLanguageTag(),
+            logoColor = config.imageColor?.value ?: if (isSystemDarkThemeProvider()) {
+                PaymentMethodMessagingView.Configuration.ImageColor.Light.value
+            } else {
+                PaymentMethodMessagingView.Configuration.ImageColor.Dark.value
+            },
+            requestOptions = ApiRequest.Options(config.publishableKey),
+        )
     }
 
     internal class Factory(

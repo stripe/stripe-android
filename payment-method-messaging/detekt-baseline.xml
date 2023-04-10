@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>TooGenericExceptionThrown:PaymentMethodMessagingViewModel.kt$PaymentMethodMessagingViewModel$throw Exception("Could not retrieve message")</ID>
+  </CurrentIssues>
+</SmellBaseline>

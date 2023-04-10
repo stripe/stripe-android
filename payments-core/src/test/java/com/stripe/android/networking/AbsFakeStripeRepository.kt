@@ -415,8 +415,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         locale: String,
         logoColor: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethodMessage? {
-        return null
+    ): Result<PaymentMethodMessage> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveElementsSession(
