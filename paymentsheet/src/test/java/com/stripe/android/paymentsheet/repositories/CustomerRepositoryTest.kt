@@ -17,7 +17,6 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -28,9 +27,25 @@ import java.security.InvalidParameterException
 internal class CustomerRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val stripeRepository = mock<StripeRepository> {
-        onBlocking { getPaymentMethods(any(), anyString(), any(), any()) }.doReturn(emptyList())
-        onBlocking { detachPaymentMethod(anyString(), any(), anyString(), any()) }.doThrow(InvalidParameterException("error"))
+        onBlocking {
+            getPaymentMethods(
+                listPaymentMethodsParams = any(),
+                publishableKey = anyString(),
+                productUsageTokens = any(),
+                requestOptions = any(),
+            )
+        }.doReturn(Result.success(emptyList()))
+
+        onBlocking {
+            detachPaymentMethod(
+                publishableKey = anyString(),
+                productUsageTokens = any(),
+                paymentMethodId = anyString(),
+                requestOptions = any(),
+            )
+        }.doReturn(Result.failure(InvalidParameterException("error")))
     }
+
     private val repository = CustomerApiRepository(
         stripeRepository,
         { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123") },
@@ -111,8 +126,8 @@ internal class CustomerRepositoryTest {
                 any()
             )
         )
-            .doThrow(InvalidParameterException("Request Failed"))
-            .doReturn(listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+            .doReturn(Result.failure(InvalidParameterException("Request Failed")))
+            .doReturn(Result.success(listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)))
         return repository
     }
 }
