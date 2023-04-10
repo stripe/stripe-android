@@ -462,7 +462,8 @@ class PaymentSheet internal constructor(
          * If `never` is used for a required field for the Payment Method used during checkout,
          * you **must** provide an appropriate value as part of [defaultBillingDetails].
          */
-        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration(),
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
