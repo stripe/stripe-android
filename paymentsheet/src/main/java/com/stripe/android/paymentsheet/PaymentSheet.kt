@@ -505,6 +505,8 @@ class PaymentSheet internal constructor(
             private var allowsDelayedPaymentMethods: Boolean = false
             private var allowsPaymentMethodsRequiringShippingAddress: Boolean = false
             private var appearance: Appearance = Appearance()
+            private var billingDetailsCollectionConfiguration =
+                BillingDetailsCollectionConfiguration()
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -544,6 +546,12 @@ class PaymentSheet internal constructor(
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
 
+            fun billingDetailsCollectionConfiguration(
+                billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+            ) = apply {
+                this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
+            }
+
             fun build() = Configuration(
                 merchantDisplayName,
                 customer,
@@ -553,7 +561,8 @@ class PaymentSheet internal constructor(
                 shippingDetails,
                 allowsDelayedPaymentMethods,
                 allowsPaymentMethodsRequiringShippingAddress,
-                appearance
+                appearance,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             )
         }
     }
