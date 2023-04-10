@@ -4,10 +4,12 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
+import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.connectBillingDetailsFields
 import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.specsForConfiguration
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -112,6 +115,12 @@ internal class FormViewModel @Inject internal constructor(
                 .firstOrNull()
         }
     private var externalHiddenIdentifiers = MutableStateFlow(emptySet<IdentifierSpec>())
+
+    init {
+        viewModelScope.launch {
+            connectBillingDetailsFields(elementsFlow)
+        }
+    }
 
     @VisibleForTesting
     internal fun addHiddenIdentifiers(identifierSpecs: Set<IdentifierSpec>) {

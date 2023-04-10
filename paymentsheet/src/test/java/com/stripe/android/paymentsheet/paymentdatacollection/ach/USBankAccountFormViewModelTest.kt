@@ -27,6 +27,7 @@ import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.AddressC
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -474,6 +475,29 @@ class USBankAccountFormViewModelTest {
             assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value).isNull()
             assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
         }
+
+    @Test
+    fun `Test phone country changes with country`() = runTest(UnconfinedTestDispatcher()) {
+        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Always,
+            email = CollectionMode.Always,
+            phone = CollectionMode.Always,
+            address = AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = false,
+        )
+
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                ),
+            )
+        )
+
+        viewModel.addressElement.countryElement.controller.onRawValueChange("CA")
+        assertThat(viewModel.phoneController.countryDropdownController.rawFieldValue.first())
+            .isEqualTo("CA")
+    }
 
     private fun createViewModel(
         args: USBankAccountFormViewModel.Args = defaultArgs

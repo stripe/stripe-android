@@ -358,13 +358,21 @@ class PaymentSheetEventTest {
             "primary_button" to expectedPrimaryButton,
             "usage" to false
         )
+        val expectedBillingDetailsCollection = mapOf(
+            "attach_defaults" to false,
+            "name" to "Automatic",
+            "email" to "Automatic",
+            "phone" to "Automatic",
+            "address" to "Automatic",
+        )
         val expectedConfigMap = mapOf(
             "customer" to false,
             "googlepay" to false,
             "primary_button_color" to false,
             "default_billing_details" to false,
             "allows_delayed_payment_methods" to false,
-            "appearance" to expectedAppearance
+            "appearance" to expectedAppearance,
+            "billing_details_collection_configuration" to expectedBillingDetailsCollection,
         )
         assertThat(
             PaymentSheetEvent.Init(
@@ -398,13 +406,21 @@ class PaymentSheetEventTest {
             "primary_button" to expectedPrimaryButton,
             "usage" to true
         )
+        val expectedBillingDetailsCollection = mapOf(
+            "attach_defaults" to true,
+            "name" to "Always",
+            "email" to "Always",
+            "phone" to "Always",
+            "address" to "Full",
+        )
         val expectedConfigMap = mapOf(
             "customer" to true,
             "googlepay" to true,
             "primary_button_color" to true,
             "default_billing_details" to true,
             "allows_delayed_payment_methods" to true,
-            "appearance" to expectedAppearance
+            "appearance" to expectedAppearance,
+            "billing_details_collection_configuration" to expectedBillingDetailsCollection,
         )
         assertThat(
             PaymentSheetEvent.Init(
