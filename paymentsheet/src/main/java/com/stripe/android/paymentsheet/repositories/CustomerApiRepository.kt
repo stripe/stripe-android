@@ -11,7 +11,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.async
-import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
@@ -49,29 +49,27 @@ internal class CustomerApiRepository @Inject constructor(
         customerConfig: PaymentSheet.CustomerConfiguration,
         types: List<PaymentMethod.Type>
     ): List<PaymentMethod> = withContext(workContext) {
-        supervisorScope {
-            types.map { paymentMethodType ->
-                async {
-                    stripeRepository.getPaymentMethods(
-                        ListPaymentMethodsParams(
-                            customerId = customerConfig.id,
-                            paymentMethodType = paymentMethodType
-                        ),
-                        lazyPaymentConfig.get().publishableKey,
-                        productUsageTokens,
-                        ApiRequest.Options(
-                            customerConfig.ephemeralKeySecret,
-                            lazyPaymentConfig.get().stripeAccountId
-                        )
-                    )
-                }
-            }.map {
-                runCatching {
-                    it.await()
-                }.onFailure {
+        val requests = types.map { paymentMethodType ->
+            async {
+                stripeRepository.getPaymentMethods(
+                    listPaymentMethodsParams = ListPaymentMethodsParams(
+                        customerId = customerConfig.id,
+                        paymentMethodType = paymentMethodType,
+                    ),
+                    publishableKey = lazyPaymentConfig.get().publishableKey,
+                    productUsageTokens = productUsageTokens,
+                    requestOptions = ApiRequest.Options(
+                        apiKey = customerConfig.ephemeralKeySecret,
+                        stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+                    ),
+                ).onFailure {
                     logger.error("Failed to retrieve payment methods.", it)
-                }.getOrDefault(emptyList())
-            }.flatten()
+                }
+            }
+        }
+
+        requests.awaitAll().flatMap {
+            it.getOrElse { emptyList() }
         }
     }
 
@@ -80,17 +78,15 @@ internal class CustomerApiRepository @Inject constructor(
         paymentMethodId: String
     ): PaymentMethod? =
         withContext(workContext) {
-            runCatching {
-                stripeRepository.detachPaymentMethod(
-                    lazyPaymentConfig.get().publishableKey,
-                    productUsageTokens,
-                    paymentMethodId,
-                    ApiRequest.Options(
-                        customerConfig.ephemeralKeySecret,
-                        lazyPaymentConfig.get().stripeAccountId
-                    )
+            stripeRepository.detachPaymentMethod(
+                publishableKey = lazyPaymentConfig.get().publishableKey,
+                productUsageTokens = productUsageTokens,
+                paymentMethodId = paymentMethodId,
+                requestOptions = ApiRequest.Options(
+                    apiKey = customerConfig.ephemeralKeySecret,
+                    stripeAccount = lazyPaymentConfig.get().stripeAccountId,
                 )
-            }.onFailure {
+            ).onFailure {
                 logger.error("Failed to detach payment method $paymentMethodId.", it)
             }.getOrNull()
         }

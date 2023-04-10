@@ -49,7 +49,9 @@ internal class CustomerSessionOperationExecutorTest {
                     productUsageTokens: Set<String>,
                     paymentMethodId: String,
                     requestOptions: ApiRequest.Options
-                ): PaymentMethod? = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                ): Result<PaymentMethod> {
+                    return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                }
             }
         )
         executor.execute(
@@ -67,9 +69,11 @@ internal class CustomerSessionOperationExecutorTest {
     }
 
     @Test
-    fun `execute with AttachPaymentMethod operation when null PaymentMethod returned should call listener with error`() = runTest {
+    fun `execute with AttachPaymentMethod operation should call listener with error on failure`() = runTest {
         val listener = mock<CustomerSession.PaymentMethodRetrievalListener>()
         listeners[OPERATION_ID] = listener
+
+        val errorMessage = "an error or something"
 
         val executor = createExecutor(
             object : AbsFakeStripeRepository() {
@@ -79,7 +83,9 @@ internal class CustomerSessionOperationExecutorTest {
                     productUsageTokens: Set<String>,
                     paymentMethodId: String,
                     requestOptions: ApiRequest.Options
-                ): PaymentMethod? = null
+                ): Result<PaymentMethod> {
+                    return Result.failure(RuntimeException(errorMessage))
+                }
             }
         )
         executor.execute(
@@ -93,7 +99,7 @@ internal class CustomerSessionOperationExecutorTest {
 
         verify(listener).onError(
             0,
-            "API request returned an invalid response.",
+            errorMessage,
             null
         )
         assertThat(customerCallbacks)
