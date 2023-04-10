@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.samples.networking
 
+import android.util.Log
 import com.github.kittinunf.fuel.core.Deserializable
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
@@ -135,7 +136,7 @@ data class ExampleCreateAndConfirmErrorResponse(
 ) {
     companion object {
 
-        @Suppress("TooGenericExceptionCaught", "SwallowedException")
+        @Suppress("TooGenericExceptionCaught")
         fun deserialize(response: Response): ExampleCreateAndConfirmErrorResponse {
             return try {
                 val body = response.body().asString("application/json")
@@ -144,6 +145,7 @@ data class ExampleCreateAndConfirmErrorResponse(
                     body
                 )
             } catch (ex: Exception) {
+                Log.e("STRIPE", ex.toString())
                 ExampleCreateAndConfirmErrorResponse(
                     error = "Something went wrong"
                 )
