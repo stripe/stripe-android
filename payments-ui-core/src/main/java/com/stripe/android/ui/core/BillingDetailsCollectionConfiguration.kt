@@ -1,14 +1,12 @@
 package com.stripe.android.ui.core
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 /**
  * Configuration for how billing details are collected during checkout.
  */
 @Parcelize
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class BillingDetailsCollectionConfiguration(
     /**
      * How to collect the name field.
@@ -42,7 +40,6 @@ data class BillingDetailsCollectionConfiguration(
     /**
      * Billing details fields collection options.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class CollectionMode {
         /**
          * The field will be collected depending on the Payment Method's requirements.
@@ -64,7 +61,6 @@ data class BillingDetailsCollectionConfiguration(
     /**
      * Billing address collection options.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class AddressCollectionMode {
         /**
          * Only the fields required by the Payment Method will be collected, this may be none.
