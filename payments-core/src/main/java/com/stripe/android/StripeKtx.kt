@@ -836,8 +836,8 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
     clientSecret: String,
     firstAmount: Int,
     secondAmount: Int
-): PaymentIntent = runApiRequest {
-    stripeRepository.verifyPaymentIntentWithMicrodeposits(
+): PaymentIntent {
+    return stripeRepository.verifyPaymentIntentWithMicrodeposits(
         clientSecret = clientSecret,
         firstAmount = firstAmount,
         secondAmount = secondAmount,
@@ -845,7 +845,7 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -877,15 +877,15 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
 suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
     clientSecret: String,
     descriptorCode: String
-): PaymentIntent = runApiRequest {
-    stripeRepository.verifyPaymentIntentWithMicrodeposits(
+): PaymentIntent {
+    return stripeRepository.verifyPaymentIntentWithMicrodeposits(
         clientSecret = clientSecret,
         descriptorCode = descriptorCode,
         requestOptions = ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -920,8 +920,8 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
     clientSecret: String,
     firstAmount: Int,
     secondAmount: Int
-): SetupIntent = runApiRequest {
-    stripeRepository.verifySetupIntentWithMicrodeposits(
+): SetupIntent {
+    return stripeRepository.verifySetupIntentWithMicrodeposits(
         clientSecret = clientSecret,
         firstAmount = firstAmount,
         secondAmount = secondAmount,
@@ -929,7 +929,7 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -961,15 +961,15 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
 suspend fun Stripe.verifySetupIntentWithMicrodeposits(
     clientSecret: String,
     descriptorCode: String
-): SetupIntent = runApiRequest {
-    stripeRepository.verifySetupIntentWithMicrodeposits(
+): SetupIntent {
+    return stripeRepository.verifySetupIntentWithMicrodeposits(
         clientSecret = clientSecret,
         descriptorCode = descriptorCode,
         requestOptions = ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**

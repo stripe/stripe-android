@@ -21,7 +21,7 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
         linkedAccountSessionId: String,
         clientSecret: String,
         stripeAccountId: String?
-    ): Result<PaymentIntent> = kotlin.runCatching {
+    ): Result<PaymentIntent> =
         stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(
             financialConnectionsSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,
@@ -32,7 +32,6 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
             ),
             expandFields = EXPAND_PAYMENT_METHOD
         )
-    }.mapCatching { it ?: throw InternalError("Error attaching session to PaymentIntent") }
 
     /**
      * Attaches a LinkedAccountSession to a given PaymentIntent,
@@ -45,7 +44,7 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
         linkedAccountSessionId: String,
         clientSecret: String,
         stripeAccountId: String?
-    ): Result<SetupIntent> = kotlin.runCatching {
+    ): Result<SetupIntent> =
         stripeRepository.attachFinancialConnectionsSessionToSetupIntent(
             financialConnectionsSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,
@@ -56,7 +55,6 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
             ),
             expandFields = EXPAND_PAYMENT_METHOD
         )
-    }.mapCatching { it ?: throw InternalError("Error attaching session to SetupIntent") }
 
     private companion object {
         private val EXPAND_PAYMENT_METHOD = listOf("payment_method")

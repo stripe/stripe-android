@@ -21,7 +21,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         customerName: String,
         customerEmail: String?,
         stripeAccountId: String?
-    ): Result<FinancialConnectionsSession> = kotlin.runCatching {
+    ): Result<FinancialConnectionsSession> =
         stripeRepository.createPaymentIntentFinancialConnectionsSession(
             paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId,
             params = CreateFinancialConnectionsSessionParams(
@@ -34,7 +34,6 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                 stripeAccountId
             )
         )
-    }.mapCatching { it ?: throw InternalError("Error creating session for PaymentIntent") }
 
     /**
      * Creates a [FinancialConnectionsSession] for the given [SetupIntent] secret.
@@ -45,7 +44,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         customerName: String,
         customerEmail: String?,
         stripeAccountId: String?
-    ): Result<FinancialConnectionsSession> = kotlin.runCatching {
+    ): Result<FinancialConnectionsSession> =
         stripeRepository.createSetupIntentFinancialConnectionsSession(
             setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId,
             params = CreateFinancialConnectionsSessionParams(
@@ -58,5 +57,4 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                 stripeAccountId
             )
         )
-    }.mapCatching { it ?: throw InternalError("Error creating session for SetupIntent") }
 }
