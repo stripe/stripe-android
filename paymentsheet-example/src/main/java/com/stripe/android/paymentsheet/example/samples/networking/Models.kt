@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.example.samples.model.CartState
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as ApiResult
 
@@ -141,7 +142,7 @@ data class ExampleCreateAndConfirmErrorResponse(
                     serializer(),
                     body
                 )
-            } catch (ex: Exception) {
+            } catch (@Suppress("SwallowedException") ex: SerializationException) {
                 ExampleCreateAndConfirmErrorResponse(
                     error = "Something went wrong"
                 )
