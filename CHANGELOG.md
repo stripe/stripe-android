@@ -2,8 +2,13 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.21.2 - 2023-04-10
+
 ### All SDKs
 * [CHANGED][6492](https://github.com/stripe/stripe-android/pull/6492) Updated Compose to 1.4.1.
+
+### Financial Connections
+* [CHANGED][6436](https://github.com/stripe/stripe-android/pull/6436) Updated Mavericks to 3.0.2
 
 ### PaymentSheet
 * [FIXED][6434](https://github.com/stripe/stripe-android/pull/6434) Fixed an issue where the `Save this card for future payments` checkbox wasn't displayed in some cases even though it should have been.
