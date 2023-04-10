@@ -19,9 +19,7 @@ pipelines:
 stages:
   stage-trigger-run-all:
     workflows:
-      - check: {}
-      - test: {}
-      - run-instrumentation-tests: {}
+      - run-payment-sheet-example-screenshot-tests: {}
 
 workflows:
   check:
@@ -94,6 +92,23 @@ workflows:
           title: Execute instrumentation tests
           inputs:
             - file_path: ./scripts/execute_instrumentation_tests.sh
+      - cache-push@2: { }
+  run-payment-sheet-example-screenshot-tests:
+    steps:
+      - activate-ssh-key@4:
+          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+      - git-clone@7.0: { }
+      - cache-pull@2: { }
+      - script@1:
+          inputs:
+            - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
+      - android-build-for-ui-testing@0:
+          inputs:
+            - variant: debug
+            - module: paymentsheet-example
+      - virtual-device-testing-for-android@1:
+          inputs:
+            - test_type: instrumentation
       - cache-push@2: { }
 meta:
   bitrise.io:
