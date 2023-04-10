@@ -6,7 +6,6 @@ import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.utils.mapResultCatching
 import javax.inject.Inject
 
 internal class CreateFinancialConnectionsSession @Inject constructor(
@@ -27,7 +26,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
             PaymentIntent.ClientSecret(clientSecret)
         }
 
-        return paymentIntentClientSecretResult.mapResultCatching { paymentIntentClientSecret ->
+        return paymentIntentClientSecretResult.mapCatching { paymentIntentClientSecret ->
             stripeRepository.createPaymentIntentFinancialConnectionsSession(
                 paymentIntentId = paymentIntentClientSecret.paymentIntentId,
                 params = CreateFinancialConnectionsSessionParams(
@@ -39,7 +38,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                     publishableKey,
                     stripeAccountId
                 )
-            )
+            ).getOrThrow()
         }
     }
 
@@ -57,7 +56,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
             SetupIntent.ClientSecret(clientSecret)
         }
 
-        return setupIntentClientSecretResult.mapResultCatching { setupIntentClientSecret ->
+        return setupIntentClientSecretResult.mapCatching { setupIntentClientSecret ->
             stripeRepository.createSetupIntentFinancialConnectionsSession(
                 setupIntentId = setupIntentClientSecret.setupIntentId,
                 params = CreateFinancialConnectionsSessionParams(
@@ -69,7 +68,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                     publishableKey,
                     stripeAccountId
                 )
-            )
+            ).getOrThrow()
         }
     }
 }
