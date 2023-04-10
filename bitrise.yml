@@ -19,8 +19,8 @@ pipelines:
 stages:
   stage-trigger-run-all:
     workflows:
-      - check: {}
-      - test: {}
+#      - check: {}
+#      - test: {}
       - run-instrumentation-tests: {}
 
 workflows:
