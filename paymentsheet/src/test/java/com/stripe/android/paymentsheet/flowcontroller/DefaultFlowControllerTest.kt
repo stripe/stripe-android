@@ -178,10 +178,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `successful payment should fire analytics event`() {
-        val viewModel = FlowControllerViewModel(
-            application = ApplicationProvider.getApplicationContext(),
-            handle = SavedStateHandle(),
-        )
+        val viewModel = createViewModel()
         val flowController = createFlowController(viewModel = viewModel)
 
         flowController.configureWithPaymentIntent(
@@ -207,10 +204,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `failed payment should fire analytics event`() {
-        val viewModel = FlowControllerViewModel(
-            application = ApplicationProvider.getApplicationContext(),
-            handle = SavedStateHandle(),
-        )
+        val viewModel = createViewModel()
         val flowController = createFlowController(viewModel = viewModel)
 
         flowController.configureWithPaymentIntent(
@@ -1286,10 +1280,7 @@ internal class DefaultFlowControllerTest {
             configuration = mock(),
             loginState = LinkState.LoginState.LoggedIn,
         ),
-        viewModel: FlowControllerViewModel = FlowControllerViewModel(
-            application = ApplicationProvider.getApplicationContext(),
-            handle = SavedStateHandle(),
-        ),
+        viewModel: FlowControllerViewModel = createViewModel(),
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentSheetLoader(
@@ -1304,10 +1295,7 @@ internal class DefaultFlowControllerTest {
 
     private fun createFlowController(
         paymentSheetLoader: PaymentSheetLoader,
-        viewModel: FlowControllerViewModel = FlowControllerViewModel(
-            application = ApplicationProvider.getApplicationContext(),
-            handle = SavedStateHandle(),
-        ),
+        viewModel: FlowControllerViewModel = createViewModel(),
     ) = DefaultFlowController(
         viewModelScope = testScope,
         lifecycleOwner = lifeCycleOwner,
@@ -1339,6 +1327,13 @@ internal class DefaultFlowControllerTest {
         ),
         intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
     )
+
+    private fun createViewModel(): FlowControllerViewModel {
+        return FlowControllerViewModel(
+            application = ApplicationProvider.getApplicationContext(),
+            handle = SavedStateHandle(),
+        )
+    }
 
     private fun createGooglePayPaymentMethodLauncherFactory() =
         object : GooglePayPaymentMethodLauncherFactory {
