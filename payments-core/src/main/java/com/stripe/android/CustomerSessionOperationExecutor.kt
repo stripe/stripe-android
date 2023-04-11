@@ -87,19 +87,14 @@ internal class CustomerSessionOperationExecutor(
                 }
             }
             is EphemeralOperation.Customer.AttachPaymentMethod -> {
-                val result = runCatching {
-                    requireNotNull(
-                        stripeRepository.attachPaymentMethod(
-                            ephemeralKey.objectId,
-                            publishableKey,
-                            operation.productUsage,
-                            operation.paymentMethodId,
-                            ApiRequest.Options(ephemeralKey.secret, stripeAccountId)
-                        )
-                    ) {
-                        REQUIRED_ERROR
-                    }
-                }
+                val result = stripeRepository.attachPaymentMethod(
+                    customerId = ephemeralKey.objectId,
+                    publishableKey = publishableKey,
+                    productUsageTokens = operation.productUsage,
+                    paymentMethodId = operation.paymentMethodId,
+                    requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
+                )
+
                 withContext(Dispatchers.Main) {
                     val listener: CustomerSession.PaymentMethodRetrievalListener? = getListener(operation.id)
                     result.fold(
@@ -113,18 +108,13 @@ internal class CustomerSessionOperationExecutor(
                 }
             }
             is EphemeralOperation.Customer.DetachPaymentMethod -> {
-                val result = runCatching {
-                    requireNotNull(
-                        stripeRepository.detachPaymentMethod(
-                            publishableKey,
-                            operation.productUsage,
-                            operation.paymentMethodId,
-                            ApiRequest.Options(ephemeralKey.secret, stripeAccountId)
-                        )
-                    ) {
-                        REQUIRED_ERROR
-                    }
-                }
+                val result = stripeRepository.detachPaymentMethod(
+                    publishableKey = publishableKey,
+                    productUsageTokens = operation.productUsage,
+                    paymentMethodId = operation.paymentMethodId,
+                    requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
+                )
+
                 withContext(Dispatchers.Main) {
                     val listener: CustomerSession.PaymentMethodRetrievalListener? = getListener(operation.id)
                     result.fold(
@@ -138,20 +128,19 @@ internal class CustomerSessionOperationExecutor(
                 }
             }
             is EphemeralOperation.Customer.GetPaymentMethods -> {
-                val result = runCatching {
-                    stripeRepository.getPaymentMethods(
-                        ListPaymentMethodsParams(
-                            customerId = ephemeralKey.objectId,
-                            paymentMethodType = operation.type,
-                            limit = operation.limit,
-                            endingBefore = operation.endingBefore,
-                            startingAfter = operation.startingAfter
-                        ),
-                        publishableKey,
-                        operation.productUsage,
-                        ApiRequest.Options(ephemeralKey.secret, stripeAccountId)
-                    )
-                }
+                val result = stripeRepository.getPaymentMethods(
+                    listPaymentMethodsParams = ListPaymentMethodsParams(
+                        customerId = ephemeralKey.objectId,
+                        paymentMethodType = operation.type,
+                        limit = operation.limit,
+                        endingBefore = operation.endingBefore,
+                        startingAfter = operation.startingAfter,
+                    ),
+                    publishableKey = publishableKey,
+                    productUsageTokens = operation.productUsage,
+                    requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
+                )
+
                 withContext(Dispatchers.Main) {
                     val listener: CustomerSession.PaymentMethodsRetrievalListener? = getListener(operation.id)
                     result.fold(

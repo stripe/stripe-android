@@ -162,8 +162,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethod? {
-        return null
+    ): Result<PaymentMethod> {
+        return Result.failure(NotImplementedError())
     }
 
     @Throws(APIException::class)
@@ -172,8 +172,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethod? {
-        return null
+    ): Result<PaymentMethod> {
+        return Result.failure(NotImplementedError())
     }
 
     @Throws(APIException::class)
@@ -182,8 +182,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
-    ): List<PaymentMethod> {
-        return emptyList()
+    ): Result<List<PaymentMethod>> {
+        return Result.failure(NotImplementedError())
     }
 
     @Throws(APIException::class)
@@ -415,8 +415,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         locale: String,
         logoColor: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethodMessage? {
-        return null
+    ): Result<PaymentMethodMessage> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveElementsSession(

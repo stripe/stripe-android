@@ -1039,7 +1039,7 @@ internal class StripeApiRepositoryTest {
                 DEFAULT_OPTIONS.apiKey,
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
-            )
+            ).getOrThrow()
         assertThat(paymentMethods)
             .hasSize(3)
         assertThat(paymentMethods.map { it.id })
@@ -1097,7 +1097,7 @@ internal class StripeApiRepositoryTest {
                 DEFAULT_OPTIONS.apiKey,
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
-            )
+            ).getOrThrow()
         assertThat(paymentMethods)
             .isEmpty()
     }

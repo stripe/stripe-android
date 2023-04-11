@@ -698,35 +698,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.CustomerAttachPaymentMethod]
      */
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        AuthenticationException::class,
-        CardException::class
-    )
     override suspend fun attachPaymentMethod(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethod? {
+    ): Result<PaymentMethod> {
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getAttachPaymentMethodUrl(paymentMethodId),
-                requestOptions,
-                mapOf("customer" to customerId)
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getAttachPaymentMethodUrl(paymentMethodId),
+                options = requestOptions,
+                params = mapOf("customer" to customerId)
             ),
-            PaymentMethodJsonParser()
+            jsonParser = PaymentMethodJsonParser()
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory
-                    .createAttachPaymentMethod(
-                        productUsageTokens
-                    )
+                paymentAnalyticsRequestFactory.createAttachPaymentMethod(productUsageTokens)
             )
         }
     }
@@ -746,19 +736,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethod? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getDetachPaymentMethodUrl(paymentMethodId),
-                requestOptions
+    ): Result<PaymentMethod> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getDetachPaymentMethodUrl(paymentMethodId),
+                options = requestOptions,
             ),
-            PaymentMethodJsonParser()
+            jsonParser = PaymentMethodJsonParser()
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory
-                    .createDetachPaymentMethod(
-                        productUsageTokens
-                    )
+                paymentAnalyticsRequestFactory.createDetachPaymentMethod(productUsageTokens)
             )
         }
     }
@@ -768,36 +755,30 @@ class StripeApiRepository @JvmOverloads internal constructor(
      *
      * Analytics event: [PaymentAnalyticsEvent.CustomerRetrievePaymentMethods]
      */
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        AuthenticationException::class,
-        CardException::class
-    )
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
-    ): List<PaymentMethod> {
-        val paymentMethodsList = fetchStripeModel(
-            apiRequestFactory.createGet(
-                paymentMethodsUrl,
-                requestOptions,
-                listPaymentMethodsParams.toParamMap()
+    ): Result<List<PaymentMethod>> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = paymentMethodsUrl,
+                options = requestOptions,
+                params = listPaymentMethodsParams.toParamMap(),
             ),
-            PaymentMethodsListJsonParser()
-        ) {
-            fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createRequest(
-                    PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
-                    productUsageTokens = productUsageTokens
+            jsonParser = PaymentMethodsListJsonParser(),
+            onResponse = {
+                fireAnalyticsRequest(
+                    paymentAnalyticsRequestFactory.createRequest(
+                        PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
+                        productUsageTokens = productUsageTokens
+                    )
                 )
-            )
+            },
+        ).map {
+            it.paymentMethods
         }
-
-        return paymentMethodsList?.paymentMethods.orEmpty()
     }
 
     /**
@@ -1552,8 +1533,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         locale: String,
         logoColor: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethodMessage? {
-        return fetchStripeModel(
+    ): Result<PaymentMethodMessage> {
+        return fetchStripeModelResult(
             apiRequestFactory.createGet(
                 url = "https://ppm.stripe.com/content",
                 options = requestOptions,
