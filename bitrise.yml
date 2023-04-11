@@ -14,36 +14,31 @@ app:
 pipelines:
   main-trigger-pipeline:
     stages:
-      - stage-trigger-run-all: {}
+      - stage-trigger-run-all: { }
 
 stages:
   stage-trigger-run-all:
     workflows:
-      - check: {}
-      - test: {}
-      - run-instrumentation-tests: {}
+      - check: { }
+      - test: { }
+      - run-instrumentation-tests: { }
 
 workflows:
   check:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
     steps:
-      - activate-ssh-key@4:
-          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@6: {}
-      - cache-pull@2: {}
-      - script@1:
-          title: Restore gradle.properties
-          inputs:
-            - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
       - script@1:
           inputs:
-          - content: ./gradlew ktlint detekt lintRelease apiCheck
-      - cache-push@2: {}
+            - content: ./gradlew ktlint detekt lintRelease apiCheck
   test:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
     steps:
-      - activate-ssh-key@4:
-          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@6: {}
-      - cache-pull@2: {}
       - script@1:
           title: Restore gradle.properties
           inputs:
@@ -51,19 +46,14 @@ workflows:
       - script@1:
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
-      - cache-push@2: {}
   maestro-financial-connections:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
     steps:
-      - avd-manager@1: {}
-      - activate-ssh-key@4:
-          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@7.0: {}
-      - cache-pull@2: {}
-      - script@1:
-          title: Restore gradle.properties
-          inputs:
-            - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
-      - wait-for-android-emulator@1: {}
+      - avd-manager@1: { }
+      - wait-for-android-emulator@1: { }
       - script-runner@0:
           title: Execute Maestro tests
           inputs:
@@ -71,20 +61,30 @@ workflows:
       - slack@3:
           is_always_run: true
           inputs:
-          - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-          - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+            - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+            - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
       - custom-test-results-export@0:
           inputs:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
-      - deploy-to-bitrise-io@2: {}
-      - cache-push@2: {}
+      - deploy-to-bitrise-io@2: { }
   run-instrumentation-tests:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
     steps:
       - avd-manager@1: { }
+      - wait-for-android-emulator@1: { }
+      - script-runner@0:
+          title: Execute instrumentation tests
+          inputs:
+            - file_path: ./scripts/execute_instrumentation_tests.sh
+  prepare_all:
+    steps:
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@7.0: { }
+      - git-clone@8: { }
       - cache-pull@2: { }
       - script@1:
           inputs:
@@ -92,11 +92,20 @@ workflows:
       - script@1:
           inputs:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
-      - wait-for-android-emulator@1: { }
+  conclude_all:
+    steps:
       - script-runner@0:
-          title: Execute instrumentation tests
+          is_always_run: true
+          title: Copy test results to tmp
           inputs:
-            - file_path: ./scripts/execute_instrumentation_tests.sh
+            - file_path: ./scripts/copy_test_results_to_tmp.sh
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - notify_user_groups: none
+            - is_compress: "true"
+            - deploy_path: /tmp/test_results
+            - is_enable_public_page: "false"
+          title: Deploy test results artifacts
       - cache-push@2: { }
 meta:
   bitrise.io:
