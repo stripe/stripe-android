@@ -1948,7 +1948,7 @@ internal class StripeApiRepositoryTest {
                 financialConnectionsSessionId = "las_123456",
                 requestOptions = DEFAULT_OPTIONS,
                 expandFields = listOf("payment_method")
-            )
+            ).getOrThrow()
 
             verify(stripeNetworkClient).executeRequest(
                 argWhere<ApiRequest> {
@@ -1956,7 +1956,7 @@ internal class StripeApiRepositoryTest {
                 }
             )
 
-            assertEquals("pm_abcdefg", response?.paymentMethodId)
+            assertEquals("pm_abcdefg", response.paymentMethodId)
         }
 
     @Test
@@ -2000,7 +2000,7 @@ internal class StripeApiRepositoryTest {
                 financialConnectionsSessionId = "las_123456",
                 requestOptions = DEFAULT_OPTIONS,
                 expandFields = listOf("payment_method")
-            )
+            ).getOrThrow()
 
             verify(stripeNetworkClient).executeRequest(
                 argWhere<ApiRequest> {
@@ -2008,7 +2008,7 @@ internal class StripeApiRepositoryTest {
                 }
             )
 
-            assertEquals("pm_abcdefg", response?.paymentMethodId)
+            assertEquals("pm_abcdefg", response.paymentMethodId)
         }
 
     @Test

@@ -1331,8 +1331,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession? {
-        return fetchStripeModel(
+    ): Result<FinancialConnectionsSession> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 url = getPaymentIntentFinancialConnectionsSessionUrl(paymentIntentId),
                 options = requestOptions,
@@ -1348,8 +1348,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         setupIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession? {
-        return fetchStripeModel(
+    ): Result<FinancialConnectionsSession> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 url = getSetupIntentFinancialConnectionsSessionUrl(setupIntentId),
                 options = requestOptions,
@@ -1388,8 +1388,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
-        return fetchStripeModel(
+    ): Result<PaymentIntent> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getAttachFinancialConnectionsSessionToPaymentIntentUrl(
                     paymentIntentId,
@@ -1414,8 +1414,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
-        return fetchStripeModel(
+    ): Result<SetupIntent> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getAttachFinancialConnectionsSessionToSetupIntentUrl(
                     setupIntentId,
@@ -1439,8 +1439,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         firstAmount: Int,
         secondAmount: Int,
         requestOptions: ApiRequest.Options
-    ): PaymentIntent? {
-        return fetchStripeModel(
+    ): Result<PaymentIntent> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getVerifyMicrodepositsOnPaymentIntentUrl(PaymentIntent.ClientSecret(clientSecret).paymentIntentId),
                 requestOptions,
@@ -1462,8 +1462,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         descriptorCode: String,
         requestOptions: ApiRequest.Options
-    ): PaymentIntent? {
-        return fetchStripeModel(
+    ): Result<PaymentIntent> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getVerifyMicrodepositsOnPaymentIntentUrl(PaymentIntent.ClientSecret(clientSecret).paymentIntentId),
                 requestOptions,
@@ -1486,8 +1486,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         firstAmount: Int,
         secondAmount: Int,
         requestOptions: ApiRequest.Options
-    ): SetupIntent? {
-        return fetchStripeModel(
+    ): Result<SetupIntent> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getVerifyMicrodepositsOnSetupIntentUrl(SetupIntent.ClientSecret(clientSecret).setupIntentId),
                 requestOptions,
@@ -1509,8 +1509,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         descriptorCode: String,
         requestOptions: ApiRequest.Options
-    ): SetupIntent? {
-        return fetchStripeModel(
+    ): Result<SetupIntent> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getVerifyMicrodepositsOnSetupIntentUrl(SetupIntent.ClientSecret(clientSecret).setupIntentId),
                 requestOptions,

@@ -537,7 +537,7 @@ class USBankAccountFormViewModelTest {
                 any(),
                 any()
             )
-        ).thenReturn(paymentIntent)
+        ).thenReturn(Result.success(paymentIntent))
 
         return CollectBankAccountResult.Completed(
             CollectBankAccountResponse(
@@ -570,7 +570,7 @@ class USBankAccountFormViewModelTest {
                 any(),
                 any()
             )
-        ).thenReturn(paymentIntent)
+        ).thenReturn(Result.success(paymentIntent))
 
         return CollectBankAccountResult.Completed(
             CollectBankAccountResponse(
