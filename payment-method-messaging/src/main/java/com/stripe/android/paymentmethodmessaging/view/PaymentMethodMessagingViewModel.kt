@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.networking.StripeRepository
@@ -35,7 +36,7 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
             _messageFlow.update {
                 retrievePaymentMethodMessage().mapCatching { message ->
                     if (message.displayHtml.isBlank() || message.learnMoreUrl.isBlank()) {
-                        throw Exception("Could not retrieve message")
+                        throw APIException(message = "Could not retrieve message")
                     } else {
                         mapper(this, message).await()
                     }
