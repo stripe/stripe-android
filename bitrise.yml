@@ -20,24 +20,19 @@ stages:
   stage-trigger-run-all:
     workflows:
       - check: {}
-      - test: {}
-      - run-instrumentation-tests: {}
+#      - test: {}
+#      - run-instrumentation-tests: {}
 
 workflows:
   check:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
     steps:
-      - activate-ssh-key@4:
-          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@6: {}
-      - cache-pull@2: {}
-      - script@1:
-          title: Restore gradle.properties
-          inputs:
-            - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
       - script@1:
           inputs:
           - content: ./gradlew ktlint detekt lintRelease apiCheck
-      - cache-push@2: {}
   test:
     steps:
       - activate-ssh-key@4:
@@ -80,11 +75,26 @@ workflows:
       - deploy-to-bitrise-io@2: {}
       - cache-push@2: {}
   run-instrumentation-tests:
+    before_run:
+      - prepare_all
     steps:
       - avd-manager@1: { }
-      - activate-ssh-key@4:
-          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@7.0: { }
+      - wait-for-android-emulator@1: { }
+      - script-runner@0:
+          title: Execute instrumentation tests
+          inputs:
+            - file_path: ./scripts/execute_instrumentation_tests.sh
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - notify_user_groups: none
+            - is_compress: "true"
+            - deploy_path: build-ci-tests/Logs/Test
+            - is_enable_public_page: "false"
+          title: Deploy test log artifacts
+      - cache-push@2: { }
+  prepare_all:
+    steps:
+      - git-clone@8: { }
       - cache-pull@2: { }
       - script@1:
           inputs:
@@ -92,11 +102,8 @@ workflows:
       - script@1:
           inputs:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
-      - wait-for-android-emulator@1: { }
-      - script-runner@0:
-          title: Execute instrumentation tests
-          inputs:
-            - file_path: ./scripts/execute_instrumentation_tests.sh
+  conclude_all:
+    steps:
       - cache-push@2: { }
 meta:
   bitrise.io:
