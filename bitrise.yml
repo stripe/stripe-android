@@ -19,8 +19,8 @@ pipelines:
 stages:
   stage-trigger-run-all:
     workflows:
-      - check: {}
-#      - test: {}
+#      - check: {}
+      - test: {}
 #      - run-instrumentation-tests: {}
 
 workflows:
@@ -34,11 +34,11 @@ workflows:
           inputs:
           - content: ./gradlew ktlint detekt lintRelease apiCheck
   test:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
     steps:
-      - activate-ssh-key@4:
-          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@6: {}
-      - cache-pull@2: {}
       - script@1:
           title: Restore gradle.properties
           inputs:
@@ -46,14 +46,13 @@ workflows:
       - script@1:
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
-      - cache-push@2: {}
   maestro-financial-connections:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
     steps:
       - avd-manager@1: {}
-      - activate-ssh-key@4:
-          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@7.0: {}
-      - cache-pull@2: {}
       - script@1:
           title: Restore gradle.properties
           inputs:
@@ -73,10 +72,11 @@ workflows:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
       - deploy-to-bitrise-io@2: {}
-      - cache-push@2: {}
   run-instrumentation-tests:
     before_run:
       - prepare_all
+    after_run:
+      - conclude_all
     steps:
       - avd-manager@1: { }
       - wait-for-android-emulator@1: { }
@@ -84,14 +84,6 @@ workflows:
           title: Execute instrumentation tests
           inputs:
             - file_path: ./scripts/execute_instrumentation_tests.sh
-      - deploy-to-bitrise-io@2:
-          inputs:
-            - notify_user_groups: none
-            - is_compress: "true"
-            - deploy_path: build-ci-tests/Logs/Test
-            - is_enable_public_page: "false"
-          title: Deploy test log artifacts
-      - cache-push@2: { }
   prepare_all:
     steps:
       - activate-ssh-key@4:
@@ -106,6 +98,18 @@ workflows:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
   conclude_all:
     steps:
+      - script-runner@0:
+          is_always_run: true
+          title: Execute instrumentation tests
+          inputs:
+            - file_path: ./scripts/copy_test_results_to_tmp.sh
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - notify_user_groups: none
+            - is_compress: "true"
+            - deploy_path: /tmp/test_results
+            - is_enable_public_page: "false"
+          title: Deploy test log artifacts
       - cache-push@2: { }
 meta:
   bitrise.io:

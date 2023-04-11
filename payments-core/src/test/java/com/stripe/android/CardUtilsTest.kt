@@ -10,6 +10,11 @@ import kotlin.test.Test
 class CardUtilsTest {
 
     @Test
+    fun testTrueIsFalse() {
+        assertThat(true).isFalse()
+    }
+
+    @Test
     fun getPossibleCardBrand_withEmptyCard_returnsUnknown() {
         assertThat(CardUtils.getPossibleCardBrand("   ")).isEqualTo(CardBrand.Unknown)
     }
