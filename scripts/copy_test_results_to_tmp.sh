@@ -11,5 +11,9 @@ copy_test_results () {
   done
 }
 
+# We won't always have test results, so put a blank file there so the upload won't fail.
+mkdir -p "/tmp/test_results"
+touch "/tmp/test_results/.keep"
+
 copy_test_results ".*/build/reports/tests/testDebugUnitTest$"
 copy_test_results ".*/build/reports/androidTests/connected$"

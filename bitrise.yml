@@ -106,7 +106,6 @@ workflows:
             - deploy_path: /tmp/test_results
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
-          run_if: '{{ [ -d "/tmp/test_results" ] }}'
       - cache-push@2: { }
 meta:
   bitrise.io:
