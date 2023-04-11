@@ -64,7 +64,10 @@ internal class CustomerSessionTest {
         Dispatchers.setMain(testDispatcher)
         runBlocking {
             whenever(stripeRepository.retrieveCustomer(any(), any(), any()))
-                .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER)
+                .thenReturn(
+                    Result.success(FIRST_CUSTOMER),
+                    Result.success(SECOND_CUSTOMER),
+                )
 
             whenever(
                 stripeRepository.addCustomerSource(
@@ -134,7 +137,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            ).thenReturn(FIRST_CUSTOMER)
+            ).thenReturn(Result.success(FIRST_CUSTOMER))
         }
     }
 

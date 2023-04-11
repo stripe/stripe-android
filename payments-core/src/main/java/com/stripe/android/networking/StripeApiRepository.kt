@@ -799,27 +799,20 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.CustomerSetShippingInfo]
      */
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        AuthenticationException::class,
-        CardException::class
-    )
     override suspend fun setCustomerShippingInfo(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
         shippingInformation: ShippingInformation,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getRetrieveCustomerUrl(customerId),
-                requestOptions,
-                mapOf("shipping" to shippingInformation.toParamMap())
+    ): Result<Customer> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getRetrieveCustomerUrl(customerId),
+                options = requestOptions,
+                params = mapOf("shipping" to shippingInformation.toParamMap()),
             ),
-            CustomerJsonParser()
+            jsonParser = CustomerJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(
@@ -833,24 +826,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.CustomerRetrieve]
      */
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        AuthenticationException::class,
-        CardException::class
-    )
     override suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return fetchStripeModel(
-            apiRequestFactory.createGet(
-                getRetrieveCustomerUrl(customerId),
-                requestOptions
+    ): Result<Customer> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getRetrieveCustomerUrl(customerId),
+                options = requestOptions,
             ),
-            CustomerJsonParser()
+            jsonParser = CustomerJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(

@@ -201,16 +201,16 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         productUsageTokens: Set<String>,
         shippingInformation: ShippingInformation,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return null
+    ): Result<Customer> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return null
+    ): Result<Customer> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveIssuingCardPin(

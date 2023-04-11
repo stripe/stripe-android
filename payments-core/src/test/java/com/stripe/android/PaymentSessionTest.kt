@@ -383,8 +383,8 @@ class PaymentSessionTest {
             customerId: String,
             productUsageTokens: Set<String>,
             requestOptions: ApiRequest.Options
-        ): Customer {
-            return FIRST_CUSTOMER
+        ): Result<Customer> {
+            return Result.success(FIRST_CUSTOMER)
         }
     }
 
