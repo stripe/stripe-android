@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.model.updateWithResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
+import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateAndConfirmErrorResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateAndConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateAndConfirmIntentResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleUpdateRequest
@@ -113,10 +114,12 @@ internal class ServerSideConfirmationCustomFlowViewModel(
                 CreateIntentResult.Success(apiResult.value.clientSecret)
             }
             is ApiResult.Failure -> {
-                val errorMessage = "Unable to create intent\n${apiResult.error.exception}"
+                val error = ExampleCreateAndConfirmErrorResponse.deserialize(
+                    apiResult.error.response
+                ).error
                 CreateIntentResult.Failure(
-                    cause = RuntimeException(errorMessage),
-                    displayMessage = "Something went wrong…",
+                    cause = RuntimeException(error),
+                    displayMessage = error,
                 )
             }
         }

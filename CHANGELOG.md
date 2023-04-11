@@ -7,8 +7,6 @@
 
 ## 20.22.0 - 2023-04-10
 
-This release updates Compose to its latest stable version, 1.4.1
-
 ### All SDKs
 * [CHANGED][6492](https://github.com/stripe/stripe-android/pull/6492) Updated Compose to 1.4.1.
 

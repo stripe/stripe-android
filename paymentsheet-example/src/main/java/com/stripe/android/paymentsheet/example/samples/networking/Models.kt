@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.samples.networking
 
+import android.util.Log
 import com.github.kittinunf.fuel.core.Deserializable
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
@@ -127,6 +128,31 @@ data class ExampleCreateAndConfirmIntentResponse(
     @SerialName("intentClientSecret")
     val clientSecret: String,
 )
+
+@Serializable
+data class ExampleCreateAndConfirmErrorResponse(
+    @SerialName("error")
+    val error: String? = null,
+) {
+    companion object {
+
+        @Suppress("TooGenericExceptionCaught")
+        fun deserialize(response: Response): ExampleCreateAndConfirmErrorResponse {
+            return try {
+                val body = response.body().asString("application/json")
+                Json.decodeFromString(
+                    serializer(),
+                    body
+                )
+            } catch (ex: Exception) {
+                Log.e("STRIPE", ex.toString())
+                ExampleCreateAndConfirmErrorResponse(
+                    error = "Something went wrong"
+                )
+            }
+        }
+    }
+}
 
 /**
  * Awaits the [ApiResult] and deserializes it into the desired type [T].

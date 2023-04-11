@@ -89,6 +89,9 @@ workflows:
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
+      - script@1:
+          inputs:
+            - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
       - wait-for-android-emulator@1: { }
       - script-runner@0:
           title: Execute instrumentation tests
