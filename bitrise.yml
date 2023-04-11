@@ -96,7 +96,7 @@ workflows:
     steps:
       - script-runner@0:
           is_always_run: true
-          title: Execute instrumentation tests
+          title: Copy test results to tmp
           inputs:
             - file_path: ./scripts/copy_test_results_to_tmp.sh
       - deploy-to-bitrise-io@2:
@@ -105,7 +105,8 @@ workflows:
             - is_compress: "true"
             - deploy_path: /tmp/test_results
             - is_enable_public_page: "false"
-          title: Deploy test log artifacts
+          title: Deploy test results artifacts
+          run_if: '{{ [ -d "/tmp/test_results" ] }}'
       - cache-push@2: { }
 meta:
   bitrise.io:
