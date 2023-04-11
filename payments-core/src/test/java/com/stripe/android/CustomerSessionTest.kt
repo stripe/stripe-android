@@ -75,8 +75,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            )
-                .thenReturn(SourceFixtures.SOURCE_CARD)
+            ).thenReturn(Result.success(SourceFixtures.SOURCE_CARD))
 
             whenever(
                 stripeRepository.deleteCustomerSource(
@@ -86,8 +85,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            )
-                .thenReturn(SourceFixtures.SOURCE_CARD)
+            ).thenReturn(Result.success(SourceFixtures.SOURCE_CARD))
 
             whenever(
                 stripeRepository.setDefaultCustomerSource(
@@ -98,8 +96,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            )
-                .thenReturn(SECOND_CUSTOMER)
+            ).thenReturn(Result.success(SECOND_CUSTOMER))
 
             whenever(
                 stripeRepository.attachPaymentMethod(
@@ -736,8 +733,9 @@ internal class CustomerSessionTest {
                 any(),
                 any()
             )
+        ).thenReturn(
+            Result.failure(APIException(statusCode = 404, message = "The card is invalid"))
         )
-            .thenThrow(APIException(statusCode = 404, message = "The card is invalid"))
 
         whenever(
             stripeRepository.deleteCustomerSource(
@@ -747,8 +745,9 @@ internal class CustomerSessionTest {
                 any(),
                 any()
             )
+        ).thenReturn(
+            Result.failure(APIException(statusCode = 404, message = "The card does not exist"))
         )
-            .thenThrow(APIException(statusCode = 404, message = "The card does not exist"))
 
         whenever(
             stripeRepository.setDefaultCustomerSource(
@@ -759,8 +758,7 @@ internal class CustomerSessionTest {
                 any(),
                 any()
             )
-        )
-            .thenThrow(APIException(statusCode = 405, message = "auth error"))
+        ).thenReturn(Result.failure(APIException(statusCode = 405, message = "auth error")))
 
         whenever(
             stripeRepository.attachPaymentMethod(

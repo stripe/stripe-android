@@ -375,8 +375,8 @@ class PaymentSessionTest {
             sourceId: String,
             sourceType: String,
             requestOptions: ApiRequest.Options
-        ): Customer {
-            return SECOND_CUSTOMER
+        ): Result<Customer> {
+            return Result.success(SECOND_CUSTOMER)
         }
 
         override suspend fun retrieveCustomer(

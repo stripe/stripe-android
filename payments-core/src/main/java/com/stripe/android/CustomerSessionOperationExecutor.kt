@@ -34,20 +34,15 @@ internal class CustomerSessionOperationExecutor(
                 }
             }
             is EphemeralOperation.Customer.AddSource -> {
-                val result = runCatching {
-                    requireNotNull(
-                        stripeRepository.addCustomerSource(
-                            ephemeralKey.objectId,
-                            publishableKey,
-                            operation.productUsage,
-                            operation.sourceId,
-                            operation.sourceType,
-                            ApiRequest.Options(ephemeralKey.secret, stripeAccountId)
-                        )
-                    ) {
-                        REQUIRED_ERROR
-                    }
-                }
+                val result = stripeRepository.addCustomerSource(
+                    customerId = ephemeralKey.objectId,
+                    publishableKey = publishableKey,
+                    productUsageTokens = operation.productUsage,
+                    sourceId = operation.sourceId,
+                    sourceType = operation.sourceType,
+                    requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
+                )
+
                 withContext(Dispatchers.Main) {
                     val listener: CustomerSession.SourceRetrievalListener? = getListener(operation.id)
                     result.fold(
@@ -61,19 +56,14 @@ internal class CustomerSessionOperationExecutor(
                 }
             }
             is EphemeralOperation.Customer.DeleteSource -> {
-                val result = runCatching {
-                    requireNotNull(
-                        stripeRepository.deleteCustomerSource(
-                            ephemeralKey.objectId,
-                            publishableKey,
-                            operation.productUsage,
-                            operation.sourceId,
-                            ApiRequest.Options(ephemeralKey.secret, stripeAccountId)
-                        )
-                    ) {
-                        REQUIRED_ERROR
-                    }
-                }
+                val result = stripeRepository.deleteCustomerSource(
+                    customerId = ephemeralKey.objectId,
+                    publishableKey = publishableKey,
+                    productUsageTokens = operation.productUsage,
+                    sourceId = operation.sourceId,
+                    requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
+                )
+
                 withContext(Dispatchers.Main) {
                     val listener: CustomerSession.SourceRetrievalListener? = getListener(operation.id)
                     result.fold(
@@ -154,20 +144,15 @@ internal class CustomerSessionOperationExecutor(
                 }
             }
             is EphemeralOperation.Customer.UpdateDefaultSource -> {
-                val result = runCatching {
-                    requireNotNull(
-                        stripeRepository.setDefaultCustomerSource(
-                            ephemeralKey.objectId,
-                            publishableKey,
-                            operation.productUsage,
-                            operation.sourceId,
-                            operation.sourceType,
-                            ApiRequest.Options(ephemeralKey.secret, stripeAccountId)
-                        )
-                    ) {
-                        REQUIRED_ERROR
-                    }
-                }
+                val result = stripeRepository.setDefaultCustomerSource(
+                    customerId = ephemeralKey.objectId,
+                    publishableKey = publishableKey,
+                    productUsageTokens = operation.productUsage,
+                    sourceId = operation.sourceId,
+                    sourceType = operation.sourceType,
+                    requestOptions = ApiRequest.Options(ephemeralKey.secret, stripeAccountId),
+                )
+
                 withContext(Dispatchers.Main) {
                     onCustomerRetrieved(operation, result)
                 }

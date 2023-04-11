@@ -188,13 +188,6 @@ abstract class StripeRepository {
         options: ApiRequest.Options
     ): Token?
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     internal abstract suspend fun addCustomerSource(
         customerId: String,
         publishableKey: String,
@@ -202,22 +195,15 @@ abstract class StripeRepository {
         sourceId: String,
         @Source.SourceType sourceType: String,
         requestOptions: ApiRequest.Options
-    ): Source?
+    ): Result<Source>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     internal abstract suspend fun deleteCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
         sourceId: String,
         requestOptions: ApiRequest.Options
-    ): Source?
+    ): Result<Source>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun attachPaymentMethod(
@@ -244,13 +230,6 @@ abstract class StripeRepository {
         requestOptions: ApiRequest.Options
     ): Result<List<PaymentMethod>>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     internal abstract suspend fun setDefaultCustomerSource(
         customerId: String,
         publishableKey: String,
@@ -258,7 +237,7 @@ abstract class StripeRepository {
         sourceId: String,
         @Source.SourceType sourceType: String,
         requestOptions: ApiRequest.Options
-    ): Customer?
+    ): Result<Customer>
 
     @Throws(
         AuthenticationException::class,
