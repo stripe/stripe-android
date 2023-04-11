@@ -1,11 +1,13 @@
 package com.stripe.android.financialconnections.repository
 
 import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.VerificationType
+import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.Locale
@@ -13,7 +15,11 @@ import java.util.Locale
 internal interface FinancialConnectionsConsumerSessionRepository {
 
     suspend fun getCachedConsumerSession(): ConsumerSession?
-    suspend fun lookupConsumerSession(email: String?): ConsumerSessionLookup
+    suspend fun lookupConsumerSession(
+        email: String,
+        clientSecret: String
+    ): ConsumerSessionLookup
+
     suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         connectionsMerchantName: String?,
@@ -29,12 +35,16 @@ internal interface FinancialConnectionsConsumerSessionRepository {
 
     companion object {
         operator fun invoke(
-            consumersApiService: FinancialConnectionsConsumersApiService,
+            consumersApiService: ConsumersApiService,
+            apiOptions: ApiRequest.Options,
+            financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
             locale: Locale?,
             logger: Logger,
         ): FinancialConnectionsConsumerSessionRepository =
             FinancialConnectionsConsumerSessionRepositoryImpl(
                 consumersApiService = consumersApiService,
+                apiOptions = apiOptions,
+                financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
                 locale = locale,
                 logger = logger,
             )
@@ -42,7 +52,9 @@ internal interface FinancialConnectionsConsumerSessionRepository {
 }
 
 private class FinancialConnectionsConsumerSessionRepositoryImpl(
-    private val consumersApiService: FinancialConnectionsConsumersApiService,
+    private val financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
+    private val consumersApiService: ConsumersApiService,
+    private val apiOptions: ApiRequest.Options,
     private val locale: Locale?,
     private val logger: Logger,
 ) : FinancialConnectionsConsumerSessionRepository {
@@ -54,9 +66,10 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         mutex.withLock { cachedConsumerSession }
 
     override suspend fun lookupConsumerSession(
-        email: String?,
+        email: String,
+        clientSecret: String
     ): ConsumerSessionLookup = mutex.withLock {
-        lookupRequest(email).also { lookup ->
+        lookupRequest(email, clientSecret).also { lookup ->
             updateCachedConsumerSession("lookupConsumerSession", lookup.consumerSession)
         }
     }
@@ -75,6 +88,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             requestSurface = CONSUMER_SURFACE,
             type = type,
             customEmailType = customEmailType,
+            requestOptions = apiOptions
         ).also { session ->
             updateCachedConsumerSession("startConsumerVerification", session)
         }
@@ -91,15 +105,16 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             verificationCode = verificationCode,
             type = type,
             requestSurface = CONSUMER_SURFACE,
+            requestOptions = apiOptions
         ).also { session ->
             updateCachedConsumerSession("confirmConsumerVerification", session)
         }
     }
 
-    private suspend fun lookupRequest(email: String?): ConsumerSessionLookup =
-        consumersApiService.lookupConsumerSession(
+    private suspend fun lookupRequest(email: String, clientSecret: String): ConsumerSessionLookup =
+        financialConnectionsConsumersApiService.postConsumerSession(
             email = email,
-            authSessionCookie = null,
+            clientSecret = clientSecret,
             requestSurface = CONSUMER_SURFACE,
         )
 

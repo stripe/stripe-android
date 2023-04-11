@@ -100,11 +100,15 @@ internal class FinancialConnectionsSheetNativeModule {
     @Singleton
     @Provides
     fun providesFinancialConnectionsConsumerSessionRepository(
-        consumersApiService: FinancialConnectionsConsumersApiService,
+        consumersApiService: ConsumersApiService,
+        apiOptions: ApiRequest.Options,
+        financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
         locale: Locale?,
         logger: Logger,
     ) = FinancialConnectionsConsumerSessionRepository(
+        financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
         consumersApiService = consumersApiService,
+        apiOptions = apiOptions,
         locale = locale ?: Locale.getDefault(),
         logger = logger,
     )

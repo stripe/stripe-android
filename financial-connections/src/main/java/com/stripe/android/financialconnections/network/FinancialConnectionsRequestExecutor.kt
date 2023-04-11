@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.network
 
+import android.util.Log
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
@@ -66,6 +67,7 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
         val requestId = response.requestId?.value
         val responseCode = response.code
         val stripeError = StripeErrorJsonParser().parse(response.responseJson())
+        Log.e("ERROR", stripeError.toString())
         throw when (responseCode) {
             HttpURLConnection.HTTP_ACCEPTED,
             HttpURLConnection.HTTP_BAD_REQUEST,
@@ -74,6 +76,7 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
                 requestId,
                 responseCode
             )
+
             HttpURLConnection.HTTP_UNAUTHORIZED -> AuthenticationException(stripeError, requestId)
             HttpURLConnection.HTTP_FORBIDDEN -> PermissionException(stripeError, requestId)
             HTTP_TOO_MANY_REQUESTS -> RateLimitException(stripeError, requestId)
