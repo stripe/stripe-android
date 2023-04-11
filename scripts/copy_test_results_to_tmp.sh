@@ -11,5 +11,7 @@ copy_test_results () {
   done
 }
 
+mkdir -p /tmp/test_results
+
 copy_test_results ".*/build/reports/tests/testDebugUnitTest$"
 copy_test_results ".*/build/reports/androidTests/connected$"
