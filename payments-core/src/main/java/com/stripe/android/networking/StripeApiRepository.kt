@@ -762,20 +762,21 @@ class StripeApiRepository @JvmOverloads internal constructor(
         requestOptions: ApiRequest.Options
     ): Result<List<PaymentMethod>> {
         return fetchStripeModelResult(
-            apiRequestFactory.createGet(
-                paymentMethodsUrl,
-                requestOptions,
-                listPaymentMethodsParams.toParamMap()
+            apiRequest = apiRequestFactory.createGet(
+                url = paymentMethodsUrl,
+                options = requestOptions,
+                params = listPaymentMethodsParams.toParamMap(),
             ),
-            PaymentMethodsListJsonParser()
-        ) {
-            fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createRequest(
-                    PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
-                    productUsageTokens = productUsageTokens
+            jsonParser = PaymentMethodsListJsonParser(),
+            onResponse = {
+                fireAnalyticsRequest(
+                    paymentAnalyticsRequestFactory.createRequest(
+                        PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
+                        productUsageTokens = productUsageTokens
+                    )
                 )
-            )
-        }.map {
+            },
+        ).map {
             it.paymentMethods
         }
     }
