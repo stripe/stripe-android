@@ -68,6 +68,28 @@ workflows:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
       - deploy-to-bitrise-io@2: { }
+  maestro-paymentsheet:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - avd-manager@1: { }
+      - wait-for-android-emulator@1: { }
+      - script-runner@0:
+          title: Execute Maestro tests
+          inputs:
+            - file_path: ./scripts/execute_maestro_paymentsheet_tests.sh
+      - slack@3:
+          is_always_run: true
+          inputs:
+            - webhook_url: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
+            - webhook_url_on_error: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
+      - custom-test-results-export@0:
+          inputs:
+            - search_pattern: '*/maestroReport.xml'
+            - test_name: Maestro tests
+      - deploy-to-bitrise-io@2: { }
   run-instrumentation-tests:
     before_run:
       - prepare_all

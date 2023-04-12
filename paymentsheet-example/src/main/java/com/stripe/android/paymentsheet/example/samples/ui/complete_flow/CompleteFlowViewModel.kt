@@ -87,7 +87,11 @@ internal class CompleteFlowViewModel(
         }
 
         _state.update {
-            it.copy(status = status)
+            it.copy(
+                isProcessing = false,
+                status = status,
+                didComplete = paymentResult is PaymentSheetResult.Completed,
+            )
         }
     }
 
