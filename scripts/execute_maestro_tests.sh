@@ -26,22 +26,12 @@ result=$?
 # Stop video recording and pull record parts.
 kill "$childpid"
 wait "$childpid"
+
+mkdir -p /tmp/test_results
+cd /tmp/test_results
 adb pull "/sdcard/$now-1.mp4" || true
 adb pull "/sdcard/$now-2.mp4" || true
 adb pull "/sdcard/$now-3.mp4" || true
 adb pull "/sdcard/$now-4.mp4" || true
-
-# Merge the pulled mp4 files
-echo "file '$now-1.mp4'" > concat-list.txt
-[ -f "$now-2.mp4" ] && echo "file '$now-2.mp4'" >> concat-list.txt
-[ -f "$now-3.mp4" ] && echo "file '$now-3.mp4'" >> concat-list.txt
-[ -f "$now-4.mp4" ] && echo "file '$now-4.mp4'" >> concat-list.txt
-
-ffmpeg -f concat -safe 0 -i concat-list.txt -c copy merged-$now.mp4
-rm concat-list.txt
-
-# Move the merged mp4 file to /tmp/test_results/
-mkdir -p /tmp/test_results
-mv merged-$now.mp4 /tmp/test_results/
 
 exit "$result"
