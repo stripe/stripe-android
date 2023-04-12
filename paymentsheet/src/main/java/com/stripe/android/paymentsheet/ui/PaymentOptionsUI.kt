@@ -12,11 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethod
@@ -50,6 +53,7 @@ internal fun PaymentOptions(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun PaymentOptions(
     state: PaymentOptionsState,
@@ -82,7 +86,9 @@ internal fun PaymentOptions(
                     onAddCardPressed = onAddCardPressed,
                     onItemSelected = onItemSelected,
                     onItemRemoved = onItemRemoved,
-                    modifier = Modifier.testTag(item.viewType.name)
+                    modifier = Modifier
+                        .semantics { testTagsAsResourceId = true }
+                        .testTag(item.viewType.name)
                 )
             }
         }
