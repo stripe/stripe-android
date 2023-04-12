@@ -105,7 +105,6 @@ workflows:
           inputs:
             - search_pattern: '*/maestroReport.xml'
             - test_name: Maestro tests
-      - deploy-to-bitrise-io@2: { }
   run-instrumentation-tests:
     before_run:
       - prepare_all
