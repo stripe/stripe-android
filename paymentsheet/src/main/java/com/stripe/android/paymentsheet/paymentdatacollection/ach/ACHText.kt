@@ -7,22 +7,26 @@ import com.stripe.android.paymentsheet.R
  * Temporary hack to get mandate text to display properly until translations are fixed
  */
 internal object ACHText {
-    fun getContinueMandateText(context: Context): String {
-        return context.getString(
-            R.string.stripe_paymentsheet_ach_continue_mandate
-        ).replace(
-            "<terms>",
-            "<a href=\"https://stripe.com/ach-payments/authorization\">"
-        ).replace("</terms>", "</a>")
-    }
 
-    fun getSaveMandateText(context: Context, merchantName: String): String {
-        return context.getString(
-            R.string.stripe_paymentsheet_ach_save_mandate,
-            merchantName,
+    fun getContinueMandateText(
+        context: Context,
+        merchantName: String,
+        isSaveForFutureUseSelected: Boolean,
+    ): String {
+        val base = if (isSaveForFutureUseSelected) {
+            context.getString(R.string.stripe_paymentsheet_ach_save_mandate, merchantName)
+        } else {
+            context.getString(
+                R.string.stripe_paymentsheet_ach_continue_mandate
+            )
+        }
+
+        return base.replace(
+            oldValue = "<terms>",
+            newValue = "<a href=\"https://stripe.com/ach-payments/authorization\">",
         ).replace(
-            "<terms>",
-            "<a href=\"https://stripe.com/ach-payments/authorization\">"
-        ).replace("</terms>", "</a>")
+            oldValue = "</terms>",
+            newValue = "</a>",
+        )
     }
 }

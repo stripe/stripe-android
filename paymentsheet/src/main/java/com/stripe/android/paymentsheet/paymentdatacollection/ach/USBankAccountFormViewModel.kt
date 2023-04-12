@@ -207,9 +207,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         get() = _currentScreenState
 
     val saveForFutureUseElement: SaveForFutureUseElement = SaveForFutureUseSpec().transform(
-        initialValue = args.formArgs.showCheckbox,
+        initialValue = false,
         merchantName = args.formArgs.merchantName
     ) as SaveForFutureUseElement
+
     val saveForFutureUse: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
         .stateIn(viewModelScope, SharingStarted.Lazily, args.formArgs.showCheckbox)
 
@@ -568,14 +569,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private fun buildMandateText(): String {
-        return if (saveForFutureUse.value) {
-            application.getString(
-                R.string.stripe_paymentsheet_ach_save_mandate,
-                formattedMerchantName()
-            )
-        } else {
-            ACHText.getContinueMandateText(application)
-        }
+        return ACHText.getContinueMandateText(
+            context = application,
+            merchantName = formattedMerchantName(),
+            isSaveForFutureUseSelected = saveForFutureUse.value,
+        )
     }
 
     internal class Factory(

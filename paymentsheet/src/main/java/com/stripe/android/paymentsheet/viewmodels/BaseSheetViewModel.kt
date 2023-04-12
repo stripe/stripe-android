@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -344,9 +345,19 @@ internal abstract class BaseSheetViewModel(
 
         savedStateHandle[SAVE_SELECTION] = selection
 
-        val mandateText = selection?.mandateText(getApplication())
-        updateBelowButtonText(mandateText)
+        val isRequestingReuse = if (selection is PaymentSelection.New) {
+            selection.customerRequestedSave == RequestReuse
+        } else {
+            false
+        }
 
+        val mandateText = selection?.mandateText(
+            context = getApplication(),
+            merchantName = merchantName,
+            isSaveForFutureUseSelected = isRequestingReuse,
+        )
+
+        updateBelowButtonText(mandateText)
         clearErrorMessages()
     }
 

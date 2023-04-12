@@ -189,16 +189,12 @@ internal class USBankAccountFormFragment : Fragment() {
                 viewModel.saveForFutureUse
                     .filterNot { viewModel.currentScreenState.value is BillingDetailsCollection }
                     .collect { saved ->
-                        updateMandateText(
-                            if (saved) {
-                                ACHText.getSaveMandateText(
-                                    context,
-                                    viewModel.formattedMerchantName(),
-                                )
-                            } else {
-                                ACHText.getContinueMandateText(requireContext())
-                            }
+                        val mandateText = ACHText.getContinueMandateText(
+                            context = requireContext(),
+                            merchantName = viewModel.formattedMerchantName(),
+                            isSaveForFutureUseSelected = saved,
                         )
+                        updateMandateText(mandateText)
                     }
             }
         }
