@@ -27,6 +27,7 @@ public abstract interface class com/stripe/android/CreateIntentResult {
 
 public final class com/stripe/android/CreateIntentResult$Failure : com/stripe/android/CreateIntentResult {
 	public static final field $stable I
+	public fun <init> (Ljava/lang/Exception;)V
 	public fun <init> (Ljava/lang/Exception;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/Exception;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun copy (Ljava/lang/Exception;Ljava/lang/String;)Lcom/stripe/android/CreateIntentResult$Failure;

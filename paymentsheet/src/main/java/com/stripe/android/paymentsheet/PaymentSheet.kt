@@ -248,7 +248,7 @@ class PaymentSheet internal constructor(
      */
     @ExperimentalPaymentSheetDecouplingApi
     @Parcelize
-    class IntentConfiguration(
+    class IntentConfiguration @JvmOverloads constructor(
         val mode: Mode,
         val paymentMethodTypes: List<String> = emptyList(),
     ) : Parcelable {
@@ -283,7 +283,7 @@ class PaymentSheet internal constructor(
              */
             @ExperimentalPaymentSheetDecouplingApi
             @Parcelize
-            class Payment(
+            class Payment @JvmOverloads constructor(
                 val amount: Long,
                 val currency: String,
                 override val setupFutureUse: SetupFutureUse? = null,
@@ -300,7 +300,7 @@ class PaymentSheet internal constructor(
              */
             @ExperimentalPaymentSheetDecouplingApi
             @Parcelize
-            class Setup(
+            class Setup @JvmOverloads constructor(
                 val currency: String?,
                 override val setupFutureUse: SetupFutureUse = SetupFutureUse.OffSession,
             ) : Mode() {
