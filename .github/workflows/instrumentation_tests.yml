@@ -1,5 +1,6 @@
 name: Instrumentation tests
 on:
+  pull_request:
   workflow_dispatch:
   schedule:
     # every 12 hours
