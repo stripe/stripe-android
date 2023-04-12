@@ -63,6 +63,22 @@ workflows:
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+      - script@1:
+          title: Notify failure endpoint
+          inputs:
+            - content: |
+                #!/usr/bin/env bash
+                set -e
+                set -o pipefail
+                set -x
+                
+                ruby ./scripts/notify_failure_endpoint.rb \
+                $SDK_FAILURE_NOTIFICATION_ENDPOINT \
+                $SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY \
+                $BITRISE_BUILD_URL \
+                RUN_BANKCON_MOBILE
+          is_always_run: true
+          run_if: ".IsBuildFailed"
       - custom-test-results-export@0:
           inputs:
             - search_pattern: '*/maestroReport.xml'
