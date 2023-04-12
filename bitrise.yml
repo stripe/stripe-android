@@ -70,6 +70,8 @@ workflows:
                 $BITRISE_BUILD_URL \
                 RUN_BANKCON_MOBILE
           title: Notify failure endpoint
+          is_always_run: true
+          run_if: ".IsBuildFailed"
       - slack@3:
           is_always_run: true
           inputs:
