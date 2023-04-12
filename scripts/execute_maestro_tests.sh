@@ -3,6 +3,10 @@
 now=$(date +%F_%H-%M-%S)
 echo $now
 
+# Install ffmpeg
+sudo apt-get update
+sudo apt-get install ffmpeg
+
 # Install Maestro
 export MAESTRO_VERSION=1.21.3; curl -Ls "https://get.maestro.mobile.dev" | bash
 export PATH="$PATH":"$HOME/.maestro/bin"
@@ -35,5 +39,9 @@ echo "file '$now-1.mp4'" > concat-list.txt
 
 ffmpeg -f concat -safe 0 -i concat-list.txt -c copy merged-$now.mp4
 rm concat-list.txt
+
+# Move the merged mp4 file to /tmp/test_results/
+mkdir -p /tmp/test_results
+mv merged-$now.mp4 /tmp/test_results/
 
 exit "$result"
