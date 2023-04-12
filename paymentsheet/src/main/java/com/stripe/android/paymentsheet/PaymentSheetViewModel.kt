@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
@@ -36,6 +37,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
@@ -75,6 +77,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
+@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     application: Application,
@@ -197,7 +200,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-        eventReporter.onInit(config)
+        val isServerSideConfirmation = args.initializationMode is DeferredIntent &&
+            IntentConfirmationInterceptor.createIntentCallback is CreateIntentCallbackForServerSideConfirmation
+
+        eventReporter.onInit(
+            configuration = config,
+            isServerSideConfirmation = isServerSideConfirmation,
+        )
 
         viewModelScope.launch {
             loadPaymentSheetState()
@@ -631,7 +640,7 @@ private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
     get() = when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> true
         is PaymentSheet.InitializationMode.SetupIntent -> false
-        is PaymentSheet.InitializationMode.DeferredIntent -> {
+        is DeferredIntent -> {
             intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
         }
     }
