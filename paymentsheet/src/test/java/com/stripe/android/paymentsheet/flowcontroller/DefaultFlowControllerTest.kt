@@ -210,7 +210,8 @@ internal class DefaultFlowControllerTest {
         verify(eventReporter)
             .onPaymentSuccess(
                 paymentSelection = isA<PaymentSelection.New>(),
-                currency = eq("usd")
+                currency = eq("usd"),
+                isDecoupling = eq(false),
             )
     }
 
@@ -233,7 +234,8 @@ internal class DefaultFlowControllerTest {
         verify(eventReporter)
             .onPaymentFailure(
                 paymentSelection = isA<PaymentSelection.New>(),
-                currency = eq("usd")
+                currency = eq("usd"),
+                isDecoupling = eq(false),
             )
     }
 

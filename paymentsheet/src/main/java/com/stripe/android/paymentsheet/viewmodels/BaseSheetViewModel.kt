@@ -242,7 +242,8 @@ internal abstract class BaseSheetViewModel(
                 eventReporter.onShowExistingPaymentOptions(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
                     activeLinkSession = linkHandler.activeLinkSession.value,
-                    currency = stripeIntent.value?.currency
+                    currency = stripeIntent.value?.currency,
+                    isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
             }
             AddFirstPaymentMethod,
@@ -250,7 +251,8 @@ internal abstract class BaseSheetViewModel(
                 eventReporter.onShowNewPaymentOptionForm(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
                     activeLinkSession = linkHandler.activeLinkSession.value,
-                    currency = stripeIntent.value?.currency
+                    currency = stripeIntent.value?.currency,
+                    isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
             }
         }
@@ -450,6 +452,10 @@ internal abstract class BaseSheetViewModel(
         // Reset the selection to the one from before opening the add payment method screen
         val paymentOptionsState = paymentOptionsState.value
         updateSelection(paymentOptionsState.selectedItem?.toPaymentSelection())
+    }
+
+    fun reportAutofillEvent(type: String) {
+        eventReporter.onAutofill(type, isDecoupling = stripeIntent.value?.clientSecret == null)
     }
 
     abstract fun onPaymentResult(paymentResult: PaymentResult)

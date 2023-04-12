@@ -98,6 +98,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
         initialValue = null,
     )
 
+    private val isDecoupling: Boolean
+        get() = args.state.stripeIntent.clientSecret == null
+
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (args.state.isGooglePayReady) {
             GooglePayState.Available
@@ -141,8 +144,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
             LinkHandler.ProcessingState.Completed -> {
                 eventReporter.onPaymentSuccess(
-                    PaymentSelection.Link,
-                    stripeIntent.value?.currency
+                    paymentSelection = PaymentSelection.Link,
+                    currency = stripeIntent.value?.currency,
+                    isDecoupling = isDecoupling,
                 )
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 onPaymentResult(PaymentResult.Completed)
@@ -229,7 +233,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         selection.value?.let { paymentSelection ->
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
-            eventReporter.onSelectPaymentOption(paymentSelection, stripeIntent.value?.currency)
+            eventReporter.onSelectPaymentOption(
+                paymentSelection = paymentSelection,
+                currency = stripeIntent.value?.currency,
+                isDecoupling = isDecoupling,
+            )
 
             when (paymentSelection) {
                 is PaymentSelection.Saved,

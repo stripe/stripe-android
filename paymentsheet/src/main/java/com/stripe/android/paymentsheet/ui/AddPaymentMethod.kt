@@ -88,7 +88,7 @@ internal fun AddPaymentMethod(
 
     Column(modifier = modifier.fillMaxWidth()) {
         CompositionLocalProvider(
-            LocalAutofillEventReporter provides sheetViewModel.eventReporter::onAutofill
+            LocalAutofillEventReporter provides sheetViewModel::reportAutofillEvent
         ) {
             PaymentElement(
                 sheetViewModel = sheetViewModel,
