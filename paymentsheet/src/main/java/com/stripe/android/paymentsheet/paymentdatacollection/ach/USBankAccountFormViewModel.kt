@@ -212,7 +212,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     ) as SaveForFutureUseElement
 
     val saveForFutureUse: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
-        .stateIn(viewModelScope, SharingStarted.Lazily, args.formArgs.showCheckbox)
+        .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     val requiredFields = combine(
         nameController.formFieldValue.map { it.isComplete },

@@ -13,7 +13,7 @@ internal object ACHText {
         merchantName: String,
         isSaveForFutureUseSelected: Boolean,
     ): String {
-        val base = if (isSaveForFutureUseSelected) {
+        val text = if (isSaveForFutureUseSelected) {
             context.getString(R.string.stripe_paymentsheet_ach_save_mandate, merchantName)
         } else {
             context.getString(
@@ -21,7 +21,7 @@ internal object ACHText {
             )
         }
 
-        return base.replace(
+        return text.replace(
             oldValue = "<terms>",
             newValue = "<a href=\"https://stripe.com/ach-payments/authorization\">",
         ).replace(
