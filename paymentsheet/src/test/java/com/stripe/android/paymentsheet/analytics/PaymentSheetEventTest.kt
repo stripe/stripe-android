@@ -19,7 +19,8 @@ class PaymentSheetEventTest {
     fun `Init event with full config should return expected toString()`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isServerSideConfirmation = false,
         )
         assertThat(
             event.eventName
@@ -35,7 +36,8 @@ class PaymentSheetEventTest {
     fun `Init event with minimum config should return expected toString()`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            configuration = PaymentSheetFixtures.CONFIG_MINIMUM
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
+            isServerSideConfirmation = false,
         )
         assertThat(
             event.eventName
@@ -373,11 +375,13 @@ class PaymentSheetEventTest {
             "allows_delayed_payment_methods" to false,
             "appearance" to expectedAppearance,
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
+            "is_server_side_confirmation" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                configuration = PaymentSheetFixtures.CONFIG_MINIMUM
+                configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
+                isServerSideConfirmation = false,
             ).additionalParams
         ).isEqualTo(
             mapOf(
@@ -421,11 +425,13 @@ class PaymentSheetEventTest {
             "allows_delayed_payment_methods" to true,
             "appearance" to expectedAppearance,
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
+            "is_server_side_confirmation" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
+                configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
+                isServerSideConfirmation = false,
             ).additionalParams
         ).isEqualTo(
             mapOf(

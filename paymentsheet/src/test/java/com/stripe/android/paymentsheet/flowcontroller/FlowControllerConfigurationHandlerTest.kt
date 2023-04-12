@@ -7,7 +7,10 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.CreateIntentCallback
+import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -32,9 +35,11 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.isNull
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.eq
 import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.seconds
 
@@ -59,6 +64,8 @@ class FlowControllerConfigurationHandlerTest {
         activityScenario.onActivity { activity ->
             viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
         }
+
+        IntentConfirmationInterceptor.createIntentCallback = null
     }
 
     @After
@@ -86,8 +93,10 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
         assertThat(viewModel.state).isNotNull()
-        verify(eventReporter)
-            .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+        verify(eventReporter).onInit(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isServerSideConfirmation = false,
+        )
     }
 
     @Test
@@ -119,8 +128,10 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
 
         // We're running ONLY the second config run, so we don't expect any interactions.
-        verify(eventReporter, never())
-            .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+        verify(eventReporter, never()).onInit(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isServerSideConfirmation = false,
+        )
     }
 
     @Test
@@ -154,7 +165,10 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
 
         // We're running a new config, so we DO expect an interaction.
-        verify(eventReporter).onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+        verify(eventReporter).onInit(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isServerSideConfirmation = false,
+        )
     }
 
     @Test
@@ -189,7 +203,10 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
 
         // We're running a new config, so we DO expect an interaction.
-        verify(eventReporter).onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+        verify(eventReporter).onInit(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isServerSideConfirmation = false,
+        )
     }
 
     @Test
@@ -386,6 +403,94 @@ class FlowControllerConfigurationHandlerTest {
 
         assertThat(resultTurbine.awaitItem()).isNotNull()
         assertThat(configurationHandler.isConfigured).isFalse()
+    }
+
+    @Test
+    fun `Sends correct analytics event when using normal intent`() = runTest {
+        val configureTurbine = Turbine<Throwable?>()
+        val configurationHandler = createConfigurationHandler()
+
+        configurationHandler.configure(
+            scope = this,
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("pi_123_sk_456"),
+            configuration = null,
+        ) { _, _ ->
+            configureTurbine.close()
+        }
+
+        configureTurbine.awaitComplete()
+
+        verify(eventReporter).onInit(
+            configuration = isNull(),
+            isServerSideConfirmation = eq(false),
+        )
+    }
+
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
+    @Test
+    fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
+        val configureTurbine = Turbine<Throwable?>()
+        val configurationHandler = createConfigurationHandler()
+
+        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
+            throw AssertionError("Not expected to be called")
+        }
+
+        configurationHandler.configure(
+            scope = this,
+            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1234,
+                        currency = "cad",
+                    ),
+                ),
+            ),
+            configuration = null,
+        ) { _, _ ->
+            configureTurbine.close()
+        }
+
+        configureTurbine.awaitComplete()
+
+        verify(eventReporter).onInit(
+            configuration = isNull(),
+            isServerSideConfirmation = eq(false),
+        )
+    }
+
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
+    @Test
+    fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
+        val configureTurbine = Turbine<Throwable?>()
+        val configurationHandler = createConfigurationHandler()
+
+        IntentConfirmationInterceptor.createIntentCallback =
+            CreateIntentCallbackForServerSideConfirmation { _, _ ->
+                throw AssertionError("Not expected to be called")
+            }
+
+        configurationHandler.configure(
+            scope = this,
+            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1234,
+                        currency = "cad",
+                    ),
+                ),
+            ),
+            configuration = null,
+        ) { _, _ ->
+            configureTurbine.close()
+        }
+
+        configureTurbine.awaitComplete()
+
+        verify(eventReporter).onInit(
+            configuration = isNull(),
+            isServerSideConfirmation = eq(true),
+        )
     }
 
     private fun defaultPaymentSheetLoader(): PaymentSheetLoader {
