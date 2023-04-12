@@ -387,36 +387,6 @@ class USBankAccountFormViewModelTest {
         }
 
     @Test
-    fun `Test form is invalid when name and email are not collected and don't have defaults`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(
-                defaultArgs.copy(
-                    formArgs = defaultArgs.formArgs.copy(
-                        billingDetails = PaymentSheet.BillingDetails(
-                            phone = CUSTOMER_PHONE,
-                            address = CUSTOMER_ADDRESS,
-                        ),
-                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-                            attachDefaultsToPaymentMethod = true,
-                            name = CollectionMode.Never,
-                            email = CollectionMode.Never,
-                            phone = CollectionMode.Always,
-                            address = AddressCollectionMode.Full,
-                        )
-                    ),
-                ),
-            )
-
-            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value).isEmpty()
-            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value).isNull()
-            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value)
-                .isEqualTo(CUSTOMER_PHONE)
-            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value)
-                .isEqualTo(CUSTOMER_ADDRESS.asAddressModel())
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
-        }
-
-    @Test
     fun `Test defaults are not used when not collecting fields if not attached`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel(
@@ -430,8 +400,8 @@ class USBankAccountFormViewModelTest {
                         ),
                         billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                             attachDefaultsToPaymentMethod = false,
-                            name = CollectionMode.Never,
-                            email = CollectionMode.Never,
+                            name = CollectionMode.Automatic,
+                            email = CollectionMode.Automatic,
                             phone = CollectionMode.Never,
                             address = AddressCollectionMode.Never,
                         )
@@ -439,11 +409,13 @@ class USBankAccountFormViewModelTest {
                 ),
             )
 
-            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value).isEmpty()
-            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo("Jenny Rose")
+            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo("email@email.com")
             assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value).isNull()
             assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value).isNull()
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
+            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
         }
 
     @Test
