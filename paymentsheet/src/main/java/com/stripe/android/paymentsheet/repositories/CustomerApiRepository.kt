@@ -42,7 +42,7 @@ internal class CustomerApiRepository @Inject constructor(
                 ephemeralKeySecret,
                 lazyPaymentConfig.get().stripeAccountId
             )
-        )
+        ).getOrNull()
     }
 
     override suspend fun getPaymentMethods(

@@ -120,7 +120,7 @@ internal class CustomerSessionOperationExecutorTest {
                     sourceId: String,
                     sourceType: String,
                     requestOptions: ApiRequest.Options
-                ): Customer? = CustomerFixtures.CUSTOMER
+                ): Result<Customer> = Result.success(CustomerFixtures.CUSTOMER)
             }
         )
         executor.execute(

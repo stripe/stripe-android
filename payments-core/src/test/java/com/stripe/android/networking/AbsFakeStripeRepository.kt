@@ -132,7 +132,6 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return null
     }
 
-    @Throws(APIException::class)
     override suspend fun addCustomerSource(
         customerId: String,
         publishableKey: String,
@@ -140,19 +139,18 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         sourceId: String,
         sourceType: String,
         requestOptions: ApiRequest.Options
-    ): Source? {
-        return null
+    ): Result<Source> {
+        return Result.failure(NotImplementedError())
     }
 
-    @Throws(APIException::class)
     override suspend fun deleteCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
         sourceId: String,
         requestOptions: ApiRequest.Options
-    ): Source? {
-        return null
+    ): Result<Source> {
+        return Result.failure(NotImplementedError())
     }
 
     @Throws(APIException::class)
@@ -186,7 +184,6 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return Result.failure(NotImplementedError())
     }
 
-    @Throws(APIException::class)
     override suspend fun setDefaultCustomerSource(
         customerId: String,
         publishableKey: String,
@@ -194,8 +191,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         sourceId: String,
         sourceType: String,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return null
+    ): Result<Customer> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun setCustomerShippingInfo(
@@ -204,16 +201,16 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         productUsageTokens: Set<String>,
         shippingInformation: ShippingInformation,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return null
+    ): Result<Customer> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return null
+    ): Result<Customer> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveIssuingCardPin(
