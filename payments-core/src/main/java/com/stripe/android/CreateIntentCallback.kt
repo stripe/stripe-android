@@ -13,7 +13,6 @@ sealed interface AbsCreateIntentCallback
  * [SetupIntent] on your server.
  */
 @ExperimentalPaymentSheetDecouplingApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface CreateIntentCallback : AbsCreateIntentCallback {
 
     /**
@@ -33,16 +32,13 @@ fun interface CreateIntentCallback : AbsCreateIntentCallback {
  * [CreateIntentCallbackForServerSideConfirmation].
  */
 @ExperimentalPaymentSheetDecouplingApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface CreateIntentResult {
 
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Success(val clientSecret: String) : CreateIntentResult
 
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Failure(
+    data class Failure @JvmOverloads constructor(
         internal val cause: Exception,
         internal val displayMessage: String? = null,
     ) : CreateIntentResult
@@ -53,7 +49,6 @@ sealed interface CreateIntentResult {
  * [PaymentIntent] or [SetupIntent] on your server.
  */
 @ExperimentalPaymentSheetDecouplingApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface CreateIntentCallbackForServerSideConfirmation : AbsCreateIntentCallback {
 
     /**

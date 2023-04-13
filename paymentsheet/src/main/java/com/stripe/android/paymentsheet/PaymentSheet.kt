@@ -56,7 +56,6 @@ class PaymentSheet internal constructor(
      * [PaymentSheet] is dismissed.
      */
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         activity: ComponentActivity,
         createIntentCallback: CreateIntentCallback,
@@ -78,7 +77,6 @@ class PaymentSheet internal constructor(
      * [PaymentSheet] is dismissed.
      */
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         activity: ComponentActivity,
         createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
@@ -112,7 +110,6 @@ class PaymentSheet internal constructor(
      * [PaymentSheet] is dismissed.
      */
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         fragment: Fragment,
         createIntentCallback: CreateIntentCallback,
@@ -134,7 +131,6 @@ class PaymentSheet internal constructor(
      * [PaymentSheet] is dismissed.
      */
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         fragment: Fragment,
         createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
@@ -192,7 +188,6 @@ class PaymentSheet internal constructor(
      * @param configuration An optional [PaymentSheet] configuration.
      */
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @JvmOverloads
     fun presentWithIntentConfiguration(
         intentConfiguration: IntentConfiguration,
@@ -252,9 +247,8 @@ class PaymentSheet internal constructor(
      * determine the payment method types using your [Stripe Dashboard settings](https://dashboard.stripe.com/settings/payment_methods).
      */
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    class IntentConfiguration(
+    class IntentConfiguration @JvmOverloads constructor(
         val mode: Mode,
         val paymentMethodTypes: List<String> = emptyList(),
     ) : Parcelable {
@@ -269,7 +263,6 @@ class PaymentSheet internal constructor(
          * Contains information about the desired payment or setup flow.
          */
         @ExperimentalPaymentSheetDecouplingApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         sealed class Mode : Parcelable {
 
             internal abstract val setupFutureUse: SetupFutureUse?
@@ -289,9 +282,8 @@ class PaymentSheet internal constructor(
              * account. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method) for more info.
              */
             @ExperimentalPaymentSheetDecouplingApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
-            class Payment(
+            class Payment @JvmOverloads constructor(
                 val amount: Long,
                 val currency: String,
                 override val setupFutureUse: SetupFutureUse? = null,
@@ -307,9 +299,8 @@ class PaymentSheet internal constructor(
              * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
              */
             @ExperimentalPaymentSheetDecouplingApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
-            class Setup(
+            class Setup @JvmOverloads constructor(
                 val currency: String?,
                 override val setupFutureUse: SetupFutureUse = SetupFutureUse.OffSession,
             ) : Mode() {
@@ -324,7 +315,6 @@ class PaymentSheet internal constructor(
          * method. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
          */
         @ExperimentalPaymentSheetDecouplingApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class SetupFutureUse {
 
             /**
@@ -345,7 +335,6 @@ class PaymentSheet internal constructor(
          * See [docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method).
          */
         @ExperimentalPaymentSheetDecouplingApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class CaptureMethod {
 
             /**
@@ -1076,7 +1065,6 @@ class PaymentSheet internal constructor(
          * @param callback called with the result of configuring the FlowController.
          */
         @ExperimentalPaymentSheetDecouplingApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun configureWithIntentConfiguration(
             intentConfiguration: IntentConfiguration,
             configuration: Configuration? = null,
@@ -1154,7 +1142,6 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @ExperimentalPaymentSheetDecouplingApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
             fun create(
                 activity: ComponentActivity,
@@ -1184,7 +1171,6 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @ExperimentalPaymentSheetDecouplingApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
             fun create(
                 activity: ComponentActivity,
@@ -1234,7 +1220,6 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @ExperimentalPaymentSheetDecouplingApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
             fun create(
                 fragment: Fragment,
@@ -1264,7 +1249,6 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @ExperimentalPaymentSheetDecouplingApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
             fun create(
                 fragment: Fragment,
