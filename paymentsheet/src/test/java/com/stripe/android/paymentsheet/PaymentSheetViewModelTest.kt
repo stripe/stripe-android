@@ -53,6 +53,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.testing.FakeIntentConfirmationInterceptor
+import com.stripe.android.testing.IntentConfirmationInterceptorTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -85,6 +86,9 @@ import kotlin.time.Duration
 internal class PaymentSheetViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -127,7 +131,6 @@ internal class PaymentSheetViewModelTest {
     @BeforeTest
     fun setup() {
         MockitoAnnotations.openMocks(this)
-        IntentConfirmationInterceptor.createIntentCallback = null
     }
 
     @AfterTest

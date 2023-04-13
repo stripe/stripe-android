@@ -13,25 +13,24 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.testing.IntentConfirmationInterceptorTestRule
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import java.util.Objects
-import kotlin.test.BeforeTest
 import kotlin.test.assertFailsWith
 
 @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 @RunWith(RobolectricTestRunner::class)
 class DefaultIntentConfirmationInterceptorTest {
 
-    private val context = ApplicationProvider.getApplicationContext<Context>()
+    @get:Rule
+    val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
 
-    @BeforeTest
-    fun before() {
-        IntentConfirmationInterceptor.createIntentCallback = null
-    }
+    private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @Test
     fun `Returns confirm as next step if invoked with client secret for existing payment method`() = runTest {

@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.testing.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.DelayingPaymentSheetLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.view.ActivityScenarioFactory
@@ -33,6 +34,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.isNull
@@ -45,6 +47,9 @@ import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
 class FlowControllerConfigurationHandlerTest {
+
+    @get:Rule
+    val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -64,8 +69,6 @@ class FlowControllerConfigurationHandlerTest {
         activityScenario.onActivity { activity ->
             viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
         }
-
-        IntentConfirmationInterceptor.createIntentCallback = null
     }
 
     @After
