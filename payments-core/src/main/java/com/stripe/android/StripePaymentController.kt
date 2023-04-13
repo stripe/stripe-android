@@ -393,7 +393,7 @@ constructor(
     override suspend fun getPaymentIntentResult(data: Intent) =
         paymentIntentFlowResultProcessor.processResult(
             PaymentFlowResult.Unvalidated.fromIntent(data)
-        )
+        ).getOrThrow()
 
     /**
      * Get the SetupIntent's client_secret from {@param data} and use to retrieve
@@ -418,7 +418,7 @@ constructor(
     override suspend fun getSetupIntentResult(data: Intent) =
         setupIntentFlowResultProcessor.processResult(
             PaymentFlowResult.Unvalidated.fromIntent(data)
-        )
+        ).getOrThrow()
 
     /**
      * Get the Source's client_secret from {@param data} and use to retrieve
