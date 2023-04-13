@@ -3,6 +3,7 @@ package com.stripe.android.model
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -12,7 +13,10 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
 data class ConsumerSessionLookup(
+    @SerialName("exists")
     val exists: Boolean,
-    val consumerSession: ConsumerSession?,
-    val errorMessage: String?
+    @SerialName("consumer_session")
+    val consumerSession: ConsumerSession? = null,
+    @SerialName("error_message")
+    val errorMessage: String? = null
 ) : StripeModel
