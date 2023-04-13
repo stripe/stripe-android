@@ -20,7 +20,7 @@ maestro test -e APP_ID=com.stripe.android.financialconnections.example --format 
 result=$?
 
 # Stop video recording and pull record parts.
-kill "$childpid"
+kill -2 "$childpid"
 wait "$childpid"
 
 mkdir -p /tmp/test_results
