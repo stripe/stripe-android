@@ -76,28 +76,22 @@ internal class GooglePayLauncherViewModel(
     ): JSONObject {
         val transactionInfo = when (args) {
             is GooglePayLauncherContract.PaymentIntentArgs -> {
-                val paymentIntent = requireNotNull(
-                    stripeRepository.retrievePaymentIntent(
-                        args.clientSecret,
-                        requestOptions
-                    )
-                ) {
-                    "Could not retrieve PaymentIntent."
-                }
+                val paymentIntent = stripeRepository.retrievePaymentIntent(
+                    args.clientSecret,
+                    requestOptions
+                ).getOrThrow()
+
                 createTransactionInfo(
                     paymentIntent,
                     paymentIntent.currency.orEmpty()
                 )
             }
             is GooglePayLauncherContract.SetupIntentArgs -> {
-                val setupIntent = requireNotNull(
-                    stripeRepository.retrieveSetupIntent(
-                        args.clientSecret,
-                        requestOptions
-                    )
-                ) {
-                    "Could not retrieve SetupIntent."
-                }
+                val setupIntent = stripeRepository.retrieveSetupIntent(
+                    args.clientSecret,
+                    requestOptions
+                ).getOrThrow()
+
                 createTransactionInfo(
                     setupIntent,
                     args.currencyCode

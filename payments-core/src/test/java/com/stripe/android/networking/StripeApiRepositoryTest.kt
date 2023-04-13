@@ -1240,15 +1240,14 @@ internal class StripeApiRepositoryTest {
                 sdkVersion = "AndroidBindings/13.0.0"
             )
 
-            val ex = assertFailsWith<InvalidRequestException> {
-                stripeRepository.retrieveSetupIntent(
-                    "seti_1CkiBMLENEVhOs7YMtUehLau_secret_invalid",
-                    DEFAULT_OPTIONS
-                )
-            }
+            val result = stripeRepository.retrieveSetupIntent(
+                "seti_1CkiBMLENEVhOs7YMtUehLau_secret_invalid",
+                DEFAULT_OPTIONS
+            )
+
             assertEquals(
                 "No such setupintent: 'seti_1CkiBMLENEVhOs7YMtUehLau'",
-                ex.stripeError?.message
+                result.exceptionOrNull()?.message,
             )
         }
 

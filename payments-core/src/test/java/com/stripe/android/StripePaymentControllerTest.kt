@@ -247,17 +247,17 @@ internal class StripePaymentControllerTest {
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ) = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
+        ) = Result.success(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
 
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): PaymentIntent {
+        ): Result<PaymentIntent> {
             retrievePaymentIntentArgs.add(
                 Triple(clientSecret, options, expandFields)
             )
-            return retrievePaymentIntentResponse
+            return Result.success(retrievePaymentIntentResponse)
         }
 
         override suspend fun retrieveSource(

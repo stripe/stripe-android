@@ -264,23 +264,22 @@ constructor(
         requestOptions: ApiRequest.Options,
         type: PaymentController.StripeIntentType
     ) {
-        runCatching {
-            val stripeIntent = when (type) {
-                PaymentController.StripeIntentType.PaymentIntent -> {
-                    stripeRepository.retrievePaymentIntent(
-                        clientSecret,
-                        requestOptions
-                    )
-                }
-                PaymentController.StripeIntentType.SetupIntent -> {
-                    stripeRepository.retrieveSetupIntent(
-                        clientSecret,
-                        requestOptions
-                    )
-                }
+        val stripeIntentResult = when (type) {
+            PaymentController.StripeIntentType.PaymentIntent -> {
+                stripeRepository.retrievePaymentIntent(
+                    clientSecret,
+                    requestOptions
+                )
             }
-            requireNotNull(stripeIntent)
-        }.fold(
+            PaymentController.StripeIntentType.SetupIntent -> {
+                stripeRepository.retrieveSetupIntent(
+                    clientSecret,
+                    requestOptions
+                )
+            }
+        }
+
+        stripeIntentResult.fold(
             onSuccess = { stripeIntent ->
                 handleNextAction(
                     host = host,
@@ -421,13 +420,12 @@ constructor(
     ): PaymentIntentResult {
         val outcome =
             alipayRepository.authenticate(paymentIntent, authenticator, requestOptions).outcome
-        val refreshedPaymentIntent = requireNotNull(
-            stripeRepository.retrievePaymentIntent(
-                paymentIntent.clientSecret.orEmpty(),
-                requestOptions,
-                expandFields = EXPAND_PAYMENT_METHOD
-            )
-        )
+
+        val refreshedPaymentIntent = stripeRepository.retrievePaymentIntent(
+            paymentIntent.clientSecret.orEmpty(),
+            requestOptions,
+            expandFields = EXPAND_PAYMENT_METHOD
+        ).getOrThrow()
 
         return PaymentIntentResult(
             refreshedPaymentIntent,

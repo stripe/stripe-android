@@ -180,18 +180,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): StripeIntent {
         return when {
             PaymentIntent.ClientSecret.isMatch(clientSecret) -> {
-                requireNotNull(
-                    retrievePaymentIntent(clientSecret, options, expandFields)
-                ) {
-                    "Could not retrieve PaymentIntent."
-                }
+                retrievePaymentIntent(clientSecret, options, expandFields).getOrThrow()
             }
             SetupIntent.ClientSecret.isMatch(clientSecret) -> {
-                requireNotNull(
-                    retrieveSetupIntent(clientSecret, options, expandFields)
-                ) {
-                    "Could not retrieve SetupIntent."
-                }
+                retrieveSetupIntent(clientSecret, options, expandFields).getOrThrow()
             }
             else -> {
                 error("Invalid client secret.")
@@ -270,17 +262,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
      *
      * @param clientSecret client_secret of the PaymentIntent to retrieve
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun retrievePaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
+    ): Result<PaymentIntent> {
         val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
         val params: Map<String, Any?> =
             if (options.apiKeyIsUserKey) {
@@ -291,13 +277,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
-            apiRequestFactory.createGet(
-                getRetrievePaymentIntentUrl(paymentIntentId),
-                options,
-                params
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getRetrievePaymentIntentUrl(paymentIntentId),
+                options = options,
+                params = params,
             ),
-            PaymentIntentJsonParser()
+            jsonParser = PaymentIntentJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.PaymentIntentRetrieve)
@@ -312,27 +298,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
      *
      * @param clientSecret client_secret of the PaymentIntent to retrieve
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun refreshPaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options
-    ): PaymentIntent? {
-        val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+    ): Result<PaymentIntent> {
+        val paymentIntentId = runCatching {
+            PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+        }.getOrElse {
+            return Result.failure(it)
+        }
 
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getRefreshPaymentIntentUrl(paymentIntentId),
-                options,
-                createClientSecretParam(clientSecret, emptyList())
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getRefreshPaymentIntentUrl(paymentIntentId),
+                options = options,
+                params = createClientSecretParam(clientSecret, emptyList()),
             ),
-            PaymentIntentJsonParser()
+            jsonParser = PaymentIntentJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.PaymentIntentRefresh)
@@ -423,28 +407,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
      *
      * @param clientSecret client_secret of the SetupIntent to retrieve
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun retrieveSetupIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
-        val setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId
+    ): Result<SetupIntent> {
+        val setupIntentId = runCatching {
+            SetupIntent.ClientSecret(clientSecret).setupIntentId
+        }.getOrElse {
+            return Result.failure(it)
+        }
 
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
-            apiRequestFactory.createGet(
-                getRetrieveSetupIntentUrl(setupIntentId),
-                options,
-                createClientSecretParam(clientSecret, expandFields)
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getRetrieveSetupIntentUrl(setupIntentId),
+                options = options,
+                params = createClientSecretParam(clientSecret, expandFields),
             ),
-            SetupIntentJsonParser()
+            jsonParser = SetupIntentJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.SetupIntentRetrieve)

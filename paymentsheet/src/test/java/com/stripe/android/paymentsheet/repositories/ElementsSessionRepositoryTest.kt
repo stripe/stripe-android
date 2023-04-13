@@ -69,7 +69,7 @@ internal class ElementsSessionRepositoryTest {
             ).thenReturn(Result.failure(APIException()))
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
-                .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
+                .thenReturn(Result.success(PaymentIntentFixtures.PI_WITH_SHIPPING))
 
             val session = withLocale(Locale.ITALY) {
                 createRepository().get(
@@ -92,7 +92,7 @@ internal class ElementsSessionRepositoryTest {
             ).thenReturn(Result.failure(RuntimeException()))
 
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
-                .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
+                .thenReturn(Result.success(PaymentIntentFixtures.PI_WITH_SHIPPING))
 
             val session = withLocale(Locale.ITALY) {
                 createRepository().get(

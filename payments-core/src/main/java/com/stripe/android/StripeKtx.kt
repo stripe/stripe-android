@@ -482,15 +482,15 @@ suspend fun Stripe.retrievePaymentIntent(
     clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId,
     expand: List<String> = emptyList(),
-): PaymentIntent = runApiRequest {
-    stripeRepository.retrievePaymentIntent(
+): PaymentIntent {
+    return stripeRepository.retrievePaymentIntent(
         clientSecret,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         ),
         expand,
-    )
+    ).getOrThrow()
 }
 
 /**
@@ -521,15 +521,15 @@ suspend fun Stripe.retrieveSetupIntent(
     clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId,
     expand: List<String> = emptyList(),
-): SetupIntent = runApiRequest {
-    stripeRepository.retrieveSetupIntent(
+): SetupIntent {
+    return stripeRepository.retrieveSetupIntent(
         clientSecret,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         ),
         expand,
-    )
+    ).getOrThrow()
 }
 
 /**

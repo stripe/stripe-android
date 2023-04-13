@@ -42,7 +42,7 @@ internal class SetupIntentFlowResultProcessorTest {
     fun `processResult() when shouldCancelSource=true should return canceled SetupIntent`() =
         runTest {
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
-                SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
+                Result.success(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
             )
             whenever(mockStripeRepository.cancelSetupIntentSource(any(), any(), any())).thenReturn(
                 SetupIntentFixtures.CANCELLED
@@ -69,8 +69,8 @@ internal class SetupIntentFlowResultProcessorTest {
     fun `3ds2 canceled with processing intent should succeed`() =
         runTest {
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
-                SetupIntentFixtures.SI_3DS2_PROCESSING,
-                SetupIntentFixtures.SI_3DS2_SUCCEEDED
+                Result.success(SetupIntentFixtures.SI_3DS2_PROCESSING),
+                Result.success(SetupIntentFixtures.SI_3DS2_SUCCEEDED),
             )
 
             val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
@@ -106,7 +106,7 @@ internal class SetupIntentFlowResultProcessorTest {
     fun `3ds2 canceled with succeeded intent should succeed`() =
         runTest {
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
-                SetupIntentFixtures.SI_3DS2_SUCCEEDED
+                Result.success(SetupIntentFixtures.SI_3DS2_SUCCEEDED)
             )
 
             val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
@@ -142,7 +142,7 @@ internal class SetupIntentFlowResultProcessorTest {
                 status = StripeIntent.Status.RequiresAction
             )
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
-                intent
+                Result.success(intent)
             )
 
             val clientSecret = requireNotNull(
