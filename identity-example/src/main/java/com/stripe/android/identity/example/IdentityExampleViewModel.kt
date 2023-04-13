@@ -2,7 +2,6 @@ package com.stripe.android.identity.example
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.coroutines.awaitStringResult
@@ -19,9 +18,6 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
             explicitNulls = false
         }
     }
-
-    val vsData: MutableLiveData<String> = MutableLiveData()
-    val eakData: MutableLiveData<String> = MutableLiveData()
 
     fun postForResult(
         type: VerificationType,

@@ -688,19 +688,6 @@ private fun SubmitView(
             }
         }
 
-    Button(
-        modifier = Modifier.fillMaxWidth(),
-        enabled = viewModel.vsData.value != null,
-        onClick = {
-            identityVerificationSheet.present(
-                requireNotNull(viewModel.vsData.value),
-                requireNotNull(viewModel.eakData.value)
-            )
-        }
-    ) {
-        Text(text = "Start previous verfication")
-    }
-
     LoadVSView(
         viewModel,
         loadingState,
