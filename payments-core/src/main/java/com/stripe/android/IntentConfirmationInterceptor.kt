@@ -90,7 +90,12 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 setupForFutureUsage = setupForFutureUsage,
             )
         } else {
-            createPaymentMethod(paymentMethodCreateParams).fold(
+            createPaymentMethod(
+                paymentMethodCreateParams.copy(
+                    productUsage = paymentMethodCreateParams.attribution
+                        .plus("deferred-intent")
+                )
+            ).fold(
                 onSuccess = { paymentMethod ->
                     intercept(
                         clientSecret = null,

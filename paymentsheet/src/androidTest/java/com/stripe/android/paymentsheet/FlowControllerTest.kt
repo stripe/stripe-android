@@ -8,7 +8,9 @@ import com.stripe.android.CreateIntentResult
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
@@ -389,6 +391,10 @@ internal class FlowControllerTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_methods"),
+            bodyPart(
+                "payment_user_agent",
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent")
+            ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
@@ -396,6 +402,12 @@ internal class FlowControllerTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
+            not(
+                bodyPart(
+                    "payment_method_data%5Bpayment_user_agent%5D",
+                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent")
+                )
+            ),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -466,6 +478,10 @@ internal class FlowControllerTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_methods"),
+            bodyPart(
+                "payment_user_agent",
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent")
+            ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
