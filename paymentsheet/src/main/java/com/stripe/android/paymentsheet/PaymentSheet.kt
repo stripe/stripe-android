@@ -354,9 +354,7 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration @JvmOverloads
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    constructor(
+    data class Configuration @JvmOverloads constructor(
         /**
          * Your customer-facing business name.
          *
@@ -394,6 +392,9 @@ class PaymentSheet internal constructor(
          * The billing information for the customer.
          *
          * If set, PaymentSheet will pre-populate the form fields with the values provided.
+         * If `billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod` is `true`,
+         * these values will be attached to the payment method even if they are not collected by
+         * the PaymentSheet UI.
          */
         val defaultBillingDetails: BillingDetails? = null,
 
@@ -445,44 +446,18 @@ class PaymentSheet internal constructor(
         val primaryButtonLabel: String? = null,
 
         /**
-         * 🚧 Under construction.
          * Describes how billing details should be collected.
          * All values default to `automatic`.
          * If `never` is used for a required field for the Payment Method used during checkout,
          * you **must** provide an appropriate value as part of [defaultBillingDetails].
          */
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration(),
     ) : Parcelable {
-
-        @JvmOverloads constructor(
-            merchantDisplayName: String,
-            customer: CustomerConfiguration? = null,
-            googlePay: GooglePayConfiguration? = null,
-            primaryButtonColor: ColorStateList? = null,
-            defaultBillingDetails: BillingDetails? = null,
-            shippingDetails: AddressDetails? = null,
-            allowsDelayedPaymentMethods: Boolean = false,
-            allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
-            appearance: Appearance = Appearance(),
-            primaryButtonLabel: String? = null,
-        ) : this(
-            merchantDisplayName = merchantDisplayName,
-            customer = customer,
-            googlePay = googlePay,
-            primaryButtonColor = primaryButtonColor,
-            defaultBillingDetails = defaultBillingDetails,
-            shippingDetails = shippingDetails,
-            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
-            appearance = appearance,
-            primaryButtonLabel = primaryButtonLabel,
-            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
-        )
-
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
+        @Suppress("TooManyFunctions")
         class Builder(
             private var merchantDisplayName: String
         ) {
@@ -494,6 +469,8 @@ class PaymentSheet internal constructor(
             private var allowsDelayedPaymentMethods: Boolean = false
             private var allowsPaymentMethodsRequiringShippingAddress: Boolean = false
             private var appearance: Appearance = Appearance()
+            private var billingDetailsCollectionConfiguration =
+                BillingDetailsCollectionConfiguration()
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -533,6 +510,12 @@ class PaymentSheet internal constructor(
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
 
+            fun billingDetailsCollectionConfiguration(
+                billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+            ) = apply {
+                this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
+            }
+
             fun build() = Configuration(
                 merchantDisplayName,
                 customer,
@@ -542,7 +525,8 @@ class PaymentSheet internal constructor(
                 shippingDetails,
                 allowsDelayedPaymentMethods,
                 allowsPaymentMethodsRequiringShippingAddress,
-                appearance
+                appearance,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             )
         }
     }

@@ -22,6 +22,47 @@ public final class com/stripe/android/ui/core/Amount$Creator : android/os/Parcel
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/ui/core/BillingDetailsCollectionConfiguration : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun <init> (Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$AddressCollectionMode;Z)V
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$AddressCollectionMode;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;
+	public final fun component2 ()Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;
+	public final fun component3 ()Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;
+	public final fun component4 ()Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$AddressCollectionMode;
+	public final fun component5 ()Z
+	public final fun copy (Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$AddressCollectionMode;Z)Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration;Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$AddressCollectionMode;ZILjava/lang/Object;)Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$AddressCollectionMode;
+	public final fun getAttachDefaultsToPaymentMethod ()Z
+	public final fun getEmail ()Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;
+	public final fun getName ()Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;
+	public final fun getPhone ()Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/BillingDetailsCollectionConfiguration$AddressCollectionMode : java/lang/Enum {
+	public static final field Automatic Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$AddressCollectionMode;
+	public static final field Full Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$AddressCollectionMode;
+	public static final field Never Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$AddressCollectionMode;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$AddressCollectionMode;
+	public static fun values ()[Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$AddressCollectionMode;
+}
+
+public final class com/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode : java/lang/Enum {
+	public static final field Always Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;
+	public static final field Automatic Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;
+	public static final field Never Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;
+	public static fun values ()[Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration$CollectionMode;
+}
+
 public final class com/stripe/android/ui/core/BillingDetailsCollectionConfiguration$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/BillingDetailsCollectionConfiguration;
