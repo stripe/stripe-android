@@ -69,7 +69,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         email: String,
         clientSecret: String
     ): ConsumerSessionLookup = mutex.withLock {
-        lookupRequest(email, clientSecret).also { lookup ->
+        postConsumerSession(email, clientSecret).also { lookup ->
             updateCachedConsumerSession("lookupConsumerSession", lookup.consumerSession)
         }
     }
@@ -111,12 +111,14 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         }
     }
 
-    private suspend fun lookupRequest(email: String, clientSecret: String): ConsumerSessionLookup =
-        financialConnectionsConsumersApiService.postConsumerSession(
-            email = email,
-            clientSecret = clientSecret,
-            requestSurface = CONSUMER_SURFACE,
-        )
+    private suspend fun postConsumerSession(
+        email: String,
+        clientSecret: String
+    ): ConsumerSessionLookup = financialConnectionsConsumersApiService.postConsumerSession(
+        email = email,
+        clientSecret = clientSecret,
+        requestSurface = CONSUMER_SURFACE,
+    )
 
     private fun updateCachedConsumerSession(
         source: String,
