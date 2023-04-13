@@ -880,7 +880,7 @@ internal class IdentityViewModel constructor(
 
     private fun calculateClearDataParam(dataToBeCollected: CollectedDataParam) =
         ClearDataParam.createFromRequirements(
-            Requirement.values().toMutableSet().minus(
+            missingRequirements.value.toMutableSet().minus(
                 collectedData.value.collectedRequirements()
             ).minus(dataToBeCollected.collectedRequirements())
         )
