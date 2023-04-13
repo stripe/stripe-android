@@ -278,6 +278,10 @@ internal class PaymentSheetTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_methods"),
+            bodyPart(
+                "payment_user_agent",
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent")
+            ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }

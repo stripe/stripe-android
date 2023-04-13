@@ -7,14 +7,12 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
-import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
@@ -50,9 +48,6 @@ internal abstract class PaymentSheetLauncherComponent : NonFallbackInjector {
 
         @BindsInstance
         fun injectorKey(@InjectorKey injectorKey: String): Builder
-
-        @BindsInstance
-        fun productUsageTokens(@Named(PRODUCT_USAGE) productUsageTokens: Set<String>): Builder
 
         fun build(): PaymentSheetLauncherComponent
     }

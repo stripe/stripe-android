@@ -43,11 +43,7 @@ class PaymentSheet internal constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback
     ) : this(
-        DefaultPaymentSheetLauncher(
-            activity = activity,
-            callback = callback,
-            deferred = false
-        )
+        DefaultPaymentSheetLauncher(activity, callback)
     )
 
     /**
@@ -66,11 +62,7 @@ class PaymentSheet internal constructor(
         createIntentCallback: CreateIntentCallback,
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
-        DefaultPaymentSheetLauncher(
-            activity = activity,
-            callback = paymentResultCallback,
-            deferred = true
-        )
+        DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
     }
@@ -92,11 +84,7 @@ class PaymentSheet internal constructor(
         createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
-        DefaultPaymentSheetLauncher(
-            activity = activity,
-            callback = paymentResultCallback,
-            deferred = true
-        )
+        DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallbackForServerSideConfirmation
     }
@@ -111,11 +99,7 @@ class PaymentSheet internal constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback
     ) : this(
-        DefaultPaymentSheetLauncher(
-            fragment = fragment,
-            callback = callback,
-            deferred = false
-        )
+        DefaultPaymentSheetLauncher(fragment, callback)
     )
 
     /**
@@ -134,11 +118,7 @@ class PaymentSheet internal constructor(
         createIntentCallback: CreateIntentCallback,
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
-        DefaultPaymentSheetLauncher(
-            fragment = fragment,
-            callback = paymentResultCallback,
-            deferred = true
-        )
+        DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
     }
@@ -160,11 +140,7 @@ class PaymentSheet internal constructor(
         createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
-        DefaultPaymentSheetLauncher(
-            fragment = fragment,
-            callback = paymentResultCallback,
-            deferred = true
-        )
+        DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallbackForServerSideConfirmation
     }
