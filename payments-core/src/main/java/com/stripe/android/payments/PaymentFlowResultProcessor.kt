@@ -43,7 +43,9 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     suspend fun processResult(
         unvalidatedResult: PaymentFlowResult.Unvalidated
     ): Result<S> = withContext(workContext) {
-        val result = unvalidatedResult.validate()
+        val result = unvalidatedResult.validate().getOrElse {
+            return@withContext Result.failure(it)
+        }
 
         val requestOptions = ApiRequest.Options(
             apiKey = publishableKeyProvider.get(),

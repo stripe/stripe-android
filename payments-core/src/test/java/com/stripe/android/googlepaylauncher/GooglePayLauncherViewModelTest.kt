@@ -251,7 +251,7 @@ class GooglePayLauncherViewModelTest {
         override suspend fun getPaymentIntentResult(
             data: Intent
         ): PaymentIntentResult {
-            val paymentFlowResult = PaymentFlowResult.Unvalidated.fromIntent(data).validate()
+            val paymentFlowResult = PaymentFlowResult.Unvalidated.fromIntent(data).validate().getOrThrow()
             return PaymentIntentResult(
                 PaymentIntentFixtures.PI_SUCCEEDED,
                 outcomeFromFlow = paymentFlowResult.flowOutcome
@@ -259,7 +259,7 @@ class GooglePayLauncherViewModelTest {
         }
 
         override suspend fun getSetupIntentResult(data: Intent): SetupIntentResult {
-            val paymentFlowResult = PaymentFlowResult.Unvalidated.fromIntent(data).validate()
+            val paymentFlowResult = PaymentFlowResult.Unvalidated.fromIntent(data).validate().getOrThrow()
             return SetupIntentResult(
                 SetupIntentFixtures.SI_SUCCEEDED,
                 outcomeFromFlow = paymentFlowResult.flowOutcome
