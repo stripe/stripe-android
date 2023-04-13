@@ -1039,7 +1039,7 @@ internal class StripeApiRepositoryTest {
                 DEFAULT_OPTIONS.apiKey,
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
-            )
+            ).getOrThrow()
         assertThat(paymentMethods)
             .hasSize(3)
         assertThat(paymentMethods.map { it.id })
@@ -1097,7 +1097,7 @@ internal class StripeApiRepositoryTest {
                 DEFAULT_OPTIONS.apiKey,
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
-            )
+            ).getOrThrow()
         assertThat(paymentMethods)
             .isEmpty()
     }
@@ -1948,7 +1948,7 @@ internal class StripeApiRepositoryTest {
                 financialConnectionsSessionId = "las_123456",
                 requestOptions = DEFAULT_OPTIONS,
                 expandFields = listOf("payment_method")
-            )
+            ).getOrThrow()
 
             verify(stripeNetworkClient).executeRequest(
                 argWhere<ApiRequest> {
@@ -1956,7 +1956,7 @@ internal class StripeApiRepositoryTest {
                 }
             )
 
-            assertEquals("pm_abcdefg", response?.paymentMethodId)
+            assertEquals("pm_abcdefg", response.paymentMethodId)
         }
 
     @Test
@@ -2000,7 +2000,7 @@ internal class StripeApiRepositoryTest {
                 financialConnectionsSessionId = "las_123456",
                 requestOptions = DEFAULT_OPTIONS,
                 expandFields = listOf("payment_method")
-            )
+            ).getOrThrow()
 
             verify(stripeNetworkClient).executeRequest(
                 argWhere<ApiRequest> {
@@ -2008,7 +2008,7 @@ internal class StripeApiRepositoryTest {
                 }
             )
 
-            assertEquals("pm_abcdefg", response?.paymentMethodId)
+            assertEquals("pm_abcdefg", response.paymentMethodId)
         }
 
     @Test

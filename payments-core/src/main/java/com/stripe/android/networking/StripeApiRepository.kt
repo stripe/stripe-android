@@ -631,13 +631,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.CustomerAddSource]
      */
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        AuthenticationException::class,
-        CardException::class
-    )
     override suspend fun addCustomerSource(
         customerId: String,
         publishableKey: String,
@@ -645,14 +638,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
         sourceId: String,
         @Source.SourceType sourceType: String,
         requestOptions: ApiRequest.Options
-    ): Source? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getAddCustomerSourceUrl(customerId),
-                requestOptions,
-                mapOf("source" to sourceId)
+    ): Result<Source> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getAddCustomerSourceUrl(customerId),
+                options = requestOptions,
+                params = mapOf("source" to sourceId),
             ),
-            SourceJsonParser()
+            jsonParser = SourceJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createAddSource(
@@ -666,26 +659,19 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.CustomerDeleteSource]
      */
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        AuthenticationException::class,
-        CardException::class
-    )
     override suspend fun deleteCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
         sourceId: String,
         requestOptions: ApiRequest.Options
-    ): Source? {
-        return fetchStripeModel(
-            apiRequestFactory.createDelete(
-                getDeleteCustomerSourceUrl(customerId, sourceId),
-                requestOptions
+    ): Result<Source> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createDelete(
+                url = getDeleteCustomerSourceUrl(customerId, sourceId),
+                options = requestOptions,
             ),
-            SourceJsonParser()
+            jsonParser = SourceJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createDeleteSource(
@@ -698,35 +684,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.CustomerAttachPaymentMethod]
      */
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        AuthenticationException::class,
-        CardException::class
-    )
     override suspend fun attachPaymentMethod(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethod? {
+    ): Result<PaymentMethod> {
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getAttachPaymentMethodUrl(paymentMethodId),
-                requestOptions,
-                mapOf("customer" to customerId)
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getAttachPaymentMethodUrl(paymentMethodId),
+                options = requestOptions,
+                params = mapOf("customer" to customerId)
             ),
-            PaymentMethodJsonParser()
+            jsonParser = PaymentMethodJsonParser()
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory
-                    .createAttachPaymentMethod(
-                        productUsageTokens
-                    )
+                paymentAnalyticsRequestFactory.createAttachPaymentMethod(productUsageTokens)
             )
         }
     }
@@ -746,19 +722,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethod? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getDetachPaymentMethodUrl(paymentMethodId),
-                requestOptions
+    ): Result<PaymentMethod> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getDetachPaymentMethodUrl(paymentMethodId),
+                options = requestOptions,
             ),
-            PaymentMethodJsonParser()
+            jsonParser = PaymentMethodJsonParser()
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory
-                    .createDetachPaymentMethod(
-                        productUsageTokens
-                    )
+                paymentAnalyticsRequestFactory.createDetachPaymentMethod(productUsageTokens)
             )
         }
     }
@@ -768,48 +741,35 @@ class StripeApiRepository @JvmOverloads internal constructor(
      *
      * Analytics event: [PaymentAnalyticsEvent.CustomerRetrievePaymentMethods]
      */
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        AuthenticationException::class,
-        CardException::class
-    )
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
-    ): List<PaymentMethod> {
-        val paymentMethodsList = fetchStripeModel(
-            apiRequestFactory.createGet(
-                paymentMethodsUrl,
-                requestOptions,
-                listPaymentMethodsParams.toParamMap()
+    ): Result<List<PaymentMethod>> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = paymentMethodsUrl,
+                options = requestOptions,
+                params = listPaymentMethodsParams.toParamMap(),
             ),
-            PaymentMethodsListJsonParser()
-        ) {
-            fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createRequest(
-                    PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
-                    productUsageTokens = productUsageTokens
+            jsonParser = PaymentMethodsListJsonParser(),
+            onResponse = {
+                fireAnalyticsRequest(
+                    paymentAnalyticsRequestFactory.createRequest(
+                        PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
+                        productUsageTokens = productUsageTokens
+                    )
                 )
-            )
+            },
+        ).map {
+            it.paymentMethods
         }
-
-        return paymentMethodsList?.paymentMethods.orEmpty()
     }
 
     /**
      * Analytics event: [PaymentAnalyticsEvent.CustomerSetDefaultSource]
      */
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        AuthenticationException::class,
-        CardException::class
-    )
     override suspend fun setDefaultCustomerSource(
         customerId: String,
         publishableKey: String,
@@ -817,14 +777,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
         sourceId: String,
         @Source.SourceType sourceType: String,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getRetrieveCustomerUrl(customerId),
-                requestOptions,
-                mapOf("default_source" to sourceId)
+    ): Result<Customer> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getRetrieveCustomerUrl(customerId),
+                options = requestOptions,
+                params = mapOf("default_source" to sourceId),
             ),
-            CustomerJsonParser()
+            jsonParser = CustomerJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(
@@ -839,27 +799,20 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.CustomerSetShippingInfo]
      */
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        AuthenticationException::class,
-        CardException::class
-    )
     override suspend fun setCustomerShippingInfo(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
         shippingInformation: ShippingInformation,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getRetrieveCustomerUrl(customerId),
-                requestOptions,
-                mapOf("shipping" to shippingInformation.toParamMap())
+    ): Result<Customer> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getRetrieveCustomerUrl(customerId),
+                options = requestOptions,
+                params = mapOf("shipping" to shippingInformation.toParamMap()),
             ),
-            CustomerJsonParser()
+            jsonParser = CustomerJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(
@@ -873,24 +826,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.CustomerRetrieve]
      */
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        AuthenticationException::class,
-        CardException::class
-    )
     override suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return fetchStripeModel(
-            apiRequestFactory.createGet(
-                getRetrieveCustomerUrl(customerId),
-                requestOptions
+    ): Result<Customer> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getRetrieveCustomerUrl(customerId),
+                options = requestOptions,
             ),
-            CustomerJsonParser()
+            jsonParser = CustomerJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(
@@ -1350,8 +1296,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession? {
-        return fetchStripeModel(
+    ): Result<FinancialConnectionsSession> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 url = getPaymentIntentFinancialConnectionsSessionUrl(paymentIntentId),
                 options = requestOptions,
@@ -1367,8 +1313,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         setupIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession? {
-        return fetchStripeModel(
+    ): Result<FinancialConnectionsSession> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 url = getSetupIntentFinancialConnectionsSessionUrl(setupIntentId),
                 options = requestOptions,
@@ -1407,8 +1353,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
-        return fetchStripeModel(
+    ): Result<PaymentIntent> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getAttachFinancialConnectionsSessionToPaymentIntentUrl(
                     paymentIntentId,
@@ -1433,8 +1379,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
-        return fetchStripeModel(
+    ): Result<SetupIntent> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getAttachFinancialConnectionsSessionToSetupIntentUrl(
                     setupIntentId,
@@ -1458,8 +1404,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         firstAmount: Int,
         secondAmount: Int,
         requestOptions: ApiRequest.Options
-    ): PaymentIntent? {
-        return fetchStripeModel(
+    ): Result<PaymentIntent> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getVerifyMicrodepositsOnPaymentIntentUrl(PaymentIntent.ClientSecret(clientSecret).paymentIntentId),
                 requestOptions,
@@ -1481,8 +1427,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         descriptorCode: String,
         requestOptions: ApiRequest.Options
-    ): PaymentIntent? {
-        return fetchStripeModel(
+    ): Result<PaymentIntent> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getVerifyMicrodepositsOnPaymentIntentUrl(PaymentIntent.ClientSecret(clientSecret).paymentIntentId),
                 requestOptions,
@@ -1505,8 +1451,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         firstAmount: Int,
         secondAmount: Int,
         requestOptions: ApiRequest.Options
-    ): SetupIntent? {
-        return fetchStripeModel(
+    ): Result<SetupIntent> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getVerifyMicrodepositsOnSetupIntentUrl(SetupIntent.ClientSecret(clientSecret).setupIntentId),
                 requestOptions,
@@ -1528,8 +1474,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         descriptorCode: String,
         requestOptions: ApiRequest.Options
-    ): SetupIntent? {
-        return fetchStripeModel(
+    ): Result<SetupIntent> {
+        return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getVerifyMicrodepositsOnSetupIntentUrl(SetupIntent.ClientSecret(clientSecret).setupIntentId),
                 requestOptions,
@@ -1552,8 +1498,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         locale: String,
         logoColor: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethodMessage? {
-        return fetchStripeModel(
+    ): Result<PaymentMethodMessage> {
+        return fetchStripeModelResult(
             apiRequestFactory.createGet(
                 url = "https://ppm.stripe.com/content",
                 options = requestOptions,

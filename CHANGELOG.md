@@ -2,11 +2,19 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [ADDED] Added `billingDetailsCollectionConfiguration` to configure how you want to collect billing details. See the docs [here](https://stripe.com/docs/payments/accept-a-payment?platform=android&ui=payment-sheet#billing-details-collection).
+
+## 20.22.0 - 2023-04-10
+
 ### All SDKs
 * [CHANGED][6492](https://github.com/stripe/stripe-android/pull/6492) Updated Compose to 1.4.1.
 
 ### PaymentSheet
 * [FIXED][6434](https://github.com/stripe/stripe-android/pull/6434) Fixed an issue where the `Save this card for future payments` checkbox wasn't displayed in some cases even though it should have been.
+
+### Financial Connections
+* [CHANGED][6436](https://github.com/stripe/stripe-android/pull/6436) Updated Mavericks to 3.0.2.
 
 ## 20.21.1 - 2023-03-27
 

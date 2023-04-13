@@ -6,7 +6,6 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
-import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -56,7 +55,6 @@ class PaymentSheet internal constructor(
      * [PaymentSheet] is dismissed.
      */
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         activity: ComponentActivity,
         createIntentCallback: CreateIntentCallback,
@@ -78,7 +76,6 @@ class PaymentSheet internal constructor(
      * [PaymentSheet] is dismissed.
      */
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         activity: ComponentActivity,
         createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
@@ -112,7 +109,6 @@ class PaymentSheet internal constructor(
      * [PaymentSheet] is dismissed.
      */
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         fragment: Fragment,
         createIntentCallback: CreateIntentCallback,
@@ -134,7 +130,6 @@ class PaymentSheet internal constructor(
      * [PaymentSheet] is dismissed.
      */
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         fragment: Fragment,
         createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
@@ -192,7 +187,6 @@ class PaymentSheet internal constructor(
      * @param configuration An optional [PaymentSheet] configuration.
      */
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @JvmOverloads
     fun presentWithIntentConfiguration(
         intentConfiguration: IntentConfiguration,
@@ -252,9 +246,8 @@ class PaymentSheet internal constructor(
      * determine the payment method types using your [Stripe Dashboard settings](https://dashboard.stripe.com/settings/payment_methods).
      */
     @ExperimentalPaymentSheetDecouplingApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    class IntentConfiguration(
+    class IntentConfiguration @JvmOverloads constructor(
         val mode: Mode,
         val paymentMethodTypes: List<String> = emptyList(),
     ) : Parcelable {
@@ -269,7 +262,6 @@ class PaymentSheet internal constructor(
          * Contains information about the desired payment or setup flow.
          */
         @ExperimentalPaymentSheetDecouplingApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         sealed class Mode : Parcelable {
 
             internal abstract val setupFutureUse: SetupFutureUse?
@@ -289,9 +281,8 @@ class PaymentSheet internal constructor(
              * account. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method) for more info.
              */
             @ExperimentalPaymentSheetDecouplingApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
-            class Payment(
+            class Payment @JvmOverloads constructor(
                 val amount: Long,
                 val currency: String,
                 override val setupFutureUse: SetupFutureUse? = null,
@@ -307,9 +298,8 @@ class PaymentSheet internal constructor(
              * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
              */
             @ExperimentalPaymentSheetDecouplingApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
-            class Setup(
+            class Setup @JvmOverloads constructor(
                 val currency: String?,
                 override val setupFutureUse: SetupFutureUse = SetupFutureUse.OffSession,
             ) : Mode() {
@@ -324,7 +314,6 @@ class PaymentSheet internal constructor(
          * method. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
          */
         @ExperimentalPaymentSheetDecouplingApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class SetupFutureUse {
 
             /**
@@ -345,7 +334,6 @@ class PaymentSheet internal constructor(
          * See [docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method).
          */
         @ExperimentalPaymentSheetDecouplingApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class CaptureMethod {
 
             /**
@@ -365,9 +353,7 @@ class PaymentSheet internal constructor(
 
     /** Configuration for [PaymentSheet] **/
     @Parcelize
-    data class Configuration @JvmOverloads
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    constructor(
+    data class Configuration @JvmOverloads constructor(
         /**
          * Your customer-facing business name.
          *
@@ -405,6 +391,9 @@ class PaymentSheet internal constructor(
          * The billing information for the customer.
          *
          * If set, PaymentSheet will pre-populate the form fields with the values provided.
+         * If `billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod` is `true`,
+         * these values will be attached to the payment method even if they are not collected by
+         * the PaymentSheet UI.
          */
         val defaultBillingDetails: BillingDetails? = null,
 
@@ -456,44 +445,18 @@ class PaymentSheet internal constructor(
         val primaryButtonLabel: String? = null,
 
         /**
-         * 🚧 Under construction.
          * Describes how billing details should be collected.
          * All values default to `automatic`.
          * If `never` is used for a required field for the Payment Method used during checkout,
          * you **must** provide an appropriate value as part of [defaultBillingDetails].
          */
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration(),
     ) : Parcelable {
-
-        @JvmOverloads constructor(
-            merchantDisplayName: String,
-            customer: CustomerConfiguration? = null,
-            googlePay: GooglePayConfiguration? = null,
-            primaryButtonColor: ColorStateList? = null,
-            defaultBillingDetails: BillingDetails? = null,
-            shippingDetails: AddressDetails? = null,
-            allowsDelayedPaymentMethods: Boolean = false,
-            allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
-            appearance: Appearance = Appearance(),
-            primaryButtonLabel: String? = null,
-        ) : this(
-            merchantDisplayName = merchantDisplayName,
-            customer = customer,
-            googlePay = googlePay,
-            primaryButtonColor = primaryButtonColor,
-            defaultBillingDetails = defaultBillingDetails,
-            shippingDetails = shippingDetails,
-            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
-            appearance = appearance,
-            primaryButtonLabel = primaryButtonLabel,
-            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
-        )
-
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
+        @Suppress("TooManyFunctions")
         class Builder(
             private var merchantDisplayName: String
         ) {
@@ -505,6 +468,8 @@ class PaymentSheet internal constructor(
             private var allowsDelayedPaymentMethods: Boolean = false
             private var allowsPaymentMethodsRequiringShippingAddress: Boolean = false
             private var appearance: Appearance = Appearance()
+            private var billingDetailsCollectionConfiguration =
+                BillingDetailsCollectionConfiguration()
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -544,6 +509,12 @@ class PaymentSheet internal constructor(
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
 
+            fun billingDetailsCollectionConfiguration(
+                billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+            ) = apply {
+                this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
+            }
+
             fun build() = Configuration(
                 merchantDisplayName,
                 customer,
@@ -553,7 +524,8 @@ class PaymentSheet internal constructor(
                 shippingDetails,
                 allowsDelayedPaymentMethods,
                 allowsPaymentMethodsRequiringShippingAddress,
-                appearance
+                appearance,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             )
         }
     }
@@ -1076,7 +1048,6 @@ class PaymentSheet internal constructor(
          * @param callback called with the result of configuring the FlowController.
          */
         @ExperimentalPaymentSheetDecouplingApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun configureWithIntentConfiguration(
             intentConfiguration: IntentConfiguration,
             configuration: Configuration? = null,
@@ -1154,7 +1125,6 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @ExperimentalPaymentSheetDecouplingApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
             fun create(
                 activity: ComponentActivity,
@@ -1184,7 +1154,6 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @ExperimentalPaymentSheetDecouplingApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
             fun create(
                 activity: ComponentActivity,
@@ -1234,7 +1203,6 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @ExperimentalPaymentSheetDecouplingApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
             fun create(
                 fragment: Fragment,
@@ -1264,7 +1232,6 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @ExperimentalPaymentSheetDecouplingApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
             fun create(
                 fragment: Fragment,

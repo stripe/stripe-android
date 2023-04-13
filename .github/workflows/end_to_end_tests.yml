@@ -28,5 +28,5 @@ jobs:
           ./scripts/notify_failure_endpoint.rb \
           ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
           ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
-          ${{ github.run_id }} \
+          "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \
           RUN_MOBILESDK

@@ -19,7 +19,8 @@ class PaymentSheetEventTest {
     fun `Init event with full config should return expected toString()`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isServerSideConfirmation = false,
         )
         assertThat(
             event.eventName
@@ -35,7 +36,8 @@ class PaymentSheetEventTest {
     fun `Init event with minimum config should return expected toString()`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            configuration = PaymentSheetFixtures.CONFIG_MINIMUM
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
+            isServerSideConfirmation = false,
         )
         assertThat(
             event.eventName
@@ -358,18 +360,28 @@ class PaymentSheetEventTest {
             "primary_button" to expectedPrimaryButton,
             "usage" to false
         )
+        val expectedBillingDetailsCollection = mapOf(
+            "attach_defaults" to false,
+            "name" to "Automatic",
+            "email" to "Automatic",
+            "phone" to "Automatic",
+            "address" to "Automatic",
+        )
         val expectedConfigMap = mapOf(
             "customer" to false,
             "googlepay" to false,
             "primary_button_color" to false,
             "default_billing_details" to false,
             "allows_delayed_payment_methods" to false,
-            "appearance" to expectedAppearance
+            "appearance" to expectedAppearance,
+            "billing_details_collection_configuration" to expectedBillingDetailsCollection,
+            "is_server_side_confirmation" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                configuration = PaymentSheetFixtures.CONFIG_MINIMUM
+                configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
+                isServerSideConfirmation = false,
             ).additionalParams
         ).isEqualTo(
             mapOf(
@@ -398,18 +410,28 @@ class PaymentSheetEventTest {
             "primary_button" to expectedPrimaryButton,
             "usage" to true
         )
+        val expectedBillingDetailsCollection = mapOf(
+            "attach_defaults" to true,
+            "name" to "Always",
+            "email" to "Always",
+            "phone" to "Always",
+            "address" to "Full",
+        )
         val expectedConfigMap = mapOf(
             "customer" to true,
             "googlepay" to true,
             "primary_button_color" to true,
             "default_billing_details" to true,
             "allows_delayed_payment_methods" to true,
-            "appearance" to expectedAppearance
+            "appearance" to expectedAppearance,
+            "billing_details_collection_configuration" to expectedBillingDetailsCollection,
+            "is_server_side_confirmation" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
+                configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
+                isServerSideConfirmation = false,
             ).additionalParams
         ).isEqualTo(
             mapOf(

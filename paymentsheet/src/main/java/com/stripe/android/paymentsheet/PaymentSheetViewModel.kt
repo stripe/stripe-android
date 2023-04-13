@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
@@ -75,6 +76,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
+@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     application: Application,
@@ -197,7 +199,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-        eventReporter.onInit(config)
+        val isServerSideConfirmation =
+            args.initializationMode is PaymentSheet.InitializationMode.DeferredIntent &&
+                IntentConfirmationInterceptor.createIntentCallback is CreateIntentCallbackForServerSideConfirmation
+
+        eventReporter.onInit(
+            configuration = config,
+            isServerSideConfirmation = isServerSideConfirmation,
+        )
 
         viewModelScope.launch {
             loadPaymentSheetState()

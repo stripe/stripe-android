@@ -194,9 +194,9 @@ internal class USBankAccountFormFragment : Fragment() {
                     .collect { saved ->
                         updateMandateText(
                             if (saved) {
-                                getString(
-                                    R.string.stripe_paymentsheet_ach_save_mandate,
-                                    viewModel.formattedMerchantName()
+                                ACHText.getSaveMandateText(
+                                    context,
+                                    viewModel.formattedMerchantName(),
                                 )
                             } else {
                                 ACHText.getContinueMandateText(requireContext())

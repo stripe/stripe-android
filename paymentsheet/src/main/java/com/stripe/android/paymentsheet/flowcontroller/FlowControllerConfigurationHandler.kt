@@ -1,7 +1,11 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -26,6 +30,14 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 ) {
 
     private val job: AtomicReference<Job?> = AtomicReference(null)
+
+    private var didLastConfigurationFail: Boolean = false
+
+    val isConfigured: Boolean
+        get() {
+            val isConfiguring = job.get()?.let { !it.isCompleted } ?: false
+            return !isConfiguring && !didLastConfigurationFail
+        }
 
     fun configure(
         scope: CoroutineScope,
@@ -52,6 +64,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     ) {
         suspend fun onConfigured(error: Throwable? = null) {
             withContext(uiContext) {
+                didLastConfigurationFail = error != null
                 resetJob()
                 callback.onConfigured(success = error == null, error = error)
             }
@@ -76,7 +89,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         when (val result = paymentSheetLoader.load(initializationMode, configuration)) {
             is PaymentSheetLoader.Result.Success -> {
                 viewModel.previousConfigureRequest = configureRequest
-                onInitSuccess(result.state)
+                onInitSuccess(result.state, configureRequest)
                 onConfigured()
             }
             is PaymentSheetLoader.Result.Failure -> {
@@ -85,8 +98,18 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         }
     }
 
-    private fun onInitSuccess(state: PaymentSheetState.Full) {
-        eventReporter.onInit(state.config)
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
+    private fun onInitSuccess(
+        state: PaymentSheetState.Full,
+        configureRequest: ConfigureRequest,
+    ) {
+        val isServerSideConfirmation = configureRequest.initializationMode is DeferredIntent &&
+            IntentConfirmationInterceptor.createIntentCallback is CreateIntentCallbackForServerSideConfirmation
+
+        eventReporter.onInit(
+            configuration = state.config,
+            isServerSideConfirmation = isServerSideConfirmation,
+        )
 
         viewModel.paymentSelection = paymentSelectionUpdater(
             currentSelection = viewModel.paymentSelection,

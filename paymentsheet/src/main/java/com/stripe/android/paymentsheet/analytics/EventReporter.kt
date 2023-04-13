@@ -4,7 +4,11 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal interface EventReporter {
-    fun onInit(configuration: PaymentSheet.Configuration?)
+
+    fun onInit(
+        configuration: PaymentSheet.Configuration?,
+        isServerSideConfirmation: Boolean,
+    )
 
     fun onDismiss()
 

@@ -11,6 +11,17 @@ import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec.PlaceholderField
+import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.PhoneNumberElement
+import com.stripe.android.uicore.elements.SectionElement
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.map
 
 internal object BillingDetailsHelpers {
     /**
@@ -95,5 +106,46 @@ internal object BillingDetailsHelpers {
                 configuration.address == AddressCollectionMode.Full
             }
         else -> null
+    }
+
+    internal suspend fun connectBillingDetailsFields(elementsFlow: Flow<List<FormElement>>) {
+        var phoneNumberElement: PhoneNumberElement? = null
+
+        elementsFlow.map { elementsList ->
+            elementsList
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<PhoneNumberElement>()
+                .firstOrNull()
+        }.collect {
+            phoneNumberElement = it
+        }
+
+        elementsFlow.flatMapConcat { elementsList ->
+            // Look for a standalone CountryElement.
+            // Note that this should be done first, because AddressElement always has a
+            // CountryElement, but it might be hidden.
+            var countryElement = elementsList
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<CountryElement>()
+                .firstOrNull()
+
+            // If not found, look for one inside an AddressElement.
+            if (countryElement == null) {
+                countryElement = elementsList
+                    .filterIsInstance<SectionElement>()
+                    .flatMap { it.fields }
+                    .filterIsInstance<AddressElement>()
+                    .firstOrNull()
+                    ?.countryElement
+            }
+
+            countryElement?.controller?.rawFieldValue ?: emptyFlow()
+        }.collect {
+            it?.let {
+                phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
+            }
+        }
     }
 }

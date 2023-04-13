@@ -21,11 +21,15 @@ internal class DefaultEventReporter @Inject internal constructor(
 ) : EventReporter {
     private var paymentSheetShownMillis: Long? = null
 
-    override fun onInit(configuration: PaymentSheet.Configuration?) {
+    override fun onInit(
+        configuration: PaymentSheet.Configuration?,
+        isServerSideConfirmation: Boolean,
+    ) {
         fireEvent(
             PaymentSheetEvent.Init(
                 mode = mode,
-                configuration = configuration
+                configuration = configuration,
+                isServerSideConfirmation = isServerSideConfirmation,
             )
         )
     }

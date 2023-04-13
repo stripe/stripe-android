@@ -7,19 +7,20 @@ require 'base64'
 
 env_sdk_failure_notif_endpoint = ARGV[0]
 env_sdk_failure_notif_endpoint_hmac_key = ARGV[1]
-github_run_id = ARGV[2]
-jira_project = ARGV[3]
-
 
 if !env_sdk_failure_notif_endpoint || !env_sdk_failure_notif_endpoint_hmac_key
   puts "SDK_FAILURE_NOTIFICATION_ENDPOINT` or `SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY` not found"
   exit 102
 end
 
-if !github_run_id
-  puts "github_run_id not found"
+failing_run_url = ARGV[2]
+
+if !failing_run_url
+  puts "failing_run_url not found"
   exit 102
 end
+
+jira_project = ARGV[3]
 
 if !jira_project
   puts "jira_project not found"
@@ -39,7 +40,7 @@ params = {
 }
 
 params[:summary] = "stripe-android E2E test failed"
-params[:description] = "Please ACK this ticket and investigate the failure. See https://github.com/stripe/stripe-android/actions/runs/#{github_run_id}"
+params[:description] = "Please ACK this ticket and investigate the failure. See %s" % failing_run_url
 params[:components] = %w[Android]
 
 req.body = params.to_json

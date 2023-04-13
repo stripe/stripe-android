@@ -224,14 +224,16 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     override fun presentPaymentOptions() {
-        val state = runCatching {
-            requireNotNull(viewModel.state)
-        }.getOrElse {
-            error(
-                "FlowController must be successfully initialized using " +
-                    "configureWithPaymentIntent() or configureWithSetupIntent() " +
-                    "before calling presentPaymentOptions()"
-            )
+        val state = viewModel.state ?: error(
+            "FlowController must be successfully initialized " +
+                "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
+                "configureWithIntentConfiguration() before calling presentPaymentOptions()."
+        )
+
+        if (!configurationHandler.isConfigured) {
+            // For now, we fail silently in these situations. In the future, we should either log
+            // or emit an event in a to-be-added event listener.
+            return
         }
 
         paymentOptionActivityLauncher.launch(
@@ -246,21 +248,29 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     override fun confirm() {
-        val state = runCatching {
-            requireNotNull(viewModel.state)
-        }.getOrElse {
-            error(
-                "FlowController must be successfully initialized using " +
-                    "configureWithPaymentIntent() or configureWithSetupIntent() " +
-                    "before calling confirm()"
+        val state = viewModel.state ?: error(
+            "FlowController must be successfully initialized " +
+                "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
+                "configureWithIntentConfiguration() before calling confirm()."
+        )
+
+        if (!configurationHandler.isConfigured) {
+            val error = IllegalStateException(
+                "FlowController.confirm() can only be called if the most recent call " +
+                    "to configureWithPaymentIntent(), configureWithSetupIntent() or " +
+                    "configureWithIntentConfiguration() has completed successfully."
             )
+            onPaymentResult(PaymentResult.Failed(error))
+            return
         }
 
         when (val paymentSelection = viewModel.paymentSelection) {
-            PaymentSelection.GooglePay -> launchGooglePay(state)
-            PaymentSelection.Link,
+            is PaymentSelection.GooglePay -> launchGooglePay(state)
+            is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
-            else -> confirmPaymentSelection(paymentSelection, state)
+            is PaymentSelection.New,
+            is PaymentSelection.Saved,
+            null -> confirmPaymentSelection(paymentSelection, state)
         }
     }
 

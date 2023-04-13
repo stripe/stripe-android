@@ -1676,14 +1676,13 @@ class Stripe internal constructor(
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
-    @JvmOverloads
     fun verifyPaymentIntentWithMicrodeposits(
         clientSecret: String,
         firstAmount: Int,
         secondAmount: Int,
         callback: ApiResultCallback<PaymentIntent>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.verifyPaymentIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 firstAmount = firstAmount,
@@ -1710,13 +1709,12 @@ class Stripe internal constructor(
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
-    @JvmOverloads
     fun verifyPaymentIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
         callback: ApiResultCallback<PaymentIntent>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.verifyPaymentIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 descriptorCode = descriptorCode,
@@ -1744,14 +1742,13 @@ class Stripe internal constructor(
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
-    @JvmOverloads
     fun verifySetupIntentWithMicrodeposits(
         clientSecret: String,
         firstAmount: Int,
         secondAmount: Int,
         callback: ApiResultCallback<SetupIntent>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.verifySetupIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 firstAmount = firstAmount,
@@ -1778,13 +1775,12 @@ class Stripe internal constructor(
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
-    @JvmOverloads
     fun verifySetupIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
         callback: ApiResultCallback<SetupIntent>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.verifySetupIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 descriptorCode = descriptorCode,
@@ -1845,6 +1841,16 @@ class Stripe internal constructor(
             val result = runCatching {
                 requireNotNull(apiMethod())
             }
+            dispatchResult(result, callback)
+        }
+    }
+
+    private fun <T : StripeModel> executeAsyncForResult(
+        callback: ApiResultCallback<T>,
+        apiMethod: suspend () -> Result<T>,
+    ) {
+        CoroutineScope(workContext).launch {
+            val result = apiMethod()
             dispatchResult(result, callback)
         }
     }

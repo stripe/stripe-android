@@ -1,7 +1,6 @@
 package com.stripe.android.networking
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.cards.Bin
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -189,13 +188,6 @@ abstract class StripeRepository {
         options: ApiRequest.Options
     ): Token?
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     internal abstract suspend fun addCustomerSource(
         customerId: String,
         publishableKey: String,
@@ -203,77 +195,41 @@ abstract class StripeRepository {
         sourceId: String,
         @Source.SourceType sourceType: String,
         requestOptions: ApiRequest.Options
-    ): Source?
+    ): Result<Source>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     internal abstract suspend fun deleteCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
         sourceId: String,
         requestOptions: ApiRequest.Options
-    ): Source?
+    ): Result<Source>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @VisibleForTesting
     abstract suspend fun attachPaymentMethod(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethod?
+    ): Result<PaymentMethod>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun detachPaymentMethod(
         publishableKey: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethod?
+    ): Result<PaymentMethod>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
-    ): List<PaymentMethod>
+    ): Result<List<PaymentMethod>>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     internal abstract suspend fun setDefaultCustomerSource(
         customerId: String,
         publishableKey: String,
@@ -281,36 +237,22 @@ abstract class StripeRepository {
         sourceId: String,
         @Source.SourceType sourceType: String,
         requestOptions: ApiRequest.Options
-    ): Customer?
+    ): Result<Customer>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     internal abstract suspend fun setCustomerShippingInfo(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
         shippingInformation: ShippingInformation,
         requestOptions: ApiRequest.Options
-    ): Customer?
+    ): Result<Customer>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
-    ): Customer?
+    ): Result<Customer>
 
     @Throws(
         AuthenticationException::class,
@@ -441,13 +383,13 @@ abstract class StripeRepository {
         paymentIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession?
+    ): Result<FinancialConnectionsSession>
 
     internal abstract suspend fun createSetupIntentFinancialConnectionsSession(
         setupIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession?
+    ): Result<FinancialConnectionsSession>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun attachFinancialConnectionsSessionToPaymentIntent(
@@ -456,7 +398,7 @@ abstract class StripeRepository {
         financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent?
+    ): Result<PaymentIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun attachFinancialConnectionsSessionToSetupIntent(
@@ -465,7 +407,7 @@ abstract class StripeRepository {
         financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent?
+    ): Result<SetupIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun verifyPaymentIntentWithMicrodeposits(
@@ -473,14 +415,14 @@ abstract class StripeRepository {
         firstAmount: Int,
         secondAmount: Int,
         requestOptions: ApiRequest.Options
-    ): PaymentIntent?
+    ): Result<PaymentIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun verifyPaymentIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
         requestOptions: ApiRequest.Options
-    ): PaymentIntent?
+    ): Result<PaymentIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun verifySetupIntentWithMicrodeposits(
@@ -488,14 +430,14 @@ abstract class StripeRepository {
         firstAmount: Int,
         secondAmount: Int,
         requestOptions: ApiRequest.Options
-    ): SetupIntent?
+    ): Result<SetupIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun verifySetupIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
         requestOptions: ApiRequest.Options
-    ): SetupIntent?
+    ): Result<SetupIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun retrievePaymentMethodMessage(
@@ -506,7 +448,7 @@ abstract class StripeRepository {
         locale: String,
         logoColor: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethodMessage?
+    ): Result<PaymentMethodMessage>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun retrieveElementsSession(
