@@ -3,17 +3,13 @@
 now=$(date +%F_%H-%M-%S)
 echo $now
 
-# Install ffmpeg
-sudo apt-get update
-sudo apt-get install ffmpeg
-
 # Install Maestro
 export MAESTRO_VERSION=1.21.3; curl -Ls "https://get.maestro.mobile.dev" | bash
 export PATH="$PATH":"$HOME/.maestro/bin"
 maestro -v
 
 # Compile and install APK.
-#./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:installDebug
+./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:installDebug
 
 # Start screen record (adb screenrecord has a 3 min limit, for now take consequent recordings.
 adb shell "screenrecord /sdcard/$now-1.mp4; screenrecord /sdcard/$now-2.mp4; screenrecord /sdcard/$now-3.mp4; screenrecord /sdcard/$now-4.mp4" &
