@@ -16,6 +16,9 @@
 ### Financial Connections
 * [CHANGED][6436](https://github.com/stripe/stripe-android/pull/6436) Updated Mavericks to 3.0.2.
 
+### Identity
+* [ADDED][6536](https://github.com/stripe/stripe-android/pull/6536) Added test mode for the SDK.
+
 ## 20.21.1 - 2023-03-27
 
 ### PaymentSheet
