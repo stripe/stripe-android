@@ -13,15 +13,20 @@ maestro -v
 
 # Start screen record (adb screenrecord has a 3 min limit, for now take consequent recordings.
 adb shell "screenrecord /sdcard/$now-1.mp4; screenrecord /sdcard/$now-2.mp4; screenrecord /sdcard/$now-3.mp4; screenrecord /sdcard/$now-4.mp4" &
+
+# Store the process ID
 childpid=$!
 
 # Clear and start collecting logs
 maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections/
 result=$?
 
-# Stop video recording and pull record parts.
+# Wait for the recording process to finish
 kill -2 "$childpid"
 wait "$childpid"
+
+# Sleep for a short duration to allow the process to finalize the video file
+sleep 3
 
 mkdir -p /tmp/test_results
 cd /tmp/test_results
