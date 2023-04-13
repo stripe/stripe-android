@@ -11,7 +11,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class Init(
         private val mode: EventReporter.Mode,
-        private val configuration: PaymentSheet.Configuration?
+        private val configuration: PaymentSheet.Configuration?,
+        private val isServerSideConfirmation: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String
             get() {
@@ -101,6 +102,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_APPEARANCE to appearanceConfigMap,
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
                         billingDetailsCollectionConfigMap,
+                    FIELD_IS_SERVER_SIDE_CONFIRMATION to isServerSideConfirmation,
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -233,6 +235,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_PRIMARY_BUTTON = "primary_button"
         const val FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION =
             "billing_details_collection_configuration"
+        const val FIELD_IS_SERVER_SIDE_CONFIRMATION = "is_server_side_confirmation"
         const val FIELD_ATTACH_DEFAULTS = "attach_defaults"
         const val FIELD_COLLECT_NAME = "name"
         const val FIELD_COLLECT_EMAIL = "email"

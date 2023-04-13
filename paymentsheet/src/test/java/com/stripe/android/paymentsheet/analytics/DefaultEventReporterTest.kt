@@ -45,7 +45,10 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onInit() should fire analytics request with expected event value`() {
-        completeEventReporter.onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+        completeEventReporter.onInit(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isServerSideConfirmation = false,
+        )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_init_customer_googlepay" &&

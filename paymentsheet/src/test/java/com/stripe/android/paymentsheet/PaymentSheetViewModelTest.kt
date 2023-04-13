@@ -8,7 +8,10 @@ import app.cash.turbine.testIn
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.CreateIntentCallback
+import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -50,6 +53,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.testing.FakeIntentConfirmationInterceptor
+import com.stripe.android.testing.IntentConfirmationInterceptorTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -65,6 +69,7 @@ import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
@@ -81,6 +86,9 @@ import kotlin.time.Duration
 internal class PaymentSheetViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -133,7 +141,10 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `init should fire analytics event`() {
         createViewModel()
-        verify(eventReporter).onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+        verify(eventReporter).onInit(
+            configuration = eq(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY),
+            isServerSideConfirmation = any(),
+        )
     }
 
     @Test
@@ -1264,6 +1275,47 @@ internal class PaymentSheetViewModelTest {
             )
             assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage(error)))
         }
+    }
+
+    @Test
+    fun `Sends correct analytics event when using normal intent`() = runTest {
+        createViewModel()
+
+        verify(eventReporter).onInit(
+            configuration = anyOrNull(),
+            isServerSideConfirmation = eq(false),
+        )
+    }
+
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
+    @Test
+    fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
+        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
+            throw AssertionError("Not expected to be called")
+        }
+
+        createViewModelForDeferredIntent()
+
+        verify(eventReporter).onInit(
+            configuration = anyOrNull(),
+            isServerSideConfirmation = eq(false),
+        )
+    }
+
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
+    @Test
+    fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
+        IntentConfirmationInterceptor.createIntentCallback =
+            CreateIntentCallbackForServerSideConfirmation { _, _ ->
+                throw AssertionError("Not expected to be called")
+            }
+
+        createViewModelForDeferredIntent()
+
+        verify(eventReporter).onInit(
+            configuration = anyOrNull(),
+            isServerSideConfirmation = eq(true),
+        )
     }
 
     private fun createViewModel(
