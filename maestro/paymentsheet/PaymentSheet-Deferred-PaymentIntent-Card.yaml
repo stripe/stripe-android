@@ -1,0 +1,18 @@
+appId: com.stripe.android.paymentsheet.example
+---
+- launchApp
+# Android specific: Navigate to example
+- tapOn: "PaymentSheet with server-side confirmation"
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn: "Buy"
+# ENTER CARD DETAILS
+- extendedWaitUntil:
+    visible: "Card"
+    timeout: 60000
+- runFlow:
+    file: ./card/subflow-card-details.yaml
+- scroll
+- tapOn: "Pay.*"
+- assertVisible: ".*Success.*"
+- tapOn: "Finish"
