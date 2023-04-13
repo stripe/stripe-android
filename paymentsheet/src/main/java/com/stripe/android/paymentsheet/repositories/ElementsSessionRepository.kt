@@ -81,36 +81,28 @@ internal sealed class ElementsSessionRepository {
         ): Result<ElementsSession> = withContext(workContext) {
             when (params) {
                 is ElementsSessionParams.PaymentIntentType -> {
-                    runCatching {
-                        requireNotNull(
-                            stripeRepository.retrievePaymentIntent(
-                                clientSecret = params.clientSecret,
-                                options = requestOptions,
-                                expandFields = listOf("payment_method")
-                            )
-                        )
-                    }.map {
+                    stripeRepository.retrievePaymentIntent(
+                        clientSecret = params.clientSecret,
+                        options = requestOptions,
+                        expandFields = listOf("payment_method"),
+                    ).map { stripeIntent ->
                         ElementsSession(
                             linkSettings = null,
                             paymentMethodSpecs = null,
-                            stripeIntent = it,
+                            stripeIntent = stripeIntent,
                         )
                     }
                 }
                 is ElementsSessionParams.SetupIntentType -> {
-                    runCatching {
-                        requireNotNull(
-                            stripeRepository.retrieveSetupIntent(
-                                clientSecret = params.clientSecret,
-                                options = requestOptions,
-                                expandFields = listOf("payment_method")
-                            )
-                        )
-                    }.map {
+                    stripeRepository.retrieveSetupIntent(
+                        clientSecret = params.clientSecret,
+                        options = requestOptions,
+                        expandFields = listOf("payment_method"),
+                    ).map { stripeIntent ->
                         ElementsSession(
                             linkSettings = null,
                             paymentMethodSpecs = null,
-                            stripeIntent = it,
+                            stripeIntent = stripeIntent,
                         )
                     }
                 }

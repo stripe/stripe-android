@@ -60,15 +60,15 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun refreshPaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun cancelPaymentIntentSource(
@@ -91,8 +91,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
-        return null
+    ): Result<SetupIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun cancelSetupIntentSource(

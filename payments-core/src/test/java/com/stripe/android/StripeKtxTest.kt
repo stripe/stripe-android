@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.content.Intent
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.model.StripeFile
@@ -265,13 +266,6 @@ internal class StripeKtxTest {
         )
 
     @Test
-    fun `When repository returns null then retrievePaymentIntent should throw InvalidRequestException`(): Unit =
-        `Given repository returns null when calling retrieveAPI with String param then throws InvalidRequestException`(
-            mockApiRepository::retrievePaymentIntent,
-            stripe::retrievePaymentIntent
-        )
-
-    @Test
     fun `When repository returns correct value then retrieveSetupIntent should Succeed`(): Unit =
         `Given repository returns non-empty value when calling retrieveAPI with String param then returns correct result`(
             mockApiRepository::retrieveSetupIntent,
@@ -281,13 +275,6 @@ internal class StripeKtxTest {
     @Test
     fun `When repository throws exception then retrieveSetupIntent should throw same exception`(): Unit =
         `Given repository throws exception when calling retrieveAPI with String param then throws same exception`(
-            mockApiRepository::retrieveSetupIntent,
-            stripe::retrieveSetupIntent
-        )
-
-    @Test
-    fun `When repository returns null then retrieveSetupIntent should throw InvalidRequestException`(): Unit =
-        `Given repository returns null when calling retrieveAPI with String param then throws InvalidRequestException`(
             mockApiRepository::retrieveSetupIntent,
             stripe::retrieveSetupIntent
         )
@@ -549,7 +536,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `Verify retrievePaymentIntent passes expand fields on to repository`(): Unit = runTest {
-        whenever(mockApiRepository.retrievePaymentIntent(isA(), isA(), isA())).doReturn(mock())
+        whenever(mockApiRepository.retrievePaymentIntent(isA(), isA(), isA())).doReturn(Result.success(mock()))
 
         val expandFields = listOf("payment_method")
 
@@ -567,7 +554,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `Verify retrieveSetupIntent passes expand fields on to repository`(): Unit = runTest {
-        whenever(mockApiRepository.retrieveSetupIntent(isA(), isA(), isA())).doReturn(mock())
+        whenever(mockApiRepository.retrieveSetupIntent(isA(), isA(), isA())).doReturn(Result.success(mock()))
         val expandFields = listOf("payment_method")
 
         stripe.retrieveSetupIntent(
@@ -807,14 +794,14 @@ internal class StripeKtxTest {
 
     private inline fun <reified ApiObject : StripeModel>
     `Given repository returns non-empty value when calling retrieveAPI with String param then returns correct result`(
-        crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> ApiObject?,
+        crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> Result<ApiObject>,
         crossinline retrieveApiInvocationBlock: suspend (String, String?) -> ApiObject
     ): Unit = runTest {
         val expectedApiObj = mock<ApiObject>()
 
         whenever(
             repositoryBlock(any(), any(), any())
-        ).thenReturn(expectedApiObj)
+        ).thenReturn(Result.success(expectedApiObj))
 
         val actualObj = retrieveApiInvocationBlock(
             "param1",
@@ -826,31 +813,14 @@ internal class StripeKtxTest {
 
     private fun
     `Given repository throws exception when calling retrieveAPI with String param then throws same exception`(
-        repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> StripeModel?,
+        repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> Result<StripeModel>,
         retrieveApiInvocationBlock: suspend (String, String?) -> StripeModel
     ): Unit = runTest {
         whenever(
             repositoryBlock(any(), any(), any())
-        ).thenThrow(mock<AuthenticationException>())
+        ).thenReturn(Result.failure(AuthenticationException(stripeError = StripeError())))
 
         assertFailsWith<AuthenticationException> {
-            retrieveApiInvocationBlock(
-                "param1",
-                TEST_STRIPE_ACCOUNT_ID
-            )
-        }
-    }
-
-    private inline fun <reified ApiObject : StripeModel>
-    `Given repository returns null when calling retrieveAPI with String param then throws InvalidRequestException`(
-        crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> ApiObject?,
-        crossinline retrieveApiInvocationBlock: suspend (String, String?) -> ApiObject
-    ): Unit = runTest {
-        whenever(
-            repositoryBlock(any(), any(), any())
-        ).thenReturn(null)
-
-        assertFailsWith<InvalidRequestException>("Failed to parse ${ApiObject::class.java.simpleName}.") {
             retrieveApiInvocationBlock(
                 "param1",
                 TEST_STRIPE_ACCOUNT_ID
