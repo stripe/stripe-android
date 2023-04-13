@@ -37,7 +37,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
@@ -200,8 +199,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-        val isServerSideConfirmation = args.initializationMode is DeferredIntent &&
-            IntentConfirmationInterceptor.createIntentCallback is CreateIntentCallbackForServerSideConfirmation
+        val isServerSideConfirmation =
+            args.initializationMode is PaymentSheet.InitializationMode.DeferredIntent &&
+                IntentConfirmationInterceptor.createIntentCallback is CreateIntentCallbackForServerSideConfirmation
 
         eventReporter.onInit(
             configuration = config,
@@ -640,7 +640,7 @@ private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
     get() = when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> true
         is PaymentSheet.InitializationMode.SetupIntent -> false
-        is DeferredIntent -> {
+        is PaymentSheet.InitializationMode.DeferredIntent -> {
             intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
         }
     }
