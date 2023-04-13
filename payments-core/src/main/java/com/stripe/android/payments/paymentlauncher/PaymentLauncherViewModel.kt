@@ -73,7 +73,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
      * confirm the same [StripeIntent] again.
      */
     private val hasStarted: Boolean
-        get() = savedStateHandle.get(KEY_HAS_STARTED) ?: false
+        get() = savedStateHandle[KEY_HAS_STARTED] ?: false
 
     /**
      * [PaymentResult] live data to be observed.
@@ -100,18 +100,17 @@ internal class PaymentLauncherViewModel @Inject constructor(
     ) {
         if (hasStarted) return
         viewModelScope.launch {
-            savedStateHandle.set(KEY_HAS_STARTED, true)
+            savedStateHandle[KEY_HAS_STARTED] = true
             logReturnUrl(confirmStripeIntentParams.returnUrl)
-            val returnUrl =
-                if (isInstantApp) {
-                    confirmStripeIntentParams.returnUrl
-                } else {
-                    confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
-                        ?: defaultReturnUrl.value
-                }
-            runCatching {
-                confirmIntent(confirmStripeIntentParams, returnUrl)
-            }.fold(
+
+            val returnUrl = if (isInstantApp) {
+                confirmStripeIntentParams.returnUrl
+            } else {
+                confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
+                    ?: defaultReturnUrl.value
+            }
+
+            confirmIntent(confirmStripeIntentParams, returnUrl).fold(
                 onSuccess = { intent ->
                     intent.nextActionData?.let {
                         if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
@@ -140,31 +139,29 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private suspend fun confirmIntent(
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         returnUrl: String?
-    ): StripeIntent =
-        confirmStripeIntentParams.also {
+    ): Result<StripeIntent> {
+        val decoratedParams = confirmStripeIntentParams.also {
             it.returnUrl = returnUrl
-        }.withShouldUseStripeSdk(shouldUseStripeSdk = true).let { decoratedParams ->
-            requireNotNull(
-                when (decoratedParams) {
-                    is ConfirmPaymentIntentParams -> {
-                        stripeApiRepository.confirmPaymentIntent(
-                            decoratedParams,
-                            apiRequestOptionsProvider.get(),
-                            expandFields = EXPAND_PAYMENT_METHOD
-                        )
-                    }
-                    is ConfirmSetupIntentParams -> {
-                        stripeApiRepository.confirmSetupIntent(
-                            decoratedParams,
-                            apiRequestOptionsProvider.get(),
-                            expandFields = EXPAND_PAYMENT_METHOD
-                        )
-                    }
-                }
-            ) {
-                REQUIRED_ERROR
+        }.withShouldUseStripeSdk(shouldUseStripeSdk = true)
+
+        return when (decoratedParams) {
+            is ConfirmPaymentIntentParams -> {
+                stripeApiRepository.confirmPaymentIntent(
+                    decoratedParams,
+                    apiRequestOptionsProvider.get(),
+                    expandFields = EXPAND_PAYMENT_METHOD
+                )
+            }
+
+            is ConfirmSetupIntentParams -> {
+                stripeApiRepository.confirmSetupIntent(
+                    decoratedParams,
+                    apiRequestOptionsProvider.get(),
+                    expandFields = EXPAND_PAYMENT_METHOD
+                )
             }
         }
+    }
 
     /**
      * Fetches a [StripeIntent] and handles its next action.
@@ -172,15 +169,12 @@ internal class PaymentLauncherViewModel @Inject constructor(
     internal fun handleNextActionForStripeIntent(clientSecret: String, host: AuthActivityStarterHost) {
         if (hasStarted) return
         viewModelScope.launch {
-            savedStateHandle.set(KEY_HAS_STARTED, true)
-            runCatching {
-                requireNotNull(
-                    stripeApiRepository.retrieveStripeIntent(
-                        clientSecret,
-                        apiRequestOptionsProvider.get()
-                    )
-                )
-            }.fold(
+            savedStateHandle[KEY_HAS_STARTED] = true
+
+            stripeApiRepository.retrieveStripeIntent(
+                clientSecret = clientSecret,
+                options = apiRequestOptionsProvider.get(),
+            ).fold(
                 onSuccess = { intent ->
                     authenticatorRegistry
                         .getAuthenticator(intent)
@@ -346,7 +340,6 @@ internal class PaymentLauncherViewModel @Inject constructor(
     internal companion object {
         const val TIMEOUT_ERROR = "Payment fails due to time out. \n"
         const val UNKNOWN_ERROR = "Payment fails due to unknown error. \n"
-        const val REQUIRED_ERROR = "API request returned an invalid response."
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
 
         @VisibleForTesting

@@ -240,7 +240,7 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<WeChatPayNextAction>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             paymentController.confirmWeChatPay(
                 confirmPaymentIntentParams,
                 ApiRequest.Options(
@@ -497,7 +497,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrThrow()
         }
     }
 
@@ -793,7 +793,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrThrow()
         }
     }
 

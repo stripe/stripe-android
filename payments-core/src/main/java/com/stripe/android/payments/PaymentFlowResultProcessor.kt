@@ -327,13 +327,11 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
         stripeIntentId: String,
         requestOptions: ApiRequest.Options,
         sourceId: String
-    ): Result<PaymentIntent> = runCatching {
-        requireNotNull(
-            stripeRepository.cancelPaymentIntentSource(
-                stripeIntentId,
-                sourceId,
-                requestOptions
-            )
+    ): Result<PaymentIntent> {
+        return stripeRepository.cancelPaymentIntentSource(
+            stripeIntentId,
+            sourceId,
+            requestOptions
         )
     }
 
@@ -394,13 +392,11 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
         stripeIntentId: String,
         requestOptions: ApiRequest.Options,
         sourceId: String
-    ): Result<SetupIntent> = runCatching {
-        requireNotNull(
-            stripeRepository.cancelSetupIntentSource(
-                stripeIntentId,
-                sourceId,
-                requestOptions
-            )
+    ): Result<SetupIntent> {
+        return stripeRepository.cancelSetupIntentSource(
+            stripeIntentId,
+            sourceId,
+            requestOptions
         )
     }
 

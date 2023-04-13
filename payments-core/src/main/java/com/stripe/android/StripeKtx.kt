@@ -598,8 +598,8 @@ suspend fun Stripe.confirmSetupIntent(
     confirmSetupIntentParams: ConfirmSetupIntentParams,
     idempotencyKey: String? = null,
     expand: List<String> = emptyList(),
-): SetupIntent = runApiRequest {
-    stripeRepository.confirmSetupIntent(
+): SetupIntent {
+    return stripeRepository.confirmSetupIntent(
         confirmSetupIntentParams,
         ApiRequest.Options(
             apiKey = publishableKey,
@@ -607,7 +607,7 @@ suspend fun Stripe.confirmSetupIntent(
             idempotencyKey = idempotencyKey
         ),
         expand,
-    )
+    ).getOrThrow()
 }
 
 /**
@@ -630,15 +630,13 @@ suspend fun Stripe.confirmWeChatPayPayment(
     confirmPaymentIntentParams: ConfirmPaymentIntentParams,
     stripeAccountId: String? = this.stripeAccountId
 ): WeChatPayNextAction {
-    return runCatching {
-        paymentController.confirmWeChatPay(
-            confirmPaymentIntentParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            )
+    return paymentController.confirmWeChatPay(
+        confirmPaymentIntentParams,
+        ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId
         )
-    }.getOrElse {
+    ).getOrElse {
         throw StripeException.create(it)
     }
 }
@@ -668,15 +666,15 @@ suspend fun Stripe.confirmWeChatPayPayment(
 suspend fun Stripe.confirmPaymentIntent(
     confirmPaymentIntentParams: ConfirmPaymentIntentParams,
     idempotencyKey: String? = null
-): PaymentIntent = runApiRequest {
-    stripeRepository.confirmPaymentIntent(
+): PaymentIntent {
+    return stripeRepository.confirmPaymentIntent(
         confirmPaymentIntentParams,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey
         )
-    )
+    ).getOrThrow()
 }
 
 /**

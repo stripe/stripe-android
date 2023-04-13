@@ -54,7 +54,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                     any()
                 )
             ).thenReturn(
-                PaymentIntentFixtures.CANCELLED
+                Result.success(PaymentIntentFixtures.CANCELLED)
             )
 
             val paymentIntentResult = processor.processResult(
@@ -80,7 +80,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(Result.success(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2))
             whenever(mockStripeRepository.cancelPaymentIntentSource(any(), any(), any()))
-                .thenReturn(PaymentIntentFixtures.PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE)
+                .thenReturn(Result.success(PaymentIntentFixtures.PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE))
 
             processor.processResult(
                 PaymentFlowResult.Unvalidated(

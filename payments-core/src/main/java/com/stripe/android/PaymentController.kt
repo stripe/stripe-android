@@ -53,24 +53,11 @@ internal interface PaymentController {
      * @param confirmPaymentIntentParams params to confirm the intent
      * @param requestOptions options for [ApiRequest]
      * @return the [WeChatPayNextAction] object encapsulating [PaymentIntent] and [WeChat]
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the payment intent's next action data is not for WeChat Pay
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
     suspend fun confirmWeChatPay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         requestOptions: ApiRequest.Options
-    ): WeChatPayNextAction
+    ): Result<WeChatPayNextAction>
 
     suspend fun startAuth(
         host: AuthActivityStarterHost,

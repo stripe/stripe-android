@@ -53,19 +53,13 @@ abstract class StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
-    ): StripeIntent
+    ): Result<StripeIntent>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     internal abstract suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
-    ): PaymentIntent?
+    ): Result<PaymentIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun retrievePaymentIntent(
@@ -80,29 +74,17 @@ abstract class StripeRepository {
         options: ApiRequest.Options
     ): Result<PaymentIntent>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     internal abstract suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ): PaymentIntent?
+    ): Result<PaymentIntent>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     internal abstract suspend fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
-    ): SetupIntent?
+    ): Result<SetupIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun retrieveSetupIntent(
@@ -111,17 +93,11 @@ abstract class StripeRepository {
         expandFields: List<String> = emptyList()
     ): Result<SetupIntent>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     internal abstract suspend fun cancelSetupIntentSource(
         setupIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ): SetupIntent?
+    ): Result<SetupIntent>
 
     @Throws(
         AuthenticationException::class,

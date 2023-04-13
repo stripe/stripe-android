@@ -177,13 +177,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): StripeIntent {
+    ): Result<StripeIntent> {
         return when {
             PaymentIntent.ClientSecret.isMatch(clientSecret) -> {
-                retrievePaymentIntent(clientSecret, options, expandFields).getOrThrow()
+                retrievePaymentIntent(clientSecret, options, expandFields)
             }
             SetupIntent.ClientSecret.isMatch(clientSecret) -> {
-                retrieveSetupIntent(clientSecret, options, expandFields).getOrThrow()
+                retrieveSetupIntent(clientSecret, options, expandFields)
             }
             else -> {
                 error("Invalid client secret.")
@@ -200,17 +200,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
      * @return a [PaymentIntent] reflecting the updated state after applying the parameter
      * provided
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
+    ): Result<PaymentIntent> {
         return confirmPaymentIntentInternal(
             confirmPaymentIntentParams = confirmPaymentIntentParams.maybeForDashboard(options),
             options = options,
@@ -222,7 +216,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
+    ): Result<PaymentIntent> {
         val params = fraudDetectionDataParamsUtils.addFraudDetectionData(
             // Add payment_user_agent if the Payment Method is being created on this call
             maybeAddPaymentUserAgent(
@@ -234,15 +228,22 @@ class StripeApiRepository @JvmOverloads internal constructor(
             ).plus(createExpandParam(expandFields)),
             fraudDetectionData
         )
-        val apiUrl = getConfirmPaymentIntentUrl(
+
+        val paymentIntentId = runCatching {
             PaymentIntent.ClientSecret(confirmPaymentIntentParams.clientSecret).paymentIntentId
-        )
+        }.getOrElse {
+            return Result.failure(it)
+        }
 
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
-            apiRequestFactory.createPost(apiUrl, options, params),
-            PaymentIntentJsonParser()
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getConfirmPaymentIntentUrl(paymentIntentId),
+                options = options,
+                params = params,
+            ),
+            jsonParser = PaymentIntentJsonParser(),
         ) {
             val paymentMethodType =
                 confirmPaymentIntentParams.paymentMethodCreateParams?.typeCode
@@ -327,26 +328,20 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.PaymentIntentCancelSource]
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ): PaymentIntent? {
+    ): Result<PaymentIntent> {
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getCancelPaymentIntentSourceUrl(paymentIntentId),
-                options,
-                mapOf("source" to sourceId)
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getCancelPaymentIntentSourceUrl(paymentIntentId),
+                options = options,
+                params = mapOf("source" to sourceId),
             ),
-            PaymentIntentJsonParser()
+            jsonParser = PaymentIntentJsonParser(),
         ) {
             fireAnalyticsRequest(PaymentAnalyticsEvent.PaymentIntentCancelSource)
         }
@@ -361,36 +356,33 @@ class StripeApiRepository @JvmOverloads internal constructor(
      * @return a [SetupIntent] reflecting the updated state after applying the parameter
      * provided
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
-        val setupIntentId =
+    ): Result<SetupIntent> {
+        val setupIntentId = runCatching {
             SetupIntent.ClientSecret(confirmSetupIntentParams.clientSecret).setupIntentId
+        }.getOrElse {
+            return Result.failure(it)
+        }
 
         fireFraudDetectionDataRequest()
 
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getConfirmSetupIntentUrl(setupIntentId),
-                options,
-                fraudDetectionDataParamsUtils.addFraudDetectionData(
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getConfirmSetupIntentUrl(setupIntentId),
+                options = options,
+                params = fraudDetectionDataParamsUtils.addFraudDetectionData(
                     // Add payment_user_agent if the Payment Method is being created on this call
                     maybeAddPaymentUserAgent(
                         confirmSetupIntentParams.toParamMap(),
                         confirmSetupIntentParams.paymentMethodCreateParams
                     ).plus(createExpandParam(expandFields)),
                     fraudDetectionData
-                )
+                ),
             ),
-            SetupIntentJsonParser()
+            jsonParser = SetupIntentJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createSetupIntentConfirmation(
@@ -437,24 +429,18 @@ class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [PaymentAnalyticsEvent.SetupIntentCancelSource]
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun cancelSetupIntentSource(
         setupIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ): SetupIntent? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getCancelSetupIntentSourceUrl(setupIntentId),
-                options,
-                mapOf("source" to sourceId)
+    ): Result<SetupIntent> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getCancelSetupIntentSourceUrl(setupIntentId),
+                options = options,
+                params = mapOf("source" to sourceId),
             ),
-            SetupIntentJsonParser()
+            jsonParser = SetupIntentJsonParser(),
         ) {
             fireAnalyticsRequest(PaymentAnalyticsEvent.SetupIntentCancelSource)
         }

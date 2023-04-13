@@ -44,16 +44,16 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): StripeIntent {
-        TODO("Not yet implemented")
+    ): Result<StripeIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrievePaymentIntent(
@@ -75,16 +75,16 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         paymentIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
-        return null
+    ): Result<SetupIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveSetupIntent(
@@ -99,8 +99,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         setupIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ): SetupIntent? {
-        return null
+    ): Result<SetupIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun createSource(

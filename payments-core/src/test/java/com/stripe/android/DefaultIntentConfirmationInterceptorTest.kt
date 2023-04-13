@@ -187,8 +187,8 @@ class DefaultIntentConfirmationInterceptorTest {
                     clientSecret: String,
                     options: ApiRequest.Options,
                     expandFields: List<String>
-                ): StripeIntent {
-                    throw apiException
+                ): Result<StripeIntent> {
+                    return Result.failure(apiException)
                 }
             },
             publishableKeyProvider = { "pk" },
@@ -356,8 +356,8 @@ class DefaultIntentConfirmationInterceptorTest {
                     clientSecret: String,
                     options: ApiRequest.Options,
                     expandFields: List<String>
-                ): StripeIntent {
-                    return PaymentIntentFixtures.PI_SUCCEEDED
+                ): Result<StripeIntent> {
+                    return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
                 }
             },
             publishableKeyProvider = { "pk" },
@@ -390,9 +390,11 @@ class DefaultIntentConfirmationInterceptorTest {
                     clientSecret: String,
                     options: ApiRequest.Options,
                     expandFields: List<String>
-                ): StripeIntent {
-                    return PaymentIntentFixtures.PI_SUCCEEDED.copy(
-                        status = StripeIntent.Status.RequiresAction,
+                ): Result<StripeIntent> {
+                    return Result.success(
+                        PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                            status = StripeIntent.Status.RequiresAction,
+                        )
                     )
                 }
             },
@@ -426,8 +428,8 @@ class DefaultIntentConfirmationInterceptorTest {
                     clientSecret: String,
                     options: ApiRequest.Options,
                     expandFields: List<String>
-                ): StripeIntent {
-                    return PaymentIntentFixtures.PI_SUCCEEDED
+                ): Result<StripeIntent> {
+                    return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
                 }
             },
             publishableKeyProvider = { "pk" },

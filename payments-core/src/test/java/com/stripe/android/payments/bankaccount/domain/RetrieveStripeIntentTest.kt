@@ -25,9 +25,7 @@ class RetrieveStripeIntentTest {
             // Given
             val publishableKey = "publishable_key"
             val clientSecret = "pi_1234_secret_5678"
-            givenRetrieveStripeIntentReturns {
-                mock<PaymentIntent>()
-            }
+            givenRetrieveStripeIntentReturns(Result.success(mock<PaymentIntent>()))
 
             // When
             val intent = retrieveStripeIntent(
@@ -52,9 +50,7 @@ class RetrieveStripeIntentTest {
             val publishableKey = "publishable_key"
             val clientSecret = "pi_invalid"
             val expectedException = APIException()
-            givenRetrieveStripeIntentReturns {
-                throw expectedException
-            }
+            givenRetrieveStripeIntentReturns(Result.failure(expectedException))
 
             // When
             val intent = retrieveStripeIntent(
@@ -78,9 +74,7 @@ class RetrieveStripeIntentTest {
             // Given
             val publishableKey = "publishable_key"
             val clientSecret = "seti_1234_secret_5678"
-            givenRetrieveStripeIntentReturns {
-                mock<SetupIntent>()
-            }
+            givenRetrieveStripeIntentReturns(Result.success(mock<SetupIntent>()))
 
             // When
             val intent = retrieveStripeIntent(
@@ -104,9 +98,7 @@ class RetrieveStripeIntentTest {
             val publishableKey = "publishable_key"
             val clientSecret = "seti_invalid"
             val expectedException = APIException()
-            givenRetrieveStripeIntentReturns {
-                throw expectedException
-            }
+            givenRetrieveStripeIntentReturns(Result.failure(expectedException))
 
             // When
             val intent = retrieveStripeIntent(
@@ -125,7 +117,7 @@ class RetrieveStripeIntentTest {
     }
 
     private suspend fun givenRetrieveStripeIntentReturns(
-        intent: () -> StripeIntent
+        result: Result<StripeIntent>
     ) {
         whenever(
             stripeRepository.retrieveStripeIntent(
@@ -133,6 +125,6 @@ class RetrieveStripeIntentTest {
                 any(),
                 any()
             )
-        ).thenAnswer { intent() }
+        ).thenReturn(result)
     }
 }
