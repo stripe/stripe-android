@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.navigation.ConfirmationDestination
+import com.stripe.android.identity.navigation.DebugDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.InitialLoadingDestination
 import com.stripe.android.identity.navigation.clearDataAndNavigateUp
@@ -34,7 +35,9 @@ internal class IdentityOnBackPressedHandler(
         if (identityViewModel.isSubmitting()) {
             return
         }
-        if (navController.previousBackStackEntry?.destination?.route == InitialLoadingDestination.ROUTE.route) {
+        if (navController.previousBackStackEntry?.destination?.route == InitialLoadingDestination.ROUTE.route ||
+            navController.previousBackStackEntry?.destination?.route == DebugDestination.ROUTE.route
+        ) {
             finishWithCancelResult(
                 identityViewModel,
                 verificationFlowFinishable,

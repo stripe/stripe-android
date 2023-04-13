@@ -10,6 +10,7 @@ import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ConsentDestination
+import com.stripe.android.identity.navigation.DebugDestination
 import com.stripe.android.identity.navigation.INDIVIDUAL
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.Requirement
@@ -38,11 +39,14 @@ class InitialLoadingScreenTest {
     private val mockFallbackUrlLauncher = mock<FallbackUrlLauncher>()
 
     private val verificationPageUnsupported = mock<VerificationPage>().also {
+        whenever(it.livemode).thenReturn(true)
+        whenever(it.livemode).thenReturn(true)
         whenever(it.unsupportedClient).thenReturn(true)
         whenever(it.fallbackUrl).thenReturn(FALLBACK_URL)
     }
 
     private val verificationPageForDocType = mock<VerificationPage>().also {
+        whenever(it.livemode).thenReturn(true)
         whenever(it.requirements).thenReturn(
             VerificationPageRequirements(
                 missing = listOf(
@@ -57,6 +61,7 @@ class InitialLoadingScreenTest {
     }
 
     private val verificationPageForIdNumberType = mock<VerificationPage>().also {
+        whenever(it.livemode).thenReturn(true)
         whenever(it.requirements).thenReturn(
             VerificationPageRequirements(
                 missing = listOf(Requirement.IDNUMBER)
@@ -64,6 +69,7 @@ class InitialLoadingScreenTest {
         )
     }
     private val verificationPageForAddressType = mock<VerificationPage>().also {
+        whenever(it.livemode).thenReturn(true)
         whenever(it.requirements).thenReturn(
             VerificationPageRequirements(
                 missing = listOf(Requirement.ADDRESS)
@@ -72,9 +78,25 @@ class InitialLoadingScreenTest {
     }
 
     private val verificationPageWithEmptyRequirements = mock<VerificationPage>().also {
+        whenever(it.livemode).thenReturn(true)
         whenever(it.requirements).thenReturn(
             VerificationPageRequirements(
                 missing = listOf()
+            )
+        )
+    }
+
+    private val verificationPageInTestMode = mock<VerificationPage>().also {
+        whenever(it.livemode).thenReturn(false)
+        whenever(it.requirements).thenReturn(
+            VerificationPageRequirements(
+                missing = listOf(
+                    Requirement.BIOMETRICCONSENT,
+                    Requirement.IDDOCUMENTTYPE,
+                    Requirement.IDDOCUMENTFRONT,
+                    Requirement.IDDOCUMENTBACK,
+                    Requirement.IDNUMBER
+                )
             )
         )
     }
@@ -86,6 +108,7 @@ class InitialLoadingScreenTest {
     }
     private val mockNavController = mock<NavController>()
 
+    @Test
     fun testUnsupportedClientOpensFallback() {
         setComposeTestRuleWith(verificationPageUnsupported) {
             verify(mockFallbackUrlLauncher).launchFallbackUrl(eq(FALLBACK_URL))
@@ -134,6 +157,18 @@ class InitialLoadingScreenTest {
             verify(mockNavController).navigate(
                 argWhere {
                     it.startsWith(ConfirmationDestination.CONFIRMATION)
+                },
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+        }
+    }
+
+    @Test
+    fun testTestModeNavigatesToDebugScreen() {
+        setComposeTestRuleWith(verificationPageInTestMode) {
+            verify(mockNavController).navigate(
+                argWhere {
+                    it.startsWith(DebugDestination.DEBUG)
                 },
                 any<NavOptionsBuilder.() -> Unit>()
             )

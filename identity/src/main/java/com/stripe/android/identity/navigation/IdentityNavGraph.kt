@@ -31,6 +31,7 @@ import com.stripe.android.identity.states.IdentityScanState.Companion.toUploadDe
 import com.stripe.android.identity.ui.ConfirmationScreen
 import com.stripe.android.identity.ui.ConsentScreen
 import com.stripe.android.identity.ui.CountryNotListedScreen
+import com.stripe.android.identity.ui.DebugScreen
 import com.stripe.android.identity.ui.DocSelectionScreen
 import com.stripe.android.identity.ui.DocumentScanMessageRes
 import com.stripe.android.identity.ui.DocumentScanScreen
@@ -74,6 +75,14 @@ internal fun IdentityNavGraph(
             modifier = Modifier.padding(contentPadding),
             startDestination = InitialLoadingDestination.destinationRoute.route
         ) {
+            screen(DebugDestination.ROUTE) {
+                DebugScreen(
+                    navController = navController,
+                    identityViewModel = identityViewModel,
+                    verificationFlowFinishable = verificationFlowFinishable
+                )
+            }
+
             screen(InitialLoadingDestination.ROUTE) {
                 InitialLoadingScreen(
                     navController = navController,
