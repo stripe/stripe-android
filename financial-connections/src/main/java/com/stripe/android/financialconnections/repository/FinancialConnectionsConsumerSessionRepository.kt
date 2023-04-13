@@ -98,7 +98,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         consumerSessionClientSecret: String,
         verificationCode: String,
         type: VerificationType
-    ): ConsumerSession {
+    ): ConsumerSession = mutex.withLock {
         return consumersApiService.confirmConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             authSessionCookie = null,

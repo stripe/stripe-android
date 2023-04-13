@@ -3,6 +3,8 @@ package com.stripe.android.financialconnections.repository
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
+import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.VerificationType
@@ -23,20 +25,25 @@ import kotlin.test.assertNull
 class FinancialConnectionsConsumerSessionRepositoryImplTest {
 
     private val consumersApiService: ConsumersApiService = mock()
+    private val financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService =
+        mock()
     private val apiOptions: ApiRequest.Options = mock()
     private val logger: Logger = mock()
+    private val locale: Locale = Locale.getDefault()
 
     private fun buildRepository() =
         FinancialConnectionsConsumerSessionRepository(
             consumersApiService = consumersApiService,
+            financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
             apiOptions = apiOptions,
-            locale = null,
+            locale = locale,
             logger = logger
         )
 
     @Test
     fun testLookupConsumerSession() = runTest {
         val email = "test@example.com"
+        val clientSecret = "client_secret"
         val consumerSession = consumerSession()
         val consumerSessionLookup = ConsumerSessionLookup(
             consumerSession = consumerSession,
@@ -46,26 +53,24 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         val repository = buildRepository()
 
         whenever(
-            consumersApiService.lookupConsumerSession(
+            financialConnectionsConsumersApiService.postConsumerSession(
                 email = eq(email),
-                authSessionCookie = anyOrNull(),
+                clientSecret = eq(clientSecret),
                 requestSurface = eq("android_connections"),
-                requestOptions = eq(apiOptions)
             )
         ).thenReturn(consumerSessionLookup)
 
         // ensures there's no cached consumer session
         assertNull(repository.getCachedConsumerSession())
 
-        val result = repository.lookupConsumerSession(email)
+        val result = repository.lookupConsumerSession(email, clientSecret)
 
         assertEquals(consumerSessionLookup, result)
 
-        verify(consumersApiService).lookupConsumerSession(
+        verify(financialConnectionsConsumersApiService).postConsumerSession(
             email = email,
-            authSessionCookie = null,
+            clientSecret = clientSecret,
             requestSurface = "android_connections",
-            requestOptions = apiOptions
         )
 
         // ensures there's a cached consumer session after the lookup call.
@@ -79,7 +84,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         val customEmailType = CustomEmailType.NETWORKED_CONNECTIONS_OTP_EMAIL
         val consumerSession = consumerSession()
         val repository = buildRepository()
-        val locale = Locale.getDefault()
+        val connectionsMerchantName = "my_merchant"
 
         whenever(
             consumersApiService.startConsumerVerification(
@@ -88,7 +93,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 authSessionCookie = anyOrNull(),
                 requestSurface = eq("android_connections"),
                 type = eq(type),
-                customEmailType = eq(customEmailType),
+                connectionsMerchantName = anyOrNull(),
+                customEmailType = anyOrNull(),
                 requestOptions = eq(apiOptions)
             )
         ).thenReturn(consumerSession)
@@ -96,8 +102,12 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         // ensures there's no cached consumer session
         assertNull(repository.getCachedConsumerSession())
 
-        val result = repository
-            .startConsumerVerification(consumerSessionClientSecret, type, customEmailType)
+        val result: ConsumerSession = repository.startConsumerVerification(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            connectionsMerchantName = connectionsMerchantName,
+            type = type,
+            customEmailType = customEmailType
+        )
 
         assertEquals(consumerSession, result)
         verify(consumersApiService).startConsumerVerification(
@@ -106,6 +116,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             authSessionCookie = null,
             requestSurface = "android_connections",
             type = type,
+            connectionsMerchantName = connectionsMerchantName,
             customEmailType = customEmailType,
             requestOptions = apiOptions
         )
