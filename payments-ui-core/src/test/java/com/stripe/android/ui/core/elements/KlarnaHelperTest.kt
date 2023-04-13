@@ -24,7 +24,16 @@ class KlarnaHelperTest {
             "ES" to R.string.klarna_buy_now_pay_later,
             "SE" to R.string.klarna_buy_now_pay_later,
             "GB" to R.string.klarna_pay_later,
-            "US" to R.string.klarna_pay_later
+            "US" to R.string.klarna_pay_later,
+            "GR" to R.string.klarna_pay_later,
+            "IE" to R.string.klarna_pay_later,
+            "PT" to R.string.klarna_buy_now_pay_later,
+            "AU" to R.string.klarna_buy_now_pay_later,
+            "CA" to R.string.klarna_buy_now_pay_later,
+            "CZ" to R.string.klarna_pay_later,
+            "NZ" to R.string.klarna_pay_later,
+            "PL" to R.string.klarna_buy_now_pay_later,
+            "CH" to R.string.klarna_buy_now_pay_later,
         )
 
         for (entry in testMap) {
@@ -42,12 +51,18 @@ class KlarnaHelperTest {
     @Test
     fun `supported klarna currency returns correct countries`() {
         assertThat(KlarnaHelper.getAllowedCountriesForCurrency("eur"))
-            .containsExactly("AT", "FI", "DE", "NL", "BE", "ES", "IT", "FR")
+            .containsExactly("AT", "FI", "DE", "NL", "BE", "ES", "IT", "FR", "GR", "IE", "PT")
 
         assertThat(KlarnaHelper.getAllowedCountriesForCurrency("dkk")).containsExactly("DK")
         assertThat(KlarnaHelper.getAllowedCountriesForCurrency("nok")).containsExactly("NO")
         assertThat(KlarnaHelper.getAllowedCountriesForCurrency("sek")).containsExactly("SE")
         assertThat(KlarnaHelper.getAllowedCountriesForCurrency("gbp")).containsExactly("GB")
         assertThat(KlarnaHelper.getAllowedCountriesForCurrency("usd")).containsExactly("US")
+        assertThat(KlarnaHelper.getAllowedCountriesForCurrency("aud")).containsExactly("AU")
+        assertThat(KlarnaHelper.getAllowedCountriesForCurrency("cad")).containsExactly("CA")
+        assertThat(KlarnaHelper.getAllowedCountriesForCurrency("czk")).containsExactly("CZ")
+        assertThat(KlarnaHelper.getAllowedCountriesForCurrency("nzd")).containsExactly("NZ")
+        assertThat(KlarnaHelper.getAllowedCountriesForCurrency("pln")).containsExactly("PL")
+        assertThat(KlarnaHelper.getAllowedCountriesForCurrency("chf")).containsExactly("CH")
     }
 }
