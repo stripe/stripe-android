@@ -1,6 +1,7 @@
 apply from: configs.androidLibrary
 
 apply plugin: 'checkstyle'
+apply plugin: 'kotlinx-serialization'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
 android {
@@ -15,6 +16,7 @@ dependencies {
     implementation project(":stripe-core")
     implementation "androidx.core:core-ktx:$androidxCoreVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
 
     testImplementation project(':network-testing')
     testImplementation "junit:junit:$junitVersion"

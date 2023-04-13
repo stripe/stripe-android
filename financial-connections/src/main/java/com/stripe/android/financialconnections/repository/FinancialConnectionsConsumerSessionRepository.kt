@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.repository
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.CustomEmailType
@@ -14,7 +15,11 @@ import java.util.Locale
 internal interface FinancialConnectionsConsumerSessionRepository {
 
     suspend fun getCachedConsumerSession(): ConsumerSession?
-    suspend fun lookupConsumerSession(email: String?): ConsumerSessionLookup
+    suspend fun lookupConsumerSession(
+        email: String,
+        clientSecret: String
+    ): ConsumerSessionLookup
+
     suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         connectionsMerchantName: String?,
@@ -32,19 +37,22 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         operator fun invoke(
             consumersApiService: ConsumersApiService,
             apiOptions: ApiRequest.Options,
+            financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
             locale: Locale?,
             logger: Logger,
         ): FinancialConnectionsConsumerSessionRepository =
             FinancialConnectionsConsumerSessionRepositoryImpl(
-                consumersApiService,
-                apiOptions,
-                locale,
-                logger,
+                consumersApiService = consumersApiService,
+                apiOptions = apiOptions,
+                financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
+                locale = locale,
+                logger = logger,
             )
     }
 }
 
 private class FinancialConnectionsConsumerSessionRepositoryImpl(
+    private val financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService,
     private val consumersApiService: ConsumersApiService,
     private val apiOptions: ApiRequest.Options,
     private val locale: Locale?,
@@ -58,9 +66,10 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         mutex.withLock { cachedConsumerSession }
 
     override suspend fun lookupConsumerSession(
-        email: String?,
+        email: String,
+        clientSecret: String
     ): ConsumerSessionLookup = mutex.withLock {
-        lookupRequest(email).also { lookup ->
+        postConsumerSession(email, clientSecret).also { lookup ->
             updateCachedConsumerSession("lookupConsumerSession", lookup.consumerSession)
         }
     }
@@ -89,7 +98,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         consumerSessionClientSecret: String,
         verificationCode: String,
         type: VerificationType
-    ): ConsumerSession {
+    ): ConsumerSession = mutex.withLock {
         return consumersApiService.confirmConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             authSessionCookie = null,
@@ -102,13 +111,14 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         }
     }
 
-    private suspend fun lookupRequest(email: String?): ConsumerSessionLookup =
-        consumersApiService.lookupConsumerSession(
-            email = email,
-            authSessionCookie = null,
-            requestSurface = CONSUMER_SURFACE,
-            requestOptions = apiOptions
-        )
+    private suspend fun postConsumerSession(
+        email: String,
+        clientSecret: String
+    ): ConsumerSessionLookup = financialConnectionsConsumersApiService.postConsumerSession(
+        email = email,
+        clientSecret = clientSecret,
+        requestSurface = CONSUMER_SURFACE,
+    )
 
     private fun updateCachedConsumerSession(
         source: String,

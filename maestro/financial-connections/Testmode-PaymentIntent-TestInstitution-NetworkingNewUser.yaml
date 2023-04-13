@@ -31,11 +31,13 @@ appId: com.stripe.android.financialconnections.example
     visible: "Success"
     timeout: 60000
 - tapOn: "Success"
-- tapOn: "Confirm"
+- tapOn: "Link Account"
 # ENTER PHONE FOR NEW NETWORKED USER
 - tapOn: "Phone number"
 - inputText: "6223115555"
 - tapOn: "Save to Link"
 # CONFIRM AND COMPLETE
+- assertVisible: "Success!"
+- assertVisible: ".*through Link.*"
 - tapOn: "Done"
 - assertVisible: ".*Intent Confirmed!.*"

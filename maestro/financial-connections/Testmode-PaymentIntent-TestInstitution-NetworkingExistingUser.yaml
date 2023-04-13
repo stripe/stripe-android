@@ -20,18 +20,16 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Agree"
 # LOGIN TO NETWORKING
 - tapOn: test@test.com
-- tapOn:
-    text: ●
-    index: 0
+  # 2FA
+- assertVisible: "●"
 - inputText: "111111"
 # SELECT NETWORKED ACCOUNT
 - tapOn: "Success"
 - tapOn: "Connect account"
 # STEP UP AUTHENTICATION
-- tapOn:
-    text: ●
-    index: 0
+- assertVisible: "●"
 - inputText: "111111"
 - assertVisible: "Success!"
+- assertVisible: ".*through Link.*"
 - tapOn: "Done"
 - assertVisible: ".*Intent Confirmed!.*"
