@@ -53,7 +53,7 @@ internal class SetupIntentFlowResultProcessorTest {
                     flowOutcome = StripeIntentResult.Outcome.CANCELED,
                     canCancelSource = true
                 )
-            )
+            ).getOrThrow()
 
             assertThat(setupIntentResult)
                 .isEqualTo(
@@ -80,7 +80,7 @@ internal class SetupIntentFlowResultProcessorTest {
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.CANCELED
                 )
-            )
+            ).getOrThrow()
 
             verify(
                 mockStripeRepository,
@@ -116,7 +116,7 @@ internal class SetupIntentFlowResultProcessorTest {
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.CANCELED
                 )
-            )
+            ).getOrThrow()
 
             verify(mockStripeRepository).retrieveSetupIntent(
                 eq(clientSecret),
@@ -154,7 +154,7 @@ internal class SetupIntentFlowResultProcessorTest {
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.CANCELED
                 )
-            )
+            ).getOrThrow()
 
             verify(
                 mockStripeRepository,

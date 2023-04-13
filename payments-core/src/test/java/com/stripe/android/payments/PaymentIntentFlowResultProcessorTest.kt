@@ -25,7 +25,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentIntentFlowResultProcessorTest {
@@ -63,7 +62,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                     flowOutcome = StripeIntentResult.Outcome.CANCELED,
                     canCancelSource = true
                 )
-            )
+            ).getOrThrow()
 
             assertThat(paymentIntentResult)
                 .isEqualTo(
@@ -116,7 +115,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.CANCELED
                 )
-            )
+            ).getOrThrow()
 
             verify(mockStripeRepository).retrievePaymentIntent(
                 eq(clientSecret),
@@ -158,7 +157,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
                 )
-            )
+            ).getOrThrow()
 
             verify(mockStripeRepository).retrievePaymentIntent(
                 eq(clientSecret),
@@ -193,14 +192,14 @@ internal class PaymentIntentFlowResultProcessorTest {
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
             val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-            assertFailsWith<MaxRetryReachedException> {
-                processor.processResult(
-                    PaymentFlowResult.Unvalidated(
-                        clientSecret = clientSecret,
-                        flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
-                    )
+            val result = processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
                 )
-            }
+            )
+
+            assertThat(result.exceptionOrNull()).isInstanceOf(MaxRetryReachedException::class.java)
 
             verify(mockStripeRepository).retrievePaymentIntent(
                 eq(clientSecret),
@@ -277,7 +276,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                     clientSecret = clientSecret,
                     flowOutcome = StripeIntentResult.Outcome.CANCELED
                 )
-            )
+            ).getOrThrow()
 
             verify(
                 mockStripeRepository,
@@ -316,7 +315,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                 clientSecret = clientSecret,
                 flowOutcome = StripeIntentResult.Outcome.CANCELED
             )
-        )
+        ).getOrThrow()
 
         verify(mockStripeRepository, atLeastOnce()).retrievePaymentIntent(
             eq(clientSecret),
