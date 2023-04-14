@@ -67,7 +67,8 @@ internal class PaymentOptionsViewModelTest {
             verify(eventReporter)
                 .onSelectPaymentOption(
                     paymentSelection = SELECTION_SAVED_PAYMENT_METHOD,
-                    currency = "usd"
+                    currency = "usd",
+                    isDecoupling = false,
                 )
         }
 
@@ -91,7 +92,8 @@ internal class PaymentOptionsViewModelTest {
             verify(eventReporter)
                 .onSelectPaymentOption(
                     paymentSelection = NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
-                    currency = "usd"
+                    currency = "usd",
+                    isDecoupling = false,
                 )
             assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(SavedSelection.None)
@@ -112,7 +114,8 @@ internal class PaymentOptionsViewModelTest {
                 verify(eventReporter)
                     .onSelectPaymentOption(
                         paymentSelection = paymentOptionResultSucceeded.paymentSelection,
-                        currency = "usd"
+                        currency = "usd",
+                        isDecoupling = false,
                     )
                 ensureAllEventsConsumed()
             }

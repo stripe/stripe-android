@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
@@ -235,7 +236,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             )
 
             if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
-                eventReporter.onLpmSpecFailure()
+                eventReporter.onLpmSpecFailure(
+                    isDecoupling = initializationMode is DeferredIntent,
+                )
             }
 
             stripeIntentValidator.requireValid(elementsSession.stripeIntent)

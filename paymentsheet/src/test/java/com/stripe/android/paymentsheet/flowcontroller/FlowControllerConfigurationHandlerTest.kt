@@ -98,6 +98,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(viewModel.state).isNotNull()
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isDecoupling = false,
             isServerSideConfirmation = false,
         )
     }
@@ -133,6 +134,7 @@ class FlowControllerConfigurationHandlerTest {
         // We're running ONLY the second config run, so we don't expect any interactions.
         verify(eventReporter, never()).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isDecoupling = false,
             isServerSideConfirmation = false,
         )
     }
@@ -170,6 +172,7 @@ class FlowControllerConfigurationHandlerTest {
         // We're running a new config, so we DO expect an interaction.
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isDecoupling = false,
             isServerSideConfirmation = false,
         )
     }
@@ -208,6 +211,7 @@ class FlowControllerConfigurationHandlerTest {
         // We're running a new config, so we DO expect an interaction.
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isDecoupling = false,
             isServerSideConfirmation = false,
         )
     }
@@ -425,6 +429,7 @@ class FlowControllerConfigurationHandlerTest {
 
         verify(eventReporter).onInit(
             configuration = isNull(),
+            isDecoupling = eq(false),
             isServerSideConfirmation = eq(false),
         )
     }
@@ -458,6 +463,7 @@ class FlowControllerConfigurationHandlerTest {
 
         verify(eventReporter).onInit(
             configuration = isNull(),
+            isDecoupling = eq(true),
             isServerSideConfirmation = eq(false),
         )
     }
@@ -492,6 +498,7 @@ class FlowControllerConfigurationHandlerTest {
 
         verify(eventReporter).onInit(
             configuration = isNull(),
+            isDecoupling = eq(true),
             isServerSideConfirmation = eq(true),
         )
     }
