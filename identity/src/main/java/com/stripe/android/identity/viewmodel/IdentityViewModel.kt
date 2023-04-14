@@ -880,7 +880,9 @@ internal class IdentityViewModel constructor(
 
     private fun calculateClearDataParam(dataToBeCollected: CollectedDataParam) =
         ClearDataParam.createFromRequirements(
-            missingRequirements.value.toMutableSet().minus(
+            requireNotNull(_verificationPage.value?.data?.requirements?.missing) {
+                "VerificationPage not initialized"
+            }.toMutableSet().minus(
                 collectedData.value.collectedRequirements()
             ).minus(dataToBeCollected.collectedRequirements())
         )
@@ -1148,9 +1150,6 @@ internal class IdentityViewModel constructor(
     fun clearCollectedData(field: Requirement) {
         _collectedData.updateStateAndSave {
             it.clearData(field)
-        }
-        _missingRequirements.updateStateAndSave { oldRequirements ->
-            oldRequirements.plus(field)
         }
     }
 
