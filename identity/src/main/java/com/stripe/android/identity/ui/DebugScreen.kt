@@ -79,7 +79,7 @@ internal fun DebugScreen(
 }
 
 @Composable
-internal fun TitleSection() {
+private fun TitleSection() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
@@ -106,7 +106,7 @@ internal fun TitleSection() {
 }
 
 @Composable
-internal fun FinishMobileFlowWithResultSection(
+private fun FinishMobileFlowWithResultSection(
     finishable: VerificationFlowFinishable
 ) {
     val failureExceptionMessage = stringResource(id = R.string.failure_from_test_mode)
@@ -158,7 +158,7 @@ internal fun FinishMobileFlowWithResultSection(
 }
 
 @Composable
-internal fun PreviewUserExperienceSection(
+private fun PreviewUserExperienceSection(
     onProceedClicked: () -> Unit
 ) {
     Text(
