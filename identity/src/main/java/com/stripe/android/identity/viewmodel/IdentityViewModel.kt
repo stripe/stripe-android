@@ -1149,6 +1149,9 @@ internal class IdentityViewModel constructor(
         _collectedData.updateStateAndSave {
             it.clearData(field)
         }
+        _missingRequirements.updateStateAndSave {oldRequirements->
+            oldRequirements.plus(field)
+        }
     }
 
     fun clearUploadedData() {
