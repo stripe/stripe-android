@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+set -e
+set -o pipefail
+set -x
 
 now=$(date +%F_%H-%M-%S)
 echo $now
