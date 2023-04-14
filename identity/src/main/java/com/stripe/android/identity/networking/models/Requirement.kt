@@ -97,41 +97,36 @@ internal enum class Requirement {
          * Infers the next destination based on a list of Requirements.
          */
         fun List<Requirement>?.nextDestination(context: Context): IdentityTopLevelDestination =
-            this?.let {
+            when {
+                this == null -> {
+                    context.finalErrorDestination()
+                }
                 // BIOMETRICCONSENT is present when type is DOCUMENT
-                if (it.contains(BIOMETRICCONSENT)) {
+                contains(BIOMETRICCONSENT) -> {
                     ConsentDestination
-                } else if (
-                    it.intersect(
-                        listOf(IDDOCUMENTTYPE, IDDOCUMENTFRONT, IDDOCUMENTBACK)
-                    ).isNotEmpty()
-                ) {
+                }
+                intersect(listOf(IDDOCUMENTTYPE, IDDOCUMENTFRONT, IDDOCUMENTBACK)).isNotEmpty() -> {
                     DocSelectionDestination
-                } else if (it.contains(FACE)) {
+                }
+
+                contains(FACE) -> {
                     SelfieDestination
                 }
                 // NAME and DOB is present when type is not DOCUMENT
-                else if (
-                    it.intersect(
-                        listOf(NAME, DOB)
-                    ).isNotEmpty()
-                ) {
+                intersect(listOf(NAME, DOB)).isNotEmpty() -> {
                     IndividualWelcomeDestination
                 }
                 // If NAME and ODB is not present but IDNUMBER or ADDRESS is present,
                 // then type is DOCUMENT, user has already uploaded document and selfie.
-                else if (it.intersect(
-                        listOf(IDNUMBER, ADDRESS)
-                    ).isNotEmpty()
-                ) {
+                intersect(listOf(IDNUMBER, ADDRESS)).isNotEmpty() -> {
                     IndividualDestination
-                } else if (it.isEmpty()) {
+                }
+                isEmpty() -> {
                     ConfirmationDestination
-                } else {
+                }
+                else -> {
                     context.finalErrorDestination()
                 }
-            } ?: run {
-                context.finalErrorDestination()
             }
     }
 }
