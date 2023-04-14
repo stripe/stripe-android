@@ -143,8 +143,10 @@ internal object BillingDetailsHelpers {
 
             countryElement?.controller?.rawFieldValue ?: emptyFlow()
         }.collect {
-            it?.let {
-                phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
+            if (phoneNumberElement?.controller?.getLocalNumber().isNullOrBlank()) {
+                it?.let {
+                    phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
+                }
             }
         }
     }
