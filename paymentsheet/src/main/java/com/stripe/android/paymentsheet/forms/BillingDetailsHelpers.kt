@@ -19,6 +19,7 @@ import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
@@ -121,33 +122,34 @@ internal object BillingDetailsHelpers {
             phoneNumberElement = it
         }
 
-        elementsFlow.flatMapConcat { elementsList ->
-            // Look for a standalone CountryElement.
-            // Note that this should be done first, because AddressElement always has a
-            // CountryElement, but it might be hidden.
-            var countryElement = elementsList
-                .filterIsInstance<SectionElement>()
-                .flatMap { it.fields }
-                .filterIsInstance<CountryElement>()
-                .firstOrNull()
-
-            // If not found, look for one inside an AddressElement.
-            if (countryElement == null) {
-                countryElement = elementsList
+        elementsFlow
+            .flatMapConcat { elementsList ->
+                // Look for a standalone CountryElement.
+                // Note that this should be done first, because AddressElement always has a
+                // CountryElement, but it might be hidden.
+                var countryElement = elementsList
                     .filterIsInstance<SectionElement>()
                     .flatMap { it.fields }
-                    .filterIsInstance<AddressElement>()
+                    .filterIsInstance<CountryElement>()
                     .firstOrNull()
-                    ?.countryElement
-            }
 
-            countryElement?.controller?.rawFieldValue ?: emptyFlow()
-        }.collect {
-            if (phoneNumberElement?.controller?.getLocalNumber().isNullOrBlank()) {
-                it?.let {
+                // If not found, look for one inside an AddressElement.
+                if (countryElement == null) {
+                    countryElement = elementsList
+                        .filterIsInstance<SectionElement>()
+                        .flatMap { it.fields }
+                        .filterIsInstance<AddressElement>()
+                        .firstOrNull()
+                        ?.countryElement
+                }
+
+                countryElement?.controller?.rawFieldValue ?: emptyFlow()
+            }
+            .filterNotNull()
+            .collect {
+                if (phoneNumberElement?.controller?.getLocalNumber().isNullOrBlank()) {
                     phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
                 }
             }
-        }
     }
 }
