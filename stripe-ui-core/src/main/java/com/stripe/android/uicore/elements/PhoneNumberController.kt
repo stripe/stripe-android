@@ -99,6 +99,8 @@ class PhoneNumberController constructor(
     fun getE164PhoneNumber(phoneNumber: String) =
         phoneNumberFormatter.value.toE164Format(phoneNumber)
 
+    fun getLocalNumber() = _fieldValue.value.removePrefix(phoneNumberFormatter.value.prefix)
+
     fun onSelectedCountryIndex(index: Int) = countryConfig.countries[index].takeIf {
         it.code.value != phoneNumberFormatter.value.countryCode
     }?.let {

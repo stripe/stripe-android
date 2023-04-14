@@ -714,95 +714,109 @@ internal class FormViewModelTest {
     }
 
     @Test
-    fun `Test phone country changes with AddressElement country`() = runBlocking {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            attachDefaultsToPaymentMethod = false,
-        )
+    fun `Test phone country changes with AddressElement country`() =
+        runBlocking {
+            val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                attachDefaultsToPaymentMethod = false,
+            )
 
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            PaymentMethod.Type.Card.code,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        )
-        val formViewModel = createViewModel(
-            args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LpmRepository.hardcodedCardSpec(billingDetailsCollectionConfiguration).formSpec,
-            ),
-        )
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                PaymentMethod.Type.Card.code,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                billingDetails = PaymentSheet.BillingDetails(),
+            )
+            val formViewModel = createViewModel(
+                args,
+                createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.Card,
+                    LpmRepository.hardcodedCardSpec(billingDetailsCollectionConfiguration).formSpec,
+                ),
+            )
 
-        val elements = formViewModel.elementsFlow.first()
-        val countryElement = elements
-            .filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-            .filterIsInstance<AddressElement>()
-            .firstOrNull()
-            ?.countryElement
-        val phoneElement = elements
-            .filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-            .filterIsInstance<PhoneNumberElement>()
-            .firstOrNull()
+            val elements = formViewModel.elementsFlow.first()
+            val countryElement = elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<AddressElement>()
+                .firstOrNull()
+                ?.countryElement
+            val phoneElement = elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<PhoneNumberElement>()
+                .firstOrNull()
 
-        assertThat(countryElement).isNotNull()
-        assertThat(phoneElement).isNotNull()
-        countryElement?.controller?.onRawValueChange("CA")
-        assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
-            .isEqualTo("CA")
-    }
+            assertThat(countryElement).isNotNull()
+            assertThat(phoneElement).isNotNull()
+            countryElement?.controller?.onRawValueChange("CA")
+            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
+                .isEqualTo("CA")
+            phoneElement?.controller?.onValueChange("+13105551234")
+            countryElement?.controller?.onRawValueChange("US")
+            // Phone number shouldn't change because it is already filled.
+            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
+                .isEqualTo("CA")
+        }
 
     @Test
-    fun `Test phone country changes with standalone CountryElement`() = runBlocking {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            attachDefaultsToPaymentMethod = false,
-        )
+    fun `Test phone country changes with standalone CountryElement`() =
+        runBlocking {
+            val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                attachDefaultsToPaymentMethod = false,
+            )
 
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            PaymentMethod.Type.Sofort.code,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        )
-        val formViewModel = createViewModel(
-            args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Sofort,
-                LayoutSpec(
-                    listOf(
-                        NameSpec(),
-                        EmailSpec(),
-                        PhoneSpec(),
-                        CountrySpec(),
-                        AddressSpec(hideCountry = true),
-                    ),
-                )
-            ),
-        )
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                PaymentMethod.Type.Sofort.code,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                billingDetails = PaymentSheet.BillingDetails(),
+            )
+            val formViewModel = createViewModel(
+                args,
+                createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.Sofort,
+                    LayoutSpec(
+                        listOf(
+                            NameSpec(),
+                            EmailSpec(),
+                            PhoneSpec(),
+                            CountrySpec(),
+                            AddressSpec(hideCountry = true),
+                        ),
+                    )
+                ),
+            )
 
-        val elements = formViewModel.elementsFlow.first()
-        val countryElement = elements
-            .filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-            .filterIsInstance<CountryElement>()
-            .firstOrNull()
-        val phoneElement = elements
-            .filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-            .filterIsInstance<PhoneNumberElement>()
-            .firstOrNull()
+            val elements = formViewModel.elementsFlow.first()
+            val countryElement = elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<CountryElement>()
+                .firstOrNull()
+            val phoneElement = elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<PhoneNumberElement>()
+                .firstOrNull()
 
-        assertThat(countryElement).isNotNull()
-        assertThat(phoneElement).isNotNull()
-        countryElement?.controller?.onRawValueChange("CA")
-        assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
-            .isEqualTo("CA")
-    }
+            assertThat(countryElement).isNotNull()
+            assertThat(phoneElement).isNotNull()
+            countryElement?.controller?.onRawValueChange("CA")
+            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
+                .isEqualTo("CA")
+            phoneElement?.controller?.onValueChange("+13105551234")
+            countryElement?.controller?.onRawValueChange("US")
+            // Phone number shouldn't change because it is already filled.
+            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
+                .isEqualTo("CA")
+        }
 
     private suspend fun getSectionFieldTextControllerWithLabel(
         formViewModel: FormViewModel,
