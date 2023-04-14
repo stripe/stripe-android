@@ -356,6 +356,12 @@ internal class IdentityViewModelTest {
 
     @Test
     fun `postVerificationPageDataAndMaybeNavigate - postFailure`() = runBlocking {
+        viewModel._verificationPage.postValue(
+            Resource.success(
+                SUCCESS_VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE
+            )
+        )
+
         val throwable = java.lang.RuntimeException()
         whenever(
             mockIdentityRepository.postVerificationPageData(
@@ -559,6 +565,12 @@ internal class IdentityViewModelTest {
         verificationPageData: VerificationPageData,
         targetTopLevelDestination: IdentityTopLevelDestination
     ) = runBlocking {
+        viewModel._verificationPage.postValue(
+            Resource.success(
+                SUCCESS_VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE
+            )
+        )
+
         whenever(
             mockIdentityRepository.postVerificationPageData(
                 any(),
@@ -601,6 +613,12 @@ internal class IdentityViewModelTest {
         verificationPageData: VerificationPageData,
         callback: () -> Unit
     ) = runBlocking {
+        viewModel._verificationPage.postValue(
+            Resource.success(
+                SUCCESS_VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE
+            )
+        )
+
         whenever(
             mockIdentityRepository.postVerificationPageData(
                 any(),
