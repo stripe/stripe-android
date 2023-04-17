@@ -32,10 +32,10 @@ data class TestParameters(
     val supportedPaymentMethods: List<PaymentMethodCode> = listOf(),
     val customPrimaryButtonLabel: String? = null,
     val attachDefaults: Boolean = false,
-    val collectName: BillingDetailsCollectionConfiguration.CollectionMode = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-    val collectEmail: BillingDetailsCollectionConfiguration.CollectionMode = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-    val collectPhone: BillingDetailsCollectionConfiguration.CollectionMode = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-    val collectAddress: BillingDetailsCollectionConfiguration.AddressCollectionMode = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+    val collectName: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+    val collectEmail: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+    val collectPhone: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+    val collectAddress: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
 )
 
 /**
