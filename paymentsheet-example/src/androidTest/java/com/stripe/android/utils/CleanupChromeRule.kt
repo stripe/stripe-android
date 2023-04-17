@@ -6,7 +6,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
 // Kills Chrome once the test is over.
-// This is to prevent the Chrome process from preventing future tests to fail.
+// This is to prevent the Chrome process from causing future tests to fail.
 internal object CleanupChromeRule : TestRule {
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
