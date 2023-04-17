@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.23.1 - 2023-04-17
+
+### PaymentSheet
+* [FIXED][6551](https://github.com/stripe/stripe-android/pull/6551) Fixed a build issue where `BillingDetailsCollectionConfiguration` couldn't be found in the classpath. If you worked around this issue by importing `payments-ui-core` directly, you can undo this change and need to update the import of `BillingDetailsCollectionConfiguration`.
+
 ## 20.23.0 - 2023-04-17
 
 ### PaymentSheet
