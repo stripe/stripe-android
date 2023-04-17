@@ -878,14 +878,21 @@ internal class IdentityViewModel constructor(
         }
     }
 
-    private fun calculateClearDataParam(dataToBeCollected: CollectedDataParam) =
-        ClearDataParam.createFromRequirements(
-            requireNotNull(_verificationPage.value?.data?.requirements?.missing) {
-                "VerificationPage not initialized"
-            }.toMutableSet().minus(
+    private fun calculateClearDataParam(dataToBeCollected: CollectedDataParam): ClearDataParam {
+        val initialMissings =
+            _verificationPage.value?.data?.requirements?.missing ?: Requirement.values().toList()
+                .also {
+                    Log.e(
+                        TAG,
+                        "_verificationPage is null, using Requirement.values() as initialMissings"
+                    )
+                }
+        return ClearDataParam.createFromRequirements(
+            initialMissings.toMutableSet().minus(
                 collectedData.value.collectedRequirements()
             ).minus(dataToBeCollected.collectedRequirements())
         )
+    }
 
     /**
      * Send a POST request to VerificationPageData,
