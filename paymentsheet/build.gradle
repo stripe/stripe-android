@@ -8,9 +8,11 @@ apply plugin: 'app.cash.paparazzi'
 dependencies {
     implementation project(":link")
     implementation project(":payments-core")
-    implementation project(':payments-ui-core')
     implementation project(':stripe-ui-core')
     compileOnly project(':financial-connections')
+
+    // Using api so that BillingDetailsCollectionConfiguration is accessible
+    api project(':payments-ui-core')
 
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
