@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.23.0 - 2023-04-17
+
 ### PaymentSheet
 * [ADDED] Added `billingDetailsCollectionConfiguration` to configure how you want to collect billing details. See the docs [here](https://stripe.com/docs/payments/accept-a-payment?platform=android&ui=payment-sheet#billing-details-collection).
 
