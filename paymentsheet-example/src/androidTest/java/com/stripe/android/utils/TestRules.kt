@@ -34,19 +34,18 @@ class TestRules private constructor(
             val composeTestRule = createEmptyComposeRule()
 
             val chain = RuleChain.emptyRuleChain()
-                .around(RetryRule(retryCount))
-                .around(RuleChain
-                    .outerRule(Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS))
-                    .around(composeTestRule)
-                    .around(TestWatcher())
-                    .let { chain ->
-                        if (disableAnimations) {
-                            chain.around(DisableAnimationsRule())
-                        } else {
-                            chain
-                        }
+                .around(composeTestRule)
+                .let { chain ->
+                    if (disableAnimations) {
+                        chain.around(DisableAnimationsRule())
+                    } else {
+                        chain
                     }
-                    .around(CleanupChromeRule))
+                }
+                .around(RetryRule(retryCount))
+                .around(Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS))
+                .around(TestWatcher())
+                .around(CleanupChromeRule)
 
             return TestRules(chain, composeTestRule)
         }
