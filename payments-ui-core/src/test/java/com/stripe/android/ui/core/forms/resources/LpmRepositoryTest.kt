@@ -367,9 +367,9 @@ class LpmRepositoryTest {
          ]
             """.trimIndent(),
             BillingDetailsCollectionConfiguration(
-                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                collectName = true,
+                collectEmail = true,
+                collectPhone = false,
                 address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         )

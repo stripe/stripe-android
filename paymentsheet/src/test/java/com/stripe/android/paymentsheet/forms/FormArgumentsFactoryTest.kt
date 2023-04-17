@@ -14,7 +14,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -107,11 +106,11 @@ class FormArgumentsFactoryTest {
         )
 
         assertThat(actualFromArguments.billingDetailsCollectionConfiguration).isEqualTo(
-            BillingDetailsCollectionConfiguration(
-                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = true,
             )
         )

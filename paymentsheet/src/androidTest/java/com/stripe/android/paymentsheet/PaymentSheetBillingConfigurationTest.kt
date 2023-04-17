@@ -11,7 +11,6 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,11 +70,11 @@ internal class PaymentSheetBillingConfigurationTest {
                             country = "US",
                         ),
                     ),
-                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-                        name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                         attachDefaultsToPaymentMethod = true,
                     ),
                 ),
@@ -147,8 +146,8 @@ internal class PaymentSheetBillingConfigurationTest {
                             country = "US",
                         ),
                     ),
-                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                         attachDefaultsToPaymentMethod = false,
                     ),
                 ),

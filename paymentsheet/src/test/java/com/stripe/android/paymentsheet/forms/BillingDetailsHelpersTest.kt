@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.removeCorrespondingPlaceholder
 import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.specForPlaceholderField
 import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.specsForConfiguration
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -22,11 +22,11 @@ import org.robolectric.RobolectricTestRunner
 class BillingDetailsHelpersTest {
     @Test
     fun `Test unused elements are removed`() {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
             attachDefaultsToPaymentMethod = false,
         )
 
@@ -44,11 +44,11 @@ class BillingDetailsHelpersTest {
 
     @Test
     fun `Test placeholders are not added in Automatic collection mode`() {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
             attachDefaultsToPaymentMethod = false,
         )
 
@@ -66,11 +66,11 @@ class BillingDetailsHelpersTest {
 
     @Test
     fun `Test billing details elements are added where they should`() {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = false,
         )
 
@@ -104,11 +104,11 @@ class BillingDetailsHelpersTest {
     @Suppress("LongMethod")
     @Test
     fun `Test correct spec is returned for placeholder fields`() {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = false,
         )
 
@@ -146,11 +146,11 @@ class BillingDetailsHelpersTest {
 
     @Test
     fun `Test null specs returned when not collecting field`() {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
             attachDefaultsToPaymentMethod = false,
         )
 
