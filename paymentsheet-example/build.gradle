@@ -17,7 +17,6 @@ dependencies {
     implementation project(':paymentsheet')
     implementation project(':stripecardscan')
     implementation project(':financial-connections')
-    implementation project(':payments-ui-core')
 
     implementation "com.google.android.libraries.places:places:$placesVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"

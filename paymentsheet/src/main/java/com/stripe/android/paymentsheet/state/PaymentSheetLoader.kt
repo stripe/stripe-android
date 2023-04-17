@@ -227,12 +227,14 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         configuration: PaymentSheet.Configuration?,
     ): Result<StripeIntent> {
         return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
+            val billingDetailsCollectionConfig =
+                configuration?.billingDetailsCollectionConfiguration?.toInternal()
+                    ?: BillingDetailsCollectionConfiguration()
+
             lpmRepository.update(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
-                billingDetailsCollectionConfiguration =
-                configuration?.billingDetailsCollectionConfiguration
-                    ?: BillingDetailsCollectionConfiguration(),
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
             )
 
             if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
@@ -346,4 +348,42 @@ private fun List<PaymentMethod>.withLastUsedPaymentMethodFirst(
 
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
     return PaymentSelection.Saved(this, isGooglePay = false)
+}
+
+private fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal(): BillingDetailsCollectionConfiguration {
+    return BillingDetailsCollectionConfiguration(
+        name = name.toInternal(),
+        phone = phone.toInternal(),
+        email = email.toInternal(),
+        address = address.toInternal(),
+        attachDefaultsToPaymentMethod = attachDefaultsToPaymentMethod,
+    )
+}
+
+private fun PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.toInternal(): BillingDetailsCollectionConfiguration.CollectionMode {
+    return when (this) {
+        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic -> {
+            BillingDetailsCollectionConfiguration.CollectionMode.Automatic
+        }
+        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never -> {
+            BillingDetailsCollectionConfiguration.CollectionMode.Never
+        }
+        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always -> {
+            BillingDetailsCollectionConfiguration.CollectionMode.Always
+        }
+    }
+}
+
+private fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.toInternal(): BillingDetailsCollectionConfiguration.AddressCollectionMode {
+    return when (this) {
+        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
+            BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+        }
+        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
+            BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+        }
+        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
+            BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+        }
+    }
 }

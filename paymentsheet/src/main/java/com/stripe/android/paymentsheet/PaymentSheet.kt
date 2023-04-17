@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
@@ -960,6 +959,83 @@ class PaymentSheet internal constructor(
             fun phone(phone: String?) = apply { this.phone = phone }
 
             fun build() = BillingDetails(address, email, name, phone)
+        }
+    }
+
+    /**
+     * Configuration for how billing details are collected during checkout.
+     */
+    @Parcelize
+    data class BillingDetailsCollectionConfiguration(
+        /**
+         * How to collect the name field.
+         */
+        val name: CollectionMode = CollectionMode.Automatic,
+
+        /**
+         * How to collect the phone field.
+         */
+        val phone: CollectionMode = CollectionMode.Automatic,
+
+        /**
+         * How to collect the email field.
+         */
+        val email: CollectionMode = CollectionMode.Automatic,
+
+        /**
+         * How to collect the billing address.
+         */
+        val address: AddressCollectionMode = AddressCollectionMode.Automatic,
+
+        /**
+         * Whether the values included in `PaymentSheet.Configuration.defaultBillingDetails`
+         * should be attached to the payment method, this includes fields that aren't displayed in the form.
+         *
+         * If `false` (the default), those values will only be used to prefill the corresponding fields in the form.
+         */
+        val attachDefaultsToPaymentMethod: Boolean = false,
+    ) : Parcelable {
+
+        /**
+         * Billing details fields collection options.
+         */
+        enum class CollectionMode {
+            /**
+             * The field will be collected depending on the Payment Method's requirements.
+             */
+            Automatic,
+
+            /**
+             * The field will never be collected.
+             * If this field is required by the Payment Method, you must provide it as part of `defaultBillingDetails`.
+             */
+            Never,
+
+            /**
+             * The field will always be collected, even if it isn't required for the Payment Method.
+             */
+            Always,
+        }
+
+        /**
+         * Billing address collection options.
+         */
+        enum class AddressCollectionMode {
+            /**
+             * Only the fields required by the Payment Method will be collected, this may be none.
+             */
+            Automatic,
+
+            /**
+             * Address will never be collected.
+             * If the Payment Method requires a billing address, you must provide it as part of `defaultBillingDetails`.
+             */
+            Never,
+
+            /**
+             * Collect the full billing address, regardless of the Payment Method requirements.
+             */
+            Full,
         }
     }
 

@@ -36,6 +36,8 @@ import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.paymentsheet.forms.UpiRequirement
 import com.stripe.android.paymentsheet.forms.ZipRequirement
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.CollectionMode.Always
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
@@ -216,8 +218,7 @@ class LpmRepository constructor(
     private fun convertToSupportedPaymentMethod(
         stripeIntent: StripeIntent,
         sharedDataSpec: SharedDataSpec,
-        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
-            BillingDetailsCollectionConfiguration()
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     ) = when (sharedDataSpec.type) {
         PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
             code = "card",
@@ -571,20 +572,16 @@ class LpmRepository constructor(
             val specs = listOfNotNull(
                 ContactInformationSpec(
                     collectName = false,
-                    collectEmail = billingDetailsCollectionConfiguration.email ==
-                        BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    collectPhone = billingDetailsCollectionConfiguration.phone ==
-                        BillingDetailsCollectionConfiguration.CollectionMode.Always
+                    collectEmail = billingDetailsCollectionConfiguration.email == Always,
+                    collectPhone = billingDetailsCollectionConfiguration.phone == Always,
                 ),
                 CardDetailsSectionSpec(
-                    collectName = billingDetailsCollectionConfiguration.name ==
-                        BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    collectName = billingDetailsCollectionConfiguration.name == Always,
                 ),
                 CardBillingSpec(
                     collectionMode = billingDetailsCollectionConfiguration.address,
                 ).takeIf {
-                    billingDetailsCollectionConfiguration.address !=
-                        BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                    billingDetailsCollectionConfiguration.address != Never
                 },
                 SaveForFutureUseSpec(),
             )

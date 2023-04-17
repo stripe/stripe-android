@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.model
 
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

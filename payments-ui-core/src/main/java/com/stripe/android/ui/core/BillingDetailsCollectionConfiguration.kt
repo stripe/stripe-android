@@ -1,11 +1,13 @@
 package com.stripe.android.ui.core
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 /**
  * Configuration for how billing details are collected during checkout.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class BillingDetailsCollectionConfiguration(
     /**
