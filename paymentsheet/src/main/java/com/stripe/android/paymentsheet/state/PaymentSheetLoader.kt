@@ -25,7 +25,7 @@ import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
 import kotlinx.coroutines.async
@@ -230,12 +230,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
             val billingDetailsCollectionConfig =
                 configuration?.billingDetailsCollectionConfiguration?.toInternal()
-                    ?: BillingDetailsCollectionConfiguration()
+                    ?: CardBillingDetailsCollectionConfiguration()
 
             lpmRepository.update(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
-                billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
+                cardBillingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
             )
 
             if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
@@ -351,20 +351,20 @@ private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
     return PaymentSelection.Saved(this, isGooglePay = false)
 }
 
-private fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal(): BillingDetailsCollectionConfiguration {
-    return BillingDetailsCollectionConfiguration(
+private fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal(): CardBillingDetailsCollectionConfiguration {
+    return CardBillingDetailsCollectionConfiguration(
         collectName = name == Always,
         collectEmail = email == Always,
         collectPhone = phone == Always,
         address = when (address) {
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
-                BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
             }
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
-                BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never
             }
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
-                BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             }
         },
     )

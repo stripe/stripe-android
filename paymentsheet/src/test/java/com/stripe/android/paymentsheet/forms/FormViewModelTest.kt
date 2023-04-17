@@ -12,7 +12,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -724,11 +724,11 @@ internal class FormViewModelTest {
                 attachDefaultsToPaymentMethod = false,
             )
 
-            val internalBillingDetailsCollectionConfig = BillingDetailsCollectionConfiguration(
+            val internalBillingDetailsCollectionConfig = CardBillingDetailsCollectionConfiguration(
                 collectName = true,
                 collectEmail = true,
                 collectPhone = true,
-                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
 
             val args = COMPOSE_FRAGMENT_ARGS.copy(

@@ -7,7 +7,7 @@ import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
@@ -366,11 +366,11 @@ class LpmRepositoryTest {
             }
          ]
             """.trimIndent(),
-            BillingDetailsCollectionConfiguration(
+            CardBillingDetailsCollectionConfiguration(
                 collectName = true,
                 collectEmail = true,
                 collectPhone = false,
-                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         )
 
@@ -393,6 +393,6 @@ class LpmRepositoryTest {
 
         val addressSpec = card.formSpec.items[2] as CardBillingSpec
         assertThat(addressSpec.collectionMode)
-            .isEqualTo(BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+            .isEqualTo(CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
     }
 }
