@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -352,38 +353,19 @@ private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
 
 private fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal(): BillingDetailsCollectionConfiguration {
     return BillingDetailsCollectionConfiguration(
-        name = name.toInternal(),
-        phone = phone.toInternal(),
-        email = email.toInternal(),
-        address = address.toInternal(),
-        attachDefaultsToPaymentMethod = attachDefaultsToPaymentMethod,
+        collectName = name == Always,
+        collectEmail = email == Always,
+        collectPhone = phone == Always,
+        address = when (address) {
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+            }
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+            }
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            }
+        },
     )
-}
-
-private fun PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.toInternal(): BillingDetailsCollectionConfiguration.CollectionMode {
-    return when (this) {
-        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic -> {
-            BillingDetailsCollectionConfiguration.CollectionMode.Automatic
-        }
-        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never -> {
-            BillingDetailsCollectionConfiguration.CollectionMode.Never
-        }
-        PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always -> {
-            BillingDetailsCollectionConfiguration.CollectionMode.Always
-        }
-    }
-}
-
-private fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.toInternal(): BillingDetailsCollectionConfiguration.AddressCollectionMode {
-    return when (this) {
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
-            BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
-        }
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
-            BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-        }
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
-            BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-        }
-    }
 }

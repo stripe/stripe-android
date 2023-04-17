@@ -988,7 +988,7 @@ class PaymentSheet internal constructor(
         val address: AddressCollectionMode = AddressCollectionMode.Automatic,
 
         /**
-         * Whether the values included in `PaymentSheet.Configuration.defaultBillingDetails`
+         * Whether the values included in [PaymentSheet.Configuration.defaultBillingDetails]
          * should be attached to the payment method, this includes fields that aren't displayed in the form.
          *
          * If `false` (the default), those values will only be used to prefill the corresponding fields in the form.

@@ -36,8 +36,6 @@ import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.paymentsheet.forms.UpiRequirement
 import com.stripe.android.paymentsheet.forms.ZipRequirement
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.CollectionMode.Always
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
@@ -572,16 +570,16 @@ class LpmRepository constructor(
             val specs = listOfNotNull(
                 ContactInformationSpec(
                     collectName = false,
-                    collectEmail = billingDetailsCollectionConfiguration.email == Always,
-                    collectPhone = billingDetailsCollectionConfiguration.phone == Always,
+                    collectEmail = billingDetailsCollectionConfiguration.collectEmail,
+                    collectPhone = billingDetailsCollectionConfiguration.collectPhone,
                 ),
                 CardDetailsSectionSpec(
-                    collectName = billingDetailsCollectionConfiguration.name == Always,
+                    collectName = billingDetailsCollectionConfiguration.collectName,
                 ),
                 CardBillingSpec(
                     collectionMode = billingDetailsCollectionConfiguration.address,
                 ).takeIf {
-                    billingDetailsCollectionConfiguration.address != Never
+                    billingDetailsCollectionConfiguration.collectAddress
                 },
                 SaveForFutureUseSpec(),
             )
