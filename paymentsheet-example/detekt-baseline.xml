@@ -37,18 +37,18 @@
     <ID>MaxLineLength:PaymentSheetPlaygroundActivity.kt$PaymentSheetPlaygroundActivity$InitializationType.Normal.value -> viewBinding.initializationRadioGroup.check(R.id.normal_initialization_button)</ID>
     <ID>MaxLineLength:PaymentSheetPlaygroundActivity.kt$PaymentSheetPlaygroundActivity$false -> viewBinding.allowsDelayedPaymentMethodsRadioGroup.check(R.id.allowsDelayedPaymentMethods_off_button)</ID>
     <ID>MaxLineLength:PaymentSheetPlaygroundActivity.kt$PaymentSheetPlaygroundActivity$get() = viewBinding.allowsDelayedPaymentMethodsRadioGroup.checkedRadioButtonId == R.id.allowsDelayedPaymentMethods_on_button</ID>
-    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:147</ID>
+    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:146</ID>
+    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:445</ID>
     <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:446</ID>
-    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:447</ID>
-    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:497</ID>
-    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:507</ID>
+    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:496</ID>
+    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:506</ID>
+    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:512</ID>
     <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:513</ID>
-    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:514</ID>
+    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:518</ID>
     <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:519</ID>
-    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:520</ID>
+    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:523</ID>
     <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:524</ID>
     <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:525</ID>
-    <ID>MaximumLineLength:com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.kt:526</ID>
     <ID>PackageNaming:CompleteFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.complete_flow</ID>
     <ID>PackageNaming:CompleteFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.complete_flow</ID>
     <ID>PackageNaming:CompleteFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.complete_flow</ID>
