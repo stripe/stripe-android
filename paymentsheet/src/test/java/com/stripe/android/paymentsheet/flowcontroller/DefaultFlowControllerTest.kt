@@ -9,6 +9,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
+import app.cash.turbine.plusAssign
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
@@ -56,7 +58,6 @@ import com.stripe.android.testing.FakeIntentConfirmationInterceptor
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.RelayingPaymentSheetLoader
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
@@ -1260,26 +1261,26 @@ private suspend fun PaymentSheet.FlowController.configureExpectingSuccess(
     clientSecret: String = PaymentSheetFixtures.CLIENT_SECRET,
     configuration: PaymentSheet.Configuration? = null,
 ) {
-    val configureResult = CompletableDeferred<Throwable?>()
+    val configureTurbine = Turbine<Throwable?>()
     configureWithPaymentIntent(
         paymentIntentClientSecret = clientSecret,
         configuration = configuration,
     ) { _, error ->
-        configureResult.complete(error)
+        configureTurbine += error
     }
-    assertThat(configureResult.await()).isNull()
+    assertThat(configureTurbine.awaitItem()).isNull()
 }
 
 private suspend fun PaymentSheet.FlowController.configureExpectingError(
     clientSecret: String = PaymentSheetFixtures.CLIENT_SECRET,
     configuration: PaymentSheet.Configuration? = null,
 ) {
-    val configureResult = CompletableDeferred<Throwable?>()
+    val configureTurbine = Turbine<Throwable?>()
     configureWithPaymentIntent(
         paymentIntentClientSecret = clientSecret,
         configuration = configuration,
     ) { _, error ->
-        configureResult.complete(error)
+        configureTurbine += error
     }
-    assertThat(configureResult.await()).isNotNull()
+    assertThat(configureTurbine.awaitItem()).isNotNull()
 }
