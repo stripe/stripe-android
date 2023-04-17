@@ -35,24 +35,21 @@ sealed class PaymentFlowResult {
         @JvmSynthetic
         fun toBundle() = bundleOf(EXTRA to this)
 
-        internal fun validate(): Result<Validated> {
+        internal fun validate(): Validated {
             if (exception is Throwable) {
-                return Result.failure(exception)
+                throw exception
+            }
+            require(!clientSecret.isNullOrBlank()) {
+                CLIENT_SECRET_INTENT_ERROR
             }
 
-            if (clientSecret.isNullOrBlank()) {
-                return Result.failure(IllegalArgumentException(CLIENT_SECRET_INTENT_ERROR))
-            }
-
-            return Result.success(
-                Validated(
-                    clientSecret = clientSecret,
-                    flowOutcome = flowOutcome,
-                    canCancelSource = canCancelSource,
-                    sourceId = sourceId,
-                    source = source,
-                    stripeAccountId = stripeAccountId
-                )
+            return Validated(
+                clientSecret = clientSecret,
+                flowOutcome = flowOutcome,
+                canCancelSource = canCancelSource,
+                sourceId = sourceId,
+                source = source,
+                stripeAccountId = stripeAccountId
             )
         }
 

@@ -43,7 +43,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     suspend fun processResult(
         unvalidatedResult: PaymentFlowResult.Unvalidated
     ): Result<S> = withContext(workContext) {
-        val result = unvalidatedResult.validate().getOrElse {
+        val result = runCatching { unvalidatedResult.validate() }.getOrElse {
             return@withContext Result.failure(it)
         }
 
