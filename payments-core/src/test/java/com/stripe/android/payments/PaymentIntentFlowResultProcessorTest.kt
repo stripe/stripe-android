@@ -297,6 +297,49 @@ internal class PaymentIntentFlowResultProcessorTest {
                 )
         }
 
+    @Test
+    fun `Keeps retrying when encountering a failure while retrieving intent`() = runTest(testDispatcher) {
+        val processingIntent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+            status = StripeIntent.Status.RequiresAction,
+        )
+
+        val succeededIntent = processingIntent.copy(status = StripeIntent.Status.Succeeded)
+
+        whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            processingIntent,
+            null,
+            null,
+            succeededIntent,
+        )
+
+        val clientSecret = requireNotNull(processingIntent.clientSecret)
+        val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
+        val result = processor.processResult(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = clientSecret,
+                flowOutcome = StripeIntentResult.Outcome.CANCELED
+            )
+        ).getOrThrow()
+
+        verify(
+            mockStripeRepository,
+            times(PaymentFlowResultProcessor.MAX_RETRIES + 1)
+        ).retrievePaymentIntent(
+            eq(clientSecret),
+            eq(requestOptions),
+            eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD),
+        )
+
+        val expectedResult = PaymentIntentResult(
+            intent = succeededIntent,
+            outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+            failureMessage = null,
+        )
+
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
     private suspend fun runCanceledFlow(
         initialIntent: PaymentIntent,
         refreshedIntent: PaymentIntent = initialIntent,
