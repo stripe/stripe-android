@@ -9,11 +9,11 @@ import androidx.navigation.NavController
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.IndividualDestination
-import com.stripe.android.identity.navigation.IndividualWelcomeDestination
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.Requirement
+import com.stripe.android.identity.networking.models.Requirement.Companion.nextDestination
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isUnsupportedClient
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
@@ -45,10 +45,10 @@ internal fun InitialLoadingScreen(
         LaunchedEffect(Unit) {
             if (it.isUnsupportedClient()) {
                 fallbackUrlLauncher.launchFallbackUrl(it.fallbackUrl)
-            } else if (it.requirements.missing.contains(Requirement.BIOMETRICCONSENT)) {
-                navController.navigateTo(ConsentDestination)
             } else {
-                navController.navigateTo(IndividualWelcomeDestination)
+                navController.navigateTo(
+                    it.requirements.missing.nextDestination(context)
+                )
             }
         }
     }

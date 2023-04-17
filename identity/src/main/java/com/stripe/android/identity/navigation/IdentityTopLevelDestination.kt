@@ -117,6 +117,8 @@ internal fun String.routeToScreenName(): String = when (this) {
         IdentityAnalyticsRequestFactory.SCREEN_NAME_INDIVIDUAL
     CountryNotListedDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_COUNTRY_NOT_LISTED
+    IndividualWelcomeDestination.ROUTE.route ->
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_INDIVIDUAL_WELCOME
     else ->
         throw IllegalArgumentException("Invalid route: $this")
 }

@@ -8,6 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.INDIVIDUAL
 import com.stripe.android.identity.networking.Resource
@@ -70,6 +71,14 @@ class InitialLoadingScreenTest {
         )
     }
 
+    private val verificationPageWithEmptyRequirements = mock<VerificationPage>().also {
+        whenever(it.requirements).thenReturn(
+            VerificationPageRequirements(
+                missing = listOf()
+            )
+        )
+    }
+
     private val verificationPageData = MutableLiveData<Resource<VerificationPage>>()
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
@@ -113,6 +122,18 @@ class InitialLoadingScreenTest {
             verify(mockNavController).navigate(
                 argWhere {
                     it.startsWith(INDIVIDUAL)
+                },
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+        }
+    }
+
+    @Test
+    fun testEmptyRequirementsNavigatesToSuccess() {
+        setComposeTestRuleWith(verificationPageWithEmptyRequirements) {
+            verify(mockNavController).navigate(
+                argWhere {
+                    it.startsWith(ConfirmationDestination.CONFIRMATION)
                 },
                 any<NavOptionsBuilder.() -> Unit>()
             )
