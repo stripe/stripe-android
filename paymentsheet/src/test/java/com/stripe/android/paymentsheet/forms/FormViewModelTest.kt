@@ -12,7 +12,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -533,7 +533,7 @@ internal class FormViewModelTest {
                     postalCode = "94111"
                 ),
             ),
-            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 attachDefaultsToPaymentMethod = true,
             )
         )
@@ -573,7 +573,7 @@ internal class FormViewModelTest {
                     postalCode = "94111"
                 ),
             ),
-            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 attachDefaultsToPaymentMethod = true,
             )
         )
@@ -613,7 +613,7 @@ internal class FormViewModelTest {
                     postalCode = "94111"
                 ),
             ),
-            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 attachDefaultsToPaymentMethod = false,
             )
         )
@@ -631,11 +631,11 @@ internal class FormViewModelTest {
 
     @Test
     fun `Test placeholder specs are transformed correctly`() = runBlocking {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = false,
         )
         val specs = listOf(
@@ -682,11 +682,11 @@ internal class FormViewModelTest {
 
     @Test
     fun `Test address without country placeholder produces correct element`() = runBlocking {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = false,
         )
 
@@ -716,12 +716,19 @@ internal class FormViewModelTest {
     @Test
     fun `Test phone country changes with AddressElement country`() =
         runBlocking {
-            val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = false,
+            )
+
+            val internalBillingDetailsCollectionConfig = CardBillingDetailsCollectionConfiguration(
+                collectName = true,
+                collectEmail = true,
+                collectPhone = true,
+                address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
 
             val args = COMPOSE_FRAGMENT_ARGS.copy(
@@ -729,11 +736,12 @@ internal class FormViewModelTest {
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 billingDetails = PaymentSheet.BillingDetails(),
             )
+
             val formViewModel = createViewModel(
                 args,
                 createLpmRepositorySupportedPaymentMethod(
                     PaymentMethod.Type.Card,
-                    LpmRepository.hardcodedCardSpec(billingDetailsCollectionConfiguration).formSpec,
+                    LpmRepository.hardcodedCardSpec(internalBillingDetailsCollectionConfig).formSpec,
                 ),
             )
 
@@ -765,11 +773,11 @@ internal class FormViewModelTest {
     @Test
     fun `Test phone country changes with standalone CountryElement`() =
         runBlocking {
-            val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = false,
             )
 

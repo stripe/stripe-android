@@ -43,7 +43,6 @@ import com.stripe.android.paymentsheet.example.playground.viewmodel.ConfirmInten
 import com.stripe.android.paymentsheet.example.playground.viewmodel.ConfirmIntentNetworkException
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -102,8 +101,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             else -> null
         }
 
-    private val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
-        get() = BillingDetailsCollectionConfiguration(
+    private val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration
+        get() = PaymentSheet.BillingDetailsCollectionConfiguration(
             name = collectName.asBillingDetailsCollectionConfigurationMode,
             email = collectEmail.asBillingDetailsCollectionConfigurationMode,
             phone = collectPhone.asBillingDetailsCollectionConfigurationMode,
