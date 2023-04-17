@@ -15,7 +15,6 @@ import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.LinkState
-import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
@@ -58,7 +57,7 @@ class TestMultiStepFieldsReloaded {
     @Before
     fun before() {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        testDriver = PlaygroundTestDriver(device, rules.compose, screenshotProcessor)
+        testDriver = PlaygroundTestDriver(device, rules.compose)
     }
 
     @Test
@@ -213,7 +212,6 @@ class TestMultiStepFieldsReloaded {
     companion object {
         // There exists only one screenshot processor so that all tests put
         // their files in the same directory.
-        private val screenshotProcessor = MyScreenCaptureProcessor()
         private val lpmRepository = initializedLpmRepository(
             context = InstrumentationRegistry.getInstrumentation().targetContext,
         )
