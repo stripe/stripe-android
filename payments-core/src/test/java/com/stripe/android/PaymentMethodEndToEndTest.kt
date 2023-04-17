@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -22,6 +23,7 @@ internal class PaymentMethodEndToEndTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    @Ignore("Ignore while this is broken on the backend.")
     @Test
     fun createPaymentMethod_withBacsDebit_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.BACS_DEBIT
