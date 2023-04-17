@@ -7,6 +7,9 @@
 ### PaymentSheet
 * [ADDED] Added `billingDetailsCollectionConfiguration` to configure how you want to collect billing details. See the docs [here](https://stripe.com/docs/payments/accept-a-payment?platform=android&ui=payment-sheet#billing-details-collection).
 
+### Identity
+* [ADDED][6536](https://github.com/stripe/stripe-android/pull/6536) Added test mode for the SDK.
+
 ## 20.22.0 - 2023-04-10
 
 ### All SDKs

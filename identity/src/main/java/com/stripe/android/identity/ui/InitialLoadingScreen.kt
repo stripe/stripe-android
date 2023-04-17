@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.navigation.ConsentDestination
+import com.stripe.android.identity.navigation.DebugDestination
 import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
@@ -45,6 +46,8 @@ internal fun InitialLoadingScreen(
         LaunchedEffect(Unit) {
             if (it.isUnsupportedClient()) {
                 fallbackUrlLauncher.launchFallbackUrl(it.fallbackUrl)
+            } else if (!it.livemode) {
+                navController.navigateTo(DebugDestination)
             } else {
                 navController.navigateTo(
                     it.requirements.missing.nextDestination(context)
