@@ -44,6 +44,7 @@ class TestRules private constructor(
                         chain
                     }
                 }
+                .around(CleanupChromeRule)
                 .around(RetryRule(retryCount))
 
             return TestRules(chain, composeTestRule)
