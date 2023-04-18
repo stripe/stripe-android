@@ -152,17 +152,11 @@ abstract class StripeRepository {
         options: ApiRequest.Options
     ): Source?
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     internal abstract suspend fun retrieveSource(
         sourceId: String,
         clientSecret: String,
         options: ApiRequest.Options
-    ): Source?
+    ): Result<Source>
 
     @Throws(
         AuthenticationException::class,

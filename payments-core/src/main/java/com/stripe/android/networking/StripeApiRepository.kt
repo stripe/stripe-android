@@ -526,24 +526,18 @@ class StripeApiRepository @JvmOverloads internal constructor(
      * @return a [Source] if one could be retrieved for the input params, or `null` if
      * no such Source could be found.
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     override suspend fun retrieveSource(
         sourceId: String,
         clientSecret: String,
         options: ApiRequest.Options
-    ): Source? {
-        return fetchStripeModel(
-            apiRequestFactory.createGet(
-                getRetrieveSourceApiUrl(sourceId),
-                options,
-                SourceParams.createRetrieveSourceParams(clientSecret)
+    ): Result<Source> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getRetrieveSourceApiUrl(sourceId),
+                options = options,
+                params = SourceParams.createRetrieveSourceParams(clientSecret),
             ),
-            SourceJsonParser()
+            jsonParser = SourceJsonParser(),
         ) {
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.SourceRetrieve)

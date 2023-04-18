@@ -385,7 +385,7 @@ class Stripe internal constructor(
         callback: ApiResultCallback<PaymentIntentResult>
     ): Boolean {
         return if (data != null && isPaymentResult(requestCode, data)) {
-            executeAsync(callback) {
+            executeAsyncForResult(callback) {
                 paymentController.getPaymentIntentResult(data)
             }
             true
@@ -675,7 +675,7 @@ class Stripe internal constructor(
         callback: ApiResultCallback<SetupIntentResult>
     ): Boolean {
         return if (data != null && isSetupResult(requestCode, data)) {
-            executeAsync(callback) {
+            executeAsyncForResult(callback) {
                 paymentController.getSetupIntentResult(data)
             }
             true
@@ -951,7 +951,7 @@ class Stripe internal constructor(
         data: Intent,
         callback: ApiResultCallback<Source>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             paymentController.getAuthenticateSourceResult(data)
         }
     }
@@ -1058,7 +1058,7 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<Source>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.retrieveSource(
                 sourceId,
                 clientSecret,
@@ -1110,7 +1110,7 @@ class Stripe internal constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 )
-            )
+            ).getOrThrow()
         }
     }
 

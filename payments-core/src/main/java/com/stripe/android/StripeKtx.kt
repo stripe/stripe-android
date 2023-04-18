@@ -560,15 +560,15 @@ suspend fun Stripe.retrieveSource(
     @Size(min = 1) sourceId: String,
     @Size(min = 1) clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId
-): Source = runApiRequest {
-    stripeRepository.retrieveSource(
+): Source {
+    return stripeRepository.retrieveSource(
         sourceId,
         clientSecret,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -721,7 +721,7 @@ suspend fun Stripe.getPaymentIntentResult(
             requestCode,
             data
         )
-    ) { paymentController.getPaymentIntentResult(data) }
+    ) { paymentController.getPaymentIntentResult(data).getOrThrow() }
 }
 
 /**
@@ -753,7 +753,7 @@ suspend fun Stripe.getSetupIntentResult(
             requestCode,
             data
         )
-    ) { paymentController.getSetupIntentResult(data) }
+    ) { paymentController.getSetupIntentResult(data).getOrThrow() }
 }
 
 /**
@@ -784,7 +784,7 @@ suspend fun Stripe.getAuthenticateSourceResult(
             requestCode,
             data
         )
-    ) { paymentController.getAuthenticateSourceResult(data) }
+    ) { paymentController.getAuthenticateSourceResult(data).getOrThrow() }
 }
 
 /**
