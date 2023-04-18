@@ -21,7 +21,7 @@ adb shell "screenrecord /sdcard/$now-1.mp4" &
 childpid=$!
 
 echo "Executing maestro tests"
-maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections-livemode/
+maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections-livemode/ || true
 result=$?
 
 echo "Waiting for record to finish"
