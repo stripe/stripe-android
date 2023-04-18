@@ -6,6 +6,11 @@ package com.stripe.android.paymentsheet.addresselement
 internal sealed class AddressElementScreen(
     open val route: String
 ) {
+
+    object Loading : AddressElementScreen("Loading")
+
+    object InputAddress : AddressElementScreen("InputAddress")
+
     class Autocomplete(
         val country: String
     ) : AddressElementScreen(
@@ -16,6 +21,4 @@ internal sealed class AddressElementScreen(
             const val route = "Autocomplete?$countryArg={$countryArg}"
         }
     }
-
-    object InputAddress : AddressElementScreen("InputAddress")
 }

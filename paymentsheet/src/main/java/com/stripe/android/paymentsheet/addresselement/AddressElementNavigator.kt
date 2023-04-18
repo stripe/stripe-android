@@ -30,15 +30,15 @@ internal class AddressElementNavigator @Inject constructor() {
             .filterNotNull()
     }
 
-    fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled) =
-        onDismiss?.let {
-            it(result)
-        }
+    fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled) {
+        onDismiss?.invoke(result)
+    }
 
-    fun onBack() =
+    fun onBack() {
         navigationController?.let { navController ->
             if (!navController.popBackStack()) {
                 dismiss()
             }
         }
+    }
 }

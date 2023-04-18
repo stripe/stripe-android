@@ -17,7 +17,6 @@ import androidx.compose.material.Surface
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
@@ -28,9 +27,9 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.paymentsheet.ui.Loading
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.AnimationConstants
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -72,7 +71,7 @@ internal class AddressElementActivity : ComponentActivity() {
                     val route = navController.currentDestination?.route
                     route != AddressElementScreen.Autocomplete.route
                 },
-                skipHalfExpanded = false,
+                skipHalfExpanded = true,
             )
 
             navController = rememberAnimatedNavController()
@@ -82,23 +81,14 @@ internal class AddressElementActivity : ComponentActivity() {
 
             LaunchedEffect(Unit) {
                 modalBottomSheetState.show()
-            }
-
-            LaunchedEffect(Unit) {
-                // We need to drop(1) to avoid the sheet being closed on the first composition,
-                // given that the initial bottom sheet state is `hidden`.
-                snapshotFlow { modalBottomSheetState.currentValue }.drop(1).collect {
-                    // finish the activity when the sheet closes.
-                    if (it == ModalBottomSheetValue.Hidden) {
-                        finish()
-                    }
-                }
+                navController.navigateToContent()
             }
 
             viewModel.navigator.onDismiss = {
                 setResult(it)
                 coroutineScope.launch {
                     modalBottomSheetState.hide()
+                    finish()
                 }
             }
 
@@ -110,9 +100,12 @@ internal class AddressElementActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxSize()
                         ) {
                             AnimatedNavHost(
-                                navController,
-                                AddressElementScreen.InputAddress.route
+                                navController = navController,
+                                startDestination = AddressElementScreen.Loading.route,
                             ) {
+                                composable(AddressElementScreen.Loading.route) {
+                                    Loading()
+                                }
                                 composable(AddressElementScreen.InputAddress.route) {
                                     InputAddressScreen(viewModel.injector)
                                 }
@@ -158,5 +151,13 @@ internal class AddressElementActivity : ComponentActivity() {
     override fun finish() {
         super.finish()
         overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
+    }
+}
+
+private fun NavHostController.navigateToContent() {
+    return navigate(AddressElementScreen.InputAddress.route) {
+        popUpTo(AddressElementScreen.Loading.route) {
+            inclusive = true
+        }
     }
 }
