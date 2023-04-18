@@ -14,7 +14,7 @@ maestro -v
 ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:installDebug
 
 # Start screen record (adb screenrecord has a 3 min limit).
-adb shell "screenrecord /sdcard/$now-1.mp4" &
+adb shell "screenrecord /sdcard/$now-1.mp4; screenrecord /sdcard/$now-2.mp4" &
 
 # Store the process ID
 childpid=$!
@@ -34,5 +34,6 @@ echo "Pulling video results from device."
 mkdir -p /tmp/test_results
 cd /tmp/test_results
 adb pull "/sdcard/$now-1.mp4" || true
+adb pull "/sdcard/$now-2.mp4" || true
 
 exit "$result"

@@ -49,7 +49,7 @@ appId: com.stripe.android.financialconnections.example
 # SELECT ALL ACCOUNTS
 - extendedWaitUntil:
     visible: "Select all accounts"
-    timeout: 60000
+    timeout: 120000
 - tapOn: "Select all accounts" # select all accounts
 - tapOn: "Link accounts"
 # CONFIRM AND COMPLETE
