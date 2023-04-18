@@ -1,0 +1,58 @@
+appId: com.stripe.android.financialconnections.example
+---
+- launchApp
+# Android specific: Navigate to example
+- tapOn: "Playground"
+- tapOn:
+    id: "Native_checkbox"
+- tapOn: "Mode_Dropdown_Icon"
+- tapOn:
+    id: "LiveTesting_checkbox"
+- tapOn:
+    id: "Data_checkbox"
+- tapOn: "Connect Accounts!"
+# Common: web AuthFlow - connect OAuth institution
+- extendedWaitUntil:
+    visible: "Agree"
+    timeout: 30000
+- tapOn: "Agree"
+# Search for FinBank
+- tapOn: "Search"
+- inputText: "finbank"
+- tapOn:
+    id: "FinBank_result_row"
+####### Bypass Chrome on-boarding screen #######
+- runFlow:
+    file: ../common/subflow-skip-chrome-welcome.yaml
+###############################################
+# Login on Finbank
+# 101732001: user id input
+# 101732002: password input
+- extendedWaitUntil:
+    visible:
+        id: "101732001"
+    timeout: 60000
+# HACK: Extra tap attempt to wait some time for FinBank animations to finish.
+- repeat:
+    times: 2
+    commands:
+      - tapOn:
+          point: -1,-1
+- tapOn:
+    id: "101732001"
+- inputText: "fini"
+- tapOn:
+    id: "101732002"
+- inputText: "fini"
+- "hideKeyboard"
+- tapOn: "Submit"
+# SELECT ALL ACCOUNTS
+- extendedWaitUntil:
+    visible: "Select all accounts"
+    timeout: 60000
+- tapOn: "Select all accounts" # select all accounts
+- tapOn: "Link accounts"
+# CONFIRM AND COMPLETE
+- tapOn: "Done"
+- assertVisible: ".*Completed!.*"
+- assertVisible: ".*FinBank.*"

@@ -42,12 +42,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -388,6 +392,7 @@ private fun ManualEntryRow(onManualEntryClick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun InstitutionResultTile(
     onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
@@ -398,6 +403,8 @@ private fun InstitutionResultTile(
         modifier = Modifier
             .fillMaxSize()
             .clickable { onInstitutionSelected(institution) }
+            .semantics { testTagsAsResourceId = true }
+            .testTag("${institution.name}_result_row")
             .padding(
                 vertical = 8.dp,
                 horizontal = 24.dp

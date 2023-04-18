@@ -21,7 +21,7 @@ adb shell "screenrecord /sdcard/$now-1.mp4" &
 childpid=$!
 
 # Clear and start collecting logs
-maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections/
+maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections-livemode/
 result=$?
 
 # Wait for the recording process to finish
