@@ -6,7 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/stripe_paymentsheet_googlepay_button_height"
         android:paddingTop="2sp"
-        android:layout_marginHorizontal="-3dp"
+        android:layout_marginHorizontal="@dimen/stripe_paymentsheet_googlepay_button_margin"
         android:background="@drawable/googlepay_button_no_shadow_background"
         android:contentDescription="@string/google_pay">
 

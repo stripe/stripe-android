@@ -151,8 +151,6 @@ internal fun Wallet(
     val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     if (containerState.shouldShow) {
-        // Remove 4.dp from each side to account for Google pay internal padding
-        // Link button will add 4.dp on each side to account for this
         Column(modifier = modifier.padding(horizontal = padding)) {
             if (containerState.showGooglePay) {
                 GooglePayButton(
@@ -162,6 +160,7 @@ internal fun Wallet(
                     modifier = Modifier.padding(top = 7.dp),
                 )
             }
+
             if (containerState.showLink) {
                 LinkButton(
                     email = email,

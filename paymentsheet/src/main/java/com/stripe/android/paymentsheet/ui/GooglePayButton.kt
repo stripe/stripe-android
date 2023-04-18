@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
@@ -56,6 +57,16 @@ internal class GooglePayButton @JvmOverloads constructor(
         viewBinding.googlePayPrimaryButton.finishedBackgroundColor = Color.TRANSPARENT
 
         if (isDark) {
+            viewBinding.googlePayButtonLayout.updateLayoutParams {
+                height = context.resources.getDimensionPixelSize(
+                    R.dimen.stripe_paymentsheet_googlepay_light_button_height
+                )
+                val margin = context.resources.getDimensionPixelSize(
+                    R.dimen.stripe_paymentsheet_googlepay_light_button_margin
+                )
+                (this as LayoutParams).setMargins(margin, 0, margin, 0)
+            }
+
             viewBinding.googlePayButtonLayout.background = ContextCompat.getDrawable(
                 context,
                 R.drawable.googlepay_button_background_light
