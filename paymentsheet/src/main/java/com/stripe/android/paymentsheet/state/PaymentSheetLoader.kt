@@ -12,20 +12,22 @@ import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -42,13 +44,13 @@ import kotlin.coroutines.CoroutineContext
 internal interface PaymentSheetLoader {
 
     suspend fun load(
-        clientSecret: ClientSecret,
+        initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration? = null
     ): Result
 
     sealed class Result {
         data class Success(val state: PaymentSheetState.Full) : Result()
-        class Failure(val throwable: Throwable) : Result()
+        data class Failure(val throwable: Throwable) : Result()
     }
 }
 
@@ -57,10 +59,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     @Named(APP_NAME) private val appName: String,
     private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
-    private val stripeIntentRepository: StripeIntentRepository,
+    private val elementsSessionRepository: ElementsSessionRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
-    private val lpmResourceRepository: ResourceRepository<LpmRepository>,
+    private val lpmRepository: LpmRepository,
     private val logger: Logger,
     private val eventReporter: EventReporter,
     @IOContext private val workContext: CoroutineContext,
@@ -68,16 +70,17 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 ) : PaymentSheetLoader {
 
     override suspend fun load(
-        clientSecret: ClientSecret,
+        initializationMode: PaymentSheet.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration?
-    ) = withContext(workContext) {
+    ): PaymentSheetLoader.Result = withContext(workContext) {
         val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
-        runCatching {
-            retrieveStripeIntent(clientSecret)
-        }.fold(
+
+        retrieveElementsSession(
+            initializationMode = initializationMode,
+            configuration = paymentSheetConfiguration,
+        ).fold(
             onSuccess = { stripeIntent ->
                 create(
-                    clientSecret = clientSecret,
                     stripeIntent = stripeIntent,
                     customerConfig = paymentSheetConfiguration?.customer,
                     config = paymentSheetConfiguration,
@@ -107,7 +110,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private suspend fun create(
-        clientSecret: ClientSecret,
         stripeIntent: StripeIntent,
         customerConfig: PaymentSheet.CustomerConfiguration?,
         config: PaymentSheet.Configuration?,
@@ -118,25 +120,48 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val isLinkAvailable = stripeIntent.paymentMethodTypes.contains(Link.code) &&
             stripeIntent.linkFundingSources.intersect(supportedFundingSources).isNotEmpty()
 
+        val savedSelection = async {
+            prefsRepository.getSavedSelection(
+                isGooglePayAvailable = isGooglePayReady,
+                isLinkAvailable = isLinkAvailable,
+            )
+        }
+
         val paymentMethods = async {
             if (customerConfig != null) {
                 retrieveCustomerPaymentMethods(
-                    stripeIntent,
-                    config,
-                    customerConfig
+                    stripeIntent = stripeIntent,
+                    config = config,
+                    customerConfig = customerConfig,
                 )
             } else {
                 emptyList()
             }
         }
 
-        val savedSelection = async {
-            retrieveSavedPaymentSelection(
-                prefsRepository,
-                isGooglePayReady,
-                isLinkAvailable,
-                paymentMethods.await()
+        val sortedPaymentMethods = async {
+            paymentMethods.await().withLastUsedPaymentMethodFirst(
+                savedSelection = savedSelection.await(),
             )
+        }
+
+        val initialPaymentSelection = async {
+            val desiredSelection = when (val selection = savedSelection.await()) {
+                is SavedSelection.GooglePay -> {
+                    PaymentSelection.GooglePay
+                }
+                is SavedSelection.Link -> {
+                    PaymentSelection.Link
+                }
+                is SavedSelection.PaymentMethod -> {
+                    paymentMethods.await().find { it.id == selection.id }?.toPaymentSelection()
+                }
+                is SavedSelection.None -> {
+                    null
+                }
+            }
+
+            desiredSelection ?: sortedPaymentMethods.await().firstOrNull()?.toPaymentSelection()
         }
 
         val linkState = async {
@@ -147,29 +172,41 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             }
         }
 
-        return@coroutineScope PaymentSheetLoader.Result.Success(
-            PaymentSheetState.Full(
-                config = config,
-                clientSecret = clientSecret,
-                stripeIntent = stripeIntent,
-                customerPaymentMethods = paymentMethods.await(),
-                savedSelection = savedSelection.await(),
-                isGooglePayReady = isGooglePayReady,
-                linkState = linkState.await(),
-                newPaymentSelection = null,
+        warnUnactivatedIfNeeded(stripeIntent)
+
+        if (supportsIntent(stripeIntent, config)) {
+            PaymentSheetLoader.Result.Success(
+                PaymentSheetState.Full(
+                    config = config,
+                    stripeIntent = stripeIntent,
+                    customerPaymentMethods = sortedPaymentMethods.await(),
+                    isGooglePayReady = isGooglePayReady,
+                    linkState = linkState.await(),
+                    paymentSelection = initialPaymentSelection.await(),
+                )
             )
-        )
+        } else {
+            val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
+            val supported = lpmRepository.values().joinToString(separator = ", ") { it.code }
+
+            PaymentSheetLoader.Result.Failure(
+                IllegalArgumentException(
+                    "None of the requested payment methods ($requested) " +
+                        "match the supported payment types ($supported)."
+                )
+            )
+        }
     }
 
     private suspend fun retrieveCustomerPaymentMethods(
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration?,
-        customerConfig: PaymentSheet.CustomerConfiguration
+        customerConfig: PaymentSheet.CustomerConfiguration,
     ): List<PaymentMethod> {
         val paymentMethodTypes = getSupportedSavedCustomerPMs(
             stripeIntent,
             config,
-            lpmResourceRepository.getRepository()
+            lpmRepository,
         ).mapNotNull {
             // The SDK is only able to parse customer LPMs
             // that are hard coded in the SDK.
@@ -177,66 +214,38 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
 
         return customerRepository.getPaymentMethods(
-            customerConfig,
-            paymentMethodTypes
+            customerConfig = customerConfig,
+            types = paymentMethodTypes,
         ).filter { paymentMethod ->
-            paymentMethod.hasExpectedDetails()
+            paymentMethod.hasExpectedDetails() &&
+                // PayPal isn't supported yet as a saved payment method (backend limitation).
+                paymentMethod.type != PaymentMethod.Type.PayPal
         }
     }
 
-    private suspend fun retrieveSavedPaymentSelection(
-        prefsRepository: PrefsRepository,
-        isGooglePayReady: Boolean,
-        isLinkReady: Boolean,
-        paymentMethods: List<PaymentMethod>
-    ): SavedSelection {
-        val savedSelection = prefsRepository.getSavedSelection(isGooglePayReady, isLinkReady)
-        if (savedSelection != SavedSelection.None) {
-            return savedSelection
+    private suspend fun retrieveElementsSession(
+        initializationMode: PaymentSheet.InitializationMode,
+        configuration: PaymentSheet.Configuration?,
+    ): Result<StripeIntent> {
+        return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
+            val billingDetailsCollectionConfig =
+                configuration?.billingDetailsCollectionConfiguration?.toInternal()
+                    ?: CardBillingDetailsCollectionConfiguration()
+
+            lpmRepository.update(
+                stripeIntent = elementsSession.stripeIntent,
+                serverLpmSpecs = elementsSession.paymentMethodSpecs,
+                cardBillingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
+            )
+
+            if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
+                eventReporter.onLpmSpecFailure(
+                    isDecoupling = initializationMode is DeferredIntent,
+                )
+            }
+
+            stripeIntentValidator.requireValid(elementsSession.stripeIntent)
         }
-
-        // No saved selection has been set yet, so we'll initialize it with a default
-        // value based on which payment methods are available.
-        val paymentSelection = determineDefaultPaymentSelection(
-            isGooglePayReady,
-            isLinkReady,
-            paymentMethods
-        )
-
-        prefsRepository.savePaymentSelection(paymentSelection)
-
-        return prefsRepository.getSavedSelection(isGooglePayReady, isLinkReady)
-    }
-
-    private fun determineDefaultPaymentSelection(
-        isGooglePayReady: Boolean,
-        isLinkReady: Boolean,
-        paymentMethods: List<PaymentMethod>
-    ): PaymentSelection? {
-        return when {
-            paymentMethods.isNotEmpty() -> PaymentSelection.Saved(paymentMethods.first())
-            isLinkReady -> PaymentSelection.Link
-            isGooglePayReady -> PaymentSelection.GooglePay
-            else -> null
-        }
-    }
-
-    private suspend fun retrieveStripeIntent(
-        clientSecret: ClientSecret
-    ): StripeIntent {
-        val paymentMethodPreference = stripeIntentRepository.get(clientSecret)
-        val lpmRepository = lpmResourceRepository.getRepository()
-
-        lpmRepository.update(
-            stripeIntent = paymentMethodPreference.intent,
-            serverLpmSpecs = paymentMethodPreference.formUI,
-        )
-
-        if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
-            eventReporter.onLpmSpecFailure()
-        }
-
-        return stripeIntentValidator.requireValid(paymentMethodPreference.intent)
     }
 
     private suspend fun loadLinkState(
@@ -296,4 +305,67 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             shippingValues = shippingAddress
         )
     }
+
+    private fun warnUnactivatedIfNeeded(stripeIntent: StripeIntent) {
+        if (stripeIntent.unactivatedPaymentMethods.isEmpty()) {
+            return
+        }
+
+        val message = "[Stripe SDK] Warning: Your Intent contains the following payment method " +
+            "types which are activated for test mode but not activated for " +
+            "live mode: ${stripeIntent.unactivatedPaymentMethods}. These payment method types " +
+            "will not be displayed in live mode until they are activated. To activate these " +
+            "payment method types visit your Stripe dashboard." +
+            "More information: https://support.stripe.com/questions/activate-a-new-payment-method"
+
+        logger.warning(message)
+    }
+
+    private fun supportsIntent(
+        stripeIntent: StripeIntent,
+        config: PaymentSheet.Configuration?,
+    ): Boolean {
+        val availablePaymentMethods = getPMsToAdd(stripeIntent, config, lpmRepository)
+        val requestedTypes = stripeIntent.paymentMethodTypes.toSet()
+        val availableTypes = availablePaymentMethods.map { it.code }.toSet()
+        return availableTypes.intersect(requestedTypes).isNotEmpty()
+    }
+}
+
+private fun List<PaymentMethod>.withLastUsedPaymentMethodFirst(
+    savedSelection: SavedSelection,
+): List<PaymentMethod> {
+    val defaultPaymentMethodIndex = (savedSelection as? SavedSelection.PaymentMethod)?.let {
+        indexOfFirst { it.id == savedSelection.id }.takeIf { it != -1 }
+    }
+
+    return if (defaultPaymentMethodIndex != null) {
+        val primaryPaymentMethod = get(defaultPaymentMethodIndex)
+        listOf(primaryPaymentMethod) + (this - primaryPaymentMethod)
+    } else {
+        this
+    }
+}
+
+private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
+    return PaymentSelection.Saved(this, isGooglePay = false)
+}
+
+private fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal(): CardBillingDetailsCollectionConfiguration {
+    return CardBillingDetailsCollectionConfiguration(
+        collectName = name == Always,
+        collectEmail = email == Always,
+        collectPhone = phone == Always,
+        address = when (address) {
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
+                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+            }
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
+                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+            }
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
+                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            }
+        },
+    )
 }

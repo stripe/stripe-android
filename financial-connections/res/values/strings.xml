@@ -7,10 +7,10 @@
     <string name="stripe_prepane_title">Link with %1$s</string>
     <string name="stripe_prepane_continue">Continue</string>
     <string name="stripe_institutionpicker_pane_select_bank">Select your bank</string>
-    <string name="stripe_institutionpicker_footer_title">CAN\'T FIND YOUR BANK?</string>
-    <string name="stripe_institutionpicker_footer_item_spelling">Double check your spelling and search terms</string>
-    <string name="stripe_institutionpicker_footer_item_manualentry">Manually add your account</string>
-    <string name="stripe_institutionpicker_footer_item_support">Questions? Contact support</string>
+    <string name="stripe_institutionpicker_no_results_desc">Double check your spelling and search terms</string>
+    <string name="stripe_institutionpicker_no_results_title">No results</string>
+    <string name="stripe_institutionpicker_manual_entry_title">Don’t see your bank?</string>
+    <string name="stripe_institutionpicker_manual_entry_desc">Enter your account and routing numbers</string>
     <string name="stripe_institutionpicker_pane_error_title">Search is currently unavailable</string>
     <string name="stripe_institutionpicker_pane_error_desc">Please try again later</string>
     <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Please try again later or <annotation clickable="manual_entry">enter your bank details manually.</annotation></string>
@@ -28,23 +28,25 @@
     <string name="stripe_error_cta_select_another_bank">Select another bank</string>
     <string name="stripe_error_cta_retry">Try again</string>
     <string name="stripe_error_cta_manual_entry">Enter bank details manually</string>
-    <string name="stripe_account_picker_loading_title">Retrieving accounts</string>
-    <string name="stripe_account_picker_loading_desc">Please wait while Stripe loads your accounts</string>
+    <string name="stripe_account_picker_loading_title">Connecting your bank</string>
+    <string name="stripe_account_picker_loading_desc">You\'re almost done.</string>
     <string name="stripe_account_picker_select_account">Select your account</string>
-    <string name="stripe_account_picker_singleselect_account">Confirm your account</string>
+    <string name="stripe_account_picker_confirm_account">Confirm your account</string>
+    <string name="stripe_account_picker_singleselect_account">Select an account</string>
     <string name="stripe_account_picker_multiselect_account">Select accounts</string>
-    <string name="stripe_account_picker_singleselect_confirm">Confirm</string>
-    <plurals name="stripe_account_picker_multiselect_confirm">
+    <string name="stripe_account_picker_cta_confirm">Confirm</string>
+    <plurals name="stripe_account_picker_cta_link">
         <item quantity="one">Link account</item>
         <item quantity="other">Link accounts</item>
     </plurals>
     <string name="stripe_success_title">Success!</string>
     <string name="stripe_search">Search</string>
     <string name="stripe_account_picker_dropdown_hint">Choose one</string>
-    <string name="data_accessible_callout"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s.<annotation clickable="learn_more"> Learn more</annotation></string>
-    <string name="data_accessible_callout_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%1$s.<annotation clickable="learn_more"> Learn more</annotation></string>
-    <string name="data_accessible_callout_through_stripe"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Stripe.<annotation clickable="learn_more"> Learn more</annotation></string>
-    <string name="data_accessible_callout_through_stripe_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Stripe.<annotation clickable="learn_more"> Learn more</annotation></string>
+    <string name="data_accessible_callout_stripe_direct"><annotation bold="accessible_data">Data accessible to Stripe: </annotation>%2$s. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="data_accessible_callout_through_stripe"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Stripe. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="data_accessible_callout_through_stripe_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Stripe. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="data_accessible_callout_through_link"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Link. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="data_accessible_callout_through_link_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Link. <annotation clickable="learn_more">Learn more</annotation></string>
     <string name="data_accessible_type_accountdetails">account details</string>
     <string name="data_accessible_type_balances">balances</string>
     <string name="data_accessible_type_transactions">transactions</string>
@@ -68,7 +70,7 @@
     <string name="stripe_validation_account_too_long">Invalid bank account number: must be at most 17 digits long.</string>
     <string name="stripe_validation_account_confirm_mismatch">Your account numbers don\'t match.</string>
     <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified with micro-deposits to your account.</string>
-    <string name="stripe_manualentry_account_type_disclaimer">Your account can be checking or savings.</string>
+    <string name="stripe_manualentry_account_type_disclaimer">Please enter a checking account.</string>
     <string name="stripe_manualentrysuccess_title">Micro-deposits initiated</string>
     <string name="stripe_manualentrysuccess_title_descriptorcode">Micro-deposit initiated</string>
     <string name="stripe_manualentrysuccess_desc">Expect two small deposits to the account ending in ••••%1$s in 1–2 business days and an email with additional instructions to verify your bank account.</string>
@@ -82,12 +84,12 @@
         <item quantity="other">Linking accounts</item>
     </plurals>
     <plurals name="stripe_attachlinkedpaymentaccount_desc">
-        <item quantity="one">Please wait while your account is linked to %1$s</item>
-        <item quantity="other">Please wait while your accounts are linked to %1$s</item>
+        <item quantity="one">Please wait while your account is connected to %1$s</item>
+        <item quantity="other">Please wait while your accounts are connected to %1$s</item>
     </plurals>
     <plurals name="stripe_attachlinkedpaymentaccount_desc_no_business">
-        <item quantity="one">Please wait while your account is linked to this business</item>
-        <item quantity="other">Please wait while your accounts are linked to this business</item>
+        <item quantity="one">Please wait while your account is connected to this business</item>
+        <item quantity="other">Please wait while your accounts are connected to this business</item>
     </plurals>
     <string name="stripe_attachlinkedpaymentaccount_error_title">Your account number couldn’t be accessed at this time</string>
     <string name="stripe_attachlinkedpaymentaccount_error_desc">Please enter your bank details manually</string>
@@ -101,9 +103,7 @@
     <string name="stripe_accounts_error_desc_retry">Please select another bank or try again.</string>
     <string name="stripe_accounts_error_desc_manualentry">Please enter your bank details manually or select another bank.</string>
     <string name="stripe_accounts_error_desc_no_retry">Please select another bank.</string>
-    <string name="stripe_accountpicker_singleaccount_description_withstripe">Stripe only needs one account at this time.</string>
-    <string name="stripe_accountpicker_singleaccount_description">%1$s only needs one account at this time.</string>
-    <string name="stripe_accountpicker_singleaccount_description_nobusinessname">This merchant only needs one account at this time.</string>
+    <string name="stripe_accountpicker_singleaccount_description">Select the account you\'d like to link.</string>
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
     <string name="stripe_success_pane_skip_title">Finishing up</string>
     <string name="stripe_success_pane_skip_desc">Hold on, we\'re almost done…</string>

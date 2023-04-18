@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - fråkopla</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">Betalingsmåten din vart avvist.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">Utløpsdatoen til kortet er ufullstendig.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">Du skreiv inn eit ugyldig IBAN-nummer.</string>
   <string name="invalid_card_number">Kortnummeret ditt er ugyldig.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Sikkerheitskoden til kortet er ugyldig.</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Utløpsmånaden på kortet er ugyldig.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">Utløpsåret på kortet ditt er ugyldig.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">Namnet ditt er ugyldig.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">Tidsavbrot ved godkjenning av betalingsmåten - prøv igjen</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Ein intern feil oppstod.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">MM / ÅÅ</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verifiser betalinga di</string>
   <string name="title_add_a_card">Legg til kort</string>

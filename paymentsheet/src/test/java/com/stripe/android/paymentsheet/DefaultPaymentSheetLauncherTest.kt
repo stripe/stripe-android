@@ -6,17 +6,23 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.CreateIntentCallback
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultPaymentSheetLauncherTest {
+
     @BeforeTest
     fun setup() {
         PaymentConfiguration.init(
@@ -36,7 +42,7 @@ class DefaultPaymentSheetLauncherTest {
         ) {
             onFragment { fragment ->
                 val results = mutableListOf<PaymentSheetResult>()
-                val launcher = com.stripe.android.paymentsheet.DefaultPaymentSheetLauncher(
+                val launcher = DefaultPaymentSheetLauncher(
                     fragment,
                     testRegistry
                 ) {
@@ -44,11 +50,35 @@ class DefaultPaymentSheetLauncherTest {
                 }
 
                 moveToState(Lifecycle.State.RESUMED)
-                launcher.presentWithPaymentIntent("pi_fake")
-                assertThat(results)
-                    .containsExactly(com.stripe.android.paymentsheet.PaymentSheetResult.Completed)
+                launcher.present(mode = PaymentSheet.InitializationMode.PaymentIntent("pi_fake"))
+                assertThat(results).containsExactly(PaymentSheetResult.Completed)
             }
         }
+    }
+
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
+    @Test
+    fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
+        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback {
+            error("I’m alive")
+        }
+
+        val lifecycleOwner = TestLifecycleOwner()
+
+        DefaultPaymentSheetLauncher(
+            activityResultLauncher = mock(),
+            lifecycleOwner = lifecycleOwner,
+            application = ApplicationProvider.getApplicationContext(),
+        )
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
     }
 
     private class FakeActivityResultRegistry(

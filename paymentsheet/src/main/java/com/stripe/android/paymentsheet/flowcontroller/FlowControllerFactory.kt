@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCaller
 import androidx.fragment.app.Fragment
@@ -13,7 +12,6 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 internal class FlowControllerFactory(
     private val viewModelStoreOwner: ViewModelStoreOwner,
     private val lifecycleOwner: LifecycleOwner,
-    private val appContext: Context,
     private val activityResultCaller: ActivityResultCaller,
     private val statusBarColor: () -> Int?,
     private val paymentOptionCallback: PaymentOptionCallback,
@@ -26,7 +24,6 @@ internal class FlowControllerFactory(
     ) : this(
         viewModelStoreOwner = activity,
         lifecycleOwner = activity,
-        appContext = activity.applicationContext,
         activityResultCaller = activity,
         statusBarColor = { activity.window.statusBarColor },
         paymentOptionCallback = paymentOptionCallback,
@@ -40,7 +37,6 @@ internal class FlowControllerFactory(
     ) : this(
         viewModelStoreOwner = fragment,
         lifecycleOwner = fragment,
-        appContext = fragment.requireContext().applicationContext,
         activityResultCaller = fragment,
         statusBarColor = { fragment.activity?.window?.statusBarColor },
         paymentOptionCallback = paymentOptionCallback,
@@ -49,7 +45,6 @@ internal class FlowControllerFactory(
 
     fun create(): PaymentSheet.FlowController =
         DefaultFlowController.getInstance(
-            appContext = appContext,
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
             activityResultCaller = activityResultCaller,

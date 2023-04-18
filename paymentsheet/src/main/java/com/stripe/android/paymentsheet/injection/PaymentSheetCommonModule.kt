@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.DefaultIntentConfirmationInterceptor
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -14,9 +16,11 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
+import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentSheetLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
@@ -41,8 +45,8 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsStripeIntentRepository(
-        repository: StripeIntentRepository.Api
-    ): StripeIntentRepository
+        repository: ElementsSessionRepository.Api
+    ): ElementsSessionRepository
 
     @Binds
     abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentSheetLoader): PaymentSheetLoader
@@ -51,6 +55,16 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsLinkAccountStatusProvider(
         impl: DefaultLinkAccountStatusProvider,
     ): LinkAccountStatusProvider
+
+    @Binds
+    abstract fun bindsIntentConfirmationInterceptor(
+        impl: DefaultIntentConfirmationInterceptor,
+    ): IntentConfirmationInterceptor
+
+    @Binds
+    abstract fun bindsPaymentSheetUpdater(
+        impl: DefaultPaymentSelectionUpdater,
+    ): PaymentSelectionUpdater
 
     companion object {
         /**

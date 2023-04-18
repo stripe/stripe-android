@@ -1,7 +1,5 @@
 package com.stripe.android.model
 
-import com.stripe.android.StripeCashAppPayBetaApi
-
 internal object PaymentMethodCreateParamsFixtures {
     internal val CARD = PaymentMethodCreateParams.Card(
         number = "4242424242424242",
@@ -115,7 +113,6 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
-    @OptIn(StripeCashAppPayBetaApi::class)
     internal val CASH_APP_PAY = PaymentMethodCreateParams.createCashAppPay(
         billingDetails = BILLING_DETAILS,
     )

@@ -10,6 +10,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -67,6 +68,7 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
 fun SectionCard(
     modifier: Modifier = Modifier,
     isSelected: Boolean = false,
+    backgroundColor: Color = MaterialTheme.stripeColors.component,
     border: BorderStroke = MaterialTheme.getBorderStroke(isSelected),
     content: @Composable () -> Unit
 ) {
@@ -74,7 +76,7 @@ fun SectionCard(
         border = border,
         // TODO(skyler-stripe): this will change when we add shadow configurations.
         elevation = if (isSelected) 1.5.dp else 0.dp,
-        backgroundColor = MaterialTheme.stripeColors.component,
+        backgroundColor = backgroundColor,
         shape = MaterialTheme.shapes.medium,
         modifier = modifier
     ) {

@@ -32,8 +32,8 @@ internal data class FinancialConnectionsTypography(
 
 )
 
-@Composable
 @Preview(group = "Components", name = "Type")
+@Composable
 internal fun TypePreview() {
     FinancialConnectionsPreview {
         Column {

@@ -2,11 +2,100 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.23.1 - 2023-04-17
+
+### PaymentSheet
+* [FIXED][6551](https://github.com/stripe/stripe-android/pull/6551) Fixed a build issue where `BillingDetailsCollectionConfiguration` couldn't be found in the classpath. If you worked around this issue by importing `payments-ui-core` directly, undo this change and update the import of `BillingDetailsCollectionConfiguration` to `com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration`.
+
+## 20.23.0 - 2023-04-17
+
+### PaymentSheet
+* [ADDED] Added `billingDetailsCollectionConfiguration` to configure how you want to collect billing details. See the docs [here](https://stripe.com/docs/payments/accept-a-payment?platform=android&ui=payment-sheet#billing-details-collection).
+
+### Identity
+* [ADDED][6536](https://github.com/stripe/stripe-android/pull/6536) Added test mode for the SDK.
+
+## 20.22.0 - 2023-04-10
+
+### All SDKs
+* [CHANGED][6492](https://github.com/stripe/stripe-android/pull/6492) Updated Compose to 1.4.1.
+
+### PaymentSheet
+* [FIXED][6434](https://github.com/stripe/stripe-android/pull/6434) Fixed an issue where the `Save this card for future payments` checkbox wasn't displayed in some cases even though it should have been.
+
+### Financial Connections
+* [CHANGED][6436](https://github.com/stripe/stripe-android/pull/6436) Updated Mavericks to 3.0.2.
+
+## 20.21.1 - 2023-03-27
+
+### PaymentSheet
+* [FIXED][6411](https://github.com/stripe/stripe-android/pull/6411) Fixed an issue in the expiry date field that could cause an exception.
+
+### Financial Connections
+* [CHANGED][6403](https://github.com/stripe/stripe-android/pull/6403) Use light status bar and navigation bar.
+* [CHANGED][6404](https://github.com/stripe/stripe-android/pull/6404) Update UI for no search results in institution picker.
+
+### StripeCardScan
+* [ADDED][6409](https://github.com/stripe/stripe-android/pull/6409) Support running Cardscan with TFLite in Google Play.
+
+## 20.21.0 - 2023-03-20
+
+### Payments
+* [ADDED][6335](https://github.com/stripe/stripe-android/pull/6335) Added `Stripe.possibleCardBrands` which retrieves a list of possible card brands given a card number.
+* [FIXED][6376](https://github.com/stripe/stripe-android/pull/6376) Fixed BLIK payment bindings.
+
+### PaymentSheet
+* [FIXED][6366](https://github.com/stripe/stripe-android/pull/6366) Fixed an issue where the result couldn't be parsed in `PaymentSheetContract`.
+* [FIXED][6386](https://github.com/stripe/stripe-android/pull/6386) Fixed an issue where `FlowController.getPaymentOption()` and `PaymentOptionCallback` might return an outdated payment option in some cases.
+
+### Financial Connections
+* [FIXED][6375](https://github.com/stripe/stripe-android/pull/6375) Fixed Accessible data callout texts.
+
+### Identity
+* [ADDED][6380](https://github.com/stripe/stripe-android/pull/6380) Integrate with `ml-core` and allow user to swap TFLite runtime.
+
+## 20.20.0 - 2023-03-13
+
+### Payments
+* [ADDED][6306](https://github.com/stripe/stripe-android/pull/6306) Added support for Cash App Pay. See the docs [here](https://stripe.com/docs/payments/cash-app-pay).
+
+### PaymentSheet
+* [ADDED][6306](https://github.com/stripe/stripe-android/pull/6306) Added support for Cash App Pay.
+* [FIXED][6326](https://github.com/stripe/stripe-android/pull/6326) Fixed an issue where the primary button would lose its padding on configuration changes.
+* [ADDED][5672](https://github.com/stripe/stripe-android/pull/5672) Added support for credit card autofill.
+
+### Identity
+* [FIXED][6341](https://github.com/stripe/stripe-android/pull/6341) Fixed an issue when remote image URI contains query parameters.
+
+## 20.19.5 - 2023-03-06
+
+### Payments
+* [ADDED][6279](https://github.com/stripe/stripe-android/pull/6279) Update to Stripe 3DS2 6.1.7, removed keep-all proguard rules in favor of the minimal required ones.
+
+### PaymentSheet
+* [ADDED][6283](https://github.com/stripe/stripe-android/pull/6283) Added support for Zip payments.
+
+### Identity
+* [ADDED] ID/Address verification
+
+## 20.19.4 - 2023-02-27
+
+### StripeCardScan
+* [FIXED][6253](https://github.com/stripe/stripe-android/pull/6253) Use the full screen card scanner to alleviate fragment crashes
+
+### All SDKs
+* [ADDED][6227](https://github.com/stripe/stripe-android/pull/6227) Removed keep-all proguard rules in favor of the minimal required ones. 
+
+## 20.19.3 - 2023-02-13
+
+### Financial Connections
+* Stability and efficiency improvements.
+
 ## 20.19.2 - 2023-02-06
 
 ### PaymentSheet
-[ADDED][6174](https://github.com/stripe/stripe-android/pull/6174) Make PaymentLauncher.create methods Java-friendly.
-[FIXED][6172](https://github.com/stripe/stripe-android/pull/6172) Centers PaymentSheet on tablets.
+* [ADDED][6174](https://github.com/stripe/stripe-android/pull/6174) Make PaymentLauncher.create methods Java-friendly.
+* [FIXED][6172](https://github.com/stripe/stripe-android/pull/6172) Centers PaymentSheet on tablets.
 
 ## 20.19.1 - 2023-01-30
 

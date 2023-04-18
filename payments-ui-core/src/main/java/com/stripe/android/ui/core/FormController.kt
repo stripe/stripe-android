@@ -3,13 +3,9 @@ package com.stripe.android.ui.core
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.forms.TransformSpecToElements
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -17,7 +13,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -28,35 +23,18 @@ import javax.inject.Inject
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class FormController @Inject constructor(
-    private val formSpec: LayoutSpec,
-    private val addressResourceRepository: ResourceRepository<AddressRepository>,
-    private val transformSpecToElement: TransformSpecToElements,
-    viewModelScope: CoroutineScope
+    formSpec: LayoutSpec,
+    transformSpecToElement: TransformSpecToElements,
 ) {
-    // Initial value is null while loading in the background
-    val elements: StateFlow<List<FormElement>?>
-
-    init {
-        if (addressResourceRepository.isLoaded()) {
-            elements = MutableStateFlow(transformSpecToElement.transform(formSpec.items))
-        } else {
-            val delayedElements = MutableStateFlow<List<FormElement>?>(null)
-            viewModelScope.launch {
-                CoroutineScope(Dispatchers.IO).launch {
-                    addressResourceRepository.waitUntilLoaded()
-                    delayedElements.value = transformSpecToElement.transform(formSpec.items)
-                }
-            }
-            elements = delayedElements
-        }
-    }
+    val elements: StateFlow<List<FormElement>> =
+        MutableStateFlow(transformSpecToElement.transform(formSpec.items))
 
     private val cardBillingElement = elements.map { elementsList ->
         elementsList
-            ?.filterIsInstance<SectionElement>()
-            ?.flatMap { it.fields }
-            ?.filterIsInstance<CardBillingAddressElement>()
-            ?.firstOrNull()
+            .filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<CardBillingAddressElement>()
+            .firstOrNull()
     }
 
     /**
@@ -71,7 +49,7 @@ class FormController @Inject constructor(
      * Emits a map of the form values when the form content is valid, null otherwise.
      */
     val completeFormValues = combine(
-        elements.filterNotNull().map { elementsList ->
+        elements.map { elementsList ->
             combine(
                 elementsList.map {
                     it.getFormFieldValueFlow()
@@ -93,7 +71,7 @@ class FormController @Inject constructor(
      * Emits a map of the form values that are complete, empty otherwise.
      */
     val formValues = combine(
-        elements.filterNotNull().map { elementsList ->
+        elements.map { elementsList ->
             combine(
                 elementsList.map {
                     it.getFormFieldValueFlow()

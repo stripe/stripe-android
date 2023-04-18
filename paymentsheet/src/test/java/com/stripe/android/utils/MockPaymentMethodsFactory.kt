@@ -1,5 +1,6 @@
 package com.stripe.android.utils
 
+import com.stripe.android.paymentsheet.forms.MandateRequirement
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.LayoutSpec
@@ -33,15 +34,16 @@ object MockPaymentMethodsFactory {
         )
     }
 
-    private fun mockPaymentMethod(
+    fun mockPaymentMethod(
         code: String,
         displayNameResource: Int,
         iconResource: Int,
         tintIconOnSelection: Boolean = false
     ): LpmRepository.SupportedPaymentMethod {
         return LpmRepository.SupportedPaymentMethod(
-            code,
+            code = code,
             requiresMandate = false,
+            mandateRequirement = MandateRequirement.Never,
             displayNameResource = displayNameResource,
             iconResource = iconResource,
             lightThemeIconUrl = null,

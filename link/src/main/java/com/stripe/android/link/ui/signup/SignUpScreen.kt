@@ -41,8 +41,8 @@ import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.progressIndicatorTestTag
-import com.stripe.android.ui.core.elements.NameConfig
 import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.TextFieldController

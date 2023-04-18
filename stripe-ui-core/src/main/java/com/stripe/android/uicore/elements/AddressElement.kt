@@ -1,7 +1,6 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.address.AutocompleteCapableAddressType
@@ -27,9 +26,10 @@ open class AddressElement constructor(
     sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?,
     private val isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
+    private val hideCountry: Boolean = false,
 ) : SectionMultiFieldElement(_identifier) {
 
-    @VisibleForTesting
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val countryElement = CountryElement(
         IdentifierSpec.Country,
         countryDropdownFieldController
@@ -96,7 +96,9 @@ open class AddressElement constructor(
             null
         }
 
-        val allFields = listOf(countryElement).plus(fields)
+        val allFields = listOfNotNull(
+            countryElement.takeUnless { hideCountry }
+        ).plus(fields)
 
         sameAsShipping?.let { same ->
             val values = if (same) {
@@ -153,8 +155,15 @@ open class AddressElement constructor(
         sameAsShippingUpdatedFlow,
         fieldsUpdatedFlow
     ) { country, otherFields, _, _ ->
-        val condensed = listOf(nameElement, countryElement, addressAutoCompleteElement)
-        val expanded = listOf(nameElement, countryElement).plus(otherFields)
+        val condensed = listOfNotNull(
+            nameElement,
+            countryElement.takeUnless { hideCountry },
+            addressAutoCompleteElement,
+        )
+        val expanded = listOfNotNull(
+            nameElement,
+            countryElement.takeUnless { hideCountry },
+        ).plus(otherFields)
         val baseElements = when (addressType) {
             is AddressType.ShippingCondensed -> {
                 // If the merchant has supplied Google Places API key, Google Places SDK is
@@ -169,7 +178,9 @@ open class AddressElement constructor(
                 expanded
             }
             else -> {
-                listOf(countryElement).plus(otherFields)
+                listOfNotNull(
+                    countryElement.takeUnless { hideCountry }
+                ).plus(otherFields)
             }
         }
 

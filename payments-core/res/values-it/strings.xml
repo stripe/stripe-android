@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - Offline</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">La tua modalità di pagamento è stata rifiutata.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">La data di scadenza della carta è incompleta.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">L\'IBAN inserito non è valido.</string>
   <string name="invalid_card_number">Il numero della carta non è valido.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Il codice di sicurezza della carta non è valido.</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Il mese di scadenza della carta non è valido.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">L\'anno di scadenza della carta non è valido.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">Nome non valido.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">Timeout durante l\'autenticazione della modalità di pagamento. Riprova.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Si è verificato un errore interno.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">MM / AA</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verifica il tuo pagamento</string>
   <string name="title_add_a_card">Aggiungi una carta</string>

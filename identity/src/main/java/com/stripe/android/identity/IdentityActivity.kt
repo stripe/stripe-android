@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.camera.framework.time.asEpochMillisecondsClockMark
 import com.stripe.android.core.injection.IOContext
@@ -29,7 +27,6 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.injection.DaggerIdentityActivityFallbackComponent
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
 import com.stripe.android.identity.navigation.ConfirmationDestination
@@ -37,9 +34,9 @@ import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
 import com.stripe.android.identity.navigation.IdentityNavGraph
-import com.stripe.android.identity.navigation.clearDataAndNavigateUp
+import com.stripe.android.identity.navigation.IndividualWelcomeDestination
 import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
-import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
+import com.stripe.android.identity.ui.IdentityTheme
 import com.stripe.android.identity.ui.IdentityTopBarState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
@@ -57,7 +54,7 @@ internal class IdentityActivity :
     @VisibleForTesting
     internal lateinit var navController: NavController
 
-    private lateinit var onBackPressedCallback: IdentityActivityOnBackPressedCallback
+    private lateinit var onBackPressedCallback: IdentityOnBackPressedHandler
 
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
@@ -118,6 +115,7 @@ internal class IdentityActivity :
             .fallbackUrlLauncher(this)
             .build()
         identityViewModel.retrieveAndBufferVerificationPage()
+        identityViewModel.initializeTfLite()
         identityViewModel.registerActivityResultCaller(this)
         fallbackUrlLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
@@ -128,16 +126,18 @@ internal class IdentityActivity :
                     finishWithResult(
                         if (it.submitted) {
                             identityViewModel.sendAnalyticsRequest(
-                                identityViewModel.identityAnalyticsRequestFactory.verificationSucceeded(
-                                    isFromFallbackUrl = true
-                                )
+                                identityViewModel.identityAnalyticsRequestFactory
+                                    .verificationSucceeded(
+                                        isFromFallbackUrl = true
+                                    )
                             )
                             VerificationFlowResult.Completed
                         } else {
                             identityViewModel.sendAnalyticsRequest(
-                                identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
-                                    isFromFallbackUrl = true
-                                )
+                                identityViewModel.identityAnalyticsRequestFactory
+                                    .verificationCanceled(
+                                        isFromFallbackUrl = true
+                                    )
                             )
                             VerificationFlowResult.Canceled
                         }
@@ -177,9 +177,9 @@ internal class IdentityActivity :
 
         setContent {
             var topBarState by remember {
-                mutableStateOf(IdentityTopBarState.DEFAULT)
+                mutableStateOf(IdentityTopBarState.GO_BACK)
             }
-            MdcTheme {
+            IdentityTheme {
                 IdentityNavGraph(
                     identityViewModel = identityViewModel,
                     fallbackUrlLauncher = this,
@@ -194,7 +194,7 @@ internal class IdentityActivity :
                 ) {
                     this.navController = it
                     onBackPressedCallback =
-                        IdentityActivityOnBackPressedCallback(
+                        IdentityOnBackPressedHandler(
                             this,
                             navController,
                             identityViewModel
@@ -248,49 +248,25 @@ internal class IdentityActivity :
         // Toggle the navigation button UI
         when (destination.route) {
             ConsentDestination.ROUTE.route -> {
-                IdentityTopBarState.CONSENT
+                IdentityTopBarState.CLOSE
             }
             ConfirmationDestination.ROUTE.route -> {
-                IdentityTopBarState.CONFIRMATION
+                IdentityTopBarState.CLOSE
             }
             ErrorDestination.ROUTE.route -> {
                 if (args?.getBoolean(ARG_SHOULD_FAIL, false) == true) {
-                    IdentityTopBarState.ERROR_SHOULD_FAIL
+                    IdentityTopBarState.CLOSE
                 } else {
-                    IdentityTopBarState.DEFAULT
+                    IdentityTopBarState.GO_BACK
                 }
             }
+            IndividualWelcomeDestination.ROUTE.route -> {
+                IdentityTopBarState.CLOSE
+            }
             else -> {
-                IdentityTopBarState.DEFAULT
+                IdentityTopBarState.GO_BACK
             }
         }
-
-    /**
-     * Handles back button behavior based on current navigation status.
-     */
-    private class IdentityActivityOnBackPressedCallback(
-        private val verificationFlowFinishable: VerificationFlowFinishable,
-        private val navController: NavController,
-        private val identityViewModel: IdentityViewModel
-    ) : OnBackPressedCallback(true) {
-        private var destination: NavDestination? = null
-        private var args: Bundle? = null
-
-        fun updateState(destination: NavDestination, args: Bundle?) {
-            this.destination = destination
-            this.args = args
-        }
-
-        override fun handleOnBackPressed() {
-            navigateOnDestination(
-                navController,
-                identityViewModel,
-                verificationFlowFinishable,
-                destination,
-                args
-            )
-        }
-    }
 
     override fun launchFallbackUrl(fallbackUrl: String) {
         val customTabsIntent = CustomTabsIntent.Builder()
@@ -304,63 +280,5 @@ internal class IdentityActivity :
             "IdentityActivity was started without arguments"
 
         const val KEY_PRESENTED = "presented"
-
-        private fun navigateOnDestination(
-            navController: NavController,
-            identityViewModel: IdentityViewModel,
-            verificationFlowFinishable: VerificationFlowFinishable,
-            destination: NavDestination?,
-            args: Bundle?
-        ) {
-            // Don't navigate if there is a outstanding API request.
-            if (identityViewModel.isSubmitting()) {
-                return
-            }
-            when (destination?.route) {
-                ConsentDestination.ROUTE.route -> {
-                    identityViewModel.sendAnalyticsRequest(
-                        identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
-                            isFromFallbackUrl = false,
-                            lastScreenName = SCREEN_NAME_CONSENT,
-                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
-                        )
-                    )
-                    verificationFlowFinishable.finishWithResult(
-                        VerificationFlowResult.Canceled
-                    )
-                }
-                ConfirmationDestination.ROUTE.route -> {
-                    identityViewModel.sendSucceededAnalyticsRequestForNative()
-                    verificationFlowFinishable.finishWithResult(
-                        VerificationFlowResult.Completed
-                    )
-                }
-                ErrorDestination.ROUTE.route -> {
-                    if (args?.getBoolean(ARG_SHOULD_FAIL, false) == true) {
-                        val failedReason = requireNotNull(
-                            identityViewModel.errorCause.value
-                        ) {
-                            "Failed to get failedReason"
-                        }
-
-                        identityViewModel.sendAnalyticsRequest(
-                            identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
-                                isFromFallbackUrl = false,
-                                requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
-                                throwable = failedReason
-                            )
-                        )
-                        verificationFlowFinishable.finishWithResult(
-                            VerificationFlowResult.Failed(failedReason)
-                        )
-                    } else {
-                        navController.clearDataAndNavigateUp(identityViewModel)
-                    }
-                }
-                else -> {
-                    navController.clearDataAndNavigateUp(identityViewModel)
-                }
-            }
-        }
     }
 }

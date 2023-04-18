@@ -43,7 +43,11 @@ internal data class ClearDataParam(
             idDocumentType = requirements.contains(Requirement.IDDOCUMENTTYPE),
             idDocumentFront = requirements.contains(Requirement.IDDOCUMENTFRONT),
             idDocumentBack = requirements.contains(Requirement.IDDOCUMENTBACK),
-            face = requirements.contains(Requirement.FACE)
+            face = requirements.contains(Requirement.FACE),
+            idNumber = requirements.contains(Requirement.IDNUMBER),
+            dob = requirements.contains(Requirement.DOB),
+            name = requirements.contains(Requirement.NAME),
+            address = requirements.contains(Requirement.ADDRESS)
         )
     }
 }

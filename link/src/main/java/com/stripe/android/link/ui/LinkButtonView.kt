@@ -1,3 +1,5 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.link.ui
 
 import android.content.Context
@@ -27,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AbstractComposeView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,6 +46,9 @@ private val LinkButtonHorizontalPadding = 10.dp
 private val LinkButtonShape = RoundedCornerShape(22.dp)
 private val LinkButtonEmailShape = RoundedCornerShape(16.dp) // Button corner radius - padding
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val LinkButtonTestTag = "LinkButtonTestTag"
+
 @Preview
 @Composable
 private fun LinkButton() {
@@ -53,30 +59,13 @@ private fun LinkButton() {
     )
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-private fun LinkButton(
-    linkPaymentLauncher: LinkPaymentLauncher,
-    enabled: Boolean,
-    onClick: (LinkPaymentLauncher.Configuration) -> Unit
-) {
-    linkPaymentLauncher.component?.let { component ->
-        val account = component.linkAccountManager.linkAccount.collectAsState()
-
-        LinkButton(
-            enabled = enabled,
-            email = account.value?.email,
-            onClick = {
-                onClick(component.configuration)
-            }
-        )
-    }
-}
-
-@Composable
-private fun LinkButton(
-    enabled: Boolean,
+fun LinkButton(
     email: String?,
-    onClick: () -> Unit
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     CompositionLocalProvider(
         LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
@@ -84,7 +73,9 @@ private fun LinkButton(
         DefaultLinkTheme {
             Button(
                 onClick = onClick,
-                modifier = Modifier.clip(LinkButtonShape),
+                modifier = modifier
+                    .clip(LinkButtonShape)
+                    .testTag(LinkButtonTestTag),
                 enabled = enabled,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = LinkButtonShape,
@@ -152,7 +143,7 @@ class LinkButtonView @JvmOverloads constructor(
         private set
 
     var linkPaymentLauncher: LinkPaymentLauncher? = null
-    var onClick by mutableStateOf<(LinkPaymentLauncher.Configuration) -> Unit>({})
+    var onClick by mutableStateOf({})
     private var isEnabledState by mutableStateOf(isEnabled)
 
     override fun setEnabled(enabled: Boolean) {
@@ -162,11 +153,12 @@ class LinkButtonView @JvmOverloads constructor(
 
     @Composable
     override fun Content() {
-        linkPaymentLauncher?.let {
+        linkPaymentLauncher?.let { launcher ->
+            val email by launcher.emailFlow.collectAsState(initial = null)
             LinkButton(
-                it,
-                isEnabledState,
-                onClick
+                email = email,
+                enabled = isEnabledState,
+                onClick = onClick,
             )
         }
     }

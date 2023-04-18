@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionFieldElement
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
@@ -55,6 +56,7 @@ object FormItemSpecSerializer :
             "card_details" -> CardDetailsSectionSpec.serializer()
             "card_billing" -> CardBillingSpec.serializer()
             "upi" -> UpiSpec.serializer()
+            "placeholder" -> PlaceholderSpec.serializer()
             else -> EmptyFormSpec.serializer()
         }
     }

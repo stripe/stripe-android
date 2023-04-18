@@ -9,14 +9,11 @@ internal class InMemoryCardAccountRangeSource(
 ) : CardAccountRangeSource {
     override val loading: Flow<Boolean> = flowOf(false)
 
-    override suspend fun getAccountRange(
+    override suspend fun getAccountRanges(
         cardNumber: CardNumber.Unvalidated
-    ): AccountRange? {
+    ): List<AccountRange>? {
         return cardNumber.bin?.let { bin ->
             store.get(bin)
-                .firstOrNull { (binRange) ->
-                    binRange.matches(cardNumber)
-                }
         }
     }
 }

@@ -7,7 +7,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.GooglePayState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -20,7 +19,6 @@ class PaymentOptionsStateMapperTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private val paymentMethodsFlow = MutableStateFlow<List<PaymentMethod>?>(null)
-    private val initialSelectionFlow = MutableStateFlow<SavedSelection?>(null)
     private val currentSelectionFlow = MutableStateFlow<PaymentSelection?>(null)
     private val googlePayStateFlow = MutableStateFlow<GooglePayState>(GooglePayState.Indeterminate)
     private val isLinkEnabledFlow = MutableStateFlow<Boolean?>(null)
@@ -29,7 +27,6 @@ class PaymentOptionsStateMapperTest {
     fun `Only emits value if required flows have emitted values`() = runTest {
         val mapper = PaymentOptionsStateMapper(
             paymentMethods = paymentMethodsFlow,
-            initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
@@ -43,7 +40,7 @@ class PaymentOptionsStateMapperTest {
             paymentMethodsFlow.value = PaymentMethodFixtures.createCards(2)
             assertThat(awaitItem()).isNull()
 
-            initialSelectionFlow.value = SavedSelection.GooglePay
+            currentSelectionFlow.value = PaymentSelection.GooglePay
             assertThat(awaitItem()).isNull()
 
             googlePayStateFlow.value = GooglePayState.Available
@@ -58,7 +55,6 @@ class PaymentOptionsStateMapperTest {
     fun `Doesn't include Google Pay and Link in payment flow`() = runTest {
         val mapper = PaymentOptionsStateMapper(
             paymentMethods = paymentMethodsFlow,
-            initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
@@ -69,7 +65,7 @@ class PaymentOptionsStateMapperTest {
         mapper().test {
             val cards = PaymentMethodFixtures.createCards(2)
             paymentMethodsFlow.value = cards
-            initialSelectionFlow.value = SavedSelection.PaymentMethod(id = cards.first().id!!)
+            currentSelectionFlow.value = PaymentSelection.Saved(cards.first())
             googlePayStateFlow.value = GooglePayState.Available
             isLinkEnabledFlow.value = true
 
@@ -81,10 +77,9 @@ class PaymentOptionsStateMapperTest {
     }
 
     @Test
-    fun `Removing selected payment option results in saved selection being selected`() = runTest {
+    fun `Removing selected payment option results in selection being null`() = runTest {
         val mapper = PaymentOptionsStateMapper(
             paymentMethods = paymentMethodsFlow,
-            initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
@@ -96,7 +91,6 @@ class PaymentOptionsStateMapperTest {
             val cards = PaymentMethodFixtures.createCards(2)
             val selectedPaymentMethod = PaymentSelection.Saved(paymentMethod = cards.last())
             paymentMethodsFlow.value = cards
-            initialSelectionFlow.value = SavedSelection.Link
             currentSelectionFlow.value = selectedPaymentMethod
             googlePayStateFlow.value = GooglePayState.Available
             isLinkEnabledFlow.value = true
@@ -112,43 +106,7 @@ class PaymentOptionsStateMapperTest {
             paymentMethodsFlow.value = cards - selectedPaymentMethod.paymentMethod
             currentSelectionFlow.value = null
 
-            assertThat(expectMostRecentItem()?.selectedItem).isEqualTo(PaymentOptionsItem.Link)
-        }
-    }
-
-    @Test
-    fun `Removing selected payment option results in first available option if no saved selection`() = runTest {
-        val mapper = PaymentOptionsStateMapper(
-            paymentMethods = paymentMethodsFlow,
-            initialSelection = initialSelectionFlow,
-            currentSelection = currentSelectionFlow,
-            googlePayState = googlePayStateFlow,
-            isLinkEnabled = isLinkEnabledFlow,
-            isNotPaymentFlow = true,
-            nameProvider = { it!! },
-        )
-
-        mapper().test {
-            val cards = PaymentMethodFixtures.createCards(2)
-            val selectedPaymentMethod = PaymentSelection.Saved(paymentMethod = cards.last())
-            paymentMethodsFlow.value = cards
-            initialSelectionFlow.value = SavedSelection.None
-            currentSelectionFlow.value = selectedPaymentMethod
-            googlePayStateFlow.value = GooglePayState.Available
-            isLinkEnabledFlow.value = true
-
-            assertThat(expectMostRecentItem()?.selectedItem).isEqualTo(
-                PaymentOptionsItem.SavedPaymentMethod(
-                    displayName = "card",
-                    paymentMethod = selectedPaymentMethod.paymentMethod,
-                )
-            )
-
-            // Remove the currently selected payment option
-            paymentMethodsFlow.value = cards - selectedPaymentMethod.paymentMethod
-            currentSelectionFlow.value = null
-
-            assertThat(expectMostRecentItem()?.selectedItem).isEqualTo(PaymentOptionsItem.GooglePay)
+            assertThat(expectMostRecentItem()?.selectedItem).isNull()
         }
     }
 }

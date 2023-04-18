@@ -12,7 +12,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SELECTION
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -110,11 +109,6 @@ internal class LinkHandler @Inject constructor(
 
     fun prepareLink(state: LinkState?) {
         setupLink(state)
-
-        if (state?.isReadyForUse == true) {
-            // If account exists, select Link by default
-            savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
-        }
     }
 
     private suspend fun requestLinkVerification(): Boolean {
@@ -129,7 +123,6 @@ internal class LinkHandler @Inject constructor(
     }
 
     suspend fun payWithLinkInline(
-        configuration: LinkPaymentLauncher.Configuration,
         userInput: UserInput?,
         paymentSelection: PaymentSelection?,
         shouldCompleteLinkInlineFlow: Boolean,
@@ -137,6 +130,8 @@ internal class LinkHandler @Inject constructor(
         (paymentSelection as? PaymentSelection.New.Card?)?.paymentMethodCreateParams?.let { params ->
             savedStateHandle[SAVE_PROCESSING] = true
             _processingState.emit(ProcessingState.Started)
+
+            val configuration = requireNotNull(linkConfiguration.value)
 
             when (linkLauncher.getAccountStatusFlow(configuration).first()) {
                 AccountStatus.Verified -> {
@@ -170,7 +165,6 @@ internal class LinkHandler @Inject constructor(
                             onSuccess = {
                                 // If successful, the account was fetched or created, so try again
                                 payWithLinkInline(
-                                    configuration = configuration,
                                     userInput = userInput,
                                     paymentSelection = paymentSelection,
                                     shouldCompleteLinkInlineFlow = shouldCompleteLinkInlineFlow,
@@ -217,6 +211,11 @@ internal class LinkHandler @Inject constructor(
                 )
             )
         }
+    }
+
+    fun launchLink() {
+        val config = linkConfiguration.value ?: return
+        launchLink(config, launchedDirectly = false)
     }
 
     fun launchLink(

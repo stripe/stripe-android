@@ -331,13 +331,16 @@ private fun BadgedInstitutionImage(
             .size(36.dp)
             .align(Alignment.BottomStart)
             .clip(RoundedCornerShape(6.dp))
-        StripeImage(
-            url = institutionIconUrl ?: "",
-            imageLoader = LocalImageLoader.current,
-            errorContent = { InstitutionPlaceholder(modifier) },
-            contentDescription = null,
-            modifier = modifier
-        )
+        when {
+            institutionIconUrl.isNullOrEmpty() -> InstitutionPlaceholder(modifier)
+            else -> StripeImage(
+                url = institutionIconUrl,
+                imageLoader = LocalImageLoader.current,
+                errorContent = { InstitutionPlaceholder(modifier) },
+                contentDescription = null,
+                modifier = modifier
+            )
+        }
         Icon(
             painter = badge.first,
             contentDescription = "",
@@ -353,8 +356,8 @@ private fun BadgedInstitutionImage(
     }
 }
 
-@Composable
 @Preview(group = "Errors", name = "unclassified error")
+@Composable
 internal fun UnclassifiedErrorContentPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
@@ -365,8 +368,8 @@ internal fun UnclassifiedErrorContentPreview() {
     }
 }
 
-@Composable
 @Preview(group = "Errors", name = "institution down planned error")
+@Composable
 internal fun InstitutionPlannedDowntimeErrorContentPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
@@ -396,8 +399,8 @@ internal fun InstitutionPlannedDowntimeErrorContentPreview() {
     }
 }
 
-@Composable
 @Preview(group = "Errors", name = "no accounts available error")
+@Composable
 internal fun NoAccountsAvailableErrorContentPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsScaffold(

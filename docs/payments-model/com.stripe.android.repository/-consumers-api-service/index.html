@@ -37,6 +37,9 @@
     <div>
     </div>
     <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":payments-model:dokkaHtmlPartial/release">androidJvm</button>
+        </div>
         <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
         <div id="searchBar"></div>
     </div>
@@ -50,38 +53,55 @@
   <div class="breadcrumbs"><a href="../../index.html">payments-model</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.repository</a><span class="delimiter">/</span><span class="current">ConsumersApiService</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Consumers</span><wbr><span>Api</span><wbr><span><span>Service</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-model:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP_PREFIX.html">RestrictTo.Scope.LIBRARY_GROUP_PREFIX</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">interface </span><a href="index.html">ConsumersApiService</a></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-model:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP_PREFIX.html">RestrictTo.Scope.LIBRARY_GROUP_PREFIX</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">interface </span><a href="index.html">ConsumersApiService</a></div><h4 class="">Inheritors</h4><div class="table" data-togglable="Inheritors"><div class="table-row" data-filterable-current=":payments-model:dokkaHtmlPartial/release" data-filterable-set=":payments-model:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-consumers-api-service-impl/index.html">ConsumersApiServiceImpl</a></div></span></div><div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Inheritors">Inheritors</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button></div>
     <div class="tabs-section-body">
       <h2 class="">Functions</h2>
-      <div class="table" data-togglable="Functions"><a data-name="-1999272225%2FFunctions%2F617549930" anchor-label="lookupConsumerSession" id="-1999272225%2FFunctions%2F617549930" data-filterable-set=":payments-model:dokkaHtmlPartial/release"></a>
+      <div class="table" data-togglable="Functions"><a data-name="16746351%2FFunctions%2F617549930" anchor-label="confirmConsumerVerification" id="16746351%2FFunctions%2F617549930" data-filterable-set=":payments-model:dokkaHtmlPartial/release"></a>
         <div class="table-row" data-filterable-current=":payments-model:dokkaHtmlPartial/release" data-filterable-set=":payments-model:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="lookup-consumer-session.html"><span>lookup</span><wbr><span>Consumer</span><wbr><span><span>Session</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1999272225%2FFunctions%2F617549930"></span>
+                <div><a href="confirm-consumer-verification.html"><span>confirm</span><wbr><span>Consumer</span><wbr><span><span>Verification</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="16746351%2FFunctions%2F617549930"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-model:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="lookup-consumer-session.html"><span class="token function">lookupConsumerSession</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">email<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">authSessionCookie<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">requestOptions<span class="token operator">: </span><a href="../../../stripe-core/com.stripe.android.core.networking/-api-request/-options/index.html">ApiRequest.Options</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.stripe.android.model/-consumer-session-lookup/index.html">ConsumerSessionLookup</a><span class="token operator">?</span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-model:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="confirm-consumer-verification.html"><span class="token function">confirmConsumerVerification</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">consumerSessionClientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">verificationCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">authSessionCookie<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">requestSurface<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">requestOptions<span class="token operator">: </span><a href="../../../stripe-core/com.stripe.android.core.networking/-api-request/-options/index.html">ApiRequest.Options</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.stripe.android.model/-consumer-session/index.html">ConsumerSession</a></div></div></div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <h2 class="">Inheritors</h2>
-      <div class="table" data-togglable="Inheritors"><a data-name="2089328459%2FInheritors%2F617549930" anchor-label="ConsumersApiServiceImpl" id="2089328459%2FInheritors%2F617549930" data-filterable-set=":payments-model:dokkaHtmlPartial/release"></a>
+<a data-name="2127458244%2FFunctions%2F617549930" anchor-label="lookupConsumerSession" id="2127458244%2FFunctions%2F617549930" data-filterable-set=":payments-model:dokkaHtmlPartial/release"></a>
         <div class="table-row" data-filterable-current=":payments-model:dokkaHtmlPartial/release" data-filterable-set=":payments-model:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
-                <div><a href="../-consumers-api-service-impl/index.html">ConsumersApiServiceImpl</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2089328459%2FInheritors%2F617549930"></span>
+                <div><a href="lookup-consumer-session.html"><span>lookup</span><wbr><span>Consumer</span><wbr><span><span>Session</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2127458244%2FFunctions%2F617549930"></span>
                   <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                 </span></span></div>
-            <div></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-model:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="lookup-consumer-session.html"><span class="token function">lookupConsumerSession</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">email<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">authSessionCookie<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">requestSurface<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">requestOptions<span class="token operator">: </span><a href="../../../stripe-core/com.stripe.android.core.networking/-api-request/-options/index.html">ApiRequest.Options</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.stripe.android.model/-consumer-session-lookup/index.html">ConsumerSessionLookup</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1135160911%2FFunctions%2F617549930" anchor-label="startConsumerVerification" id="1135160911%2FFunctions%2F617549930" data-filterable-set=":payments-model:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":payments-model:dokkaHtmlPartial/release" data-filterable-set=":payments-model:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="start-consumer-verification.html"><span>start</span><wbr><span>Consumer</span><wbr><span><span>Verification</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1135160911%2FFunctions%2F617549930"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-model:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="start-consumer-verification.html"><span class="token function">startConsumerVerification</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">consumerSessionClientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">locale<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/Locale.html">Locale</a><span class="token punctuation">, </span></span><span class="parameter ">authSessionCookie<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">requestSurface<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">requestOptions<span class="token operator">: </span><a href="../../../stripe-core/com.stripe.android.core.networking/-api-request/-options/index.html">ApiRequest.Options</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.stripe.android.model/-consumer-session/index.html">ConsumerSession</a></div></div></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -93,6 +113,6 @@
       </div>
     </div>
 </div>
-
-</body></html>
+</body>
+</html>
 

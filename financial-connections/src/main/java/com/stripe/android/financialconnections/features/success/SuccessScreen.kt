@@ -264,9 +264,12 @@ private fun getSubtitle(
     )
 }
 
-@Composable
-@Preview
+@Preview(
+    group = "Success",
+    name = "Default"
+)
 @Suppress("LongMethod")
+@Composable
 internal fun SuccessScreenPreview() {
     FinancialConnectionsPreview {
         SuccessContent(
@@ -279,6 +282,7 @@ internal fun SuccessScreenPreview() {
                     FinancialConnectionsAccount.Permissions.TRANSACTIONS
                 ),
                 isStripeDirect = true,
+                isNetworking = false,
                 dataPolicyUrl = ""
             ),
             disconnectUrl = "",

@@ -44,6 +44,7 @@ import com.stripe.android.identity.navigation.DriverLicenseScanDestination
 import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
 import com.stripe.android.identity.navigation.IDScanDestination
 import com.stripe.android.identity.navigation.IDUploadDestination
+import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.PassportScanDestination
 import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.navigation.SelfieDestination
@@ -67,6 +68,7 @@ import com.stripe.android.identity.networking.models.CollectedDataParam.Companio
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.Requirement
+import com.stripe.android.identity.networking.models.Requirement.Companion.INDIVIDUAL_REQUIREMENT_SET
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -75,13 +77,17 @@ import com.stripe.android.identity.networking.models.VerificationPageData.Compan
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingConsent
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingDocType
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingFront
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingIndividualRequirements
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingSelfie
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
+import com.stripe.android.mlcore.base.InterpreterInitializer
+import com.stripe.android.uicore.address.AddressSchemaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -106,6 +112,8 @@ internal class IdentityViewModel constructor(
     internal val fpsTracker: FPSTracker,
     internal val screenTracker: ScreenTracker,
     internal val imageHandler: IdentityImageHandler,
+    internal val addressSchemaRepository: AddressSchemaRepository,
+    private val tfLiteInitializer: InterpreterInitializer,
     private val savedStateHandle: SavedStateHandle,
     @UIContext internal val uiContext: CoroutineContext,
     @IOContext internal val workContext: CoroutineContext
@@ -204,12 +212,12 @@ internal class IdentityViewModel constructor(
     /**
      * StateFlow to track missing requirements.
      */
-    private val _missingRequirements = MutableStateFlow<List<Requirement>>(
+    private val _missingRequirements = MutableStateFlow<Set<Requirement>>(
         savedStateHandle[MISSING_REQUIREMENTS] ?: run {
-            listOf()
+            setOf()
         }
     )
-    val missingRequirements: StateFlow<List<Requirement>> = _missingRequirements
+    val missingRequirements: StateFlow<Set<Requirement>> = _missingRequirements
 
     val frontCollectedInfo =
         _documentFrontUploadedState.combine(_collectedData) { upload, collected ->
@@ -228,6 +236,21 @@ internal class IdentityViewModel constructor(
             SharingStarted.Eagerly,
             (SingleSideDocumentUploadState() to CollectedDataParam())
         )
+
+    private val _isTfLiteInitialized: MutableLiveData<Boolean> = MutableLiveData(false)
+    val isTfLiteInitialized: LiveData<Boolean> = _isTfLiteInitialized
+
+    fun initializeTfLite() {
+        viewModelScope.launch(workContext) {
+            tfLiteInitializer.initialize(
+                getApplication(),
+                {
+                    _isTfLiteInitialized.postValue(true)
+                },
+                { throw IllegalStateException("Failed to initialize TFLite runtime: $it") }
+            )
+        }
+    }
 
     /**
      * Response for initial VerificationPage, used for building UI.
@@ -268,6 +291,7 @@ internal class IdentityViewModel constructor(
         private var idDetectorModel: File? = null
         private var faceDetectorModel: File? = null
         private var faceDetectorModelValueSet = false
+        private var isTfliteInitialized = false
 
         init {
             postValue(Resource.loading())
@@ -311,12 +335,18 @@ internal class IdentityViewModel constructor(
                     Status.IDLE -> {} // no-op
                 }
             }
+            addSource(isTfLiteInitialized) { initialized ->
+                isTfliteInitialized = initialized
+                if (isTfliteInitialized) {
+                    maybePostSuccess()
+                }
+            }
         }
 
         private fun maybePostSuccess() {
             page?.let { page ->
                 idDetectorModel?.let { idDetectorModel ->
-                    if (faceDetectorModelValueSet) {
+                    if (isTfliteInitialized && faceDetectorModelValueSet) {
                         postValue(
                             Resource.success(
                                 PageAndModelFiles(
@@ -788,7 +818,7 @@ internal class IdentityViewModel constructor(
                     _verificationPage.postValue(Resource.success(verificationPage))
                     identityAnalyticsRequestFactory.verificationPage = verificationPage
                     _missingRequirements.updateStateAndSave {
-                        verificationPage.requirements.missing
+                        verificationPage.requirements.missing.toSet()
                     }
                     if (shouldRetrieveModel) {
                         downloadModelAndPost(
@@ -848,12 +878,21 @@ internal class IdentityViewModel constructor(
         }
     }
 
-    private fun calculateClearDataParam(dataToBeCollected: CollectedDataParam) =
-        ClearDataParam.createFromRequirements(
-            Requirement.values().toMutableSet().minus(
+    private fun calculateClearDataParam(dataToBeCollected: CollectedDataParam): ClearDataParam {
+        val initialMissings =
+            _verificationPage.value?.data?.requirements?.missing ?: Requirement.values().toList()
+                .also {
+                    Log.e(
+                        TAG,
+                        "_verificationPage is null, using Requirement.values() as initialMissings"
+                    )
+                }
+        return ClearDataParam.createFromRequirements(
+            initialMissings.toMutableSet().minus(
                 collectedData.value.collectedRequirements()
             ).minus(dataToBeCollected.collectedRequirements())
         )
+    }
 
     /**
      * Send a POST request to VerificationPageData,
@@ -886,9 +925,21 @@ internal class IdentityViewModel constructor(
             _collectedData.updateStateAndSave { oldValue ->
                 oldValue.mergeWith(collectedDataParam)
             }
-            _missingRequirements.updateStateAndSave {
-                requireNotNull(newVerificationPageData.requirements.missings) {
-                    "VerificationPageDataRequirements.missings is null"
+
+            _missingRequirements.updateStateAndSave { oldMissings ->
+                val newMissings =
+                    requireNotNull(newVerificationPageData.requirements.missings).toSet()
+
+                newMissings.intersect(INDIVIDUAL_REQUIREMENT_SET).takeIf { it.isNotEmpty() }
+                    ?.let {
+                        // If "NAME", "DOB" and "IDNUMBER" are collected and "DOB" is invalid,
+                        // newMissings will only contain "DOB". However we still need to show the UI to
+                        // collect all three fields, manually updated the oldIndividualMissings.
+                        val oldIndividualMissings =
+                            oldMissings.intersect(INDIVIDUAL_REQUIREMENT_SET)
+                        newMissings.plus(oldIndividualMissings)
+                    } ?: run {
+                    newMissings
                 }
             }
 
@@ -958,6 +1009,8 @@ internal class IdentityViewModel constructor(
                 onMissingBack()
             } else if (verificationPageData.isMissingSelfie()) {
                 navController.navigateTo(SelfieDestination)
+            } else if (verificationPageData.isMissingIndividualRequirements()) {
+                navController.navigateTo(IndividualDestination)
             } else {
                 onReadyToSubmit()
             }
@@ -1248,6 +1301,22 @@ internal class IdentityViewModel constructor(
                 )
             }
         )
+    }
+
+    suspend fun postVerificationPageDataForIndividual(
+        individualCollectedStates: IndividualCollectedStates,
+        navController: NavController
+    ) {
+        postVerificationPageDataAndMaybeNavigate(
+            navController,
+            individualCollectedStates.toCollectedDataParam(),
+            fromRoute = IndividualDestination.ROUTE.route,
+        ) {
+            submitAndNavigate(
+                navController = navController,
+                fromRoute = IndividualDestination.ROUTE.route
+            )
+        }
     }
 
     /**
@@ -1560,6 +1629,8 @@ internal class IdentityViewModel constructor(
                 subcomponent.fpsTracker,
                 subcomponent.screenTracker,
                 subcomponent.identityImageHandler,
+                subcomponent.addressRepository,
+                subcomponent.tfLiteInitializer,
                 savedStateHandle,
                 uiContextSupplier(),
                 workContextSupplier()

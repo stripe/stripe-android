@@ -17,12 +17,16 @@
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">Banco iDEAL</string>
   <string name="invalid_email_address">Dirección de correo electrónico no válida: %s</string>
+  <!-- Error message when UPI ID is invalid -->
+  <string name="invalid_upi_id">ID de UPI no válida</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Compra ahora y paga después con Klarna.</string>
   <!-- Klarna pay later copy -->
   <string name="klarna_pay_later">Paga después con Klarna.</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="p24_bank">Banco Przelewy24</string>
+  <!-- PayPal mandate text -->
+  <string name="paypal_mandate">Si confirmas tu pago con Paypal, permitirás que %s efectúe cargos de pagos futuros en tu cuenta de Paypal conforme a sus condiciones estipuladas.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Guardar para futuros pagos a %s</string>
   <!-- Button title to open camera to scan credit/debit card -->
@@ -37,6 +41,8 @@
   <string name="stripe_payment_method_bank">Banco</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Información de la tarjeta</string>
+  <!-- Header text shown above a UPI ID text field -->
+  <string name="stripe_paymentsheet_buy_using_upi_id">Comprar con un ID de UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Débito directo BECS (Australia)</string>
   <!-- Title for credit card number entry field -->
@@ -45,4 +51,6 @@
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Débito SEPA</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Configurar</string>
+  <!-- Label for UPI ID number field on form -->
+  <string name="upi_id_label">ID de UPI</string>
 </resources>

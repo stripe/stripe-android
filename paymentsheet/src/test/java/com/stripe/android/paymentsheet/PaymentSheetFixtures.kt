@@ -7,11 +7,8 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -22,7 +19,8 @@ internal object PaymentSheetFixtures {
         get() = "#121212".toColorInt()
 
     internal const val MERCHANT_DISPLAY_NAME = "Merchant, Inc."
-    internal const val CLIENT_SECRET = "client_secret"
+    internal const val CLIENT_SECRET = "pi_1234_secret_1234"
+    internal const val DIFFERENT_CLIENT_SECRET = "pi_4321_secret_4321"
 
     internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(
         CLIENT_SECRET
@@ -64,6 +62,13 @@ internal object PaymentSheetFixtures {
                     fontResId = 0
                 )
             )
+        ),
+        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
         )
     )
 
@@ -86,16 +91,25 @@ internal object PaymentSheetFixtures {
             googlePay = ConfigFixtures.GOOGLE_PAY
         )
 
+    internal val CONFIG_BILLING_DETAILS_COLLECTION = PaymentSheet.Configuration(
+        merchantDisplayName = MERCHANT_DISPLAY_NAME,
+        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+    )
+
     internal val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
         state = PaymentSheetState.Full(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            clientSecret = PaymentIntentClientSecret("pssst… this is a secret"),
             customerPaymentMethods = emptyList(),
             config = CONFIG_GOOGLEPAY,
             isGooglePayReady = false,
-            newPaymentSelection = null,
+            paymentSelection = null,
             linkState = null,
-            savedSelection = SavedSelection.None,
         ),
         statusBarColor = STATUS_BAR_COLOR,
         injectorKey = DUMMY_INJECTOR_KEY,
@@ -108,8 +122,7 @@ internal object PaymentSheetFixtures {
         isGooglePayReady: Boolean = state.isGooglePayReady,
         stripeIntent: StripeIntent = state.stripeIntent,
         config: PaymentSheet.Configuration? = state.config,
-        newPaymentSelection: PaymentSelection.New? = state.newPaymentSelection,
-        clientSecret: ClientSecret = state.clientSecret,
+        paymentSelection: PaymentSelection? = state.paymentSelection,
         linkState: LinkState? = state.linkState,
     ): PaymentOptionContract.Args {
         return copy(
@@ -118,37 +131,42 @@ internal object PaymentSheetFixtures {
                 isGooglePayReady = isGooglePayReady,
                 stripeIntent = stripeIntent,
                 config = config,
-                newPaymentSelection = newPaymentSelection,
-                clientSecret = clientSecret,
+                paymentSelection = paymentSelection,
                 linkState = linkState,
             ),
         )
     }
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
-        get() = PaymentSheetContract.Args(
-            SetupIntentClientSecret(CLIENT_SECRET),
+        get() = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.SetupIntent("seti_1234_secret_1234"),
             CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             STATUS_BAR_COLOR
         )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY
-        get() = PaymentSheetContract.Args(
-            PAYMENT_INTENT_CLIENT_SECRET,
+        get() = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
             CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             STATUS_BAR_COLOR
         )
 
     internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY
-        get() = PaymentSheetContract.Args(
-            PAYMENT_INTENT_CLIENT_SECRET,
+        get() = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
             CONFIG_CUSTOMER,
             STATUS_BAR_COLOR
         )
 
     internal val ARGS_WITHOUT_CONFIG
-        get() = PaymentSheetContract.Args(
-            PAYMENT_INTENT_CLIENT_SECRET,
+        get() = PaymentSheetContractV2.Args(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
             config = null,
             STATUS_BAR_COLOR
         )

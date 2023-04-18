@@ -3,6 +3,7 @@
 package com.stripe.android.financialconnections.features.manualentry
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,15 +32,20 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
+import com.airbnb.mvrx.Loading
+import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.LoadingContent
+import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
+import com.stripe.android.financialconnections.features.partnerauth.ErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -57,13 +63,12 @@ internal fun ManualEntryScreen() {
     val viewModel: ManualEntryViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state: State<ManualEntryState> = viewModel.collectAsState()
-
     ManualEntryContent(
         routing = state.value.routing to state.value.routingError,
         account = state.value.account to state.value.accountError,
         accountConfirm = state.value.accountConfirm to state.value.accountConfirmError,
         isValidForm = state.value.isValidForm,
-        verifyWithMicrodeposits = state.value.verifyWithMicrodeposits,
+        payload = state.value.payload,
         linkPaymentAccountStatus = state.value.linkPaymentAccount,
         onRoutingEntered = viewModel::onRoutingEntered,
         onAccountEntered = viewModel::onAccountEntered,
@@ -72,14 +77,13 @@ internal fun ManualEntryScreen() {
     ) { parentViewModel.onCloseNoConfirmationClick(Pane.MANUAL_ENTRY) }
 }
 
-@Suppress("LongMethod")
 @Composable
 private fun ManualEntryContent(
     routing: Pair<String?, Int?>,
     account: Pair<String?, Int?>,
     accountConfirm: Pair<String?, Int?>,
     isValidForm: Boolean,
-    verifyWithMicrodeposits: Boolean,
+    payload: Async<Payload>,
     linkPaymentAccountStatus: Async<LinkAccountSessionPaymentAccount>,
     onRoutingEntered: (String) -> Unit,
     onAccountEntered: (String) -> Unit,
@@ -96,97 +100,140 @@ private fun ManualEntryContent(
             )
         }
     ) {
-        Column(
-            Modifier.fillMaxSize()
-        ) {
-            // Scrollable content
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(scrollState)
-                    .padding(
-                        top = 16.dp,
-                        start = 24.dp,
-                        end = 24.dp,
-                        bottom = 24.dp
-                    )
-            ) {
-                var currentCheck: Int? by remember { mutableStateOf(R.drawable.stripe_check_base) }
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(R.string.stripe_manualentry_title),
-                    color = FinancialConnectionsTheme.colors.textPrimary,
-                    style = FinancialConnectionsTheme.typography.subtitle
+        when (payload) {
+            is Loading, Uninitialized -> LoadingContent()
+            is Fail -> ErrorContent(
+                error = payload.error,
+                onSelectAnotherBank = {},
+                onEnterDetailsManually = {},
+                onCloseFromErrorClick = {}
+            )
+
+            is Success -> when (payload().customManualEntry) {
+                true -> LoadingContent()
+                false -> ManualEntryLoaded(
+                    scrollState = scrollState,
+                    linkPaymentAccountStatus = linkPaymentAccountStatus,
+                    payload = payload(),
+                    routing = routing,
+                    onRoutingEntered = onRoutingEntered,
+                    account = account,
+                    onAccountEntered = onAccountEntered,
+                    accountConfirm = accountConfirm,
+                    onAccountConfirmEntered = onAccountConfirmEntered,
+                    isValidForm = isValidForm,
+                    onSubmit = onSubmit
                 )
-                Spacer(modifier = Modifier.size(24.dp))
-                Box {
+            }
+        }
+    }
+}
+
+@Composable
+@Suppress("LongMethod")
+private fun ManualEntryLoaded(
+    scrollState: ScrollState,
+    payload: Payload,
+    linkPaymentAccountStatus: Async<LinkAccountSessionPaymentAccount>,
+    routing: Pair<String?, Int?>,
+    onRoutingEntered: (String) -> Unit,
+    account: Pair<String?, Int?>,
+    onAccountEntered: (String) -> Unit,
+    accountConfirm: Pair<String?, Int?>,
+    onAccountConfirmEntered: (String) -> Unit,
+    isValidForm: Boolean,
+    onSubmit: () -> Unit
+) {
+    Column(
+        Modifier.fillMaxSize()
+    ) {
+        // Scrollable content
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(scrollState)
+                .padding(
+                    top = 16.dp,
+                    start = 24.dp,
+                    end = 24.dp,
+                    bottom = 24.dp
+                )
+        ) {
+            var currentCheck: Int? by remember { mutableStateOf(R.drawable.stripe_check_base) }
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.stripe_manualentry_title),
+                color = FinancialConnectionsTheme.colors.textPrimary,
+                style = FinancialConnectionsTheme.typography.subtitle
+            )
+            Spacer(modifier = Modifier.size(24.dp))
+            Box {
+                Image(
+                    painter = painterResource(id = R.drawable.stripe_check_base),
+                    contentDescription = "Image of bank check referencing routing number"
+                )
+                currentCheck?.let {
                     Image(
-                        painter = painterResource(id = R.drawable.stripe_check_base),
+                        painter = painterResource(id = it),
                         contentDescription = "Image of bank check referencing routing number"
                     )
-                    currentCheck?.let {
-                        Image(
-                            painter = painterResource(id = it),
-                            contentDescription = "Image of bank check referencing routing number"
-                        )
-                    }
                 }
-                if (linkPaymentAccountStatus is Fail) {
-                    Text(
-                        text = (linkPaymentAccountStatus.error as? StripeException)?.message
-                            ?: stringResource(R.string.stripe_error_generic_title),
-                        color = FinancialConnectionsTheme.colors.textCritical,
-                        style = FinancialConnectionsTheme.typography.body
-                    )
-                    Spacer(modifier = Modifier.size(8.dp))
-                }
-                if (verifyWithMicrodeposits) {
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Text(
-                        text = stringResource(R.string.stripe_manualentry_microdeposits_desc),
-                        color = FinancialConnectionsTheme.colors.textPrimary,
-                        style = FinancialConnectionsTheme.typography.body
-                    )
-                }
+            }
+            if (linkPaymentAccountStatus is Fail) {
+                Text(
+                    text = (linkPaymentAccountStatus.error as? StripeException)?.message
+                        ?: stringResource(R.string.stripe_error_generic_title),
+                    color = FinancialConnectionsTheme.colors.textCritical,
+                    style = FinancialConnectionsTheme.typography.body
+                )
                 Spacer(modifier = Modifier.size(8.dp))
-
-                InputWithError(
-                    label = R.string.stripe_manualentry_routing,
-                    hint = "123456789",
-                    inputWithError = routing,
-                    testTag = "RoutingInput",
-                    onInputChanged = onRoutingEntered,
-                    onFocusGained = { currentCheck = R.drawable.stripe_check_routing }
-                )
-                Spacer(modifier = Modifier.size(24.dp))
-                InputWithError(
-                    label = R.string.stripe_manualentry_account,
-                    hint = "000123456789",
-                    inputWithError = account,
-                    testTag = "AccountInput",
-                    onInputChanged = onAccountEntered,
-                    onFocusGained = { currentCheck = R.drawable.stripe_check_account }
-                )
+            }
+            if (payload.verifyWithMicrodeposits) {
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
-                    text = stringResource(R.string.stripe_manualentry_account_type_disclaimer),
-                    color = FinancialConnectionsTheme.colors.textSecondary,
-                    style = FinancialConnectionsTheme.typography.caption
+                    text = stringResource(R.string.stripe_manualentry_microdeposits_desc),
+                    color = FinancialConnectionsTheme.colors.textPrimary,
+                    style = FinancialConnectionsTheme.typography.body
                 )
-                Spacer(modifier = Modifier.size(24.dp))
-                InputWithError(
-                    label = R.string.stripe_manualentry_accountconfirm,
-                    hint = "000123456789",
-                    inputWithError = accountConfirm,
-                    testTag = "ConfirmAccountInput",
-                    onInputChanged = onAccountConfirmEntered,
-                    onFocusGained = { currentCheck = R.drawable.stripe_check_account }
-                )
-                Spacer(modifier = Modifier.weight(1f))
             }
-            // Footer
-            ManualEntryFooter(isValidForm, onSubmit)
+            Spacer(modifier = Modifier.size(8.dp))
+
+            InputWithError(
+                label = R.string.stripe_manualentry_routing,
+                hint = "123456789",
+                inputWithError = routing,
+                testTag = "RoutingInput",
+                onInputChanged = onRoutingEntered,
+                onFocusGained = { currentCheck = R.drawable.stripe_check_routing }
+            )
+            Spacer(modifier = Modifier.size(24.dp))
+            InputWithError(
+                label = R.string.stripe_manualentry_account,
+                hint = "000123456789",
+                inputWithError = account,
+                testTag = "AccountInput",
+                onInputChanged = onAccountEntered,
+                onFocusGained = { currentCheck = R.drawable.stripe_check_account }
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = stringResource(R.string.stripe_manualentry_account_type_disclaimer),
+                color = FinancialConnectionsTheme.colors.textSecondary,
+                style = FinancialConnectionsTheme.typography.caption
+            )
+            Spacer(modifier = Modifier.size(24.dp))
+            InputWithError(
+                label = R.string.stripe_manualentry_accountconfirm,
+                hint = "000123456789",
+                inputWithError = accountConfirm,
+                testTag = "ConfirmAccountInput",
+                onInputChanged = onAccountConfirmEntered,
+                onFocusGained = { currentCheck = R.drawable.stripe_check_account }
+            )
+            Spacer(modifier = Modifier.weight(1f))
         }
+        // Footer
+        ManualEntryFooter(isValidForm, onSubmit)
     }
 }
 
@@ -258,38 +305,21 @@ private fun InputWithError(
     }
 }
 
-@Preview
+@Preview(
+    group = "Manual Entry Pane",
+)
 @Composable
-internal fun ManualEntryScreenPreview() {
+internal fun ManualEntryPreview(
+    @PreviewParameter(ManualEntryPreviewParameterProvider::class) state: ManualEntryState
+) {
     FinancialConnectionsPreview {
         ManualEntryContent(
             routing = "" to null,
             account = "" to null,
             accountConfirm = "" to null,
             isValidForm = true,
-            verifyWithMicrodeposits = true,
-            linkPaymentAccountStatus = Uninitialized,
-            onRoutingEntered = {},
-            onAccountEntered = {},
-            onAccountConfirmEntered = {},
-            onSubmit = {},
-        ) {}
-    }
-}
-
-@Preview
-@Composable
-internal fun ManualEntryScreenErrorPreview() {
-    FinancialConnectionsPreview {
-        ManualEntryContent(
-            routing = "" to null,
-            account = "" to null,
-            accountConfirm = "" to null,
-            isValidForm = true,
-            verifyWithMicrodeposits = true,
-            linkPaymentAccountStatus = Fail(
-                APIException(message = "Error linking accounts")
-            ),
+            payload = state.payload,
+            linkPaymentAccountStatus = state.linkPaymentAccount,
             onRoutingEntered = {},
             onAccountEntered = {},
             onAccountConfirmEntered = {},

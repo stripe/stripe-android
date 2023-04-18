@@ -19,7 +19,9 @@ internal data class FormArguments(
     val amount: Amount? = null,
     val billingDetails: PaymentSheet.BillingDetails? = null,
     val shippingDetails: AddressDetails? = null,
-    val initialPaymentMethodCreateParams: PaymentMethodCreateParams? = null
+    val initialPaymentMethodCreateParams: PaymentMethodCreateParams? = null,
+    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+        PaymentSheet.BillingDetailsCollectionConfiguration(),
 ) : Parcelable
 
 internal fun FormArguments.getInitialValuesMap(): Map<IdentifierSpec, String?> {

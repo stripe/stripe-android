@@ -9,7 +9,7 @@ dependencies {
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
 
-    def camerax_version = "1.2.0"
+    def camerax_version = "1.2.1"
 
     implementation "androidx.camera:camera-core:$camerax_version"
     implementation "androidx.camera:camera-camera2:$camerax_version"
@@ -31,8 +31,6 @@ dependencies {
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
     androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 ext {

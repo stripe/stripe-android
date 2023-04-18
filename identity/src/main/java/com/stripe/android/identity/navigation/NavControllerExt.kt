@@ -56,14 +56,7 @@ internal fun NavController.navigateToErrorScreenWithDefaultValues(context: Conte
 internal fun NavController.navigateToFinalErrorScreen(
     context: Context
 ) {
-    navigateTo(
-        ErrorDestination(
-            errorTitle = context.getString(R.string.error),
-            errorContent = context.getString(R.string.unexpected_error_try_again),
-            backButtonText = context.getString(R.string.go_back),
-            shouldFail = true
-        )
-    )
+    navigateTo(context.finalErrorDestination())
 }
 
 /**
@@ -89,6 +82,7 @@ internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityVie
         if (DOCUMENT_UPLOAD_ROUTES.contains(currentEntryRoute)) {
             identityViewModel.clearUploadedData()
         }
+
         currentEntryRoute.routeToRequirement().forEach(identityViewModel::clearCollectedData)
     }
 

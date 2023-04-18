@@ -25,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.material.MdcTheme
-import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -62,7 +61,6 @@ class CashAppPayActivity : StripeIntentActivity() {
         }
     }
 
-    @OptIn(StripeCashAppPayBetaApi::class)
     private fun payWithCashAppPay(
         flow: CashAppPayFlow,
         customerId: String,

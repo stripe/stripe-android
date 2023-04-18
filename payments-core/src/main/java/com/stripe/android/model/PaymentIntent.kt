@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.PaymentIntent.CaptureMethod
@@ -17,7 +16,6 @@ import java.util.regex.Pattern
  * - [Payment Intents Overview](https://stripe.com/docs/payments/payment-intents)
  * - [PaymentIntents API Reference](https://stripe.com/docs/api/payment_intents)
  */
-@OptIn(StripeCashAppPayBetaApi::class)
 @Parcelize
 data class PaymentIntent
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -182,8 +180,10 @@ constructor(
             is StripeIntent.NextActionData.CashAppRedirect -> {
                 StripeIntent.NextActionType.CashAppRedirect
             }
+            is StripeIntent.NextActionData.BlikAuthorize -> {
+                StripeIntent.NextActionType.BlikAuthorize
+            }
             is StripeIntent.NextActionData.AlipayRedirect,
-            is StripeIntent.NextActionData.BlikAuthorize,
             is StripeIntent.NextActionData.WeChatPayRedirect,
             null -> {
                 null
@@ -208,26 +208,27 @@ constructor(
         return status === StripeIntent.Status.RequiresConfirmation
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun isSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
+        return isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)
+    }
+
     /**
      * SetupFutureUsage is considered to be set if it is on or off session.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    private fun isTopLevelSetupFutureUsageSet() =
-        when (setupFutureUsage) {
+    private fun isTopLevelSetupFutureUsageSet(): Boolean {
+        return when (setupFutureUsage) {
             StripeIntent.Usage.OnSession -> true
             StripeIntent.Usage.OffSession -> true
             StripeIntent.Usage.OneTime -> false
             null -> false
         }
+    }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
-        return isTopLevelSetupFutureUsageSet() || paymentMethodOptionsJsonString?.let {
-            JSONObject(paymentMethodOptionsJsonString)
-                .optJSONObject(code)
-                ?.optString("setup_future_usage")?.let {
-                    true
-                } ?: false
+    private fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
+        return paymentMethodOptionsJsonString?.let { json ->
+            val pmOptions = JSONObject(json).optJSONObject(code)
+            pmOptions?.has("setup_future_usage") ?: false
         } ?: false
     }
 

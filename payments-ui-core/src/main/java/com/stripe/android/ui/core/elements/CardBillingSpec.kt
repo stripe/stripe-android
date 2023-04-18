@@ -1,11 +1,13 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.supportedBillingCountries
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -16,13 +18,20 @@ data class CardBillingSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("card_billing"),
     @SerialName("allowed_country_codes")
-    val allowedCountryCodes: Set<String> = supportedBillingCountries
+    val allowedCountryCodes: Set<String> = supportedBillingCountries,
+    @SerialName("collection_mode")
+    val collectionMode: CardBillingDetailsCollectionConfiguration.AddressCollectionMode =
+        CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
         addressRepository: AddressRepository,
-        shippingValues: Map<IdentifierSpec, String?>?
-    ): SectionElement {
+        shippingValues: Map<IdentifierSpec, String?>?,
+    ): SectionElement? {
+        if (collectionMode == CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never) {
+            return null
+        }
+
         val sameAsShippingElement =
             shippingValues?.get(IdentifierSpec.SameAsShipping)
                 ?.toBooleanStrictOrNull()
@@ -38,7 +47,8 @@ data class CardBillingSpec(
             countryCodes = allowedCountryCodes,
             rawValuesMap = initialValues,
             sameAsShippingElement = sameAsShippingElement,
-            shippingValuesMap = shippingValues
+            shippingValuesMap = shippingValues,
+            collectionMode = collectionMode,
         )
 
         return createSectionElement(

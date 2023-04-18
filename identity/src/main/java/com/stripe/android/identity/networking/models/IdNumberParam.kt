@@ -11,7 +11,7 @@ internal data class IdNumberParam(
     @SerialName("country")
     val country: String?,
     @SerialName("partial_value")
-    val partialValue: String?,
+    val partialValue: String? = null,
     @SerialName("value")
-    val value: String?
+    val value: String? = null
 ) : Parcelable

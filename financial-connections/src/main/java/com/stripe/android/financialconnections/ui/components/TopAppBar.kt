@@ -93,16 +93,16 @@ internal val LazyListState.elevation: Dp
         AppBarDefaults.TopAppBarElevation
     }
 
-@Composable
 @Preview(group = "Components", name = "TopAppBar")
+@Composable
 internal fun TopAppBarNoStripeLogoPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsTopAppBar {}
     }
 }
 
-@Composable
 @Preview(group = "Components", name = "TopAppBar - no Stripe logo")
+@Composable
 internal fun FinancialConnectionsTopAppBarPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsTopAppBar(

@@ -1,5 +1,9 @@
 package com.stripe.android.financialconnections.ui.theme
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.view.Window
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.Colors
@@ -9,11 +13,16 @@ import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.WindowCompat
 
 private val LightColorPalette = FinancialConnectionsColors(
     backgroundSurface = Color.White,
@@ -150,6 +159,20 @@ internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
         LocalFinancialConnectionsTypography provides Typography,
         LocalFinancialConnectionsColors provides LightColorPalette
     ) {
+        val view = LocalView.current
+        val window = findWindow()
+        val barColor = FinancialConnectionsTheme.colors.borderDefault
+        if (!view.isInEditMode) {
+            SideEffect {
+                window?.let { window ->
+                    val insets = WindowCompat.getInsetsController(window, view)
+                    window.statusBarColor = barColor.toArgb()
+                    window.navigationBarColor = barColor.toArgb()
+                    insets.isAppearanceLightStatusBars = true
+                    insets.isAppearanceLightNavigationBars = true
+                }
+            }
+        }
         MaterialTheme(
             colors = debugColors(),
             content = {
@@ -164,9 +187,22 @@ internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     }
 }
 
-private val LocalFinancialConnectionsTypography = staticCompositionLocalOf<FinancialConnectionsTypography> {
-    error("no FinancialConnectionsTypography provided")
-}
+@Composable
+private fun findWindow(): Window? =
+    (LocalView.current.parent as? DialogWindowProvider)?.window
+        ?: LocalView.current.context.findWindow()
+
+private tailrec fun Context.findWindow(): Window? =
+    when (this) {
+        is Activity -> window
+        is ContextWrapper -> baseContext.findWindow()
+        else -> null
+    }
+
+private val LocalFinancialConnectionsTypography =
+    staticCompositionLocalOf<FinancialConnectionsTypography> {
+        error("no FinancialConnectionsTypography provided")
+    }
 
 private val LocalFinancialConnectionsColors = staticCompositionLocalOf<FinancialConnectionsColors> {
     error("No FinancialConnectionsColors provided")

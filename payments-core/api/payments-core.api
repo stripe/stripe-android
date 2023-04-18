@@ -178,6 +178,9 @@ public final class com/stripe/android/EphemeralOperation$RetrieveKey$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public abstract interface annotation class com/stripe/android/ExperimentalPaymentSheetDecouplingApi : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/GooglePayConfig {
 	public static final field $stable I
 	public fun <init> (Landroid/content/Context;)V
@@ -956,6 +959,7 @@ public final class com/stripe/android/Stripe {
 	public final fun retrievePaymentIntentSynchronous (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/PaymentIntent;
 	public final fun retrievePaymentIntentSynchronous (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lcom/stripe/android/model/PaymentIntent;
 	public static synthetic fun retrievePaymentIntentSynchronous$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentIntent;
+	public final fun retrievePossibleBrands (Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun retrieveSetupIntent (Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun retrieveSetupIntent (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun retrieveSetupIntent (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lcom/stripe/android/ApiResultCallback;)V
@@ -990,9 +994,6 @@ public final class com/stripe/android/StripeApiBeta : java/lang/Enum {
 	public final fun getCode ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/StripeApiBeta;
 	public static fun values ()[Lcom/stripe/android/StripeApiBeta;
-}
-
-public abstract interface annotation class com/stripe/android/StripeCashAppPayBetaApi : java/lang/annotation/Annotation {
 }
 
 public abstract class com/stripe/android/StripeIntentResult : com/stripe/android/core/model/StripeModel {
@@ -1052,6 +1053,7 @@ public final class com/stripe/android/StripeKtxKt {
 	public static final fun getSetupIntentResult (Lcom/stripe/android/Stripe;ILandroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun retrievePaymentIntent (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun retrievePaymentIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun retrievePossibleBrands (Lcom/stripe/android/Stripe;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun retrieveSetupIntent (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun retrieveSetupIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun retrieveSource (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1064,6 +1066,7 @@ public final class com/stripe/android/StripeKtxKt {
 
 public abstract interface class com/stripe/android/cards/CardAccountRangeRepository$Factory {
 	public abstract fun create ()Lcom/stripe/android/cards/CardAccountRangeRepository;
+	public abstract fun createWithStripeRepository (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;)Lcom/stripe/android/cards/CardAccountRangeRepository;
 }
 
 public abstract interface class com/stripe/android/cards/CardAccountRangeService$AccountRangeResultListener {
@@ -2707,6 +2710,70 @@ public final class com/stripe/android/model/DateOfBirth$Creator : android/os/Par
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/DeferredIntentParams$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/DeferredIntentParams;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/DeferredIntentParams;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/DeferredIntentParams$Mode$Payment$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/DeferredIntentParams$Mode$Payment;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/DeferredIntentParams$Mode$Payment;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/DeferredIntentParams$Mode$Setup$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/DeferredIntentParams$Mode$Setup;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/DeferredIntentParams$Mode$Setup;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/ElementsSession$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ElementsSession;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ElementsSession;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/ElementsSession$LinkSettings$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ElementsSession$LinkSettings;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ElementsSession$LinkSettings;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/ElementsSessionParams$DeferredIntentType$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ElementsSessionParams$DeferredIntentType;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ElementsSessionParams$DeferredIntentType;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/ElementsSessionParams$PaymentIntentType$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ElementsSessionParams$PaymentIntentType;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ElementsSessionParams$PaymentIntentType;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/ElementsSessionParams$SetupIntentType$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ElementsSessionParams$SetupIntentType;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ElementsSessionParams$SetupIntentType;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public abstract class com/stripe/android/model/ExpirationDate {
 	public static final field $stable I
 }
@@ -3712,6 +3779,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field USBankAccount Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Upi Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field WeChatPay Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field Zip Lcom/stripe/android/model/PaymentMethod$Type;
 	public final field code Ljava/lang/String;
 	public final field isReusable Z
 	public final field isVoucher Z
@@ -4722,6 +4790,29 @@ public final class com/stripe/android/model/PiiTokenParams$Creator : android/os/
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PiiTokenParams;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/PiiTokenParams;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/PossibleBrands : com/stripe/android/core/model/StripeModel {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lcom/stripe/android/model/PossibleBrands;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/PossibleBrands;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/model/PossibleBrands;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBrands ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/PossibleBrands$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PossibleBrands;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/PossibleBrands;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

@@ -1,6 +1,13 @@
 appId: ${APP_ID}
 ---
 ####### Bypass Chrome on-boarding screen #######
+# If no default browser selected, select Chrome
+- tapOn:
+    text: ".*Chrome.*"
+    optional: true
+- tapOn:
+    text: ".*ALWAYS.*"
+    optional: true
 # ACCEPT TERMS (tries id and text)
 - tapOn:
     id: "com.android.chrome:id/terms_accept"

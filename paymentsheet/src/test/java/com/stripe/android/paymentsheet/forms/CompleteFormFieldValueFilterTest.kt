@@ -1,12 +1,13 @@
 package com.stripe.android.paymentsheet.forms
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.elements.EmailElement
-import com.stripe.android.ui.core.elements.SectionController
-import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionController
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,8 @@ class CompleteFormFieldValueFilterTest {
         fieldFlow,
         hiddenIdentifersFlow,
         showingMandate = MutableStateFlow(true),
-        userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest)
+        userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest),
+        defaultValues = emptyMap(),
     )
 
     init {
@@ -109,6 +111,64 @@ class CompleteFormFieldValueFilterTest {
                 .doesNotContainKey(IdentifierSpec.Email)
             assertThat(formFieldValue?.fieldValuePairs)
                 .containsKey(IdentifierSpec.Country)
+        }
+    }
+
+    @Test
+    fun `Verify defaults are preserved if no fields override them`() = runTest {
+        val formFieldValueFilter = CompleteFormFieldValueFilter(
+            fieldFlow,
+            hiddenIdentifersFlow,
+            showingMandate = MutableStateFlow(true),
+            userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest),
+            defaultValues = mapOf(
+                IdentifierSpec.Name to "Jane Doe",
+                IdentifierSpec.Email to "foo@bar.com",
+            ),
+        )
+
+        fieldFlow.value = mapOf(
+            IdentifierSpec.Country to FormFieldEntry("US", true),
+        )
+
+        formFieldValueFilter.filterFlow().test {
+            assertThat(awaitItem()?.fieldValuePairs).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry("Jane Doe", true),
+                    IdentifierSpec.Email to FormFieldEntry("foo@bar.com", true),
+                    IdentifierSpec.Country to FormFieldEntry("US", true),
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `Verify defaults are overridden`() = runTest {
+        val formFieldValueFilter = CompleteFormFieldValueFilter(
+            fieldFlow,
+            hiddenIdentifersFlow,
+            showingMandate = MutableStateFlow(true),
+            userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest),
+            defaultValues = mapOf(
+                IdentifierSpec.Name to "Jane Doe",
+                IdentifierSpec.Email to "foo@bar.com",
+            ),
+        )
+
+        fieldFlow.value = mapOf(
+            IdentifierSpec.Country to FormFieldEntry("US", true),
+            IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", true),
+            IdentifierSpec.Email to FormFieldEntry("mail@mail.com", true),
+        )
+
+        formFieldValueFilter.filterFlow().test {
+            assertThat(awaitItem()?.fieldValuePairs).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", true),
+                    IdentifierSpec.Email to FormFieldEntry("mail@mail.com", true),
+                    IdentifierSpec.Country to FormFieldEntry("US", true),
+                )
+            )
         }
     }
 }

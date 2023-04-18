@@ -21,20 +21,26 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         customerName: String,
         customerEmail: String?,
         stripeAccountId: String?
-    ): Result<FinancialConnectionsSession> = kotlin.runCatching {
-        stripeRepository.createPaymentIntentFinancialConnectionsSession(
-            paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId,
-            params = CreateFinancialConnectionsSessionParams(
-                clientSecret = clientSecret,
-                customerName = customerName,
-                customerEmailAddress = customerEmail
-            ),
-            requestOptions = ApiRequest.Options(
-                publishableKey,
-                stripeAccountId
-            )
-        )
-    }.mapCatching { it ?: throw InternalError("Error creating session for PaymentIntent") }
+    ): Result<FinancialConnectionsSession> {
+        val paymentIntentClientSecretResult = runCatching {
+            PaymentIntent.ClientSecret(clientSecret)
+        }
+
+        return paymentIntentClientSecretResult.mapCatching { paymentIntentClientSecret ->
+            stripeRepository.createPaymentIntentFinancialConnectionsSession(
+                paymentIntentId = paymentIntentClientSecret.paymentIntentId,
+                params = CreateFinancialConnectionsSessionParams(
+                    clientSecret = clientSecret,
+                    customerName = customerName,
+                    customerEmailAddress = customerEmail
+                ),
+                requestOptions = ApiRequest.Options(
+                    publishableKey,
+                    stripeAccountId
+                )
+            ).getOrThrow()
+        }
+    }
 
     /**
      * Creates a [FinancialConnectionsSession] for the given [SetupIntent] secret.
@@ -45,18 +51,24 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         customerName: String,
         customerEmail: String?,
         stripeAccountId: String?
-    ): Result<FinancialConnectionsSession> = kotlin.runCatching {
-        stripeRepository.createSetupIntentFinancialConnectionsSession(
-            setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId,
-            params = CreateFinancialConnectionsSessionParams(
-                clientSecret = clientSecret,
-                customerName = customerName,
-                customerEmailAddress = customerEmail
-            ),
-            requestOptions = ApiRequest.Options(
-                publishableKey,
-                stripeAccountId
-            )
-        )
-    }.mapCatching { it ?: throw InternalError("Error creating session for SetupIntent") }
+    ): Result<FinancialConnectionsSession> {
+        val setupIntentClientSecretResult = runCatching {
+            SetupIntent.ClientSecret(clientSecret)
+        }
+
+        return setupIntentClientSecretResult.mapCatching { setupIntentClientSecret ->
+            stripeRepository.createSetupIntentFinancialConnectionsSession(
+                setupIntentId = setupIntentClientSecret.setupIntentId,
+                params = CreateFinancialConnectionsSessionParams(
+                    clientSecret = clientSecret,
+                    customerName = customerName,
+                    customerEmailAddress = customerEmail
+                ),
+                requestOptions = ApiRequest.Options(
+                    publishableKey,
+                    stripeAccountId
+                )
+            ).getOrThrow()
+        }
+    }
 }

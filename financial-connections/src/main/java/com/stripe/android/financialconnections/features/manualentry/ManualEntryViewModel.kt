@@ -12,9 +12,13 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate.EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
+import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -23,6 +27,7 @@ import javax.inject.Inject
 @Suppress("LongParameterList")
 internal class ManualEntryViewModel @Inject constructor(
     initialState: ManualEntryState,
+    private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
@@ -31,14 +36,17 @@ internal class ManualEntryViewModel @Inject constructor(
 ) : MavericksViewModel<ManualEntryState>(initialState) {
 
     init {
-        logErrors()
+        observeAsyncs()
         observeInputs()
         suspend {
-            getManifest().manualEntryUsesMicrodeposits.also {
-                eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY))
-            }
+            val manifest = getManifest()
+            eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY))
+            ManualEntryState.Payload(
+                verifyWithMicrodeposits = manifest.manualEntryUsesMicrodeposits,
+                customManualEntry = manifest.manualEntryMode == ManualEntryMode.CUSTOM
+            )
         }.execute {
-            copy(verifyWithMicrodeposits = it() ?: false)
+            copy(payload = it)
         }
     }
 
@@ -72,7 +80,19 @@ internal class ManualEntryViewModel @Inject constructor(
         }
     }
 
-    private fun logErrors() {
+    private fun observeAsyncs() {
+        onAsync(
+            ManualEntryState::payload,
+            onSuccess = { payload ->
+                if (payload.customManualEntry) {
+                    nativeAuthFlowCoordinator().emit(
+                        Terminate(
+                            USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
+                        )
+                    )
+                }
+            },
+        )
         onAsync(
             ManualEntryState::linkPaymentAccount,
             onFail = {
@@ -142,6 +162,7 @@ internal class ManualEntryViewModel @Inject constructor(
 }
 
 internal data class ManualEntryState(
+    val payload: Async<Payload> = Uninitialized,
     val routing: String? = null,
     val account: String? = null,
     val accountConfirm: String? = null,
@@ -149,8 +170,13 @@ internal data class ManualEntryState(
     val accountError: Int? = null,
     val accountConfirmError: Int? = null,
     val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized,
-    val verifyWithMicrodeposits: Boolean = false
+
 ) : MavericksState {
+
+    data class Payload(
+        val verifyWithMicrodeposits: Boolean,
+        val customManualEntry: Boolean
+    )
 
     val isValidForm
         get() =

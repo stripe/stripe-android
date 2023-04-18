@@ -155,6 +155,29 @@ class PaymentIntentResultTest {
     }
 
     @Test
+    fun outcome_whenBlikAndRequiresAction_shouldReturnSuccess() {
+        val paymentIntent = PaymentIntent(
+            created = 500L,
+            amount = 1000L,
+            clientSecret = "secret",
+            paymentMethod = PaymentMethodFixtures.BLIK_PAYMENT_METHOD,
+            isLiveMode = false,
+            id = "pi_12345",
+            currency = "pln",
+            countryCode = "pl",
+            paymentMethodTypes = listOf("blik"),
+            status = StripeIntent.Status.RequiresAction,
+            unactivatedPaymentMethods = emptyList(),
+            nextActionData = StripeIntent.NextActionData.BlikAuthorize,
+        )
+        val result = PaymentIntentResult(
+            intent = paymentIntent
+        )
+        assertThat(result.outcome)
+            .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+    }
+
+    @Test
     fun `should parcelize correctly`() {
         ParcelUtils.verifyParcelRoundtrip(
             PaymentIntentResult(

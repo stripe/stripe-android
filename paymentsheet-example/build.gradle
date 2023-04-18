@@ -1,9 +1,7 @@
-plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-    id 'org.jetbrains.kotlin.plugin.serialization'
-    id 'shot'
-}
+apply from: configs.androidApplication
+
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'shot'
 
 // Read values from gradle.properties or system environment variable
 def getBackendUrl() {
@@ -37,7 +35,6 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
     implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
     implementation 'com.github.kittinunf.fuel:fuel:2.3.1'
-    implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'com.godaddy.android.colorpicker:compose-color-picker-android:0.7.0'
 
     implementation "androidx.compose.ui:ui:$androidxComposeUiVersion"
@@ -65,7 +62,7 @@ dependencies {
 
     // Core library
     androidTestImplementation "androidx.test:core:$androidTestVersion"
-    androidTestImplementation 'androidx.test:core-ktx:1.1.0'
+    androidTestImplementation 'androidx.test:core-ktx:1.5.0'
 
     // AndroidJUnitRunner and JUnit Rules
     androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
@@ -87,18 +84,11 @@ dependencies {
         exclude group: 'org.checkerframework', module: 'checker'
     }
     androidTestImplementation "androidx.test.espresso:espresso-web:$espressoVersion"
-    androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$espressoVersion"
-    // The following Espresso dependency can be either "implementation"
-    // or "androidTestImplementation", depending on whether you want the
-    // dependency to appear on your APK's compile classpath or the test APK
-    // classpath.
-    implementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
-
-    androidTestImplementation 'com.jakewharton.espresso:okhttp3-idling-resource:1.0.0'
 
     // Test rules and transitive dependencies:
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion"
-    androidTestImplementation project(path: ':payments-ui-core')
+    androidTestImplementation project(':payments-ui-core')
+    androidTestImplementation project(':payments-core-testing')
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeUiVersion"
 
@@ -110,23 +100,9 @@ shot {
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-
     defaultConfig {
         applicationId "com.stripe.android.paymentsheet.example"
-        minSdkVersion 21
-        targetSdkVersion rootProject.ext.compileSdkVersion
         versionCode 11
-        versionName VERSION_NAME
 
         testInstrumentationRunner "com.karumi.shot.ShotTestRunner"
 
@@ -135,23 +111,11 @@ android {
                 GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey()
         ]
     }
-
-    buildTypes {
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
     buildFeatures {
         viewBinding true
         compose true
     }
     composeOptions {
         kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
-    }
-
-    testOptions {
-        // Make sure animations are off when we run espresso tests
-        animationsDisabled = true
     }
 }

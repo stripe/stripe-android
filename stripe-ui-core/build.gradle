@@ -4,6 +4,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'app.cash.paparazzi'
 
 ext {
     artifactId = "stripe-ui-core"
@@ -60,8 +61,8 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
+    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
+    testImplementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"

@@ -84,6 +84,15 @@ public final class com/stripe/android/uicore/elements/BillingSpecKt {
 public final class com/stripe/android/uicore/elements/CheckboxElementUIKt {
 }
 
+public final class com/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt {
+	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/uicore/elements/ComposableSingletons$SectionUIKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$SectionUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -92,6 +101,7 @@ public final class com/stripe/android/uicore/elements/ComposableSingletons$Secti
 }
 
 public final class com/stripe/android/uicore/elements/DropdownConfig$DefaultImpls {
+	public static fun getDisableDropdownWithSingleElement (Lcom/stripe/android/uicore/elements/DropdownConfig;)Z
 	public static fun getTinyMode (Lcom/stripe/android/uicore/elements/DropdownConfig;)Z
 }
 
@@ -172,9 +182,14 @@ public final class com/stripe/android/uicore/elements/SectionFieldElementUIKt {
 public final class com/stripe/android/uicore/elements/SectionUIKt {
 }
 
+public final class com/stripe/android/uicore/elements/TextFieldConfig$DefaultImpls {
+	public static fun getPlaceHolder (Lcom/stripe/android/uicore/elements/TextFieldConfig;)Ljava/lang/String;
+}
+
 public final class com/stripe/android/uicore/elements/TextFieldController$DefaultImpls {
 	public static fun ComposeUI-MxjM1cc (Lcom/stripe/android/uicore/elements/TextFieldController;ZLcom/stripe/android/uicore/elements/SectionFieldElement;Landroidx/compose/ui/Modifier;Ljava/util/Set;Lcom/stripe/android/uicore/elements/IdentifierSpec;IILandroidx/compose/runtime/Composer;I)V
 	public static fun getEnabled (Lcom/stripe/android/uicore/elements/TextFieldController;)Z
+	public static fun getPlaceHolder (Lcom/stripe/android/uicore/elements/TextFieldController;)Lkotlinx/coroutines/flow/Flow;
 }
 
 public abstract class com/stripe/android/uicore/elements/TextFieldStateConstants$Error : com/stripe/android/uicore/elements/TextFieldState {
@@ -294,5 +309,8 @@ public final class com/stripe/android/uicore/text/EmbeddableImage$Drawable : com
 }
 
 public final class com/stripe/android/uicore/text/HtmlKt {
+}
+
+public final class com/stripe/android/uicore/text/MiddleEllipsisTextKt {
 }
 

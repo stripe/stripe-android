@@ -2,6 +2,8 @@ package com.stripe.android.ui.core.elements
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -26,10 +28,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 
-sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
+internal sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
     abstract val cardBrandFlow: Flow<CardBrand>
 
     abstract val cardScanEnabled: Boolean
+
+    @OptIn(ExperimentalComposeUiApi::class)
+    override val autofillType: AutofillType = AutofillType.CreditCardNumber
 
     fun onCardScanResult(cardScanSheetResult: CardScanSheetResult) {
         // Don't need to populate the card number if the result is Canceled or Failed

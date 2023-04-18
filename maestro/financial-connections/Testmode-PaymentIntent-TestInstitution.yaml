@@ -21,15 +21,13 @@ appId: com.stripe.android.financialconnections.example
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
-    env:
-      APP_ID: com.stripe.android.financialconnections.example
 ###############################################
 # SELECT ALL ACCOUNTS
 - extendedWaitUntil:
     visible: "Success"
     timeout: 60000
 - tapOn: "Success" # select all accounts
-- tapOn: "Confirm"
+- tapOn: "Link account"
 # CONFIRM AND COMPLETE
 - tapOn: "Done"
 - assertVisible: ".*Intent Confirmed!.*"

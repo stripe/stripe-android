@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - Çevrimdışı</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">Ödeme yönteminiz reddedildi.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">Kartınızın son kullanma tarihi eksik.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">Girdiğiniz IBAN geçersiz.</string>
   <string name="invalid_card_number">Kart numaranız geçersiz.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Kartınızın güvenlik kodu geçersiz.</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Kartınızın son kullanma ayı geçersiz.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">Kartınızın son kullanma yılı geçersiz.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">Adınız geçersiz.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">Ödeme metodunuz doğrulanırken zaman aşımına uğradı -- tekrar deneyin</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Dâhili bir hata oluştu.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">AA / YY</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Ödemenizi doğrulayın</string>
   <string name="title_add_a_card">Kart Ekle</string>

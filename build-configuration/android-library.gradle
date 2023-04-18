@@ -11,7 +11,6 @@ apply from: rootProject.file('build-configuration/detekt.gradle')
 apply from: rootProject.file('build-configuration/ktlint.gradle')
 
 assemble.dependsOn('lint')
-check.dependsOn('checkstyle')
 check.dependsOn('ktlint')
 
 configurations {
@@ -28,7 +27,7 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion rootProject.ext.compileSdkVersion
-        consumerProguardFiles 'proguard-rules.txt'
+        consumerProguardFiles "consumer-rules.txt"
 
         vectorDrawables.useSupportLibrary = true
 
@@ -57,11 +56,17 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
+    }
+
+    kotlin {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of("11"))
+        }
     }
 }

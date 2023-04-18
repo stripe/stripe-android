@@ -164,6 +164,27 @@ class DefaultIdentityRepositoryTest {
     }
 
     @Test
+    fun `retrieveVerificationPage - verify individual welcome static page`() {
+        testFetchVerificationPage(
+            VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING
+        ) {
+            assertThat(it.individualWelcome.getStartedButtonText).isEqualTo("Get started")
+            assertThat(it.individualWelcome.body).isEqualTo(
+                "You’ll need to share some personal information to complete the " +
+                    "verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>"
+            )
+            assertThat(it.individualWelcome.title).isEqualTo(
+                "Tora's catfood partners with Stripe for secure Identity verification"
+            )
+            assertThat(it.individualWelcome.privacyPolicy).isEqualTo(
+                "Data will be stored and may be used according to the " +
+                    "<a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy."
+            )
+            assertThat(it.individualWelcome.timeEstimate).isEqualTo("Takes less than 1 minute.")
+        }
+    }
+
+    @Test
     fun `retrieveVerificationPage - verify countryNotListed page`() {
         testFetchVerificationPage(
             VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING

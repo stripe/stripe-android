@@ -1,0 +1,15 @@
+apply from: configs.androidLibrary
+
+dependencies {
+    implementation project(":payments-core")
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+    implementation "junit:junit:$junitVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
+
+    androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
+}
+
+android {
+    namespace 'com.stripe.android.testing'
+}

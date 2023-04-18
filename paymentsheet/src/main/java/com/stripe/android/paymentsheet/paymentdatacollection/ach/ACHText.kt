@@ -15,4 +15,14 @@ internal object ACHText {
             "<a href=\"https://stripe.com/ach-payments/authorization\">"
         ).replace("</terms>", "</a>")
     }
+
+    fun getSaveMandateText(context: Context, merchantName: String): String {
+        return context.getString(
+            R.string.stripe_paymentsheet_ach_save_mandate,
+            merchantName,
+        ).replace(
+            "<terms>",
+            "<a href=\"https://stripe.com/ach-payments/authorization\">"
+        ).replace("</terms>", "</a>")
+    }
 }

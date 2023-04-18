@@ -6,7 +6,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
-import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.confirmPaymentIntent
 import com.stripe.android.confirmSetupIntent
 import com.stripe.android.core.exception.InvalidRequestException
@@ -422,7 +421,6 @@ internal class EndToEndTest {
         }
     }
 
-    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun `test cashapp payment intent flow`() = runTest {
         val stripe = Stripe(context, settings.publishableKey)
@@ -448,7 +446,6 @@ internal class EndToEndTest {
             .isEqualTo(StripeIntent.NextActionType.CashAppRedirect)
     }
 
-    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun `test cashapp payment intent flow with setup future usage`() = runTest {
         val stripe = Stripe(context, settings.publishableKey)
@@ -476,7 +473,6 @@ internal class EndToEndTest {
             .isEqualTo(StripeIntent.NextActionType.CashAppRedirect)
     }
 
-    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun `test cashapp setup intent flow`() = runTest {
         val stripe = Stripe(context, settings.publishableKey)
@@ -485,7 +481,6 @@ internal class EndToEndTest {
             Request.CreateSetupIntentParams(
                 createParams = Request.CreateParams(
                     paymentMethodTypes = listOf("cashapp"),
-                    customer = "cus_LO3hhHz7XpE7Ty",
                 ),
             )
         )

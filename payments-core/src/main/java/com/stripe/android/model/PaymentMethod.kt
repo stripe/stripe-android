@@ -350,6 +350,13 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false
         ),
+        Zip(
+            "zip",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
         USBankAccount(
             code = "us_bank_account",
             isReusable = true,

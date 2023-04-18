@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
+import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
@@ -25,6 +26,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountFixtures
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -153,6 +155,8 @@ class FinancialConnectionsSheetViewModelTest {
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isInstanceOf(Failed::class.java)
             }
+            verify(eventReporter)
+                .onResult(eq(configuration), any<Failed>())
         }
     }
 
@@ -160,6 +164,8 @@ class FinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - intent with cancel url should fire analytics event and set cancel result`() {
         runTest {
             // Given
+            whenever(fetchFinancialConnectionsSession(any()))
+                .thenReturn(financialConnectionsSessionWithNoMoreAccounts)
             whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
             val viewModel = createViewModel(defaultInitialState)
             val cancelIntent = cancelIntent()
@@ -178,6 +184,8 @@ class FinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - when intent with cancel URL received, then finish with Result#Cancel`() =
         runTest {
             // Given
+            whenever(fetchFinancialConnectionsSession(any()))
+                .thenReturn(financialConnectionsSessionWithNoMoreAccounts)
             whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
             val viewModel = createViewModel(defaultInitialState)
 
@@ -189,6 +197,34 @@ class FinancialConnectionsSheetViewModelTest {
             withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
                 assertThat(it.viewEffect).isEqualTo(FinishWithResult(Canceled))
+            }
+        }
+
+    @Test
+    fun `handleOnNewIntent - when intent with cancel URL and custom manual entry, finish Result#Failed`() =
+        runTest {
+            // Given
+            val expectedSession = financialConnectionsSession().copy(
+                statusDetails = StatusDetails(
+                    cancelled = StatusDetails.Cancelled(
+                        reason = StatusDetails.Cancelled.Reason.CUSTOM_MANUAL_ENTRY
+                    )
+                )
+            )
+            whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
+            whenever(fetchFinancialConnectionsSession(any())).thenReturn(expectedSession)
+            val viewModel = createViewModel(defaultInitialState)
+
+            // When
+            // end auth flow
+            viewModel.handleOnNewIntent(cancelIntent())
+
+            // Then
+            withState(viewModel) {
+                require(it.viewEffect is FinishWithResult)
+                require(it.viewEffect.result is Failed)
+                assertThat(it.viewEffect.result.error).isInstanceOf(CustomManualEntryRequiredError::class.java)
+                assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
             }
         }
 
@@ -351,6 +387,7 @@ class FinancialConnectionsSheetViewModelTest {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.ON_EXTERNAL_ACTIVITY)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
+                verify(eventReporter).onResult(eq(configuration), any<Canceled>())
             }
         }
     }
@@ -377,6 +414,7 @@ class FinancialConnectionsSheetViewModelTest {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.ON_EXTERNAL_ACTIVITY)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
+                verify(eventReporter).onResult(eq(configuration), any<Canceled>())
             }
         }
     }

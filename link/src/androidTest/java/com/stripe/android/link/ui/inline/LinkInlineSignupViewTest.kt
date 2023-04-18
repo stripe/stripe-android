@@ -13,7 +13,7 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.uicore.elements.EmailConfig
-import com.stripe.android.ui.core.elements.NameConfig
+import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import org.junit.Rule

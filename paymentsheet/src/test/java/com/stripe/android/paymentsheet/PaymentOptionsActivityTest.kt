@@ -7,8 +7,11 @@ import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -21,7 +24,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -36,18 +38,13 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
-import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.InjectableActivityScenario
@@ -59,7 +56,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -87,34 +83,6 @@ internal class PaymentOptionsActivityTest {
 
     private val eventReporter = mock<EventReporter>()
     private lateinit var injector: NonFallbackInjector
-    private val addressRepository = AddressRepository(context.resources)
-    private val lpmRepository = mock<LpmRepository>().apply {
-        whenever(fromCode(any())).thenReturn(
-            LpmRepository.SupportedPaymentMethod(
-                PaymentMethod.Type.Card.code,
-                false,
-                com.stripe.android.ui.core.R.string.stripe_paymentsheet_payment_method_card,
-                com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
-                null,
-                null,
-                true,
-                PaymentMethodRequirements(emptySet(), emptySet(), true),
-                LayoutSpec.create(
-                    EmailSpec(),
-                    SaveForFutureUseSpec()
-                )
-            )
-        )
-    }
-
-    private val viewModel = createViewModel()
-
-    private val primaryButtonUIState = PrimaryButton.UIState(
-        label = "Test",
-        onClick = {},
-        enabled = true,
-        visible = true
-    )
 
     private val ActivityPaymentOptionsBinding.continueButton: PrimaryButton
         get() = root.findViewById(R.id.primary_button)
@@ -134,41 +102,51 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `click outside of bottom sheet should return cancel result`() {
-        val scenario = activityScenario()
-        scenario.launchForResult(
-            createIntent()
-        ).use {
+    fun `click outside of bottom sheet before selection should return cancel result without selection`() {
+        runActivityScenario {
             it.onActivity { activity ->
                 activity.viewBinding.root.performClick()
                 activity.finish()
             }
 
             assertThat(
-                PaymentOptionResult.fromIntent(scenario.getResult().resultData)
+                PaymentOptionResult.fromIntent(it.getResult().resultData)
             ).isEqualTo(
-                PaymentOptionResult.Canceled(null, listOf())
+                PaymentOptionResult.Canceled(null, null, listOf())
             )
         }
     }
 
     @Test
     fun `click outside of bottom sheet should return cancel result even if there is a selection`() {
-        val scenario = activityScenario()
-        scenario.launchForResult(
-            createIntent()
-        ).use {
+        val initialSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.createCard(),
+        )
+
+        val usBankAccount = PaymentMethodFixtures.US_BANK_ACCOUNT
+        val paymentMethods = listOf(initialSelection.paymentMethod, usBankAccount)
+
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentSelection = initialSelection,
+            paymentMethods = paymentMethods,
+        )
+
+        runActivityScenario(args) {
             it.onActivity { activity ->
-                viewModel.updateSelection(PaymentSelection.GooglePay)
+                // We use US Bank Account because they don't dismiss PaymentSheet upon selection
+                // due to their mandate requirement.
+                val usBankAccountLabel = usBankAccount.getLabel(context.resources)
+                composeTestRule
+                    .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_$usBankAccountLabel")
+                    .performClick()
 
                 activity.viewBinding.root.performClick()
                 activity.finish()
             }
 
-            assertThat(
-                PaymentOptionResult.fromIntent(scenario.getResult().resultData)
-            ).isEqualTo(
-                PaymentOptionResult.Canceled(null, listOf())
+            val result = PaymentOptionResult.fromIntent(it.getResult().resultData)
+            assertThat(result).isEqualTo(
+                PaymentOptionResult.Canceled(null, initialSelection, paymentMethods)
             )
         }
     }
@@ -179,37 +157,22 @@ internal class PaymentOptionsActivityTest {
             paymentMethods = PaymentMethodFixtures.createCards(5)
         )
 
-        val scenario = activityScenario(
-            viewModel = createViewModel(args)
-        )
-
-        scenario.launch(createIntent(args)).use {
+        runActivityScenario(args) {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.continueButton.isVisible)
-                    .isFalse()
+                assertThat(activity.viewBinding.continueButton.isVisible).isFalse()
             }
         }
     }
 
     @Test
     fun `ContinueButton should be visible when showing add payment method form`() {
-        val scenario = activityScenario(
-            createViewModel(
-                args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
-                )
-            )
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
         )
-        scenario.launch(
-            createIntent(
-                args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
-                )
-            )
-        ).use {
+
+        runActivityScenario(args) {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.continueButton.isVisible)
-                    .isTrue()
+                assertThat(activity.viewBinding.continueButton.isVisible).isTrue()
             }
         }
     }
@@ -220,35 +183,28 @@ internal class PaymentOptionsActivityTest {
             paymentMethods = PaymentMethodFixtures.createCards(5)
         )
 
-        val viewModel = createViewModel(args)
-        val scenario = activityScenario(viewModel)
-
-        scenario.launch(createIntent(args)).use {
+        runActivityScenario(args) {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.continueButton.isVisible)
-                    .isFalse()
+                assertThat(activity.viewBinding.continueButton.isVisible).isFalse()
 
                 // Navigate to "Add Payment Method" fragment
-                viewModel.transitionToAddPaymentScreen()
+                composeTestRule
+                    .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add")
+                    .performClick()
 
-                assertThat(activity.viewBinding.continueButton.isVisible)
-                    .isTrue()
+                assertThat(activity.viewBinding.continueButton.isVisible).isTrue()
 
                 // Navigate back to payment options list
                 pressBack()
 
-                assertThat(activity.viewBinding.continueButton.isVisible)
-                    .isFalse()
+                assertThat(activity.viewBinding.continueButton.isVisible).isFalse()
             }
         }
     }
 
     @Test
     fun `Verify Ready state updates the add button label`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
+        runActivityScenario {
             it.onActivity { activity ->
                 val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.continueButton)
 
@@ -265,10 +221,7 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `Verify bottom sheet expands on start`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
+        runActivityScenario {
             it.onActivity { activity ->
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
@@ -279,15 +232,17 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify ProcessResult state closes the sheet`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
+    fun `Verify selecting a payment method closes the sheet`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(isGooglePayReady = true)
+
+        runActivityScenario(args) {
             it.onActivity { activity ->
-                val paymentSelection = PaymentSelection.GooglePay
-                viewModel.updateSelection(paymentSelection)
-                viewModel.onUserSelection()
+                composeTestRule
+                    .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_Google Pay")
+                    .performClick()
+
+                composeTestRule.waitForIdle()
+
                 idleLooper()
 
                 assertThat(activity.bottomSheetBehavior.state)
@@ -297,140 +252,58 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `ContinueButton should be enabled when primaryButtonEnabled is true`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity { activity ->
-                viewModel.updatePrimaryButtonUIState(
-                    primaryButtonUIState.copy(
-                        enabled = true
-                    )
-                )
-                assertThat(activity.viewBinding.continueButton.isEnabled).isTrue()
-            }
-        }
-    }
+    fun `notes visibility is set correctly`() {
+        val usBankAccount = PaymentMethodFixtures.US_BANK_ACCOUNT
 
-    @Test
-    fun `ContinueButton should be disabled when primaryButtonEnabled is false`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity { activity ->
-                viewModel.updatePrimaryButtonUIState(
-                    primaryButtonUIState.copy(
-                        enabled = false
-                    )
-                )
-                assertThat(activity.viewBinding.continueButton.isEnabled).isFalse()
-            }
-        }
-    }
+        val label = usBankAccount.getLabel(context.resources)
+        val mandateText = "By continuing, you agree to authorize payments pursuant to these terms."
 
-    @Test
-    fun `ContinueButton text should update when primaryButtonText updates`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity { activity ->
-                viewModel.updatePrimaryButtonUIState(
-                    primaryButtonUIState.copy(
-                        label = "Some text"
-                    )
-                )
-                assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Some text")
-            }
-        }
-    }
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = listOf(usBankAccount),
+            isGooglePayReady = true,
+        )
 
-    @Test
-    fun `ContinueButton should go back to initial state after updating selection`() {
-        Dispatchers.setMain(testDispatcher)
+        runActivityScenario(args) {
+            it.onActivity {
+                composeTestRule
+                    .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_$label")
+                    .performClick()
 
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity { activity ->
-                viewModel.updatePrimaryButtonUIState(
-                    primaryButtonUIState.copy(
-                        label = "Some text",
-                        enabled = false
-                    )
-                )
-                assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Some text")
-                assertThat(activity.viewBinding.continueButton.isEnabled).isFalse()
+                composeTestRule
+                    .onNodeWithText(mandateText)
+                    .assertIsDisplayed()
 
-                viewModel.updateSelection(mock<PaymentSelection.New.Card>())
-                assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Continue")
-                assertThat(activity.viewBinding.continueButton.isEnabled).isTrue()
-            }
-        }
-    }
+                composeTestRule
+                    .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_Google Pay")
+                    .performClick()
 
-    @Test
-    fun `notes visibility is visible`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity { activity ->
-                viewModel.updateBelowButtonText(
-                    ApplicationProvider.getApplicationContext<Context>().getString(
-                        R.string.stripe_paymentsheet_payment_method_us_bank_account
-                    )
-                )
-                assertThat(activity.viewBinding.notes.isVisible).isTrue()
-            }
-        }
-    }
-
-    @Test
-    fun `notes visibility is gone`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity { activity ->
-                viewModel.updateBelowButtonText(null)
-                assertThat(activity.viewBinding.notes.isVisible).isFalse()
+                composeTestRule
+                    .onNodeWithText(mandateText)
+                    .assertDoesNotExist()
             }
         }
     }
 
     @Test
     fun `primary button appearance is set`() {
-        val scenario = activityScenario(
-            createViewModel(
-                args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
-                )
-            )
-        )
-        scenario.launch(
-            createIntent(
-                args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-                    config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
-                        appearance = PaymentSheet.Appearance(
-                            primaryButton = PaymentSheet.PrimaryButton(
-                                colorsLight = PaymentSheet.PrimaryButtonColors(
-                                    background = Color.Magenta,
-                                    onBackground = Color.Magenta,
-                                    border = Color.Magenta
-                                ),
-                                shape = PaymentSheet.PrimaryButtonShape(),
-                                typography = PaymentSheet.PrimaryButtonTypography()
-                            )
-                        )
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
+                appearance = PaymentSheet.Appearance(
+                    primaryButton = PaymentSheet.PrimaryButton(
+                        colorsLight = PaymentSheet.PrimaryButtonColors(
+                            background = Color.Magenta,
+                            onBackground = Color.Magenta,
+                            border = Color.Magenta
+                        ),
+                        shape = PaymentSheet.PrimaryButtonShape(),
+                        typography = PaymentSheet.PrimaryButtonTypography()
                     )
                 )
-            )
-        ).use {
+            ),
+        )
+
+        runActivityScenario(args) {
             it.onActivity { activity ->
                 assertThat(activity.viewBinding.continueButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.continueButton.defaultTintList).isEqualTo(
@@ -447,56 +320,37 @@ internal class PaymentOptionsActivityTest {
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
     }
 
-    @Test
-    fun `Clears error on user selection`() {
-        val scenario = activityScenario()
-        scenario.launch(createIntent()).onActivity { activity ->
-            viewModel.onError("some error")
-            assertThat(activity.viewBinding.message.isVisible).isTrue()
-
-            composeTestRule
-                .onNodeWithText("some error")
-                .assertExists()
-
-            viewModel.onUserSelection()
-
-            composeTestRule
-                .onNodeWithText("some error")
-                .assertDoesNotExist()
-        }
-    }
-
-    private fun createIntent(
-        args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS
-    ): Intent {
-        return Intent(
+    private fun runActivityScenario(
+        args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS,
+        block: (InjectableActivityScenario<PaymentOptionsActivity>) -> Unit,
+    ) {
+        val intent = Intent(
             ApplicationProvider.getApplicationContext(),
             PaymentOptionsActivity::class.java
         ).putExtras(
             bundleOf(ActivityStarter.Args.EXTRA to args)
         )
-    }
 
-    private fun activityScenario(
-        viewModel: PaymentOptionsViewModel = this.viewModel
-    ): InjectableActivityScenario<PaymentOptionsActivity> {
-        return injectableActivityScenario {
-            injectActivity {
-                viewModelFactory = viewModelFactoryFor(viewModel)
-            }
-        }
-    }
-
-    private fun createViewModel(
-        args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS
-    ): PaymentOptionsViewModel {
         val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
             onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
         }
-        return TestViewModelFactory.create(
+
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Context>().resources,
+            ),
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+        ).apply {
+            update(
+                stripeIntent = args.state.stripeIntent,
+                serverLpmSpecs = null,
+            )
+        }
+
+        val viewModel = TestViewModelFactory.create(
             linkLauncher = linkPaymentLauncher,
         ) { linkHandler, savedStateHandle ->
-            registerFormViewModelInjector()
+            registerFormViewModelInjector(lpmRepository)
             PaymentOptionsViewModel(
                 args = args,
                 prefsRepositoryFactory = { FakePrefsRepository() },
@@ -505,18 +359,26 @@ internal class PaymentOptionsActivityTest {
                 workContext = testDispatcher,
                 application = ApplicationProvider.getApplicationContext(),
                 logger = Logger.noop(),
-                injectorKey = DUMMY_INJECTOR_KEY,
-                lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-                addressResourceRepository = StaticAddressResourceRepository(addressRepository),
+                lpmRepository = lpmRepository,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
             ).also {
                 it.injector = injector
             }
         }
+
+        val scenario = injectableActivityScenario<PaymentOptionsActivity> {
+            injectActivity {
+                viewModelFactory = viewModelFactoryFor(viewModel)
+            }
+        }
+
+        scenario.launchForResult(intent).use(block)
     }
 
-    fun registerFormViewModelInjector() {
+    private fun registerFormViewModelInjector(
+        lpmRepository: LpmRepository,
+    ) {
         val formViewModel = FormViewModel(
             context = context,
             formArguments = FormArguments(
@@ -527,8 +389,8 @@ internal class PaymentOptionsActivityTest {
                 amount = Amount(50, "USD"),
                 initialPaymentMethodCreateParams = null
             ),
-            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
+            lpmRepository = lpmRepository,
+            addressRepository = AddressRepository(context.resources, Dispatchers.Unconfined),
             showCheckboxFlow = mock()
         )
 

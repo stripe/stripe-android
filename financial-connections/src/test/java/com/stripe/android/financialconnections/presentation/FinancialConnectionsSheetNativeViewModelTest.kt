@@ -5,23 +5,32 @@ import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.test.MvRxTestRule
+import com.airbnb.mvrx.test.MavericksTestRule
 import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.ApiKeyFixtures.financialConnectionsSessionNoAccounts
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate.EarlyTerminationCause
+import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import kotlin.test.assertIs
@@ -31,14 +40,42 @@ import kotlin.test.assertIs
 internal class FinancialConnectionsSheetNativeViewModelTest {
 
     @get:Rule
-    val mvrxRule = MvRxTestRule(testDispatcher = UnconfinedTestDispatcher())
+    val mavericksTestRule = MavericksTestRule(testDispatcher = UnconfinedTestDispatcher())
 
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
+    private val completeFinancialConnectionsSession = mock<CompleteFinancialConnectionsSession>()
     private val applicationId = "com.sample.applicationid"
     private val configuration = FinancialConnectionsSheet.Configuration(
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
+
+    @Test
+    fun `nativeAuthFlowCoordinator - when manual entry termination, finish with CustomManualEntryRequiredError`() =
+        runTest {
+            val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
+            val sessionWithCustomManualEntry = financialConnectionsSessionNoAccounts().copy(
+                statusDetails = StatusDetails(
+                    cancelled = StatusDetails.Cancelled(
+                        reason = StatusDetails.Cancelled.Reason.CUSTOM_MANUAL_ENTRY
+                    )
+                )
+            )
+            whenever(nativeAuthFlowCoordinator())
+                .thenReturn(messagesFlow)
+            whenever(completeFinancialConnectionsSession(any()))
+                .thenReturn(sessionWithCustomManualEntry)
+
+            val viewModel = createViewModel()
+
+            messagesFlow.emit(Terminate(EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY))
+
+            withState(viewModel) {
+                require(it.viewEffect is FinancialConnectionsSheetNativeViewEffect.Finish)
+                require(it.viewEffect.result is FinancialConnectionsSheetActivityResult.Failed)
+                assertThat(it.viewEffect.result.error).isInstanceOf(CustomManualEntryRequiredError::class.java)
+            }
+        }
 
     @Test
     fun `handleOnNewIntent - when deeplink with success code received, webAuthFlow async succeeds`() {
@@ -126,7 +163,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         activityRetainedComponent = mock(),
         applicationId = applicationId,
         uriUtils = UriUtils(Logger.noop()),
-        completeFinancialConnectionsSession = mock(),
+        completeFinancialConnectionsSession = completeFinancialConnectionsSession,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         logger = mock(),
         initialState = initialState

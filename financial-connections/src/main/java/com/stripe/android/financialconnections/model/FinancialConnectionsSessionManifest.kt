@@ -20,6 +20,7 @@ import kotlinx.serialization.Serializable
  * @param instantVerificationDisabled
  * @param institutionSearchDisabled
  * @param livemode
+ * @param manualEntryMode
  * @param manualEntryUsesMicrodeposits
  * @param mobileHandoffEnabled
  * @param nextPane
@@ -83,6 +84,9 @@ internal data class FinancialConnectionsSessionManifest(
 
     @SerialName(value = "next_pane")
     val nextPane: Pane,
+
+    @SerialName(value = "manual_entry_mode")
+    val manualEntryMode: ManualEntryMode,
 
     @SerialName(value = "permissions")
     val permissions: List<FinancialConnectionsAccount.Permissions>,

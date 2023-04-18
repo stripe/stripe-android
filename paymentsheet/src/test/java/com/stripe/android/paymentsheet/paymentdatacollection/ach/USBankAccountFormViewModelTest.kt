@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
@@ -17,11 +18,15 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -57,7 +62,7 @@ class USBankAccountFormViewModelTest {
             )
         ),
         isCompleteFlow = true,
-        clientSecret = PaymentIntentClientSecret("pi_12345"),
+        clientSecret = PaymentIntentClientSecret("pi_12345_secret_54321"),
         savedPaymentMethod = null,
         shippingDetails = null,
         onConfirmStripeIntent = onConfirmStripeIntent,
@@ -125,10 +130,12 @@ class USBankAccountFormViewModelTest {
             assertThat(
                 currentScreenState
             ).isInstanceOf(
-                USBankAccountFormScreenState.NameAndEmailCollection::class.java
+                USBankAccountFormScreenState.BillingDetailsCollection::class.java
             )
 
-            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection)
+            viewModel.handlePrimaryButtonClick(
+                currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
+            )
 
             verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
@@ -253,7 +260,9 @@ class USBankAccountFormViewModelTest {
             val currentScreenState =
                 viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
 
-            viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection)
+            viewModel.handlePrimaryButtonClick(
+                currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
+            )
 
             verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
@@ -310,6 +319,157 @@ class USBankAccountFormViewModelTest {
             )
         }
 
+    @Test
+    fun `Test defaults are used when not collecting fields if they are attached`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetails = PaymentSheet.BillingDetails(
+                            name = CUSTOMER_NAME,
+                            email = CUSTOMER_EMAIL,
+                            phone = CUSTOMER_PHONE,
+                            address = CUSTOMER_ADDRESS,
+                        ),
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            attachDefaultsToPaymentMethod = true,
+                            name = CollectionMode.Never,
+                            email = CollectionMode.Never,
+                            phone = CollectionMode.Never,
+                            address = AddressCollectionMode.Never,
+                        )
+                    ),
+                ),
+            )
+
+            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_NAME)
+            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_EMAIL)
+            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_PHONE)
+            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_ADDRESS.asAddressModel())
+            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
+        }
+
+    @Test
+    fun `Test defaults are only used for fields that are being collected`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetails = PaymentSheet.BillingDetails(
+                            name = CUSTOMER_NAME,
+                            email = CUSTOMER_EMAIL,
+                            phone = CUSTOMER_PHONE,
+                            address = CUSTOMER_ADDRESS,
+                        ),
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            attachDefaultsToPaymentMethod = false,
+                            name = CollectionMode.Always,
+                            email = CollectionMode.Always,
+                            phone = CollectionMode.Never,
+                            address = AddressCollectionMode.Never,
+                        )
+                    ),
+                ),
+            )
+
+            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_NAME)
+            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_EMAIL)
+            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
+        }
+
+    @Test
+    fun `Test defaults are not used when not collecting fields if not attached`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetails = PaymentSheet.BillingDetails(
+                            name = CUSTOMER_NAME,
+                            email = CUSTOMER_EMAIL,
+                            phone = CUSTOMER_PHONE,
+                            address = CUSTOMER_ADDRESS,
+                        ),
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            attachDefaultsToPaymentMethod = false,
+                            name = CollectionMode.Automatic,
+                            email = CollectionMode.Automatic,
+                            phone = CollectionMode.Never,
+                            address = AddressCollectionMode.Never,
+                        )
+                    ),
+                ),
+            )
+
+            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo("Jenny Rose")
+            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo("email@email.com")
+            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
+        }
+
+    @Test
+    fun `Test all collected fields are required`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                defaultArgs.copy(
+                    formArgs = defaultArgs.formArgs.copy(
+                        billingDetails = PaymentSheet.BillingDetails(
+                            name = CUSTOMER_NAME,
+                            email = CUSTOMER_EMAIL,
+                        ),
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            attachDefaultsToPaymentMethod = true,
+                            name = CollectionMode.Always,
+                            email = CollectionMode.Always,
+                            phone = CollectionMode.Always,
+                            address = AddressCollectionMode.Full,
+                        )
+                    ),
+                ),
+            )
+
+            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_NAME)
+            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value)
+                .isEqualTo(CUSTOMER_EMAIL)
+            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value).isNull()
+            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
+        }
+
+    @Test
+    fun `Test phone country changes with country`() = runTest(UnconfinedTestDispatcher()) {
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Always,
+            email = CollectionMode.Always,
+            phone = CollectionMode.Always,
+            address = AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = false,
+        )
+
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                ),
+            )
+        )
+
+        viewModel.addressElement.countryElement.controller.onRawValueChange("CA")
+        assertThat(viewModel.phoneController.countryDropdownController.rawFieldValue.first())
+            .isEqualTo("CA")
+    }
+
     private fun createViewModel(
         args: USBankAccountFormViewModel.Args = defaultArgs
     ): USBankAccountFormViewModel {
@@ -322,7 +482,8 @@ class USBankAccountFormViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             stripeRepository = stripeRepository,
             lazyPaymentConfig = { paymentConfiguration },
-            savedStateHandle = savedStateHandle
+            savedStateHandle = savedStateHandle,
+            addressRepository = createAddressRepository(),
         )
     }
 
@@ -347,7 +508,7 @@ class USBankAccountFormViewModelTest {
                 any(),
                 any()
             )
-        ).thenReturn(paymentIntent)
+        ).thenReturn(Result.success(paymentIntent))
 
         return CollectBankAccountResult.Completed(
             CollectBankAccountResponse(
@@ -380,7 +541,7 @@ class USBankAccountFormViewModelTest {
                 any(),
                 any()
             )
-        ).thenReturn(paymentIntent)
+        ).thenReturn(Result.success(paymentIntent))
 
         return CollectBankAccountResult.Completed(
             CollectBankAccountResponse(
@@ -395,5 +556,21 @@ class USBankAccountFormViewModelTest {
         const val CUSTOMER_NAME = "Jenny Rose"
         const val CUSTOMER_EMAIL = "email@email.com"
         const val STRIPE_ACCOUNT_ID = "stripe_account_id"
+        const val CUSTOMER_PHONE = "+13105551234"
+        val CUSTOMER_ADDRESS = PaymentSheet.Address(
+            line1 = "123 Main Street",
+            line2 = "Apt 456",
+            city = "San Francisco",
+            state = "CA",
+            postalCode = "94111",
+            country = "US",
+        )
     }
+}
+
+private fun createAddressRepository(): AddressRepository {
+    return AddressRepository(
+        resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        workContext = Dispatchers.Unconfined,
+    )
 }

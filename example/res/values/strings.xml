@@ -34,6 +34,11 @@
     <string name="manual_us_bank_account_example">"Manual US Bank Account Example"</string>
     <string name="cash_app_pay_example">Cash App Pay</string>
     <string name="card_brands">Card Brands</string>
+    <string name="card_brands_hint">Card number</string>
+    <string name="possible_card_brands">Possible Card Brands</string>
+    <string name="retrieve_possible_card_brands">Get Possible Card Brands</string>
+    <string name="blik_example">BLIK</string>
+    <string name="pay_with_blik">Pay with BLIK</string>
 
     <string name="select_add_card">Select or add card</string>
     <string name="selected_card">Selected card:</string>

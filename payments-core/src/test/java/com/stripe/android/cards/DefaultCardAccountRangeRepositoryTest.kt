@@ -6,16 +6,24 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.header
+import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.RequestMatchers.query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -25,6 +33,9 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultCardAccountRangeRepositoryTest {
+
+    @get:Rule
+    val networkRule = NetworkRule()
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
@@ -201,7 +212,50 @@ internal class DefaultCardAccountRangeRepositoryTest {
 
         // should not access remote source
         repository.getAccountRange(CardNumberFixtures.VISA)
-        verify(remoteSource, never()).getAccountRange(CardNumberFixtures.VISA)
+        verify(remoteSource, never()).getAccountRanges(CardNumberFixtures.VISA)
+    }
+
+    @Test
+    fun `getAccountRanges sends all parameters`() = runTest {
+        val binPrefix = "513130"
+        networkRule.enqueue(
+            method("GET"),
+            path("/edge-internal/card-metadata"),
+            header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
+            header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
+            query("bin_prefix", binPrefix),
+        ) { response ->
+            response.setBody(
+                """
+                    {
+                        "data":[
+                            {
+                                "account_range_high":"5131309999999999",
+                                "account_range_low":"5131300000000000",
+                                "brand":"MASTERCARD",
+                                "country":"FR",
+                                "funding":"DEBIT",
+                                "pan_length":16
+                            },
+                            {
+                                "account_range_high":"5131304799999999",
+                                "account_range_low":"5131304700000000",
+                                "brand":"CARTES_BANCAIRES",
+                                "country":"FR",
+                                "funding":"DEBIT",
+                                "pan_length":16
+                            }
+                        ]
+                    }
+                """.trimIndent()
+            )
+        }
+
+        val accountRanges = realRepository.getAccountRanges(CardNumber.Unvalidated(binPrefix))
+        val cardBrands = accountRanges?.map { it.brand }?.toSet()
+
+        assertThat(accountRanges).isNotEmpty()
+        assertThat(cardBrands).containsExactly(CardBrand.MasterCard, CardBrand.CartesBancaires)
     }
 
     private fun createRealRepository(
@@ -235,12 +289,16 @@ internal class DefaultCardAccountRangeRepositoryTest {
     private class FakeCardAccountRangeSource(
         isLoading: Boolean = false
     ) : CardAccountRangeSource {
-        override suspend fun getAccountRange(
+        override suspend fun getAccountRanges(
             cardNumber: CardNumber.Unvalidated
-        ): AccountRange? {
+        ): List<AccountRange>? {
             return null
         }
 
         override val loading: Flow<Boolean> = flowOf(isLoading)
+    }
+
+    private companion object {
+        private val DEFAULT_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
     }
 }

@@ -40,13 +40,15 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.NameAndEmailCollection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.BillingDetailsCollection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
@@ -54,7 +56,11 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.AddressElementUI
 import com.stripe.android.uicore.elements.H6Text
+import com.stripe.android.uicore.elements.PhoneNumberElementUI
+import com.stripe.android.uicore.elements.SameAsShippingElementUI
+import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.stripeColors
@@ -75,6 +81,7 @@ internal class USBankAccountFormFragment : Fragment() {
     private val paymentSheetViewModelFactory: ViewModelProvider.Factory by lazy {
         PaymentSheetViewModel.Factory {
             requireNotNull(
+                @Suppress("DEPRECATION")
                 requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
             )
         }
@@ -83,6 +90,7 @@ internal class USBankAccountFormFragment : Fragment() {
     private val paymentOptionsViewModelFactory: ViewModelProvider.Factory by lazy {
         PaymentOptionsViewModel.Factory {
             requireNotNull(
+                @Suppress("DEPRECATION")
                 requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
             )
         }
@@ -154,6 +162,7 @@ internal class USBankAccountFormFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
+
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 sheetViewModel?.primaryButtonState?.launchAndCollectIn(viewLifecycleOwner) { state ->
@@ -167,14 +176,13 @@ internal class USBankAccountFormFragment : Fragment() {
                 }
             }
         }
+
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.requiredFields.collect {
-                    sheetViewModel?.updatePrimaryButtonUIState(
-                        sheetViewModel?.primaryButtonUIState?.value?.copy(
-                            enabled = it
-                        )
-                    )
+                viewModel.requiredFields.collect { hasRequiredFields ->
+                    sheetViewModel?.updateCustomPrimaryButtonUiState {
+                        it?.copy(enabled = hasRequiredFields)
+                    }
                 }
             }
         }
@@ -182,13 +190,13 @@ internal class USBankAccountFormFragment : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.saveForFutureUse
-                    .filterNot { viewModel.currentScreenState.value is NameAndEmailCollection }
+                    .filterNot { viewModel.currentScreenState.value is BillingDetailsCollection }
                     .collect { saved ->
                         updateMandateText(
                             if (saved) {
-                                getString(
-                                    R.string.stripe_paymentsheet_ach_save_mandate,
-                                    viewModel.formattedMerchantName()
+                                ACHText.getSaveMandateText(
+                                    context,
+                                    viewModel.formattedMerchantName(),
                                 )
                             } else {
                                 ACHText.getContinueMandateText(requireContext())
@@ -207,8 +215,8 @@ internal class USBankAccountFormFragment : Fragment() {
                 }
 
                 when (val screenState = currentScreenState) {
-                    is NameAndEmailCollection -> {
-                        NameAndEmailCollectionScreen(screenState)
+                    is BillingDetailsCollection -> {
+                        BillingDetailsCollectionScreen(screenState)
                     }
                     is USBankAccountFormScreenState.MandateCollection -> {
                         MandateCollectionScreen(screenState)
@@ -227,8 +235,8 @@ internal class USBankAccountFormFragment : Fragment() {
     private fun handleScreenStateChanged(screenState: USBankAccountFormScreenState) {
         sheetViewModel?.onError(screenState.error)
 
-        val showProcessingWhenClicked = screenState is NameAndEmailCollection || completePayment
-        val enabled = if (screenState is NameAndEmailCollection) {
+        val showProcessingWhenClicked = screenState is BillingDetailsCollection || completePayment
+        val enabled = if (screenState is BillingDetailsCollection) {
             viewModel.requiredFields.value
         } else {
             true
@@ -245,18 +253,20 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     override fun onDetach() {
-        sheetViewModel?.updateBelowButtonText(null)
-        sheetViewModel?.updatePrimaryButtonUIState(null)
+        sheetViewModel?.resetUSBankPrimaryButton()
         viewModel.onDestroy()
         super.onDetach()
     }
 
     @Composable
-    private fun NameAndEmailCollectionScreen(
-        screenState: NameAndEmailCollection
+    private fun BillingDetailsCollectionScreen(
+        screenState: BillingDetailsCollection
     ) {
         Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm(screenState.name, screenState.email)
+            BillingDetailsForm(
+                screenState.name,
+                screenState.email,
+            )
         }
     }
 
@@ -265,7 +275,10 @@ internal class USBankAccountFormFragment : Fragment() {
         screenState: USBankAccountFormScreenState.MandateCollection
     ) {
         Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm(screenState.name, screenState.email)
+            BillingDetailsForm(
+                screenState.name,
+                screenState.email,
+            )
             AccountDetailsForm(
                 screenState.paymentAccount.institutionName,
                 screenState.paymentAccount.last4,
@@ -279,7 +292,10 @@ internal class USBankAccountFormFragment : Fragment() {
         screenState: USBankAccountFormScreenState.VerifyWithMicrodeposits
     ) {
         Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm(screenState.name, screenState.email)
+            BillingDetailsForm(
+                screenState.name,
+                screenState.email,
+            )
             AccountDetailsForm(
                 screenState.paymentAccount.bankName,
                 screenState.paymentAccount.last4,
@@ -293,7 +309,10 @@ internal class USBankAccountFormFragment : Fragment() {
         screenState: USBankAccountFormScreenState.SavedAccount
     ) {
         Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm(screenState.name, screenState.email)
+            BillingDetailsForm(
+                screenState.name,
+                screenState.email,
+            )
             AccountDetailsForm(
                 screenState.bankName,
                 screenState.last4,
@@ -303,43 +322,117 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     @Composable
-    private fun NameAndEmailForm(
-        name: String,
-        email: String?
-    ) {
+    private fun BillingDetailsForm(name: String, email: String?) {
         val processing = viewModel.processing.collectAsState(false)
         Column(Modifier.fillMaxWidth()) {
             H6Text(
                 text = stringResource(R.string.stripe_paymentsheet_pay_with_bank_title),
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(0.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                TextFieldSection(
-                    textFieldController = viewModel.nameController.apply {
-                        onRawValueChange(name)
-                    },
+            if (formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    TextFieldSection(
+                        textFieldController = viewModel.nameController.apply {
+                            onRawValueChange(name)
+                        },
+                        imeAction = ImeAction.Next,
+                        enabled = !processing.value
+                    )
+                }
+            }
+            if (formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    TextFieldSection(
+                        textFieldController = viewModel.emailController.apply {
+                            onRawValueChange(email ?: "")
+                        },
+                        imeAction = ImeAction.Next,
+                        enabled = !processing.value
+                    )
+                }
+            }
+            if (formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always) {
+                phoneSection()
+            }
+            if (formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full) {
+                addressSection()
+            }
+        }
+    }
+
+    @Suppress("SpreadOperator")
+    @Composable
+    private fun phoneSection() {
+        val processing = viewModel.processing.collectAsState(false)
+        val error by viewModel.phoneController.error.collectAsState(null)
+        val sectionErrorString = error?.let {
+            it.formatArgs?.let { args ->
+                stringResource(
+                    it.errorMessage,
+                    *args
+                )
+            } ?: stringResource(it.errorMessage)
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Section(null, sectionErrorString) {
+                PhoneNumberElementUI(
+                    enabled = !processing.value,
+                    controller = viewModel.phoneController,
                     imeAction = ImeAction.Next,
-                    enabled = !processing.value
                 )
             }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(0.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                TextFieldSection(
-                    textFieldController = viewModel.emailController.apply {
-                        onRawValueChange(email ?: "")
-                    },
-                    imeAction = ImeAction.Done,
-                    enabled = !processing.value
+        }
+    }
+
+    @Suppress("SpreadOperator")
+    @Composable
+    fun addressSection() {
+        val processing = viewModel.processing.collectAsState(false)
+        val error by viewModel.addressElement.controller.error.collectAsState(null)
+        val sectionErrorString = error?.let {
+            it.formatArgs?.let { args ->
+                stringResource(
+                    it.errorMessage,
+                    *args
                 )
+            } ?: stringResource(it.errorMessage)
+        }
+        val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState(
+            null
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Column {
+                Section(R.string.billing_details, sectionErrorString) {
+                    AddressElementUI(
+                        enabled = !processing.value,
+                        controller = viewModel.addressElement.controller,
+                        hiddenIdentifiers = emptySet(),
+                        lastTextFieldIdentifier = lastTextFieldIdentifier,
+                    )
+                }
+                viewModel.sameAsShippingElement?.let {
+                    SameAsShippingElementUI(it.controller)
+                }
             }
         }
     }
@@ -438,33 +531,28 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     private fun updatePrimaryButton(
-        text: String?,
+        text: String,
         onClick: () -> Unit,
         shouldShowProcessingWhenClicked: Boolean = true,
         enabled: Boolean = true,
-        visible: Boolean = true
     ) {
         sheetViewModel?.updatePrimaryButtonState(PrimaryButton.State.Ready)
-        sheetViewModel?.updatePrimaryButtonUIState(
+        sheetViewModel?.updateCustomPrimaryButtonUiState {
             PrimaryButton.UIState(
                 label = text,
                 onClick = {
                     if (shouldShowProcessingWhenClicked) {
-                        sheetViewModel?.updatePrimaryButtonState(
-                            PrimaryButton.State.StartProcessing
-                        )
+                        sheetViewModel?.updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
                     }
                     onClick()
-                    sheetViewModel?.updatePrimaryButtonUIState(
-                        sheetViewModel?.primaryButtonUIState?.value?.copy(
-                            onClick = null
-                        )
-                    )
+                    sheetViewModel?.updateCustomPrimaryButtonUiState { button ->
+                        button?.copy(enabled = false)
+                    }
                 },
                 enabled = enabled,
-                visible = visible
+                lockVisible = completePayment,
             )
-        )
+        }
     }
 
     private fun updateMandateText(mandateText: String?) {

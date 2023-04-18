@@ -1,0 +1,20 @@
+appId: com.stripe.android.paymentsheet.example
+---
+- launchApp
+# Android specific: Navigate to example
+- tapOn: "FlowController"
+- extendedWaitUntil:
+    visible: "Select"
+    timeout: 60000
+- tapOn: "Select"
+- tapOn:
+    id: "AddCard"
+    optional: true
+# ENTER CARD DETAILS
+- runFlow:
+    file: ./card/subflow-card-details.yaml
+- scroll
+- tapOn: "Continue"
+- tapOn: "Buy"
+- assertVisible: ".*Success.*"
+- tapOn: "Finish"

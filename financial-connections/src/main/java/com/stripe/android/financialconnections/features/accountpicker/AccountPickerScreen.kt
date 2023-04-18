@@ -34,6 +34,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
@@ -63,6 +64,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.uicore.text.MiddleEllipsisText
 
 @Composable
 internal fun AccountPickerScreen() {
@@ -107,7 +109,7 @@ private fun AccountPickerContent(
     ) {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> AccountPickerLoading()
-            is Success -> when (payload().skipAccountSelection) {
+            is Success -> when (payload().shouldSkipPane) {
                 // ensures account picker is not shown momentarily
                 // if account selection should be skipped.
                 true -> AccountPickerLoading()
@@ -122,6 +124,7 @@ private fun AccountPickerContent(
                     onSubmit = onSubmit,
                     selectionMode = payload().selectionMode,
                     accessibleDataCalloutModel = payload().accessibleData,
+                    requiresSingleAccountConfirmation = payload().requiresSingleAccountConfirmation,
                     onSelectAllAccountsClicked = onSelectAllAccountsClicked,
                     onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick
                 )
@@ -167,6 +170,7 @@ private fun AccountPickerLoaded(
     accounts: List<PartnerAccountUI>,
     allAccountsSelected: Boolean,
     accessibleDataCalloutModel: AccessibleDataCalloutModel?,
+    requiresSingleAccountConfirmation: Boolean,
     selectionMode: SelectionMode,
     selectedIds: Set<String>,
     onAccountClicked: (PartnerAccount) -> Unit,
@@ -193,9 +197,12 @@ private fun AccountPickerLoaded(
                 modifier = Modifier
                     .fillMaxWidth(),
                 text = stringResource(
-                    when (selectionMode) {
-                        SelectionMode.RADIO -> R.string.stripe_account_picker_singleselect_account
-                        SelectionMode.CHECKBOXES -> R.string.stripe_account_picker_multiselect_account
+                    when (requiresSingleAccountConfirmation) {
+                        true -> R.string.stripe_account_picker_confirm_account
+                        false -> when (selectionMode) {
+                            SelectionMode.RADIO -> R.string.stripe_account_picker_singleselect_account
+                            SelectionMode.CHECKBOXES -> R.string.stripe_account_picker_multiselect_account
+                        }
                     }
                 ),
                 style = FinancialConnectionsTheme.typography.subtitle
@@ -242,17 +249,12 @@ private fun AccountPickerLoaded(
                 .fillMaxWidth()
         ) {
             Text(
-                text = when (selectionMode) {
-                    SelectionMode.CHECKBOXES ->
-                        pluralStringResource(
-                            count = selectedIds.size,
-                            id = R.plurals.stripe_account_picker_multiselect_confirm
-                        )
-
-                    SelectionMode.RADIO ->
-                        stringResource(
-                            R.string.stripe_account_picker_singleselect_confirm
-                        )
+                text = when (requiresSingleAccountConfirmation) {
+                    true -> stringResource(R.string.stripe_account_picker_cta_confirm)
+                    false -> pluralStringResource(
+                        count = selectedIds.size,
+                        id = R.plurals.stripe_account_picker_cta_link
+                    )
                 }
             )
         }
@@ -407,10 +409,8 @@ private fun AccountItem(
             Column(
                 Modifier.weight(0.7f)
             ) {
-                Text(
+                MiddleEllipsisText(
                     text = title,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
                     color = if (accountUI.account.allowSelection) {
                         colors.textPrimary
                     } else {
@@ -456,35 +456,14 @@ private fun getAccountTexts(
 @Preview(
     showBackground = true,
     group = "Account Picker Pane",
-    name = "Multiselect - account selected"
 )
 @Composable
-internal fun AccountPickerPreviewMultiSelect() {
+internal fun AccountPickerPreview(
+    @PreviewParameter(AccountPickerPreviewParameterProvider::class) state: AccountPickerState
+) {
     FinancialConnectionsPreview {
         AccountPickerContent(
-            AccountPickerStates.multiSelect(),
-            onAccountClicked = {},
-            onSubmit = {},
-            onSelectAllAccountsClicked = {},
-            onSelectAnotherBank = {},
-            onEnterDetailsManually = {},
-            onLoadAccountsAgain = {},
-            onCloseClick = {},
-            onLearnMoreAboutDataAccessClick = {}
-        ) {}
-    }
-}
-
-@Preview(
-    showBackground = true,
-    group = "Account Picker Pane",
-    name = "Single select - account selected"
-)
-@Composable
-internal fun AccountPickerPreviewSingleSelect() {
-    FinancialConnectionsPreview {
-        AccountPickerContent(
-            AccountPickerStates.singleSelect(),
+            state = state,
             onAccountClicked = {},
             onSubmit = {},
             onSelectAllAccountsClicked = {},

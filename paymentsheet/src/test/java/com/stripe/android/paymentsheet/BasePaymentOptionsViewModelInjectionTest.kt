@@ -18,13 +18,12 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
-import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
-import com.stripe.android.utils.PaymentIntentFactory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -42,9 +41,6 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val addressResourceRepository = StaticAddressResourceRepository(
-        AddressRepository(ApplicationProvider.getApplicationContext<Context>().resources)
-    )
 
     val eventReporter = mock<EventReporter>()
 
@@ -57,7 +53,6 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
 
     fun createViewModel(
         paymentMethods: List<PaymentMethod> = emptyList(),
-        @InjectorKey injectorKey: String,
         args: PaymentOptionContract.Args = PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
     ): PaymentOptionsViewModel = runBlocking {
         val lpmRepository = LpmRepository(
@@ -89,9 +84,7 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
                 workContext = testDispatcher,
                 application = ApplicationProvider.getApplicationContext(),
                 logger = Logger.noop(),
-                injectorKey = injectorKey,
-                lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-                addressResourceRepository = addressResourceRepository,
+                lpmRepository = lpmRepository,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
             )
@@ -112,8 +105,8 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
                 amount = Amount(50, "USD"),
                 initialPaymentMethodCreateParams = null
             ),
-            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = addressResourceRepository,
+            lpmRepository = lpmRepository,
+            addressRepository = createAddressRepository(),
             showCheckboxFlow = mock()
         )
     ) {
@@ -151,4 +144,11 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
         }
         WeakMapInjectorRegistry.register(injector, injectorKey)
     }
+}
+
+private fun createAddressRepository(): AddressRepository {
+    return AddressRepository(
+        resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        workContext = Dispatchers.Unconfined,
+    )
 }

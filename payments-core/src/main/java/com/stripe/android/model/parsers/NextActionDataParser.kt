@@ -1,7 +1,6 @@
 package com.stripe.android.model.parsers
 
 import android.net.Uri
-import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
@@ -224,7 +223,6 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         }
     }
 
-    @OptIn(StripeCashAppPayBetaApi::class)
     internal class CashAppRedirectParser :
         ModelJsonParser<StripeIntent.NextActionData.CashAppRedirect> {
 

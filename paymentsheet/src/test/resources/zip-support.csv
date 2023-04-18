@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+zip, true, true, off_session, false, card/zip, false, false, not available, false
+zip, true, true, off_session, false, card/eps/zip, false, false, not available, false
+zip, true, false, off_session, false, card/zip, false, false, not available, false
+zip, true, false, off_session, false, card/eps/zip, false, false, not available, false
+zip, true, true, on_session, false, card/zip, false, false, not available, false
+zip, true, true, on_session, false, card/eps/zip, false, false, not available, false
+zip, true, false, on_session, false, card/zip, false, false, not available, false
+zip, true, false, on_session, false, card/eps/zip, false, false, not available, false
+zip, true, true, null, false, card/zip, false, true, oneTime, true
+zip, true, true, null, false, card/eps/zip, false, true, oneTime, true
+zip, true, false, null, false, card/zip, false, true, oneTime, true
+zip, true, false, null, false, card/eps/zip, false, true, oneTime, true
+zip, false, true, off_session, false, card/zip, false, false, not available, false
+zip, false, true, off_session, false, card/eps/zip, false, false, not available, false
+zip, false, false, off_session, false, card/zip, false, false, not available, false
+zip, false, false, off_session, false, card/eps/zip, false, false, not available, false
+zip, false, true, on_session, false, card/zip, false, false, not available, false
+zip, false, true, on_session, false, card/eps/zip, false, false, not available, false
+zip, false, false, on_session, false, card/zip, false, false, not available, false
+zip, false, false, on_session, false, card/eps/zip, false, false, not available, false
+zip, false, true, null, false, card/zip, false, true, oneTime, true
+zip, false, true, null, false, card/eps/zip, false, true, oneTime, true
+zip, false, false, null, false, card/zip, false, true, oneTime, true
+zip, false, false, null, false, card/eps/zip, false, true, oneTime, true
+zip, true, true, off_session, true, card/zip, false, false, not available, false
+zip, true, true, off_session, true, card/eps/zip, false, false, not available, false
+zip, true, false, off_session, true, card/zip, false, false, not available, false
+zip, true, false, off_session, true, card/eps/zip, false, false, not available, false
+zip, true, true, on_session, true, card/zip, false, false, not available, false
+zip, true, true, on_session, true, card/eps/zip, false, false, not available, false
+zip, true, false, on_session, true, card/zip, false, false, not available, false
+zip, true, false, on_session, true, card/eps/zip, false, false, not available, false
+zip, true, true, null, true, card/zip, false, true, oneTime, true
+zip, true, true, null, true, card/eps/zip, false, true, oneTime, true
+zip, true, false, null, true, card/zip, false, true, oneTime, true
+zip, true, false, null, true, card/eps/zip, false, true, oneTime, true
+zip, false, true, off_session, true, card/zip, false, false, not available, false
+zip, false, true, off_session, true, card/eps/zip, false, false, not available, false
+zip, false, false, off_session, true, card/zip, false, false, not available, false
+zip, false, false, off_session, true, card/eps/zip, false, false, not available, false
+zip, false, true, on_session, true, card/zip, false, false, not available, false
+zip, false, true, on_session, true, card/eps/zip, false, false, not available, false
+zip, false, false, on_session, true, card/zip, false, false, not available, false
+zip, false, false, on_session, true, card/eps/zip, false, false, not available, false
+zip, false, true, null, true, card/zip, false, true, oneTime, true
+zip, false, true, null, true, card/eps/zip, false, true, oneTime, true
+zip, false, false, null, true, card/zip, false, true, oneTime, true
+zip, false, false, null, true, card/eps/zip, false, true, oneTime, true

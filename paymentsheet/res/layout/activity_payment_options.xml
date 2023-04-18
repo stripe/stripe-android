@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinator"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -16,65 +15,11 @@
         android:background="?colorSurface"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-        <!-- This empty ComposeView is used to open a LinkVerificationDialog when needed -->
         <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/link_auth"
+            android:id="@+id/content"
             android:layout_width="match_parent"
-            android:layout_height="0dp" />
+            android:layout_height="wrap_content" />
 
-        <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/top_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white" />
-
-        <ScrollView
-            android:id="@+id/scroll_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:id="@+id/fragment_container_parent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:animateLayoutChanges="true">
-
-                <androidx.compose.ui.platform.ComposeView
-                    android:id="@+id/header"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"/>
-
-                <androidx.compose.ui.platform.ComposeView
-                    android:id="@+id/content_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <androidx.compose.ui.platform.ComposeView
-                    android:id="@+id/message"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <androidx.compose.ui.platform.ComposeView
-                    android:id="@+id/button_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <androidx.compose.ui.platform.ComposeView
-                    android:id="@+id/notes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_marginVertical="2dp"
-                    android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal" />
-
-                <View
-                    android:id="@+id/bottom_spacer"
-                    android:visibility="gone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/stripe_paymentsheet_button_container_spacing_bottom" />
-            </LinearLayout>
-        </ScrollView>
     </LinearLayout>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

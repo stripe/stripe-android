@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - Fora de línia</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">S\'ha rebutjat el mètode de pagament.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">La data de caducitat de la teva targeta no està completa.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">L\'IBAN és incorrecte.</string>
   <string name="invalid_card_number">El número de la teva targeta no és vàlid.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">El codi de seguretat de la teva targeta no és vàlid</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">El mes de caducitat de la teva targeta no és vàlid.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">L\'any de caducitat de la teva targeta no és vàlid.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">El nom no és vàlid.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">S\'ha esgotat el temps d\'autenticació del teu mètode de pagament - intenta-ho un altre cop</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">S\'ha produït un error intern.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">MM / AA</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verifica la forma de pagament</string>
   <string name="title_add_a_card">Afegir una targeta</string>

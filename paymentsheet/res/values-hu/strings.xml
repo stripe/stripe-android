@@ -8,13 +8,21 @@
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[A folytatással elfogadja, hogy engedélyezi a kifizetéseket ezen <terms>feltételek</terms> szerint.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
   <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Azzal, hogy elmenti a bankszámlát a(z) %s számára, beleegyezik a kifizetések engedélyezésébe ezen <terms>feltételek</terms> szerint.]]></string>
+  <!-- Error message when an error case happens when linking your account -->
+  <string name="stripe_paymentsheet_ach_something_went_wrong">Hiba történt a számlája kapcsolásakor, próbálja meg később.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Hozzáadás</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Fizetési adatok megadása</string>
+  <!-- Title for a button that when pressed saves the provided address. -->
+  <string name="stripe_paymentsheet_address_element_primary_button">Cím mentése</string>
+  <!-- Title for shipping address entry section -->
+  <string name="stripe_paymentsheet_address_element_shipping_address">Szállítási cím</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Fizetési mód választása</string>
   <string name="stripe_paymentsheet_close">Bezárás</string>
+  <!-- Text for a button that allows manual entry of an address -->
+  <string name="stripe_paymentsheet_enter_address_manually">Cím megadása kézzel</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">A Stripe néhány munkanapon belül egy 0,01 $ összegű utalást fog küldeni a bankszámlájára. Ezután e-mailben megkapja az útmutatást a fizetés befejezéséhez a(z) %s felé.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
@@ -25,8 +33,12 @@
   <string name="stripe_paymentsheet_pay_button_label">Fizetés:</string>
   <!-- Title shown above a section containing various payment options -->
   <string name="stripe_paymentsheet_pay_using">Fizetés a következővel:</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_pay_with_bank_title">Fizessen egyszerűen a bankszámlájával.</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Feldolgozás...</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_title">Bankszámla eltávolítása</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">%s eltávolítása</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
@@ -37,4 +49,14 @@
   <string name="stripe_paymentsheet_select_payment_method">Fizetési mód kiválasztása</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Összesen: %s</string>
+  <!-- Button text on a screen asking the user to approve a payment -->
+  <string name="upi_polling_cancel">Szakítsa meg, és fizessen más módon</string>
+  <!-- Text on a screen asking the user to approve a payment -->
+  <string name="upi_polling_header">Fizetés jóváhagyása</string>
+  <!-- Countdown timer text on a screen asking the user to approve a payment -->
+  <string name="upi_polling_message">Nyissa meg az UPI-alkalmazását a fizetés jóváhagyásához %s belül</string>
+  <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
+  <string name="upi_polling_payment_failed_message">Lépjen vissza, és válasszon másik fizetési módot</string>
+  <!-- Text on a screen that indicates a payment has failed -->
+  <string name="upi_polling_payment_failed_title">A fizetés nem sikerült</string>
 </resources>

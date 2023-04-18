@@ -48,13 +48,43 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.stripeColors
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
+@Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
+internal fun OTPElementUIPreview() {
+    StripeTheme {
+        OTPElementUI(
+            enabled = true,
+            element = OTPElement(
+                identifier = IdentifierSpec.Generic("otp"),
+                controller = OTPController()
+            )
+        )
+    }
+}
+
+@Composable
+@Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
+internal fun OTPElementUIDisabledPreview() {
+    StripeTheme {
+        OTPElementUI(
+            enabled = false,
+            element = OTPElement(
+                identifier = IdentifierSpec.Generic("otp"),
+                controller = OTPController()
+            )
+        )
+    }
+}
+
+@Composable
+@Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun OTPElementUI(
     enabled: Boolean,
@@ -86,6 +116,11 @@ fun OTPElementUI(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 4.dp),
+                backgroundColor = if (enabled) {
+                    MaterialTheme.stripeColors.component
+                } else {
+                    MaterialTheme.stripeColors.placeholderText.copy(alpha = 0.1f)
+                },
                 border = BorderStroke(
                     width = MaterialTheme.getBorderStrokeWidth(isSelected),
                     color = if (isSelected) {

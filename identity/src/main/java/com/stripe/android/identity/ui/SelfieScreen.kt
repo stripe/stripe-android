@@ -21,8 +21,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Checkbox
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +47,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -60,6 +63,8 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.camera.SelfieCameraManager
+import com.stripe.android.identity.navigation.SelfieDestination
+import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.states.FaceDetectorTransitioner
@@ -77,6 +82,7 @@ internal const val SELFIE_SCAN_MESSAGE_TAG = "SelfieScanMessage"
 internal const val SELFIE_SCAN_CONTINUE_BUTTON_TAG = "SelfieScanContinue"
 internal const val SCAN_VIEW_TAG = "SelfieScanViewTag"
 internal const val RESULT_VIEW_TAG = "SelfieResultViewTag"
+internal const val RETAKE_SELFIE_BUTTON_TAG = "RetakeSelfieButtonTag"
 internal const val CONSENT_CHECKBOX_TAG = "ConsentCheckboxTag"
 private const val FLASH_MAX_ALPHA = 0.5f
 private const val FLASH_ANIMATION_TIME = 200
@@ -249,6 +255,7 @@ internal fun SelfieScanScreen(
                         allowImageCollectionHtml = successSelfieCapturePage.consentText,
                         allowImageCollectionCheckboxEnabled = allowImageCollectionCheckboxEnabled,
                         allowImageCollection = allowImageCollection,
+                        navController = navController
                     ) {
                         allowImageCollection = it
                     }
@@ -289,6 +296,7 @@ private fun ResultView(
     allowImageCollectionHtml: String,
     allowImageCollectionCheckboxEnabled: Boolean,
     allowImageCollection: Boolean,
+    navController: NavController,
     onAllowImageCollectionChanged: (Boolean) -> Unit
 ) {
     LazyRow(
@@ -320,6 +328,29 @@ private fun ResultView(
     }
 
     Row(
+        modifier = Modifier
+            .padding(
+                start = dimensionResource(id = R.dimen.page_horizontal_margin),
+                end = dimensionResource(id = R.dimen.page_horizontal_margin),
+                top = 20.dp
+            )
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        TextButton(
+            modifier = Modifier.testTag(RETAKE_SELFIE_BUTTON_TAG),
+            onClick = { navController.navigateTo(SelfieDestination) }
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.camera_icon),
+                contentDescription = stringResource(id = R.string.description_camera),
+                modifier = Modifier.padding(end = 5.dp)
+            )
+            Text(text = stringResource(id = R.string.retake_photos))
+        }
+    }
+
+    Row(
         modifier = Modifier.padding(
             start = dimensionResource(id = R.dimen.page_horizontal_margin),
             end = dimensionResource(id = R.dimen.page_horizontal_margin),
@@ -329,9 +360,7 @@ private fun ResultView(
         Checkbox(
             modifier = Modifier.testTag(CONSENT_CHECKBOX_TAG),
             checked = allowImageCollection,
-            onCheckedChange = {
-                onAllowImageCollectionChanged(!allowImageCollection)
-            },
+            onCheckedChange = { onAllowImageCollectionChanged(!allowImageCollection) },
             enabled = allowImageCollectionCheckboxEnabled
         )
 

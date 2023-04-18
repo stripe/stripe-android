@@ -20,7 +20,7 @@ import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldConfig
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.util.UUID
@@ -215,7 +215,8 @@ class CountryAddressSchema(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun parseAddressesSchema(inputStream: InputStream?) =
     getJsonStringFromInputStream(inputStream)?.let {
-        format.decodeFromString<ArrayList<CountryAddressSchema>>(
+        format.decodeFromString(
+            ListSerializer(CountryAddressSchema.serializer()),
             it
         )
     }

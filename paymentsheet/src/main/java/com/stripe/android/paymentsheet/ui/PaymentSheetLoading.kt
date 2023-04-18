@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
@@ -21,7 +22,9 @@ internal fun PaymentSheetLoading(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.height(height),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height),
     ) {
         CircularProgressIndicator(
             color = MaterialTheme.colors.onSurface,

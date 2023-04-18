@@ -20,6 +20,7 @@ import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -32,33 +33,33 @@ import java.util.concurrent.atomic.AtomicInteger
 // TODO(ccen) Rewrite the test with generic Element and move it to stripe-ui-core
 @RunWith(RobolectricTestRunner::class)
 class AddressElementTest {
-    private val addressRepository = AddressRepository(
-        ApplicationProvider.getApplicationContext<Application>().resources
-    )
+    private val addressRepository = createAddressRepository()
     private val countryDropdownFieldController = DropdownFieldController(
         CountryConfig(setOf("US", "JP"))
     )
 
     init {
-        // We want to use fields that are easy to set in error
-        addressRepository.add(
-            "US",
-            listOf(
-                EmailElement(
-                    IdentifierSpec.Email,
-                    controller = SimpleTextFieldController(EmailConfig())
+        runBlocking {
+            // We want to use fields that are easy to set in error
+            addressRepository.add(
+                "US",
+                listOf(
+                    EmailElement(
+                        IdentifierSpec.Email,
+                        controller = SimpleTextFieldController(EmailConfig())
+                    )
                 )
             )
-        )
-        addressRepository.add(
-            "JP",
-            listOf(
-                IbanElement(
-                    IdentifierSpec.Generic("sepa_debit[iban]"),
-                    SimpleTextFieldController(IbanConfig())
+            addressRepository.add(
+                "JP",
+                listOf(
+                    IbanElement(
+                        IdentifierSpec.Generic("sepa_debit[iban]"),
+                        SimpleTextFieldController(IbanConfig())
+                    )
                 )
             )
-        )
+        }
     }
 
     @Test
@@ -525,4 +526,11 @@ private suspend fun AddressElement.trailingIconFor(
     val controllerForSpec = (fieldForSpec as SimpleTextElement).controller
     val trailingIcon = (controllerForSpec as SimpleTextFieldController).textFieldConfig.trailingIcon
     return trailingIcon.value as? TextFieldIcon.Trailing?
+}
+
+private fun createAddressRepository(): AddressRepository {
+    return AddressRepository(
+        resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        workContext = Dispatchers.Unconfined,
+    )
 }

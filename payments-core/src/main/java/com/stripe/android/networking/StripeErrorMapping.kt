@@ -6,6 +6,11 @@ import com.stripe.android.core.StripeError
 
 @Suppress("ComplexMethod")
 internal fun StripeError.withLocalizedMessage(context: Context): StripeError {
+    val newMessage = context.mapErrorCodeToLocalizedMessage(code) ?: message
+    return copy(message = newMessage)
+}
+
+internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String? {
     val messageResourceId = when (code) {
         "incorrect_number" -> R.string.invalid_card_number
         "invalid_number" -> R.string.invalid_card_number
@@ -21,7 +26,5 @@ internal fun StripeError.withLocalizedMessage(context: Context): StripeError {
         "generic_decline" -> R.string.generic_decline
         else -> null
     }
-
-    val newMessage = messageResourceId?.let { context.getString(it) } ?: message
-    return copy(message = newMessage)
+    return messageResourceId?.let { getString(it) }
 }

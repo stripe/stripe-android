@@ -27,6 +27,24 @@
   <string name="could_not_capture_title">Niet gelukt om afbeelding vast te leggen</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="description_clock">Klokpictogram</string>
+  <!-- Content description for close button -->
+  <string name="description_close">verificatiepagina sluiten</string>
+  <!-- Content description for exclamation icon -->
+  <string name="description_exclamation">pictogram met uitroepteken</string>
+  <!-- Content description for back button -->
+  <string name="description_go_back">naar vorige scherm</string>
+  <!-- Content description for merchant logo -->
+  <string name="description_merchant_logo">logo van handelaar</string>
+  <!-- Content description for plus icon -->
+  <string name="description_plus">plus-pictogram</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="description_privacy_policy">pictogram voor privacybeleid</string>
+  <!-- Content description for stripe logo -->
+  <string name="description_stripe_logo">logo van Stripe</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="description_time_estimate">pictogram voor geschatte tijd tot voltooiing van verificatie</string>
+  <!-- Label for Date of birth field -->
+  <string name="dob">Geboortedatum</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="driver_license">Rijbewijs</string>
   <!-- Text for error labels -->
@@ -39,6 +57,8 @@
   <string name="file_upload_content_id">Upload afbeeldingen van de voor- en achterkant van je identiteitskaart</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Upload een afbeelding van je paspoort</string>
+  <!-- Label for first (given) name field -->
+  <string name="first_name">Voornaam</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="flash_mask">Animatie van masker voor selfie</string>
   <!-- Description of front of driver's license image -->
@@ -57,10 +77,24 @@
   <string name="hold_still">Niet bewegen, het document wordt gescand</string>
   <!-- display name for ID -->
   <string name="id_card">ID</string>
+  <!-- Label for ID number section -->
+  <string name="id_number">Identificatienummer</string>
+  <!-- An error message. -->
+  <string name="incomplete_id_number">Het opgegeven identificatienummer is onvolledig.</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="individual_cpf">CPF natuurlijk persoon</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="invalid_dob_error">Geboortedatum lijkt ongeldig te zijn</string>
   <!-- Continue button text -->
   <string name="kontinue">doorgaan</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="last_4_of_ssn">Laatste vier cijfers van socialezekerheidsnummer</string>
+  <!-- Label for last (family) name field -->
+  <string name="last_name">Achternaam</string>
   <!-- Status while screen is loading -->
   <string name="loading">Bezig met laden</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="nric_or_fin">NRIC of FIN</string>
   <!-- No comment provided by engineer. -->
   <string name="ok">OK</string>
   <!-- Label of the passport option for document type selection -->
@@ -79,6 +113,8 @@
   <string name="position_passport">Plaats je paspoort midden in het frame</string>
   <!-- Instructional text for capturing selfie -->
   <string name="position_selfie">Houd je gezicht in het midden van het frame.</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="retake_photos">Nieuwe foto\'s maken</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Gescand</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->

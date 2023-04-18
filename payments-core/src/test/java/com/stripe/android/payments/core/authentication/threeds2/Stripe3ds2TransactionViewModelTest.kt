@@ -25,7 +25,7 @@ import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
-import com.stripe.android.utils.fakeCreationExtras
+import com.stripe.android.testing.fakeCreationExtras
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import kotlinx.parcelize.Parcelize
@@ -15,7 +14,6 @@ import java.util.regex.Pattern
  * - [Setup Intents Overview](https://stripe.com/docs/payments/setup-intents)
  * - [SetupIntents API Reference](https://stripe.com/docs/api/setup_intents)
  */
-@OptIn(StripeCashAppPayBetaApi::class)
 @Parcelize
 data class SetupIntent internal constructor(
     /**

@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="stripe_paymentsheet_address_element_same_as_shipping">Billing address is same as shipping</string>
-</resources>

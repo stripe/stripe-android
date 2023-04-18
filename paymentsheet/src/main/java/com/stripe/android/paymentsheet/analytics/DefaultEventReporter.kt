@@ -21,19 +21,28 @@ internal class DefaultEventReporter @Inject internal constructor(
 ) : EventReporter {
     private var paymentSheetShownMillis: Long? = null
 
-    override fun onInit(configuration: PaymentSheet.Configuration?) {
+    override fun onInit(
+        configuration: PaymentSheet.Configuration?,
+        isDecoupling: Boolean,
+        isServerSideConfirmation: Boolean,
+    ) {
         fireEvent(
             PaymentSheetEvent.Init(
                 mode = mode,
-                configuration = configuration
+                configuration = configuration,
+                isDecoupled = isDecoupling,
+                isServerSideConfirmation = isServerSideConfirmation,
             )
         )
     }
 
-    override fun onDismiss() {
+    override fun onDismiss(
+        isDecoupling: Boolean,
+    ) {
         fireEvent(
             PaymentSheetEvent.Dismiss(
-                mode = mode
+                mode = mode,
+                isDecoupled = isDecoupling,
             )
         )
     }
@@ -41,7 +50,8 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onShowExistingPaymentOptions(
         linkEnabled: Boolean,
         activeLinkSession: Boolean,
-        currency: String?
+        currency: String?,
+        isDecoupling: Boolean,
     ) {
         paymentSheetShownMillis = eventTimeProvider.currentTimeMillis()
         fireEvent(
@@ -49,7 +59,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                 mode = mode,
                 linkEnabled = linkEnabled,
                 activeLinkSession = activeLinkSession,
-                currency = currency
+                currency = currency,
+                isDecoupled = isDecoupling,
             )
         )
     }
@@ -57,7 +68,8 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onShowNewPaymentOptionForm(
         linkEnabled: Boolean,
         activeLinkSession: Boolean,
-        currency: String?
+        currency: String?,
+        isDecoupling: Boolean,
     ) {
         paymentSheetShownMillis = eventTimeProvider.currentTimeMillis()
         fireEvent(
@@ -65,27 +77,31 @@ internal class DefaultEventReporter @Inject internal constructor(
                 mode = mode,
                 linkEnabled = linkEnabled,
                 activeLinkSession = activeLinkSession,
-                currency = currency
+                currency = currency,
+                isDecoupled = isDecoupling,
             )
         )
     }
 
     override fun onSelectPaymentOption(
         paymentSelection: PaymentSelection,
-        currency: String?
+        currency: String?,
+        isDecoupling: Boolean,
     ) {
         fireEvent(
             PaymentSheetEvent.SelectPaymentOption(
                 mode = mode,
                 paymentSelection = paymentSelection,
-                currency = currency
+                currency = currency,
+                isDecoupled = isDecoupling,
             )
         )
     }
 
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection?,
-        currency: String?
+        currency: String?,
+        isDecoupling: Boolean,
     ) {
         // Google Pay is treated as a saved payment method after confirmation, so we need to
         // "reset" to PaymentSelection.GooglePay for accurate reporting
@@ -103,14 +119,16 @@ internal class DefaultEventReporter @Inject internal constructor(
                 paymentSelection = realSelection,
                 durationMillis = durationMillisFrom(paymentSheetShownMillis),
                 result = PaymentSheetEvent.Payment.Result.Success,
-                currency = currency
+                currency = currency,
+                isDecoupled = isDecoupling,
             )
         )
     }
 
     override fun onPaymentFailure(
         paymentSelection: PaymentSelection?,
-        currency: String?
+        currency: String?,
+        isDecoupling: Boolean,
     ) {
         fireEvent(
             PaymentSheetEvent.Payment(
@@ -118,14 +136,29 @@ internal class DefaultEventReporter @Inject internal constructor(
                 paymentSelection = paymentSelection,
                 durationMillis = durationMillisFrom(paymentSheetShownMillis),
                 result = PaymentSheetEvent.Payment.Result.Failure,
-                currency = currency
+                currency = currency,
+                isDecoupled = isDecoupling,
             )
         )
     }
 
-    override fun onLpmSpecFailure() {
+    override fun onLpmSpecFailure(
+        isDecoupling: Boolean,
+    ) {
         fireEvent(
-            PaymentSheetEvent.LpmSerializeFailureEvent()
+            PaymentSheetEvent.LpmSerializeFailureEvent(isDecoupled = isDecoupling)
+        )
+    }
+
+    override fun onAutofill(
+        type: String,
+        isDecoupling: Boolean,
+    ) {
+        fireEvent(
+            PaymentSheetEvent.AutofillEvent(
+                type = type,
+                isDecoupled = isDecoupling,
+            )
         )
     }
 

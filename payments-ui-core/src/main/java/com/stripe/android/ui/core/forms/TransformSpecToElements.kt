@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.forms
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
@@ -10,6 +11,7 @@ import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
+import com.stripe.android.ui.core.elements.ContactInformationSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -23,12 +25,13 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.OTPSpec
+import com.stripe.android.ui.core.elements.PhoneSpec
+import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.UpiSpec
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -41,18 +44,19 @@ import com.stripe.android.uicore.elements.IdentifierSpec
  * @param viewOnlyFields A set of identifiers for the fields that should be view-only, non-editable.
  * Currently only [IdentifierSpec.CardNumber] is supported and any other identifier is ignored.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class TransformSpecToElements(
-    private val addressResourceRepository: ResourceRepository<AddressRepository>,
+    private val addressRepository: AddressRepository,
     private val initialValues: Map<IdentifierSpec, String?>,
     private val shippingValues: Map<IdentifierSpec, String?>?,
     private val amount: Amount?,
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
     private val context: Context,
-    private val viewOnlyFields: Set<IdentifierSpec> = emptySet()
+    private val viewOnlyFields: Set<IdentifierSpec> = emptySet(),
 ) {
     fun transform(list: List<FormItemSpec>): List<FormElement> =
-        list.map {
+        list.mapNotNull {
             when (it) {
                 is SaveForFutureUseSpec -> it.transform(
                     saveForFutureUseInitialValue,
@@ -69,6 +73,7 @@ class TransformSpecToElements(
                 is OTPSpec -> it.transform()
                 is NameSpec -> it.transform(initialValues)
                 is EmailSpec -> it.transform(initialValues)
+                is PhoneSpec -> it.transform(initialValues)
                 is SimpleTextSpec -> it.transform(initialValues)
                 is AuBankAccountNumberSpec -> it.transform(initialValues)
                 is IbanSpec -> it.transform(initialValues)
@@ -78,16 +83,19 @@ class TransformSpecToElements(
                 is CountrySpec -> it.transform(initialValues)
                 is AddressSpec -> it.transform(
                     initialValues,
-                    addressResourceRepository.getRepository(),
+                    addressRepository,
                     shippingValues
                 )
                 is CardBillingSpec -> it.transform(
                     initialValues,
-                    addressResourceRepository.getRepository(),
-                    shippingValues
+                    addressRepository,
+                    shippingValues,
                 )
                 is SepaMandateTextSpec -> it.transform(merchantName)
                 is UpiSpec -> it.transform()
+                is ContactInformationSpec -> it.transform(initialValues)
+                is PlaceholderSpec ->
+                    error("Placeholders should be processed before calling transform.")
             }
         }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
 }

@@ -37,6 +37,7 @@ dependencies {
     javadocDeps "com.google.android.material:material:$materialVersion"
 
     testImplementation project(':financial-connections')
+    testImplementation project(':payments-core-testing')
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
     testImplementation "org.robolectric:robolectric:$robolectricVersion"
@@ -50,15 +51,15 @@ dependencies {
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
     testImplementation "androidx.lifecycle:lifecycle-runtime-testing:$androidxLifecycleVersion"
+    testImplementation project(path: ':network-testing')
     testImplementation testLibs.turbine
 
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
     androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
+    androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
 
     androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 android {

@@ -10,15 +10,15 @@ import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardBillingAddressElementTest {
-    private val addressRepository = AddressRepository(
-        ApplicationProvider.getApplicationContext<Application>().resources
-    )
+    private val addressRepository = createAddressRepository()
     val dropdownFieldController = DropdownFieldController(
         CountryConfig(emptySet())
     )
@@ -33,25 +33,27 @@ internal class CardBillingAddressElementTest {
     )
 
     init {
-        // We want to use fields that are easy to set in error
-        addressRepository.add(
-            "US",
-            listOf(
-                EmailElement(
-                    IdentifierSpec.Email,
-                    controller = SimpleTextFieldController(EmailConfig())
+        runBlocking {
+            // We want to use fields that are easy to set in error
+            addressRepository.add(
+                "US",
+                listOf(
+                    EmailElement(
+                        IdentifierSpec.Email,
+                        controller = SimpleTextFieldController(EmailConfig())
+                    )
                 )
             )
-        )
-        addressRepository.add(
-            "JP",
-            listOf(
-                IbanElement(
-                    IdentifierSpec.Generic("sepa_debit[iban]"),
-                    SimpleTextFieldController(IbanConfig())
+            addressRepository.add(
+                "JP",
+                listOf(
+                    IbanElement(
+                        IdentifierSpec.Generic("sepa_debit[iban]"),
+                        SimpleTextFieldController(IbanConfig())
+                    )
                 )
             )
-        )
+        }
     }
 
     @Test
@@ -119,4 +121,11 @@ internal class CardBillingAddressElementTest {
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
     }
+}
+
+private fun createAddressRepository(): AddressRepository {
+    return AddressRepository(
+        resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        workContext = Dispatchers.Unconfined,
+    )
 }

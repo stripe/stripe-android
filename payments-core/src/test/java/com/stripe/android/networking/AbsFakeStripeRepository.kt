@@ -18,13 +18,14 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
-import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -70,14 +71,6 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return null
     }
 
-    override suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        locale: Locale
-    ): PaymentMethodPreference? {
-        return null
-    }
-
     override suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
@@ -99,14 +92,6 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         options: ApiRequest.Options,
         expandFields: List<String>
     ): SetupIntent? {
-        return null
-    }
-
-    override suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        locale: Locale
-    ): PaymentMethodPreference? {
         return null
     }
 
@@ -147,7 +132,6 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return null
     }
 
-    @Throws(APIException::class)
     override suspend fun addCustomerSource(
         customerId: String,
         publishableKey: String,
@@ -155,19 +139,18 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         sourceId: String,
         sourceType: String,
         requestOptions: ApiRequest.Options
-    ): Source? {
-        return null
+    ): Result<Source> {
+        return Result.failure(NotImplementedError())
     }
 
-    @Throws(APIException::class)
     override suspend fun deleteCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
         sourceId: String,
         requestOptions: ApiRequest.Options
-    ): Source? {
-        return null
+    ): Result<Source> {
+        return Result.failure(NotImplementedError())
     }
 
     @Throws(APIException::class)
@@ -177,8 +160,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethod? {
-        return null
+    ): Result<PaymentMethod> {
+        return Result.failure(NotImplementedError())
     }
 
     @Throws(APIException::class)
@@ -187,8 +170,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethod? {
-        return null
+    ): Result<PaymentMethod> {
+        return Result.failure(NotImplementedError())
     }
 
     @Throws(APIException::class)
@@ -197,11 +180,10 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
-    ): List<PaymentMethod> {
-        return emptyList()
+    ): Result<List<PaymentMethod>> {
+        return Result.failure(NotImplementedError())
     }
 
-    @Throws(APIException::class)
     override suspend fun setDefaultCustomerSource(
         customerId: String,
         publishableKey: String,
@@ -209,8 +191,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         sourceId: String,
         sourceType: String,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return null
+    ): Result<Customer> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun setCustomerShippingInfo(
@@ -219,16 +201,16 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         productUsageTokens: Set<String>,
         shippingInformation: ShippingInformation,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return null
+    ): Result<Customer> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
-    ): Customer? {
-        return null
+    ): Result<Customer> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveIssuingCardPin(
@@ -298,24 +280,6 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return null
     }
 
-    override suspend fun startConsumerVerification(
-        consumerSessionClientSecret: String,
-        locale: Locale,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        return null
-    }
-
-    override suspend fun confirmConsumerVerification(
-        consumerSessionClientSecret: String,
-        verificationCode: String,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSession? {
-        return null
-    }
-
     override suspend fun logoutConsumer(
         consumerSessionClientSecret: String,
         authSessionCookie: String?,
@@ -376,8 +340,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun attachFinancialConnectionsSessionToSetupIntent(
@@ -386,24 +350,24 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         financialConnectionsSessionId: String,
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
-    ): SetupIntent? {
-        return null
+    ): Result<SetupIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun createPaymentIntentFinancialConnectionsSession(
         paymentIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession? {
-        return null
+    ): Result<FinancialConnectionsSession> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun createSetupIntentFinancialConnectionsSession(
         setupIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
         requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession? {
-        return null
+    ): Result<FinancialConnectionsSession> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun verifyPaymentIntentWithMicrodeposits(
@@ -411,16 +375,16 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         firstAmount: Int,
         secondAmount: Int,
         requestOptions: ApiRequest.Options
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun verifyPaymentIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
         requestOptions: ApiRequest.Options
-    ): PaymentIntent? {
-        return null
+    ): Result<PaymentIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun verifySetupIntentWithMicrodeposits(
@@ -428,16 +392,16 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         firstAmount: Int,
         secondAmount: Int,
         requestOptions: ApiRequest.Options
-    ): SetupIntent? {
-        return null
+    ): Result<SetupIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun verifySetupIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
         requestOptions: ApiRequest.Options
-    ): SetupIntent? {
-        return null
+    ): Result<SetupIntent> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrievePaymentMethodMessage(
@@ -448,7 +412,21 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         locale: String,
         logoColor: String,
         requestOptions: ApiRequest.Options
-    ): PaymentMethodMessage? {
+    ): Result<PaymentMethodMessage> {
+        return Result.failure(NotImplementedError())
+    }
+
+    override suspend fun retrieveElementsSession(
+        params: ElementsSessionParams,
+        options: ApiRequest.Options
+    ): Result<ElementsSession> {
+        return Result.failure(NotImplementedError())
+    }
+
+    override suspend fun retrieveCardMetadata(
+        cardNumber: String,
+        requestOptions: ApiRequest.Options
+    ): CardMetadata? {
         return null
     }
 }

@@ -141,7 +141,7 @@ class AnalyticsRequestV2(
     }
 
     override val headers = mapOf(
-        HEADER_CONTENT_TYPE to "${MimeType.Form}; charset=${Charsets.UTF_8.name()}",
+        HEADER_CONTENT_TYPE to "${MimeType.Form.code}; charset=${Charsets.UTF_8.name()}",
         HEADER_ORIGIN to origin, // required by r.stripe.com
         HEADER_USER_AGENT to "Stripe/v1 android/$VERSION_NAME" // required by r.stripe.com
     )

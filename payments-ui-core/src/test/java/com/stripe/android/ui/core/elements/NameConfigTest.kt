@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth
+import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Limitless
 import org.junit.Test

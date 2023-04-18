@@ -7,7 +7,7 @@ dependencies {
     implementation testLibs.okhttpTls
     implementation "junit:junit:$junitVersion"
 
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
+    androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
 }
 
 android {

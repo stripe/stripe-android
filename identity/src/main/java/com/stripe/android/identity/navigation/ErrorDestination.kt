@@ -1,8 +1,10 @@
 package com.stripe.android.identity.navigation
 
+import android.content.Context
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.stripe.android.identity.R
 
 internal class ErrorDestination(
     errorTitle: String,
@@ -75,3 +77,11 @@ internal class ErrorDestination(
         }
     }
 }
+
+internal fun Context.finalErrorDestination(): ErrorDestination =
+    ErrorDestination(
+        errorTitle = getString(R.string.error),
+        errorContent = getString(R.string.unexpected_error_try_again),
+        backButtonText = getString(R.string.go_back),
+        shouldFail = true
+    )

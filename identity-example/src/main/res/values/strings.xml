@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">Stripe Identity Example</string>
 
     <string name="theme1">theme-purple</string>
@@ -10,11 +10,11 @@
     <string name="allowed_types">Allowed document types</string>
     <string name="require_id_number">Require ID number</string>
     <string name="require_matching_selfie">Require matching selfie</string>
-    <string name="use_native">Use native SDK</string>
-    <string name="use_web">Use web redirect</string>
+    <string name="use_native">Native</string>
+    <string name="use_web">Web</string>
+    <string name="get_link">Link</string>
 
-    <string name="classic_example">Classic Activity example</string>
-    <string name="compose_example">Compose Activity example</string>
+    <string name="identity_example">Identity Example</string>
     <string name="verification_type">Verification Type</string>
     <string name="require_address">Require address</string>
 

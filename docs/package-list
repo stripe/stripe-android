@@ -12,6 +12,7 @@ com.stripe.android.camera.scanui
 com.stripe.android.camera.scanui.util
 module:financial-connections
 com.stripe.android.financialconnections
+com.stripe.android.financialconnections.exception
 com.stripe.android.financialconnections.features.partnerauth
 com.stripe.android.financialconnections.launcher
 com.stripe.android.financialconnections.model
@@ -51,6 +52,8 @@ com.stripe.android.polling
 com.stripe.android.utils
 com.stripe.android.view
 com.stripe.android.view.i18n
+module:payments-core-testing
+com.stripe.android.testing
 module:payments-model
 com.stripe.android
 com.stripe.android.cards
@@ -72,6 +75,7 @@ module:paymentsheet
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.addresselement
 com.stripe.android.paymentsheet.model
+com.stripe.android.paymentsheet.ui
 module:stripe-core
 com.stripe.android.core
 com.stripe.android.core.browser
@@ -103,3 +107,11 @@ com.stripe.android.stripecardscan.scanui
 module:wechatpay
 com.stripe.android.payments.wechatpay
 com.stripe.android.payments.wechatpay.reflection
+module:base
+com.stripe.android.mlcore.base
+module:cardscan
+com.stripe.android.mlcore.impl
+module:default
+com.stripe.android.mlcore.impl
+module:googleplay
+com.stripe.android.mlcore.impl

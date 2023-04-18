@@ -283,8 +283,7 @@ class CardFormView @JvmOverloads constructor(
 
         cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
         cardMultilineWidget.expirationDatePlaceholderRes = null
-        cardMultilineWidget.expiryTextInputLayout.hint =
-            context.getString(R.string.stripe_paymentsheet_expiration_date_hint)
+        cardMultilineWidget.expiryTextInputLayout.hint = context.getString(R.string.expiration_date_hint)
         cardMultilineWidget.cardNumberTextInputLayout.placeholderText = null
         cardMultilineWidget.setCvcPlaceholderText("")
 

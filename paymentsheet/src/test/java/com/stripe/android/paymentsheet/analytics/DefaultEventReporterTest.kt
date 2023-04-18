@@ -45,7 +45,11 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onInit() should fire analytics request with expected event value`() {
-        completeEventReporter.onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+        completeEventReporter.onInit(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isDecoupling = false,
+            isServerSideConfirmation = false,
+        )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_init_customer_googlepay" &&
@@ -59,7 +63,8 @@ class DefaultEventReporterTest {
         completeEventReporter.onShowExistingPaymentOptions(
             linkEnabled = true,
             activeLinkSession = false,
-            currency = "usd"
+            currency = "usd",
+            isDecoupling = false,
         )
 
         verify(analyticsRequestExecutor).executeAsync(
@@ -78,7 +83,8 @@ class DefaultEventReporterTest {
         completeEventReporter.onShowNewPaymentOptionForm(
             linkEnabled = false,
             activeLinkSession = true,
-            currency = "usd"
+            currency = "usd",
+            isDecoupling = false,
         )
 
         verify(analyticsRequestExecutor).executeAsync(
@@ -98,14 +104,16 @@ class DefaultEventReporterTest {
         completeEventReporter.onShowExistingPaymentOptions(
             linkEnabled = false,
             activeLinkSession = false,
-            currency = "usd"
+            currency = "usd",
+            isDecoupling = false,
         )
         reset(analyticsRequestExecutor)
         whenever(eventTimeProvider.currentTimeMillis()).thenReturn(2000L)
 
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            currency = "usd"
+            currency = "usd",
+            isDecoupling = false,
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
@@ -124,6 +132,7 @@ class DefaultEventReporterTest {
             linkEnabled = false,
             activeLinkSession = false,
             currency = "usd",
+            isDecoupling = false,
         )
 
         reset(analyticsRequestExecutor)
@@ -135,6 +144,7 @@ class DefaultEventReporterTest {
                 isGooglePay = true,
             ),
             currency = "usd",
+            isDecoupling = false,
         )
 
         verify(analyticsRequestExecutor).executeAsync(
@@ -151,14 +161,16 @@ class DefaultEventReporterTest {
         completeEventReporter.onShowExistingPaymentOptions(
             linkEnabled = false,
             activeLinkSession = false,
-            currency = "usd"
+            currency = "usd",
+            isDecoupling = false,
         )
         reset(analyticsRequestExecutor)
         whenever(eventTimeProvider.currentTimeMillis()).thenReturn(2000L)
 
         completeEventReporter.onPaymentFailure(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            currency = "usd"
+            currency = "usd",
+            isDecoupling = false,
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
@@ -174,7 +186,8 @@ class DefaultEventReporterTest {
     fun `onSelectPaymentOption() should fire analytics request with expected event value`() {
         customEventReporter.onSelectPaymentOption(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            currency = "usd"
+            currency = "usd",
+            isDecoupling = false,
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->

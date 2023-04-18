@@ -1,44 +1,10 @@
 name: Instrumentation tests
 on:
+  workflow_dispatch:
   schedule:
     # every 12 hours
     - cron: '0 */12 * * *'
 jobs:
-  instrumentation-tests:
-    name: Instrumentation tests
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/stripe_setup
-      - name: Instrumentation tests
-        uses: reactivecircus/android-emulator-runner@v2.22.0
-        with:
-          api-level: 29
-          arch: x86
-          disable-animations: true
-          script: bash ./scripts/execute_instrumentation_tests.sh
-        env:
-          STRIPE_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_EXAMPLE_BACKEND_URL }}
-          STRIPE_EXAMPLE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_EXAMPLE_PUBLISHABLE_KEY }}
-
-      - uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: instrumentation-test-report
-          path: |
-            **/build/reports/androidTests/
-
-      - name: Notify failure endpoint
-        id: notifyFailureEndpoint
-        if: failure()
-        run: |
-          ./scripts/notify_failure_endpoint.rb \
-          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
-          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
-          ${{ github.run_id }} \
-          RUN_MOBILESDK
-
   # This should be updated to use the browserstack github actions when supported
   browserstack-instrumentation-tests:
     name: Browserstack Instrumentation tests
@@ -66,7 +32,7 @@ jobs:
           ./scripts/notify_failure_endpoint.rb \
           ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
           ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
-          ${{ github.run_id }} \
+          "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \
           RUN_MOBILESDK
 
   screenshot-regression-tests:
@@ -84,17 +50,15 @@ jobs:
           disable-animations: true
           sdcard-path-or-size: 512M
           profile: Nexus 6
-          script: ./gradlew paymentsheet-example:executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot && ./gradlew paymentsheet:executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.paymentsheet.screenshot
+          script: ./gradlew paymentsheet-example:executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot
       - uses: actions/upload-artifact@v3
+        if: failure()
         with:
-          if: success() || failure()
-          name: screenshot-test-report-paymentsheet-example
-          path: /Users/runner/work/stripe-android/stripe-android/paymentsheet-example/build/reports/shot/debug/verification/ |  /Users/runner/work/stripe-android/stripe-android/paymentsheet/build/reports/shot/debug/verification/
-      - uses: actions/upload-artifact@v3
-        with:
-          if: success() || failure()
-          name: screenshot-test-report-paymentsheet
-          path: /Users/runner/work/stripe-android/stripe-android/paymentsheet/build/reports/shot/debug/verification/
+          name: test-failures
+          path: |
+            **/build/reports/shot/debug/verification/
+            **/tmp/shot/screenshot/
+            **/build/reports/androidTests/connected/
 #       - name: Notify failure endpoint
 #         id: notifyFailureEndpoint
 #         if: failure()
@@ -102,5 +66,5 @@ jobs:
 #           ./scripts/notify_failure_endpoint.rb \
 #           ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
 #           ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
-#           ${{ github.run_id }} \
+#           "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \
 #           RUN_MOBILESDK

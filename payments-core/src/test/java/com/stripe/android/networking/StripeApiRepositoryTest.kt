@@ -10,7 +10,6 @@ import com.stripe.android.FinancialConnectionsFixtures
 import com.stripe.android.FraudDetectionDataFixtures
 import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
-import com.stripe.android.StripeCashAppPayBetaApi
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.model.StripeFileParams
@@ -36,6 +35,9 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
+import com.stripe.android.model.DeferredIntentParams
+import com.stripe.android.model.ElementsSessionFixtures
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -44,7 +46,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageFixtures
-import com.stripe.android.model.PaymentMethodPreferenceFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.SourceFixtures
@@ -239,22 +240,6 @@ internal class StripeApiRepositoryTest {
         assertEquals(
             "https://api.stripe.com/v1/consumers/accounts/sign_up",
             StripeApiRepository.consumerSignUpUrl
-        )
-    }
-
-    @Test
-    fun testStartConsumerVerificationUrl() {
-        assertEquals(
-            "https://api.stripe.com/v1/consumers/sessions/start_verification",
-            StripeApiRepository.startConsumerVerificationUrl
-        )
-    }
-
-    @Test
-    fun testConfirmConsumerVerificationUrl() {
-        assertEquals(
-            "https://api.stripe.com/v1/consumers/sessions/confirm_verification",
-            StripeApiRepository.confirmConsumerVerificationUrl
         )
     }
 
@@ -669,7 +654,6 @@ internal class StripeApiRepositoryTest {
                 )
         }
 
-    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun confirmPaymentIntent_withPaymentMethodCreateParamsAttribution_setsCorrectPaymentUserAgent() =
         runTest {
@@ -780,7 +764,6 @@ internal class StripeApiRepositoryTest {
                 )
         }
 
-    @OptIn(StripeCashAppPayBetaApi::class)
     @Test
     fun confirmSetupIntent_withPaymentMethodCreateParamsAttribution_setsCorrectPaymentUserAgent() =
         runTest {
@@ -1056,7 +1039,7 @@ internal class StripeApiRepositoryTest {
                 DEFAULT_OPTIONS.apiKey,
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
-            )
+            ).getOrThrow()
         assertThat(paymentMethods)
             .hasSize(3)
         assertThat(paymentMethods.map { it.id })
@@ -1114,7 +1097,7 @@ internal class StripeApiRepositoryTest {
                 DEFAULT_OPTIONS.apiKey,
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
-            )
+            ).getOrThrow()
         assertThat(paymentMethods)
             .isEmpty()
     }
@@ -1596,66 +1579,6 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `retrievePaymentIntentWithOrderedPaymentMethods() sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                PaymentMethodPreferenceFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val clientSecret = "test_locale"
-            val locale = Locale.GERMANY
-            create().retrievePaymentIntentWithOrderedPaymentMethods(
-                clientSecret,
-                DEFAULT_OPTIONS,
-                locale
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
-            val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
-            assertTrue(paymentMethodDataParams.contains("payment_method_preference.payment_intent.payment_method"))
-            assertEquals(apiRequest.params!!["locale"], locale.toLanguageTag())
-            assertEquals(apiRequest.params!!["type"], "payment_intent")
-            assertEquals(apiRequest.params!!["client_secret"], clientSecret)
-
-            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRetrieveOrdered)
-        }
-
-    @Test
-    fun `retrieveSetupIntentWithOrderedPaymentMethods() sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                PaymentMethodPreferenceFixtures.EXPANDED_SETUP_INTENT_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val clientSecret = "test_client_secret"
-            val locale = Locale.FRANCE
-            create().retrieveSetupIntentWithOrderedPaymentMethods(
-                clientSecret,
-                DEFAULT_OPTIONS,
-                locale
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
-            val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
-            assertTrue(paymentMethodDataParams.contains("payment_method_preference.setup_intent.payment_method"))
-            assertEquals(apiRequest.params!!["locale"], locale.toLanguageTag())
-            assertEquals(apiRequest.params!!["type"], "setup_intent")
-            assertEquals(apiRequest.params!!["client_secret"], clientSecret)
-
-            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SetupIntentRetrieveOrdered)
-        }
-
-    @Test
     fun verifyRefreshPaymentIntent() =
         runTest {
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
@@ -1724,80 +1647,6 @@ internal class StripeApiRepositoryTest {
                 assertEquals(this["legal_name"], name)
                 assertEquals(this["locale"], locale.toLanguageTag())
                 assertEquals(this["consent_action"], "clicked_button_mobile")
-                withNestedParams("cookies") {
-                    assertEquals(this["verification_session_client_secrets"], listOf(cookie))
-                }
-            }
-        }
-
-    @Test
-    fun `startConsumerVerification() sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val clientSecret = "secret"
-            val locale = Locale.US
-            val cookie = "cookie2"
-            create().startConsumerVerification(
-                clientSecret,
-                locale,
-                cookie,
-                DEFAULT_OPTIONS
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-            with(params) {
-                assertEquals(this["request_surface"], "android_payment_element")
-                assertEquals(this["type"], "SMS")
-                assertEquals(this["locale"], locale.toLanguageTag())
-                withNestedParams("credentials") {
-                    assertEquals(this["consumer_session_client_secret"], clientSecret)
-                }
-                withNestedParams("cookies") {
-                    assertEquals(this["verification_session_client_secrets"], listOf(cookie))
-                }
-            }
-        }
-
-    @Test
-    fun `confirmConsumerVerification() sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                ConsumerFixtures.CONSUMER_VERIFIED_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val clientSecret = "secret"
-            val verificationCode = "1234"
-            val cookie = "cookie1"
-            create().confirmConsumerVerification(
-                clientSecret,
-                verificationCode,
-                cookie,
-                DEFAULT_OPTIONS
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-
-            with(params) {
-                assertEquals(this["request_surface"], "android_payment_element")
-                assertEquals(this["type"], "SMS")
-                assertEquals(this["code"], verificationCode)
-                withNestedParams("credentials") {
-                    assertEquals(this["consumer_session_client_secret"], clientSecret)
-                }
                 withNestedParams("cookies") {
                     assertEquals(this["verification_session_client_secrets"], listOf(cookie))
                 }
@@ -2099,7 +1948,7 @@ internal class StripeApiRepositoryTest {
                 financialConnectionsSessionId = "las_123456",
                 requestOptions = DEFAULT_OPTIONS,
                 expandFields = listOf("payment_method")
-            )
+            ).getOrThrow()
 
             verify(stripeNetworkClient).executeRequest(
                 argWhere<ApiRequest> {
@@ -2107,7 +1956,7 @@ internal class StripeApiRepositoryTest {
                 }
             )
 
-            assertEquals("pm_abcdefg", response?.paymentMethodId)
+            assertEquals("pm_abcdefg", response.paymentMethodId)
         }
 
     @Test
@@ -2151,7 +2000,7 @@ internal class StripeApiRepositoryTest {
                 financialConnectionsSessionId = "las_123456",
                 requestOptions = DEFAULT_OPTIONS,
                 expandFields = listOf("payment_method")
-            )
+            ).getOrThrow()
 
             verify(stripeNetworkClient).executeRequest(
                 argWhere<ApiRequest> {
@@ -2159,7 +2008,7 @@ internal class StripeApiRepositoryTest {
                 }
             )
 
-            assertEquals("pm_abcdefg", response?.paymentMethodId)
+            assertEquals("pm_abcdefg", response.paymentMethodId)
         }
 
     @Test
@@ -2439,6 +2288,116 @@ internal class StripeApiRepositoryTest {
                 assertEquals("color", this["logo_color"])
             }
         }
+
+    @Test
+    fun `Verify that the elements session endpoint has the right query params for payment intents`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.PaymentIntentType(clientSecret = "client_secret"),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertEquals(
+            "https://api.stripe.com/v1/elements/sessions",
+            request.baseUrl
+        )
+
+        with(params) {
+            assertEquals("payment_intent", this["type"])
+            assertEquals("en-US", this["locale"])
+            assertEquals("client_secret", this["client_secret"])
+        }
+    }
+
+    @Test
+    fun `Verify that the elements session endpoint has the right query params for setup intents`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.SetupIntentType(clientSecret = "client_secret"),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertEquals(
+            "https://api.stripe.com/v1/elements/sessions",
+            request.baseUrl
+        )
+
+        with(params) {
+            assertEquals("setup_intent", this["type"])
+            assertEquals("en-US", this["locale"])
+            assertEquals("client_secret", this["client_secret"])
+        }
+    }
+
+    @Test
+    fun `Verify that the elements session endpoint has the right query params for deferred intents`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd"
+                    ),
+                    paymentMethodTypes = setOf("card", "link")
+                )
+            ),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertEquals(
+            "https://api.stripe.com/v1/elements/sessions",
+            request.baseUrl
+        )
+
+        with(params) {
+            assertEquals("deferred_intent", this["type"])
+            assertEquals("en-US", this["locale"])
+            assertEquals("payment", this["deferred_intent[mode]"])
+            assertEquals(2000L, this["deferred_intent[amount]"])
+            assertEquals("usd", this["deferred_intent[currency]"])
+            assertEquals(null, this["deferred_intent[setup_future_usage]"])
+            assertEquals(null, this["deferred_intent[capture_method]"])
+            assertEquals("card", this["deferred_intent[payment_method_types][0]"])
+            assertEquals("link", this["deferred_intent[payment_method_types][1]"])
+        }
+    }
 
     /**
      * Helper DSL to validate nested params.

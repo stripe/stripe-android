@@ -11,6 +11,7 @@ import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.supportedBillingCountries
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -41,13 +42,20 @@ data class AddressSpec(
      * This field is not deserialized, this field is used for the Address Element
      */
     @Transient
-    val type: AddressType = AddressType.Normal()
+    val type: AddressType = AddressType.Normal(),
+
+    /**
+     * This field is not deserialized, it is used for the special case where the address element
+     * shouldn't show country.
+     */
+    @Transient
+    val hideCountry: Boolean = false,
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
         addressRepository: AddressRepository,
-        shippingValues: Map<IdentifierSpec, String?>?
-    ): SectionElement {
+        shippingValues: Map<IdentifierSpec, String?>?,
+    ): SectionElement? {
         val label = if (showLabel) R.string.billing_details else null
         return if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
             createSectionElement(
@@ -59,7 +67,7 @@ data class AddressSpec(
                     )
                 ),
                 label = label
-            )
+            ).takeUnless { hideCountry }
         } else {
             val sameAsShippingElement =
                 shippingValues?.get(IdentifierSpec.SameAsShipping)
@@ -77,7 +85,8 @@ data class AddressSpec(
                 countryCodes = allowedCountryCodes,
                 addressType = type,
                 sameAsShippingElement = sameAsShippingElement,
-                shippingValuesMap = shippingValues
+                shippingValuesMap = shippingValues,
+                hideCountry = hideCountry,
             )
             createSectionElement(
                 sectionFieldElements = listOfNotNull(

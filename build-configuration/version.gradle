@@ -1,0 +1,7 @@
+ext.getVersionCode = { versionName ->
+    // Split the version name by dots into an array of integers
+    def versionNumbers = versionName.split('\\.').collect { it.toInteger() }
+
+    // Calculate the version code as a sum of the version numbers
+    return versionNumbers[0] * 10000 + versionNumbers[1] * 100 + versionNumbers[2]
+}

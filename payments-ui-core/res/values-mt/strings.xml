@@ -17,12 +17,16 @@
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">Il-Bank iDEAL</string>
   <string name="invalid_email_address">Indirizz tal-email ħażin: %s</string>
+  <!-- Error message when UPI ID is invalid -->
+  <string name="invalid_upi_id">L-ID UPI mhix tajba</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Ixtri issa jew ħallas iktar tard bil-Klarna.</string>
   <!-- Klarna pay later copy -->
   <string name="klarna_pay_later">Ħlas aktar tard bil-Klarna.</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="p24_bank">Bank Przelewy24</string>
+  <!-- PayPal mandate text -->
+  <string name="paypal_mandate">Meta tikkonferma l-pagament tiegħek ma\' PayPal, tkun qed tagħti permess lil %s biex fil-ġejjieni tiġbor il-pagamenti mill-kont ta\' PayPal tiegħek skont ir-regoli tagħha.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Issejvja għall-pagamenti futuri lil %s</string>
   <!-- Button title to open camera to scan credit/debit card -->
@@ -37,6 +41,8 @@
   <string name="stripe_payment_method_bank">Bank</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">L-informazzjoni tal-kard</string>
+  <!-- Header text shown above a UPI ID text field -->
+  <string name="stripe_paymentsheet_buy_using_upi_id">Ixtri billi tuża ID UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Debitu Dirett BECS AU</string>
   <!-- Title for credit card number entry field -->
@@ -45,4 +51,6 @@
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Debitu SEPA</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Stabilixxi</string>
+  <!-- Label for UPI ID number field on form -->
+  <string name="upi_id_label">ID UPI</string>
 </resources>

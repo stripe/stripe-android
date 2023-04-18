@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.content.Context
+import android.app.Application
 import androidx.annotation.StringRes
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
@@ -8,34 +8,41 @@ import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CountrySpec
+import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
+import com.stripe.android.ui.core.elements.PhoneSpec
+import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
-import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.RowElement
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
+import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,6 +50,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
+@Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
     private val emailSection = EmailSpec()
@@ -52,35 +60,29 @@ internal class FormViewModelTest {
     )
     val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(context.resources))
 
-    private val addressResourceRepository = StaticAddressResourceRepository(
-        AddressRepository(
-            ApplicationProvider.getApplicationContext<Context>().resources
-        )
-    )
     val showCheckboxFlow = MutableStateFlow(false)
 
     private fun createLpmRepositorySupportedPaymentMethod(
         paymentMethodType: PaymentMethod.Type,
         layoutSpec: LayoutSpec
-    ): StaticLpmResourceRepository {
+    ): LpmRepository {
         val mockLpmRepository = mock<LpmRepository>()
 
         whenever(mockLpmRepository.fromCode(paymentMethodType.code)).thenReturn(
             LpmRepository.SupportedPaymentMethod(
-                paymentMethodType.code,
-                false,
-                R.string.stripe_paymentsheet_payment_method_card,
-                R.drawable.stripe_ic_paymentsheet_pm_card,
-                null,
-                null,
-                true,
-                PaymentMethodRequirements(emptySet(), emptySet(), true),
-                layoutSpec
+                code = paymentMethodType.code,
+                requiresMandate = false,
+                mandateRequirement = MandateRequirement.Never,
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                tintIconOnSelection = true,
+                requirement = PaymentMethodRequirements(emptySet(), emptySet(), true),
+                formSpec = layoutSpec
             )
         )
-        return StaticLpmResourceRepository(
-            mockLpmRepository
-        )
+        return mockLpmRepository
     }
 
     @Test
@@ -130,30 +132,31 @@ internal class FormViewModelTest {
     }
 
     @Test
-    fun `Verify setting save for future use visibility removes it from completed values`() = runTest {
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            paymentMethodCode = PaymentMethod.Type.Card.code
-        )
-        val formViewModel = createViewModel(
-            args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    SaveForFutureUseSpec()
+    fun `Verify setting save for future use visibility removes it from completed values`() =
+        runTest {
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                paymentMethodCode = PaymentMethod.Type.Card.code
+            )
+            val formViewModel = createViewModel(
+                args,
+                createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.Card,
+                    LayoutSpec.create(
+                        SaveForFutureUseSpec()
+                    )
                 )
             )
-        )
 
-        formViewModel.hiddenIdentifiers.test {
-            assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
+            formViewModel.hiddenIdentifiers.test {
+                assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
 
-            showCheckboxFlow.tryEmit(true)
-            assertThat(awaitItem()).isEmpty()
+                showCheckboxFlow.tryEmit(true)
+                assertThat(awaitItem()).isEmpty()
 
-            showCheckboxFlow.tryEmit(false)
-            assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
+                showCheckboxFlow.tryEmit(false)
+                assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
+            }
         }
-    }
 
     @Test
     fun `Verify if there are no text fields, there is no last text field id`() = runTest {
@@ -513,6 +516,316 @@ internal class FormViewModelTest {
             }
     }
 
+    @Test
+    fun `Test default values are filled`() {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            billingDetails = PaymentSheet.BillingDetails(
+                name = "Jenny Rosen",
+                email = "mail@mail.com",
+                phone = "+13105551234",
+                address = PaymentSheet.Address(
+                    line1 = "123 Main Street",
+                    line2 = "456",
+                    city = "San Francisco",
+                    state = "CA",
+                    country = "US",
+                    postalCode = "94111"
+                ),
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                attachDefaultsToPaymentMethod = true,
+            )
+        )
+
+        val viewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LpmRepository.HardcodedCard.formSpec,
+            )
+        )
+
+        assertThat(viewModel.defaultValuesToInclude).containsExactlyEntriesIn(
+            mapOf(
+                IdentifierSpec.Name to "Jenny Rosen",
+                IdentifierSpec.Email to "mail@mail.com",
+                IdentifierSpec.Phone to "+13105551234",
+                IdentifierSpec.Line1 to "123 Main Street",
+                IdentifierSpec.Line2 to "456",
+                IdentifierSpec.City to "San Francisco",
+                IdentifierSpec.State to "CA",
+                IdentifierSpec.Country to "US",
+                IdentifierSpec.PostalCode to "94111",
+            )
+        )
+    }
+
+    @Test
+    fun `Test only provided default values are filled`() {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            billingDetails = PaymentSheet.BillingDetails(
+                name = "Jenny Rosen",
+                email = "mail@mail.com",
+                address = PaymentSheet.Address(
+                    country = "US",
+                    postalCode = "94111"
+                ),
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                attachDefaultsToPaymentMethod = true,
+            )
+        )
+
+        val viewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LpmRepository.HardcodedCard.formSpec,
+            )
+        )
+
+        assertThat(viewModel.defaultValuesToInclude).containsExactlyEntriesIn(
+            mapOf(
+                IdentifierSpec.Name to "Jenny Rosen",
+                IdentifierSpec.Email to "mail@mail.com",
+                IdentifierSpec.Country to "US",
+                IdentifierSpec.PostalCode to "94111",
+            )
+        )
+    }
+
+    @Test
+    fun `Test default values are not filled`() {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            billingDetails = PaymentSheet.BillingDetails(
+                name = "Jenny Rosen",
+                email = "mail@mail.com",
+                phone = "+13105551234",
+                address = PaymentSheet.Address(
+                    line1 = "123 Main Street",
+                    line2 = "456",
+                    city = "San Francisco",
+                    state = "CA",
+                    country = "US",
+                    postalCode = "94111"
+                ),
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                attachDefaultsToPaymentMethod = false,
+            )
+        )
+
+        val viewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LpmRepository.HardcodedCard.formSpec,
+            )
+        )
+
+        assertThat(viewModel.defaultValuesToInclude).isEmpty()
+    }
+
+    @Test
+    fun `Test placeholder specs are transformed correctly`() = runBlocking {
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = false,
+        )
+        val specs = listOf(
+            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name),
+            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Email),
+            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Phone),
+            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.BillingAddress),
+        )
+
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+        )
+        val formViewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Bancontact,
+                LayoutSpec(specs),
+            )
+        )
+        val formElement = formViewModel.elementsFlow.first()
+
+        val nameSection = formElement[0] as SectionElement
+        val nameElement = nameSection.fields[0] as SimpleTextElement
+        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_full_name)
+        assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
+
+        val emailSection = formElement[1] as SectionElement
+        val emailElement = emailSection.fields[0] as EmailElement
+        assertThat(emailElement.controller.label.first()).isEqualTo(R.string.email)
+        assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
+
+        val phoneSection = formElement[2] as SectionElement
+        val phoneElement = phoneSection.fields[0] as PhoneNumberElement
+        assertThat(phoneElement.controller.label.first()).isEqualTo(R.string.address_label_phone_number)
+        assertThat(phoneElement.identifier.v1).isEqualTo("billing_details[phone]")
+
+        val addressSection = formElement[3] as SectionElement
+        val addressElement = addressSection.fields[0] as AddressElement
+
+        val identifiers = addressElement.fields.first().map { it.identifier }
+        // Check that the address element contains country.
+        assertThat(identifiers).contains(IdentifierSpec.Country)
+    }
+
+    @Test
+    fun `Test address without country placeholder produces correct element`() = runBlocking {
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = false,
+        )
+
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+        )
+        val formViewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Bancontact,
+                LayoutSpec(
+                    listOf(
+                        PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry)
+                    )
+                ),
+            )
+        )
+        val formElement = formViewModel.elementsFlow.first()
+
+        val addressSection = formElement.first() as SectionElement
+        val addressElement = addressSection.fields[0] as AddressElement
+        val identifiers = addressElement.fields.first().map { it.identifier }
+        // Check that the address element doesn't contain country.
+        assertThat(identifiers).doesNotContain(IdentifierSpec.Country)
+    }
+
+    @Test
+    fun `Test phone country changes with AddressElement country`() =
+        runBlocking {
+            val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                attachDefaultsToPaymentMethod = false,
+            )
+
+            val internalBillingDetailsCollectionConfig = CardBillingDetailsCollectionConfiguration(
+                collectName = true,
+                collectEmail = true,
+                collectPhone = true,
+                address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            )
+
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                PaymentMethod.Type.Card.code,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                billingDetails = PaymentSheet.BillingDetails(),
+            )
+
+            val formViewModel = createViewModel(
+                args,
+                createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.Card,
+                    LpmRepository.hardcodedCardSpec(internalBillingDetailsCollectionConfig).formSpec,
+                ),
+            )
+
+            val elements = formViewModel.elementsFlow.first()
+            val countryElement = elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<AddressElement>()
+                .firstOrNull()
+                ?.countryElement
+            val phoneElement = elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<PhoneNumberElement>()
+                .firstOrNull()
+
+            assertThat(countryElement).isNotNull()
+            assertThat(phoneElement).isNotNull()
+            countryElement?.controller?.onRawValueChange("CA")
+            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
+                .isEqualTo("CA")
+            phoneElement?.controller?.onValueChange("+13105551234")
+            countryElement?.controller?.onRawValueChange("US")
+            // Phone number shouldn't change because it is already filled.
+            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
+                .isEqualTo("CA")
+        }
+
+    @Test
+    fun `Test phone country changes with standalone CountryElement`() =
+        runBlocking {
+            val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                attachDefaultsToPaymentMethod = false,
+            )
+
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                PaymentMethod.Type.Sofort.code,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                billingDetails = PaymentSheet.BillingDetails(),
+            )
+            val formViewModel = createViewModel(
+                args,
+                createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.Sofort,
+                    LayoutSpec(
+                        listOf(
+                            NameSpec(),
+                            EmailSpec(),
+                            PhoneSpec(),
+                            CountrySpec(),
+                            AddressSpec(hideCountry = true),
+                        ),
+                    )
+                ),
+            )
+
+            val elements = formViewModel.elementsFlow.first()
+            val countryElement = elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<CountryElement>()
+                .firstOrNull()
+            val phoneElement = elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<PhoneNumberElement>()
+                .firstOrNull()
+
+            assertThat(countryElement).isNotNull()
+            assertThat(phoneElement).isNotNull()
+            countryElement?.controller?.onRawValueChange("CA")
+            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
+                .isEqualTo("CA")
+            phoneElement?.controller?.onValueChange("+13105551234")
+            countryElement?.controller?.onRawValueChange("US")
+            // Phone number shouldn't change because it is already filled.
+            assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
+                .isEqualTo("CA")
+        }
+
     private suspend fun getSectionFieldTextControllerWithLabel(
         formViewModel: FormViewModel,
         @StringRes label: Int
@@ -585,12 +898,12 @@ internal class FormViewModelTest {
 
     fun createViewModel(
         arguments: FormArguments,
-        lpmResourceRepository: ResourceRepository<LpmRepository>
+        lpmRepository: LpmRepository
     ) = FormViewModel(
         context = context,
         formArguments = arguments,
-        lpmResourceRepository = lpmResourceRepository,
-        addressResourceRepository = addressResourceRepository,
+        lpmRepository = lpmRepository,
+        addressRepository = createAddressRepository(),
         showCheckboxFlow = showCheckboxFlow
     )
 }
@@ -600,4 +913,11 @@ internal suspend fun FormViewModel.setSaveForFutureUse(value: Boolean) {
         .firstOrNull()
         ?.filterIsInstance<SaveForFutureUseElement>()
         ?.firstOrNull()?.controller?.onValueChange(value)
+}
+
+private fun createAddressRepository(): AddressRepository {
+    return AddressRepository(
+        resources = ApplicationProvider.getApplicationContext<Application>().resources,
+        workContext = Dispatchers.Unconfined,
+    )
 }

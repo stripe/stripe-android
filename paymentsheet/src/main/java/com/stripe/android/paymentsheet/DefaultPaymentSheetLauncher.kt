@@ -5,6 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
@@ -19,9 +22,10 @@ import org.jetbrains.annotations.TestOnly
  * able to pass in an activity.
  */
 internal class DefaultPaymentSheetLauncher(
-    private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>,
-    application: Application
-) : PaymentSheetLauncher, NonFallbackInjector {
+    private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
+    lifecycleOwner: LifecycleOwner,
+    application: Application,
+) : PaymentSheetLauncher {
     @InjectorKey
     private val injectorKey: String =
         WeakMapInjectorRegistry.nextKey(requireNotNull(PaymentSheetLauncher::class.simpleName))
@@ -34,31 +38,42 @@ internal class DefaultPaymentSheetLauncher(
             .build()
 
     init {
-        WeakMapInjectorRegistry.register(this, injectorKey)
+        WeakMapInjectorRegistry.register(Injector(paymentSheetLauncherComponent), injectorKey)
+
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    IntentConfirmationInterceptor.createIntentCallback = null
+                    super.onDestroy(owner)
+                }
+            }
+        )
     }
 
     constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback
     ) : this(
-        activity.registerForActivityResult(
-            PaymentSheetContract()
+        activityResultLauncher = activity.registerForActivityResult(
+            PaymentSheetContractV2()
         ) {
             callback.onPaymentSheetResult(it)
         },
-        activity.application
+        lifecycleOwner = activity,
+        application = activity.application,
     )
 
     constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback
     ) : this(
-        fragment.registerForActivityResult(
-            PaymentSheetContract()
+        activityResultLauncher = fragment.registerForActivityResult(
+            PaymentSheetContractV2()
         ) {
             callback.onPaymentSheetResult(it)
         },
-        fragment.requireActivity().application
+        lifecycleOwner = fragment,
+        application = fragment.requireActivity().application,
     )
 
     @TestOnly
@@ -67,51 +82,42 @@ internal class DefaultPaymentSheetLauncher(
         registry: ActivityResultRegistry,
         callback: PaymentSheetResultCallback
     ) : this(
-        fragment.registerForActivityResult(
-            PaymentSheetContract(),
+        activityResultLauncher = fragment.registerForActivityResult(
+            PaymentSheetContractV2(),
             registry
         ) {
             callback.onPaymentSheetResult(it)
         },
-        fragment.requireActivity().application
+        lifecycleOwner = fragment,
+        application = fragment.requireActivity().application,
     )
 
-    override fun presentWithPaymentIntent(
-        paymentIntentClientSecret: String,
+    override fun present(
+        mode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?
-    ) = present(
-        PaymentSheetContract.Args.createPaymentIntentArgsWithInjectorKey(
-            paymentIntentClientSecret,
-            configuration,
-            injectorKey
+    ) {
+        val args = PaymentSheetContractV2.Args(
+            initializationMode = mode,
+            config = configuration,
+            injectorKey = injectorKey,
         )
-    )
-
-    override fun presentWithSetupIntent(
-        setupIntentClientSecret: String,
-        configuration: PaymentSheet.Configuration?
-    ) = present(
-        PaymentSheetContract.Args.createSetupIntentArgsWithInjectorKey(
-            setupIntentClientSecret,
-            configuration,
-            injectorKey
-        )
-    )
-
-    private fun present(args: PaymentSheetContract.Args) {
         activityResultLauncher.launch(args)
     }
 
-    override fun inject(injectable: Injectable<*>) {
-        when (injectable) {
-            is PaymentSheetViewModel.Factory -> {
-                paymentSheetLauncherComponent.inject(injectable)
-            }
-            is FormViewModel.Factory -> {
-                paymentSheetLauncherComponent.inject(injectable)
-            }
-            else -> {
-                throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
+    private class Injector(
+        private val paymentSheetLauncherComponent: PaymentSheetLauncherComponent,
+    ) : NonFallbackInjector {
+        override fun inject(injectable: Injectable<*>) {
+            when (injectable) {
+                is PaymentSheetViewModel.Factory -> {
+                    paymentSheetLauncherComponent.inject(injectable)
+                }
+                is FormViewModel.Factory -> {
+                    paymentSheetLauncherComponent.inject(injectable)
+                }
+                else -> {
+                    throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
+                }
             }
         }
     }

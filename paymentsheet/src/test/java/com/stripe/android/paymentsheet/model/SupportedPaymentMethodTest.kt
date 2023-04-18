@@ -11,9 +11,9 @@ import com.stripe.android.model.PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
-import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.serialization.Serializable
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,7 +29,7 @@ class SupportedPaymentMethodTest {
         )
     ).apply {
         this.update(
-            PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethods),
+            PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethodTypes),
             null
         )
     }

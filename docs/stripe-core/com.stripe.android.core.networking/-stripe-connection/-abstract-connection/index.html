@@ -37,6 +37,9 @@
     <div>
     </div>
     <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":stripe-core:dokkaHtmlPartial/release">androidJvm</button>
+        </div>
         <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
         <div id="searchBar"></div>
     </div>
@@ -50,10 +53,10 @@
   <div class="breadcrumbs"><a href="../../../index.html">stripe-core</a><span class="delimiter">/</span><a href="../../index.html">com.stripe.android.core.networking</a><span class="delimiter">/</span><a href="../index.html">StripeConnection</a><span class="delimiter">/</span><span class="current">AbstractConnection</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Abstract</span><wbr><span><span>Connection</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">AbstractConnection</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">ResponseBodyType</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">conn<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/net/HttpURLConnection.html">HttpURLConnection</a></span></span><span class="token punctuation">)</span> : <a href="../index.html">StripeConnection</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">ResponseBodyType</a><span class="token operator">&gt; </span></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">AbstractConnection</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">ResponseBodyType</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">conn<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/net/HttpURLConnection.html">HttpURLConnection</a></span></span><span class="token punctuation">)</span> : <a href="../index.html">StripeConnection</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">ResponseBodyType</a><span class="token operator">&gt; </span></div><h4 class="">Inheritors</h4><div class="table" data-togglable="Inheritors"><div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-default/index.html">Default</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-file-connection/index.html">FileConnection</a></div></span></div><div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button><button class="section-tab" data-togglable="Inheritors">Inheritors</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
     <div class="tabs-section-body">
       <h2 class="tabbedcontent">Constructors</h2>
       <div class="table" data-togglable="Constructors"><a data-name="-1179313014%2FConstructors%2F1458831206" anchor-label="AbstractConnection" id="-1179313014%2FConstructors%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
@@ -66,7 +69,7 @@
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-abstract-connection.html"><span class="token function">AbstractConnection</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">conn<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/net/HttpURLConnection.html">HttpURLConnection</a></span></span><span class="token punctuation">)</span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">conn<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/net/HttpURLConnection.html">HttpURLConnection</a></span></span><span class="token punctuation">)</span></div></div></div>
               </div>
             </div>
           </div>
@@ -136,30 +139,6 @@
           </div>
         </div>
       </div>
-      <h2 class="">Inheritors</h2>
-      <div class="table" data-togglable="Inheritors"><a data-name="-767413292%2FInheritors%2F1458831206" anchor-label="Default" id="-767413292%2FInheritors%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="../-default/index.html">Default</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-767413292%2FInheritors%2F1458831206"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div></div>
-          </div>
-        </div>
-<a data-name="-1865191245%2FInheritors%2F1458831206" anchor-label="FileConnection" id="-1865191245%2FInheritors%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="../-file-connection/index.html">FileConnection</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1865191245%2FInheritors%2F1458831206"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div></div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -168,6 +147,6 @@
       </div>
     </div>
 </div>
-
-</body></html>
+</body>
+</html>
 

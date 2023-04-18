@@ -22,16 +22,24 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillNode
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalAutofill
+import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,10 +49,22 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.Logger
+import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalAutofillEventReporter = staticCompositionLocalOf(::defaultAutofillEventReporter)
+
+private fun defaultAutofillEventReporter(): (String) -> Unit {
+    return { autofillType ->
+        Logger.getInstance(BuildConfig.DEBUG)
+            .debug("LocalAutofillEventReporter $autofillType event not reported")
+    }
+}
 
 /**
  * This is focused on converting an [TextFieldController] into what is displayed in a section
@@ -98,6 +118,7 @@ fun TextFieldSection(
  * Read-only text fields are usually used to display pre-filled forms that user can not edit.
  *
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TextField(
     textFieldController: TextFieldController,
@@ -115,6 +136,7 @@ fun TextField(
     val shouldShowError by textFieldController.visibleError.collectAsState(false)
     val loading by textFieldController.loading.collectAsState(false)
     val contentDescription by textFieldController.contentDescription.collectAsState("")
+    val placeHolder by textFieldController.placeHolder.collectAsState(null)
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
     val colors = textFieldColors(shouldShowError)
@@ -128,6 +150,26 @@ fun TextField(
         if (fieldState == TextFieldStateConstants.Valid.Full && hasFocus) {
             focusManager.moveFocus(nextFocusDirection)
         }
+    }
+
+    val autofillReporter = LocalAutofillEventReporter.current
+
+    val autofillNode = remember {
+        AutofillNode(
+            autofillTypes = listOfNotNull(textFieldController.autofillType),
+            onFill = {
+                textFieldController.autofillType?.let { type ->
+                    autofillReporter(type.name)
+                }
+                textFieldController.onValueChange(it)
+            }
+        )
+    }
+    val autofill = LocalAutofill.current
+    val autofillTree = LocalAutofillTree.current
+
+    LaunchedEffect(autofillNode) {
+        autofillTree += autofillNode
     }
 
     TextField(
@@ -156,11 +198,22 @@ fun TextField(
                     false
                 }
             }
+            .onGloballyPositioned {
+                autofillNode.boundingBox = it.boundsInWindow()
+            }
             .onFocusChanged {
                 if (hasFocus != it.isFocused) {
                     textFieldController.onFocusChange(it.isFocused)
                 }
                 hasFocus = it.isFocused
+
+                if (autofill != null && autofillNode.boundingBox != null) {
+                    if (it.isFocused) {
+                        autofill.requestAutofillForNode(autofillNode)
+                    } else {
+                        autofill.cancelAutofillForNode(autofillNode)
+                    }
+                }
             }
             .semantics {
                 this.contentDescription = contentDescription
@@ -168,17 +221,22 @@ fun TextField(
             },
         enabled = enabled && textFieldController.enabled,
         readOnly = readOnly,
-        label = {
-            FormLabel(
-                text = if (textFieldController.showOptionalLabel) {
-                    stringResource(
-                        R.string.form_label_optional,
-                        label?.let { stringResource(it) } ?: ""
-                    )
-                } else {
-                    label?.let { stringResource(it) } ?: ""
-                }
-            )
+        label = label?.let {
+            {
+                FormLabel(
+                    text = if (textFieldController.showOptionalLabel) {
+                        stringResource(
+                            R.string.form_label_optional,
+                            stringResource(it)
+                        )
+                    } else {
+                        stringResource(it)
+                    }
+                )
+            }
+        },
+        placeholder = placeHolder?.let {
+            { Placeholder(text = it) }
         },
         trailingIcon = trailingIcon?.let {
             {

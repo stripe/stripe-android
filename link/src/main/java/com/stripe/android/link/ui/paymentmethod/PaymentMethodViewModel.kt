@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.paymentmethod
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.NonFallbackInjector
@@ -14,7 +15,6 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
@@ -24,6 +24,7 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
@@ -54,7 +55,8 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val navigator: Navigator,
     private val confirmationManager: ConfirmationManager,
     private val logger: Logger,
-    private val formControllerProvider: Provider<FormControllerSubcomponent.Builder>
+    private val formControllerProvider: Provider<FormControllerSubcomponent.Builder>,
+    private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
 ) : ViewModel() {
     private val stripeIntent = args.stripeIntent
 
@@ -124,7 +126,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                         linkAccount.email,
                         args.stripeIntent
                     ).fold(
-                        onSuccess = ::completePayment,
+                        onSuccess = { completePayment(it) },
                         onFailure = ::onError
                     )
                 }
@@ -202,35 +204,68 @@ internal class PaymentMethodViewModel @Inject constructor(
         navigator.cancel(reason = PayAnotherWay)
     }
 
-    private fun completePayment(linkPaymentDetails: LinkPaymentDetails) {
-        val params = ConfirmStripeIntentParamsFactory.createFactory(
-            stripeIntent,
-            args.shippingValues?.toConfirmPaymentIntentShipping()
+    private suspend fun completePayment(linkPaymentDetails: LinkPaymentDetails) {
+        val nextStep = intentConfirmationInterceptor.intercept(
+            clientSecret = stripeIntent.clientSecret,
+            paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams,
+            shippingValues = args.shippingValues?.toConfirmPaymentIntentShipping(),
+            setupForFutureUsage = null,
         )
-            .createConfirmStripeIntentParams(linkPaymentDetails.paymentMethodCreateParams)
 
-        confirmationManager.confirmStripeIntent(params) { result ->
+        when (nextStep) {
+            is IntentConfirmationInterceptor.NextStep.Confirm -> {
+                confirmStripeIntent(nextStep.confirmParams)
+            }
+            is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
+                handleNextAction(nextStep.clientSecret)
+            }
+            is IntentConfirmationInterceptor.NextStep.Fail -> {
+                onError(ErrorMessage.Raw(nextStep.message))
+            }
+            is IntentConfirmationInterceptor.NextStep.Complete -> {
+                handlePaymentSuccess()
+            }
+        }
+    }
+
+    private fun confirmStripeIntent(confirmParams: ConfirmStripeIntentParams) {
+        confirmationManager.confirmStripeIntent(confirmParams) { result ->
             result.fold(
-                onSuccess = { paymentResult ->
-                    when (paymentResult) {
-                        is PaymentResult.Canceled -> {
-                            // no-op, let the user continue their flow
-                            setState(PrimaryButtonState.Enabled)
-                        }
-                        is PaymentResult.Failed -> {
-                            onError(paymentResult.throwable)
-                        }
-                        is PaymentResult.Completed -> {
-                            setState(PrimaryButtonState.Completed)
-                            viewModelScope.launch {
-                                delay(PrimaryButtonState.COMPLETED_DELAY_MS)
-                                navigator.dismiss(LinkActivityResult.Completed)
-                            }
-                        }
-                    }
-                },
-                onFailure = ::onError
+                onSuccess = ::handlePaymentResult,
+                onFailure = ::onError,
             )
+        }
+    }
+
+    private fun handleNextAction(clientSecret: String) {
+        confirmationManager.handleNextAction(clientSecret, stripeIntent) { result ->
+            result.fold(
+                onSuccess = ::handlePaymentResult,
+                onFailure = ::onError,
+            )
+        }
+    }
+
+    private fun handlePaymentResult(paymentResult: PaymentResult) {
+        when (paymentResult) {
+            is PaymentResult.Canceled -> {
+                // no-op, let the user continue their flow
+                setState(PrimaryButtonState.Enabled)
+            }
+            is PaymentResult.Failed -> {
+                onError(paymentResult.throwable)
+            }
+            is PaymentResult.Completed -> {
+                handlePaymentSuccess()
+            }
+        }
+    }
+
+    private fun handlePaymentSuccess() {
+        setState(PrimaryButtonState.Completed)
+        viewModelScope.launch {
+            delay(PrimaryButtonState.COMPLETED_DELAY_MS)
+            navigator.dismiss(LinkActivityResult.Completed)
         }
     }
 
@@ -238,10 +273,14 @@ internal class PaymentMethodViewModel @Inject constructor(
         _errorMessage.value = null
     }
 
-    private fun onError(error: Throwable) = error.getErrorMessage().let {
+    private fun onError(error: Throwable) {
         logger.error("Error: ", error)
+        onError(errorMessage = error.getErrorMessage())
+    }
+
+    private fun onError(errorMessage: ErrorMessage) {
         setState(PrimaryButtonState.Enabled)
-        _errorMessage.value = it
+        _errorMessage.value = errorMessage
     }
 
     private fun setState(state: PrimaryButtonState) {

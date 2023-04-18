@@ -48,6 +48,8 @@
   <string name="address_zip_invalid">Il-kodiċi postali tiegħek mhux validu.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="address_zip_postal_invalid">Il-Kodiċi postali tiegħek mhux validu</string>
+  <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
+  <string name="billing_same_as_shipping">L-indirizz tal-fatturazzjoni huwa l-istess bħall-indirizz tal-posta</string>
   <!-- Used when a required field is blank and submit is clicked. -->
   <string name="blank_and_required">Dit-taqsima ma tistax titħalla vojta.</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
@@ -56,8 +58,16 @@
   <string name="email">Email</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">L-indirizz tal-email li daħħalt mhux tajjeb.</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiration_date_hint">XX / SS</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="form_label_optional">%s (mhux obbligatorja)</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">Id-data tal-iskadenza tal-kard tiegħek mhijiex kompluta.</string>
   <!-- Error description for incomplete phone number -->
   <string name="incomplete_phone_number">In-numru tat-telefon mhuwiex komplut</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">Ix-xahar tal-iskadenza tal-kard tiegħek mhux validu.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">Is-sena tal-iskadenza tal-kard tiegħek mhijiex valida.</string>
 </resources>

@@ -3,20 +3,22 @@ package com.stripe.android.ui.core.forms.resources
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethod.Type.Card
+import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.forms.Delayed
+import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.CardBillingSpec
+import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
+import com.stripe.android.ui.core.elements.ContactInformationSpec
 import com.stripe.android.ui.core.elements.EmptyFormSpec
-import com.stripe.android.utils.PaymentIntentFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.advanceTimeBy
+import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
 class LpmRepositoryTest {
@@ -166,7 +168,7 @@ class LpmRepositoryTest {
         lpmRepository.updateFromDisk(PaymentIntentFactory.create())
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
-        lpmRepository.supportedPaymentMethods.forEach { code ->
+        lpmRepository.supportedPaymentMethodTypes.forEach { code ->
             if (!hasEmptyForm(code)) {
                 assertThat(
                     lpmRepository.fromCode(code)!!.formSpec.items
@@ -328,35 +330,69 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify LpmRepository waitUntilLoaded completes after update`() = runTest(
-        context = TestCoroutineScheduler(),
-        dispatchTimeoutMs = TimeUnit.SECONDS.toMillis(1)
-
-    ) {
+    fun `Verify LpmRepository filters out USBankAccount if StripeIntent has no client secret`() = runTest {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                isFinancialConnectionsAvailable = { false },
+            ),
+        )
+
+        val deferredPaymentIntent = PaymentIntentFactory.create(
+            paymentMethodTypes = listOf("card", "us_bank_account", "cashapp"),
+        ).copy(
+            clientSecret = null,
+        )
+
+        lpmRepository.update(
+            stripeIntent = deferredPaymentIntent,
+            serverLpmSpecs = null,
+        )
+
+        val supportedPaymentMethods = lpmRepository.values().map { it.code }
+        assertThat(supportedPaymentMethods).containsExactly(Card.code, CashAppPay.code)
+    }
+
+    @Test
+    fun `Card contains fields according to billing details collection configuration`() {
+        lpmRepository.update(
+            PaymentIntentFactory.create(paymentMethodTypes = listOf("card")),
+            """
+          [
+            {
+                "type": "card",
+                "async": false,
+                "fields": []
+            }
+         ]
+            """.trimIndent(),
+            CardBillingDetailsCollectionConfiguration(
+                collectName = true,
+                collectEmail = true,
+                collectPhone = false,
+                address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         )
 
-        assertThat(lpmRepository.isLoaded()).isFalse()
+        val card = lpmRepository.fromCode("card")!!
+        // Contact information, Card information, Billing address and Save for future use.
+        assertThat(card.formSpec.items.size).isEqualTo(4)
+        assertThat(card.formSpec.items[0]).isInstanceOf(ContactInformationSpec::class.java)
+        assertThat(card.formSpec.items[1]).isInstanceOf(CardDetailsSectionSpec::class.java)
+        assertThat(card.formSpec.items[2]).isInstanceOf(CardBillingSpec::class.java)
+        assertThat(card.formSpec.items[3]).isInstanceOf(SaveForFutureUseSpec::class.java)
 
-        val job = launch(Dispatchers.IO) {
-            lpmRepository.waitUntilLoaded()
-        }
+        val contactInfoSpec = card.formSpec.items[0] as ContactInformationSpec
+        // Name is collected in the card details section.
+        assertThat(contactInfoSpec.collectName).isFalse()
+        assertThat(contactInfoSpec.collectEmail).isTrue()
+        assertThat(contactInfoSpec.collectPhone).isFalse()
 
-        // Allow for the waitUntilLoaded to kick off.
-        advanceTimeBy(1)
+        val cardSpec = card.formSpec.items[1] as CardDetailsSectionSpec
+        assertThat(cardSpec.collectName).isTrue()
 
-        lpmRepository.update(
-            stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("upi")),
-            serverLpmSpecs = "[]"
-        )
-
-        assertThat(lpmRepository.isLoaded()).isTrue()
-        job.join()
-        assertThat(job.isCompleted).isTrue()
+        val addressSpec = card.formSpec.items[2] as CardBillingSpec
+        assertThat(addressSpec.collectionMode)
+            .isEqualTo(CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
     }
 }

@@ -1,6 +1,6 @@
 ext.versions = [
         detekt: "1.22.0",
-        mavericks: "3.0.1",
+        mavericks: "3.0.2",
         okhttp: '4.10.0',
 ]
 
@@ -10,6 +10,7 @@ ext.buildLibs = [
 
 ext.configs = [
         androidLibrary: "${project.rootDir}/build-configuration/android-library.gradle",
+        androidApplication: "${project.rootDir}/build-configuration/android-application.gradle",
 ]
 
 ext.libs = [
@@ -18,7 +19,7 @@ ext.libs = [
 ]
 
 ext.testLibs = [
-        turbine: "app.cash.turbine:turbine:0.12.1",
+        turbine: "app.cash.turbine:turbine:0.12.3",
         mavericks: "com.airbnb.android:mavericks-testing:$versions.mavericks",
         okhttpMockWebServer: "com.squareup.okhttp3:mockwebserver:$versions.okhttp",
         okhttpTls: "com.squareup.okhttp3:okhttp-tls:$versions.okhttp",

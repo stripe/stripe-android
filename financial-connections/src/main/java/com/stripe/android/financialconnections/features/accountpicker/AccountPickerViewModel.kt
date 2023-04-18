@@ -21,8 +21,7 @@ import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAc
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
-import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
-import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -75,37 +74,26 @@ internal class AccountPickerViewModel @Inject constructor(
                     )
                 )
             }
-            val accounts = partnerAccountList.data.map { account ->
-                AccountPickerState.PartnerAccountUI(
-                    account = account,
-                    institutionIcon = activeInstitution?.icon?.default,
-                    formattedBalance =
-                    if (account.balanceAmount != null && account.currency != null) {
-                        CurrencyFormatter
-                            .format(
-                                amount = account.balanceAmount.toLong(),
-                                amountCurrencyCode = account.currency,
-                                targetLocale = locale ?: Locale.getDefault()
-                            )
-                    } else {
-                        null
-                    }
-                )
-            }.sortedBy { it.account.allowSelection.not() }
+            val accounts = buildAccountList(partnerAccountList, activeInstitution)
 
             AccountPickerState.Payload(
                 skipAccountSelection = partnerAccountList.skipAccountSelection == true ||
                     activeAuthSession.skipAccountSelection == true,
                 accounts = accounts,
                 selectionMode = if (manifest.singleAccount) SelectionMode.RADIO else SelectionMode.CHECKBOXES,
-                accessibleData = AccessibleDataCalloutModel(
-                    businessName = ConsentTextBuilder.getBusinessName(manifest),
-                    permissions = manifest.permissions,
-                    isStripeDirect = manifest.isStripeDirect ?: false,
-                    dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
-                ),
+                accessibleData = AccessibleDataCalloutModel.fromManifest(manifest),
+                /**
+                 * in the special case that this is single account and the institution would have
+                 * skipped account selection but _didn't_ (because we still saw this), we should
+                 * render specific text that tells the user to "confirm" their account.
+                 */
+                requiresSingleAccountConfirmation = activeAuthSession.institutionSkipAccountSelection == true &&
+                    manifest.singleAccount &&
+                    activeAuthSession.isOAuth,
                 singleAccount = manifest.singleAccount,
-                institutionSkipAccountSelection = activeAuthSession.institutionSkipAccountSelection == true,
+                userSelectedSingleAccountInInstitution = manifest.singleAccount &&
+                    activeAuthSession.institutionSkipAccountSelection == true &&
+                    accounts.size == 1,
                 businessName = manifest.businessName,
                 stripeDirect = manifest.isStripeDirect ?: false
             ).also {
@@ -113,6 +101,27 @@ internal class AccountPickerViewModel @Inject constructor(
             }
         }.execute { copy(payload = it) }
     }
+
+    private fun buildAccountList(
+        partnerAccountList: PartnerAccountsList,
+        activeInstitution: FinancialConnectionsInstitution?,
+    ) = partnerAccountList.data.map { account ->
+        AccountPickerState.PartnerAccountUI(
+            account = account,
+            institutionIcon = activeInstitution?.icon?.default,
+            formattedBalance =
+            if (account.balanceAmount != null && account.currency != null) {
+                CurrencyFormatter
+                    .format(
+                        amount = account.balanceAmount.toLong(),
+                        amountCurrencyCode = account.currency,
+                        targetLocale = locale ?: Locale.getDefault()
+                    )
+            } else {
+                null
+            }
+        )
+    }.sortedBy { it.account.allowSelection.not() }
 
     private fun onPayloadLoaded() {
         onAsync(AccountPickerState::payload, onSuccess = { payload ->
@@ -125,9 +134,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 // the user saw an OAuth account selection screen and selected
                 // just one to send back in a single-account context. treat these as if
                 // we had done account selection, and submit.
-                payload.singleAccount &&
-                    payload.institutionSkipAccountSelection &&
-                    payload.accounts.size == 1 -> submitAccounts(
+                payload.userSelectedSingleAccountInInstitution -> submitAccounts(
                     selectedIds = setOf(payload.accounts.first().account.id),
                     updateLocalCache = true
                 )
@@ -283,27 +290,23 @@ internal data class AccountPickerState(
         val singleAccount: Boolean,
         val stripeDirect: Boolean,
         val businessName: String?,
-        val institutionSkipAccountSelection: Boolean
+        val userSelectedSingleAccountInInstitution: Boolean,
+        val requiresSingleAccountConfirmation: Boolean
     ) {
 
         val selectableAccounts
             get() = accounts.filter { it.account.allowSelection }
 
+        val shouldSkipPane: Boolean
+            get() = skipAccountSelection || userSelectedSingleAccountInInstitution
+
         val subtitle: TextResource?
             get() = when {
-                singleAccount.not() -> null
-                stripeDirect -> TextResource.StringId(
-                    R.string.stripe_accountpicker_singleaccount_description_withstripe
+                requiresSingleAccountConfirmation -> TextResource.StringId(
+                    R.string.stripe_accountpicker_singleaccount_description
                 )
 
-                businessName != null -> TextResource.StringId(
-                    R.string.stripe_accountpicker_singleaccount_description,
-                    listOf(businessName)
-                )
-
-                else -> TextResource.StringId(
-                    R.string.stripe_accountpicker_singleaccount_description_nobusinessname
-                )
+                else -> null
             }
     }
 

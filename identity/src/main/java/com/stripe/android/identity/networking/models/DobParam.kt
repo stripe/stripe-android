@@ -14,4 +14,24 @@ internal data class DobParam(
     val month: String? = null,
     @SerialName("year")
     val year: String? = null
-) : Parcelable
+) : Parcelable {
+    override fun toString(): String {
+        return "$month/$day/$year"
+    }
+
+    companion object {
+        fun String.toDob(): DobParam? =
+            if (this.matches(regexMMDDYYYY)) {
+                DobParam(
+                    day = this.substring(2, 4),
+                    month = this.substring(0, 2),
+                    year = this.substring(4)
+                )
+            } else {
+                null
+            }
+
+        val regexMMDDYYYY =
+            Regex("(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])(19|20)\\d\\d")
+    }
+}

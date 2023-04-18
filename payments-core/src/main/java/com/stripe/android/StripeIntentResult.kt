@@ -89,12 +89,12 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
             StripeIntent.NextActionType.RedirectToUrl,
             StripeIntent.NextActionType.UseStripeSdk,
             StripeIntent.NextActionType.AlipayRedirect,
-            StripeIntent.NextActionType.BlikAuthorize,
             StripeIntent.NextActionType.WeChatPayRedirect,
             StripeIntent.NextActionType.CashAppRedirect,
             null -> {
                 false
             }
+            StripeIntent.NextActionType.BlikAuthorize,
             StripeIntent.NextActionType.DisplayOxxoDetails,
             StripeIntent.NextActionType.UpiAwaitNotification,
             StripeIntent.NextActionType.VerifyWithMicrodeposits -> {

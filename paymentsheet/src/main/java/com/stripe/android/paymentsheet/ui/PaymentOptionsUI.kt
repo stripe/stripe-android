@@ -3,18 +3,23 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethod
@@ -48,6 +53,7 @@ internal fun PaymentOptions(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun PaymentOptions(
     state: PaymentOptionsState,
@@ -57,11 +63,13 @@ internal fun PaymentOptions(
     onItemSelected: (PaymentSelection?) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
+    scrollState: LazyListState = rememberLazyListState(),
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
         val width = rememberItemWidth(maxWidth)
 
         LazyRow(
+            state = scrollState,
             userScrollEnabled = !isProcessing,
             contentPadding = PaddingValues(horizontal = 17.dp),
         ) {
@@ -78,7 +86,9 @@ internal fun PaymentOptions(
                     onAddCardPressed = onAddCardPressed,
                     onItemSelected = onItemSelected,
                     onItemRemoved = onItemRemoved,
-                    modifier = Modifier.testTag(item.viewType.name)
+                    modifier = Modifier
+                        .semantics { testTagsAsResourceId = true }
+                        .testTag(item.viewType.name)
                 )
             }
         }
@@ -86,12 +96,12 @@ internal fun PaymentOptions(
 }
 
 @Composable
-internal fun rememberItemWidth(maxWidth: Dp): Dp {
+internal fun rememberItemWidth(maxWidth: Dp): Dp = remember(maxWidth) {
     val targetWidth = maxWidth - 17.dp * 2
     val minItemWidth = 100.dp + (6.dp * 2)
     // numVisibleItems is incremented in steps of 0.5 items (1, 1.5, 2, 2.5, 3, ...)
     val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
-    return (targetWidth / numVisibleItems)
+    (targetWidth / numVisibleItems)
 }
 
 @Composable

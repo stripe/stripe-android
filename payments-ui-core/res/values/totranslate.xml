@@ -1,20 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <!--
-    Items here need to be entered in our translation tool
-    -->
-    <!-- ACHv2 -->
-    <string name="stripe_paymentsheet_ach_something_went_wrong">Something went wrong when linking your account.\nPlease try again later.</string>
-    <string name="stripe_paymentsheet_pay_with_bank_title">Pay with your bank account in just a few steps.</string>
-    <string name="stripe_paymentsheet_remove_bank_account_title">Remove bank account</string>
+    <!-- Cash App mandate text -->
+    <string name="cashapp_mandate">By continuing, you authorize %1$s to debit your Cash App account for this payment and future payments in accordance with %2$s\'s terms, until this authorization is revoked. You can change this anytime in your Cash App Settings.</string>
 
-    <!-- UPI -->
-    <string name="stripe_paymentsheet_buy_using_upi_id">Buy using a UPI ID</string>
-    <string name="upi_id_label">UPI ID</string>
-
-    <!-- Shipping Address Element -->
-    <string name="stripe_paymentsheet_enter_address_manually">Enter address manually</string>
-    <string name="stripe_paymentsheet_autocomplete_no_results_found">No results found</string>
-    <string name="stripe_paymentsheet_address_element_shipping_address">Shipping Address</string>
-    <string name="stripe_paymentsheet_address_element_primary_button">Save Address</string>
+    <!-- Billing details collection -->
+    <string name="name_on_card">Name on card</string>
+    <string name="contact_information">Contact information</string>
 </resources>

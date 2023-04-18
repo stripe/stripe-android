@@ -27,6 +27,24 @@
   <string name="could_not_capture_title">Slike ni bilo mogoče posneti</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="description_clock">Ikona ure</string>
+  <!-- Content description for close button -->
+  <string name="description_close">zapri stran za preverjanje</string>
+  <!-- Content description for exclamation icon -->
+  <string name="description_exclamation">ikona klicaja</string>
+  <!-- Content description for back button -->
+  <string name="description_go_back">vrnite se na prejšnji zaslon</string>
+  <!-- Content description for merchant logo -->
+  <string name="description_merchant_logo">logotip trgovca</string>
+  <!-- Content description for plus icon -->
+  <string name="description_plus">ikona znaka plus</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="description_privacy_policy">ikona pravilnika o zasebnosti</string>
+  <!-- Content description for stripe logo -->
+  <string name="description_stripe_logo">logotip storitve stripe</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="description_time_estimate">ikona predvidenega časa za dokončanje preverjanja</string>
+  <!-- Label for Date of birth field -->
+  <string name="dob">Datum rojstva</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="driver_license">Vozniško dovoljenje</string>
   <!-- Text for error labels -->
@@ -39,6 +57,8 @@
   <string name="file_upload_content_id">Naložite sliki sprednje in hrbtne strani osebne izkaznice</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Naložite sliko potnega lista</string>
+  <!-- Label for first (given) name field -->
+  <string name="first_name">Ime</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="flash_mask">Maska za animacijo selfija</string>
   <!-- Description of front of driver's license image -->
@@ -57,10 +77,24 @@
   <string name="hold_still">Optično branje – držite pri miru</string>
   <!-- display name for ID -->
   <string name="id_card">Osebni dokument</string>
+  <!-- Label for ID number section -->
+  <string name="id_number">Številka osebnega dokumenta</string>
+  <!-- An error message. -->
+  <string name="incomplete_id_number">Vnesena številka osebnega dokumenta ni popolna.</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="individual_cpf">CPF posameznika</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="invalid_dob_error">Videti je, da datum rojstva ni veljaven</string>
   <!-- Continue button text -->
   <string name="kontinue">nadaljuj</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="last_4_of_ssn">Zadnje 4 števke številke socialnega zavarovanja</string>
+  <!-- Label for last (family) name field -->
+  <string name="last_name">Priimek</string>
   <!-- Status while screen is loading -->
   <string name="loading">Nalaganje</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="nric_or_fin">NRIC ali FIN</string>
   <!-- No comment provided by engineer. -->
   <string name="ok">V redu</string>
   <!-- Label of the passport option for document type selection -->
@@ -79,6 +113,8 @@
   <string name="position_passport">Zagotovite, da je potni list na sredini okvirja</string>
   <!-- Instructional text for capturing selfie -->
   <string name="position_selfie">Zagotovite, da je vaš obraz na sredini okvira.</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="retake_photos">Znova posnemi fotografije</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Optično prebrano</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->

@@ -12,7 +12,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.uicore.elements.EmailConfig
-import com.stripe.android.ui.core.elements.NameConfig
+import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import org.junit.Rule
 import org.junit.Test
@@ -82,7 +82,7 @@ internal class SignUpScreenTest {
     fun header_message_is_correct() {
         setContent(SignUpState.InputtingEmail)
 
-        composeTestRule.onNodeWithText("Secure 1-click checkout").assertExists()
+        composeTestRule.onNodeWithText("Secure 1\u2060-\u2060click checkout").assertExists()
     }
 
     @Test

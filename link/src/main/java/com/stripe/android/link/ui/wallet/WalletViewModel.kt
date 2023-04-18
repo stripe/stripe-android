@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.wallet
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.NonFallbackInjector
@@ -11,7 +12,6 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason.PayAnotherWay
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
@@ -30,8 +30,8 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.address.toConfirmPaymentIntentShipping
 import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.ui.core.elements.DateConfig
 import com.stripe.android.ui.core.elements.createExpiryDateFormFieldValues
+import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +47,8 @@ internal class WalletViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val confirmationManager: ConfirmationManager,
-    private val logger: Logger
+    private val logger: Logger,
+    private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
 ) : ViewModel() {
 
     private val stripeIntent = args.stripeIntent
@@ -149,17 +150,50 @@ internal class WalletViewModel @Inject constructor(
                 }
             )
         } else {
-            val params = createConfirmStripeIntentParams(
+            val params = createPaymentMethodCreateParams(
                 selectedPaymentDetails = selectedPaymentDetails,
-                linkAccount = linkAccount
+                linkAccount = linkAccount,
             )
 
-            confirmationManager.confirmStripeIntent(params) { result ->
-                result.fold(
-                    onSuccess = ::handleConfirmPaymentSuccess,
-                    onFailure = ::onError
-                )
+            val nextStep = intentConfirmationInterceptor.intercept(
+                clientSecret = stripeIntent.clientSecret,
+                paymentMethodCreateParams = params,
+                shippingValues = args.shippingValues?.toConfirmPaymentIntentShipping(),
+                setupForFutureUsage = null,
+            )
+
+            when (nextStep) {
+                is IntentConfirmationInterceptor.NextStep.Confirm -> {
+                    confirmStripeIntent(nextStep.confirmParams)
+                }
+                is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
+                    handleNextAction(nextStep.clientSecret)
+                }
+                is IntentConfirmationInterceptor.NextStep.Fail -> {
+                    onError(ErrorMessage.Raw(nextStep.message))
+                }
+                is IntentConfirmationInterceptor.NextStep.Complete -> {
+                    handleConfirmPaymentSuccess(PaymentResult.Completed)
+                }
             }
+        }
+    }
+
+    private fun confirmStripeIntent(confirmParams: ConfirmStripeIntentParams) {
+        confirmationManager.confirmStripeIntent(confirmParams) { result ->
+            result.fold(
+                onSuccess = ::handleConfirmPaymentSuccess,
+                onFailure = ::onError,
+            )
+        }
+    }
+
+    private fun handleNextAction(clientSecret: String) {
+        confirmationManager.handleNextAction(clientSecret, stripeIntent) { result ->
+            result.fold(
+                onSuccess = ::handleConfirmPaymentSuccess,
+                onFailure = ::onError,
+            )
         }
     }
 
@@ -177,15 +211,10 @@ internal class WalletViewModel @Inject constructor(
         return linkAccountManager.updatePaymentDetails(updateParams)
     }
 
-    private fun createConfirmStripeIntentParams(
+    private fun createPaymentMethodCreateParams(
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        linkAccount: LinkAccount
-    ): ConfirmStripeIntentParams {
-        val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-            stripeIntent = stripeIntent,
-            shipping = args.shippingValues?.toConfirmPaymentIntentShipping()
-        )
-
+        linkAccount: LinkAccount,
+    ): PaymentMethodCreateParams {
         val cvc = uiState.value.cvcInput.takeIf { it.isComplete }?.value
         val extraParams = if (cvc != null) {
             mapOf("card" to mapOf("cvc" to cvc))
@@ -193,13 +222,11 @@ internal class WalletViewModel @Inject constructor(
             null
         }
 
-        val params = paramsFactory.createPaymentMethodCreateParams(
+        return PaymentMethodCreateParams.createLink(
+            paymentDetailsId = selectedPaymentDetails.id,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            selectedPaymentDetails = selectedPaymentDetails,
-            extraParams = extraParams
+            extraParams = extraParams,
         )
-
-        return paramsFactory.createConfirmStripeIntentParams(params)
     }
 
     private fun handleConfirmPaymentSuccess(paymentResult: PaymentResult) {

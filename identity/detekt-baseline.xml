@@ -10,6 +10,7 @@
     <ID>FunctionOnlyReturningConstant:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$private fun isFaceFocused(): Boolean</ID>
     <ID>LargeClass:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
     <ID>LargeClass:IdentityViewModelTest.kt$IdentityViewModelTest</ID>
+    <ID>LongMethod:AddressSection.kt$@Composable internal fun AddressSection( enabled: Boolean, identityViewModel: IdentityViewModel, addressCountries: List&lt;Country>, addressNotListedText: String, navController: NavController, onAddressCollected: (Resource&lt;RequiredInternationalAddress>) -> Unit )</ID>
     <ID>LongMethod:CameraScreenLaunchedEffect.kt$@Composable internal fun CameraScreenLaunchedEffect( identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, verificationPage: VerificationPage, navController: NavController, cameraManager: IdentityCameraManager, onCameraReady: () -> Unit )</ID>
     <ID>LongMethod:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( navController: NavController, identityViewModel: IdentityViewModel, verificationFlowFinishable: VerificationFlowFinishable )</ID>
     <ID>LongMethod:ConsentScreen.kt$@Composable private fun SuccessUI( merchantLogoUri: Uri, verificationPage: VerificationPage, onConsentAgreed: () -> Unit, onConsentDeclined: () -> Unit )</ID>
@@ -17,6 +18,7 @@
     <ID>LongMethod:DocumenetScanScreen.kt$@Composable internal fun DocumentScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, frontScanType: IdentityScanState.ScanType, backScanType: IdentityScanState.ScanType?, shouldStartFromBack: Boolean, messageRes: DocumentScanMessageRes, collectedDataParamType: CollectedDataParam.Type, route: String )</ID>
     <ID>LongMethod:ErrorScreen.kt$@Composable internal fun ErrorScreen( identityViewModel: IdentityViewModel, title: String, modifier: Modifier = Modifier, message1: String? = null, message2: String? = null, topButton: ErrorScreenButton? = null, bottomButton: ErrorScreenButton? = null, )</ID>
     <ID>LongMethod:IDDetectorAnalyzer.kt$IDDetectorAnalyzer$override suspend fun analyze( data: AnalyzerInput, state: IdentityScanState ): AnalyzerOutput</ID>
+    <ID>LongMethod:IDNumberSection.kt$@Composable internal fun IDNumberSection( enabled: Boolean, idNumberCountries: List&lt;Country>, countryNotListedText: String, navController: NavController, onIdNumberCollected: (Resource&lt;IdNumberParam>) -> Unit )</ID>
     <ID>LongMethod:IdentityActivity.kt$IdentityActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:IdentityNavGraph.kt$@Composable internal fun IdentityNavGraph( navController: NavHostController = rememberNavController(), identityViewModel: IdentityViewModel, fallbackUrlLauncher: FallbackUrlLauncher, appSettingsOpenable: AppSettingsOpenable, cameraPermissionEnsureable: CameraPermissionEnsureable, verificationFlowFinishable: VerificationFlowFinishable, identityScanViewModelFactory: IdentityScanViewModel.IdentityScanViewModelFactory, onTopBarNavigationClick: () -> Unit, topBarState: IdentityTopBarState, onNavControllerCreated: (NavController) -> Unit )</ID>
     <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$internal fun uploadScanResult( result: IdentityAggregator.FinalResult, verificationPage: VerificationPage, targetScanType: IdentityScanState.ScanType? )</ID>
@@ -24,12 +26,27 @@
     <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$suspend fun postVerificationPageDataForDocSelection( type: CollectedDataParam.Type, navController: NavController, viewLifecycleOwner: LifecycleOwner, cameraPermissionEnsureable: CameraPermissionEnsureable )</ID>
     <ID>LongMethod:IdentityViewModelTest.kt$IdentityViewModelTest$private fun testUploadDocumentScanSuccessResult(isFront: Boolean)</ID>
     <ID>LongMethod:IdentityViewModelTest.kt$IdentityViewModelTest$private fun testUploadSelfieScanSuccessResult( selfie: FaceDetectorTransitioner.Selfie, isHighRes: Boolean )</ID>
+    <ID>LongMethod:IndividualScreen.kt$@Composable internal fun IndividualScreen( navController: NavController, identityViewModel: IdentityViewModel )</ID>
     <ID>LongMethod:SelfieScreen.kt$@Composable internal fun SelfieScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, )</ID>
+    <ID>LongMethod:SelfieScreen.kt$@Composable private fun ResultView( displayState: IdentityScanState, allowImageCollectionHtml: String, allowImageCollectionCheckboxEnabled: Boolean, allowImageCollection: Boolean, navController: NavController, onAllowImageCollectionChanged: (Boolean) -> Unit )</ID>
     <ID>LongMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, shouldShowTakePhoto: Boolean, shouldShowChoosePhoto: Boolean )</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$100</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$5</ID>
+    <ID>MagicNumber:DobParam.kt$DobParam.Companion$4</ID>
     <ID>MagicNumber:FaceDetectorAnalyzer.kt$FaceDetectorAnalyzer$3</ID>
     <ID>MagicNumber:IDDetectorAnalyzer.kt$IDDetectorAnalyzer$3</ID>
+    <ID>MagicNumber:IDNumberSection.kt$11</ID>
+    <ID>MagicNumber:IDNumberSection.kt$4</ID>
+    <ID>MagicNumber:IDNumberSection.kt$BRIDConfig.&lt;no name provided>$11</ID>
+    <ID>MagicNumber:IDNumberSection.kt$BRVisualTransformation$5</ID>
+    <ID>MagicNumber:IDNumberSection.kt$BRVisualTransformation$8</ID>
+    <ID>MagicNumber:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$11</ID>
+    <ID>MagicNumber:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$14</ID>
+    <ID>MagicNumber:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$3</ID>
+    <ID>MagicNumber:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$5</ID>
+    <ID>MagicNumber:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$7</ID>
+    <ID>MagicNumber:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$8</ID>
+    <ID>MagicNumber:IDNumberSection.kt$USIDConfig.&lt;no name provided>$4</ID>
     <ID>MagicNumber:RoundToMaxDecimals.kt$10</ID>
     <ID>MatchingDeclarationName:ComposeLoadingButton.kt$LoadingButtonState</ID>
     <ID>MaxLineLength:DefaultIdentityRepositoryTest.kt$DefaultIdentityRepositoryTest$fun</ID>
@@ -47,6 +64,10 @@
     <ID>MaximumLineLength:com.stripe.android.identity.camera.IdentityScanFlow.kt:34</ID>
     <ID>MaximumLineLength:com.stripe.android.identity.states.FaceDetectorTransitioner.kt:221</ID>
     <ID>MaximumLineLength:com.stripe.android.identity.states.IDDetectorTransitioner.kt:127</ID>
+    <ID>ReturnCount:AddressSection.kt$private fun isValidAddress(addressMap: Map&lt;IdentifierSpec, FormFieldEntry>): Boolean</ID>
+    <ID>ReturnCount:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>
+    <ID>ReturnCount:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
+    <ID>SwallowedException:IdentityTheme.kt$e: ReflectiveOperationException</ID>
     <ID>ThrowsCount:DefaultIdentityRepository.kt$DefaultIdentityRepository$private suspend fun &lt;Response : StripeModel> executeRequestWithModelJsonParser( request: StripeRequest, responseJsonParser: ModelJsonParser&lt;Response>, onSuccessExecutionTimeBlock: (Long) -> Unit = {} ): Response</ID>
     <ID>TooManyFunctions:IdentityAnalyticsRequestFactory.kt$IdentityAnalyticsRequestFactory</ID>
     <ID>TooManyFunctions:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>

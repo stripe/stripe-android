@@ -124,17 +124,11 @@
   <string name="fpx_bank_offline">%s - Offline</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="generic_decline">Vaše platební metoda byla zamítnuta.</string>
-  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">Datum konce platnosti vaší karty je neúplné.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
   <string name="invalid_bank_account_iban">Číslo IBAN, které jste zadali, je neplatné.</string>
   <string name="invalid_card_number">Číslo vaší karty je neplatné.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Bezpečnostní kód vaší karty je neplatný.</string>
-  <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Rok konce platnosti vaší karty je neplatný.</string>
-  <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">Rok konce platnosti vaší karty je neplatný.</string>
   <!-- Error when customer's name is invalid -->
   <string name="invalid_owner_name">Vaše jméno je neplatné.</string>
   <!-- Shipping form error message -->
@@ -161,8 +155,6 @@
   <string name="stripe_failure_reason_timed_out">Časový limit ověření Vašeho způsobu platby uplynul -- zkuste to znovu</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Došlo k interní chybě.</string>
-  <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">MM / RR</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Ověřte platbu</string>
   <string name="title_add_a_card">Přidat kartu</string>

@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.foundation.lazy.LazyListState
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
@@ -14,13 +16,13 @@ class PaymentOptionsScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.values(),
-        PaymentSheetAppearance.values(),
-        FontSize.values(),
+        arrayOf(SystemAppearance.LightTheme),
+        arrayOf(PaymentSheetAppearance.DefaultAppearance),
+        arrayOf(FontSize.DefaultFont),
     )
 
     @Test
-    fun testDefaultState() {
+    fun testWidthLessThanScreen() {
         paparazziRule.snapshot {
             PaymentOptions(
                 state = PaymentOptionsState(
@@ -40,9 +42,7 @@ class PaymentOptionsScreenshotTest {
     }
 
     @Test
-    fun testEditingState() {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
+    fun testWidthMoreThanScreen() {
         paparazziRule.snapshot {
             PaymentOptions(
                 state = PaymentOptionsState(
@@ -50,13 +50,21 @@ class PaymentOptionsScreenshotTest {
                         PaymentOptionsItem.AddCard,
                         PaymentOptionsItem.GooglePay,
                         PaymentOptionsItem.SavedPaymentMethod(
-                            displayName = "Visa",
-                            paymentMethod = paymentMethod,
-                        )
+                            displayName = "Card",
+                            paymentMethod = createCard("4242"),
+                        ),
+                        PaymentOptionsItem.SavedPaymentMethod(
+                            displayName = "Card",
+                            paymentMethod = createCard("4000"),
+                        ),
+                        PaymentOptionsItem.SavedPaymentMethod(
+                            displayName = "Card",
+                            paymentMethod = createCard("1234"),
+                        ),
                     ),
                     selectedIndex = 1,
                 ),
-                isEditing = true,
+                isEditing = false,
                 isProcessing = false,
                 onAddCardPressed = {},
                 onItemSelected = {},
@@ -66,9 +74,7 @@ class PaymentOptionsScreenshotTest {
     }
 
     @Test
-    fun testProcessingState() {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
+    fun testWidthMoreThanScreenAndScrollToEnd() {
         paparazziRule.snapshot {
             PaymentOptions(
                 state = PaymentOptionsState(
@@ -76,18 +82,34 @@ class PaymentOptionsScreenshotTest {
                         PaymentOptionsItem.AddCard,
                         PaymentOptionsItem.GooglePay,
                         PaymentOptionsItem.SavedPaymentMethod(
-                            displayName = "Visa",
-                            paymentMethod = paymentMethod,
-                        )
+                            displayName = "Card",
+                            paymentMethod = createCard("4242"),
+                        ),
+                        PaymentOptionsItem.SavedPaymentMethod(
+                            displayName = "Card",
+                            paymentMethod = createCard("4000"),
+                        ),
+                        PaymentOptionsItem.SavedPaymentMethod(
+                            displayName = "Card",
+                            paymentMethod = createCard("1234"),
+                        ),
                     ),
                     selectedIndex = 1,
                 ),
                 isEditing = false,
-                isProcessing = true,
+                isProcessing = false,
                 onAddCardPressed = {},
                 onItemSelected = {},
                 onItemRemoved = {},
+                scrollState = LazyListState(firstVisibleItemIndex = 2),
             )
         }
+    }
+
+    private fun createCard(last4: String): PaymentMethod {
+        val original = PaymentMethodFixtures.createCard()
+        return original.copy(
+            card = original.card?.copy(last4 = last4),
+        )
     }
 }

@@ -2,7 +2,9 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -31,8 +33,11 @@ class AddressTextFieldController(
         config.visualTransformation ?: VisualTransformation.None
     override val showOptionalLabel: Boolean = false
 
-    override val label: Flow<Int> = MutableStateFlow(config.label)
+    override val label = MutableStateFlow(config.label)
     override val debugLabel = config.debugLabel
+
+    @ExperimentalComposeUiApi
+    override val autofillType: AutofillType? = null
 
     /** This is all the information that can be observed on the element */
     private val _fieldValue = MutableStateFlow("")

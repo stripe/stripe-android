@@ -1,0 +1,20 @@
+apply from: configs.androidLibrary
+
+android {
+    buildFeatures {
+        buildConfig = false
+    }
+    namespace 'com.stripe.android.mlcore.base'
+}
+
+dependencies {
+    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
+}
+
+ext {
+    artifactId = "ml-core-base"
+    artifactName = "ml-core-base"
+    artifactDescrption = "The base machine learning module for Stripe Android SDKs"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

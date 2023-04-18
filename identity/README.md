@@ -1,4 +1,4 @@
-# Stripe Android SDK Identity module (Beta)
+# Stripe Android SDK Identity module
 The Stripe Identity Android SDK makes it quick and easy to verify your user's identity in your Android app. We provide a prebuilt UI to collect your user's ID documents, match photo ID with selfies, and validate ID numbers.
 
 > To get access to the Identity Android SDK, visit the [Identity Settings](https://dashboard.stripe.com/settings/identity) page and click **Enable**.
@@ -37,6 +37,18 @@ If you intend to use this SDK with Stripe's Identity service, you must not modif
 ### Integration
 
 Get started with Stripe Identity's [Android integration guide](https://stripe.com/docs/identity/verify-identity-documents?platform=android) and [example project](../identity-example), or [📘 browse the SDK reference](https://stripe.dev/stripe-android/identity/index.html) for fine-grained documentation of all the classes and methods in the SDK.
+
+### Use TFLite in Google play to reduce binary size
+
+Identity Android SDK uses a portable TFLite runtime to execute machine learning models, if your application is released through Google play, you could instead use the Google play runtime, this would reduce the SDK size by ~1.2mb.
+
+To do so, configure your app's dependency on stripe identity as follows.
+```
+    implementation("com.stripe:identity:x.y.z") {
+      exclude group: 'com.stripe', module: 'ml-core-default' // exclude the default tflite runtime
+    }
+    implementation("com.stripe:ml-core-googleplay:x.y.z") // include the google play tflite runtime
+```
 
 ### Example
 

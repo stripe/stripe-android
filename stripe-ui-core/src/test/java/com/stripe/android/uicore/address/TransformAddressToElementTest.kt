@@ -4,7 +4,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.R
-import com.stripe.android.uicore.address.AddressRepository.Companion.supportedCountries
+import com.stripe.android.uicore.address.AddressSchemaRepository.Companion.SUPPORTED_COUNTRIES
 import com.stripe.android.uicore.elements.AdministrativeAreaConfig
 import com.stripe.android.uicore.elements.AdministrativeAreaElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -107,7 +107,7 @@ class TransformAddressToElementTest {
 
     @Test
     fun `Make sure name schema is not found on fields not processed`() {
-        supportedCountries.forEach { countryCode ->
+        SUPPORTED_COUNTRIES.forEach { countryCode ->
             val schemaList = readFile("src/main/assets/addressinfo/$countryCode.json")
             val invalidNameType = schemaList?.filter { addressSchema ->
                 addressSchema.schema?.nameType != null
@@ -125,7 +125,7 @@ class TransformAddressToElementTest {
     @Test
     fun `Make sure sorting code and dependent locality is never required`() {
         // Sorting code and dependent locality are not actually sent to the server.
-        supportedCountries.forEach { countryCode ->
+        SUPPORTED_COUNTRIES.forEach { countryCode ->
             val schemaList = readFile("src/main/assets/addressinfo/$countryCode.json")
             val invalidNameType = schemaList?.filter { addressSchema ->
                 addressSchema.required &&
@@ -141,7 +141,7 @@ class TransformAddressToElementTest {
 
     @Test
     fun `Make sure all country code json files are serializable`() {
-        supportedCountries.forEach { countryCode ->
+        SUPPORTED_COUNTRIES.forEach { countryCode ->
             val schemaList = readFile("src/main/assets/addressinfo/$countryCode.json")
             schemaList?.filter { addressSchema ->
                 addressSchema.schema?.nameType != null

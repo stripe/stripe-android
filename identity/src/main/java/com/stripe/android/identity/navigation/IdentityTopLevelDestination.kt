@@ -7,7 +7,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.networking.models.Requirement
 
 internal abstract class IdentityTopLevelDestination(
-    val shouldPopUpToDocSelection: Boolean = false
+    val popUpToParam: PopUpToParam? = null
 ) {
     /**
      * The route this destination navigates to, used for composable.
@@ -35,11 +35,21 @@ internal abstract class IdentityTopLevelDestination(
     abstract val destinationRoute: DestinationRoute
 
     /**
-     * Route with arguments, filled with actual toString value of arguments as follows:
+     * Route with arguments,
+     * default value should be a string without any arguments:
+     *   routeBase
+     * overridden value should fill with actual toString value of arguments as follows:
      *   routeBase?argName1=arg1StringValue&argName2=arg2StringValue
+     *
      */
-    abstract val routeWithArgs: String
+    open val routeWithArgs: String
+        get() = destinationRoute.route
 }
+
+internal data class PopUpToParam(
+    val route: String,
+    val inclusive: Boolean
+)
 
 internal fun String.toRouteBase() = substringBefore('?')
 
@@ -70,8 +80,8 @@ internal fun NavBackStackEntry?.getBooleanArgument(argName: String) =
  */
 internal fun NavController.navigateTo(destination: IdentityTopLevelDestination) {
     navigate(destination.routeWithArgs) {
-        if (destination.shouldPopUpToDocSelection) {
-            popUpTo(DocSelectionDestination.ROUTE.route) { inclusive = false }
+        destination.popUpToParam?.let {
+            popUpTo(it.route) { inclusive = it.inclusive }
         }
     }
 }
@@ -103,6 +113,14 @@ internal fun String.routeToScreenName(): String = when (this) {
         IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
     CouldNotCaptureDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
+    IndividualDestination.ROUTE.route ->
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_INDIVIDUAL
+    CountryNotListedDestination.ROUTE.route ->
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_COUNTRY_NOT_LISTED
+    IndividualWelcomeDestination.ROUTE.route ->
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_INDIVIDUAL_WELCOME
+    DebugDestination.ROUTE.route ->
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_DEBUG
     else ->
         throw IllegalArgumentException("Invalid route: $this")
 }
@@ -126,6 +144,8 @@ internal fun String.routeToRequirement(): List<Requirement> = when (this) {
         listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
     SelfieDestination.ROUTE.route ->
         listOf(Requirement.FACE)
+    IndividualDestination.ROUTE.route ->
+        listOf(Requirement.NAME, Requirement.DOB, Requirement.ADDRESS, Requirement.IDNUMBER)
     else ->
         emptyList()
 }

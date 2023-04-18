@@ -6,10 +6,12 @@
         <activity
             android:name=".PaymentSheetActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".PaymentOptionsActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".addresselement.AddressElementActivity"

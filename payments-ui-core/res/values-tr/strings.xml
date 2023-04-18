@@ -17,12 +17,16 @@
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL Bank</string>
   <string name="invalid_email_address">Geçersiz e-posta adresi: %s</string>
+  <!-- Error message when UPI ID is invalid -->
+  <string name="invalid_upi_id">Geçersiz UPI Numarası</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Şimdi satın alın veya daha sonra Klarna ile ödeyin.</string>
   <!-- Klarna pay later copy -->
   <string name="klarna_pay_later">Daha sonra Klarna ile ödeyin.</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="p24_bank">Przelewy24 Bank</string>
+  <!-- PayPal mandate text -->
+  <string name="paypal_mandate">PayPal\'la ödemeyi onayladığınızda, %s şirketine gelecekteki ödemeler için kendi koşullarına uygun olarak PayPal hesabınızı ücretlendirme izni vermiş olursunuz.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Gelecekteki %s ödemeleri için kaydedilsin</string>
   <!-- Button title to open camera to scan credit/debit card -->
@@ -37,6 +41,8 @@
   <string name="stripe_payment_method_bank">Banka</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Kart bilgileri</string>
+  <!-- Header text shown above a UPI ID text field -->
+  <string name="stripe_paymentsheet_buy_using_upi_id">UPI Numarası kullanarak satın alın</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS Otomatik Ödeme</string>
   <!-- Title for credit card number entry field -->
@@ -45,4 +51,6 @@
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Bankamatik</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Ayarla</string>
+  <!-- Label for UPI ID number field on form -->
+  <string name="upi_id_label">UPI Numarası</string>
 </resources>

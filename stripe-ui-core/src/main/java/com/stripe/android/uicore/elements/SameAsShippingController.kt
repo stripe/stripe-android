@@ -15,8 +15,7 @@ import kotlinx.coroutines.flow.map
 class SameAsShippingController(
     initialValue: Boolean
 ) : InputController, SectionFieldComposable {
-    override val label: Flow<Int> =
-        MutableStateFlow(R.string.stripe_paymentsheet_address_element_same_as_shipping)
+    override val label: Flow<Int> = MutableStateFlow(R.string.billing_same_as_shipping)
     private val _value = MutableStateFlow(initialValue)
     val value: Flow<Boolean> = _value
     override val fieldValue: Flow<String> = value.map { it.toString() }

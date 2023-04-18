@@ -9,6 +9,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
@@ -37,6 +38,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
+import com.stripe.android.model.PossibleBrands
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
@@ -1674,14 +1676,13 @@ class Stripe internal constructor(
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
-    @JvmOverloads
     fun verifyPaymentIntentWithMicrodeposits(
         clientSecret: String,
         firstAmount: Int,
         secondAmount: Int,
         callback: ApiResultCallback<PaymentIntent>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.verifyPaymentIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 firstAmount = firstAmount,
@@ -1708,13 +1709,12 @@ class Stripe internal constructor(
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
-    @JvmOverloads
     fun verifyPaymentIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
         callback: ApiResultCallback<PaymentIntent>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.verifyPaymentIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 descriptorCode = descriptorCode,
@@ -1742,14 +1742,13 @@ class Stripe internal constructor(
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
-    @JvmOverloads
     fun verifySetupIntentWithMicrodeposits(
         clientSecret: String,
         firstAmount: Int,
         secondAmount: Int,
         callback: ApiResultCallback<SetupIntent>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.verifySetupIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 firstAmount = firstAmount,
@@ -1776,13 +1775,12 @@ class Stripe internal constructor(
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
-    @JvmOverloads
     fun verifySetupIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
         callback: ApiResultCallback<SetupIntent>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.verifySetupIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 descriptorCode = descriptorCode,
@@ -1794,6 +1792,47 @@ class Stripe internal constructor(
         }
     }
 
+    /**
+     * Retrieve a list of possible brands for the given card number.
+     * Returns an error if the cardNumber length is less than 6 characters.
+     *
+     * @param cardNumber the card number
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    fun retrievePossibleBrands(
+        cardNumber: String,
+        callback: ApiResultCallback<PossibleBrands>
+    ) {
+        CardNumber.Unvalidated(cardNumber).bin ?: run {
+            callback.onError(
+                InvalidRequestException(
+                    message = "cardNumber cannot be less than 6 characters"
+                )
+            )
+            return
+        }
+
+        executeAsync(callback) {
+            val cardMetaData = stripeRepository.retrieveCardMetadata(
+                cardNumber = cardNumber,
+                requestOptions = ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+
+            val brands = cardMetaData?.accountRanges?.map {
+                it.brand
+            }
+
+            brands?.let {
+                PossibleBrands(
+                    brands = brands.toSet().toList()
+                )
+            }
+        }
+    }
+
     private fun <T : StripeModel> executeAsync(
         callback: ApiResultCallback<T>,
         apiMethod: suspend () -> T?
@@ -1802,6 +1841,16 @@ class Stripe internal constructor(
             val result = runCatching {
                 requireNotNull(apiMethod())
             }
+            dispatchResult(result, callback)
+        }
+    }
+
+    private fun <T : StripeModel> executeAsyncForResult(
+        callback: ApiResultCallback<T>,
+        apiMethod: suspend () -> Result<T>,
+    ) {
+        CoroutineScope(workContext).launch {
+            val result = apiMethod()
             dispatchResult(result, callback)
         }
     }

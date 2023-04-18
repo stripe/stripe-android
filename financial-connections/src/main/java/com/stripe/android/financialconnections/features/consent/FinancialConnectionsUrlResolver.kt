@@ -10,14 +10,14 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 internal object FinancialConnectionsUrlResolver {
     fun getDisconnectUrl(manifest: FinancialConnectionsSessionManifest): String {
         return when (manifest.accountDisconnectionMethod ?: AccountDisconnectionMethod.UNKNOWN) {
-            AccountDisconnectionMethod.DASHBOARD -> FinancialConnectionsUrls.Disconnect.dashboard
-            AccountDisconnectionMethod.SUPPORT,
-            AccountDisconnectionMethod.LINK -> FinancialConnectionsUrls.Disconnect.link
-            AccountDisconnectionMethod.EMAIL -> FinancialConnectionsUrls.Disconnect.email
-            AccountDisconnectionMethod.UNKNOWN -> when (manifest.isEndUserFacing ?: false) {
+            AccountDisconnectionMethod.SUPPORT -> when (manifest.isEndUserFacing ?: false) {
                 true -> FinancialConnectionsUrls.Disconnect.supportEndUser
                 false -> FinancialConnectionsUrls.Disconnect.supportMerchantUser
             }
+            AccountDisconnectionMethod.DASHBOARD -> FinancialConnectionsUrls.Disconnect.dashboard
+            AccountDisconnectionMethod.LINK -> FinancialConnectionsUrls.Disconnect.link
+            AccountDisconnectionMethod.EMAIL,
+            AccountDisconnectionMethod.UNKNOWN -> FinancialConnectionsUrls.Disconnect.email
         }
     }
 

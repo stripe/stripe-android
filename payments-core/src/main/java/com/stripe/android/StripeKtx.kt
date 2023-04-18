@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.content.Intent
 import androidx.annotation.Size
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
@@ -23,6 +24,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
+import com.stripe.android.model.PossibleBrands
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
@@ -834,8 +836,8 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
     clientSecret: String,
     firstAmount: Int,
     secondAmount: Int
-): PaymentIntent = runApiRequest {
-    stripeRepository.verifyPaymentIntentWithMicrodeposits(
+): PaymentIntent {
+    return stripeRepository.verifyPaymentIntentWithMicrodeposits(
         clientSecret = clientSecret,
         firstAmount = firstAmount,
         secondAmount = secondAmount,
@@ -843,7 +845,7 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -875,15 +877,15 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
 suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
     clientSecret: String,
     descriptorCode: String
-): PaymentIntent = runApiRequest {
-    stripeRepository.verifyPaymentIntentWithMicrodeposits(
+): PaymentIntent {
+    return stripeRepository.verifyPaymentIntentWithMicrodeposits(
         clientSecret = clientSecret,
         descriptorCode = descriptorCode,
         requestOptions = ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -918,8 +920,8 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
     clientSecret: String,
     firstAmount: Int,
     secondAmount: Int
-): SetupIntent = runApiRequest {
-    stripeRepository.verifySetupIntentWithMicrodeposits(
+): SetupIntent {
+    return stripeRepository.verifySetupIntentWithMicrodeposits(
         clientSecret = clientSecret,
         firstAmount = firstAmount,
         secondAmount = secondAmount,
@@ -927,7 +929,7 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -959,13 +961,53 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
 suspend fun Stripe.verifySetupIntentWithMicrodeposits(
     clientSecret: String,
     descriptorCode: String
-): SetupIntent = runApiRequest {
-    stripeRepository.verifySetupIntentWithMicrodeposits(
+): SetupIntent {
+    return stripeRepository.verifySetupIntentWithMicrodeposits(
         clientSecret = clientSecret,
         descriptorCode = descriptorCode,
         requestOptions = ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         )
+    ).getOrElse { throw StripeException.create(it) }
+}
+
+/**
+ * Retrieve a list of possible brands for the given card number.
+ * Returns an error if the cardNumber length is less than 6 characters.
+ *
+ * @param cardNumber the card number
+ *
+ * @return [PossibleBrands] for the given card number
+ */
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class
+)
+suspend fun Stripe.retrievePossibleBrands(
+    cardNumber: String
+): PossibleBrands = runApiRequest {
+    CardNumber.Unvalidated(cardNumber).bin ?: throw InvalidRequestException(
+        message = "cardNumber cannot be less than 6 characters"
     )
+
+    val cardMetaData = stripeRepository.retrieveCardMetadata(
+        cardNumber = cardNumber,
+        requestOptions = ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId
+        )
+    )
+
+    val brands = cardMetaData?.accountRanges?.map {
+        it.brand
+    }
+
+    brands?.let {
+        PossibleBrands(
+            brands = brands.toSet().toList()
+        )
+    }
 }

@@ -7,18 +7,23 @@
     <ID>ConstructorParameterNaming:RowElement.kt$RowElement$_identifier: IdentifierSpec</ID>
     <ID>CyclomaticComplexMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
     <ID>CyclomaticComplexMethod:IdentifierSpec.kt$IdentifierSpec.Companion$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) fun get(value: String)</ID>
-    <ID>CyclomaticComplexMethod:TextFieldUI.kt$@Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
+    <ID>CyclomaticComplexMethod:StripeTheme.kt$@Composable @ReadOnlyComposable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun StripeTypography.toComposeTypography(): Typography</ID>
+    <ID>CyclomaticComplexMethod:TextFieldUI.kt$@OptIn(ExperimentalComposeUiApi::class) @Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
     <ID>EmptyFunctionBlock:DrawablePainter.kt$EmptyPainter${}</ID>
     <ID>FunctionParameterNaming:IdentifierSpec.kt$IdentifierSpec.Companion$_value: String</ID>
     <ID>LongMethod:DropdownFieldUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun DropDown( controller: DropdownFieldController, enabled: Boolean, modifier: Modifier = Modifier )</ID>
     <ID>LongMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
-    <ID>LongMethod:OTPElementUI.kt$@OptIn(ExperimentalMaterialApi::class) @Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun OTPElementUI( enabled: Boolean, element: OTPElement, modifier: Modifier = Modifier, colors: OTPElementColors = OTPElementColors( selectedBorder = MaterialTheme.colors.primary, placeholder = MaterialTheme.stripeColors.placeholderText ), focusRequester: FocusRequester = remember { FocusRequester() } )</ID>
     <ID>LongMethod:PhoneNumberElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun PhoneNumberElementUI( enabled: Boolean, controller: PhoneNumberController, requestFocusWhenShown: Boolean = false, imeAction: ImeAction = ImeAction.Done )</ID>
-    <ID>LongMethod:TextFieldUI.kt$@Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
+    <ID>LongMethod:TextFieldUI.kt$@OptIn(ExperimentalComposeUiApi::class) @Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
+    <ID>MagicNumber:DateConfig.kt$DateConfig$4</ID>
+    <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$100</ID>
+    <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$12</ID>
+    <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$50</ID>
     <ID>MagicNumber:DrawablePainter.kt$DrawablePainter$255</ID>
     <ID>MagicNumber:DropdownFieldUI.kt$.8f</ID>
     <ID>MagicNumber:DropdownFieldUI.kt$.9f</ID>
     <ID>MagicNumber:DropdownFieldUI.kt$8.9f</ID>
+    <ID>MagicNumber:ExpiryDateVisualTransformation.kt$ExpiryDateVisualTransformation$12</ID>
     <ID>MagicNumber:Html.kt$0.1f</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$3</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$5</ID>
@@ -36,6 +41,7 @@
     <ID>ReturnCount:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
     <ID>ReturnCount:UiUtils.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Context.getDrawableFromUri(uri: Uri): Drawable?</ID>
     <ID>SpreadOperator:PhoneNumberElementUI.kt$( it.errorMessage, *args )</ID>
+    <ID>SpreadOperator:SectionElementUI.kt$( it.errorMessage, *args )</ID>
     <ID>SpreadOperator:TextFieldUI.kt$( it.errorMessage, *args )</ID>
     <ID>ThrowingExceptionsWithoutMessageOrCause:TransformAddressToElement.kt$IllegalArgumentException()</ID>
     <ID>ThrowsCount:UiUtils.kt$@SuppressLint("DiscouragedApi") internal fun Context.getResourceId(uri: Uri): Pair&lt;Resources, Int></ID>

@@ -23,7 +23,14 @@ internal abstract class DocumentScanDestination(
     @StringRes backMessageStringRes: Int = INVALID_STRING_RES,
     collectedDataParamType: CollectedDataParam.Type
 ) : IdentityTopLevelDestination(
-    shouldPopUpToDocSelection = shouldPopUpToDocSelection
+    popUpToParam = if (shouldPopUpToDocSelection) {
+        PopUpToParam(
+            route = DocSelectionDestination.ROUTE.route,
+            inclusive = false
+        )
+    } else {
+        null
+    }
 ) {
     override val routeWithArgs by lazy {
         destinationRoute.withParams(
@@ -174,16 +181,20 @@ internal fun ScanDestinationEffect(
     }
 }
 
-internal object SelfieDestination : IdentityTopLevelDestination() {
-    const val SELFIE = "Selfie"
+internal object SelfieDestination : IdentityTopLevelDestination(
+    popUpToParam = PopUpToParam(
+        route = SELFIE,
+        inclusive = true
+    )
+) {
     val ROUTE = object : DestinationRoute() {
         override val routeBase = SELFIE
     }
 
     override val destinationRoute = ROUTE
-    override val routeWithArgs = destinationRoute.route
 }
 
+internal const val SELFIE = "Selfie"
 internal const val ARG_SHOULD_START_FROM_BACK = "startFromBack"
 internal const val ARG_FRONT_SCAN_TYPE = "frontScanType"
 internal const val ARG_BACK_SCAN_TYPE = "backScanType"

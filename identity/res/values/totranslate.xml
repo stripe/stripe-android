@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <!-- Content description for plus icon -->
-    <string name="description_plus">plus icon</string>
-    <!-- Content description for stripe logo -->
-    <string name="description_stripe_logo">stripe logo</string>
-    <!-- Content description for merchant logo -->
-    <string name="description_merchant_logo">merchant logo</string>
-    <!-- Content description for the icon for estimated time to complete verification -->
-    <string name="description_time_estimate">estimated time to complete verification icon</string>
-    <!-- Content description for the icon for privacy policy -->
-    <string name="description_privacy_policy">privacy policy icon</string>
-    <!-- Content description for exclamation icon -->
-    <string name="description_exclamation">exclamation icon</string>
-    <!-- Content description for close button -->
-    <string name="description_close">close verification page</string>
-    <!-- Content description for back button -->
-    <string name="description_go_back">go back to the previous screen</string>
+    <!-- Content description for camera icon -->
+    <string name="description_camera">camera icon</string>
+    <string name="test_model_title">You\'re currently in testmode</string>
+    <string name="test_model_content">This page is only shown in testmode.</string>
+    <string name="complete_with_test_data">Complete with test data</string>
+    <string name="complete_with_test_data_details"><![CDATA[Save time by choosing a desired result and completing instantly with that outcome. The mobile SDK flow will return with result <b>Completed</b>.]]></string>
+
+    <string name="verification_success">Verification success</string>
+    <string name="verification_failure">Verification failure</string>
+    <string name="verification_success_async">Verification success async</string>
+    <string name="verification_failure_async">Verification failure async</string>
+    <string name="submit">SUBMIT</string>
+
+    <string name="finish_mobile_flow">Terminate mobile SDK flow</string>
+    <string name="finish_mobile_flow_details"><![CDATA[Terminate mobile SDK flow locally with <b>Completed</b>, <b>Canceled</b> or <b>Failed</b> without changing the verification session on server.]]></string>
+
+    <string name="failure_from_test_mode">Failure from test mode</string>
+    <string name="completed">COMPLETED</string>
+    <string name="cancelled">CANCELLED</string>
+    <string name="failed">FAILED</string>
+
+    <string name="preview_user_experience">Preview user experience</string>
+    <string name="preview_user_experience_details">Proceed to preview as an end user. Information provided will not be verified.</string>
+    <string name="proceed">PROCEED</string>
 </resources>

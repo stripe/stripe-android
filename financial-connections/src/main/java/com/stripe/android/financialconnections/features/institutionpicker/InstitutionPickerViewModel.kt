@@ -57,13 +57,15 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 featuredInstitutions(
                     clientSecret = configuration.financialConnectionsSessionClientSecret
                 )
-            }.onFailure { logger.error("Error fetching featured institutions") }
+            }.onFailure {
+                logger.error("Error fetching featured institutions", it)
+                eventTracker.track(FinancialConnectionsEvent.Error(Pane.INSTITUTION_PICKER, it))
+            }
+            val institutionsResult = institutions.getOrNull()?.data ?: emptyList()
             Payload(
-                featuredInstitutions = institutions.getOrNull()?.data ?: emptyList(),
+                featuredInstitutions = institutionsResult,
                 searchDisabled = manifest.institutionSearchDisabled,
-                allowManualEntry = kotlin
-                    .runCatching { manifest.allowManualEntry }
-                    .getOrElse { false }
+                allowManualEntry = manifest.allowManualEntry
             )
         }.execute { copy(payload = it) }
     }
@@ -106,7 +108,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 )
                 result
             } else {
-                InstitutionResponse(emptyList())
+                InstitutionResponse(
+                    data = emptyList(),
+                    showManualEntry = false
+                )
             }
         }.execute {
             copy(searchInstitutions = if (it.isCancellationError()) Loading() else it)
@@ -153,7 +158,12 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private fun clearSearch() {
         setState {
             copy(
-                searchInstitutions = Success(InstitutionResponse(emptyList())),
+                searchInstitutions = Success(
+                    InstitutionResponse(
+                        data = emptyList(),
+                        showManualEntry = false
+                    )
+                ),
                 searchMode = false
             )
         }
@@ -189,11 +199,13 @@ internal class InstitutionPickerViewModel @Inject constructor(
 }
 
 internal data class InstitutionPickerState(
+    // This is just used to provide a text in Compose previews
+    val previewText: String? = null,
     val searchMode: Boolean = false,
-    val allowManualEntry: Boolean = false,
     val payload: Async<Payload> = Uninitialized,
     val searchInstitutions: Async<InstitutionResponse> = Uninitialized
 ) : MavericksState {
+
     data class Payload(
         val featuredInstitutions: List<FinancialConnectionsInstitution>,
         val allowManualEntry: Boolean,

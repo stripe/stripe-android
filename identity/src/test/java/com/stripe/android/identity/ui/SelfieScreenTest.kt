@@ -92,6 +92,7 @@ class SelfieScreenTest {
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
+            onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
 
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
@@ -105,6 +106,7 @@ class SelfieScreenTest {
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
+            onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
 
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
@@ -118,6 +120,7 @@ class SelfieScreenTest {
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
+            onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
 
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
@@ -131,6 +134,7 @@ class SelfieScreenTest {
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
+            onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
 
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
@@ -155,6 +159,7 @@ class SelfieScreenTest {
             onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.selfie_capture_complete))
 
             onNodeWithTag(RESULT_VIEW_TAG).assertExists()
+            onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertExists()
             onNodeWithTag(CONSENT_CHECKBOX_TAG).assertIsOff()
             onNodeWithTag(SCAN_VIEW_TAG).assertDoesNotExist()
 

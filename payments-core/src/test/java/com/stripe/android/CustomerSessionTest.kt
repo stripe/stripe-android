@@ -64,7 +64,10 @@ internal class CustomerSessionTest {
         Dispatchers.setMain(testDispatcher)
         runBlocking {
             whenever(stripeRepository.retrieveCustomer(any(), any(), any()))
-                .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER)
+                .thenReturn(
+                    Result.success(FIRST_CUSTOMER),
+                    Result.success(SECOND_CUSTOMER),
+                )
 
             whenever(
                 stripeRepository.addCustomerSource(
@@ -75,8 +78,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            )
-                .thenReturn(SourceFixtures.SOURCE_CARD)
+            ).thenReturn(Result.success(SourceFixtures.SOURCE_CARD))
 
             whenever(
                 stripeRepository.deleteCustomerSource(
@@ -86,8 +88,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            )
-                .thenReturn(SourceFixtures.SOURCE_CARD)
+            ).thenReturn(Result.success(SourceFixtures.SOURCE_CARD))
 
             whenever(
                 stripeRepository.setDefaultCustomerSource(
@@ -98,8 +99,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            )
-                .thenReturn(SECOND_CUSTOMER)
+            ).thenReturn(Result.success(SECOND_CUSTOMER))
 
             whenever(
                 stripeRepository.attachPaymentMethod(
@@ -109,8 +109,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            )
-                .thenReturn(PAYMENT_METHOD)
+            ).thenReturn(Result.success(PAYMENT_METHOD))
 
             whenever(
                 stripeRepository.detachPaymentMethod(
@@ -119,8 +118,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            )
-                .thenReturn(PAYMENT_METHOD)
+            ).thenReturn(Result.success(PAYMENT_METHOD))
 
             whenever(
                 stripeRepository.getPaymentMethods(
@@ -129,8 +127,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            )
-                .thenReturn(listOf(PAYMENT_METHOD))
+            ).thenReturn(Result.success(listOf(PAYMENT_METHOD)))
 
             whenever(
                 stripeRepository.setCustomerShippingInfo(
@@ -140,7 +137,7 @@ internal class CustomerSessionTest {
                     any(),
                     any()
                 )
-            ).thenReturn(FIRST_CUSTOMER)
+            ).thenReturn(Result.success(FIRST_CUSTOMER))
         }
     }
 
@@ -739,8 +736,9 @@ internal class CustomerSessionTest {
                 any(),
                 any()
             )
+        ).thenReturn(
+            Result.failure(APIException(statusCode = 404, message = "The card is invalid"))
         )
-            .thenThrow(APIException(statusCode = 404, message = "The card is invalid"))
 
         whenever(
             stripeRepository.deleteCustomerSource(
@@ -750,8 +748,9 @@ internal class CustomerSessionTest {
                 any(),
                 any()
             )
+        ).thenReturn(
+            Result.failure(APIException(statusCode = 404, message = "The card does not exist"))
         )
-            .thenThrow(APIException(statusCode = 404, message = "The card does not exist"))
 
         whenever(
             stripeRepository.setDefaultCustomerSource(
@@ -762,8 +761,7 @@ internal class CustomerSessionTest {
                 any(),
                 any()
             )
-        )
-            .thenThrow(APIException(statusCode = 405, message = "auth error"))
+        ).thenReturn(Result.failure(APIException(statusCode = 405, message = "auth error")))
 
         whenever(
             stripeRepository.attachPaymentMethod(
@@ -773,8 +771,9 @@ internal class CustomerSessionTest {
                 any(),
                 any()
             )
+        ).thenReturn(
+            Result.failure(APIException(statusCode = 404, message = "The payment method is invalid"))
         )
-            .thenThrow(APIException(statusCode = 404, message = "The payment method is invalid"))
 
         whenever(
             stripeRepository.detachPaymentMethod(
@@ -783,8 +782,9 @@ internal class CustomerSessionTest {
                 any(),
                 any()
             )
+        ).thenReturn(
+            Result.failure(APIException(statusCode = 404, message = "The payment method does not exist"))
         )
-            .thenThrow(APIException(statusCode = 404, message = "The payment method does not exist"))
 
         whenever(
             stripeRepository.getPaymentMethods(
@@ -793,8 +793,9 @@ internal class CustomerSessionTest {
                 any(),
                 any()
             )
+        ).thenReturn(
+            Result.failure(APIException(statusCode = 404, message = "The payment method does not exist"))
         )
-            .thenThrow(APIException(statusCode = 404, message = "The payment method does not exist"))
     }
 
     private fun createCustomerSession(

@@ -27,6 +27,24 @@
   <string name="could_not_capture_title">No se ha podido capturar la imagen</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="description_clock">Icono de reloj</string>
+  <!-- Content description for close button -->
+  <string name="description_close">cerrar la página de verificación</string>
+  <!-- Content description for exclamation icon -->
+  <string name="description_exclamation">icono de exclamación</string>
+  <!-- Content description for back button -->
+  <string name="description_go_back">volver a la pantalla anterior</string>
+  <!-- Content description for merchant logo -->
+  <string name="description_merchant_logo">logotipo del comerciante</string>
+  <!-- Content description for plus icon -->
+  <string name="description_plus">icono de más</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="description_privacy_policy">icono de la política de privacidad</string>
+  <!-- Content description for stripe logo -->
+  <string name="description_stripe_logo">logotipo de stripe</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="description_time_estimate">logotipo del tiempo estimado para completar la verificación</string>
+  <!-- Label for Date of birth field -->
+  <string name="dob">Fecha de nacimiento</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="driver_license">Permiso de conducir</string>
   <!-- Text for error labels -->
@@ -39,6 +57,8 @@
   <string name="file_upload_content_id">Carga las imágenes del anverso y el reverso de tu documento de identidad</string>
   <!-- Instructions for uploading images of passport -->
   <string name="file_upload_content_passport">Carga una imagen de tu pasaporte</string>
+  <!-- Label for first (given) name field -->
+  <string name="first_name">Nombre</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="flash_mask">Máscara para animación de selfies</string>
   <!-- Description of front of driver's license image -->
@@ -57,10 +77,24 @@
   <string name="hold_still">Espera, se está escaneando</string>
   <!-- display name for ID -->
   <string name="id_card">Documento de identidad</string>
+  <!-- Label for ID number section -->
+  <string name="id_number">Número de ID</string>
+  <!-- An error message. -->
+  <string name="incomplete_id_number">El número de ID que has introducido está incompleto.</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="individual_cpf">CPF individual</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="invalid_dob_error">Parece que la fecha de nacimiento no es válida</string>
   <!-- Continue button text -->
   <string name="kontinue">continuar</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="last_4_of_ssn">Últimos 4 dígitos del número de seguridad social</string>
+  <!-- Label for last (family) name field -->
+  <string name="last_name">Apellidos</string>
   <!-- Status while screen is loading -->
   <string name="loading">Cargando</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="nric_or_fin">NRIC o FIN</string>
   <!-- No comment provided by engineer. -->
   <string name="ok">Aceptar</string>
   <!-- Label of the passport option for document type selection -->
@@ -79,6 +113,8 @@
   <string name="position_passport">Coloca el pasaporte en el centro del marco</string>
   <!-- Instructional text for capturing selfie -->
   <string name="position_selfie">Coloca la cara en el centro del marco.</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="retake_photos">Volver a sacar las fotos</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="scanned">Escaneado</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->

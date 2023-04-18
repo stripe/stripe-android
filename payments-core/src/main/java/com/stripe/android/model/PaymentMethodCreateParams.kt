@@ -5,7 +5,6 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.CardUtils
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.Stripe
-import com.stripe.android.StripeCashAppPayBetaApi
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import org.json.JSONException
@@ -21,8 +20,7 @@ import org.json.JSONObject
  * See [PaymentMethod] for API object.
  */
 @Parcelize
-data class PaymentMethodCreateParams @OptIn(StripeCashAppPayBetaApi::class)
-internal constructor(
+data class PaymentMethodCreateParams internal constructor(
     internal val code: PaymentMethodCode,
     internal val requiresMandate: Boolean,
     val card: Card? = null,
@@ -54,7 +52,6 @@ internal constructor(
     private val overrideParamMap: Map<String, @RawValue Any>? = null
 ) : StripeParamsModel, Parcelable {
 
-    @OptIn(StripeCashAppPayBetaApi::class)
     internal constructor(
         type: PaymentMethod.Type,
         card: Card? = null,
@@ -216,7 +213,6 @@ internal constructor(
         metadata = metadata
     )
 
-    @StripeCashAppPayBetaApi
     private constructor(
         cashAppPay: CashAppPay,
         billingDetails: PaymentMethod.BillingDetails?,
@@ -227,6 +223,11 @@ internal constructor(
         billingDetails = billingDetails,
         metadata = metadata,
     )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun requiresMandate(): Boolean {
+        return requiresMandate
+    }
 
     override fun toParamMap(): Map<String, Any> {
         return overrideParamMap
@@ -487,7 +488,6 @@ internal constructor(
     /**
      * Encapsulates parameters used to create [PaymentMethodCreateParams] when using Cash App Pay.
      */
-    @StripeCashAppPayBetaApi
     @Parcelize
     class CashAppPay : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> = emptyMap()
@@ -950,7 +950,6 @@ internal constructor(
          */
         @JvmStatic
         @JvmOverloads
-        @StripeCashAppPayBetaApi
         fun createCashAppPay(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null

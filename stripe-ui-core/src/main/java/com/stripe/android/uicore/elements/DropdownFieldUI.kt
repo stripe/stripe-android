@@ -74,15 +74,20 @@ fun DropDown(
     val label by controller.label.collectAsState(null)
     val selectedIndex by controller.selectedIndex.collectAsState(0)
     val items = controller.displayItems
+    val shouldDisableDropdownWithSingleItem =
+        items.count() == 1 && controller.disableDropdownWithSingleElement
+
+    val shouldEnable = enabled && !shouldDisableDropdownWithSingleItem
+
     var expanded by remember { mutableStateOf(false) }
     val selectedItemLabel = controller.getSelectedItemLabel(selectedIndex)
     val interactionSource = remember { MutableInteractionSource() }
-    val currentTextColor = if (enabled) {
+    val currentTextColor = if (shouldEnable) {
         MaterialTheme.stripeColors.onComponent
     } else {
         TextFieldDefaults
             .textFieldColors()
-            .indicatorColor(enabled, false, interactionSource)
+            .indicatorColor(enabled = false, isError = false, interactionSource = interactionSource)
             .value
     }
 
@@ -99,7 +104,7 @@ fun DropDown(
                     canFocus = inputModeManager.inputMode != InputMode.Touch
                 }
                 .clickable(
-                    enabled = enabled,
+                    enabled = shouldEnable,
                     onClickLabel = stringResource(R.string.change)
                 ) {
                     expanded = true
@@ -111,12 +116,14 @@ fun DropDown(
                         selectedItemLabel,
                         color = currentTextColor
                     )
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_chevron_down),
-                        contentDescription = null,
-                        modifier = Modifier.height(24.dp),
-                        tint = MaterialTheme.stripeColors.placeholderText
-                    )
+                    if (!shouldDisableDropdownWithSingleItem) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_chevron_down),
+                            contentDescription = null,
+                            modifier = Modifier.height(24.dp),
+                            tint = MaterialTheme.stripeColors.placeholderText
+                        )
+                    }
                 }
             } else {
                 Row(
@@ -131,7 +138,7 @@ fun DropDown(
                         )
                     ) {
                         label?.let {
-                            FormLabel(stringResource(it), enabled = enabled)
+                            FormLabel(stringResource(it), enabled = shouldEnable)
                         }
                         Row(
                             modifier = Modifier.fillMaxWidth(.9f),
@@ -143,13 +150,15 @@ fun DropDown(
                             )
                         }
                     }
-                    Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_chevron_down),
-                            contentDescription = null,
-                            modifier = Modifier.height(24.dp),
-                            tint = currentTextColor
-                        )
+                    if (!shouldDisableDropdownWithSingleItem) {
+                        Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_chevron_down),
+                                contentDescription = null,
+                                modifier = Modifier.height(24.dp),
+                                tint = currentTextColor
+                            )
+                        }
                     }
                 }
             }

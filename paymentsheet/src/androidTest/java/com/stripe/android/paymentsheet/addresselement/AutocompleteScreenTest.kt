@@ -5,7 +5,6 @@ import android.text.SpannableString
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -13,13 +12,13 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
+import com.stripe.android.uicore.DefaultStripeTheme
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,22 +43,6 @@ class AutocompleteScreenTest {
         onAddressOptionsAppBar().assertExists()
         onQueryField().assertExists()
         onEnterAddressManually().assertExists()
-    }
-
-    @Test
-    fun no_results_found_should_appear() {
-        setContent()
-        onQueryField().performTextInput("Some text")
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule
-                .onAllNodesWithText("No results found")
-                .fetchSemanticsNodes().size == 1
-        }
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-            composeTestRule
-                .onAllNodesWithTag(TEST_TAG_ATTRIBUTION_DRAWABLE)
-                .fetchSemanticsNodes().size == 1
-        }
     }
 
     @Test

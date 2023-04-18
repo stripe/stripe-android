@@ -1,20 +1,16 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onParent
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextReplacement
 import androidx.lifecycle.Lifecycle
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.scrollTo
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CreateIntentResult
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import org.junit.Rule
@@ -28,11 +24,13 @@ internal class PaymentSheetTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
+    private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
+
     @get:Rule
     val networkRule = NetworkRule()
 
     @Test
-    fun testCompleteFlowWithSuccessfulCardPayment() {
+    fun testSuccessfulCardPayment() {
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -60,14 +58,7 @@ internal class PaymentSheetTest {
             )
         }
 
-        fillOutCard()
-
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-        }
+        page.fillOutCardDetails()
 
         networkRule.enqueue(
             method("POST"),
@@ -76,20 +67,13 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-success.json")
-        }
-
-        onView(withId(R.id.primary_button)).perform(scrollTo(), click())
+        page.clickPrimaryButton()
 
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
     @Test
-    fun testCustomFlowWithSuccessfulCardPayment() {
+    fun testSuccessfulDelayedSuccessPayment() {
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -97,55 +81,33 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        val resultCountDownLatch = CountDownLatch(1)
+        val countDownLatch = CountDownLatch(1)
         val activityScenarioRule = composeTestRule.activityRule
         val scenario = activityScenarioRule.scenario
         scenario.moveToState(Lifecycle.State.CREATED)
-        lateinit var flowController: PaymentSheet.FlowController
+        lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
-            flowController = PaymentSheet.FlowController.create(
-                activity = it,
-                paymentOptionCallback = { paymentOption ->
-                    assertThat(paymentOption?.label).endsWith("4242")
-                    flowController.confirm()
-                },
-                paymentResultCallback = { result ->
-                    assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
-                    resultCountDownLatch.countDown()
-                },
-            )
+            paymentSheet = PaymentSheet(it) { result ->
+                assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
+                countDownLatch.countDown()
+            }
         }
         scenario.moveToState(Lifecycle.State.RESUMED)
         scenario.onActivity {
-            flowController.configureWithPaymentIntent(
+            paymentSheet.presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = null,
-                callback = { success, error ->
-                    assertThat(success).isTrue()
-                    assertThat(error).isNull()
-                    flowController.presentPaymentOptions()
-                }
             )
         }
 
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(hasText("+ Add"))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNode(hasText("+ Add"))
-            .onParent()
-            .onParent()
-            .performClick()
-
-        fillOutCard()
+        page.fillOutCardDetails()
 
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
         ) { response ->
-            response.testBodyFromFile("payment-intent-confirm.json")
+            response.testBodyFromFile("payment-intent-confirm_with-requires_action-status.json")
         }
 
         networkRule.enqueue(
@@ -155,147 +117,13 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-intent-get-success.json")
         }
 
-        onView(withId(R.id.primary_button)).perform(scrollTo(), click())
+        page.clickPrimaryButton()
 
-        assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
     @Test
-    fun testCustomFlowWithFailedElementsSessionCall() {
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.setResponseCode(400)
-        }
-
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
-        }
-
-        val resultCountDownLatch = CountDownLatch(1)
-        val activityScenarioRule = composeTestRule.activityRule
-        val scenario = activityScenarioRule.scenario
-        scenario.moveToState(Lifecycle.State.CREATED)
-        lateinit var flowController: PaymentSheet.FlowController
-        scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
-            flowController = PaymentSheet.FlowController.create(
-                activity = it,
-                paymentOptionCallback = { paymentOption ->
-                    assertThat(paymentOption?.label).endsWith("4242")
-                    flowController.confirm()
-                },
-                paymentResultCallback = { result ->
-                    assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
-                    resultCountDownLatch.countDown()
-                },
-            )
-        }
-        scenario.moveToState(Lifecycle.State.RESUMED)
-        scenario.onActivity {
-            flowController.configureWithPaymentIntent(
-                paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
-                callback = { success, error ->
-                    assertThat(success).isTrue()
-                    assertThat(error).isNull()
-                    flowController.presentPaymentOptions()
-                }
-            )
-        }
-
-        fillOutCard()
-
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_intents/pi_example/confirm"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-confirm.json")
-        }
-
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/payment_intents/pi_example"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-get-success.json")
-        }
-
-        onView(withId(R.id.primary_button)).perform(click())
-
-        assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
-    }
-
-    @Test
-    fun testCustomFlowWithFailedConfirmCall() {
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-        }
-
-        val resultCountDownLatch = CountDownLatch(1)
-        val activityScenarioRule = composeTestRule.activityRule
-        val scenario = activityScenarioRule.scenario
-        scenario.moveToState(Lifecycle.State.CREATED)
-        lateinit var flowController: PaymentSheet.FlowController
-        scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
-            flowController = PaymentSheet.FlowController.create(
-                activity = it,
-                paymentOptionCallback = { paymentOption ->
-                    assertThat(paymentOption?.label).endsWith("4242")
-                    flowController.confirm()
-                },
-                paymentResultCallback = { result ->
-                    assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
-                    resultCountDownLatch.countDown()
-                },
-            )
-        }
-        scenario.moveToState(Lifecycle.State.RESUMED)
-        scenario.onActivity {
-            flowController.configureWithPaymentIntent(
-                paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
-                callback = { success, error ->
-                    assertThat(success).isTrue()
-                    assertThat(error).isNull()
-                    flowController.presentPaymentOptions()
-                }
-            )
-        }
-
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(hasText("+ Add"))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule.onNode(hasText("+ Add"))
-            .onParent()
-            .onParent()
-            .performClick()
-
-        fillOutCard()
-
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_intents/pi_example/confirm"),
-        ) { response ->
-            response.setResponseCode(400)
-        }
-
-        onView(withId(R.id.primary_button)).perform(click())
-
-        assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
-    }
-
-    @Test
-    fun testCompleteFlowFailureWhenSetupRequestsFail() {
+    fun testFailureWhenSetupRequestsFail() {
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -333,19 +161,132 @@ internal class PaymentSheetTest {
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 
-    private fun fillOutCard() {
-        composeTestRule.waitUntil {
-            composeTestRule.onAllNodes(hasText("Card number"))
-                .fetchSemanticsNodes().isNotEmpty()
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
+    @Test
+    fun testDeferredIntentCardPayment() {
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
         }
 
-        composeTestRule.onNode(hasText("Card number"))
-            .performTextReplacement("4242424242424242")
-        composeTestRule.onNode(hasText("MM / YY"))
-            .performTextReplacement("12/34")
-        composeTestRule.onNode(hasText("CVC"))
-            .performTextReplacement("123")
-        composeTestRule.onNode(hasText("ZIP Code"))
-            .performTextReplacement("12345")
+        val countDownLatch = CountDownLatch(1)
+        val activityScenarioRule = composeTestRule.activityRule
+        val scenario = activityScenarioRule.scenario
+        scenario.moveToState(Lifecycle.State.CREATED)
+        lateinit var paymentSheet: PaymentSheet
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            paymentSheet = PaymentSheet(
+                activity = it,
+                createIntentCallback = {
+                    CreateIntentResult.Success("pi_example_secret_example")
+                }
+            ) { result ->
+                assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
+                countDownLatch.countDown()
+            }
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        scenario.onActivity {
+            paymentSheet.presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd"
+                    )
+                ),
+                configuration = null,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_methods"),
+            bodyPart(
+                "payment_user_agent",
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent")
+            ),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            not(
+                bodyPart(
+                    "payment_method_data%5Bpayment_user_agent%5D",
+                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent")
+                )
+            ),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+
+        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    }
+
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
+    @Test
+    fun testDeferredIntentFailedCardPayment() {
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
+        }
+
+        val activityScenarioRule = composeTestRule.activityRule
+        val scenario = activityScenarioRule.scenario
+        scenario.moveToState(Lifecycle.State.CREATED)
+        lateinit var paymentSheet: PaymentSheet
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            paymentSheet = PaymentSheet(
+                activity = it,
+                createIntentCallback = {
+                    CreateIntentResult.Failure(
+                        cause = Exception("We don't accept visa"),
+                        displayMessage = "We don't accept visa"
+                    )
+                }
+            ) {
+                error("Shouldn't call PaymentSheetResultCallback")
+            }
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        scenario.onActivity {
+            paymentSheet.presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd"
+                    )
+                ),
+                configuration = null,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_methods"),
+            bodyPart(
+                "payment_user_agent",
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent")
+            ),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        page.clickPrimaryButton()
+        page.waitForText("We don't accept visa")
     }
 }

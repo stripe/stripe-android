@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:ComposeExampleUI.kt$@Composable internal fun ExampleScreen( configuration: IdentityVerificationSheet.Configuration, viewModel: IdentityExampleViewModel )</ID>
+    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun AllowedDocumentTypes( identitySubmissionState: IdentitySubmissionState, onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit )</ID>
+    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun IntegrationTypeUI( identitySubmissionState: IdentitySubmissionState, onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit )</ID>
+    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun LoadVSView( viewModel: IdentityExampleViewModel, loadingState: LoadingState, identitySubmissionState: IdentitySubmissionState, onLoadingStateChanged: (LoadingState) -> Unit, onPostResult: (String, String, String) -> Unit )</ID>
+    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun RequireDocTypes( identitySubmissionState: IdentitySubmissionState, onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit )</ID>
+    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun SubmitView( submissionState: IdentitySubmissionState, scaffoldState: ScaffoldState, configuration: IdentityVerificationSheet.Configuration, viewModel: IdentityExampleViewModel, )</ID>
+    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun TypeSelectUI( verificationType: VerificationType, integrationType: IntegrationType, onVerificationTypeChanged: (VerificationType) -> Unit )</ID>
+    <ID>MaxLineLength:ComposeExampleUI.kt$resultString = "Error generating verificationSessionId and ephemeralKeySecret: ${it.getException().message}"</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.example.ui.ComposeExampleUI.kt:631</ID>
+    <ID>TooGenericExceptionCaught:IdentityExampleViewModel.kt$IdentityExampleViewModel$t: Throwable</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -8,6 +8,7 @@
     <ID>FunctionNaming:LinkAppBar.kt$@Preview @Composable private fun LinkAppBar_NoEmail()</ID>
     <ID>LongMethod:LinkActivity.kt$LinkActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:LinkAppBar.kt$@Composable internal fun LinkAppBar( state: LinkAppBarState, onBackPressed: () -> Unit, onLogout: () -> Unit, showBottomSheetContent: (BottomSheetContent?) -> Unit )</ID>
+    <ID>LongMethod:LinkButtonView.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) @Composable fun LinkButton( email: String?, enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:LinkInlineSignup.kt$@Composable internal fun LinkInlineSignup( merchantName: String, emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, signUpState: SignUpState, enabled: Boolean, expanded: Boolean, requiresNameCollection: Boolean, errorMessage: ErrorMessage?, toggleExpanded: () -> Unit, modifier: Modifier = Modifier )</ID>
     <ID>LongMethod:PaymentDetails.kt$@Composable internal fun PaymentDetailsListItem( paymentDetails: ConsumerPaymentDetails.PaymentDetails, enabled: Boolean, isSupported: Boolean, isSelected: Boolean, isUpdating: Boolean, onClick: () -> Unit, onMenuButtonClick: () -> Unit )</ID>
     <ID>LongMethod:PaymentMethodBody.kt$@Composable internal fun PaymentMethodBody( linkAccount: LinkAccount, injector: NonFallbackInjector, loadFromArgs: Boolean )</ID>
@@ -35,6 +36,5 @@
     <ID>TopLevelPropertyNaming:PrimaryButton.kt$internal const val completedIconTestTag = "CompletedIcon"</ID>
     <ID>TopLevelPropertyNaming:PrimaryButton.kt$internal const val progressIndicatorTestTag = "CircularProgressIndicator"</ID>
     <ID>UnnecessaryAbstractClass:LinkComponent.kt$LinkComponent$LinkComponent</ID>
-    <ID>UnusedPrivateMember:PaymentMethodViewModelTest.kt$PaymentMethodViewModelTest$private fun createFinancialConnectionsAccount(id: String = "id")</ID>
   </CurrentIssues>
 </SmellBaseline>
