@@ -6,7 +6,7 @@ buildscript {
     apply from: './build-configuration/build-environment.gradle'
     ext.kotlinVersion = '1.8.0'
     // until Dokka 1.8.0 is released and we no longer need dev builds
-    ext.dokkaVersion = '1.8.0-dev-194'
+    ext.dokkaVersion = '1.8.20-dev-213'
 
     repositories {
         mavenCentral()
