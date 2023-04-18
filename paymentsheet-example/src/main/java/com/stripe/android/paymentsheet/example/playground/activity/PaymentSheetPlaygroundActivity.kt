@@ -365,7 +365,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 viewModel.readyToCheckout.collect { isReady ->
                     if (isReady) {
                         viewBinding.completeCheckoutButton.isEnabled = true
-                        viewBinding.shippingAddressButton.isEnabled = true
                         configureCustomCheckout()
                     } else {
                         disableViews()
@@ -442,8 +441,12 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         collectAddress: String,
     ) {
         when (initialization) {
-            InitializationType.Normal.value -> viewBinding.initializationRadioGroup.check(R.id.normal_initialization_button)
-            InitializationType.Deferred.value -> viewBinding.initializationRadioGroup.check(R.id.deferred_initialization_button)
+            InitializationType.Normal.value -> {
+                viewBinding.initializationRadioGroup.check(R.id.normal_initialization_button)
+            }
+            InitializationType.Deferred.value -> {
+                viewBinding.initializationRadioGroup.check(R.id.deferred_initialization_button)
+            }
         }
 
         when (customer) {
@@ -481,48 +484,76 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             Shipping.Off.value -> viewBinding.shippingRadioGroup.check(R.id.shipping_off_button)
         }
 
-        when (setDefaultBillingAddress) {
-            true -> viewBinding.defaultBillingRadioGroup.check(R.id.default_billing_on_button)
-            false -> viewBinding.defaultBillingRadioGroup.check(R.id.default_billing_off_button)
+        if (setDefaultBillingAddress) {
+            viewBinding.defaultBillingRadioGroup.check(R.id.default_billing_on_button)
+        } else {
+            viewBinding.defaultBillingRadioGroup.check(R.id.default_billing_off_button)
         }
 
-        when (setAutomaticPaymentMethods) {
-            true -> viewBinding.automaticPmGroup.check(R.id.automatic_pm_on_button)
-            false -> viewBinding.automaticPmGroup.check(R.id.automatic_pm_off_button)
+        if (setAutomaticPaymentMethods) {
+            viewBinding.automaticPmGroup.check(R.id.automatic_pm_on_button)
+        } else {
+            viewBinding.automaticPmGroup.check(R.id.automatic_pm_off_button)
         }
 
-        when (setDelayedPaymentMethods) {
-            true -> viewBinding.allowsDelayedPaymentMethodsRadioGroup.check(R.id.allowsDelayedPaymentMethods_on_button)
-            false -> viewBinding.allowsDelayedPaymentMethodsRadioGroup.check(R.id.allowsDelayedPaymentMethods_off_button)
+        if (setDelayedPaymentMethods) {
+            viewBinding.allowsDelayedPaymentMethodsRadioGroup.check(R.id.allowsDelayedPaymentMethods_on_button)
+        } else {
+            viewBinding.allowsDelayedPaymentMethodsRadioGroup.check(R.id.allowsDelayedPaymentMethods_off_button)
         }
 
-        when (attachDefaultBillingAddress) {
-            true -> viewBinding.attachDefaultsRadioGroup.check(R.id.attach_defaults_on_button)
-            false -> viewBinding.attachDefaultsRadioGroup.check(R.id.attach_defaults_off_button)
+        if (attachDefaultBillingAddress) {
+            viewBinding.attachDefaultsRadioGroup.check(R.id.attach_defaults_on_button)
+        } else {
+            viewBinding.attachDefaultsRadioGroup.check(R.id.attach_defaults_off_button)
         }
 
         when (collectName) {
-            BillingCollectionMode.Auto.value -> viewBinding.collectNameRadioGroup.check(R.id.collect_name_radio_auto)
-            BillingCollectionMode.Always.value -> viewBinding.collectNameRadioGroup.check(R.id.collect_name_radio_always)
-            BillingCollectionMode.Never.value -> viewBinding.collectNameRadioGroup.check(R.id.collect_name_radio_never)
+            BillingCollectionMode.Auto.value -> {
+                viewBinding.collectNameRadioGroup.check(R.id.collect_name_radio_auto)
+            }
+            BillingCollectionMode.Always.value -> {
+                viewBinding.collectNameRadioGroup.check(R.id.collect_name_radio_always)
+            }
+            BillingCollectionMode.Never.value -> {
+                viewBinding.collectNameRadioGroup.check(R.id.collect_name_radio_never)
+            }
         }
 
         when (collectEmail) {
-            BillingCollectionMode.Auto.value -> viewBinding.collectEmailRadioGroup.check(R.id.collect_email_radio_auto)
-            BillingCollectionMode.Always.value -> viewBinding.collectEmailRadioGroup.check(R.id.collect_email_radio_always)
-            BillingCollectionMode.Never.value -> viewBinding.collectEmailRadioGroup.check(R.id.collect_email_radio_never)
+            BillingCollectionMode.Auto.value -> {
+                viewBinding.collectEmailRadioGroup.check(R.id.collect_email_radio_auto)
+            }
+            BillingCollectionMode.Always.value -> {
+                viewBinding.collectEmailRadioGroup.check(R.id.collect_email_radio_always)
+            }
+            BillingCollectionMode.Never.value -> {
+                viewBinding.collectEmailRadioGroup.check(R.id.collect_email_radio_never)
+            }
         }
 
         when (collectPhone) {
-            BillingCollectionMode.Auto.value -> viewBinding.collectPhoneRadioGroup.check(R.id.collect_phone_radio_auto)
-            BillingCollectionMode.Always.value -> viewBinding.collectPhoneRadioGroup.check(R.id.collect_phone_radio_always)
-            BillingCollectionMode.Never.value -> viewBinding.collectPhoneRadioGroup.check(R.id.collect_phone_radio_never)
+            BillingCollectionMode.Auto.value -> {
+                viewBinding.collectPhoneRadioGroup.check(R.id.collect_phone_radio_auto)
+            }
+            BillingCollectionMode.Always.value -> {
+                viewBinding.collectPhoneRadioGroup.check(R.id.collect_phone_radio_always)
+            }
+            BillingCollectionMode.Never.value -> {
+                viewBinding.collectPhoneRadioGroup.check(R.id.collect_phone_radio_never)
+            }
         }
 
         when (collectAddress) {
-            BillingCollectionMode.Auto.value -> viewBinding.collectAddressRadioGroup.check(R.id.collect_address_radio_auto)
-            BillingCollectionMode.Always.value -> viewBinding.collectAddressRadioGroup.check(R.id.collect_address_radio_full)
-            BillingCollectionMode.Never.value -> viewBinding.collectAddressRadioGroup.check(R.id.collect_address_radio_never)
+            BillingCollectionMode.Auto.value -> {
+                viewBinding.collectAddressRadioGroup.check(R.id.collect_address_radio_auto)
+            }
+            BillingCollectionMode.Always.value -> {
+                viewBinding.collectAddressRadioGroup.check(R.id.collect_address_radio_full)
+            }
+            BillingCollectionMode.Never.value -> {
+                viewBinding.collectAddressRadioGroup.check(R.id.collect_address_radio_never)
+            }
         }
     }
 
