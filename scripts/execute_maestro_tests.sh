@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 set -o pipefail
 set -x
 
@@ -21,7 +20,8 @@ adb shell "screenrecord /sdcard/$now-1.mp4" &
 childpid=$!
 
 echo "Executing maestro tests"
-maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections/; result=$? || true
+maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections-livemode/
+result=$?
 
 echo "Waiting for record to finish"
 kill -2 "$childpid"
