@@ -23,7 +23,6 @@ data class TestParameters(
     val saveForFutureUseCheckboxVisible: Boolean,
     val useBrowser: Browser? = null,
     val authorizationAction: AuthorizeAction? = null,
-    val takeScreenshotOnLpmLoad: Boolean = false,
     val forceDarkMode: Boolean? = null,
     val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
     val snapshotReturningCustomer: Boolean = false,

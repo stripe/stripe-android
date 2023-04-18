@@ -1,4 +1,4 @@
-package com.stripe.android.test.core
+package com.stripe.android.utils
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
