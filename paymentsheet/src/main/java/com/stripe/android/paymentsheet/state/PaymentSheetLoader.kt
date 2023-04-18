@@ -181,7 +181,18 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                     stripeIntent = stripeIntent,
                     customerPaymentMethods = sortedPaymentMethods.await(),
                     isGooglePayReady = isGooglePayReady,
-                    linkState = linkState.await(),
+                    linkState = LinkState(
+                        configuration = LinkPaymentLauncher.Configuration(
+                            stripeIntent,
+                            "Test",
+                            null,
+                            null,
+                            null,
+                            null,
+                            null
+                        ),
+                        loginState = LinkState.LoginState.LoggedOut
+                    ),
                     paymentSelection = initialPaymentSelection.await(),
                 )
             )

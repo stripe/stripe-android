@@ -2,6 +2,6 @@
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="#e0ffffff">
     <item
-        android:drawable="@drawable/googlepay_button_background_image" />
+        android:drawable="@drawable/googlepay_button_no_shadow_background_image" />
 </ripple>
 

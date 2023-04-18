@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentSheetPrimaryButtonBinding
 import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
 
@@ -149,23 +148,18 @@ internal fun Wallet(
     val googlePayButtonState by viewModel.googlePayButtonState.collectAsState(initial = null)
     val buttonsEnabled by viewModel.buttonsEnabled.collectAsState(initial = false)
 
-    val isDark = !MaterialTheme.colors.surface.shouldUseDarkDynamicColor()
-
     val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     if (containerState.shouldShow) {
         // Remove 4.dp from each side to account for Google pay internal padding
         // Link button will add 4.dp on each side to account for this
-        Column(modifier = modifier.padding(horizontal = padding - 4.dp)) {
+        Column(modifier = modifier.padding(horizontal = padding)) {
             if (containerState.showGooglePay) {
                 GooglePayButton(
                     state = googlePayButtonState?.convert(),
                     isEnabled = buttonsEnabled,
-                    isDark = isDark,
                     onPressed = viewModel::checkoutWithGooglePay,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 7.dp),
+                    modifier = Modifier.padding(top = 7.dp),
                 )
             }
             if (containerState.showLink) {
@@ -176,8 +170,7 @@ internal fun Wallet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 6.dp)
-                        .padding(horizontal = 4.dp)
-                        .requiredHeight(42.dp),
+                        .requiredHeight(48.dp),
                 )
             }
 

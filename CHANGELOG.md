@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [CHANGED][6471](https://github.com/stripe/stripe-android/pull/6471) Updated Google Pay button to match new brand guidelines.
+
 ## 20.23.1 - 2023-04-17
 
 ### PaymentSheet
@@ -11,7 +14,6 @@
 
 ### PaymentSheet
 * [ADDED] Added `billingDetailsCollectionConfiguration` to configure how you want to collect billing details. See the docs [here](https://stripe.com/docs/payments/accept-a-payment?platform=android&ui=payment-sheet#billing-details-collection).
-* [CHANGED][6471](https://github.com/stripe/stripe-android/pull/6471) Updated Google Pay button to match new brand guidelines.
 
 ### Identity
 * [ADDED][6536](https://github.com/stripe/stripe-android/pull/6536) Added test mode for the SDK.

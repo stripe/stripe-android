@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -13,15 +14,16 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
+import com.stripe.android.uicore.shouldUseDarkDynamicColor
 
 @Composable
 internal fun GooglePayButton(
     state: PrimaryButton.State?,
     isEnabled: Boolean,
-    isDark: Boolean,
     onPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val isDark = !MaterialTheme.colors.surface.shouldUseDarkDynamicColor()
     AndroidView(
         factory = { context -> GooglePayButton(context, isDark) },
         update = { googlePayButton ->
