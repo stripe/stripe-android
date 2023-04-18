@@ -3,10 +3,12 @@ package com.stripe.android.paymentsheet.addresselement
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -72,7 +74,12 @@ internal class AddressElementActivity : ComponentActivity() {
                     route != AddressElementScreen.Autocomplete.route
                 },
                 skipHalfExpanded = true,
+                animationSpec = tween(),
             )
+
+            BackHandler {
+                viewModel.navigator.onBack()
+            }
 
             navController = rememberAnimatedNavController()
             viewModel.navigator.navigationController = navController
