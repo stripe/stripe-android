@@ -34,7 +34,7 @@ appId: com.stripe.android.financialconnections.example
     timeout: 60000
 # HACK: Extra tap attempt to wait some time for FinBank animations to finish.
 - repeat:
-    times: 2
+    times: 3
     commands:
       - tapOn:
           point: -1,-1
@@ -45,7 +45,7 @@ appId: com.stripe.android.financialconnections.example
     id: "101732002"
 - inputText: "fini"
 - "hideKeyboard"
-- tapOn: "Submit"
+- pressKey: Enter
 # SELECT ALL ACCOUNTS
 - extendedWaitUntil:
     visible: "Select all accounts"
