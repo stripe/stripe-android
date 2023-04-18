@@ -20,18 +20,18 @@ adb shell "screenrecord /sdcard/$now-1.mp4" &
 # Store the process ID
 childpid=$!
 
-# Clear and start collecting logs
+echo "Executing maestro tests"
 maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections-livemode/
 result=$?
 
-# Wait for the recording process to finish
+echo "Waiting for record to finish"
 kill -2 "$childpid"
 wait "$childpid"
 
 # Sleep for a short duration to allow the process to finalize the video file
 sleep 3
 
-# Pull the video file from the device
+echo "Pulling video results from device."
 mkdir -p /tmp/test_results
 cd /tmp/test_results
 adb pull "/sdcard/$now-1.mp4" || true
