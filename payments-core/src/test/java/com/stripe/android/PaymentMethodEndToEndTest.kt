@@ -23,7 +23,6 @@ internal class PaymentMethodEndToEndTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    @Ignore("Ignore while this is broken on the backend.")
     @Test
     fun createPaymentMethod_withBacsDebit_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.BACS_DEBIT
