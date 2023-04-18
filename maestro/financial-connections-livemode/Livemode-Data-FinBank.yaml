@@ -30,21 +30,21 @@ appId: com.stripe.android.financialconnections.example
 # 101732002: password input
 - extendedWaitUntil:
     visible:
-        id: "101732001"
+      id: "101732001"
     timeout: 60000
-# HACK: Extra tap attempt to wait some time for FinBank animations to finish.
 - repeat:
-    times: 3
+    times: 2
     commands:
+      # HACK: Extra tap attempt to wait some time for FinBank animations to finish.
       - tapOn:
           point: -1,-1
-- tapOn:
-    id: "101732001"
-- inputText: "fini"
-- tapOn:
-    id: "101732002"
-- inputText: "fini"
-- "hideKeyboard"
+      - tapOn:
+          id: "101732001"
+      - inputText: "fini"
+      - tapOn:
+          id: "101732002"
+      - inputText: "fini"
+      - "hideKeyboard"
 - pressKey: Enter
 # SELECT ALL ACCOUNTS
 - extendedWaitUntil:
