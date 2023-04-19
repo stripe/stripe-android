@@ -29,3 +29,5 @@ jobs:
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Fail if not accepted
+        run: contains(github.event.issue.labels.*.name, 'accept-risky-change')
