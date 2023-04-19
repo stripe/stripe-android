@@ -56,7 +56,7 @@ internal class SourceEndToEndTest {
             returnUrl = RETURN_URL,
             currency = "GBP",
             klarnaParams = KlarnaSourceParams(
-                purchaseCountry = "UK",
+                purchaseCountry = "GB",
                 lineItems = LINE_ITEMS,
                 billingPhone = "02012267709",
                 billingEmail = "test@example.com",
@@ -82,9 +82,9 @@ internal class SourceEndToEndTest {
     fun createKlarnaParamsWithCustomPaymentMethods() {
         val sourceParams = SourceParams.createKlarna(
             returnUrl = RETURN_URL,
-            currency = "USD",
+            currency = "EUR",
             klarnaParams = KlarnaSourceParams(
-                purchaseCountry = "US",
+                purchaseCountry = "DE",
                 lineItems = LINE_ITEMS,
                 customPaymentMethods = setOf(
                     KlarnaSourceParams.CustomPaymentMethods.Installments,
