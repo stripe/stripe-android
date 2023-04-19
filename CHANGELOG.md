@@ -3,7 +3,7 @@
 ## XX.XX.XX - 2023-XX-XX
 
 ### PaymentSheet
-* [CHANGED][6471](https://github.com/stripe/stripe-android/pull/6471) Updated Google Pay button to match new brand guidelines.
+* [CHANGED][6471](https://github.com/stripe/stripe-android/pull/6471) Updated Google Pay button to match new brand guidelines. You can now change the radius of the Google Pay button with the [Appearance API](https://stripe.com/docs/elements/appearance-api?platform=android#shapes-android).
 
 ## 20.23.1 - 2023-04-17
 

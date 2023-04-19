@@ -1,33 +1,50 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
-import android.graphics.Color
+import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.wallet.button.ButtonConstants
+import com.google.android.gms.wallet.button.ButtonOptions
+import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.GooglePayJsonFactory.Companion.ALLOWED_PAYMENT_METHODS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
-import com.stripe.android.uicore.shouldUseDarkDynamicColor
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.convertDpToPx
+import com.stripe.android.uicore.isSystemDarkTheme
 
 @Composable
 internal fun GooglePayButton(
     state: PrimaryButton.State?,
+    allowCreditCards: Boolean,
+    billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?,
     isEnabled: Boolean,
     onPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isDark = !MaterialTheme.colors.surface.shouldUseDarkDynamicColor()
+    val cornerRadius = LocalContext.current.convertDpToPx(
+        StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
+    ).toInt()
     AndroidView(
-        factory = { context -> GooglePayButton(context, isDark) },
+        factory = { context -> GooglePayButton(context) },
         update = { googlePayButton ->
+            googlePayButton.initialize(
+                cornerRadius = cornerRadius,
+                allowCreditCards = allowCreditCards,
+                billingAddressParameters = billingAddressParameters
+            )
             googlePayButton.isEnabled = isEnabled
             googlePayButton.updateState(state)
             googlePayButton.setOnClickListener { onPressed() }
@@ -38,7 +55,6 @@ internal fun GooglePayButton(
 
 internal class GooglePayButton @JvmOverloads constructor(
     context: Context,
-    isDark: Boolean = false,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
@@ -53,61 +69,99 @@ internal class GooglePayButton @JvmOverloads constructor(
         // Call super so we don't inadvertently effect the primary button as well.
         super.setClickable(true)
         super.setEnabled(true)
-        viewBinding.googlePayPrimaryButton.backgroundTintList = null
-        viewBinding.googlePayPrimaryButton.finishedBackgroundColor = Color.TRANSPARENT
+    }
 
-        if (isDark) {
-            viewBinding.googlePayButtonLayout.updateLayoutParams {
-                height = context.resources.getDimensionPixelSize(
-                    R.dimen.stripe_paymentsheet_googlepay_light_button_height
-                )
-                val margin = context.resources.getDimensionPixelSize(
-                    R.dimen.stripe_paymentsheet_googlepay_light_button_margin
-                )
-                (this as LayoutParams).setMargins(margin, 0, margin, 0)
-            }
+    fun initialize(
+        cornerRadius: Int,
+        allowCreditCards: Boolean,
+        billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?
+    ) {
+        initializePrimaryButton()
+        val isDark = context.isSystemDarkTheme()
+        val allowedPaymentMethods = GooglePayJsonFactory(context)
+            .createIsReadyToPayRequest(
+                billingAddressParameters = billingAddressParameters,
+                allowCreditCards = allowCreditCards
+            ).getJSONArray(ALLOWED_PAYMENT_METHODS).toString()
 
-            viewBinding.googlePayButtonLayout.background = ContextCompat.getDrawable(
-                context,
-                R.drawable.googlepay_button_background_light
+        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) != 0) return
+
+        viewBinding.googlePayPaymentButton.initialize(
+            ButtonOptions.newBuilder()
+                .setButtonTheme(
+                    if (isDark) {
+                        ButtonConstants.ButtonTheme.LIGHT
+                    } else {
+                        ButtonConstants.ButtonTheme.DARK
+                    }
+                )
+                .setButtonType(ButtonConstants.ButtonType.PAY)
+                .setCornerRadius(cornerRadius)
+                .setAllowedPaymentMethods(allowedPaymentMethods)
+                .build()
+        )
+    }
+
+    private fun initializePrimaryButton() {
+        with(viewBinding.googlePayPrimaryButton) {
+            val isDark = context.isSystemDarkTheme()
+            setAppearanceConfiguration(
+                StripeTheme.primaryButtonStyle,
+                null
             )
-            viewBinding.googlePayButtonContent.setImageResource(
-                R.drawable.pay_with_googlepay_button_content_dark
-            )
-            viewBinding.googlePayPrimaryButton.setLockIconDrawable(
-                R.drawable.stripe_ic_lock_googlepay_dark
-            )
-            viewBinding.googlePayPrimaryButton.setIndicatorColor(
-                ContextCompat.getColor(
+            if (isDark) {
+                val backgroundColor = ContextCompat.getColor(
                     context,
-                    R.color.stripe_googlepay_color_dark,
+                    R.color.stripe_googlepay_color
                 )
-            )
-            viewBinding.googlePayPrimaryButton.setConfirmedIconDrawable(
-                R.drawable.stripe_ic_paymentsheet_primary_button_googlepay_checkmark_dark
-            )
-            viewBinding.googlePayPrimaryButton.setDefaultLabelColor(
-                ContextCompat.getColor(
+                finishedBackgroundColor = backgroundColor
+                backgroundTintList = ColorStateList.valueOf(backgroundColor)
+                setLockIconDrawable(
+                    R.drawable.stripe_ic_lock_googlepay_dark
+                )
+                setIndicatorColor(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.stripe_googlepay_color_dark,
+                    )
+                )
+                setConfirmedIconDrawable(
+                    R.drawable.stripe_ic_paymentsheet_primary_button_googlepay_checkmark_dark
+                )
+                setDefaultLabelColor(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.stripe_googlepay_color_dark
+                    )
+                )
+            } else {
+                val backgroundColor = ContextCompat.getColor(
                     context,
                     R.color.stripe_googlepay_color_dark
                 )
-            )
+                finishedBackgroundColor = backgroundColor
+                backgroundTintList = ColorStateList.valueOf(backgroundColor)
+            }
         }
     }
 
     private fun onReadyState() {
         viewBinding.googlePayPrimaryButton.isVisible = false
-        viewBinding.googlePayButtonContent.isVisible = true
+        viewBinding.googlePayPaymentButton.isVisible = true
     }
 
     private fun onStartProcessing() {
+        val padding = context.resources.getDimensionPixelSize(
+            R.dimen.stripe_paymentsheet_googlepay_button_bottom_padding
+        )
+        viewBinding.googlePayButtonLayout.updatePadding(bottom = padding)
         viewBinding.googlePayPrimaryButton.isVisible = true
-        viewBinding.googlePayButtonContent.isVisible = false
+        viewBinding.googlePayPaymentButton.isVisible = false
     }
 
     private fun onFinishProcessing() {
         viewBinding.googlePayPrimaryButton.isVisible = true
-        viewBinding.googlePayButtonContent.isVisible = false
+        viewBinding.googlePayPaymentButton.isVisible = false
     }
 
     override fun setEnabled(enabled: Boolean) {
