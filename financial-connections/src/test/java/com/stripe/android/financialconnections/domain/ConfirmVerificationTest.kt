@@ -34,7 +34,9 @@ internal class ConfirmVerificationTest {
 
         whenever(
             consumerSessionRepository.confirmConsumerVerification(
-                clientSecret, verificationCode, VerificationType.SMS
+                consumerSessionClientSecret = clientSecret,
+                verificationCode = verificationCode,
+                type = VerificationType.SMS
             )
         ).thenReturn(consumerSession)
 
@@ -56,7 +58,9 @@ internal class ConfirmVerificationTest {
 
         whenever(
             consumerSessionRepository.confirmConsumerVerification(
-                clientSecret, verificationCode, VerificationType.EMAIL
+                consumerSessionClientSecret = clientSecret,
+                verificationCode = verificationCode,
+                type = VerificationType.EMAIL
             )
         ).thenReturn(consumerSession)
 
@@ -78,7 +82,9 @@ internal class ConfirmVerificationTest {
 
         whenever(
             consumerSessionRepository.confirmConsumerVerification(
-                clientSecret, verificationCode, VerificationType.SMS
+                consumerSessionClientSecret = clientSecret,
+                verificationCode = verificationCode,
+                type = VerificationType.SMS
             )
         ).thenAnswer {
             throw InvalidRequestException(
@@ -105,7 +111,9 @@ internal class ConfirmVerificationTest {
 
         whenever(
             consumerSessionRepository.confirmConsumerVerification(
-                clientSecret, verificationCode, VerificationType.EMAIL
+                consumerSessionClientSecret = clientSecret,
+                verificationCode = verificationCode,
+                type = VerificationType.EMAIL
             )
         ).thenAnswer {
             throw InvalidRequestException(
@@ -132,7 +140,9 @@ internal class ConfirmVerificationTest {
 
         whenever(
             consumerSessionRepository.confirmConsumerVerification(
-                clientSecret, verificationCode, VerificationType.SMS
+                consumerSessionClientSecret = clientSecret,
+                verificationCode = verificationCode,
+                type = VerificationType.SMS
             )
         ).thenAnswer {
             throw InvalidRequestException(
@@ -159,7 +169,9 @@ internal class ConfirmVerificationTest {
 
         whenever(
             consumerSessionRepository.confirmConsumerVerification(
-                clientSecret, verificationCode, VerificationType.EMAIL
+                consumerSessionClientSecret = clientSecret,
+                verificationCode = verificationCode,
+                type = VerificationType.EMAIL
             )
         ).thenAnswer {
             throw InvalidRequestException(
@@ -177,5 +189,4 @@ internal class ConfirmVerificationTest {
         assertEquals(errorMessage, exception.message)
         assertEquals(OTPError.Type.EMAIL_CODE_EXPIRED, exception.type)
     }
-
 }
