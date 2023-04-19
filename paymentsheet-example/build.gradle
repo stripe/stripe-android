@@ -13,8 +13,7 @@ def getGooglePlacesApiKey() {
 }
 
 dependencies {
-    implementation project(':payments-core')
-    implementation project(':paymentsheet')
+    implementation project(':payments')
     implementation project(':stripecardscan')
     implementation project(':financial-connections')
 
