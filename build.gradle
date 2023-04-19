@@ -21,7 +21,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
-        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.13.0"
+        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.13.1"
         classpath 'com.karumi:shot:5.14.1'
         classpath 'app.cash.paparazzi:paparazzi-gradle-plugin:1.2.0'
         classpath 'com.google.gms:google-services:4.3.15'
