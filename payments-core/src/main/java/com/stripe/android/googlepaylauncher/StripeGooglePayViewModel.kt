@@ -73,17 +73,10 @@ internal class StripeGooglePayViewModel(
     ) = liveData {
         withContext(workContext) {
             emit(
-                runCatching {
-                    requireNotNull(
-                        stripeRepository.createPaymentMethod(
-                            params,
-                            ApiRequest.Options(
-                                publishableKey,
-                                stripeAccountId
-                            )
-                        )
-                    )
-                }
+                stripeRepository.createPaymentMethod(
+                    paymentMethodCreateParams = params,
+                    options = ApiRequest.Options(publishableKey, stripeAccountId),
+                )
             )
         }
     }

@@ -286,7 +286,7 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod = repository.createPaymentMethod(
             params,
             ApiRequest.Options(ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY)
-        )
+        ).getOrThrow()
         assertThat(paymentMethod?.type)
             .isEqualTo(PaymentMethod.Type.GrabPay)
     }
@@ -300,9 +300,8 @@ internal class PaymentMethodEndToEndTest {
         ).createPaymentMethod(
             PaymentMethodCreateParams.createPayPal(),
             ApiRequest.Options(ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY)
-        )
+        ).getOrThrow()
 
-        requireNotNull(paymentMethod)
         assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.PayPal)
     }

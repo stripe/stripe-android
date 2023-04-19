@@ -99,16 +99,10 @@ abstract class StripeRepository {
         options: ApiRequest.Options
     ): Result<SetupIntent>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     internal abstract suspend fun createSource(
         sourceParams: SourceParams,
         options: ApiRequest.Options
-    ): Source?
+    ): Result<Source>
 
     internal abstract suspend fun retrieveSource(
         sourceId: String,
@@ -116,29 +110,16 @@ abstract class StripeRepository {
         options: ApiRequest.Options
     ): Result<Source>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
-    ): PaymentMethod?
+    ): Result<PaymentMethod>
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class
-    )
     internal abstract suspend fun createToken(
         tokenParams: TokenParams,
         options: ApiRequest.Options
-    ): Token?
+    ): Result<Token>
 
     internal abstract suspend fun addCustomerSource(
         customerId: String,
@@ -256,7 +237,7 @@ abstract class StripeRepository {
     internal abstract suspend fun createFile(
         fileParams: StripeFileParams,
         requestOptions: ApiRequest.Options
-    ): StripeFile
+    ): Result<StripeFile>
 
     internal abstract suspend fun retrieveObject(
         url: String,
@@ -265,7 +246,7 @@ abstract class StripeRepository {
 
     internal abstract suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
-    ): RadarSession?
+    ): Result<RadarSession>
 
     // Link endpoints
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

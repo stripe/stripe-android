@@ -159,9 +159,9 @@ class StripeGooglePayViewModelTest {
             override suspend fun createPaymentMethod(
                 paymentMethodCreateParams: PaymentMethodCreateParams,
                 options: ApiRequest.Options
-            ): PaymentMethod? {
+            ): Result<PaymentMethod> {
                 requestOptions = options
-                return null
+                return Result.failure(NotImplementedError())
             }
         }
         val viewModel = StripeGooglePayViewModel(

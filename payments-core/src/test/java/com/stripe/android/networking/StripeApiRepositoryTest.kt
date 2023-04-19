@@ -1162,12 +1162,12 @@ internal class StripeApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenAnswer { throw UnknownHostException() }
 
-            assertFailsWith<APIConnectionException> {
-                create().createSource(
-                    SourceParams.createCardParams(CARD_PARAMS),
-                    DEFAULT_OPTIONS
-                )
-            }
+            val result = create().createSource(
+                SourceParams.createCardParams(CARD_PARAMS),
+                DEFAULT_OPTIONS
+            )
+
+            assertThat(result.exceptionOrNull()).isInstanceOf(APIConnectionException::class.java)
         }
 
     @Test
@@ -1521,9 +1521,7 @@ internal class StripeApiRepositoryTest {
                 ),
                 workContext = testDispatcher
             )
-            val radarSession = requireNotNull(
-                stripeRepository.createRadarSession(DEFAULT_OPTIONS)
-            )
+            val radarSession = stripeRepository.createRadarSession(DEFAULT_OPTIONS).getOrThrow()
             assertThat(radarSession.id)
                 .startsWith("rse_")
 
@@ -1542,10 +1540,8 @@ internal class StripeApiRepositoryTest {
                 workContext = testDispatcher
             )
 
-            val invalidRequestException = assertFailsWith<InvalidRequestException> {
-                stripeRepository.createRadarSession(DEFAULT_OPTIONS)
-            }
-            assertThat(invalidRequestException.message)
+            val result = stripeRepository.createRadarSession(DEFAULT_OPTIONS)
+            assertThat(result.exceptionOrNull()?.message)
                 .isEqualTo("Could not obtain fraud data required to create a Radar Session.")
         }
 
@@ -1556,10 +1552,8 @@ internal class StripeApiRepositoryTest {
 
             Stripe.advancedFraudSignalsEnabled = false
             val stripeRepository = create()
-            val invalidRequestException = assertFailsWith<InvalidRequestException> {
-                stripeRepository.createRadarSession(DEFAULT_OPTIONS)
-            }
-            assertThat(invalidRequestException.message)
+            val result = stripeRepository.createRadarSession(DEFAULT_OPTIONS)
+            assertThat(result.exceptionOrNull()?.message)
                 .isEqualTo("Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session.")
         }
 

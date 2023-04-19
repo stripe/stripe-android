@@ -2,7 +2,6 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
@@ -152,12 +151,10 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
     private suspend fun createPaymentMethod(
         params: PaymentMethodCreateParams,
     ): Result<PaymentMethod> {
-        return runCatching {
-            stripeRepository.createPaymentMethod(
-                paymentMethodCreateParams = params,
-                options = requestOptions,
-            ) ?: throw APIException(message = "Couldn't parse response when creating payment method")
-        }
+        return stripeRepository.createPaymentMethod(
+            paymentMethodCreateParams = params,
+            options = requestOptions,
+        )
     }
 
     private suspend fun handleClientSideConfirmation(

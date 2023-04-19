@@ -113,8 +113,8 @@ class DefaultIntentConfirmationInterceptorTest {
                 override suspend fun createPaymentMethod(
                     paymentMethodCreateParams: PaymentMethodCreateParams,
                     options: ApiRequest.Options
-                ): PaymentMethod {
-                    return PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                ): Result<PaymentMethod> {
+                    return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 }
             },
             publishableKeyProvider = { "pk" },
@@ -149,8 +149,8 @@ class DefaultIntentConfirmationInterceptorTest {
                 override suspend fun createPaymentMethod(
                     paymentMethodCreateParams: PaymentMethodCreateParams,
                     options: ApiRequest.Options
-                ): PaymentMethod? {
-                    throw apiException
+                ): Result<PaymentMethod> {
+                    return Result.failure(apiException)
                 }
             },
             publishableKeyProvider = { "pk" },

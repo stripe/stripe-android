@@ -106,8 +106,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun createSource(
         sourceParams: SourceParams,
         options: ApiRequest.Options
-    ): Source? {
-        return null
+    ): Result<Source> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveSource(
@@ -121,15 +121,15 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
-    ): PaymentMethod? {
-        return null
+    ): Result<PaymentMethod> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun createToken(
         tokenParams: TokenParams,
         options: ApiRequest.Options
-    ): Token? {
-        return null
+    ): Result<Token> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun addCustomerSource(
@@ -254,8 +254,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun createFile(
         fileParams: StripeFileParams,
         requestOptions: ApiRequest.Options
-    ): StripeFile {
-        return StripeFile()
+    ): Result<StripeFile> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun retrieveObject(
@@ -265,7 +265,9 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
 
     override suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
-    ) = RadarSession("rse_abc123")
+    ): Result<RadarSession> {
+        return Result.success(RadarSession("rse_abc123"))
+    }
 
     override suspend fun consumerSignUp(
         email: String,

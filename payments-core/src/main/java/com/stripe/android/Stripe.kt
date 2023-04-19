@@ -821,7 +821,7 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<PaymentMethod>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.createPaymentMethod(
                 paymentMethodCreateParams,
                 ApiRequest.Options(
@@ -868,7 +868,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrThrow()
         }
     }
 
@@ -976,7 +976,7 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<Source>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.createSource(
                 sourceParams,
                 ApiRequest.Options(
@@ -1029,7 +1029,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrThrow()
         }
     }
 
@@ -1179,20 +1179,15 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId
     ): Token? {
-        return try {
-            runBlocking {
-                stripeRepository.createToken(
-                    accountParams,
-                    ApiRequest.Options(
-                        apiKey = publishableKey,
-                        stripeAccount = stripeAccountId,
-                        idempotencyKey = idempotencyKey
-                    )
+        return runBlocking {
+            stripeRepository.createToken(
+                accountParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
                 )
-            }
-        } catch (exception: CardException) {
-            // Should never occur. CardException is only for card related requests.
-            null
+            ).getOrThrow()
         }
     }
 
@@ -1268,7 +1263,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrThrow()
         }
     }
 
@@ -1340,7 +1335,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrThrow()
         }
     }
 
@@ -1414,7 +1409,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrThrow()
         }
     }
 
@@ -1486,7 +1481,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrThrow()
         }
     }
 
@@ -1555,7 +1550,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrThrow()
         }
     }
 
@@ -1565,7 +1560,7 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.createToken(
                 tokenParams,
                 ApiRequest.Options(
@@ -1594,7 +1589,7 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<StripeFile>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.createFile(
                 fileParams,
                 ApiRequest.Options(
@@ -1629,7 +1624,7 @@ class Stripe internal constructor(
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
-            )
+            ).getOrThrow()
         }
     }
 
@@ -1650,7 +1645,7 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<RadarSession>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             stripeRepository.createRadarSession(
                 ApiRequest.Options(
                     apiKey = publishableKey,

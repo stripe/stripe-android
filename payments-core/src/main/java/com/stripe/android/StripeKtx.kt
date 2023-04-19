@@ -98,15 +98,15 @@ suspend fun Stripe.createPaymentMethod(
     paymentMethodCreateParams: PaymentMethodCreateParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): PaymentMethod = runApiRequest {
-    stripeRepository.createPaymentMethod(
+): PaymentMethod {
+    return stripeRepository.createPaymentMethod(
         paymentMethodCreateParams,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -137,15 +137,15 @@ suspend fun Stripe.createSource(
     sourceParams: SourceParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Source = runApiRequest {
-    stripeRepository.createSource(
+): Source {
+    return stripeRepository.createSource(
         sourceParams,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -176,15 +176,15 @@ suspend fun Stripe.createAccountToken(
     accountParams: AccountParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequest {
-    stripeRepository.createToken(
+): Token {
+    return stripeRepository.createToken(
         accountParams,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -215,15 +215,15 @@ suspend fun Stripe.createBankAccountToken(
     bankAccountTokenParams: BankAccountTokenParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequest {
-    stripeRepository.createToken(
+): Token {
+    return stripeRepository.createToken(
         bankAccountTokenParams,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -254,15 +254,15 @@ suspend fun Stripe.createPiiToken(
     personalId: String,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequest {
-    stripeRepository.createToken(
+): Token {
+    return stripeRepository.createToken(
         PiiTokenParams(personalId),
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -295,15 +295,15 @@ suspend fun Stripe.createCardToken(
     cardParams: CardParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequest {
-    stripeRepository.createToken(
+): Token {
+    return stripeRepository.createToken(
         cardParams,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -333,15 +333,15 @@ suspend fun Stripe.createCvcUpdateToken(
     @Size(min = 3, max = 4) cvc: String,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequest {
-    stripeRepository.createToken(
+): Token {
+    return stripeRepository.createToken(
         CvcTokenParams(cvc),
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -373,15 +373,15 @@ suspend fun Stripe.createPersonToken(
     params: PersonTokenParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequest {
-    stripeRepository.createToken(
+): Token {
+    return stripeRepository.createToken(
         params,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -414,15 +414,15 @@ suspend fun Stripe.createFile(
     fileParams: StripeFileParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): StripeFile = runApiRequest {
-    stripeRepository.createFile(
+): StripeFile {
+    return stripeRepository.createFile(
         fileParams,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
@@ -444,14 +444,12 @@ suspend fun Stripe.createFile(
     APIException::class
 )
 suspend fun Stripe.createRadarSession(): RadarSession {
-    return runApiRequest {
-        stripeRepository.createRadarSession(
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            )
+    return stripeRepository.createRadarSession(
+        ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId
         )
-    }
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
