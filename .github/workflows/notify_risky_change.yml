@@ -1,0 +1,27 @@
+name: CI
+on:
+  pull_request:
+    paths:
+      - 'paymentsheet-example/build.gradle'
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: peter-evans/find-comment@v2
+        id: find_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: Risky Change
+      - uses: peter-evans/create-or-update-comment@v2
+        with:
+          body: |
+            Risky Change
+            
+            This is considered a risky change, please review carefully.
+          edit-mode: replace
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
