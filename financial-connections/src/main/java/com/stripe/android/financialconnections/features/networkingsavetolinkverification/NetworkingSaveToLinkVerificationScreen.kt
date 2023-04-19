@@ -46,7 +46,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -134,9 +133,8 @@ private fun NetworkingSaveToLinkVerificationLoaded(
         VerificationSection(
             focusRequester = focusRequester,
             otpElement = payload.otpElement,
-            confirmVerificationError = (confirmVerificationAsync as? Fail)?.error,
-            verificationType = VerificationType.SMS,
-            enabled = confirmVerificationAsync !is Loading
+            enabled = confirmVerificationAsync !is Loading,
+            confirmVerificationError = (confirmVerificationAsync as? Fail)?.error
         )
         Spacer(modifier = Modifier.size(24.dp))
         EmailSubtext(payload.email)

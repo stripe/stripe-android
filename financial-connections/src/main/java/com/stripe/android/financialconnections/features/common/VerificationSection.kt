@@ -14,15 +14,15 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
+import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError.Type
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
-import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementUI
 
@@ -31,7 +31,6 @@ internal fun VerificationSection(
     focusRequester: FocusRequester,
     otpElement: OTPElement,
     enabled: Boolean,
-    verificationType: VerificationType,
     confirmVerificationError: Throwable?,
 ) {
     Column {
@@ -42,11 +41,10 @@ internal fun VerificationSection(
                 element = otpElement
             )
         }
-        if (confirmVerificationError != null) {
+        if (confirmVerificationError is OTPError) {
             Spacer(modifier = Modifier.size(4.dp))
             VerificationErrorText(
                 error = confirmVerificationError,
-                verificationType = verificationType
             )
         }
     }
@@ -57,8 +55,7 @@ internal fun VerificationSection(
  */
 @Composable
 private fun VerificationErrorText(
-    error: Throwable,
-    verificationType: VerificationType
+    error: OTPError,
 ) {
     val uriHandler = LocalUriHandler.current
     Row {
@@ -72,7 +69,7 @@ private fun VerificationErrorText(
         )
         AnnotatedText(
             modifier = Modifier.padding(horizontal = 4.dp),
-            text = getVerificationErrorMessage(error = error, verificationType = verificationType),
+            text = error.toMessage(),
             defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
                 color = FinancialConnectionsTheme.colors.textCritical
             ),
@@ -89,23 +86,10 @@ private fun VerificationErrorText(
     }
 }
 
-private fun getVerificationErrorMessage(
-    error: Throwable,
-    verificationType: VerificationType
-): TextResource {
-    return when ((error as? StripeException)?.stripeError?.code ?: "") {
-        "consumer_verification_code_invalid" -> TextResource.StringId(
-            R.string.stripe_verification_codeInvalid
-        )
-        "consumer_session_expired",
-        "consumer_verification_expired",
-        "consumer_verification_max_attempts_exceeded" -> TextResource.StringId(
-            when (verificationType) {
-                VerificationType.EMAIL -> R.string.stripe_verification_codeExpiredEmail
-                VerificationType.SMS -> R.string.stripe_verification_codeExpiredSms
-            }
-        )
-
-        else -> TextResource.StringId(R.string.stripe_verification_unexpectedError)
+private fun OTPError.toMessage(): TextResource = TextResource.StringId(
+    when (type) {
+        Type.EMAIL_CODE_EXPIRED -> R.string.stripe_verification_codeExpiredEmail
+        Type.SMS_CODE_EXPIRED -> R.string.stripe_verification_codeExpiredSms
+        Type.CODE_INVALID -> R.string.stripe_verification_codeInvalid
     }
-}
+)
