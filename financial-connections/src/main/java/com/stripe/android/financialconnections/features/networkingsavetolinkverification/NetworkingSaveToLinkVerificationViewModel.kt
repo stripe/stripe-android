@@ -88,10 +88,10 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
                 goNext(Pane.SUCCESS)
             },
             onFail = { error ->
+                logger.error("Error confirming verification", error)
+                eventTracker.track(Error(PANE, error))
                 if (error !is OTPError) {
                     saveToLinkWithStripeSucceeded.set(false)
-                    logger.error("Error confirming verification", error)
-                    eventTracker.track(Error(PANE, error))
                     goNext(Pane.SUCCESS)
                 }
             },
