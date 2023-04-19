@@ -1,4 +1,4 @@
-name: CI
+name: Notify Risky Change
 on:
   pull_request:
     types: [opened, labeled, unlabeled, synchronize]
