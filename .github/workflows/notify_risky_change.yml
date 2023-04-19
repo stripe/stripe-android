@@ -1,6 +1,7 @@
 name: CI
 on:
   pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
     paths:
       - 'example/build.gradle'
       - '**-example/build.gradle'
@@ -24,7 +25,7 @@ jobs:
             This is considered a risky change because it adjusts the sample app build.gradle, please review carefully.
             We've seen issues in the past which resulted in failed builds for merchants. Please make sure the build.gradle change is intended.
             
-            - [ ] I acknowledge that I'm changing an example app and have verified that the SDK remains in a shippable state.
+            By adding the label `accept-risky-change` to this PR, I acknowledge that I'm changing an example app and have verified that the SDK remains in a shippable state.
           edit-mode: replace
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
