@@ -31,5 +31,5 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Fail if not accepted
-        if: ${{ !contains(github.event.issue.labels.*.name, 'accept-risky-change') }}
+        if: ${{ contains(github.event.issue.labels.*.name, 'accept-risky-change') == false }}
         run: exit 1
