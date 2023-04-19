@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import org.mockito.kotlin.mock
 
 internal object PaymentSheetFixtures {
@@ -64,11 +63,11 @@ internal object PaymentSheetFixtures {
                 )
             )
         ),
-        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = true,
         )
     )
@@ -94,11 +93,11 @@ internal object PaymentSheetFixtures {
 
     internal val CONFIG_BILLING_DETAILS_COLLECTION = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
-        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = true,
         )
     )

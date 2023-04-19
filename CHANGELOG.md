@@ -2,8 +2,18 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.23.1 - 2023-04-17
+
+### PaymentSheet
+* [FIXED][6551](https://github.com/stripe/stripe-android/pull/6551) Fixed a build issue where `BillingDetailsCollectionConfiguration` couldn't be found in the classpath. If you worked around this issue by importing `payments-ui-core` directly, undo this change and update the import of `BillingDetailsCollectionConfiguration` to `com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration`.
+
+## 20.23.0 - 2023-04-17
+
 ### PaymentSheet
 * [ADDED] Added `billingDetailsCollectionConfiguration` to configure how you want to collect billing details. See the docs [here](https://stripe.com/docs/payments/accept-a-payment?platform=android&ui=payment-sheet#billing-details-collection).
+
+### Identity
+* [ADDED][6536](https://github.com/stripe/stripe-android/pull/6536) Added test mode for the SDK.
 
 ## 20.22.0 - 2023-04-10
 

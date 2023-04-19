@@ -3,7 +3,6 @@ package com.stripe.android.test.core
 import android.app.Activity
 import android.app.Application
 import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
@@ -19,7 +18,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.IdlingPolicies
-import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
@@ -45,7 +43,6 @@ import java.util.concurrent.TimeUnit
 class PlaygroundTestDriver(
     private val device: UiDevice,
     private val composeTestRule: ComposeTestRule,
-    private val basicScreenCaptureProcessor: MyScreenCaptureProcessor,
 ) : ScreenshotTest {
     private var resultValue: String? = null
     private lateinit var testParameters: TestParameters
@@ -205,25 +202,11 @@ class PlaygroundTestDriver(
 
         selectors.paymentSelection.click()
 
-        // This takes a screenshot so that translation strings of placeholders
-        // and labels and design can all be verified
-        takeScreenShot(
-            fileName = "${selectors.baseScreenshotFilenamePrefix}-beforeText",
-            testParameters.takeScreenshotOnLpmLoad
-        )
-
         FieldPopulator(
             selectors,
             testParameters,
             populateCustomLpmFields,
         ).populateFields()
-
-        // This takes a screenshot so that design and style can be verified after
-        // user input is entered.
-        takeScreenShot(
-            fileName = "${selectors.baseScreenshotFilenamePrefix}-afterText",
-            testParameters.takeScreenshotOnLpmLoad
-        )
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
@@ -464,19 +447,6 @@ class PlaygroundTestDriver(
         if (isDone) {
             waitForPlaygroundActivity()
             assertThat(resultValue).isEqualTo("Success")
-        }
-    }
-
-    private fun takeScreenShot(
-        fileName: String,
-        takeScreenshotOnLpmLoad: Boolean
-    ) {
-        if (takeScreenshotOnLpmLoad) {
-            val capture = Screenshot.capture()
-            capture.name = fileName
-            capture.format = Bitmap.CompressFormat.PNG
-
-            capture.process(setOf(basicScreenCaptureProcessor))
         }
     }
 

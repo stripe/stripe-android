@@ -17,7 +17,6 @@ import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.LinkState
-import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
@@ -38,12 +37,11 @@ class TestFieldPopulation {
 
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
-    private val screenshotProcessor = MyScreenCaptureProcessor()
 
     @Before
     fun before() {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        testDriver = PlaygroundTestDriver(device, rules.compose, screenshotProcessor)
+        testDriver = PlaygroundTestDriver(device, rules.compose)
     }
 
     private val sepaDebit = TestParameters(

@@ -144,6 +144,7 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onInit(
             configuration = eq(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY),
             isServerSideConfirmation = any(),
+            isDecoupling = eq(false),
         )
     }
 
@@ -461,7 +462,8 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter)
                 .onPaymentSuccess(
                     paymentSelection = selection,
-                    currency = "usd"
+                    currency = "usd",
+                    isDecoupling = false,
                 )
             assertThat(prefsRepository.paymentSelectionArgs)
                 .containsExactly(selection)
@@ -509,7 +511,8 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter)
                 .onPaymentSuccess(
                     paymentSelection = selection,
-                    currency = "usd"
+                    currency = "usd",
+                    isDecoupling = false,
                 )
 
             assertThat(prefsRepository.paymentSelectionArgs).isEmpty()
@@ -535,7 +538,8 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter)
                 .onPaymentFailure(
                     paymentSelection = selection,
-                    currency = "usd"
+                    currency = "usd",
+                    isDecoupling = false,
                 )
 
             val stripeIntent = awaitItem()
@@ -966,7 +970,8 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(false),
             activeLinkSession = eq(false),
-            currency = eq("usd")
+            currency = eq("usd"),
+            isDecoupling = eq(false),
         )
 
         receiver.cancelAndIgnoreRemainingEvents()
@@ -989,7 +994,8 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(true),
             activeLinkSession = eq(false),
-            currency = eq("usd")
+            currency = eq("usd"),
+            isDecoupling = eq(false),
         )
 
         receiver.cancelAndIgnoreRemainingEvents()
@@ -1012,7 +1018,8 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(true),
             activeLinkSession = eq(true),
-            currency = eq("usd")
+            currency = eq("usd"),
+            isDecoupling = eq(false),
         )
 
         receiver.cancelAndIgnoreRemainingEvents()
@@ -1030,7 +1037,8 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onShowExistingPaymentOptions(
             linkEnabled = eq(false),
             activeLinkSession = eq(false),
-            currency = eq("usd")
+            currency = eq("usd"),
+            isDecoupling = eq(false),
         )
 
         viewModel.transitionToAddPaymentScreen()
@@ -1038,7 +1046,8 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(false),
             activeLinkSession = eq(false),
-            currency = eq("usd")
+            currency = eq("usd"),
+            isDecoupling = eq(false),
         )
 
         receiver.cancelAndIgnoreRemainingEvents()
@@ -1284,6 +1293,7 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
             isServerSideConfirmation = eq(false),
+            isDecoupling = eq(false),
         )
     }
 
@@ -1298,6 +1308,7 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
+            isDecoupling = eq(true),
             isServerSideConfirmation = eq(false),
         )
     }
@@ -1314,6 +1325,7 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
+            isDecoupling = eq(true),
             isServerSideConfirmation = eq(true),
         )
     }

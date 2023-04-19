@@ -200,13 +200,13 @@ internal class PaymentLauncherViewModel @Inject constructor(
     @VisibleForTesting
     internal fun onPaymentFlowResult(paymentFlowResult: PaymentFlowResult.Unvalidated) {
         viewModelScope.launch {
-            runCatching {
-                if (isPaymentIntent) {
-                    lazyPaymentIntentFlowResultProcessor.get()
-                } else {
-                    lazySetupIntentFlowResultProcessor.get()
-                }.processResult(paymentFlowResult)
-            }.fold(
+            val resultProcessor = if (isPaymentIntent) {
+                lazyPaymentIntentFlowResultProcessor.get()
+            } else {
+                lazySetupIntentFlowResultProcessor.get()
+            }
+
+            resultProcessor.processResult(paymentFlowResult).fold(
                 onSuccess = {
                     withContext(uiContext) {
                         postResult(it)

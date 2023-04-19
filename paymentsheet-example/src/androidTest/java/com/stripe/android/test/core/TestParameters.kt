@@ -2,7 +2,6 @@ package com.stripe.android.test.core
 
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 
 /**
@@ -24,7 +23,6 @@ data class TestParameters(
     val saveForFutureUseCheckboxVisible: Boolean,
     val useBrowser: Browser? = null,
     val authorizationAction: AuthorizeAction? = null,
-    val takeScreenshotOnLpmLoad: Boolean = false,
     val forceDarkMode: Boolean? = null,
     val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
     val snapshotReturningCustomer: Boolean = false,
@@ -32,10 +30,10 @@ data class TestParameters(
     val supportedPaymentMethods: List<PaymentMethodCode> = listOf(),
     val customPrimaryButtonLabel: String? = null,
     val attachDefaults: Boolean = false,
-    val collectName: BillingDetailsCollectionConfiguration.CollectionMode = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-    val collectEmail: BillingDetailsCollectionConfiguration.CollectionMode = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-    val collectPhone: BillingDetailsCollectionConfiguration.CollectionMode = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-    val collectAddress: BillingDetailsCollectionConfiguration.AddressCollectionMode = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+    val collectName: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+    val collectEmail: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+    val collectPhone: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+    val collectAddress: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
 )
 
 /**

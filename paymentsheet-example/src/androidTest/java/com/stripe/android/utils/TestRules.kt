@@ -2,9 +2,7 @@ package com.stripe.android.utils
 
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
-import com.stripe.android.test.core.TestWatcher
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
 import org.junit.rules.Timeout
@@ -33,10 +31,8 @@ class TestRules private constructor(
         ): TestRules {
             val composeTestRule = createEmptyComposeRule()
 
-            val chain = RuleChain
-                .outerRule(Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS))
+            val chain = RuleChain.emptyRuleChain()
                 .around(composeTestRule)
-                .around(TestWatcher())
                 .let { chain ->
                     if (disableAnimations) {
                         chain.around(DisableAnimationsRule())
@@ -45,6 +41,8 @@ class TestRules private constructor(
                     }
                 }
                 .around(RetryRule(retryCount))
+                .around(Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS))
+                .around(CleanupChromeRule)
 
             return TestRules(chain, composeTestRule)
         }

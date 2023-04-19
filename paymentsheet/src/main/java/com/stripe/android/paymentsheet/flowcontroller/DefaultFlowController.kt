@@ -102,6 +102,12 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private var paymentLauncher: StripePaymentLauncher? = null
 
+    private val isDecoupling: Boolean
+        get() {
+            val initMode = viewModel.previousConfigureRequest?.initializationMode
+            return initMode is PaymentSheet.InitializationMode.DeferredIntent
+        }
+
     override var shippingDetails: AddressDetails?
         get() = viewModel.state?.config?.shippingDetails
         set(value) {
@@ -372,8 +378,9 @@ internal class DefaultFlowController @Inject internal constructor(
                     },
                     onFailure = {
                         eventReporter.onPaymentFailure(
-                            PaymentSelection.GooglePay,
-                            viewModel.state?.stripeIntent?.currency
+                            paymentSelection = PaymentSelection.GooglePay,
+                            currency = viewModel.state?.stripeIntent?.currency,
+                            isDecoupling = isDecoupling,
                         )
                         paymentResultCallback.onPaymentSheetResult(
                             PaymentSheetResult.Failed(it)
@@ -383,8 +390,9 @@ internal class DefaultFlowController @Inject internal constructor(
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 eventReporter.onPaymentFailure(
-                    PaymentSelection.GooglePay,
-                    viewModel.state?.stripeIntent?.currency
+                    paymentSelection = PaymentSelection.GooglePay,
+                    currency = viewModel.state?.stripeIntent?.currency,
+                    isDecoupling = isDecoupling,
                 )
                 paymentResultCallback.onPaymentSheetResult(
                     PaymentSheetResult.Failed(
@@ -457,12 +465,14 @@ internal class DefaultFlowController @Inject internal constructor(
                 eventReporter.onPaymentSuccess(
                     paymentSelection = viewModel.paymentSelection,
                     currency = viewModel.state?.stripeIntent?.currency,
+                    isDecoupling = isDecoupling,
                 )
             }
             is PaymentResult.Failed -> {
                 eventReporter.onPaymentFailure(
                     paymentSelection = viewModel.paymentSelection,
                     currency = viewModel.state?.stripeIntent?.currency,
+                    isDecoupling = isDecoupling,
                 )
             }
             else -> {

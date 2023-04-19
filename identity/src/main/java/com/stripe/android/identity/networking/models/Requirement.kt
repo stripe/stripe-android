@@ -1,15 +1,20 @@
 package com.stripe.android.identity.networking.models
 
+import android.content.Context
+import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.DocSelectionDestination
 import com.stripe.android.identity.navigation.DriverLicenseScanDestination
 import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
 import com.stripe.android.identity.navigation.IDScanDestination
 import com.stripe.android.identity.navigation.IDUploadDestination
+import com.stripe.android.identity.navigation.IdentityTopLevelDestination
 import com.stripe.android.identity.navigation.IndividualDestination
+import com.stripe.android.identity.navigation.IndividualWelcomeDestination
 import com.stripe.android.identity.navigation.PassportScanDestination
 import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.navigation.SelfieDestination
+import com.stripe.android.identity.navigation.finalErrorDestination
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -85,6 +90,42 @@ internal enum class Requirement {
                 }
                 DOB, NAME, IDNUMBER, ADDRESS -> {
                     fromRoute == IndividualDestination.ROUTE.route
+                }
+            }
+
+        /**
+         * Infers the next destination based on a list of Requirements.
+         */
+        fun List<Requirement>?.nextDestination(context: Context): IdentityTopLevelDestination =
+            when {
+                this == null -> {
+                    context.finalErrorDestination()
+                }
+                // BIOMETRICCONSENT is present when type is DOCUMENT
+                contains(BIOMETRICCONSENT) -> {
+                    ConsentDestination
+                }
+                intersect(listOf(IDDOCUMENTTYPE, IDDOCUMENTFRONT, IDDOCUMENTBACK)).isNotEmpty() -> {
+                    DocSelectionDestination
+                }
+
+                contains(FACE) -> {
+                    SelfieDestination
+                }
+                // NAME and DOB is present when type is not DOCUMENT
+                intersect(listOf(NAME, DOB)).isNotEmpty() -> {
+                    IndividualWelcomeDestination
+                }
+                // If NAME and ODB is not present but IDNUMBER or ADDRESS is present,
+                // then type is DOCUMENT, user has already uploaded document and selfie.
+                intersect(listOf(IDNUMBER, ADDRESS)).isNotEmpty() -> {
+                    IndividualDestination
+                }
+                isEmpty() -> {
+                    ConfirmationDestination
+                }
+                else -> {
+                    context.finalErrorDestination()
                 }
             }
     }

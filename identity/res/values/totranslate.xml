@@ -2,4 +2,26 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <!-- Content description for camera icon -->
     <string name="description_camera">camera icon</string>
+    <string name="test_model_title">You\'re currently in testmode</string>
+    <string name="test_model_content">This page is only shown in testmode.</string>
+    <string name="complete_with_test_data">Complete with test data</string>
+    <string name="complete_with_test_data_details"><![CDATA[Save time by choosing a desired result and completing instantly with that outcome. The mobile SDK flow will return with result <b>Completed</b>.]]></string>
+
+    <string name="verification_success">Verification success</string>
+    <string name="verification_failure">Verification failure</string>
+    <string name="verification_success_async">Verification success async</string>
+    <string name="verification_failure_async">Verification failure async</string>
+    <string name="submit">SUBMIT</string>
+
+    <string name="finish_mobile_flow">Terminate mobile SDK flow</string>
+    <string name="finish_mobile_flow_details"><![CDATA[Terminate mobile SDK flow locally with <b>Completed</b>, <b>Canceled</b> or <b>Failed</b> without changing the verification session on server.]]></string>
+
+    <string name="failure_from_test_mode">Failure from test mode</string>
+    <string name="completed">COMPLETED</string>
+    <string name="cancelled">CANCELLED</string>
+    <string name="failed">FAILED</string>
+
+    <string name="preview_user_experience">Preview user experience</string>
+    <string name="preview_user_experience_details">Proceed to preview as an end user. Information provided will not be verified.</string>
+    <string name="proceed">PROCEED</string>
 </resources>

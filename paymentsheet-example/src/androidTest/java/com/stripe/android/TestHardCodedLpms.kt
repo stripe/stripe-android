@@ -5,7 +5,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
@@ -15,7 +15,6 @@ import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.LinkState
-import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
@@ -38,10 +37,6 @@ class TestHardCodedLpms {
     private lateinit var testDriver: PlaygroundTestDriver
 
     companion object {
-        // There exists only one screenshot processor so that all tests put
-        // their files in the same directory.
-        private val screenshotProcessor = MyScreenCaptureProcessor()
-
         private val lpmRepository = initializedLpmRepository(
             context = InstrumentationRegistry.getInstrumentation().targetContext,
         )
@@ -50,7 +45,7 @@ class TestHardCodedLpms {
     @Before
     fun before() {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        testDriver = PlaygroundTestDriver(device, rules.compose, screenshotProcessor)
+        testDriver = PlaygroundTestDriver(device, rules.compose)
     }
 
     private val newUser = TestParameters(
@@ -68,7 +63,6 @@ class TestHardCodedLpms {
         saveForFutureUseCheckboxVisible = false,
         useBrowser = null,
         authorizationAction = AuthorizeAction.Authorize,
-        takeScreenshotOnLpmLoad = true,
         merchantCountryCode = "GB"
     )
 
@@ -97,10 +91,10 @@ class TestHardCodedLpms {
                 saveForFutureUseCheckboxVisible = true,
                 saveCheckboxValue = false,
                 attachDefaults = false,
-                collectName = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                collectEmail = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                collectPhone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                collectAddress = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                collectName = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                collectEmail = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                collectPhone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                collectAddress = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             ),
         )
     }

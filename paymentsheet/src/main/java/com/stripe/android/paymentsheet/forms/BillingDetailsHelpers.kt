@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.AddressCollectionMode
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.CollectionMode
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
@@ -17,9 +17,8 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
 
@@ -29,9 +28,9 @@ internal object BillingDetailsHelpers {
      */
     internal fun specsForConfiguration(
         specs: List<FormItemSpec>,
-        configuration: BillingDetailsCollectionConfiguration,
+        configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
     ): List<FormItemSpec> {
-        var billingDetailsPlaceholders = mutableListOf(
+        val billingDetailsPlaceholders = mutableListOf(
             PlaceholderField.Name,
             PlaceholderField.Email,
             PlaceholderField.Phone,
@@ -87,7 +86,7 @@ internal object BillingDetailsHelpers {
     @VisibleForTesting
     internal fun specForPlaceholderField(
         field: PlaceholderField,
-        configuration: BillingDetailsCollectionConfiguration,
+        configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
     ) = when (field) {
         PlaceholderField.Name -> NameSpec().takeIf {
             configuration.name == CollectionMode.Always
@@ -121,31 +120,34 @@ internal object BillingDetailsHelpers {
             phoneNumberElement = it
         }
 
-        elementsFlow.flatMapConcat { elementsList ->
-            // Look for a standalone CountryElement.
-            // Note that this should be done first, because AddressElement always has a
-            // CountryElement, but it might be hidden.
-            var countryElement = elementsList
-                .filterIsInstance<SectionElement>()
-                .flatMap { it.fields }
-                .filterIsInstance<CountryElement>()
-                .firstOrNull()
-
-            // If not found, look for one inside an AddressElement.
-            if (countryElement == null) {
-                countryElement = elementsList
+        elementsFlow
+            .flatMapConcat { elementsList ->
+                // Look for a standalone CountryElement.
+                // Note that this should be done first, because AddressElement always has a
+                // CountryElement, but it might be hidden.
+                var countryElement = elementsList
                     .filterIsInstance<SectionElement>()
                     .flatMap { it.fields }
-                    .filterIsInstance<AddressElement>()
+                    .filterIsInstance<CountryElement>()
                     .firstOrNull()
-                    ?.countryElement
-            }
 
-            countryElement?.controller?.rawFieldValue ?: emptyFlow()
-        }.collect {
-            it?.let {
-                phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
+                // If not found, look for one inside an AddressElement.
+                if (countryElement == null) {
+                    countryElement = elementsList
+                        .filterIsInstance<SectionElement>()
+                        .flatMap { it.fields }
+                        .filterIsInstance<AddressElement>()
+                        .firstOrNull()
+                        ?.countryElement
+                }
+
+                countryElement?.controller?.rawFieldValue ?: emptyFlow()
             }
-        }
+            .filterNotNull()
+            .collect {
+                if (phoneNumberElement?.controller?.getLocalNumber().isNullOrBlank()) {
+                    phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
+                }
+            }
     }
 }

@@ -12,8 +12,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class Init(
         private val mode: EventReporter.Mode,
         private val configuration: PaymentSheet.Configuration?,
+        private val isDecoupled: Boolean,
         private val isServerSideConfirmation: Boolean,
     ) : PaymentSheetEvent() {
+
         override val eventName: String
             get() {
                 val configValue = listOfNotNull(
@@ -22,6 +24,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 ).takeUnless { it.isEmpty() }?.joinToString(separator = "_") ?: "default"
                 return formatEventName(mode, "init_$configValue")
             }
+
         override val additionalParams: Map<String, Any?>
             get() {
                 val primaryButtonConfig = configuration?.appearance?.primaryButton
@@ -106,30 +109,36 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
+                    FIELD_IS_DECOUPLED to isDecoupled,
                     "locale" to Locale.getDefault().toString()
                 )
             }
     }
 
     class Dismiss(
-        mode: EventReporter.Mode
+        mode: EventReporter.Mode,
+        isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "dismiss")
-        override val additionalParams: Map<String, Any> = mapOf()
+        override val additionalParams: Map<String, Any> = mapOf(
+            FIELD_IS_DECOUPLED to isDecoupled,
+        )
     }
 
     class ShowNewPaymentOptionForm(
         mode: EventReporter.Mode,
         linkEnabled: Boolean,
         activeLinkSession: Boolean,
-        currency: String?
+        currency: String?,
+        isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_newpm_show")
         override val additionalParams: Map<String, Any?> = mapOf(
             "link_enabled" to linkEnabled,
             "active_link_session" to activeLinkSession,
             "locale" to Locale.getDefault().toString(),
-            "currency" to currency
+            "currency" to currency,
+            FIELD_IS_DECOUPLED to isDecoupled,
         )
     }
 
@@ -138,26 +147,30 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         linkEnabled: Boolean,
         activeLinkSession: Boolean,
         currency: String?,
+        isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_savedpm_show")
         override val additionalParams: Map<String, Any?> = mapOf(
             "link_enabled" to linkEnabled,
             "active_link_session" to activeLinkSession,
             "locale" to Locale.getDefault().toString(),
-            "currency" to currency
+            "currency" to currency,
+            FIELD_IS_DECOUPLED to isDecoupled,
         )
     }
 
     class SelectPaymentOption(
         mode: EventReporter.Mode,
         paymentSelection: PaymentSelection?,
-        currency: String?
+        currency: String?,
+        isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String =
             formatEventName(mode, "paymentoption_${analyticsValue(paymentSelection)}_select")
         override val additionalParams: Map<String, Any?> = mapOf(
             "locale" to Locale.getDefault().toString(),
             "currency" to currency,
+            FIELD_IS_DECOUPLED to isDecoupled,
         )
     }
 
@@ -166,7 +179,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         result: Result,
         durationMillis: Long?,
         paymentSelection: PaymentSelection?,
-        currency: String?
+        currency: String?,
+        isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String =
             formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_$result")
@@ -175,6 +189,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 "duration" to durationMillis?.div(1000f),
                 "locale" to Locale.getDefault().toString(),
                 "currency" to currency,
+                FIELD_IS_DECOUPLED to isDecoupled,
             )
 
         enum class Result(private val code: String) {
@@ -185,21 +200,28 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         }
     }
 
-    class LpmSerializeFailureEvent : PaymentSheetEvent() {
-        override val additionalParams: Map<String, Any?>
-            get() = emptyMap()
+    class LpmSerializeFailureEvent(
+        isDecoupled: Boolean,
+    ) : PaymentSheetEvent() {
         override val eventName: String = "luxe_serialize_failure"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_IS_DECOUPLED to isDecoupled,
+        )
     }
 
-    class AutofillEvent(type: String) : PaymentSheetEvent() {
+    class AutofillEvent(
+        type: String,
+        isDecoupled: Boolean,
+    ) : PaymentSheetEvent() {
         private fun String.toSnakeCase() = replace(
             "(?<=.)(?=\\p{Upper})".toRegex(),
             "_"
         ).lowercase()
 
-        override val additionalParams: Map<String, Any?>
-            get() = emptyMap()
         override val eventName: String = "autofill_${type.toSnakeCase()}"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_IS_DECOUPLED to isDecoupled,
+        )
     }
 
     internal companion object {
@@ -235,6 +257,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_PRIMARY_BUTTON = "primary_button"
         const val FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION =
             "billing_details_collection_configuration"
+        const val FIELD_IS_DECOUPLED = "is_decoupled"
         const val FIELD_IS_SERVER_SIDE_CONFIRMATION = "is_server_side_confirmation"
         const val FIELD_ATTACH_DEFAULTS = "attach_defaults"
         const val FIELD_COLLECT_NAME = "name"

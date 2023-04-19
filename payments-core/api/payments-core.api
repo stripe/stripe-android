@@ -178,6 +178,9 @@ public final class com/stripe/android/EphemeralOperation$RetrieveKey$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public abstract interface annotation class com/stripe/android/ExperimentalPaymentSheetDecouplingApi : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/GooglePayConfig {
 	public static final field $stable I
 	public fun <init> (Landroid/content/Context;)V

@@ -18,13 +18,12 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.AddressCollectionMode
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -332,7 +331,7 @@ class USBankAccountFormViewModelTest {
                             phone = CUSTOMER_PHONE,
                             address = CUSTOMER_ADDRESS,
                         ),
-                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                             attachDefaultsToPaymentMethod = true,
                             name = CollectionMode.Never,
                             email = CollectionMode.Never,
@@ -366,7 +365,7 @@ class USBankAccountFormViewModelTest {
                             phone = CUSTOMER_PHONE,
                             address = CUSTOMER_ADDRESS,
                         ),
-                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                             attachDefaultsToPaymentMethod = false,
                             name = CollectionMode.Always,
                             email = CollectionMode.Always,
@@ -398,7 +397,7 @@ class USBankAccountFormViewModelTest {
                             phone = CUSTOMER_PHONE,
                             address = CUSTOMER_ADDRESS,
                         ),
-                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                             attachDefaultsToPaymentMethod = false,
                             name = CollectionMode.Automatic,
                             email = CollectionMode.Automatic,
@@ -428,7 +427,7 @@ class USBankAccountFormViewModelTest {
                             name = CUSTOMER_NAME,
                             email = CUSTOMER_EMAIL,
                         ),
-                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                             attachDefaultsToPaymentMethod = true,
                             name = CollectionMode.Always,
                             email = CollectionMode.Always,
@@ -450,7 +449,7 @@ class USBankAccountFormViewModelTest {
 
     @Test
     fun `Test phone country changes with country`() = runTest(UnconfinedTestDispatcher()) {
-        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
             name = CollectionMode.Always,
             email = CollectionMode.Always,
             phone = CollectionMode.Always,

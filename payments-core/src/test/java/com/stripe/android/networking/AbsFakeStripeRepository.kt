@@ -114,8 +114,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         sourceId: String,
         clientSecret: String,
         options: ApiRequest.Options
-    ): Source? {
-        return null
+    ): Result<Source> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun createPaymentMethod(

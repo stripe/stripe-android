@@ -141,6 +141,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val isProcessingPaymentIntent
         get() = args.initializationMode.isProcessingPayment
 
+    private val isDecoupling: Boolean
+        get() = args.initializationMode is PaymentSheet.InitializationMode.DeferredIntent
+
     override var newPaymentSelection: PaymentSelection.New? = null
 
     private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
@@ -199,12 +202,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-        val isServerSideConfirmation =
-            args.initializationMode is PaymentSheet.InitializationMode.DeferredIntent &&
-                IntentConfirmationInterceptor.createIntentCallback is CreateIntentCallbackForServerSideConfirmation
+        val isServerSideConfirmation = isDecoupling &&
+            IntentConfirmationInterceptor.createIntentCallback is CreateIntentCallbackForServerSideConfirmation
 
         eventReporter.onInit(
             configuration = config,
+            isDecoupling = isDecoupling,
             isServerSideConfirmation = isServerSideConfirmation,
         )
 
@@ -225,7 +228,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
             }
             LinkHandler.ProcessingState.Completed -> {
-                eventReporter.onPaymentSuccess(PaymentSelection.Link, stripeIntent.value?.currency)
+                eventReporter.onPaymentSuccess(
+                    paymentSelection = PaymentSelection.Link,
+                    currency = stripeIntent.value?.currency,
+                    isDecoupling = isDecoupling,
+                )
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
             }
@@ -486,7 +493,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun processPayment(stripeIntent: StripeIntent, paymentResult: PaymentResult) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
-                eventReporter.onPaymentSuccess(selection.value, stripeIntent.currency)
+                eventReporter.onPaymentSuccess(
+                    paymentSelection = selection.value,
+                    currency = stripeIntent.currency,
+                    isDecoupling = isDecoupling,
+                )
 
                 // Default future payments to the selected payment method. New payment methods won't
                 // be the default because we don't know if the user selected save for future use.
@@ -503,7 +514,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             else -> {
                 if (paymentResult is PaymentResult.Failed) {
-                    eventReporter.onPaymentFailure(selection.value, stripeIntent.currency)
+                    eventReporter.onPaymentFailure(
+                        paymentSelection = selection.value,
+                        currency = stripeIntent.currency,
+                        isDecoupling = isDecoupling,
+                    )
                 }
 
                 runCatching {
@@ -538,8 +553,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 logger.error("Error processing Google Pay payment", result.error)
                 eventReporter.onPaymentFailure(
-                    PaymentSelection.GooglePay,
-                    stripeIntent.value?.currency
+                    paymentSelection = PaymentSelection.GooglePay,
+                    currency = stripeIntent.value?.currency,
+                    isDecoupling = isDecoupling,
                 )
                 onError(
                     when (result.errorCode) {

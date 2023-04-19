@@ -401,7 +401,7 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel(isPaymentIntent = true)
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(succeededPaymentResult)
+                .thenReturn(Result.success(succeededPaymentResult))
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
             verify(paymentIntentFlowResultProcessor).processResult(paymentFlowResult)
@@ -414,7 +414,7 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel(isPaymentIntent = false)
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(setupIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(succeededSetupResult)
+                .thenReturn(Result.success(succeededSetupResult))
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
             verify(setupIntentFlowResultProcessor).processResult(paymentFlowResult)
@@ -427,7 +427,7 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel()
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(succeededPaymentResult)
+                .thenReturn(Result.success(succeededPaymentResult))
 
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
@@ -441,7 +441,7 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel()
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(failedPaymentResult)
+                .thenReturn(Result.success(failedPaymentResult))
 
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
@@ -455,7 +455,7 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel()
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(canceledPaymentResult)
+                .thenReturn(Result.success(canceledPaymentResult))
 
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
@@ -469,7 +469,7 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel()
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(timedOutPaymentResult)
+                .thenReturn(Result.success(timedOutPaymentResult))
 
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
@@ -483,7 +483,7 @@ class PaymentLauncherViewModelTest {
             val viewModel = createViewModel()
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-                .thenReturn(unknownPaymentResult)
+                .thenReturn(Result.success(unknownPaymentResult))
 
             viewModel.onPaymentFlowResult(paymentFlowResult)
 

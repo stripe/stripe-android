@@ -12,6 +12,8 @@ import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
@@ -23,7 +25,7 @@ import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
 import kotlinx.coroutines.async
@@ -226,16 +228,20 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         configuration: PaymentSheet.Configuration?,
     ): Result<StripeIntent> {
         return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
+            val billingDetailsCollectionConfig =
+                configuration?.billingDetailsCollectionConfiguration?.toInternal()
+                    ?: CardBillingDetailsCollectionConfiguration()
+
             lpmRepository.update(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
-                billingDetailsCollectionConfiguration =
-                configuration?.billingDetailsCollectionConfiguration
-                    ?: BillingDetailsCollectionConfiguration(),
+                cardBillingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
             )
 
             if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
-                eventReporter.onLpmSpecFailure()
+                eventReporter.onLpmSpecFailure(
+                    isDecoupling = initializationMode is DeferredIntent,
+                )
             }
 
             stripeIntentValidator.requireValid(elementsSession.stripeIntent)
@@ -343,4 +349,23 @@ private fun List<PaymentMethod>.withLastUsedPaymentMethodFirst(
 
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
     return PaymentSelection.Saved(this, isGooglePay = false)
+}
+
+private fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal(): CardBillingDetailsCollectionConfiguration {
+    return CardBillingDetailsCollectionConfiguration(
+        collectName = name == Always,
+        collectEmail = email == Always,
+        collectPhone = phone == Always,
+        address = when (address) {
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
+                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+            }
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
+                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+            }
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
+                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            }
+        },
+    )
 }

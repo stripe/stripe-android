@@ -103,11 +103,13 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         state: PaymentSheetState.Full,
         configureRequest: ConfigureRequest,
     ) {
-        val isServerSideConfirmation = configureRequest.initializationMode is DeferredIntent &&
+        val isDecoupling = configureRequest.initializationMode is DeferredIntent
+        val isServerSideConfirmation = isDecoupling &&
             IntentConfirmationInterceptor.createIntentCallback is CreateIntentCallbackForServerSideConfirmation
 
         eventReporter.onInit(
             configuration = state.config,
+            isDecoupling = isDecoupling,
             isServerSideConfirmation = isServerSideConfirmation,
         )
 

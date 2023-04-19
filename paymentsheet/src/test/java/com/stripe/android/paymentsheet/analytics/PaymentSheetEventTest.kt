@@ -20,6 +20,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isDecoupled = false,
             isServerSideConfirmation = false,
         )
         assertThat(
@@ -37,6 +38,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
+            isDecoupled = false,
             isServerSideConfirmation = false,
         )
         assertThat(
@@ -60,7 +62,8 @@ class PaymentSheetEventTest {
             ),
             durationMillis = 1L,
             result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd"
+            currency = "usd",
+            isDecoupled = false,
         )
         assertThat(
             newPMEvent.eventName
@@ -73,7 +76,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F
+                "duration" to 0.001F,
+                "is_decoupled" to false,
             )
         )
     }
@@ -85,7 +89,8 @@ class PaymentSheetEventTest {
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             durationMillis = 1L,
             result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd"
+            currency = "usd",
+            isDecoupled = false,
         )
         assertThat(
             savedPMEvent.eventName
@@ -98,7 +103,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F
+                "duration" to 0.001F,
+                "is_decoupled" to false,
             )
         )
     }
@@ -110,7 +116,8 @@ class PaymentSheetEventTest {
             paymentSelection = PaymentSelection.GooglePay,
             durationMillis = 1L,
             result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd"
+            currency = "usd",
+            isDecoupled = false,
         )
         assertThat(
             googlePayEvent.eventName
@@ -123,7 +130,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F
+                "duration" to 0.001F,
+                "is_decoupled" to false,
             )
         )
     }
@@ -135,7 +143,8 @@ class PaymentSheetEventTest {
             paymentSelection = PaymentSelection.Link,
             durationMillis = 1L,
             result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd"
+            currency = "usd",
+            isDecoupled = false,
         )
         assertThat(
             linkEvent.eventName
@@ -148,7 +157,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F
+                "duration" to 0.001F,
+                "is_decoupled" to false,
             )
         )
     }
@@ -166,7 +176,8 @@ class PaymentSheetEventTest {
             ),
             durationMillis = 1L,
             result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd"
+            currency = "usd",
+            isDecoupled = false,
         )
         assertThat(
             inlineLinkEvent.eventName
@@ -179,7 +190,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F
+                "duration" to 0.001F,
+                "is_decoupled" to false,
             )
         )
     }
@@ -195,7 +207,8 @@ class PaymentSheetEventTest {
             ),
             durationMillis = 1L,
             result = PaymentSheetEvent.Payment.Result.Failure,
-            currency = "usd"
+            currency = "usd",
+            isDecoupled = false,
         )
         assertThat(
             newPMEvent.eventName
@@ -208,7 +221,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F
+                "duration" to 0.001F,
+                "is_decoupled" to false,
             )
         )
     }
@@ -220,7 +234,8 @@ class PaymentSheetEventTest {
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             durationMillis = 1L,
             result = PaymentSheetEvent.Payment.Result.Failure,
-            currency = "usd"
+            currency = "usd",
+            isDecoupled = false,
         )
         assertThat(
             savedPMEvent.eventName
@@ -233,7 +248,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F
+                "duration" to 0.001F,
+                "is_decoupled" to false,
             )
         )
     }
@@ -245,7 +261,8 @@ class PaymentSheetEventTest {
             paymentSelection = PaymentSelection.GooglePay,
             durationMillis = 1L,
             result = PaymentSheetEvent.Payment.Result.Failure,
-            currency = "usd"
+            currency = "usd",
+            isDecoupled = false,
         )
         assertThat(
             googlePayEvent.eventName
@@ -258,7 +275,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F
+                "duration" to 0.001F,
+                "is_decoupled" to false,
             )
         )
     }
@@ -270,7 +288,8 @@ class PaymentSheetEventTest {
             paymentSelection = PaymentSelection.Link,
             durationMillis = 1L,
             result = PaymentSheetEvent.Payment.Result.Failure,
-            currency = "usd"
+            currency = "usd",
+            isDecoupled = false,
         )
         assertThat(
             linkEvent.eventName
@@ -283,7 +302,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F
+                "duration" to 0.001F,
+                "is_decoupled" to false,
             )
         )
     }
@@ -301,7 +321,8 @@ class PaymentSheetEventTest {
             ),
             durationMillis = 1L,
             result = PaymentSheetEvent.Payment.Result.Failure,
-            currency = "usd"
+            currency = "usd",
+            isDecoupled = false,
         )
         assertThat(
             inlineLinkEvent.eventName
@@ -314,7 +335,8 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
-                "duration" to 0.001F
+                "duration" to 0.001F,
+                "is_decoupled" to false,
             )
         )
     }
@@ -324,7 +346,8 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.SelectPaymentOption(
             mode = EventReporter.Mode.Custom,
             paymentSelection = PaymentSelection.GooglePay,
-            currency = "usd"
+            currency = "usd",
+            isDecoupled = false,
         )
         assertThat(
             event.eventName
@@ -337,6 +360,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "locale" to "en_US",
                 "currency" to "usd",
+                "is_decoupled" to false,
             )
         )
     }
@@ -381,12 +405,14 @@ class PaymentSheetEventTest {
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
+                isDecoupled = false,
                 isServerSideConfirmation = false,
             ).additionalParams
         ).isEqualTo(
             mapOf(
                 "mpe_config" to expectedConfigMap,
-                "locale" to "en_US"
+                "locale" to "en_US",
+                "is_decoupled" to false,
             )
         )
     }
@@ -431,12 +457,14 @@ class PaymentSheetEventTest {
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
+                isDecoupled = false,
                 isServerSideConfirmation = false,
             ).additionalParams
         ).isEqualTo(
             mapOf(
                 "mpe_config" to expectedConfigMap,
-                "locale" to "en_US"
+                "locale" to "en_US",
+                "is_decoupled" to false,
             )
         )
     }
