@@ -40,19 +40,17 @@ android {
 dependencies {
     implementation project(':payments')
 
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
-    testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
-
-    testImplementation "com.squareup.retrofit2:retrofit:2.9.0"
-    testImplementation "com.squareup.retrofit2:converter-moshi:2.9.0"
-
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    testImplementation libs.kotlin.coroutines
+    testImplementation libs.kotlin.coroutinesAndroid
+    testImplementation libs.retrofit
+    testImplementation libs.retrofitMoshiConverter
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.junitKtx
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
 }

@@ -28,41 +28,39 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 }
 
 dependencies {
     implementation project(":stripe-core")
-    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
-    implementation "androidx.compose.ui:ui:$androidxComposeUiVersion"
-    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeUiVersion"
-    implementation "androidx.compose.foundation:foundation:$androidxComposeVersion"
-    // used by StripeImageLoader's disk cache.
-    implementation "com.jakewharton:disklrucache:2.0.2"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
-    implementation "androidx.compose.material:material:$androidxComposeVersion"
-    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeUiVersion"
-    implementation "androidx.core:core-ktx:$androidxCoreVersion"
-    implementation "com.google.dagger:dagger:$daggerVersion"
+    implementation libs.androidx.annotation
+    implementation libs.androidx.coreKtx
+    implementation libs.compose.foundation
+    implementation libs.compose.material
+    implementation libs.compose.ui
+    implementation libs.compose.uiToolingPreview
+    implementation libs.dagger
+    implementation libs.diskLruCache
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.kotlin.serialization
 
-    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeUiVersion"
-    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeUiVersion"
+    debugImplementation libs.compose.uiTestManifest
+    debugImplementation libs.compose.uiTooling
 
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
-    testImplementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
+    testImplementation libs.androidx.liveDataKtx
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.junitKtx
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"

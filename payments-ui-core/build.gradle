@@ -9,57 +9,51 @@ dependencies {
     implementation project(":payments-core")
     implementation project(":stripe-ui-core")
     compileOnly project(":stripecardscan")
-    compileOnly "com.google.android.libraries.places:places:$placesVersion"
+    compileOnly libs.places
 
-    implementation 'androidx.constraintlayout:constraintlayout-compose:1.0.1'
-    implementation "androidx.core:core-ktx:$androidxCoreVersion"
-    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
-    implementation "com.google.android.material:material:$materialVersion"
-    implementation "com.google.dagger:dagger:$daggerVersion"
-    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.annotation
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.liveDataKtx
+    implementation libs.material
+    implementation libs.dagger
+    kapt libs.daggerCompiler
 
-    implementation "androidx.compose.ui:ui:$androidxComposeUiVersion"
-    // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
-    implementation "androidx.compose.foundation:foundation:$androidxComposeVersion"
-    // Material Design
-    implementation "androidx.compose.material:material:$androidxComposeVersion"
-    // Material design icons
-    implementation "androidx.compose.material:material-icons-core:$androidxComposeVersion"
-    // Integration with activities
-    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    // Integration with observables
-    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeRuntimeVersion"
-    implementation "com.google.accompanist:accompanist-flowlayout:$accompanistVersion"
-    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeUiVersion"
+    implementation libs.compose.ui
+    implementation libs.compose.foundation
+    implementation libs.compose.material
+    implementation libs.compose.materialIcons
+    implementation libs.compose.activity
+    implementation libs.compose.liveData
+    implementation libs.accompanist.flowLayout
+    implementation libs.compose.uiToolingPreview
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
-
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$playServicesVersion"
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.kotlin.coroutinesPlayServices
+    implementation libs.kotlin.serialization
 
     // Tooling support (Previews, etc.)
-    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeUiVersion"
+    debugImplementation libs.compose.uiTooling
 
     testImplementation project(':payments-core-testing')
     testImplementation project(':stripecardscan')
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
-    testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
-    testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation "org.json:json:$jsonVersion"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
-    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
-    testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
-    testImplementation "com.google.android.libraries.places:places:$placesVersion"
+    testImplementation libs.places
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.truth
+    testImplementation testLibs.junit
+    testImplementation testLibs.json
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
     testImplementation testLibs.turbine
 }
 
@@ -80,7 +74,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 
     lintOptions {
