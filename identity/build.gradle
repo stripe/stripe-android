@@ -10,60 +10,47 @@ dependencies {
     implementation project(":stripe-ui-core")
     implementation project(":ml-core:default")
 
-    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
-    implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
-    implementation "androidx.fragment:fragment-ktx:$androidxFragmentVersion"
+    implementation libs.accompanist.themeAdapter
+    implementation libs.androidx.activity
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.browser
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.fragment
+    implementation libs.androidx.lifecycle
+    implementation libs.androidx.liveDataKtx
+    implementation libs.androidx.legacySupport
+    implementation libs.androidx.navigationFragment
+    implementation libs.androidx.navigationUi
+    implementation libs.androidx.viewModel
+    implementation libs.compose.activity
+    implementation libs.compose.liveData
+    implementation libs.compose.material
+    implementation libs.compose.navigation
+    implementation libs.compose.runtime
+    implementation libs.compose.viewModels
+    implementation libs.dagger
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.serialization
+    implementation libs.material
 
-    // Navigation
-    implementation "androidx.navigation:navigation-fragment-ktx:$androidxNavigationVersion"
-    implementation "androidx.navigation:navigation-ui-ktx:$androidxNavigationVersion"
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    debugImplementation libs.compose.uiTestManifest
 
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
+    kapt libs.daggerCompiler
 
-    implementation "androidx.core:core-ktx:$androidxCoreVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$androidxLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "com.google.android.material:material:$materialVersion"
-    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
-    implementation "com.google.dagger:dagger:$daggerVersion"
-    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
-    implementation "androidx.browser:browser:$androidxBrowserVersion"
-
-    // Compose
-    implementation "androidx.compose.runtime:runtime:$androidxComposeRuntimeVersion"
-    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    // Integration with ViewModels
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$androidxLifecycleVersion"
-    // Integration with Navigation
-    implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
-    // Integration with observables
-    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeRuntimeVersion"
-    // Material Design
-    implementation "androidx.compose.material:material:$androidxComposeVersion"
-    // MdcTheme
-    implementation "com.google.accompanist:accompanist-themeadapter-material:$accompanistVersion"
-    // Test rules and transitive dependencies:
-    testImplementation("androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion")
-    // Needed for createComposeRule, but not createAndroidComposeRule:
-    debugImplementation("androidx.compose.ui:ui-test-manifest:$androidxComposeUiVersion")
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.navigation
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
-    testImplementation "androidx.test.espresso:espresso-core:3.5.0"
-
-
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
-    testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
-    testImplementation "androidx.navigation:navigation-testing:$androidxNavigationVersion"
-    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    testImplementation testLibs.espresso.core
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
 }
 
 android {
@@ -92,7 +79,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 }
 

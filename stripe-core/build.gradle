@@ -12,29 +12,28 @@ ext {
 }
 
 dependencies {
-    implementation "com.google.dagger:dagger:$daggerVersion"
-    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    implementation libs.androidx.browser
+    implementation libs.dagger
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.kotlin.serialization
 
-    implementation "androidx.browser:browser:$androidxBrowserVersion"
+    kapt libs.daggerCompiler
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
-
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
-    testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation "org.json:json:$jsonVersion"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
-    testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
-    testImplementation "androidx.test:runner:$androidTestRunnerVersion"
-    testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.testRunner
+    testImplementation testLibs.json
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.okhttpMockWebServer
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"

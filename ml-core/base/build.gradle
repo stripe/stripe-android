@@ -8,7 +8,7 @@ android {
 }
 
 dependencies {
-    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
+    implementation libs.androidx.annotation
 }
 
 ext {

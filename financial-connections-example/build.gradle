@@ -31,7 +31,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 }
 
@@ -44,30 +44,28 @@ dependencies {
     implementation project(':financial-connections')
     implementation project(':payments-core')
 
-    implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "androidx.core:core-ktx:$androidxCoreVersion"
-    implementation "com.google.android.material:material:$materialVersion"
-    implementation "com.google.code.gson:gson:$gsonVersion"
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
-    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    implementation libs.androidx.activity
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.lifecycle
+    implementation libs.compose.activity
+    implementation libs.compose.material
+    implementation libs.compose.liveData
+    implementation libs.compose.ui
+    implementation libs.compose.uiToolingPreview
+    implementation libs.gson
+    implementation libs.loggingInterceptor
+    implementation libs.material
+    implementation libs.retrofit
+    implementation libs.retrofitGsonConverter
 
-    // Jetpack Compose
-    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    implementation "androidx.compose.material:material:$androidxComposeVersion"
-    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeRuntimeVersion"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$androidxLifecycleVersion"
-    implementation "androidx.compose.ui:ui:$androidxComposeUiVersion"
-    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeUiVersion"
+    debugImplementation libs.compose.uiTestManifest
+    debugImplementation libs.compose.uiTooling
+    debugImplementation libs.leakCanary
 
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
+    testImplementation testLibs.androidx.junit
+    testImplementation testLibs.junit
 
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion"
-    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeUiVersion"
-    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeUiVersion"
-
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation testLibs.androidx.composeUi
 }

@@ -9,57 +9,57 @@ dependencies {
     api project(":payments-model")
     compileOnly project(':financial-connections')
 
-    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "androidx.browser:browser:$androidxBrowserVersion"
-    implementation "androidx.recyclerview:recyclerview:$androidxRecyclerviewVersion"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidxLifecycleVersion"
-    implementation "androidx.fragment:fragment-ktx:$androidxFragmentVersion"
-    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
-    implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
-    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    implementation "com.google.android.gms:play-services-wallet:$playServicesWalletVersion"
-    implementation "com.google.android.material:material:$materialVersion"
-    implementation "com.google.dagger:dagger:$daggerVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
-    implementation 'com.google.android.instantapps:instantapps:1.1.0'
+    implementation libs.androidx.activity
+    implementation libs.androidx.annotation
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.browser
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.fragment
+    implementation libs.androidx.liveDataKtx
+    implementation libs.androidx.recyclerView
+    implementation libs.androidx.savedState
+    implementation libs.androidx.viewModel
+    implementation libs.compose.activity
+    implementation libs.dagger
+    implementation libs.material
+    implementation libs.playServicesWallet
+    implementation libs.instantApps
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
     // For instructions on replacing the BouncyCastle dependency used by the 3DS2 SDK, see
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
-    implementation "com.stripe:stripe-3ds2-android:$stripe3ds2Version"
+    implementation libs.stripe3ds2
 
-    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    kapt libs.daggerCompiler
 
-    javadocDeps "androidx.annotation:annotation:$androidxAnnotationVersion"
-    javadocDeps "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    javadocDeps "com.google.android.material:material:$materialVersion"
+    javadocDeps libs.androidx.annotation
+    javadocDeps libs.androidx.appCompat
+    javadocDeps libs.material
 
     testImplementation project(':financial-connections')
+    testImplementation project(':network-testing')
     testImplementation project(':payments-core-testing')
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
-    testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation "org.json:json:$jsonVersion"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
-    testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
-    testImplementation "androidx.lifecycle:lifecycle-runtime-testing:$androidxLifecycleVersion"
-    testImplementation project(path: ':network-testing')
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.lifecycle
+    testImplementation testLibs.json
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
     testImplementation testLibs.turbine
 
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    androidTestImplementation "androidx.test:rules:$androidTestVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
     androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.testRunner
 
-    androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
+    androidTestUtil testLibs.testOrchestrator
 }
 
 android {
@@ -96,7 +96,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 }
 

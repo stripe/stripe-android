@@ -12,90 +12,88 @@ dependencies {
     implementation project(':stripe-ui-core')
     compileOnly project(':financial-connections')
 
-    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "androidx.browser:browser:$androidxBrowserVersion"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$androidxLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidxLifecycleVersion"
-    implementation "androidx.fragment:fragment-ktx:$androidxFragmentVersion"
-    implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
-    implementation "com.google.android.gms:play-services-wallet:$playServicesWalletVersion"
-    implementation "com.google.android.material:material:$materialVersion"
-    implementation "com.google.dagger:dagger:$daggerVersion"
-    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    // Kotlin
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.kotlin.serialization
 
-    implementation "androidx.compose.ui:ui:$androidxComposeUiVersion"
-    implementation "androidx.compose.ui:ui-viewbinding:$androidxComposeUiVersion"
-    // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
-    implementation "androidx.compose.foundation:foundation:$androidxComposeVersion"
-    // Material Design
-    implementation "androidx.compose.material:material:$androidxComposeVersion"
-    // Material design icons
-    implementation "androidx.compose.material:material-icons-core:$androidxComposeVersion"
-    // Integration with activities
-    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
-    implementation"com.google.accompanist:accompanist-navigation-animation:$accompanistVersion"
+    // AndroidX
+    implementation libs.androidx.activity
+    implementation libs.androidx.annotation
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.browser
+    implementation libs.androidx.fragment
+    implementation libs.androidx.lifecycle
+    implementation libs.androidx.savedState
+    implementation libs.androidx.viewModel
+
+    // DI
+    implementation libs.dagger
+    kapt libs.daggerCompiler
+
+    // Compose
+    implementation libs.compose.ui
+    implementation libs.compose.uiViewBinding
+    implementation libs.compose.foundation
+    implementation libs.compose.material
+    implementation libs.compose.materialIcons
+    implementation libs.compose.activity
+    implementation libs.compose.navigation
+    implementation libs.accompanist.navigationAnimation
+
+    // Other
+    implementation libs.playServicesWallet
+    implementation libs.material
+
     // Tooling support (Previews, etc.)
-    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeUiVersion"
-    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeUiVersion"
+    implementation libs.compose.uiToolingPreview
+    debugImplementation libs.compose.uiTooling
+    debugImplementation libs.compose.uiTestManifest
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
-
-    testImplementation "org.hamcrest:hamcrest:2.2"
     testImplementation project(':link')
     testImplementation project(':financial-connections')
     testImplementation project(':payments-core-testing')
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
-    testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
-    testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation "org.json:json:$jsonVersion"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
-    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
-    testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
-    testImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion"
-    testImplementation "androidx.lifecycle:lifecycle-runtime-testing:$androidxLifecycleVersion"
+
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.junit
+    testImplementation testLibs.androidx.lifecycle
+    testImplementation testLibs.hamcrest
+    testImplementation testLibs.junit
+    testImplementation testLibs.json
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
     testImplementation testLibs.turbine
 
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
-    testImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-
-    androidTestImplementation "com.google.android.libraries.places:places:$placesVersion"
-    androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    androidTestImplementation ("androidx.test.espresso:espresso-contrib:$espressoVersion") {
-        exclude group: 'org.checkerframework', module: 'checker'
-    }
-    androidTestImplementation "androidx.test:rules:$androidTestVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
-    androidTestImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
-    androidTestImplementation "androidx.test:core-ktx:$androidTestVersion"
-    // Test rules and transitive dependencies:
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion"
-    androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
-    androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
-    androidTestImplementation "com.google.truth:truth:$truthVersion"
-    androidTestImplementation "androidx.test.uiautomator:uiautomator:$uiautomator"
+    testImplementation testLibs.espresso.core
 
     androidTestImplementation project(':network-testing')
 
-    // Tooling support (Previews, etc.)
-    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeUiVersion"
-    // Needed for createComposeRule, but not createAndroidComposeRule:
-    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeUiVersion"
+    androidTestImplementation libs.places
+    androidTestImplementation testLibs.androidx.composeUi
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.androidx.junitKtx
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.androidx.truth
+    androidTestImplementation testLibs.androidx.uiAutomator
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation (testLibs.espresso.contrib) {
+        exclude group: 'org.checkerframework', module: 'checker'
+    }
+    androidTestImplementation testLibs.truth
 
-    // Test rules and transitive dependencies:
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$androidxComposeUiVersion")
+    androidTestUtil testLibs.testOrchestrator
 }
 
 android {
@@ -123,7 +121,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 
     lintOptions {
