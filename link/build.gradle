@@ -62,6 +62,8 @@ dependencies {
 }
 
 android {
+    namespace 'com.stripe.android.link'
+
     buildFeatures {
         compose = true
     }

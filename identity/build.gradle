@@ -67,6 +67,8 @@ dependencies {
 }
 
 android {
+    namespace 'com.stripe.android.identity'
+
     sourceSets {
         main {
             assets {

@@ -64,6 +64,8 @@ dependencies {
 }
 
 android {
+    namespace 'com.stripe.android.ui.core'
+    
     buildFeatures {
         compose = true
         viewBinding = true

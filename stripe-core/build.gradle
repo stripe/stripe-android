@@ -11,6 +11,10 @@ ext {
     artifactDescrption = "The core module of Stripe Android SDKs"
 }
 
+android {
+    namespace 'com.stripe.android.core'
+}
+
 dependencies {
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"

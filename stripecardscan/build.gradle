@@ -37,6 +37,8 @@ dependencies {
 }
 
 android {
+    namespace 'com.stripe.android.stripecardscan'
+
     buildFeatures {
         viewBinding true
     }

@@ -8,6 +8,7 @@ apply plugin: 'app.cash.paparazzi'
 apply plugin: 'com.google.devtools.ksp'
 
 android {
+    namespace 'com.stripe.android.financialconnections'
     defaultConfig {
         testApplicationId "com.stripe.android.financialconnections.test"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

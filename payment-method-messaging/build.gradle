@@ -6,6 +6,8 @@ apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'kotlinx-serialization'
 
 android {
+    namespace 'com.stripe.android.paymentmethodmessaging'
+
     testOptions {
         unitTests {
             includeAndroidResources = true

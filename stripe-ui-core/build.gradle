@@ -13,6 +13,8 @@ ext {
 }
 
 android {
+    namespace 'com.stripe.android.uicore'
+
     buildFeatures {
         compose true
     }

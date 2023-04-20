@@ -5,6 +5,8 @@ apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 assemble.dependsOn('lint')
 
 android {
+    namespace 'com.stripe.android.identity.example'
+
     defaultConfig {
         applicationId "com.stripe.android.identity.example"
         versionCode 15

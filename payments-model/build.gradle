@@ -4,6 +4,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
 android {
+    namespace 'com.stripe.payments.model'
     testOptions {
         kotlinOptions {
             freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]

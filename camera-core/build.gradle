@@ -1,5 +1,9 @@
 apply from: configs.androidLibrary
 
+android {
+    namespace 'com.stripe.android.camera'
+}
+
 dependencies {
     implementation project(":stripe-core")
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
