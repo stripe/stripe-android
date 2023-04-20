@@ -22,6 +22,7 @@ if (System.getenv("JITPACK")) {
 }
 
 android {
+    namespace STRIPE_ANDROID_NAMESPACE
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
