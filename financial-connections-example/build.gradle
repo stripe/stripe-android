@@ -4,7 +4,6 @@ apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    namespace 'com.stripe.android.financialconnections.example'
     defaultConfig {
         applicationId "com.stripe.android.financialconnections.example"
 

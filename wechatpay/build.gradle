@@ -3,10 +3,6 @@ apply from: configs.androidLibrary
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
-android {
-    namespace 'com.stripe.android.payments.wechatpay'
-}
-
 dependencies {
     implementation project(':payments-core')
 

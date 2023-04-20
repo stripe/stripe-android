@@ -92,7 +92,6 @@ dependencies {
 }
 
 android {
-    namespace 'com.stripe.android.example'
     defaultConfig {
         vectorDrawables.useSupportLibrary = true
 

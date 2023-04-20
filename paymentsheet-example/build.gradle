@@ -99,8 +99,6 @@ shot {
 }
 
 android {
-    namespace 'com.stripe.android.paymentsheet.example'
-
     defaultConfig {
         applicationId "com.stripe.android.paymentsheet.example"
         versionCode 11

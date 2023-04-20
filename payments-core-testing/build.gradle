@@ -9,7 +9,3 @@ dependencies {
 
     androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
 }
-
-android {
-    namespace 'com.stripe.android.testing'
-}

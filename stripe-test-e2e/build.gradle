@@ -15,8 +15,6 @@ private def readProperty(name) {
 }
 
 android {
-    namespace 'com.stripe.android.test.e2e'
-
     defaultConfig {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

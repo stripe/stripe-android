@@ -99,8 +99,6 @@ dependencies {
 }
 
 android {
-    namespace 'com.stripe.android.paymentsheet'
-
     defaultConfig {
         testApplicationId "com.stripe.android.paymentsheet.test"
     }
