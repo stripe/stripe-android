@@ -21,7 +21,7 @@ stages:
     workflows:
       - check: { }
       - test: { }
-      - run-instrumentation-tests: { }
+      - maestro-paymentsheet: { }
 
 workflows:
   check:

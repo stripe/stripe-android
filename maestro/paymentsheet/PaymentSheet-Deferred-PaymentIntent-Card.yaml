@@ -2,7 +2,7 @@ appId: com.stripe.android.paymentsheet.example
 ---
 - launchApp
 # Android specific: Navigate to example
-- tapOn: "PaymentSheet with server-side confirmation"
+- tapOn: "LSDKJFSKDJFLSJDLFKJ"
 - waitForAnimationToEnd:
     timeout: 5000
 - tapOn: "Buy"
