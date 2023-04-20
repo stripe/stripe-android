@@ -3,7 +3,7 @@
 
     <application>
         <activity
-            android:name=".MainActivity"
+            android:name="com.stripe.android.paymentsheet.MainActivity"
             android:theme="@style/Theme.AppCompat.Light"
             android:exported="false" />
     </application>
