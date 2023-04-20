@@ -60,7 +60,7 @@ ext {
     androidxArchCoreVersion = '2.2.0'
     androidxBrowserVersion = '1.5.0'
     androidxComposeVersion = '1.4.1'
-    androidxComposeRuntimeVersion = '1.4.1'
+    androidxComposeRuntimeVersion = '1.4.2'
     androidxComposeUiVersion = '1.4.1'
     androidxComposeCompilerVersion = '1.4.1'
     androidxConstraintlayoutComposeVersion = '1.0.1'
