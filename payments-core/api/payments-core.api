@@ -192,7 +192,6 @@ public final class com/stripe/android/GooglePayConfig {
 
 public final class com/stripe/android/GooglePayJsonFactory {
 	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/GooglePayJsonFactory$Companion;
 	public fun <init> (Landroid/content/Context;Z)V
 	public synthetic fun <init> (Landroid/content/Context;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lcom/stripe/android/GooglePayConfig;Z)V

@@ -222,7 +222,8 @@ class GooglePayJsonFactory constructor(
             )
     }
 
-    private fun createCardPaymentMethod(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun createCardPaymentMethod(
         billingAddressParameters: BillingAddressParameters?,
         allowCreditCards: Boolean?
     ): JSONObject {
@@ -442,10 +443,8 @@ class GooglePayJsonFactory constructor(
         internal val merchantName: String? = null
     ) : Parcelable
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    companion object {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        const val ALLOWED_PAYMENT_METHODS = "allowedPaymentMethods"
+    private companion object {
+        private const val ALLOWED_PAYMENT_METHODS = "allowedPaymentMethods"
         private const val API_VERSION = 2
         private const val API_VERSION_MINOR = 0
 

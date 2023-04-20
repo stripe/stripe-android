@@ -44,12 +44,14 @@ import com.stripe.android.uicore.StripeTheme
 
 private val LinkButtonVerticalPadding = 6.dp
 private val LinkButtonHorizontalPadding = 10.dp
-private val LinkButtonShape = RoundedCornerShape(
-    StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
-)
-private val LinkButtonEmailShape = RoundedCornerShape(
-    StripeTheme.primaryButtonStyle.shape.cornerRadius.dp / 2
-)
+private val LinkButtonShape: RoundedCornerShape
+    get() = RoundedCornerShape(
+        StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
+    )
+private val LinkButtonEmailShape: RoundedCornerShape
+    get() = RoundedCornerShape(
+        StripeTheme.primaryButtonStyle.shape.cornerRadius.dp / 2
+    )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val LinkButtonTestTag = "LinkButtonTestTag"

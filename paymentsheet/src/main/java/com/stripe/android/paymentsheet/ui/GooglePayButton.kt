@@ -18,12 +18,12 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.wallet.button.ButtonConstants
 import com.google.android.gms.wallet.button.ButtonOptions
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.GooglePayJsonFactory.Companion.ALLOWED_PAYMENT_METHODS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.convertDpToPx
 import com.stripe.android.uicore.isSystemDarkTheme
+import org.json.JSONArray
 
 @Composable
 internal fun GooglePayButton(
@@ -78,11 +78,12 @@ internal class GooglePayButton @JvmOverloads constructor(
     ) {
         initializePrimaryButton()
         val isDark = context.isSystemDarkTheme()
-        val allowedPaymentMethods = GooglePayJsonFactory(context)
-            .createIsReadyToPayRequest(
+        val allowedPaymentMethods = JSONArray().put(
+            GooglePayJsonFactory(context).createCardPaymentMethod(
                 billingAddressParameters = billingAddressParameters,
                 allowCreditCards = allowCreditCards
-            ).getJSONArray(ALLOWED_PAYMENT_METHODS).toString()
+            )
+        ).toString()
 
         if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) != 0) return
 
@@ -104,44 +105,34 @@ internal class GooglePayButton @JvmOverloads constructor(
 
     private fun initializePrimaryButton() {
         with(viewBinding.googlePayPrimaryButton) {
-            val isDark = context.isSystemDarkTheme()
             setAppearanceConfiguration(
                 StripeTheme.primaryButtonStyle,
                 null
             )
-            if (isDark) {
-                val backgroundColor = ContextCompat.getColor(
+            val backgroundColor = ContextCompat.getColor(
+                context,
+                R.color.stripe_paymentsheet_googlepay_primary_button_background_color
+            )
+            finishedBackgroundColor = backgroundColor
+            backgroundTintList = ColorStateList.valueOf(backgroundColor)
+            setLockIconDrawable(
+                R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_lock
+            )
+            setIndicatorColor(
+                ContextCompat.getColor(
                     context,
-                    R.color.stripe_googlepay_color
+                    R.color.stripe_paymentsheet_googlepay_primary_button_tint_color,
                 )
-                finishedBackgroundColor = backgroundColor
-                backgroundTintList = ColorStateList.valueOf(backgroundColor)
-                setLockIconDrawable(
-                    R.drawable.stripe_ic_lock_googlepay_dark
-                )
-                setIndicatorColor(
-                    ContextCompat.getColor(
-                        context,
-                        R.color.stripe_googlepay_color_dark,
-                    )
-                )
-                setConfirmedIconDrawable(
-                    R.drawable.stripe_ic_paymentsheet_primary_button_googlepay_checkmark_dark
-                )
-                setDefaultLabelColor(
-                    ContextCompat.getColor(
-                        context,
-                        R.color.stripe_googlepay_color_dark
-                    )
-                )
-            } else {
-                val backgroundColor = ContextCompat.getColor(
+            )
+            setConfirmedIconDrawable(
+                R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_checkmark
+            )
+            setDefaultLabelColor(
+                ContextCompat.getColor(
                     context,
-                    R.color.stripe_googlepay_color_dark
+                    R.color.stripe_paymentsheet_googlepay_primary_button_tint_color
                 )
-                finishedBackgroundColor = backgroundColor
-                backgroundTintList = ColorStateList.valueOf(backgroundColor)
-            }
+            )
         }
     }
 

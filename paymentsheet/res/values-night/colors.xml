@@ -31,5 +31,8 @@
     <color name="stripe_paymentsheet_googlepay_divider_text">#99FFFFFF</color>
 
     <color name="stripe_paymentsheet_link_mark">#FFFFFF</color>
+
+    <color name="stripe_paymentsheet_googlepay_primary_button_background_color">#FFFFFF</color>
+    <color name="stripe_paymentsheet_googlepay_primary_button_tint_color">#1F1F1F</color>
     <!-- CardFormView -->
 </resources>
