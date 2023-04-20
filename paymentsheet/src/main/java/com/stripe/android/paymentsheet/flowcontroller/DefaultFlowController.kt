@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -19,6 +20,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.stripe.android.CreateIntentCallback
+import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
@@ -85,6 +88,49 @@ import javax.inject.Singleton
 */
 @Composable
 fun rememberPaymentSheetFlowController(
+    paymentOptionCallback: PaymentOptionCallback,
+    paymentResultCallback: PaymentSheetResultCallback,
+): PaymentSheet.FlowController {
+    return rememberPaymentSheetFlowControllerInternal(
+        paymentOptionCallback = paymentOptionCallback,
+        paymentResultCallback = paymentResultCallback,
+    )
+}
+
+@ExperimentalPaymentSheetDecouplingApi
+@Composable
+fun rememberPaymentSheetFlowController(
+    createIntentCallback: CreateIntentCallback,
+    paymentOptionCallback: PaymentOptionCallback,
+    paymentResultCallback: PaymentSheetResultCallback,
+): PaymentSheet.FlowController {
+    LaunchedEffect(createIntentCallback) {
+        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+    }
+    return rememberPaymentSheetFlowControllerInternal(
+        paymentOptionCallback = paymentOptionCallback,
+        paymentResultCallback = paymentResultCallback,
+    )
+}
+
+@ExperimentalPaymentSheetDecouplingApi
+@Composable
+fun rememberPaymentSheetFlowController(
+    createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
+    paymentOptionCallback: PaymentOptionCallback,
+    paymentResultCallback: PaymentSheetResultCallback,
+): PaymentSheet.FlowController {
+    LaunchedEffect(createIntentCallbackForServerSideConfirmation) {
+        IntentConfirmationInterceptor.createIntentCallback = createIntentCallbackForServerSideConfirmation
+    }
+    return rememberPaymentSheetFlowControllerInternal(
+        paymentOptionCallback = paymentOptionCallback,
+        paymentResultCallback = paymentResultCallback,
+    )
+}
+
+@Composable
+private fun rememberPaymentSheetFlowControllerInternal(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {

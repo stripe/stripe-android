@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.ErrorScreen
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
 import com.stripe.android.paymentsheet.example.samples.ui.shared.SubscriptionToggle
+import com.stripe.android.paymentsheet.rememberPaymentSheet
 
 internal class ServerSideConfirmationCompleteFlowActivity : AppCompatActivity() {
 
@@ -35,14 +36,13 @@ internal class ServerSideConfirmationCompleteFlowActivity : AppCompatActivity() 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        paymentSheet = PaymentSheet(
-            activity = this,
-            createIntentCallbackForServerSideConfirmation = viewModel::createAndConfirmIntent,
-            paymentResultCallback = viewModel::handlePaymentSheetResult,
-        )
-
         setContent {
             PaymentSheetExampleTheme {
+                val paymentSheet = rememberPaymentSheet(
+                    createIntentCallbackForServerSideConfirmation = viewModel::createAndConfirmIntent,
+                    paymentResultCallback = viewModel::handlePaymentSheetResult,
+                )
+
                 val uiState by viewModel.state.collectAsState()
 
                 uiState.status?.let { status ->

@@ -8,8 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -34,18 +34,49 @@ import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
 
+@ExperimentalPaymentSheetDecouplingApi
+@Composable
+fun rememberPaymentSheet(
+    createIntentCallback: CreateIntentCallback,
+    paymentResultCallback: PaymentSheetResultCallback,
+): PaymentSheet {
+    LaunchedEffect(createIntentCallback) {
+        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+    }
+    return rememberPaymentSheetInternal(paymentResultCallback)
+}
+
+@ExperimentalPaymentSheetDecouplingApi
+@Composable
+fun rememberPaymentSheet(
+    createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
+    paymentResultCallback: PaymentSheetResultCallback,
+): PaymentSheet {
+    LaunchedEffect(createIntentCallbackForServerSideConfirmation) {
+        IntentConfirmationInterceptor.createIntentCallback = createIntentCallbackForServerSideConfirmation
+    }
+    return rememberPaymentSheetInternal(paymentResultCallback)
+}
+
 /**
  * Creates a [PaymentSheet] that is remembered across compositions.
  *
  * This *must* be called unconditionally, as part of the initialization path.
  *
- * @param callback Called with the result of the payment after [PaymentSheet] is dismissed.
+ * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
  */
 @Composable
 fun rememberPaymentSheet(
-    callback: PaymentSheetResultCallback,
+    paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
-    val onResult by rememberUpdatedState(newValue = callback::onPaymentSheetResult)
+    return rememberPaymentSheetInternal(paymentResultCallback)
+}
+
+@Composable
+private fun rememberPaymentSheetInternal(
+    paymentResultCallback: PaymentSheetResultCallback,
+): PaymentSheet {
+    val onResult by rememberUpdatedState(newValue = paymentResultCallback::onPaymentSheetResult)
 
     val activityResultLauncher = rememberLauncherForActivityResult(
         contract = PaymentSheetContractV2(),
@@ -56,6 +87,7 @@ fun rememberPaymentSheet(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     return remember {
+
         val launcher = DefaultPaymentSheetLauncher(
             activityResultLauncher = activityResultLauncher,
             application = context.applicationContext as Application,

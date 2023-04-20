@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.ErrorScreen
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
+import com.stripe.android.paymentsheet.flowcontroller.rememberPaymentSheetFlowController
 
 internal class CustomFlowActivity : AppCompatActivity() {
 
@@ -31,25 +32,22 @@ internal class CustomFlowActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<CustomFlowViewModel>()
 
-    private lateinit var flowController: PaymentSheet.FlowController
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        flowController = PaymentSheet.FlowController.create(
-            activity = this,
-            paymentOptionCallback = viewModel::handlePaymentOptionChanged,
-            paymentResultCallback = viewModel::handlePaymentSheetResult,
-        )
-
         setContent {
+            val flowController = rememberPaymentSheetFlowController(
+                paymentOptionCallback = viewModel::handlePaymentOptionChanged,
+                paymentResultCallback = viewModel::handlePaymentSheetResult,
+            )
+
             PaymentSheetExampleTheme {
                 val uiState by viewModel.state.collectAsState()
                 val paymentMethodLabel = determinePaymentMethodLabel(uiState)
 
                 uiState.paymentInfo?.let { paymentInfo ->
                     LaunchedEffect(paymentInfo) {
-                        configureFlowController(paymentInfo)
+                        configureFlowController(flowController, paymentInfo)
                     }
                 }
 
@@ -92,7 +90,10 @@ internal class CustomFlowActivity : AppCompatActivity() {
         }
     }
 
-    private fun configureFlowController(paymentInfo: CustomFlowViewState.PaymentInfo) {
+    private fun configureFlowController(
+        flowController: PaymentSheet.FlowController,
+        paymentInfo: CustomFlowViewState.PaymentInfo,
+    ) {
         flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = paymentInfo.clientSecret,
             configuration = paymentInfo.paymentSheetConfig,

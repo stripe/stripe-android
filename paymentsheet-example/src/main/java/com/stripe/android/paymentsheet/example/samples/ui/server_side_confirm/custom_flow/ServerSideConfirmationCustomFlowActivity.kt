@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSe
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
 import com.stripe.android.paymentsheet.example.samples.ui.shared.SubscriptionToggle
+import com.stripe.android.paymentsheet.flowcontroller.rememberPaymentSheetFlowController
 import kotlinx.coroutines.CompletableDeferred
 
 internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
@@ -37,25 +38,22 @@ internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<ServerSideConfirmationCustomFlowViewModel>()
 
-    private lateinit var flowController: PaymentSheet.FlowController
-
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        flowController = PaymentSheet.FlowController.create(
-            activity = this,
-            paymentOptionCallback = viewModel::handlePaymentOptionChanged,
-            createIntentCallbackForServerSideConfirmation = viewModel::createAndConfirmIntent,
-            paymentResultCallback = viewModel::handlePaymentSheetResult,
-        )
-
         setContent {
             PaymentSheetExampleTheme {
+                val flowController = rememberPaymentSheetFlowController(
+                    createIntentCallbackForServerSideConfirmation = viewModel::createAndConfirmIntent,
+                    paymentOptionCallback = viewModel::handlePaymentOptionChanged,
+                    paymentResultCallback = viewModel::handlePaymentSheetResult,
+                )
+
                 val uiState by viewModel.state.collectAsState()
                 val paymentMethodLabel = determinePaymentMethodLabel(uiState)
 
-                AttachFlowControllerToViewModel(uiState)
+                AttachFlowControllerToViewModel(flowController, uiState)
 
                 uiState.status?.let { status ->
                     if (uiState.didComplete) {
@@ -107,6 +105,7 @@ internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Composable
     fun AttachFlowControllerToViewModel(
+        flowController: PaymentSheet.FlowController,
         uiState: ServerSideConfirmationCustomFlowViewState,
     ) {
         DisposableEffect(Unit) {
