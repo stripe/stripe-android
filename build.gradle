@@ -54,7 +54,7 @@ ext {
     buildToolsVersion = "30.0.3"
     compileSdkVersion = 33
 
-    androidxActivityVersion = '1.6.1'
+    androidxActivityVersion = '1.7.1'
     androidxAnnotationVersion = '1.6.0'
     androidxAppcompatVersion = '1.6.1'
     androidxArchCoreVersion = '2.2.0'
