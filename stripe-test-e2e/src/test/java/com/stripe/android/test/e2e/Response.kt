@@ -6,10 +6,11 @@ sealed class Response {
     data class CreatedCardPaymentIntent(
         @field:Json(name = "publishableKey") val publishableKey: String,
         @field:Json(name = "paymentIntent") val clientSecret: String,
-        @field:Json(name = "expectedAmount") val amount: Int,
         @field:Json(name = "expectedCurrency") val currency: String,
         @field:Json(name = "expectedAccountID") val accountId: String
-    ) : Response()
+    ) : Response() {
+        val amount: Int = 500
+    }
 
     data class FetchedCardPaymentIntent(
         /**
