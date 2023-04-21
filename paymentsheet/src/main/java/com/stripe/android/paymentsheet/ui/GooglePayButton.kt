@@ -8,13 +8,13 @@ import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
-import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.wallet.button.ButtonConstants
 import com.google.android.gms.wallet.button.ButtonOptions
 import com.stripe.android.GooglePayJsonFactory
@@ -37,10 +37,14 @@ internal fun GooglePayButton(
     val cornerRadius = LocalContext.current.convertDpToPx(
         StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
     ).toInt()
+
+    val isInspectionMode = LocalInspectionMode.current
+
     AndroidView(
         factory = { context -> GooglePayButton(context) },
         update = { googlePayButton ->
             googlePayButton.initialize(
+                isInspectionMode = isInspectionMode,
                 cornerRadius = cornerRadius,
                 allowCreditCards = allowCreditCards,
                 billingAddressParameters = billingAddressParameters
@@ -72,10 +76,12 @@ internal class GooglePayButton @JvmOverloads constructor(
     }
 
     fun initialize(
+        isInspectionMode: Boolean,
         cornerRadius: Int,
         allowCreditCards: Boolean,
         billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?
     ) {
+        if (isInspectionMode) return
         initializePrimaryButton()
         val isDark = context.isSystemDarkTheme()
         val allowedPaymentMethods = JSONArray().put(
@@ -84,8 +90,6 @@ internal class GooglePayButton @JvmOverloads constructor(
                 allowCreditCards = allowCreditCards
             )
         ).toString()
-
-        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) != 0) return
 
         viewBinding.googlePayPaymentButton.initialize(
             ButtonOptions.newBuilder()
