@@ -6562,6 +6562,11 @@ public final class com/stripe/android/payments/bankaccount/CollectBankAccountLau
 	public static synthetic fun presentWithSetupIntent$default (Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;ILjava/lang/Object;)V
 }
 
+public final class com/stripe/android/payments/bankaccount/CollectSessionForDeferredPaymentsLauncher$DefaultImpls {
+	public static synthetic fun presentForDeferredPayment$default (Lcom/stripe/android/payments/bankaccount/CollectSessionForDeferredPaymentsLauncher;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;ILjava/lang/Object;)V
+	public static synthetic fun presentForDeferredSetup$default (Lcom/stripe/android/payments/bankaccount/CollectSessionForDeferredPaymentsLauncher;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+}
+
 public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args$Companion {
 	public final fun fromIntent (Landroid/content/Intent;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountContract$Args;
 }
@@ -6678,6 +6683,46 @@ public final class com/stripe/android/payments/bankaccount/navigation/CollectBan
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResult$Failed;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResult$Failed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsContract$Args$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsContract$Args;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsContract$Args;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsContract$Result$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsContract$Result;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsContract$Result;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsResult$Cancelled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsResult$Cancelled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsResult$Cancelled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsResult$Completed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsResult$Completed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsResult$Completed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsResult$Failed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsResult$Failed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/navigation/CollectSessionForDeferredPaymentsResult$Failed;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
