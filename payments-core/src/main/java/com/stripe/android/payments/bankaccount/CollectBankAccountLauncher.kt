@@ -29,6 +29,12 @@ interface CollectBankAccountLauncher {
         configuration: CollectBankAccountConfiguration
     )
 
+    fun presentWithDeferredIntent(
+        publishableKey: String,
+        stripeAccountId: String? = null,
+        configuration: CollectBankAccountConfiguration
+    )
+
     companion object {
         /**
          * Create a [CollectBankAccountLauncher] instance with [ComponentActivity].
@@ -100,6 +106,21 @@ internal class StripeCollectBankAccountLauncher constructor(
                 clientSecret = clientSecret,
                 configuration = configuration,
                 attachToIntent = true
+            )
+        )
+    }
+
+    override fun presentWithDeferredIntent(
+        publishableKey: String,
+        stripeAccountId: String?,
+        configuration: CollectBankAccountConfiguration
+    ) {
+        hostActivityLauncher.launch(
+            CollectBankAccountContract.Args.ForDeferredIntent(
+                publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
+                configuration = configuration,
+                attachToIntent = false
             )
         )
     }

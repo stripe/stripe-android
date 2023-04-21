@@ -27,6 +27,6 @@ sealed class CollectBankAccountResult : Parcelable {
 
 @Parcelize
 data class CollectBankAccountResponse(
-    val intent: StripeIntent,
+    val intent: StripeIntent?,
     val financialConnectionsSession: FinancialConnectionsSession
 ) : StripeModel

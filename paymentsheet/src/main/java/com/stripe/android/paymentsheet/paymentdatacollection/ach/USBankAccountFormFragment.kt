@@ -37,7 +37,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
@@ -45,9 +44,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.BillingDetailsCollection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -119,11 +116,7 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     private val clientSecret by lazy {
-        when (val intent = sheetViewModel?.stripeIntent?.value) {
-            is PaymentIntent -> PaymentIntentClientSecret(intent.clientSecret!!)
-            is SetupIntent -> SetupIntentClientSecret(intent.clientSecret!!)
-            else -> null
-        }
+        sheetViewModel?.stripeIntent?.value?.clientSecret
     }
 
     private val viewModel by activityViewModels<USBankAccountFormViewModel> {
@@ -134,11 +127,13 @@ internal class USBankAccountFormFragment : Fragment() {
             USBankAccountFormViewModel.Args(
                 formArgs = formArgs,
                 isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
+                isPaymentFlow = sheetViewModel?.stripeIntent?.value is PaymentIntent,
                 clientSecret = clientSecret,
                 savedPaymentMethod = savedPaymentMethod,
                 shippingDetails = sheetViewModel?.config?.shippingDetails,
-                onConfirmStripeIntent = { params ->
-                    (sheetViewModel as? PaymentSheetViewModel)?.confirmStripeIntent(params)
+                onConfirmSelection = { selection ->
+                    (sheetViewModel as? PaymentSheetViewModel)?.updateSelection(selection)
+                    (sheetViewModel as? PaymentSheetViewModel)?.checkout()
                 },
                 onUpdateSelectionAndFinish = { paymentSelection ->
                     sheetViewModel?.updateSelection(paymentSelection)

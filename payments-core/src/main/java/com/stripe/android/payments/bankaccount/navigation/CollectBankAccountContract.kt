@@ -41,7 +41,7 @@ class CollectBankAccountContract :
     sealed class Args(
         open val publishableKey: String,
         open val stripeAccountId: String?,
-        open val clientSecret: String,
+        open val clientSecret: String?,
         open val configuration: CollectBankAccountConfiguration,
         open val attachToIntent: Boolean
     ) : Parcelable {
@@ -75,6 +75,21 @@ class CollectBankAccountContract :
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
             clientSecret = clientSecret,
+            configuration = configuration,
+            attachToIntent = attachToIntent
+        )
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class ForDeferredIntent(
+            override val publishableKey: String,
+            override val stripeAccountId: String?,
+            override val configuration: CollectBankAccountConfiguration,
+            override val attachToIntent: Boolean
+        ) : Args(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            clientSecret = null,
             configuration = configuration,
             attachToIntent = attachToIntent
         )

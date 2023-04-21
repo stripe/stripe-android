@@ -217,10 +217,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         flowController = PaymentSheet.FlowController.create(
             activity = this,
             paymentOptionCallback = ::onPaymentOption,
-            createIntentCallbackForServerSideConfirmation = { paymentMethodId, shouldSavePaymentMethod ->
-                viewModel.createAndConfirmIntent(
+            createIntentCallback = { paymentMethodId ->
+                viewModel.createIntent(
                     paymentMethodId = paymentMethodId,
-                    shouldSavePaymentMethod = shouldSavePaymentMethod,
                     merchantCountryCode = merchantCountryCode.value,
                     mode = mode.value,
                     returnUrl = returnUrl,

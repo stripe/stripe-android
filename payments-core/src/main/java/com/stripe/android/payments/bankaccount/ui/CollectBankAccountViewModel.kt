@@ -17,6 +17,7 @@ import com.stripe.android.payments.bankaccount.domain.RetrieveStripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForDeferredIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Cancelled
@@ -72,20 +73,25 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     customerName = configuration.name,
                     customerEmail = configuration.email
                 )
-            }
-                .mapCatching { requireNotNull(it.clientSecret) }
-                .onSuccess { financialConnectionsSessionSecret: String ->
-                    logger.debug("Bank account session created! $financialConnectionsSessionSecret.")
-                    hasLaunched = true
-                    _viewEffect.emit(
-                        OpenConnectionsFlow(
-                            financialConnectionsSessionSecret = financialConnectionsSessionSecret,
-                            publishableKey = args.publishableKey,
-                            stripeAccountId = args.stripeAccountId
-                        )
+                is ForDeferredIntent -> createFinancialConnectionsSession.forDeferredIntent(
+                    publishableKey = args.publishableKey,
+                    stripeAccountId = args.stripeAccountId,
+                )
+            }.mapCatching {
+                requireNotNull(it.clientSecret)
+            }.onSuccess { financialConnectionsSessionSecret: String ->
+                logger.debug("Bank account session created! $financialConnectionsSessionSecret.")
+                hasLaunched = true
+                _viewEffect.emit(
+                    OpenConnectionsFlow(
+                        financialConnectionsSessionSecret = financialConnectionsSessionSecret,
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.stripeAccountId
                     )
-                }
-                .onFailure { finishWithError(it) }
+                )
+            }.onFailure {
+                finishWithError(it)
+            }
         }
     }
 
@@ -113,21 +119,30 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
     private fun finishWithFinancialConnectionsSession(financialConnectionsSession: FinancialConnectionsSession) {
         viewModelScope.launch {
-            retrieveStripeIntent(
-                args.publishableKey,
-                args.clientSecret
-            ).onSuccess { stripeIntent ->
-                finishWithResult(
-                    Completed(
-                        CollectBankAccountResponse(
-                            intent = stripeIntent,
-                            financialConnectionsSession = financialConnectionsSession
+            args.clientSecret?.let {
+                retrieveStripeIntent(
+                    args.publishableKey,
+                    it
+                ).onSuccess { stripeIntent ->
+                    finishWithResult(
+                        Completed(
+                            CollectBankAccountResponse(
+                                intent = stripeIntent,
+                                financialConnectionsSession = financialConnectionsSession
+                            )
                         )
                     )
+                }.onFailure {
+                    finishWithError(it)
+                }
+            } ?: finishWithResult(
+                Completed(
+                    CollectBankAccountResponse(
+                        intent = null,
+                        financialConnectionsSession = financialConnectionsSession
+                    )
                 )
-            }.onFailure {
-                finishWithError(it)
-            }
+            )
         }
     }
 
@@ -146,20 +161,20 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     clientSecret = args.clientSecret,
                     linkedAccountSessionId = financialConnectionsSession.id
                 )
-            }
-                .mapCatching {
-                    Completed(
-                        CollectBankAccountResponse(
-                            it,
-                            financialConnectionsSession
-                        )
+                is ForDeferredIntent -> return@launch
+            }.mapCatching {
+                Completed(
+                    CollectBankAccountResponse(
+                        it,
+                        financialConnectionsSession
                     )
-                }
-                .onSuccess { result: Completed ->
-                    logger.debug("Bank account session attached to  intent!!")
-                    finishWithResult(result)
-                }
-                .onFailure { finishWithError(it) }
+                )
+            }.onSuccess { result: Completed ->
+                logger.debug("Bank account session attached to intent!!")
+                finishWithResult(result)
+            }.onFailure {
+                finishWithError(it)
+            }
         }
     }
 

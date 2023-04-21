@@ -15,7 +15,6 @@ import javax.inject.Singleton
     modules = [
         CoroutineContextModule::class,
         USBankAccountFormViewModelModule::class,
-        StripeRepositoryModule::class,
         CoreCommonModule::class
     ]
 )

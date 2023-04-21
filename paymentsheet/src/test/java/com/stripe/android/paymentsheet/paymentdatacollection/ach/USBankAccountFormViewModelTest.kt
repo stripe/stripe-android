@@ -65,7 +65,7 @@ class USBankAccountFormViewModelTest {
         clientSecret = PaymentIntentClientSecret("pi_12345_secret_54321"),
         savedPaymentMethod = null,
         shippingDetails = null,
-        onConfirmStripeIntent = onConfirmStripeIntent,
+        onConfirmSelection = onConfirmStripeIntent,
         onUpdateSelectionAndFinish = onUpdateSelectionAndFinish
     )
 
