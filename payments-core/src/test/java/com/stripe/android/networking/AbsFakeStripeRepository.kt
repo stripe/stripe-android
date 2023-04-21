@@ -354,6 +354,13 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return Result.failure(NotImplementedError())
     }
 
+    override suspend fun createDeferredFinancialConnectionsSession(
+        uniqueId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<FinancialConnectionsSession> {
+        return Result.failure(NotImplementedError())
+    }
+
     override suspend fun createPaymentIntentFinancialConnectionsSession(
         paymentIntentId: String,
         params: CreateFinancialConnectionsSessionParams,

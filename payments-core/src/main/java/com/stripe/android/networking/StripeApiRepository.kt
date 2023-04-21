@@ -1286,6 +1286,24 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override suspend fun createDeferredFinancialConnectionsSession(
+        uniqueId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<FinancialConnectionsSession> {
+        return fetchStripeModelResult(
+            apiRequestFactory.createPost(
+                url = deferredFinancialConnectionsSessionUrl,
+                options = requestOptions,
+                params = mapOf(
+                    "unique_id" to uniqueId
+                )
+            ),
+            FinancialConnectionsSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
     override suspend fun createPaymentIntentFinancialConnectionsSession(
         paymentIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
@@ -1898,6 +1916,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val linkFinancialConnectionsSessionUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/link_account_sessions")
+
+        /**
+         * @return `https://api.stripe.com/v1/connections/link_account_sessions_for_deferred_payment`
+         */
+        internal val deferredFinancialConnectionsSessionUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("connections/link_account_sessions_for_deferred_payment")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/:id`

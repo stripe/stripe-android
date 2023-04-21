@@ -373,6 +373,11 @@ abstract class StripeRepository {
 
     // ACHv2 endpoints
 
+    internal abstract suspend fun createDeferredFinancialConnectionsSession(
+        uniqueId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<FinancialConnectionsSession>
+
     internal abstract suspend fun createPaymentIntentFinancialConnectionsSession(
         paymentIntentId: String,
         params: CreateFinancialConnectionsSessionParams,

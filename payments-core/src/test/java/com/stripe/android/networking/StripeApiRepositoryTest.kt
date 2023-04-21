@@ -260,6 +260,14 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun testDeferredFinancialConnectionsSessionUrlUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/connections/link_account_sessions_for_deferred_payment",
+            StripeApiRepository.deferredFinancialConnectionsSessionUrl
+        )
+    }
+
+    @Test
     fun testConsumerPaymentDetailsUrl() {
         assertEquals(
             "https://api.stripe.com/v1/consumers/payment_details",
@@ -1709,6 +1717,31 @@ internal class StripeApiRepositoryTest {
                 withNestedParams("credentials") {
                     assertEquals(this["consumer_session_client_secret"], clientSecret)
                 }
+            }
+        }
+
+    @Test
+    fun `createDeferredFinancialConnectionsSession() sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                FinancialConnectionsFixtures.SESSION.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val uuid = "some_uuid"
+            create().createDeferredFinancialConnectionsSession(
+                uuid,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+            with(params) {
+                assertEquals(uuid, this["unique_id"])
             }
         }
 

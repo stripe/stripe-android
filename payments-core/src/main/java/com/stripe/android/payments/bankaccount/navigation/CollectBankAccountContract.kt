@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
 import kotlinx.parcelize.Parcelize
@@ -36,12 +37,14 @@ class CollectBankAccountContract :
 
     /**
      * @param attachToIntent enable this to attach the link account session to the given intent
+     * @param elementsSession pass an [ElementsSession] when a client secret is not available
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Args(
         open val publishableKey: String,
         open val stripeAccountId: String?,
-        open val clientSecret: String,
+        open val clientSecret: String?,
+        open val elementsSession: ElementsSession?,
         open val configuration: CollectBankAccountConfiguration,
         open val attachToIntent: Boolean
     ) : Parcelable {
@@ -59,6 +62,7 @@ class CollectBankAccountContract :
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
             clientSecret = clientSecret,
+            elementsSession = null,
             configuration = configuration,
             attachToIntent = attachToIntent
         )
@@ -75,8 +79,25 @@ class CollectBankAccountContract :
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
             clientSecret = clientSecret,
+            elementsSession = null,
             configuration = configuration,
             attachToIntent = attachToIntent
+        )
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class ForDeferredIntent(
+            override val publishableKey: String,
+            override val stripeAccountId: String?,
+            override val elementsSession: ElementsSession?,
+            override val configuration: CollectBankAccountConfiguration,
+        ) : Args(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            clientSecret = null,
+            elementsSession = elementsSession,
+            configuration = configuration,
+            attachToIntent = false
         )
 
         companion object {

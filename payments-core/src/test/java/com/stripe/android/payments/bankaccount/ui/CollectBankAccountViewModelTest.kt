@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -14,6 +15,7 @@ import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnections
 import com.stripe.android.payments.bankaccount.domain.CreateFinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.domain.RetrieveStripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForDeferredIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
@@ -88,6 +90,27 @@ class CollectBankAccountViewModelTest {
 
             // When
             buildViewModel(viewEffect, setupIntentConfiguration())
+
+            // Then
+            assertThat(awaitItem()).isEqualTo(
+                OpenConnectionsFlow(
+                    publishableKey = publishableKey,
+                    financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
+                    stripeAccountId = stripeAccountId
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `init - when createFinancialConnectionsSession succeeds for DI, opens connection flow`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        viewEffect.test {
+            // Given
+            givenCreateAccountSessionForDeferredIntentReturns(Result.success(financialConnectionsSession))
+
+            // When
+            buildViewModel(viewEffect, deferredIntentConfiguration())
 
             // Then
             assertThat(awaitItem()).isEqualTo(
@@ -220,6 +243,33 @@ class CollectBankAccountViewModelTest {
     }
 
     @Test
+    fun `connectionsResult - when attach succeeds for DI, finish with success`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        viewEffect.test {
+            // Given
+            givenCreateAccountSessionForDeferredIntentReturns(Result.success(financialConnectionsSession))
+
+            // When
+            val viewModel = buildViewModel(viewEffect, deferredIntentConfiguration())
+            viewModel.onConnectionsResult(
+                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
+            )
+
+            // Then
+            assertThat(expectMostRecentItem()).isEqualTo(
+                FinishWithResult(
+                    Completed(
+                        CollectBankAccountResponse(
+                            ElementsSessionFixtures.DEFERRED_INTENT.stripeIntent,
+                            paymentsFinancialConnectionsSession
+                        )
+                    )
+                )
+            )
+        }
+    }
+
+    @Test
     fun `connectionsResult - when attach fails, finish with error`() = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
@@ -305,6 +355,19 @@ class CollectBankAccountViewModelTest {
         }
     }
 
+    private fun givenCreateAccountSessionForDeferredIntentReturns(
+        result: Result<FinancialConnectionsSession>
+    ) {
+        createFinancialConnectionsSession.stub {
+            onBlocking {
+                forDeferredIntent(
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId
+                )
+            }.doReturn(result)
+        }
+    }
+
     private fun givenRetrieveStripeIntentReturns(
         result: Result<StripeIntent>
     ) {
@@ -358,6 +421,18 @@ class CollectBankAccountViewModelTest {
                 email
             ),
             attachToIntent = attachToIntent
+        )
+    }
+
+    private fun deferredIntentConfiguration(): ForDeferredIntent {
+        return ForDeferredIntent(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            elementsSession = ElementsSessionFixtures.DEFERRED_INTENT,
+            configuration = CollectBankAccountConfiguration.USBankAccount(
+                name,
+                email
+            ),
         )
     }
 }

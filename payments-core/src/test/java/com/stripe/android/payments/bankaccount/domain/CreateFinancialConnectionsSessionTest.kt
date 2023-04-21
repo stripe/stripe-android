@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -207,6 +208,62 @@ class CreateFinancialConnectionsSessionTest {
         }
     }
 
+    @Test
+    fun `forDeferredIntent - given repository succeeds, linkedSession created for deferred intent`() {
+        runTest {
+            // Given
+            val publishableKey = "publishable_key"
+            val stripeAccountId = "accountId"
+            givenCreateSessionWithDeferredIntentReturns { Result.success(linkedAccountSession) }
+
+            // When
+            val deferredIntent: Result<FinancialConnectionsSession> =
+                createFinancialConnectionsSession.forDeferredIntent(
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId
+                )
+
+            // Then
+            verify(stripeRepository).createDeferredFinancialConnectionsSession(
+                uniqueId = any(),
+                requestOptions = eq(
+                    ApiRequest.Options(
+                        apiKey = publishableKey,
+                        stripeAccount = stripeAccountId
+                    )
+                )
+            )
+            assertThat((deferredIntent)).isEqualTo(Result.success(linkedAccountSession))
+        }
+    }
+
+    @Test
+    fun `forDeferredIntent - given repository throws exception, results in internal error failure`() {
+        runTest {
+            // Given
+            val publishableKey = "publishable_key"
+
+            val expectedException = APIException()
+            givenCreateSessionWithDeferredIntentReturns { Result.failure(expectedException) }
+
+            // When
+            val paymentIntent: Result<FinancialConnectionsSession> =
+                createFinancialConnectionsSession.forDeferredIntent(
+                    publishableKey = publishableKey,
+                    stripeAccountId = null
+                )
+
+            // Then
+            verify(stripeRepository).createDeferredFinancialConnectionsSession(
+                uniqueId = any(),
+                requestOptions = eq(
+                    ApiRequest.Options(publishableKey)
+                )
+            )
+            assertThat(paymentIntent.exceptionOrNull()!!).isEqualTo(expectedException)
+        }
+    }
+
     private suspend fun givenCreateSessionWithPaymentIntentReturns(
         session: () -> Result<FinancialConnectionsSession>,
     ) {
@@ -227,6 +284,17 @@ class CreateFinancialConnectionsSessionTest {
                 any(),
                 any(),
                 any()
+            )
+        ).doReturn(session())
+    }
+
+    private suspend fun givenCreateSessionWithDeferredIntentReturns(
+        session: () -> Result<FinancialConnectionsSession>,
+    ) {
+        whenever(
+            stripeRepository.createDeferredFinancialConnectionsSession(
+                any(),
+                any(),
             )
         ).doReturn(session())
     }

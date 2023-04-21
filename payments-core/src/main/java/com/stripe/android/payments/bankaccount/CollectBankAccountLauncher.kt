@@ -3,7 +3,9 @@ package com.stripe.android.payments.bankaccount
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import kotlinx.parcelize.Parcelize
@@ -26,6 +28,14 @@ interface CollectBankAccountLauncher {
         publishableKey: String,
         stripeAccountId: String? = null,
         clientSecret: String,
+        configuration: CollectBankAccountConfiguration
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun presentWithDeferredIntent(
+        publishableKey: String,
+        stripeAccountId: String? = null,
+        elementsSession: ElementsSession,
         configuration: CollectBankAccountConfiguration
     )
 
@@ -100,6 +110,23 @@ internal class StripeCollectBankAccountLauncher constructor(
                 clientSecret = clientSecret,
                 configuration = configuration,
                 attachToIntent = true
+            )
+        )
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override fun presentWithDeferredIntent(
+        publishableKey: String,
+        stripeAccountId: String?,
+        elementsSession: ElementsSession,
+        configuration: CollectBankAccountConfiguration
+    ) {
+        hostActivityLauncher.launch(
+            CollectBankAccountContract.Args.ForDeferredIntent(
+                publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
+                elementsSession = elementsSession,
+                configuration = configuration
             )
         )
     }
