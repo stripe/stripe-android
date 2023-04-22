@@ -137,13 +137,6 @@ internal class USBankAccountFormFragment : Fragment() {
                 clientSecret = clientSecret,
                 savedPaymentMethod = savedPaymentMethod,
                 shippingDetails = sheetViewModel?.config?.shippingDetails,
-                onConfirmStripeIntent = { params ->
-                    (sheetViewModel as? PaymentSheetViewModel)?.confirmStripeIntent(params)
-                },
-                onUpdateSelectionAndFinish = { paymentSelection ->
-                    sheetViewModel?.updateSelection(paymentSelection)
-                    sheetViewModel?.onFinish()
-                }
             )
         }
     }
@@ -162,6 +155,10 @@ internal class USBankAccountFormFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
+
+        viewModel.result.launchAndCollectIn(viewLifecycleOwner) { result ->
+            sheetViewModel?.handleUSBankAccountSelected(result)
+        }
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {

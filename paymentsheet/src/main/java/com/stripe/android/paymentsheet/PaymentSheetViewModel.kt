@@ -412,6 +412,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    override fun handleUSBankAccountSelected(paymentSelection: PaymentSelection.New.USBankAccount) {
+        confirmPaymentSelection(paymentSelection)
+    }
+
     override fun clearErrorMessages() {
         if (viewState.value is PaymentSheetViewState.Reset) {
             viewState.value = PaymentSheetViewState.Reset(message = null)
