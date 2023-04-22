@@ -57,9 +57,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -203,16 +205,25 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             )
         )
 
-    val currentScreenState: StateFlow<USBankAccountFormScreenState>
-        get() = _currentScreenState
+    val currentScreenState: StateFlow<USBankAccountFormScreenState> = _currentScreenState
 
     val saveForFutureUseElement: SaveForFutureUseElement = SaveForFutureUseSpec().transform(
         initialValue = false,
         merchantName = args.formArgs.merchantName
     ) as SaveForFutureUseElement
 
-    val saveForFutureUse: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
+    private val saveForFutureUse: StateFlow<Boolean> = saveForFutureUseElement
+        .controller
+        .saveForFutureUse
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
+
+    val isSavingForFutureUse: StateFlow<Boolean> = saveForFutureUse.filterNot {
+        currentScreenState.value is USBankAccountFormScreenState.BillingDetailsCollection
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = args.formArgs.showCheckbox,
+    )
 
     val requiredFields = combine(
         nameController.formFieldValue.map { it.isComplete },
@@ -232,31 +243,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     )
 
     private val _processing = MutableStateFlow(false)
-    val processing: StateFlow<Boolean>
-        get() = _processing
+    val processing: StateFlow<Boolean> = _processing
 
     @VisibleForTesting
     var collectBankAccountLauncher: CollectBankAccountLauncher? = null
 
     init {
-        args.savedPaymentMethod?.paymentMethodCreateParams?.let {
-            _currentScreenState.update {
-                USBankAccountFormScreenState.SavedAccount(
-                    name.value,
-                    email.value,
-                    phone.value,
-                    address.value,
-                    args.savedPaymentMethod.financialConnectionsSessionId,
-                    args.savedPaymentMethod.intentId,
-                    args.savedPaymentMethod.bankName,
-                    args.savedPaymentMethod.last4,
-                    buildPrimaryButtonText(),
-                    buildMandateText(),
-                    args.formArgs.showCheckbox
-                )
-            }
-        }
-
         val hasDefaultName = args.formArgs.billingDetails?.name != null &&
             args.formArgs.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
         val collectingName =
@@ -303,7 +295,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                     financialConnectionsSessionId =
                                     result.response.financialConnectionsSession.id,
                                     intentId = intentId,
-                                    primaryButtonText = buildPrimaryButtonText(),
+                                    primaryButtonText = args.buttonLabel,
                                     mandateText = buildMandateText(),
                                     saveForFutureUsage = saveForFutureUse.value
                                 )
@@ -322,7 +314,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                     financialConnectionsSessionId =
                                     result.response.financialConnectionsSession.id,
                                     intentId = intentId,
-                                    primaryButtonText = buildPrimaryButtonText(),
+                                    primaryButtonText = args.buttonLabel,
                                     mandateText = buildMandateText(),
                                     saveForFutureUsage = saveForFutureUse.value
                                 )
@@ -343,14 +335,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    fun handlePrimaryButtonClick(screenState: USBankAccountFormScreenState) {
-        _currentScreenState.value = _currentScreenState.value.updateInputs(
-            name.value,
-            email.value,
-            phone.value,
-            address.value,
-            saveForFutureUse.value,
-        )
+    fun handlePrimaryButtonClick() {
+        val screenState = _currentScreenState.updateAndGet {
+            it.updateInputs(
+                name = name.value,
+                email = email.value,
+                phone = phone.value,
+                address = address.value,
+                saveForFutureUsage = saveForFutureUse.value,
+            )
+        }
+
         when (screenState) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
                 args.clientSecret?.let {
@@ -504,11 +499,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             R.string.paymentsheet_payment_method_item_card_number,
                             last4
                         ),
-                        iconResource = TransformToBankIcon(
-                            bankName
-                        ),
-                        paymentMethodCreateParams =
-                        PaymentMethodCreateParams.create(
+                        iconResource = TransformToBankIcon(bankName),
+                        paymentMethodCreateParams = PaymentMethodCreateParams.create(
                             usBankAccount = PaymentMethodCreateParams.USBankAccount(
                                 linkAccountSessionId = linkAccountId
                             ),
@@ -548,23 +540,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     _result.tryEmit(paymentSelection)
                 }
             }
-        }
-    }
-
-    private fun buildPrimaryButtonText(): String {
-        return when {
-            args.isCompleteFlow -> {
-                if (args.clientSecret is PaymentIntentClientSecret) {
-                    args.formArgs.amount!!.buildPayButtonLabel(application.resources)
-                } else {
-                    application.getString(
-                        R.string.stripe_setup_button_label
-                    )
-                }
-            }
-            else -> application.getString(
-                R.string.stripe_continue_button_label
-            )
         }
     }
 
@@ -613,9 +588,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     data class Args(
         val formArgs: FormArguments,
-        val isCompleteFlow: Boolean,
+        val buttonLabel: String,
         val clientSecret: ClientSecret?,
-        val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     )

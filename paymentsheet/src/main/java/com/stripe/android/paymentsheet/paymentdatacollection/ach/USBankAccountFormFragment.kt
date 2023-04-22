@@ -32,10 +32,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -46,7 +43,6 @@ import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.BillingDetailsCollection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
@@ -64,8 +60,6 @@ import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.stripeColors
-import kotlinx.coroutines.flow.filterNot
-import kotlinx.coroutines.launch
 
 /**
  * Fragment that displays a form for us_bank_account payment data collection
@@ -96,8 +90,8 @@ internal class USBankAccountFormFragment : Fragment() {
         }
     }
 
-    private val sheetViewModel: BaseSheetViewModel? by lazy {
-        when (requireActivity()) {
+    private val sheetViewModel: BaseSheetViewModel by lazy {
+        when (val activity = requireActivity()) {
             is PaymentOptionsActivity -> {
                 activityViewModels<PaymentOptionsViewModel> {
                     paymentOptionsViewModelFactory
@@ -109,7 +103,7 @@ internal class USBankAccountFormFragment : Fragment() {
                 }.value
             }
             else -> {
-                null
+                error("Can't instantiate USBankAccountFormFragment inside ${activity::class.java.name}")
             }
         }
     }
@@ -119,7 +113,7 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     private val clientSecret by lazy {
-        when (val intent = sheetViewModel?.stripeIntent?.value) {
+        when (val intent = sheetViewModel.stripeIntent.value) {
             is PaymentIntent -> PaymentIntentClientSecret(intent.clientSecret!!)
             is SetupIntent -> SetupIntentClientSecret(intent.clientSecret!!)
             else -> null
@@ -128,15 +122,11 @@ internal class USBankAccountFormFragment : Fragment() {
 
     private val viewModel by activityViewModels<USBankAccountFormViewModel> {
         USBankAccountFormViewModel.Factory {
-            val savedPaymentMethod =
-                sheetViewModel?.newPaymentSelection as? PaymentSelection.New.USBankAccount
-
             USBankAccountFormViewModel.Args(
                 formArgs = formArgs,
-                isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
+                buttonLabel = buildButtonLabel(),
                 clientSecret = clientSecret,
-                savedPaymentMethod = savedPaymentMethod,
-                shippingDetails = sheetViewModel?.config?.shippingDetails,
+                shippingDetails = sheetViewModel.config?.shippingDetails,
             )
         }
     }
@@ -157,46 +147,31 @@ internal class USBankAccountFormFragment : Fragment() {
         )
 
         viewModel.result.launchAndCollectIn(viewLifecycleOwner) { result ->
-            sheetViewModel?.handleUSBankAccountConfirmed(result)
+            sheetViewModel.handleUSBankAccountConfirmed(result)
         }
 
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                sheetViewModel?.primaryButtonState?.launchAndCollectIn(viewLifecycleOwner) { state ->
-                    // When the primary button state is StartProcessing or FinishProcessing
-                    // we should disable the inputs of this form. StartProcessing shows the loading
-                    // spinner, FinishProcessing shows the checkmark animation
-                    viewModel.setProcessing(
-                        state is PrimaryButton.State.StartProcessing ||
-                            state is PrimaryButton.State.FinishProcessing
-                    )
-                }
+        sheetViewModel.primaryButtonState.launchAndCollectIn(viewLifecycleOwner) { state ->
+            // When the primary button state is StartProcessing or FinishProcessing
+            // we should disable the inputs of this form. StartProcessing shows the loading
+            // spinner, FinishProcessing shows the checkmark animation
+            viewModel.setProcessing(
+                state is PrimaryButton.State.StartProcessing || state is PrimaryButton.State.FinishProcessing
+            )
+        }
+
+        viewModel.requiredFields.launchAndCollectIn(viewLifecycleOwner) { hasRequiredFields ->
+            sheetViewModel.updateCustomPrimaryButtonUiState {
+                it?.copy(enabled = hasRequiredFields)
             }
         }
 
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.requiredFields.collect { hasRequiredFields ->
-                    sheetViewModel?.updateCustomPrimaryButtonUiState {
-                        it?.copy(enabled = hasRequiredFields)
-                    }
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.saveForFutureUse
-                    .filterNot { viewModel.currentScreenState.value is BillingDetailsCollection }
-                    .collect { saved ->
-                        val mandateText = ACHText.getContinueMandateText(
-                            context = requireContext(),
-                            merchantName = viewModel.formattedMerchantName(),
-                            isSaveForFutureUseSelected = saved,
-                        )
-                        updateMandateText(mandateText)
-                    }
-            }
+        viewModel.isSavingForFutureUse.launchAndCollectIn(viewLifecycleOwner) { saved ->
+            val mandateText = ACHText.getContinueMandateText(
+                context = requireContext(),
+                merchantName = viewModel.formattedMerchantName(),
+                isSaveForFutureUseSelected = saved,
+            )
+            updateMandateText(mandateText)
         }
 
         setContent {
@@ -226,7 +201,7 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     private fun handleScreenStateChanged(screenState: USBankAccountFormScreenState) {
-        sheetViewModel?.onError(screenState.error)
+        sheetViewModel.onError(screenState.error)
 
         val showProcessingWhenClicked = screenState is BillingDetailsCollection || completePayment
         val enabled = if (screenState is BillingDetailsCollection) {
@@ -237,7 +212,7 @@ internal class USBankAccountFormFragment : Fragment() {
 
         updatePrimaryButton(
             text = screenState.primaryButtonText,
-            onClick = { viewModel.handlePrimaryButtonClick(screenState) },
+            onClick = viewModel::handlePrimaryButtonClick,
             enabled = enabled,
             shouldShowProcessingWhenClicked = showProcessingWhenClicked
         )
@@ -246,7 +221,7 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     override fun onDetach() {
-        sheetViewModel?.resetUSBankPrimaryButton()
+        sheetViewModel.resetUSBankPrimaryButton()
         viewModel.onDestroy()
         super.onDetach()
     }
@@ -355,17 +330,16 @@ internal class USBankAccountFormFragment : Fragment() {
                 }
             }
             if (formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always) {
-                phoneSection()
+                PhoneSection()
             }
             if (formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full) {
-                addressSection()
+                AddressSection()
             }
         }
     }
 
-    @Suppress("SpreadOperator")
     @Composable
-    private fun phoneSection() {
+    private fun PhoneSection() {
         val processing = viewModel.processing.collectAsState(false)
         val error by viewModel.phoneController.error.collectAsState(null)
         val sectionErrorString = error?.let {
@@ -392,9 +366,8 @@ internal class USBankAccountFormFragment : Fragment() {
         }
     }
 
-    @Suppress("SpreadOperator")
     @Composable
-    fun addressSection() {
+    fun AddressSection() {
         val processing = viewModel.processing.collectAsState(false)
         val error by viewModel.addressElement.controller.error.collectAsState(null)
         val sectionErrorString = error?.let {
@@ -529,16 +502,16 @@ internal class USBankAccountFormFragment : Fragment() {
         shouldShowProcessingWhenClicked: Boolean = true,
         enabled: Boolean = true,
     ) {
-        sheetViewModel?.updatePrimaryButtonState(PrimaryButton.State.Ready)
-        sheetViewModel?.updateCustomPrimaryButtonUiState {
+        sheetViewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
+        sheetViewModel.updateCustomPrimaryButtonUiState {
             PrimaryButton.UIState(
                 label = text,
                 onClick = {
                     if (shouldShowProcessingWhenClicked) {
-                        sheetViewModel?.updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+                        sheetViewModel.updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
                     }
                     onClick()
-                    sheetViewModel?.updateCustomPrimaryButtonUiState { button ->
+                    sheetViewModel.updateCustomPrimaryButtonUiState { button ->
                         button?.copy(enabled = false)
                     }
                 },
@@ -567,6 +540,19 @@ internal class USBankAccountFormFragment : Fragment() {
                 $mandateText
             """.trimIndent()
         } ?: run { null }
-        sheetViewModel?.updateBelowButtonText(updatedText)
+        sheetViewModel.updateBelowButtonText(updatedText)
+    }
+
+    private fun buildButtonLabel(): String {
+        val isCompleteFlow = sheetViewModel is PaymentSheetViewModel
+        return if (isCompleteFlow) {
+            if (clientSecret is PaymentIntentClientSecret) {
+                formArgs.amount!!.buildPayButtonLabel(resources)
+            } else {
+                getString(R.string.stripe_setup_button_label)
+            }
+        } else {
+            getString(R.string.stripe_continue_button_label)
+        }
     }
 }
