@@ -190,9 +190,7 @@ internal class StripePaymentControllerTest {
     fun `confirmAndAuthenticateAlipay() should return expected outcome`() =
         runTest {
             whenever(alipayRepository.authenticate(any(), any(), any())).thenReturn(
-                AlipayAuthResult(
-                    StripeIntentResult.Outcome.SUCCEEDED
-                )
+                Result.success(AlipayAuthResult(StripeIntentResult.Outcome.SUCCEEDED))
             )
             stripeRepository.retrievePaymentIntentResponse =
                 PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
@@ -204,7 +202,7 @@ internal class StripePaymentControllerTest {
                 ),
                 mock(),
                 REQUEST_OPTIONS
-            )
+            ).getOrThrow()
 
             assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
             assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.shouldUseStripeSdk()).isTrue()

@@ -14,20 +14,21 @@ internal class DefaultAlipayRepository(
         paymentIntent: PaymentIntent,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
-    ): AlipayAuthResult {
+    ): Result<AlipayAuthResult> {
         if (paymentIntent.paymentMethod?.liveMode == false) {
-            throw IllegalArgumentException(
-                "Attempted to authenticate test mode " +
-                    "PaymentIntent with the Alipay SDK.\n" +
-                    "The Alipay SDK does not support test mode payments."
+            return Result.failure(
+                IllegalArgumentException(
+                    "Attempted to authenticate test mode " +
+                        "PaymentIntent with the Alipay SDK.\n" +
+                        "The Alipay SDK does not support test mode payments."
+                )
             )
         }
 
         val nextActionData = paymentIntent.nextActionData
-        if (nextActionData is StripeIntent.NextActionData.AlipayRedirect) {
-            val output =
-                authenticator.onAuthenticationRequest(nextActionData.data)
-            return AlipayAuthResult(
+        return if (nextActionData is StripeIntent.NextActionData.AlipayRedirect) {
+            val output = authenticator.onAuthenticationRequest(nextActionData.data)
+            val result = AlipayAuthResult(
                 when (output[ALIPAY_RESULT_FIELD]) {
                     AlipayAuthResult.RESULT_CODE_SUCCESS -> {
                         nextActionData.authCompleteUrl?.let { authCompleteUrl ->
@@ -40,8 +41,11 @@ internal class DefaultAlipayRepository(
                     else -> StripeIntentResult.Outcome.UNKNOWN
                 }
             )
+            Result.success(result)
         } else {
-            throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")
+            Result.failure(
+                RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")
+            )
         }
     }
 

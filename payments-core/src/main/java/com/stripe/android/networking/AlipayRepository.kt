@@ -10,5 +10,5 @@ internal interface AlipayRepository {
         paymentIntent: PaymentIntent,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
-    ): AlipayAuthResult
+    ): Result<AlipayAuthResult>
 }

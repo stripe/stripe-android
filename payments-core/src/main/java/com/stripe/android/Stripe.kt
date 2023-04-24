@@ -199,7 +199,7 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
-        executeAsync(callback) {
+        executeAsyncForResult(callback) {
             paymentController.confirmAndAuthenticateAlipay(
                 confirmPaymentIntentParams,
                 authenticator,

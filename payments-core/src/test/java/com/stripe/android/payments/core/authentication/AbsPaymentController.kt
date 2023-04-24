@@ -28,8 +28,8 @@ internal abstract class AbsPaymentController : PaymentController {
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
-    ): PaymentIntentResult {
-        TODO("Not yet implemented")
+    ): Result<PaymentIntentResult> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun confirmWeChatPay(

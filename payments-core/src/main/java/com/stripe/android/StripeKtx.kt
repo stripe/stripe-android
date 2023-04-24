@@ -59,15 +59,15 @@ suspend fun Stripe.confirmAlipayPayment(
     confirmPaymentIntentParams: ConfirmPaymentIntentParams,
     authenticator: AlipayAuthenticator,
     stripeAccountId: String? = this.stripeAccountId
-): PaymentIntentResult = runApiRequest {
-    paymentController.confirmAndAuthenticateAlipay(
+): PaymentIntentResult {
+    return paymentController.confirmAndAuthenticateAlipay(
         confirmPaymentIntentParams,
         authenticator,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         )
-    )
+    ).getOrElse { throw StripeException.create(it) }
 }
 
 /**
