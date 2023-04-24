@@ -51,7 +51,7 @@ ext.versions = [
         material                    : '1.8.0',
         mockito                     : '5.2.0',
         mockitoKotlin               : '4.1.0',
-        okhttp                      : '4.10.0',
+        okhttp                      : '4.11.0',
         okio                        : '3.3.0',
         paparazzi                   : '1.2.0',
         places                      : '3.0.0',
