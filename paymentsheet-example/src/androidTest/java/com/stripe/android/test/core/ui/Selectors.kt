@@ -12,12 +12,7 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.wallet.IsReadyToPayRequest
-import com.google.android.gms.wallet.PaymentsClient
-import com.google.android.gms.wallet.WalletConstants
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -174,42 +169,6 @@ class Selectors(
                 }
             }
         }
-
-    fun onGooglePayAvailable(availableCallable: () -> Unit, unavailableCallable: () -> Unit) {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val googlePayJsonFactory = GooglePayJsonFactory(context)
-
-        val paymentsClient: PaymentsClient by lazy {
-            val options = com.google.android.gms.wallet.Wallet.WalletOptions.Builder()
-                .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
-                .build()
-
-            com.google.android.gms.wallet.Wallet.getPaymentsClient(context, options)
-        }
-
-        val request = IsReadyToPayRequest.fromJson(
-            googlePayJsonFactory.createIsReadyToPayRequest(
-                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
-                    false,
-                    GooglePayJsonFactory.BillingAddressParameters.Format.Min,
-                    false
-                ),
-                existingPaymentMethodRequired = true
-            ).toString()
-        )
-
-        paymentsClient.isReadyToPay(request)
-            .addOnCompleteListener { task ->
-                val isReady = runCatching {
-                    task.getResult(ApiException::class.java) == true
-                }.getOrDefault(false)
-                if (isReady) {
-                    availableCallable()
-                } else {
-                    unavailableCallable()
-                }
-            }
-    }
 
     private fun getInstalledPackages() = InstrumentationRegistry.getInstrumentation()
         .targetContext

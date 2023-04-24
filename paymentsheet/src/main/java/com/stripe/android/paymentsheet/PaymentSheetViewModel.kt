@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
@@ -190,6 +191,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             } else {
                 R.string.stripe_paymentsheet_or_pay_using
             },
+            googlePayAllowCreditCards = googlePayLauncherConfig?.allowCreditCards ?: false,
+            googlePayBillingAddressParameters = googlePayLauncherConfig?.let {
+                GooglePayJsonFactory.BillingAddressParameters(
+                    it.billingAddressConfig.isRequired,
+                    when (it.billingAddressConfig.format) {
+                        GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min ->
+                            GooglePayJsonFactory.BillingAddressParameters.Format.Min
+                        GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full ->
+                            GooglePayJsonFactory.BillingAddressParameters.Format.Full
+                    },
+                    it.billingAddressConfig.isPhoneNumberRequired
+                )
+            }
         )
     }
 
