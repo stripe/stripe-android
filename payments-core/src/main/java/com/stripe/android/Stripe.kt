@@ -451,7 +451,7 @@ class Stripe internal constructor(
         clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId,
         expand: List<String> = emptyList(),
-    ): PaymentIntent? {
+    ): PaymentIntent {
         return runBlocking {
             stripeRepository.retrievePaymentIntent(
                 PaymentIntent.ClientSecret(clientSecret).value,
@@ -747,7 +747,7 @@ class Stripe internal constructor(
         clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId,
         expand: List<String> = emptyList(),
-    ): SetupIntent? {
+    ): SetupIntent {
         return runBlocking {
             stripeRepository.retrieveSetupIntent(
                 SetupIntent.ClientSecret(clientSecret).value,
@@ -1101,7 +1101,7 @@ class Stripe internal constructor(
         @Size(min = 1) sourceId: String,
         @Size(min = 1) clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId
-    ): Source? {
+    ): Source {
         return runBlocking {
             stripeRepository.retrieveSource(
                 sourceId,
