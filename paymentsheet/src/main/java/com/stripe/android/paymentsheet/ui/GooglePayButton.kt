@@ -43,12 +43,13 @@ internal fun GooglePayButton(
     AndroidView(
         factory = { context -> GooglePayButton(context) },
         update = { googlePayButton ->
-            googlePayButton.initialize(
-                isInspectionMode = isInspectionMode,
-                cornerRadius = cornerRadius,
-                allowCreditCards = allowCreditCards,
-                billingAddressParameters = billingAddressParameters
-            )
+            if (!isInspectionMode) {
+                googlePayButton.initialize(
+                    cornerRadius = cornerRadius,
+                    allowCreditCards = allowCreditCards,
+                    billingAddressParameters = billingAddressParameters
+                )
+            }
             googlePayButton.isEnabled = isEnabled
             googlePayButton.updateState(state)
             googlePayButton.setOnClickListener { onPressed() }
@@ -76,12 +77,10 @@ internal class GooglePayButton @JvmOverloads constructor(
     }
 
     fun initialize(
-        isInspectionMode: Boolean,
         cornerRadius: Int,
         allowCreditCards: Boolean,
         billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?
     ) {
-        if (isInspectionMode) return
         initializePrimaryButton()
         val isDark = context.isSystemDarkTheme()
         val allowedPaymentMethods = JSONArray().put(
@@ -91,20 +90,28 @@ internal class GooglePayButton @JvmOverloads constructor(
             )
         ).toString()
 
-        viewBinding.googlePayPaymentButton.initialize(
-            ButtonOptions.newBuilder()
-                .setButtonTheme(
-                    if (isDark) {
-                        ButtonConstants.ButtonTheme.LIGHT
-                    } else {
-                        ButtonConstants.ButtonTheme.DARK
-                    }
-                )
-                .setButtonType(ButtonConstants.ButtonType.PAY)
-                .setCornerRadius(cornerRadius)
-                .setAllowedPaymentMethods(allowedPaymentMethods)
-                .build()
-        )
+        val options = with(ButtonOptions.newBuilder()) {
+            setButtonTheme(
+                if (isDark) {
+                    ButtonConstants.ButtonTheme.LIGHT
+                } else {
+                    ButtonConstants.ButtonTheme.DARK
+                }
+            )
+            setButtonType(ButtonConstants.ButtonType.PAY)
+            setAllowedPaymentMethods(allowedPaymentMethods)
+            setCornerRadius(
+                // Corner radius of 0 is undefined in Google Pay
+                if (cornerRadius <= 0) {
+                    1
+                } else {
+                    cornerRadius
+                }
+            )
+            build()
+        }
+
+        viewBinding.googlePayPaymentButton.initialize(options)
     }
 
     private fun initializePrimaryButton() {
