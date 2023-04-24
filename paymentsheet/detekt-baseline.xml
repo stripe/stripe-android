@@ -66,6 +66,7 @@
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
     <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowControllerNonFallbackInjector</ID>
     <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>
+    <ID>TooManyFunctions:PaymentOptionsViewModel.kt$PaymentOptionsViewModel : BaseSheetViewModel</ID>
     <ID>TooManyFunctions:PaymentSheetViewModel.kt$PaymentSheetViewModel : BaseSheetViewModel</ID>
     <ID>UnnecessaryAbstractClass:PaymentSheetCommonModule.kt$PaymentSheetCommonModule$PaymentSheetCommonModule</ID>
     <ID>UnnecessaryAbstractClass:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule$PaymentSheetLauncherModule</ID>
