@@ -36,7 +36,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayLauncherViewModelTest {
@@ -70,18 +69,17 @@ class GooglePayLauncherViewModelTest {
         runTest {
             googlePayRepository.value = false
 
-            val error = assertFailsWith<IllegalStateException> {
-                viewModel.createLoadPaymentDataTask()
-            }
-            assertThat(error.message)
+            val result = viewModel.createLoadPaymentDataTask()
+
+            assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+            assertThat(result.exceptionOrNull()?.message)
                 .isEqualTo("Google Pay is unavailable.")
         }
 
     @Test
     fun `createLoadPaymentDataTask() should return task when Google Pay is available`() =
         runTest {
-            assertThat(viewModel.createLoadPaymentDataTask())
-                .isNotNull()
+            assertThat(viewModel.createLoadPaymentDataTask().isSuccess).isTrue()
         }
 
     @Test

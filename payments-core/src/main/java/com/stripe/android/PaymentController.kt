@@ -40,25 +40,12 @@ internal interface PaymentController {
      * @param requestOptions a [ApiRequest.Options] to associate with this request
      *
      * @return a [PaymentIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the PaymentIntent response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
     suspend fun confirmAndAuthenticateAlipay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
-    ): PaymentIntentResult
+    ): Result<PaymentIntentResult>
 
     /**
      * Confirm the Stripe Intent for WeChat Pay, return WeChat Pay params from intent's next action

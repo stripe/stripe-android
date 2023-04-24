@@ -195,7 +195,7 @@ constructor(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
-    ): PaymentIntentResult {
+    ): Result<PaymentIntentResult> {
         return authenticateAlipay(
             confirmPaymentIntent(
                 confirmPaymentIntentParams,
@@ -417,21 +417,28 @@ constructor(
         paymentIntent: PaymentIntent,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
-    ): PaymentIntentResult {
-        val outcome =
-            alipayRepository.authenticate(paymentIntent, authenticator, requestOptions).outcome
+    ): Result<PaymentIntentResult> {
+        val authResult = alipayRepository.authenticate(
+            paymentIntent = paymentIntent,
+            authenticator = authenticator,
+            requestOptions = requestOptions,
+        ).getOrElse {
+            return Result.failure(it)
+        }
 
-        val refreshedPaymentIntent = stripeRepository.retrievePaymentIntent(
+        val outcome = authResult.outcome
+
+        return stripeRepository.retrievePaymentIntent(
             paymentIntent.clientSecret.orEmpty(),
             requestOptions,
             expandFields = EXPAND_PAYMENT_METHOD
-        ).getOrThrow()
-
-        return PaymentIntentResult(
-            refreshedPaymentIntent,
-            outcome,
-            failureMessageFactory.create(refreshedPaymentIntent, outcome)
-        )
+        ).map { refreshedPaymentIntent ->
+            PaymentIntentResult(
+                intent = refreshedPaymentIntent,
+                outcomeFromFlow = outcome,
+                failureMessage = failureMessageFactory.create(refreshedPaymentIntent, outcome),
+            )
+        }
     }
 
     private suspend fun handleError(

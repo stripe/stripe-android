@@ -13,7 +13,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultAlipayRepositoryTest {
@@ -26,7 +25,7 @@ internal class DefaultAlipayRepositoryTest {
             INTENT,
             createAuthenticator(AlipayAuthResult.RESULT_CODE_SUCCESS),
             REQUEST_OPTIONS
-        )
+        ).getOrThrow()
 
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
@@ -42,7 +41,7 @@ internal class DefaultAlipayRepositoryTest {
             INTENT,
             createAuthenticator(AlipayAuthResult.RESULT_CODE_CANCELLED),
             REQUEST_OPTIONS
-        )
+        ).getOrThrow()
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.CANCELED)
     }
@@ -53,7 +52,7 @@ internal class DefaultAlipayRepositoryTest {
             INTENT,
             createAuthenticator(AlipayAuthResult.RESULT_CODE_FAILED),
             REQUEST_OPTIONS
-        )
+        ).getOrThrow()
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.FAILED)
     }
@@ -64,7 +63,7 @@ internal class DefaultAlipayRepositoryTest {
             INTENT,
             createAuthenticator("unknown"),
             REQUEST_OPTIONS
-        )
+        ).getOrThrow()
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
     }
@@ -75,34 +74,34 @@ internal class DefaultAlipayRepositoryTest {
             INTENT,
             createAuthenticator(null),
             REQUEST_OPTIONS
-        )
+        ).getOrThrow()
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
     }
 
     @Test
     fun `authenticate() should throw exception when alipay data missing`() = runTest {
-        val exception = assertFailsWith<RuntimeException> {
-            repository.authenticate(
-                PaymentIntentFixtures.PI_REQUIRES_REDIRECT,
-                createAuthenticator(AlipayAuthResult.RESULT_CODE_SUCCESS),
-                REQUEST_OPTIONS
-            )
-        }
-        assertThat(exception.message)
+        val result = repository.authenticate(
+            PaymentIntentFixtures.PI_REQUIRES_REDIRECT,
+            createAuthenticator(AlipayAuthResult.RESULT_CODE_SUCCESS),
+            REQUEST_OPTIONS
+        )
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(RuntimeException::class.java)
+        assertThat(result.exceptionOrNull()?.message)
             .isEqualTo("Unable to authenticate Payment Intent with Alipay SDK")
     }
 
     @Test
     fun `authenticate() should throw exception in test mode`() = runTest {
-        val exception = assertFailsWith<IllegalArgumentException> {
-            repository.authenticate(
-                PaymentIntentFixtures.ALIPAY_TEST_MODE,
-                createAuthenticator(AlipayAuthResult.RESULT_CODE_SUCCESS),
-                REQUEST_OPTIONS
-            )
-        }
-        assertThat(exception.message)
+        val result = repository.authenticate(
+            PaymentIntentFixtures.ALIPAY_TEST_MODE,
+            createAuthenticator(AlipayAuthResult.RESULT_CODE_SUCCESS),
+            REQUEST_OPTIONS
+        )
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull()?.message)
             .isEqualTo(
                 """
                 Attempted to authenticate test mode PaymentIntent with the Alipay SDK.

@@ -73,50 +73,52 @@ internal class GooglePayLauncherViewModel(
     @VisibleForTesting
     suspend fun createPaymentDataRequest(
         args: GooglePayLauncherContract.Args
-    ): JSONObject {
+    ): Result<JSONObject> {
         val transactionInfo = when (args) {
             is GooglePayLauncherContract.PaymentIntentArgs -> {
-                val paymentIntent = stripeRepository.retrievePaymentIntent(
+                stripeRepository.retrievePaymentIntent(
                     args.clientSecret,
                     requestOptions
-                ).getOrThrow()
-
-                createTransactionInfo(
-                    paymentIntent,
-                    paymentIntent.currency.orEmpty()
-                )
+                ).mapCatching { paymentIntent ->
+                    createTransactionInfo(
+                        paymentIntent,
+                        paymentIntent.currency.orEmpty()
+                    )
+                }
             }
             is GooglePayLauncherContract.SetupIntentArgs -> {
-                val setupIntent = stripeRepository.retrieveSetupIntent(
+                stripeRepository.retrieveSetupIntent(
                     args.clientSecret,
                     requestOptions
-                ).getOrThrow()
-
-                createTransactionInfo(
-                    setupIntent,
-                    args.currencyCode
-                )
+                ).mapCatching { setupIntent ->
+                    createTransactionInfo(
+                        setupIntent,
+                        args.currencyCode
+                    )
+                }
             }
         }
 
-        return googlePayJsonFactory.createPaymentDataRequest(
-            transactionInfo = transactionInfo,
-            merchantInfo = GooglePayJsonFactory.MerchantInfo(
-                merchantName = args.config.merchantName
-            ),
-            billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
-                isRequired = args.config.billingAddressConfig.isRequired,
-                format = when (args.config.billingAddressConfig.format) {
-                    GooglePayLauncher.BillingAddressConfig.Format.Min ->
-                        GooglePayJsonFactory.BillingAddressParameters.Format.Min
-                    GooglePayLauncher.BillingAddressConfig.Format.Full ->
-                        GooglePayJsonFactory.BillingAddressParameters.Format.Full
-                },
-                isPhoneNumberRequired = args.config.billingAddressConfig.isPhoneNumberRequired
-            ),
-            isEmailRequired = args.config.isEmailRequired,
-            allowCreditCards = args.config.allowCreditCards
-        )
+        return transactionInfo.map {
+            googlePayJsonFactory.createPaymentDataRequest(
+                transactionInfo = it,
+                merchantInfo = GooglePayJsonFactory.MerchantInfo(
+                    merchantName = args.config.merchantName
+                ),
+                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
+                    isRequired = args.config.billingAddressConfig.isRequired,
+                    format = when (args.config.billingAddressConfig.format) {
+                        GooglePayLauncher.BillingAddressConfig.Format.Min ->
+                            GooglePayJsonFactory.BillingAddressParameters.Format.Min
+                        GooglePayLauncher.BillingAddressConfig.Format.Full ->
+                            GooglePayJsonFactory.BillingAddressParameters.Format.Full
+                    },
+                    isPhoneNumberRequired = args.config.billingAddressConfig.isPhoneNumberRequired
+                ),
+                isEmailRequired = args.config.isEmailRequired,
+                allowCreditCards = args.config.allowCreditCards
+            )
+        }
     }
 
     @VisibleForTesting
@@ -150,15 +152,16 @@ internal class GooglePayLauncherViewModel(
         }
     }
 
-    suspend fun createLoadPaymentDataTask(): Task<PaymentData> {
-        check(isReadyToPay()) {
-            "Google Pay is unavailable."
+    suspend fun createLoadPaymentDataTask(): Result<Task<PaymentData>> {
+        if (!isReadyToPay()) {
+            return Result.failure(IllegalStateException("Google Pay is unavailable."))
         }
-        return paymentsClient.loadPaymentData(
-            PaymentDataRequest.fromJson(
-                createPaymentDataRequest(args).toString()
+
+        return createPaymentDataRequest(args).map { request ->
+            paymentsClient.loadPaymentData(
+                PaymentDataRequest.fromJson(request.toString())
             )
-        )
+        }
     }
 
     suspend fun confirmStripeIntent(

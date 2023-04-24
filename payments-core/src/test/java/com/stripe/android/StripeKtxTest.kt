@@ -387,7 +387,7 @@ internal class StripeKtxTest {
         runTest {
             whenever(
                 mockPaymentController.confirmAndAuthenticateAlipay(any(), any(), any())
-            ).thenThrow(mock<AuthenticationException>())
+            ).thenReturn(Result.failure(mock<AuthenticationException>()))
 
             assertFailsWith<AuthenticationException> {
                 stripe.confirmAlipayPayment(
@@ -405,7 +405,7 @@ internal class StripeKtxTest {
 
             whenever(
                 mockPaymentController.confirmAndAuthenticateAlipay(any(), any(), any())
-            ).thenReturn(expectedApiObj)
+            ).thenReturn(Result.success(expectedApiObj))
 
             val actualObj = stripe.confirmAlipayPayment(
                 mock(),
