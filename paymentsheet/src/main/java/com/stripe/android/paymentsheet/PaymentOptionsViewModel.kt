@@ -262,7 +262,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
-    override fun handleUSBankAccountSelected(paymentSelection: PaymentSelection.New.USBankAccount) {
+    override fun handleUSBankAccountConfirmed(paymentSelection: PaymentSelection.New.USBankAccount) {
         updateSelection(paymentSelection)
         onUserSelection()
     }

@@ -177,7 +177,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         it.last()
     }
 
-    private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount>()
+    private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount>(replay = 1)
     val result: Flow<PaymentSelection.New.USBankAccount> = _result
 
     init {

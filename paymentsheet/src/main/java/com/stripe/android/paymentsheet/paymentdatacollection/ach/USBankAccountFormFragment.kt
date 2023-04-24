@@ -157,7 +157,7 @@ internal class USBankAccountFormFragment : Fragment() {
         )
 
         viewModel.result.launchAndCollectIn(viewLifecycleOwner) { result ->
-            sheetViewModel?.handleUSBankAccountSelected(result)
+            sheetViewModel?.handleUSBankAccountConfirmed(result)
         }
 
         lifecycleScope.launch {
