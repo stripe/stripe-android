@@ -12,24 +12,22 @@ internal class StartVerification @Inject constructor(
 
     suspend fun sms(
         consumerSessionClientSecret: String,
-    ): ConsumerSession = requireNotNull(
-        consumerSessionRepository.startConsumerVerification(
-            consumerSessionClientSecret = consumerSessionClientSecret,
-            connectionsMerchantName = null,
-            customEmailType = null,
-            type = VerificationType.SMS,
-        )
+    ): ConsumerSession = consumerSessionRepository.startConsumerVerification(
+        consumerSessionClientSecret = consumerSessionClientSecret,
+        connectionsMerchantName = null,
+        customEmailType = null,
+        type = VerificationType.SMS,
     )
+
 
     suspend fun email(
         consumerSessionClientSecret: String,
         businessName: String?,
-    ): ConsumerSession = requireNotNull(
-        consumerSessionRepository.startConsumerVerification(
-            consumerSessionClientSecret = consumerSessionClientSecret,
-            customEmailType = CustomEmailType.NETWORKED_CONNECTIONS_OTP_EMAIL,
-            connectionsMerchantName = businessName,
-            type = VerificationType.EMAIL,
-        )
+    ): ConsumerSession = consumerSessionRepository.startConsumerVerification(
+        consumerSessionClientSecret = consumerSessionClientSecret,
+        customEmailType = CustomEmailType.NETWORKED_CONNECTIONS_OTP_EMAIL,
+        connectionsMerchantName = businessName,
+        type = VerificationType.EMAIL,
     )
+
 }

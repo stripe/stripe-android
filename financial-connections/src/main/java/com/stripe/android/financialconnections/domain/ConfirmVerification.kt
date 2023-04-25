@@ -13,34 +13,29 @@ internal class ConfirmVerification @Inject constructor(
     suspend fun sms(
         consumerSessionClientSecret: String,
         verificationCode: String,
-    ): ConsumerSession = requireNotNull(
-        kotlin.runCatching {
-            consumerSessionRepository.confirmConsumerVerification(
-                consumerSessionClientSecret = consumerSessionClientSecret,
-                verificationCode = verificationCode,
-                type = VerificationType.SMS
-            )
-        }.fold(
-            onSuccess = { it },
-            onFailure = { throw it.toDomainException(VerificationType.SMS) }
+    ): ConsumerSession = kotlin.runCatching {
+        consumerSessionRepository.confirmConsumerVerification(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            verificationCode = verificationCode,
+            type = VerificationType.SMS
         )
+    }.fold(
+        onSuccess = { it },
+        onFailure = { throw it.toDomainException(VerificationType.SMS) }
     )
 
     suspend fun email(
         consumerSessionClientSecret: String,
         verificationCode: String,
-    ): ConsumerSession = requireNotNull(
-        kotlin.runCatching {
-            consumerSessionRepository.confirmConsumerVerification(
-                consumerSessionClientSecret = consumerSessionClientSecret,
-                verificationCode = verificationCode,
-                type = VerificationType.EMAIL
-            )
-        }.fold(
-            onSuccess = { it },
-            onFailure = { throw it.toDomainException(VerificationType.EMAIL) }
+    ): ConsumerSession = kotlin.runCatching {
+        consumerSessionRepository.confirmConsumerVerification(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            verificationCode = verificationCode,
+            type = VerificationType.EMAIL
         )
-
+    }.fold(
+        onSuccess = { it },
+        onFailure = { throw it.toDomainException(VerificationType.EMAIL) }
     )
 
     /**
