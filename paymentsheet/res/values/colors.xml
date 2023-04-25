@@ -46,6 +46,8 @@
     <color name="stripe_paymentsheet_testmode_background">#FFDE94</color>
     <color name="stripe_paymentsheet_testmode_text">#8E5710</color>
 
+    <color name="stripe_paymentsheet_googlepay_primary_button_background_color">#1F1F1F</color>
+    <color name="stripe_paymentsheet_googlepay_primary_button_tint_color">#FFFFFF</color>
     <!-- CardFormView -->
 
 </resources>

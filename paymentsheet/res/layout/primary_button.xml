@@ -37,7 +37,7 @@
         android:id="@+id/confirmed_icon"
         android:layout_width="@dimen/stripe_paymentsheet_primary_button_icon_size"
         android:layout_height="@dimen/stripe_paymentsheet_primary_button_icon_size"
-        android:src="@drawable/stripe_ic_paymentsheet_primary_button_checkmark"
+        android:src="@drawable/stripe_ic_paymentsheet_googlepay_primary_button_checkmark"
         android:layout_marginStart="@dimen/stripe_paymentsheet_primary_button_icon_padding"
         android:layout_marginEnd="@dimen/stripe_paymentsheet_primary_button_icon_padding"
         android:layout_gravity="end|center_vertical"

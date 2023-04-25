@@ -47,14 +47,14 @@ class GooglePayButtonTest {
             PrimaryButton.State.FinishProcessing {}
         )
         assertThat(primaryButton.isVisible).isTrue()
-        assertThat(googlePayButton.viewBinding.googlePayButtonContent.isVisible).isFalse()
+        assertThat(googlePayButton.viewBinding.googlePayPaymentButton.isVisible).isFalse()
 
         googlePayButton.updateState(
             PrimaryButton.State.Ready
         )
         assertThat(primaryButton.isVisible).isFalse()
         assertThat((primaryButton.background as GradientDrawable).color).isNotNull()
-        assertThat(googlePayButton.viewBinding.googlePayButtonContent.isVisible).isTrue()
+        assertThat(googlePayButton.viewBinding.googlePayPaymentButton.isVisible).isTrue()
     }
 
     @Test
@@ -68,7 +68,7 @@ class GooglePayButtonTest {
             "Processing…"
         )
         assertThat(primaryButton.isVisible).isTrue()
-        assertThat(googlePayButton.viewBinding.googlePayButtonContent.isVisible).isFalse()
+        assertThat(googlePayButton.viewBinding.googlePayPaymentButton.isVisible).isFalse()
     }
 
     @Test
@@ -84,7 +84,7 @@ class GooglePayButtonTest {
 
         assertThat(finishedProcessing).isTrue()
         assertThat(primaryButton.isVisible).isTrue()
-        assertThat(googlePayButton.viewBinding.googlePayButtonContent.isVisible).isFalse()
+        assertThat(googlePayButton.viewBinding.googlePayPaymentButton.isVisible).isFalse()
     }
 
     @Test

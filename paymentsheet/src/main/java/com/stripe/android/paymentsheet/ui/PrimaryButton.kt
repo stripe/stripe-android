@@ -6,11 +6,14 @@ import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.annotation.ColorInt
+import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -44,6 +47,8 @@ internal class PrimaryButton @JvmOverloads constructor(
     // This is the text set by the client.  The internal label text is set to this value
     // in the on ready state and it is temporarily replaced during the processing and finishing states.
     private var originalLabel: String? = null
+
+    private var defaultLabelColor: Int? = null
 
     @VisibleForTesting
     internal var externalLabel: String? = null
@@ -100,6 +105,22 @@ internal class PrimaryButton @JvmOverloads constructor(
         backgroundTintList = tintList
     }
 
+    fun setDefaultLabelColor(@ColorInt color: Int) {
+        defaultLabelColor = color
+    }
+
+    fun setLockIconDrawable(@DrawableRes drawable: Int) {
+        viewBinding.lockIcon.setImageResource(drawable)
+    }
+
+    fun setIndicatorColor(@ColorInt color: Int) {
+        viewBinding.confirmingIcon.setIndicatorColor(color)
+    }
+
+    fun setConfirmedIconDrawable(@DrawableRes drawable: Int) {
+        viewBinding.confirmedIcon.setImageResource(drawable)
+    }
+
     override fun setBackgroundTintList(tintList: ColorStateList?) {
         val shape = GradientDrawable()
         shape.shape = GradientDrawable.RECTANGLE
@@ -133,7 +154,10 @@ internal class PrimaryButton @JvmOverloads constructor(
                 originalLabel = text
             }
             viewBinding.label.setContent {
-                LabelUI(label = text)
+                LabelUI(
+                    label = text,
+                    color = defaultLabelColor,
+                )
             }
         }
     }
@@ -240,11 +264,12 @@ internal class PrimaryButton @JvmOverloads constructor(
 }
 
 @Composable
-private fun LabelUI(label: String) {
+private fun LabelUI(label: String, color: Int?) {
     StripeTheme {
         Text(
             text = label,
             textAlign = TextAlign.Center,
+            color = color?.let { Color(it) } ?: Color.Unspecified,
             style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
             modifier = Modifier
                 .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)

@@ -4,13 +4,12 @@ android {
     buildFeatures {
         buildConfig = false
     }
-    namespace 'com.stripe.android.mlcore.impl'
 }
 
 dependencies {
     api project(':ml-core:base')
     implementation project(":stripecardscan-tflite")
-    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
+    implementation libs.androidx.annotation
 }
 
 ext {

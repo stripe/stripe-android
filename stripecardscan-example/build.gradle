@@ -14,29 +14,27 @@ def getPublishableKey() {
 dependencies {
     implementation project(':stripecardscan')
 
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
-    implementation "androidx.preference:preference-ktx:$androidxPreferenceVersion"
-    implementation "androidx.core:core-ktx:$androidxCoreVersion"
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
-    implementation "androidx.navigation:navigation-fragment-ktx:$androidxNavigationVersion"
-    implementation "androidx.navigation:navigation-ui-ktx:$androidxNavigationVersion"
-    implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
-    implementation "com.google.android.material:material:$materialVersion"
+    implementation libs.androidx.activity
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.liveDataKtx
+    implementation libs.androidx.navigationFragment
+    implementation libs.androidx.navigationUi
+    implementation libs.androidx.preference
+    implementation libs.androidx.viewModel
+    implementation libs.fuel
+    implementation libs.kotlin.serialization
+    implementation libs.loggingInterceptor
+    implementation libs.material
+    implementation libs.retrofitKotlinSerializationConverter
 
-    implementation 'com.github.kittinunf.fuel:fuel:2.3.1'
+    debugImplementation libs.leakCanary
 
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
+    testImplementation testLibs.junit
 
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
-    implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0"
-
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
-
-    testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.espresso.core
 }
 
 android {

@@ -155,9 +155,10 @@ internal fun Wallet(
             if (containerState.showGooglePay) {
                 GooglePayButton(
                     state = googlePayButtonState?.convert(),
+                    allowCreditCards = containerState.googlePayAllowCreditCards,
+                    billingAddressParameters = containerState.googlePayBillingAddressParameters,
                     isEnabled = buttonsEnabled,
                     onPressed = viewModel::checkoutWithGooglePay,
-                    modifier = Modifier.padding(top = 7.dp),
                 )
             }
 
@@ -168,7 +169,6 @@ internal fun Wallet(
                     onClick = viewModel::handleLinkPressed,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 6.dp)
                         .requiredHeight(48.dp),
                 )
             }
