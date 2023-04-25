@@ -50,7 +50,7 @@ dependencies {
     implementation libs.androidx.lifecycle
     implementation libs.compose.activity
     implementation libs.compose.material
-    implementation "androidx.compose.material:material-icons-extended:$androidxComposeVersion"
+    implementation libs.compose.materialIconsExtended
     implementation libs.compose.liveData
     implementation libs.compose.ui
     implementation libs.compose.uiToolingPreview
