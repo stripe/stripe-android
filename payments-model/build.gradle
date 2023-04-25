@@ -16,7 +16,7 @@ dependencies {
     implementation project(":stripe-core")
     implementation libs.androidx.appCompat
     implementation libs.androidx.coreKtx
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
+    implementation libs.kotlin.serialization
 
     testImplementation project(':network-testing')
     testImplementation testLibs.androidx.core
