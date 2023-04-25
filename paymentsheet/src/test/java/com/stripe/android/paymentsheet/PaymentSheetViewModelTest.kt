@@ -45,7 +45,6 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
@@ -771,15 +770,15 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `updateSelection() posts mandate text when selected payment is us_bank_account`() {
         val viewModel = createViewModel()
+
         viewModel.updateSelection(
-            PaymentSelection.Saved(
-                PaymentMethodFixtures.US_BANK_ACCOUNT
-            )
+            PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
         )
 
         assertThat(viewModel.notesText.value)
             .isEqualTo(
-                ACHText.getContinueMandateText(ApplicationProvider.getApplicationContext())
+                "By continuing, you agree to authorize payments pursuant to " +
+                    "<a href=\"https://stripe.com/ach-payments/authorization\">these terms</a>."
             )
 
         viewModel.updateSelection(
@@ -797,9 +796,7 @@ internal class PaymentSheetViewModelTest {
             .isEqualTo(null)
 
         viewModel.updateSelection(
-            PaymentSelection.Saved(
-                PaymentMethodFixtures.CARD_PAYMENT_METHOD
-            )
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
 
         assertThat(viewModel.notesText.value)
