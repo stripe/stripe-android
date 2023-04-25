@@ -222,7 +222,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
-        initialValue = args.formArgs.showCheckbox,
+        initialValue = false,
     )
 
     val requiredFields = combine(

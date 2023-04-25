@@ -338,6 +338,7 @@ internal class USBankAccountFormFragment : Fragment() {
         }
     }
 
+    @Suppress("SpreadOperator")
     @Composable
     private fun PhoneSection() {
         val processing = viewModel.processing.collectAsState(false)
@@ -366,6 +367,7 @@ internal class USBankAccountFormFragment : Fragment() {
         }
     }
 
+    @Suppress("SpreadOperator")
     @Composable
     fun AddressSection() {
         val processing = viewModel.processing.collectAsState(false)
