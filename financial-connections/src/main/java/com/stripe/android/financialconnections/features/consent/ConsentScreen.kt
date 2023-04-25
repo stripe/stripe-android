@@ -400,7 +400,7 @@ private fun ConsentFooter(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(text = consent.cta)
+            Text(text = "Yeah sure...")
         }
         if (belowCta != null) {
             Spacer(modifier = Modifier.size(24.dp))
