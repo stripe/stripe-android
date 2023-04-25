@@ -16,9 +16,7 @@ internal object ACHText {
         val text = if (isSaveForFutureUseSelected) {
             context.getString(R.string.stripe_paymentsheet_ach_save_mandate, merchantName)
         } else {
-            context.getString(
-                R.string.stripe_paymentsheet_ach_continue_mandate
-            )
+            context.getString(R.string.stripe_paymentsheet_ach_continue_mandate)
         }
 
         return text.replace(
