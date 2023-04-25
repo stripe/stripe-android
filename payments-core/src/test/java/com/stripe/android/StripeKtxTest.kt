@@ -297,7 +297,7 @@ internal class StripeKtxTest {
         val expectedApiObj = mock<Source>()
         whenever(
             mockApiRepository.retrieveSource(any(), any(), any())
-        ).thenReturn(expectedApiObj)
+        ).thenReturn(Result.success(expectedApiObj))
         val actualObj = stripe.retrieveSource(
             "param11",
             "param12",
@@ -312,25 +312,9 @@ internal class StripeKtxTest {
         runTest {
             whenever(
                 mockApiRepository.retrieveSource(any(), any(), any())
-            ).thenThrow(mock<AuthenticationException>())
+            ).thenReturn(Result.failure(mock<AuthenticationException>()))
 
             assertFailsWith<AuthenticationException> {
-                stripe.retrieveSource(
-                    "param11",
-                    "param12",
-                    TEST_STRIPE_ACCOUNT_ID
-                )
-            }
-        }
-
-    @Test
-    fun `When repository returns null then retrieveSource should throw InvalidRequestException`(): Unit =
-        runTest {
-            whenever(
-                mockApiRepository.retrieveSource(any(), any(), any())
-            ).thenReturn(null)
-
-            assertFailsWithMessage<InvalidRequestException>("Failed to parse Source.") {
                 stripe.retrieveSource(
                     "param11",
                     "param12",
@@ -877,7 +861,7 @@ internal class StripeKtxTest {
     private inline fun <reified ApiObject : StripeModel>
     `Given controller returns non-empty value when calling getAPI then returns correct result`(
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
-        crossinline controllerInvocationBlock: suspend (Intent) -> ApiObject,
+        crossinline controllerInvocationBlock: suspend (Intent) -> Result<ApiObject>,
         crossinline getAPIInvocationBlock: suspend (Int, Intent) -> ApiObject
     ) = runTest {
         val expectedApiObj = mock<ApiObject>()
@@ -888,7 +872,7 @@ internal class StripeKtxTest {
 
         whenever(
             controllerInvocationBlock(any())
-        ).thenReturn(expectedApiObj)
+        ).thenReturn(Result.success(expectedApiObj))
 
         val actualObj = getAPIInvocationBlock(
             TEST_REQUEST_CODE,
@@ -901,7 +885,7 @@ internal class StripeKtxTest {
     private inline fun <ApiObject : StripeModel>
     `Given controller returns exception when calling getAPI then throws same exception`(
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
-        crossinline controllerInvocationBlock: suspend (Intent) -> ApiObject,
+        crossinline controllerInvocationBlock: suspend (Intent) -> Result<ApiObject>,
         crossinline getAPIInvocationBlock: suspend (Int, Intent) -> ApiObject
     ): Unit = runTest {
         whenever(
@@ -910,7 +894,7 @@ internal class StripeKtxTest {
 
         whenever(
             controllerInvocationBlock(any())
-        ).thenThrow(mock<AuthenticationException>())
+        ).thenReturn(Result.failure(mock<AuthenticationException>()))
 
         assertFailsWith<AuthenticationException> {
             getAPIInvocationBlock(

@@ -127,7 +127,7 @@ internal class StripePaymentControllerTest {
                 ).toBundle()
             )
 
-            val paymentIntentResult = controller.getPaymentIntentResult(intent)
+            val paymentIntentResult = controller.getPaymentIntentResult(intent).getOrThrow()
 
             assertThat(stripeRepository.retrievePaymentIntentArgs)
                 .containsExactly(
@@ -264,7 +264,9 @@ internal class StripePaymentControllerTest {
             sourceId: String,
             clientSecret: String,
             options: ApiRequest.Options
-        ) = SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable)
+        ): Result<Source> {
+            return Result.success(SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable))
+        }
 
         override suspend fun cancelPaymentIntentSource(
             paymentIntentId: String,

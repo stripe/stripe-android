@@ -119,21 +119,8 @@ internal interface PaymentController {
      *
      * @param data the result Intent
      * @return the [PaymentIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the PaymentIntent response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    suspend fun getPaymentIntentResult(data: Intent): PaymentIntentResult
+    suspend fun getPaymentIntentResult(data: Intent): Result<PaymentIntentResult>
 
     /**
      * Get the SetupIntent's client_secret from [data] and use to retrieve
@@ -141,21 +128,8 @@ internal interface PaymentController {
      *
      * @param data the result Intent
      * @return the [SetupIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the SetupIntent response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    suspend fun getSetupIntentResult(data: Intent): SetupIntentResult
+    suspend fun getSetupIntentResult(data: Intent): Result<SetupIntentResult>
 
     /**
      * Get the Source's client_secret from [data] and use to retrieve
@@ -163,21 +137,8 @@ internal interface PaymentController {
      *
      * @param data the result Intent
      * @return the [Source] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the Source response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    suspend fun getAuthenticateSourceResult(data: Intent): Source
+    suspend fun getAuthenticateSourceResult(data: Intent): Result<Source>
 
     /**
      * Determine which authentication mechanism should be used, or bypass authentication

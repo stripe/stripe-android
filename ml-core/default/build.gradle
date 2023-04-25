@@ -4,14 +4,13 @@ android {
     buildFeatures {
         buildConfig = false
     }
-    namespace 'com.stripe.android.mlcore.impl'
 }
 
 dependencies {
     api project(':ml-core:base')
-    api 'org.tensorflow:tensorflow-lite-support:0.4.3'
-    implementation 'org.tensorflow:tensorflow-lite:2.11.0'
-    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
+    implementation libs.androidx.annotation
+    implementation libs.tensorflowLite
+    api libs.tensorflowLiteSupport
 }
 
 ext {

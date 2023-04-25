@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
@@ -21,7 +20,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
-import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
@@ -33,13 +31,11 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.model.create
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
@@ -55,6 +51,8 @@ import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.utils.requireApplication
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -178,6 +176,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     val lastTextFieldIdentifier = addressElement.getTextFieldIdentifiers().map {
         it.last()
     }
+
+    private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount>(replay = 1)
+    val result: Flow<PaymentSelection.New.USBankAccount> = _result
 
     init {
         viewModelScope.launch {
@@ -532,34 +533,20 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         intentId = intentId
                     )
 
-                    if (args.isCompleteFlow) {
-                        confirm(clientSecret, paymentSelection)
-                    } else {
-                        _currentScreenState.update { screenState ->
-                            if (screenState is USBankAccountFormScreenState.SavedAccount) {
-                                screenState.copy(
-                                    bankName = bankName,
-                                    last4 = last4
-                                )
-                            } else {
-                                screenState
-                            }
+                    _currentScreenState.update { screenState ->
+                        if (screenState is USBankAccountFormScreenState.SavedAccount) {
+                            screenState.copy(
+                                bankName = bankName,
+                                last4 = last4
+                            )
+                        } else {
+                            screenState
                         }
-                        args.onUpdateSelectionAndFinish(paymentSelection)
                     }
+
+                    _result.tryEmit(paymentSelection)
                 }
             }
-        }
-    }
-
-    private fun confirm(clientSecret: ClientSecret, paymentSelection: PaymentSelection.New) {
-        viewModelScope.launch {
-            val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-                clientSecret = clientSecret.value,
-                shipping = args.shippingDetails?.toConfirmPaymentIntentShipping()
-            )
-            val confirmIntent = confirmParamsFactory.create(paymentSelection)
-            args.onConfirmStripeIntent(confirmIntent)
         }
     }
 
@@ -626,22 +613,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    /**
-     * Arguments for launching [USBankAccountFormFragment]
-     *
-     * @param formArgs The form arguments supplied by the payment sheet
-     * @param isCompleteFlow Whether the payment should be completed, or the selected payment
-     *                          method should be returned as a result
-     * @param clientSecret The client secret for the Stripe Intent being processed
-     */
     data class Args(
         val formArgs: FormArguments,
         val isCompleteFlow: Boolean,
         val clientSecret: ClientSecret?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
-        val onConfirmStripeIntent: (ConfirmStripeIntentParams) -> Unit,
-        val onUpdateSelectionAndFinish: (PaymentSelection) -> Unit,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     )
 

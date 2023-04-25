@@ -40,11 +40,18 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.uicore.StripeTheme
 
 private val LinkButtonVerticalPadding = 6.dp
 private val LinkButtonHorizontalPadding = 10.dp
-private val LinkButtonShape = RoundedCornerShape(22.dp)
-private val LinkButtonEmailShape = RoundedCornerShape(16.dp) // Button corner radius - padding
+private val LinkButtonShape: RoundedCornerShape
+    get() = RoundedCornerShape(
+        StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
+    )
+private val LinkButtonEmailShape: RoundedCornerShape
+    get() = RoundedCornerShape(
+        StripeTheme.primaryButtonStyle.shape.cornerRadius.dp / 2
+    )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val LinkButtonTestTag = "LinkButtonTestTag"

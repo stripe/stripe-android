@@ -418,13 +418,11 @@ internal class StripeApiRepositoryTest {
             .thenReturn(stripeResponse)
 
         val sourceId = "src_19t3xKBZqEXluyI4uz2dxAfQ"
-        val source = requireNotNull(
-            create().retrieveSource(
-                sourceId,
-                "mocked",
-                DEFAULT_OPTIONS
-            )
-        )
+        val source = create().retrieveSource(
+            sourceId,
+            "mocked",
+            DEFAULT_OPTIONS
+        ).getOrThrow()
 
         assertThat(source.id)
             .isEqualTo(sourceId)

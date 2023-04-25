@@ -1,44 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
-
     <RelativeLayout
         android:id="@+id/google_pay_button_layout"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/stripe_paymentsheet_googlepay_button_height"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/stripe_paymentsheet_googlepay_button_margin_horizontal"
+        android:clipToPadding="false"
         android:paddingTop="2sp"
-        android:background="@drawable/googlepay_button_background"
         android:contentDescription="@string/google_pay">
-
         <com.stripe.android.paymentsheet.ui.PrimaryButton
             android:id="@+id/google_pay_primary_button"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="@dimen/stripe_paymentsheet_googlepay_button_height"
+            android:layout_marginTop="@dimen/stripe_paymentsheet_googlepay_button_margin"
+            android:layout_marginHorizontal="@dimen/stripe_paymentsheet_googlepay_button_margin"
             android:visibility="invisible" />
 
-        <LinearLayout
-            android:duplicateParentState="true"
+        <com.google.android.gms.wallet.button.PayButton
+            android:id="@+id/google_pay_payment_button"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:weightSum="2"
-            android:gravity="center_vertical"
-            android:orientation="vertical">
-
-            <ImageView
-                android:id="@+id/google_pay_button_content"
-                android:layout_weight="1"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:scaleType="fitCenter"
-                android:duplicateParentState="true"
-                android:src="@drawable/pay_with_googlepay_button_content" />
-        </LinearLayout>
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitXY"
-            android:duplicateParentState="true"
-            android:src="@drawable/stripe_googlepay_button_overlay" />
+            android:layout_height="wrap_content" />
     </RelativeLayout>
 </merge>
 

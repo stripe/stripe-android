@@ -18,78 +18,50 @@ def getAccountId() {
 dependencies {
     implementation project(':payments')
     implementation project(':financial-connections')
-    implementation project(':stripe-ui-core')
 
-    implementation("com.alipay.sdk:alipaysdk-android:15.8.12")
+    implementation libs.accompanist.themeAdapter
+    implementation libs.alipay
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.fragment
+    implementation libs.androidx.liveDataKtx
+    implementation libs.androidx.preference
+    implementation libs.androidx.recyclerView
+    implementation libs.androidx.viewModel
+    implementation libs.compose.activity
+    implementation libs.compose.liveData
+    implementation libs.compose.material
+    implementation libs.gson
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.loggingInterceptor
+    implementation libs.material
+    implementation libs.playServicesWallet
+    implementation libs.okio
+    implementation libs.retrofit
+    implementation libs.retrofitGsonConverter
 
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "androidx.recyclerview:recyclerview:$androidxRecyclerviewVersion"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
-    implementation "com.google.android.material:material:$materialVersion"
-    implementation "androidx.fragment:fragment-ktx:$androidxFragmentVersion"
-    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
-    implementation "androidx.preference:preference-ktx:$androidxPreferenceVersion"
+    debugImplementation libs.leakCanary
 
-    implementation "com.google.android.gms:play-services-wallet:$playServicesWalletVersion"
+    testImplementation testLibs.androidx.core
 
-    /* Used for server calls */
-    implementation 'com.squareup.okio:okio:3.3.0'
-    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
-
-    /* Used to make Retrofit easier and GSON & Rx-compatible*/
-    implementation "com.google.code.gson:gson:$gsonVersion"
-    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
-
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
-
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
-
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
-
-    // Jetpack Compose
-    // Integration with activities
-    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    // Compose Material Design
-    implementation "androidx.compose.material:material:$androidxComposeVersion"
-    // Integration with observables
-    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeRuntimeVersion"
-    // MdcTheme
-    implementation "com.google.accompanist:accompanist-themeadapter-material:$accompanistVersion"
-    // end of Jetpack Compose
-
-    testImplementation "androidx.test:core:$androidTestVersion"
-
-    // Core library
-    androidTestImplementation "androidx.test:core:$androidTestVersion"
-    androidTestImplementation "androidx.test:core-ktx:$androidTestVersion"
-
-    // AndroidJUnitRunner and JUnit Rules
-    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
-    androidTestImplementation "androidx.test:rules:$androidTestVersion"
-
-    // Assertions
-    androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
-    androidTestImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
-    androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
-    androidTestImplementation "com.google.truth:truth:$truthVersion"
-
-    // Espresso dependencies
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    androidTestImplementation("androidx.test.espresso:espresso-contrib:$espressoVersion") {
+    androidTestImplementation testLibs.androidx.core
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.androidx.junitKtx
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.truth
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation(testLibs.espresso.contrib) {
         exclude group: 'org.checkerframework', module: 'checker'
     }
-    androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
-    androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$espressoVersion"
+    androidTestImplementation testLibs.espresso.idling
+    androidTestImplementation testLibs.espresso.idlingResource
+    androidTestImplementation testLibs.espresso.intents
+    androidTestImplementation testLibs.truth
 
-    // The following Espresso dependency can be either "implementation"
-    // or "androidTestImplementation", depending on whether you want the
-    // dependency to appear on your APK's compile classpath or the test APK
-    // classpath.
-    androidTestImplementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
-
-    androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
+    androidTestUtil testLibs.testOrchestrator
 }
 
 android {
@@ -134,6 +106,6 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
+        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 }

@@ -2,35 +2,34 @@ apply from: configs.androidLibrary
 
 dependencies {
     implementation project(":stripe-core")
-    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
 
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "androidx.core:core-ktx:$androidxCoreVersion"
-    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.annotation
+    implementation libs.kotlin.coroutines
 
-    def camerax_version = "1.2.1"
+    implementation libs.camera.core
+    implementation libs.camera.camera2
+    implementation libs.camera.lifecycle
+    implementation libs.camera.view
 
-    implementation "androidx.camera:camera-core:$camerax_version"
-    implementation "androidx.camera:camera-camera2:$camerax_version"
-    implementation "androidx.camera:camera-lifecycle:$camerax_version"
-    implementation "androidx.camera:camera-view:$camerax_version"
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.testRunner
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.test
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.truth
+    testImplementation testLibs.robolectric
 
-    testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation "androidx.test:runner:$androidTestRunnerVersion"
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.kotlin.test
+    androidTestImplementation testLibs.kotlin.coroutines
 
-    androidTestImplementation "androidx.test:rules:$androidTestVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestRunnerVersion"
-    androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
-    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
+    androidTestUtil testLibs.testOrchestrator
 }
 
 ext {

@@ -4,11 +4,10 @@ android {
     buildFeatures {
         buildConfig = false
     }
-    namespace 'com.stripe.android.mlcore.base'
 }
 
 dependencies {
-    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
+    implementation libs.androidx.annotation
 }
 
 ext {

@@ -104,6 +104,7 @@ workflows:
             - file_path: ./scripts/execute_maestro_paymentsheet_tests.sh
       - slack@3:
           is_always_run: true
+          run_if: .IsBuildFailed
           inputs:
             - webhook_url: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_ELEMENTS_MAESTRO

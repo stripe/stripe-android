@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.content.Context
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.GooglePayJsonFactory.TransactionInfo.TotalPriceStatus
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -83,7 +84,7 @@ class GooglePayJsonFactory constructor(
             .put("apiVersion", API_VERSION)
             .put("apiVersionMinor", API_VERSION_MINOR)
             .put(
-                "allowedPaymentMethods",
+                ALLOWED_PAYMENT_METHODS,
                 JSONArray()
                     .put(
                         createCardPaymentMethod(
@@ -140,7 +141,7 @@ class GooglePayJsonFactory constructor(
             .put("apiVersion", API_VERSION)
             .put("apiVersionMinor", API_VERSION_MINOR)
             .put(
-                "allowedPaymentMethods",
+                ALLOWED_PAYMENT_METHODS,
                 JSONArray()
                     .put(
                         createCardPaymentMethod(
@@ -221,7 +222,8 @@ class GooglePayJsonFactory constructor(
             )
     }
 
-    private fun createCardPaymentMethod(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun createCardPaymentMethod(
         billingAddressParameters: BillingAddressParameters?,
         allowCreditCards: Boolean?
     ): JSONObject {
@@ -442,6 +444,7 @@ class GooglePayJsonFactory constructor(
     ) : Parcelable
 
     private companion object {
+        private const val ALLOWED_PAYMENT_METHODS = "allowedPaymentMethods"
         private const val API_VERSION = 2
         private const val API_VERSION_MINOR = 0
 

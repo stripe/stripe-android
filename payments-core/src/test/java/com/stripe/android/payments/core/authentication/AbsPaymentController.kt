@@ -66,16 +66,16 @@ internal abstract class AbsPaymentController : PaymentController {
         return false
     }
 
-    override suspend fun getPaymentIntentResult(data: Intent): PaymentIntentResult {
-        TODO("Not yet implemented")
+    override suspend fun getPaymentIntentResult(data: Intent): Result<PaymentIntentResult> {
+        return Result.failure(NotImplementedError())
     }
 
-    override suspend fun getSetupIntentResult(data: Intent): SetupIntentResult {
-        TODO("Not yet implemented")
+    override suspend fun getSetupIntentResult(data: Intent): Result<SetupIntentResult> {
+        return Result.failure(NotImplementedError())
     }
 
-    override suspend fun getAuthenticateSourceResult(data: Intent): Source {
-        TODO("Not yet implemented")
+    override suspend fun getAuthenticateSourceResult(data: Intent): Result<Source> {
+        return Result.failure(NotImplementedError())
     }
 
     override suspend fun handleNextAction(

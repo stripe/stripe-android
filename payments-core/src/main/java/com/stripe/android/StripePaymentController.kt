@@ -8,10 +8,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import com.google.android.instantapps.InstantApps
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.exception.AuthenticationException
-import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -318,15 +314,11 @@ constructor(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceStart)
         )
 
-        runCatching {
-            requireNotNull(
-                stripeRepository.retrieveSource(
-                    sourceId = source.id.orEmpty(),
-                    clientSecret = source.clientSecret.orEmpty(),
-                    options = requestOptions
-                )
-            )
-        }.fold(
+        stripeRepository.retrieveSource(
+            sourceId = source.id.orEmpty(),
+            clientSecret = source.clientSecret.orEmpty(),
+            options = requestOptions
+        ).fold(
             onSuccess = { retrievedSourced ->
                 onSourceRetrieved(host, retrievedSourced, requestOptions)
             },
@@ -376,24 +368,11 @@ constructor(
      *
      * @param data the result Intent
      * @return the [PaymentIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
     override suspend fun getPaymentIntentResult(data: Intent) =
         paymentIntentFlowResultProcessor.processResult(
             PaymentFlowResult.Unvalidated.fromIntent(data)
-        ).getOrThrow()
+        )
 
     /**
      * Get the SetupIntent's client_secret from {@param data} and use to retrieve
@@ -401,24 +380,11 @@ constructor(
      *
      * @param data the result Intent
      * @return the [SetupIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
     override suspend fun getSetupIntentResult(data: Intent) =
         setupIntentFlowResultProcessor.processResult(
             PaymentFlowResult.Unvalidated.fromIntent(data)
-        ).getOrThrow()
+        )
 
     /**
      * Get the Source's client_secret from {@param data} and use to retrieve
@@ -426,21 +392,8 @@ constructor(
      *
      * @param data the result Intent
      * @return the [Source] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the Source response's JsonParser returns null
      */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    override suspend fun getAuthenticateSourceResult(data: Intent): Source {
+    override suspend fun getAuthenticateSourceResult(data: Intent): Result<Source> {
         val result = PaymentFlowResult.Unvalidated.fromIntent(data)
         val sourceId = result.sourceId.orEmpty()
         val clientSecret = result.clientSecret.orEmpty()
@@ -454,12 +407,10 @@ constructor(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceResult)
         )
 
-        return requireNotNull(
-            stripeRepository.retrieveSource(
-                sourceId,
-                clientSecret,
-                requestOptions
-            )
+        return stripeRepository.retrieveSource(
+            sourceId,
+            clientSecret,
+            requestOptions
         )
     }
 
