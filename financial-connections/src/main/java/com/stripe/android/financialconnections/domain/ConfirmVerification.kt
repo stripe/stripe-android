@@ -47,18 +47,18 @@ internal class ConfirmVerification @Inject constructor(
      * Convert Exception to [OTPError] (a soft error related to OTP verification) or
      * returns the original exception.
      */
-    private fun Throwable.toDomainException(verificationCode: VerificationType): Throwable {
-        return when (val code = (this as? StripeException)?.stripeError?.code ?: "") {
-            "consumer_verification_code_invalid" -> OTPError(code, OTPError.Type.CODE_INVALID)
-            "consumer_session_expired",
-            "consumer_verification_expired",
-            "consumer_verification_max_attempts_exceeded" -> when (verificationCode) {
-                VerificationType.EMAIL -> OTPError(code, OTPError.Type.EMAIL_CODE_EXPIRED)
-                VerificationType.SMS -> OTPError(code, OTPError.Type.SMS_CODE_EXPIRED)
-            }
-
-            else -> this
+    private fun Throwable.toDomainException(
+        verificationCode: VerificationType
+    ): Throwable = when (val code = (this as? StripeException)?.stripeError?.code ?: "") {
+        "consumer_verification_code_invalid" -> OTPError(code, OTPError.Type.CODE_INVALID)
+        "consumer_session_expired",
+        "consumer_verification_expired",
+        "consumer_verification_max_attempts_exceeded" -> when (verificationCode) {
+            VerificationType.EMAIL -> OTPError(code, OTPError.Type.EMAIL_CODE_EXPIRED)
+            VerificationType.SMS -> OTPError(code, OTPError.Type.SMS_CODE_EXPIRED)
         }
+
+        else -> this
     }
 
     /**
