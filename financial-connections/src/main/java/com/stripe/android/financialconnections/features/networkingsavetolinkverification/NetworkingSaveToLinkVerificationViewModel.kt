@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationError.Error.StartVerificationSessionError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationSuccess
 import com.stripe.android.financialconnections.domain.ConfirmVerification
+import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GoNext
@@ -87,10 +88,12 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
                 goNext(Pane.SUCCESS)
             },
             onFail = { error ->
-                saveToLinkWithStripeSucceeded.set(false)
                 logger.error("Error confirming verification", error)
                 eventTracker.track(Error(PANE, error))
-                goNext(Pane.SUCCESS)
+                if (error !is OTPError) {
+                    saveToLinkWithStripeSucceeded.set(false)
+                    goNext(Pane.SUCCESS)
+                }
             },
         )
     }

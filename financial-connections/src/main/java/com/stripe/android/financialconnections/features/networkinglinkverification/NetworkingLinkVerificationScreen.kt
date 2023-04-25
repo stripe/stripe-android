@@ -29,9 +29,9 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.stripe.android.core.StripeError
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.domain.ConfirmVerification
+import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError.Type
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.VerificationSection
@@ -45,7 +45,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -131,8 +130,7 @@ private fun NetworkingLinkVerificationLoaded(
             focusRequester = focusRequester,
             otpElement = payload.otpElement,
             enabled = confirmVerificationAsync !is Loading,
-            confirmVerificationError = (confirmVerificationAsync as? Fail)?.error,
-            verificationType = VerificationType.SMS
+            confirmVerificationError = (confirmVerificationAsync as? Fail)?.error
         )
         Spacer(modifier = Modifier.size(24.dp))
         EmailSubtext(payload.email)
@@ -218,12 +216,9 @@ internal fun NetworkingLinkVerificationScreenWithErrorPreview() {
         NetworkingLinkVerificationContent(
             state = NetworkingLinkVerificationState(
                 confirmVerification = Fail(
-                    APIException(
-                        stripeError = StripeError(
-                            code = "consumer_verification_max_attempts_exceeded"
-                        ),
-                        statusCode = 400,
-                        message = "auth error"
+                    ConfirmVerification.OTPError(
+                        message = "consumer_verification_max_attempts_exceeded",
+                        type = Type.SMS_CODE_EXPIRED
                     )
                 ),
                 payload = Success(
