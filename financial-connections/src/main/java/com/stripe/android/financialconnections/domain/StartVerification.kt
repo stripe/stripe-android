@@ -19,7 +19,6 @@ internal class StartVerification @Inject constructor(
         type = VerificationType.SMS,
     )
 
-
     suspend fun email(
         consumerSessionClientSecret: String,
         businessName: String?,
@@ -29,5 +28,4 @@ internal class StartVerification @Inject constructor(
         connectionsMerchantName = businessName,
         type = VerificationType.EMAIL,
     )
-
 }
