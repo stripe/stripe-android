@@ -45,7 +45,7 @@ internal class HeaderTextFactory(
                 PaymentSheetScreen.AddFirstPaymentMethod,
                 PaymentSheetScreen.AddAnotherPaymentMethod -> {
                     if (types.singleOrNull() == PaymentMethod.Type.Card.code) {
-                        R.string.title_add_a_card
+                        R.string.stripe_title_add_a_card
                     } else {
                         R.string.stripe_paymentsheet_choose_payment_method
                     }

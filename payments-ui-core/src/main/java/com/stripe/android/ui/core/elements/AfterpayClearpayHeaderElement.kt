@@ -34,7 +34,7 @@ data class AfterpayClearpayHeaderElement(
             else -> 4
         }
         return resources.getString(
-            R.string.afterpay_clearpay_message
+            R.string.stripe_afterpay_clearpay_message
         ).replace("<num_installments/>", numInstallments.toString())
             .replace(
                 "<installment_price/>",

@@ -49,7 +49,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
 
     override val accessibilityText: String
         get() {
-            return resources.getString(R.string.acc_label_expiry_date_node, text)
+            return resources.getString(R.string.stripe_acc_label_expiry_date_node, text)
         }
 
     internal var includeSeparatorGaps: Boolean by Delegates.observable(
@@ -213,11 +213,11 @@ class ExpiryDateEditText @JvmOverloads constructor(
                     setErrorMessage(
                         resources.getString(
                             if (expirationDate.isPartialEntry) {
-                                R.string.incomplete_expiry_date
+                                R.string.stripe_incomplete_expiry_date
                             } else if (!expirationDate.isMonthValid) {
-                                R.string.invalid_expiry_month
+                                R.string.stripe_invalid_expiry_month
                             } else {
-                                R.string.invalid_expiry_year
+                                R.string.stripe_invalid_expiry_year
                             }
                         )
                     )

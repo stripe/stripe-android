@@ -1,169 +1,169 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Label for card number entry text field -->
-  <string name="acc_label_card_number">Kartes numurs</string>
-  <string name="acc_label_card_number_node">%s, kartes numurs</string>
-  <string name="acc_label_cvc_node">%s, CVC</string>
-  <string name="acc_label_expiry_date">Derīguma termiņš</string>
-  <string name="acc_label_expiry_date_node">%s, derīguma termiņš</string>
+  <string name="stripe_acc_label_card_number">Kartes numurs</string>
+  <string name="stripe_acc_label_card_number_node">%s, kartes numurs</string>
+  <string name="stripe_acc_label_cvc_node">%s, CVC</string>
+  <string name="stripe_acc_label_expiry_date">Derīguma termiņš</string>
+  <string name="stripe_acc_label_expiry_date_node">%s, derīguma termiņš</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-  <string name="acc_label_zip">Pasta indekss</string>
+  <string name="stripe_acc_label_zip">Pasta indekss</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
-  <string name="acc_label_zip_short">Pasta ind.</string>
+  <string name="stripe_acc_label_zip_short">Pasta ind.</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="added">%s pievienots</string>
+  <string name="stripe_added">%s pievienots</string>
   <!-- Error text indicating that city is required, used for all locations -->
-  <string name="address_city_required">Ievadiet pilsētu</string>
+  <string name="stripe_address_city_required">Ievadiet pilsētu</string>
   <!-- Error text indicating country is invalid -->
-  <string name="address_country_invalid">Ievadītā valsts nav derīga</string>
+  <string name="stripe_address_country_invalid">Ievadītā valsts nav derīga</string>
   <!-- Error text indicating that county is required, used for UK addresses -->
-  <string name="address_county_required">Ievadiet apriņķi</string>
+  <string name="stripe_address_county_required">Ievadiet apriņķi</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
-  <string name="address_label_address_line1_optional">1. adreses rindiņa (nav obligāti)</string>
+  <string name="stripe_address_label_address_line1_optional">1. adreses rindiņa (nav obligāti)</string>
   <!-- Address line 2 placeholder for billing address form. -->
-  <string name="address_label_address_line2_optional">2. adreses rindiņa (nav obligāti)</string>
+  <string name="stripe_address_label_address_line2_optional">2. adreses rindiņa (nav obligāti)</string>
   <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
-  <string name="address_label_address_optional">Adrese (nav obligāti) </string>
+  <string name="stripe_address_label_address_optional">Adrese (nav obligāti) </string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
-  <string name="address_label_apt_optional">Dzīv. (nav obligāti)</string>
+  <string name="stripe_address_label_apt_optional">Dzīv. (nav obligāti)</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
-  <string name="address_label_city_optional">Pilsēta (nav obligāti)</string>
+  <string name="stripe_address_label_city_optional">Pilsēta (nav obligāti)</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
-  <string name="address_label_county_optional">Apriņķis (nav obligāti)</string>
+  <string name="stripe_address_label_county_optional">Apriņķis (nav obligāti)</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
-  <string name="address_label_phone_number_optional">Tālruņa numurs (nav obligāti)</string>
+  <string name="stripe_address_label_phone_number_optional">Tālruņa numurs (nav obligāti)</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
-  <string name="address_label_postal_code_optional">Pasta indekss (nav obligāti)</string>
+  <string name="stripe_address_label_postal_code_optional">Pasta indekss (nav obligāti)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
-  <string name="address_label_postcode">Pasta indekss</string>
+  <string name="stripe_address_label_postcode">Pasta indekss</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
-  <string name="address_label_postcode_optional">Pasta indekss (nav obligāti)</string>
+  <string name="stripe_address_label_postcode_optional">Pasta indekss (nav obligāti)</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
-  <string name="address_label_province_optional">Province (nav obligāti)</string>
+  <string name="stripe_address_label_province_optional">Province (nav obligāti)</string>
   <!-- Label for input requesting the region, used for international addresses -->
-  <string name="address_label_region_generic">Novads/štats/province/reģions</string>
+  <string name="stripe_address_label_region_generic">Novads/štats/province/reģions</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
-  <string name="address_label_region_generic_optional">Novads/štats/province/reģions (nav obligāti)</string>
+  <string name="stripe_address_label_region_generic_optional">Novads/štats/province/reģions (nav obligāti)</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
-  <string name="address_label_state_optional">Novads/štats (nav obligāti)</string>
+  <string name="stripe_address_label_state_optional">Novads/štats (nav obligāti)</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
-  <string name="address_label_zip_code_optional">Pasta indekss (nav obligāti)</string>
+  <string name="stripe_address_label_zip_code_optional">Pasta indekss (nav obligāti)</string>
   <!-- Label for input requesting postal code, used for international addresses -->
-  <string name="address_label_zip_postal_code">Pasta indekss</string>
+  <string name="stripe_address_label_zip_postal_code">Pasta indekss</string>
   <!-- Label for input requesting postal code where input is optional, used for international addresses -->
-  <string name="address_label_zip_postal_code_optional">Pasta indekss (neobligāts)</string>
+  <string name="stripe_address_label_zip_postal_code_optional">Pasta indekss (neobligāts)</string>
   <!-- Error text indicating name is required -->
-  <string name="address_name_required">Ievadiet vārdu un uzvārdu</string>
+  <string name="stripe_address_name_required">Ievadiet vārdu un uzvārdu</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
-  <string name="address_phone_number_required">Ievadiet tālruņa numuru</string>
+  <string name="stripe_address_phone_number_required">Ievadiet tālruņa numuru</string>
   <!-- Error message for when postal code in form is invalid -->
-  <string name="address_postal_code_invalid">Pasta indekss nav derīgs.</string>
+  <string name="stripe_address_postal_code_invalid">Pasta indekss nav derīgs.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
-  <string name="address_postcode_invalid">Pasta indekss nav derīgs</string>
+  <string name="stripe_address_postcode_invalid">Pasta indekss nav derīgs</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->
-  <string name="address_province_required">Ievadiet provinci</string>
+  <string name="stripe_address_province_required">Ievadiet provinci</string>
   <!-- Error text indicating that region is required, used for international addresses -->
-  <string name="address_region_generic_required">Ievadiet novadu/štatu/provinci/reģionu</string>
+  <string name="stripe_address_region_generic_required">Ievadiet novadu/štatu/provinci/reģionu</string>
   <!-- Error text indicating that address is required, used for all locations -->
-  <string name="address_required">Ievadiet adresi</string>
+  <string name="stripe_address_required">Ievadiet adresi</string>
   <!-- Error text indicating that state is required, used for US addresses -->
-  <string name="address_state_required">Ievadiet novadu/štatu</string>
+  <string name="stripe_address_state_required">Ievadiet novadu/štatu</string>
   <!-- Pay over time with Affirm copy -->
-  <string name="affirm_buy_now_pay_later">Maksāt pakāpeniski ar &lt;img src=\"affirm\"&gt;.</string>
+  <string name="stripe_affirm_buy_now_pay_later">Maksāt pakāpeniski ar &lt;img src=\"affirm\"&gt;.</string>
   <!-- Label for Name on account field on form -->
-  <string name="au_becs_account_name">Konta īpašnieks</string>
+  <string name="stripe_au_becs_account_name">Konta īpašnieks</string>
   <!-- Placeholder for AU BECS BSB number -->
-  <string name="au_becs_bsb_number">BSB numurs</string>
+  <string name="stripe_au_becs_bsb_number">BSB numurs</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="au_becs_mandate">Sniedzot savu bankas konta informāciju un apstiprinot šo maksājumu, jūs piekrītat šim tiešā debeta pieprasījumam un &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;tiešā debeta pieprasījuma pakalpojuma līgumam&lt;/a&gt;, kā arī pilnvarojat uzņēmumu Stripe Payments Australia Pty Ltd ACN 160 180 343, tiešā debeta lietotāja ID numurs 507156 (turpmāk — “Stripe”) izmantot lielapjoma elektronisko klīringa sistēmu (BECS), lai uzņēmuma %s (turpmāk — “Tirgotājs”) vārdā debitētu jūsu kontu par jebkādām summām, par kurām Tirgotājs jums ir atsevišķi ziņojis. Jūs apliecināt, ka esat vai nu iepriekš minētā konta īpašnieks, vai tā pilnvarota persona ar paraksta tiesībām.</string>
+  <string name="stripe_au_becs_mandate">Sniedzot savu bankas konta informāciju un apstiprinot šo maksājumu, jūs piekrītat šim tiešā debeta pieprasījumam un &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;tiešā debeta pieprasījuma pakalpojuma līgumam&lt;/a&gt;, kā arī pilnvarojat uzņēmumu Stripe Payments Australia Pty Ltd ACN 160 180 343, tiešā debeta lietotāja ID numurs 507156 (turpmāk — “Stripe”) izmantot lielapjoma elektronisko klīringa sistēmu (BECS), lai uzņēmuma %s (turpmāk — “Tirgotājs”) vārdā debitētu jūsu kontu par jebkādām summām, par kurām Tirgotājs jums ir atsevišķi ziņojis. Jūs apliecināt, ka esat vai nu iepriekš minētā konta īpašnieks, vai tā pilnvarota persona ar paraksta tiesībām.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="becs_mandate_acceptance">\n    Sniedzot savu bankas konta informāciju un apstiprinot šo maksājumu, jūs\n    piekrītat šim tiešā debeta pieprasījumam un pakalpojuma līgumam, kā arī pilnvarojat uzņēmumu\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, tiešā debeta lietotāja ID numurs 507156\n    (turpmāk — “Stripe”) izmantot lielapjoma elektronisko klīringa sistēmu (BECS),\n    lai uzņēmuma %1$s (turpmāk — “Tirgotājs”) vārdā debitētu jūsu kontu par jebkādām summām,\n    par kurām Tirgotājs jums ir atsevišķi ziņojis. Jūs apliecināt, ka esat vai nu\n    iepriekš minētā konta īpašnieks, vai tā pilnvarota persona ar paraksta tiesībām.\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    Sniedzot savu bankas konta informāciju un apstiprinot šo maksājumu, jūs\n    piekrītat šim tiešā debeta pieprasījumam un pakalpojuma līgumam, kā arī pilnvarojat uzņēmumu\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, tiešā debeta lietotāja ID numurs 507156\n    (turpmāk — “Stripe”) izmantot lielapjoma elektronisko klīringa sistēmu (BECS),\n    lai uzņēmuma %1$s (turpmāk — “Tirgotājs”) vārdā debitētu jūsu kontu par jebkādām summām,\n    par kurām Tirgotājs jums ir atsevišķi ziņojis. Jūs apliecināt, ka esat vai nu\n    iepriekš minētā konta īpašnieks, vai tā pilnvarota persona ar paraksta tiesībām.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
-  <string name="becs_widget_account_number">Konta numurs</string>
+  <string name="stripe_becs_widget_account_number">Konta numurs</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="becs_widget_account_number_incomplete">Konta numurs nav pilnīgs.</string>
+  <string name="stripe_becs_widget_account_number_incomplete">Konta numurs nav pilnīgs.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
-  <string name="becs_widget_account_number_required">Jānorāda konta numurs.</string>
+  <string name="stripe_becs_widget_account_number_required">Jānorāda konta numurs.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
-  <string name="becs_widget_bsb">BSB</string>
+  <string name="stripe_becs_widget_bsb">BSB</string>
   <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
-  <string name="becs_widget_bsb_incomplete">Ievadītais BSB ir nepilnīgs.</string>
+  <string name="stripe_becs_widget_bsb_incomplete">Ievadītais BSB ir nepilnīgs.</string>
   <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
-  <string name="becs_widget_bsb_invalid">Ievadītais BSB nav derīgs.</string>
+  <string name="stripe_becs_widget_bsb_invalid">Ievadītais BSB nav derīgs.</string>
   <!-- BECS Debit Widget - email address field - label -->
-  <string name="becs_widget_email">E-pasta adrese</string>
+  <string name="stripe_becs_widget_email">E-pasta adrese</string>
   <!-- BECS Debit Widget - email address field - invalid error message -->
-  <string name="becs_widget_email_invalid">E-pasta adrese nav derīga.</string>
+  <string name="stripe_becs_widget_email_invalid">E-pasta adrese nav derīga.</string>
   <!-- BECS Debit Widget - email address field - required error message -->
-  <string name="becs_widget_email_required">Jānorāda e-pasta adrese.</string>
+  <string name="stripe_becs_widget_email_required">Jānorāda e-pasta adrese.</string>
   <!-- BECS Debit Widget - name field - label -->
-  <string name="becs_widget_name">Vārds, uzvārds</string>
+  <string name="stripe_becs_widget_name">Vārds, uzvārds</string>
   <!-- BECS Debit Widget - name field - required error message -->
-  <string name="becs_widget_name_required">Jānorāda vārds/nosaukums.</string>
+  <string name="stripe_becs_widget_name_required">Jānorāda vārds/nosaukums.</string>
   <!-- Button title to cancel action in an alert -->
-  <string name="cancel">Atcelt</string>
+  <string name="stripe_cancel">Atcelt</string>
   <!-- Error when the card was declined by the credit card networks -->
-  <string name="card_declined">Karte tika noraidīta</string>
+  <string name="stripe_card_declined">Karte tika noraidīta</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="card_ending_in">%1$s, kuras numura pēdējie cipari ir %2$s</string>
+  <string name="stripe_card_ending_in">%1$s, kuras numura pēdējie cipari ir %2$s</string>
   <!-- Text for close button -->
-  <string name="close">Aizvērt</string>
+  <string name="stripe_close">Aizvērt</string>
   <!-- Accessibility action for deleting a payment method -->
-  <string name="delete_payment_method">Dzēst maksājuma metodi</string>
-  <string name="delete_payment_method_prompt_title">Vai dzēst maksājuma metodi?</string>
+  <string name="stripe_delete_payment_method">Dzēst maksājuma metodi</string>
+  <string name="stripe_delete_payment_method_prompt_title">Vai dzēst maksājuma metodi?</string>
   <!-- Done button title -->
-  <string name="done">Gatavs</string>
+  <string name="stripe_done">Gatavs</string>
   <!-- Button title to enter editing mode -->
-  <string name="edit">Rediģēt</string>
+  <string name="stripe_edit">Rediģēt</string>
   <!-- Error when the card has already expired -->
-  <string name="expired_card">Kartes derīguma termiņš ir beidzies</string>
+  <string name="stripe_expired_card">Kartes derīguma termiņš ir beidzies</string>
   <!-- label for text field to enter card expiry -->
-  <string name="expiry_date_hint">MM/GG</string>
-  <string name="expiry_label_short">Derīguma termiņš</string>
-  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="fpx_bank_offline">%s — bezsaistē</string>
-  <!-- Error message when a payment method gets declined. -->
-  <string name="generic_decline">Maksājuma veids tika noraidīts.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="invalid_bank_account_iban">Ievadītais IBAN nav derīgs.</string>
-  <string name="invalid_card_number">Kartes numurs nav derīgs.</string>
-  <!-- Error message for card entry form when CVC/CVV is invalid -->
-  <string name="invalid_cvc">Kartes drošības kods nav derīgs.</string>
-  <!-- Error when customer's name is invalid -->
-  <string name="invalid_owner_name">Jūsu vārds nav derīgs.</string>
-  <!-- Shipping form error message -->
-  <string name="invalid_shipping_information">Nederīga piegādes adrese</string>
-  <!-- Error message for when postal code in form is incomplete -->
-  <string name="invalid_zip">Pasta indekss nav pilnīgs.</string>
-  <string name="payment_method_add_new_card">Pievienot jaunu karti…</string>
-  <string name="payment_method_add_new_fpx">Atlasīt bankas kontu (FPX)…</string>
-  <!-- Label for free shipping method -->
-  <string name="price_free">Bezmaksas</string>
-  <!-- Error when there is a problem processing the credit card -->
-  <string name="processing_error">Radās kļūda, apstrādājot jūsu karti — mēģiniet vēlreiz pēc dažām sekundēm</string>
-  <!-- Button title for confirmation alert to remove a saved payment method
-   Text for remove button -->
-  <string name="remove">Noņemt</string>
-  <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="removed">%s noņemts</string>
-  <string name="secure_checkout">Droša norēķināšanās</string>
+  <string name="stripe_expiry_date_hint">MM/GG</string>
+  <string name="stripe_expiry_label_short">Derīguma termiņš</string>
   <!-- Generic error message shown when payment cannot be processed. -->
   <string name="stripe_failure_connection_error">Ir radušās problēmas, veidojot savienojumu ar mūsu maksājumu nodrošinātāju. Lūdzu, pārbaudiet savu interneta savienojumu un mēģiniet vēlreiz.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Nevaram autentificēt jūsu maksājuma metodi. Lūdzu, izvēlieties citu maksājuma metodi un mēģiniet vēlreiz.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Autentificējot jūsu maksājuma metodi, iestājās noildze — mēģiniet vēlreiz</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="stripe_fpx_bank_offline">%s — bezsaistē</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="stripe_generic_decline">Maksājuma veids tika noraidīts.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Radās iekšēja kļūda.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="stripe_invalid_bank_account_iban">Ievadītais IBAN nav derīgs.</string>
+  <string name="stripe_invalid_card_number">Kartes numurs nav derīgs.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="stripe_invalid_cvc">Kartes drošības kods nav derīgs.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="stripe_invalid_owner_name">Jūsu vārds nav derīgs.</string>
+  <!-- Shipping form error message -->
+  <string name="stripe_invalid_shipping_information">Nederīga piegādes adrese</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="stripe_invalid_zip">Pasta indekss nav pilnīgs.</string>
+  <string name="stripe_payment_method_add_new_card">Pievienot jaunu karti…</string>
+  <string name="stripe_payment_method_add_new_fpx">Atlasīt bankas kontu (FPX)…</string>
+  <!-- Label for free shipping method -->
+  <string name="stripe_price_free">Bezmaksas</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="stripe_processing_error">Radās kļūda, apstrādājot jūsu karti — mēģiniet vēlreiz pēc dažām sekundēm</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="stripe_remove">Noņemt</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="stripe_removed">%s noņemts</string>
+  <string name="stripe_secure_checkout">Droša norēķināšanās</string>
+  <string name="stripe_title_add_a_card">Kartes pievienošana</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="stripe_title_add_an_address">Iestatiet adresi</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="stripe_title_bank_account">Bankas konts</string>
+  <!-- Title for Payment Method screen -->
+  <string name="stripe_title_payment_method">Maksājuma metode</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="stripe_title_select_shipping_method">Atlasiet piegādes metodi</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verificējiet savu maksājumu</string>
-  <string name="title_add_a_card">Kartes pievienošana</string>
-  <!-- Screen title telling users they should add an address -->
-  <string name="title_add_an_address">Iestatiet adresi</string>
-  <!-- Label for Bank Account selection or detail entry form -->
-  <string name="title_bank_account">Bankas konts</string>
-  <!-- Title for Payment Method screen -->
-  <string name="title_payment_method">Maksājuma metode</string>
-  <!-- Screen title telling users they should select a shipping address -->
-  <string name="title_select_shipping_method">Atlasiet piegādes metodi</string>
 </resources>

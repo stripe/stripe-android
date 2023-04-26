@@ -31,13 +31,13 @@ class CvcConfig : CardDetailsTextFieldConfig {
                 else -> TextFieldStateConstants.Valid.Limitless
             }
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
-            TextFieldStateConstants.Error.Incomplete(R.string.invalid_cvc)
+            TextFieldStateConstants.Error.Incomplete(R.string.stripe_invalid_cvc)
         } else if (isDigitLimit && number.length > numberAllowedDigits) {
-            TextFieldStateConstants.Error.Invalid(R.string.invalid_cvc)
+            TextFieldStateConstants.Error.Invalid(R.string.stripe_invalid_cvc)
         } else if (isDigitLimit && number.length == numberAllowedDigits) {
             TextFieldStateConstants.Valid.Full
         } else {
-            TextFieldStateConstants.Error.Invalid(R.string.invalid_cvc)
+            TextFieldStateConstants.Error.Invalid(R.string.stripe_invalid_cvc)
         }
     }
 

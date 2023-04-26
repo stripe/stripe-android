@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class NameConfig : TextFieldConfig {
     @StringRes
-    override val label = R.string.address_label_full_name
+    override val label = R.string.stripe_address_label_full_name
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.Words
     override val debugLabel = "name"
     override val keyboard = KeyboardType.Text

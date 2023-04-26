@@ -16,7 +16,7 @@ class CountryConfigTest {
     @Test
     fun `Verify the label`() {
         assertThat(CountryConfig(locale = Locale.US).label)
-            .isEqualTo(R.string.address_label_country_or_region)
+            .isEqualTo(R.string.stripe_address_label_country_or_region)
     }
 
     @Test

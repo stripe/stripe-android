@@ -9,8 +9,8 @@ internal sealed class LinkLogoutMenuItem(
     override val textResId: Int,
     override val isDestructive: Boolean = false
 ) : LinkMenuItem {
-    object Logout : LinkLogoutMenuItem(textResId = R.string.log_out, isDestructive = true)
-    object Cancel : LinkLogoutMenuItem(textResId = R.string.cancel)
+    object Logout : LinkLogoutMenuItem(textResId = R.string.stripe_log_out, isDestructive = true)
+    object Cancel : LinkLogoutMenuItem(textResId = R.string.stripe_cancel)
 }
 
 @Composable

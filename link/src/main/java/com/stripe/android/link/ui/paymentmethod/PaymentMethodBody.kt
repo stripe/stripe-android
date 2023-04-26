@@ -165,7 +165,7 @@ internal fun PaymentMethodBody(
 ) {
     ScrollableTopLevelColumn {
         Text(
-            text = stringResource(R.string.add_payment_method),
+            text = stringResource(R.string.stripe_add_payment_method),
             modifier = Modifier
                 .padding(top = 4.dp, bottom = 32.dp),
             textAlign = TextAlign.Center,

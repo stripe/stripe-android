@@ -82,7 +82,7 @@ internal class ShippingMethodView @JvmOverloads constructor(
         viewBinding.price.text = PaymentUtils.formatPriceStringUsingFree(
             shippingMethod.amount,
             shippingMethod.currency,
-            context.getString(R.string.price_free)
+            context.getString(R.string.stripe_price_free)
         )
     }
 }

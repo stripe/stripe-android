@@ -110,7 +110,7 @@ internal fun SignUpBody(
 
     ScrollableTopLevelColumn {
         Text(
-            text = stringResource(R.string.sign_up_header),
+            text = stringResource(R.string.stripe_sign_up_header),
             modifier = Modifier
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
@@ -118,7 +118,7 @@ internal fun SignUpBody(
             color = MaterialTheme.colors.onPrimary
         )
         Text(
-            text = stringResource(R.string.sign_up_message, merchantName),
+            text = stringResource(R.string.stripe_sign_up_message, merchantName),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 30.dp),
@@ -178,7 +178,7 @@ internal fun SignUpBody(
                     )
                 }
                 PrimaryButton(
-                    label = stringResource(R.string.sign_up),
+                    label = stringResource(R.string.stripe_sign_up),
                     state = if (isReadyToSignUp) {
                         PrimaryButtonState.Enabled
                     } else {

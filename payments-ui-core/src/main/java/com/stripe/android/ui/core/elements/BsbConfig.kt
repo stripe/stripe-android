@@ -30,7 +30,7 @@ class BsbConfig(private val banks: List<BecsDebitBanks.Bank>) : TextFieldConfig 
     override val loading: StateFlow<Boolean> = MutableStateFlow(false)
 
     @StringRes
-    override val label = R.string.becs_widget_bsb
+    override val label = R.string.stripe_becs_widget_bsb
     override val keyboard = KeyboardType.Number
 
     // Displays the BSB number in 2 groups of 3 characters with a dash added between them
@@ -77,7 +77,7 @@ class BsbConfig(private val banks: List<BecsDebitBanks.Bank>) : TextFieldConfig 
 
         if (input.length < LENGTH) {
             return TextFieldStateConstants.Error.Incomplete(
-                R.string.becs_widget_bsb_incomplete
+                R.string.stripe_becs_widget_bsb_incomplete
             )
         }
 
@@ -87,7 +87,7 @@ class BsbConfig(private val banks: List<BecsDebitBanks.Bank>) : TextFieldConfig 
 
         if (bank == null || input.length > LENGTH) {
             return TextFieldStateConstants.Error.Invalid(
-                R.string.becs_widget_bsb_invalid
+                R.string.stripe_becs_widget_bsb_invalid
             )
         }
 

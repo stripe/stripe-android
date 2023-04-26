@@ -179,7 +179,7 @@ private fun AddCard(
         labelText = stringResource(R.string.stripe_paymentsheet_add_payment_method_button_label),
         iconRes = iconRes,
         onItemSelectedListener = onAddCardPressed,
-        description = stringResource(R.string.add_new_payment_method),
+        description = stringResource(R.string.stripe_add_new_payment_method),
         modifier = modifier,
     )
 }

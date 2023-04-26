@@ -42,7 +42,7 @@ class PostalCodeEditText @JvmOverloads constructor(
         }
 
     init {
-        setErrorMessage(resources.getString(R.string.invalid_zip))
+        setErrorMessage(resources.getString(R.string.stripe_invalid_zip))
         maxLines = 1
 
         doAfterTextChanged {
@@ -63,7 +63,7 @@ class PostalCodeEditText @JvmOverloads constructor(
      * Configure the field for United States users
      */
     private fun configureForUs() {
-        updateHint(R.string.address_label_zip_code)
+        updateHint(R.string.stripe_address_label_zip_code)
         filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH_US))
         keyListener = DigitsKeyListener.getInstance(false, true)
         setNumberOnlyInputType()
@@ -73,7 +73,7 @@ class PostalCodeEditText @JvmOverloads constructor(
      * Configure the field for global users
      */
     private fun configureForGlobal() {
-        updateHint(R.string.address_label_postal_code)
+        updateHint(R.string.stripe_address_label_postal_code)
         keyListener = TextKeyListener.getInstance()
         inputType = InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS
         filters = arrayOf()

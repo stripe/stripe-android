@@ -279,16 +279,16 @@ internal class BillingAddressView @JvmOverloads constructor(
     private fun updateStateView(countryCode: CountryCode?) {
         when {
             isUS(countryCode) -> {
-                R.string.address_label_state
+                R.string.stripe_address_label_state
             }
             CountryCode.isCA(countryCode) -> {
-                R.string.address_label_province
+                R.string.stripe_address_label_province
             }
             CountryCode.isGB(countryCode) -> {
-                R.string.address_label_county
+                R.string.stripe_address_label_county
             }
             else -> {
-                R.string.address_label_region_generic
+                R.string.stripe_address_label_region_generic
             }
         }.let {
             stateLayout.hint = resources.getString(it)
@@ -313,9 +313,9 @@ internal class BillingAddressView @JvmOverloads constructor(
 
         viewBinding.postalCodeLayout.hint = resources.getString(
             if (isUS(countryCode)) {
-                R.string.acc_label_zip_short
+                R.string.stripe_acc_label_zip_short
             } else {
-                R.string.address_label_postal_code
+                R.string.stripe_address_label_postal_code
             }
         )
     }

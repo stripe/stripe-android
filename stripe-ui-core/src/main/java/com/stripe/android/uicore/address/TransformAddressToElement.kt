@@ -36,35 +36,35 @@ enum class FieldType(
     AddressLine1(
         "addressLine1",
         IdentifierSpec.Line1,
-        R.string.address_label_address_line1
+        R.string.stripe_address_label_address_line1
     ),
 
     @SerialName("addressLine2")
     AddressLine2(
         "addressLine2",
         IdentifierSpec.Line2,
-        R.string.address_label_address_line2
+        R.string.stripe_address_label_address_line2
     ),
 
     @SerialName("locality")
     Locality(
         "locality",
         IdentifierSpec.City,
-        R.string.address_label_city
+        R.string.stripe_address_label_city
     ),
 
     @SerialName("dependentLocality")
     DependentLocality(
         "dependentLocality",
         IdentifierSpec.DependentLocality,
-        R.string.address_label_city
+        R.string.stripe_address_label_city
     ),
 
     @SerialName("postalCode")
     PostalCode(
         "postalCode",
         IdentifierSpec.PostalCode,
-        R.string.address_label_postal_code
+        R.string.stripe_address_label_postal_code
     ) {
         override fun capitalization() = KeyboardCapitalization.None
     },
@@ -73,7 +73,7 @@ enum class FieldType(
     SortingCode(
         "sortingCode",
         IdentifierSpec.SortingCode,
-        R.string.address_label_postal_code
+        R.string.stripe_address_label_postal_code
     ) {
         override fun capitalization() = KeyboardCapitalization.None
     },
@@ -89,7 +89,7 @@ enum class FieldType(
     Name(
         "name",
         IdentifierSpec.Name,
-        R.string.address_label_full_name
+        R.string.stripe_address_label_full_name
     );
 
     open fun capitalization() = KeyboardCapitalization.Words
@@ -106,79 +106,79 @@ enum class FieldType(
 @Serializable
 enum class NameType(@StringRes val stringResId: Int) {
     @SerialName("area")
-    Area(R.string.address_label_hk_area),
+    Area(R.string.stripe_address_label_hk_area),
 
     @SerialName("cedex")
-    Cedex(R.string.address_label_cedex),
+    Cedex(R.string.stripe_address_label_cedex),
 
     @SerialName("city")
-    City(R.string.address_label_city),
+    City(R.string.stripe_address_label_city),
 
     @SerialName("country")
-    Country(R.string.address_label_country_or_region),
+    Country(R.string.stripe_address_label_country_or_region),
 
     @SerialName("county")
-    County(R.string.address_label_county),
+    County(R.string.stripe_address_label_county),
 
     @SerialName("department")
-    Department(R.string.address_label_department),
+    Department(R.string.stripe_address_label_department),
 
     @SerialName("district")
-    District(R.string.address_label_district),
+    District(R.string.stripe_address_label_district),
 
     @SerialName("do_si")
-    DoSi(R.string.address_label_kr_do_si),
+    DoSi(R.string.stripe_address_label_kr_do_si),
 
     @SerialName("eircode")
-    Eircode(R.string.address_label_ie_eircode),
+    Eircode(R.string.stripe_address_label_ie_eircode),
 
     @SerialName("emirate")
-    Emirate(R.string.address_label_ae_emirate),
+    Emirate(R.string.stripe_address_label_ae_emirate),
 
     @SerialName("island")
-    Island(R.string.address_label_island),
+    Island(R.string.stripe_address_label_island),
 
     @SerialName("neighborhood")
-    Neighborhood(R.string.address_label_neighborhood),
+    Neighborhood(R.string.stripe_address_label_neighborhood),
 
     @SerialName("oblast")
-    Oblast(R.string.address_label_oblast),
+    Oblast(R.string.stripe_address_label_oblast),
 
     @SerialName("parish")
-    Parish(R.string.address_label_bb_jm_parish),
+    Parish(R.string.stripe_address_label_bb_jm_parish),
 
     @SerialName("pin")
-    Pin(R.string.address_label_in_pin),
+    Pin(R.string.stripe_address_label_in_pin),
 
     @SerialName("post_town")
-    PostTown(R.string.address_label_post_town),
+    PostTown(R.string.stripe_address_label_post_town),
 
     @SerialName("postal")
-    Postal(R.string.address_label_postal_code),
+    Postal(R.string.stripe_address_label_postal_code),
 
     @SerialName("prefecture")
-    Perfecture(R.string.address_label_jp_prefecture),
+    Perfecture(R.string.stripe_address_label_jp_prefecture),
 
     @SerialName("province")
-    Province(R.string.address_label_province),
+    Province(R.string.stripe_address_label_province),
 
     @SerialName("state")
-    State(R.string.address_label_state),
+    State(R.string.stripe_address_label_state),
 
     @SerialName("suburb")
-    Suburb(R.string.address_label_suburb),
+    Suburb(R.string.stripe_address_label_suburb),
 
     @SerialName("suburb_or_city")
-    SuburbOrCity(R.string.address_label_au_suburb_or_city),
+    SuburbOrCity(R.string.stripe_address_label_au_suburb_or_city),
 
     @SerialName("townland")
-    Townload(R.string.address_label_ie_townland),
+    Townload(R.string.stripe_address_label_ie_townland),
 
     @SerialName("village_township")
-    VillageTownship(R.string.address_label_village_township),
+    VillageTownship(R.string.stripe_address_label_village_township),
 
     @SerialName("zip")
-    Zip(R.string.address_label_zip_code)
+    Zip(R.string.stripe_address_label_zip_code)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -56,7 +56,7 @@ data class AddressSpec(
         addressRepository: AddressRepository,
         shippingValues: Map<IdentifierSpec, String?>?,
     ): SectionElement? {
-        val label = if (showLabel) R.string.billing_details else null
+        val label = if (showLabel) R.string.stripe_billing_details else null
         return if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
             createSectionElement(
                 sectionFieldElement = CountryElement(

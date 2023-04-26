@@ -35,16 +35,16 @@ internal sealed class PaymentOptionsItem {
 
         fun getDescription(resources: Resources) = when (paymentMethod.type) {
             PaymentMethod.Type.Card -> resources.getString(
-                R.string.card_ending_in,
+                R.string.stripe_card_ending_in,
                 paymentMethod.card?.brand,
                 paymentMethod.card?.last4
             )
             PaymentMethod.Type.SepaDebit -> resources.getString(
-                R.string.bank_account_ending_in,
+                R.string.stripe_bank_account_ending_in,
                 paymentMethod.sepaDebit?.last4
             )
             PaymentMethod.Type.USBankAccount -> resources.getString(
-                R.string.bank_account_ending_in,
+                R.string.stripe_bank_account_ending_in,
                 paymentMethod.usBankAccount?.last4
             )
             else -> ""

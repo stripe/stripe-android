@@ -1,40 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
-  <string name="afterpay_clearpay_message"><![CDATA[Zapłacić w <num_installments/> nieoprocentowanych ratach <installment_price/> z <img/>]]></string>
+  <string name="stripe_afterpay_clearpay_message"><![CDATA[Zapłacić w <num_installments/> nieoprocentowanych ratach <installment_price/> z <img/>]]></string>
   <!-- Text for back button -->
-  <string name="back">Wstecz</string>
+  <string name="stripe_back">Wstecz</string>
   <!-- Billing address section title for card form entry. -->
-  <string name="billing_details">Adres rozliczeniowy</string>
-  <!-- Label for the field containing the dropdown of EPS Banks -->
-  <string name="eps_bank">Bank EPS</string>
-  <!-- An error message displayed when the customer's IBAN is incomplete. -->
-  <string name="iban_incomplete">Podany IBAN jest niepełny.</string>
-  <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="iban_invalid_country">Podany IBAN jest nieprawidłowy. „%s” nie jest prawidłowym kodem kraju.</string>
-  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-  <string name="iban_invalid_start">IBAN powinien się zaczynać od dwuliterowego kodu kraju.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="ideal_bank">iDEAL Bank</string>
-  <string name="invalid_email_address">Nieprawidłowy adres e-mail: %s</string>
-  <!-- Error message when UPI ID is invalid -->
-  <string name="invalid_upi_id">Nieprawidłowy UPI ID</string>
-  <!-- Klarna buy now or pay later copy -->
-  <string name="klarna_buy_now_pay_later">Kup teraz lub zapłać za pomocą Klarna później.</string>
-  <!-- Klarna pay later copy -->
-  <string name="klarna_pay_later">Zapłać później za pomocą Klarna.</string>
-  <!-- Label on the dropdown to select the Przelewy24 Bank -->
-  <string name="p24_bank">Bank - Przelewy24</string>
-  <!-- PayPal mandate text -->
-  <string name="paypal_mandate">Zatwierdzając płatność z PayPal, zezwalasz %s na obciążenie Twojego konta PayPal przyszłymi płatnościami zgodnie z ich warunkami.</string>
-  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="save_for_future_payments_with_merchant_name">Zapisz do przyszłych %s płatności</string>
-  <!-- Button title to open camera to scan credit/debit card -->
-  <string name="scan_card">Skanuj kartę</string>
-  <!-- SEPA mandate text -->
-  <string name="sepa_mandate">Podając dane płatności i potwierdzając tę płatność, upoważniasz (A) %s i Stripe, naszego dostawcę usług płatności, do wysłania instrukcji do Twojego banku w celu obciążenia Twojego konta oraz (B) Twój bank do obciążenia Twojego konta zgodnie z tymi instrukcjami. W ramach swoich praw jesteś uprawniony(-a) do otrzymania zwrotu od Twojego banku zgodnie z zasadami i warunkami umowy z bankiem. Zwrot należy odebrać w ciągu 8 tygodni, licząc od daty obciążenia konta. Twoje prawa są wyjaśnione w oświadczeniu, które możesz otrzymać z banku. Wyrażasz zgodę na otrzymywanie powiadomień w przypadku przyszłych obciążeń do 2 dni przed ich wystąpieniem.</string>
+  <string name="stripe_billing_details">Adres rozliczeniowy</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Kontynuuj</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="stripe_eps_bank">Bank EPS</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="stripe_iban_incomplete">Podany IBAN jest niepełny.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="stripe_iban_invalid_country">Podany IBAN jest nieprawidłowy. „%s” nie jest prawidłowym kodem kraju.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="stripe_iban_invalid_start">IBAN powinien się zaczynać od dwuliterowego kodu kraju.</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_ideal_bank">iDEAL Bank</string>
+  <string name="stripe_invalid_email_address">Nieprawidłowy adres e-mail: %s</string>
+  <!-- Error message when UPI ID is invalid -->
+  <string name="stripe_invalid_upi_id">Nieprawidłowy UPI ID</string>
+  <!-- Klarna buy now or pay later copy -->
+  <string name="stripe_klarna_buy_now_pay_later">Kup teraz lub zapłać za pomocą Klarna później.</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_klarna_pay_later">Zapłać później za pomocą Klarna.</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="stripe_p24_bank">Bank - Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Zapłać %s</string>
   <!-- Title for a bank account payment method -->
@@ -49,8 +41,16 @@
   <string name="stripe_paymentsheet_payment_method_card">Karta</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Polecenie zapłaty SEPA</string>
+  <!-- PayPal mandate text -->
+  <string name="stripe_paypal_mandate">Zatwierdzając płatność z PayPal, zezwalasz %s na obciążenie Twojego konta PayPal przyszłymi płatnościami zgodnie z ich warunkami.</string>
+  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
+  <string name="stripe_save_for_future_payments_with_merchant_name">Zapisz do przyszłych %s płatności</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="stripe_scan_card">Skanuj kartę</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_sepa_mandate">Podając dane płatności i potwierdzając tę płatność, upoważniasz (A) %s i Stripe, naszego dostawcę usług płatności, do wysłania instrukcji do Twojego banku w celu obciążenia Twojego konta oraz (B) Twój bank do obciążenia Twojego konta zgodnie z tymi instrukcjami. W ramach swoich praw jesteś uprawniony(-a) do otrzymania zwrotu od Twojego banku zgodnie z zasadami i warunkami umowy z bankiem. Zwrot należy odebrać w ciągu 8 tygodni, licząc od daty obciążenia konta. Twoje prawa są wyjaśnione w oświadczeniu, które możesz otrzymać z banku. Wyrażasz zgodę na otrzymywanie powiadomień w przypadku przyszłych obciążeń do 2 dni przed ich wystąpieniem.</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Ustaw</string>
   <!-- Label for UPI ID number field on form -->
-  <string name="upi_id_label">UPI ID</string>
+  <string name="stripe_upi_id_label">UPI ID</string>
 </resources>

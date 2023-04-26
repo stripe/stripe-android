@@ -28,8 +28,8 @@ object KlarnaHelper {
 
     fun getKlarnaHeader(locale: Locale = Locale.getDefault()) =
         if (buyNowCountries.contains(locale.country)) {
-            R.string.klarna_buy_now_pay_later
+            R.string.stripe_klarna_buy_now_pay_later
         } else {
-            R.string.klarna_pay_later
+            R.string.stripe_klarna_pay_later
         }
 }

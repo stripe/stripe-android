@@ -1,40 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
-  <string name="afterpay_clearpay_message"><![CDATA[Maksāt ar <num_installments/> bezprocentu maksājumiem <installment_price/> ar <img/>]]></string>
+  <string name="stripe_afterpay_clearpay_message"><![CDATA[Maksāt ar <num_installments/> bezprocentu maksājumiem <installment_price/> ar <img/>]]></string>
   <!-- Text for back button -->
-  <string name="back">Atpakaļ</string>
+  <string name="stripe_back">Atpakaļ</string>
   <!-- Billing address section title for card form entry. -->
-  <string name="billing_details">Norēķinu adrese</string>
-  <!-- Label for the field containing the dropdown of EPS Banks -->
-  <string name="eps_bank">Elektronisko maksājumu pakalpojumu banka</string>
-  <!-- An error message displayed when the customer's IBAN is incomplete. -->
-  <string name="iban_incomplete">Ievadītais IBAN nav pilnīgs.</string>
-  <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="iban_invalid_country">Ievadītais IBAN nav derīgs, \"%s\" nav atbalstīts valsts kods.</string>
-  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-  <string name="iban_invalid_start">IBAN sākumā jābūt divu burtu valsts kodam.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="ideal_bank">iDEAL banka</string>
-  <string name="invalid_email_address">Nederīga e-pasta adrese: %s</string>
-  <!-- Error message when UPI ID is invalid -->
-  <string name="invalid_upi_id">Nederīgs UPI ID</string>
-  <!-- Klarna buy now or pay later copy -->
-  <string name="klarna_buy_now_pay_later">Pērciet tagad vai maksājiet vēlāk ar Klarna.</string>
-  <!-- Klarna pay later copy -->
-  <string name="klarna_pay_later">Maksāt vēlāk ar Klarna.</string>
-  <!-- Label on the dropdown to select the Przelewy24 Bank -->
-  <string name="p24_bank">Przelewy24 banka</string>
-  <!-- PayPal mandate text -->
-  <string name="paypal_mandate">Apstiprinot maksājumu PayPal, jūs atļaujat %s saskaņā ar viņu noteikumiem iekasēt no jūsu PayPal konta summas par turpmākajiem maksājumiem.</string>
-  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="save_for_future_payments_with_merchant_name">Saglabāt nākotnes %s maksājumiem</string>
-  <!-- Button title to open camera to scan credit/debit card -->
-  <string name="scan_card">Skenēt karti</string>
-  <!-- SEPA mandate text -->
-  <string name="sepa_mandate">Norādot savu maksājuma informāciju un apstiprinot šo maksājumu, jūs pilnvarojat A) %s un Stripe (mūsu maksājumu pakalpojumu sniedzēju) nosūtīt rīkojumu jūsu bankai debetēt jūsu kontu un B) jūsu banku debetēt jūsu kontu saskaņā ar šo rīkojumu. Jums ir tiesības pieprasīt naudas līdzekļu atmaksu no jūsu bankas saskaņā ar jūsu bankas konta apkalpošanas līguma noteikumiem un nosacījumiem. Naudas līdzekļu atmaksa jāpieprasa astoņu nedēļu laikā, sākot no jūsu konta debetēšanas datuma. Jūsu tiesības ir paskaidrotas paziņojumā, kuru varat saņemt savā bankā. Jūs piekrītat saņemt paziņojumus par turpmākajiem debeta darījumiem vismaz divas dienas pirms to veikšanas.</string>
+  <string name="stripe_billing_details">Norēķinu adrese</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Turpināt</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="stripe_eps_bank">Elektronisko maksājumu pakalpojumu banka</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="stripe_iban_incomplete">Ievadītais IBAN nav pilnīgs.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="stripe_iban_invalid_country">Ievadītais IBAN nav derīgs, \"%s\" nav atbalstīts valsts kods.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="stripe_iban_invalid_start">IBAN sākumā jābūt divu burtu valsts kodam.</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_ideal_bank">iDEAL banka</string>
+  <string name="stripe_invalid_email_address">Nederīga e-pasta adrese: %s</string>
+  <!-- Error message when UPI ID is invalid -->
+  <string name="stripe_invalid_upi_id">Nederīgs UPI ID</string>
+  <!-- Klarna buy now or pay later copy -->
+  <string name="stripe_klarna_buy_now_pay_later">Pērciet tagad vai maksājiet vēlāk ar Klarna.</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_klarna_pay_later">Maksāt vēlāk ar Klarna.</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="stripe_p24_bank">Przelewy24 banka</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Maksāt %s</string>
   <!-- Title for a bank account payment method -->
@@ -49,8 +41,16 @@
   <string name="stripe_paymentsheet_payment_method_card">Karte</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA debets</string>
+  <!-- PayPal mandate text -->
+  <string name="stripe_paypal_mandate">Apstiprinot maksājumu PayPal, jūs atļaujat %s saskaņā ar viņu noteikumiem iekasēt no jūsu PayPal konta summas par turpmākajiem maksājumiem.</string>
+  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
+  <string name="stripe_save_for_future_payments_with_merchant_name">Saglabāt nākotnes %s maksājumiem</string>
+  <!-- Button title to open camera to scan credit/debit card -->
+  <string name="stripe_scan_card">Skenēt karti</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_sepa_mandate">Norādot savu maksājuma informāciju un apstiprinot šo maksājumu, jūs pilnvarojat A) %s un Stripe (mūsu maksājumu pakalpojumu sniedzēju) nosūtīt rīkojumu jūsu bankai debetēt jūsu kontu un B) jūsu banku debetēt jūsu kontu saskaņā ar šo rīkojumu. Jums ir tiesības pieprasīt naudas līdzekļu atmaksu no jūsu bankas saskaņā ar jūsu bankas konta apkalpošanas līguma noteikumiem un nosacījumiem. Naudas līdzekļu atmaksa jāpieprasa astoņu nedēļu laikā, sākot no jūsu konta debetēšanas datuma. Jūsu tiesības ir paskaidrotas paziņojumā, kuru varat saņemt savā bankā. Jūs piekrītat saņemt paziņojumus par turpmākajiem debeta darījumiem vismaz divas dienas pirms to veikšanas.</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Iestatīt</string>
   <!-- Label for UPI ID number field on form -->
-  <string name="upi_id_label">UPI ID</string>
+  <string name="stripe_upi_id_label">UPI ID</string>
 </resources>

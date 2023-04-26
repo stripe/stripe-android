@@ -38,7 +38,7 @@ internal fun AddressOptionsAppBar(
                     if (isRootScreen) {
                         R.string.stripe_paymentsheet_close
                     } else {
-                        R.string.back
+                        R.string.stripe_back
                     }
                 ),
                 tint = MaterialTheme.stripeColors.appBarIcon

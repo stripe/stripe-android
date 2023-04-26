@@ -44,7 +44,7 @@ class TextFieldStateConstants {
             override fun isBlank(): Boolean = false
         }
 
-        object Blank : Error(R.string.blank_and_required) {
+        object Blank : Error(R.string.stripe_blank_and_required) {
             override fun shouldShowError(hasFocus: Boolean): Boolean = false
             override fun isBlank(): Boolean = true
         }

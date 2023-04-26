@@ -21,7 +21,7 @@ internal class DeletePaymentMethodDialogFactory internal constructor(
             cardDisplayTextFactory.createUnstyled(it)
         }
         return AlertDialog.Builder(context, R.style.AlertDialogStyle)
-            .setTitle(R.string.delete_payment_method_prompt_title)
+            .setTitle(R.string.stripe_delete_payment_method_prompt_title)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 onDeletedPaymentMethod(paymentMethod)

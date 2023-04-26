@@ -26,7 +26,7 @@ class AuBankAccountNumberConfig : TextFieldConfig {
     override val loading: StateFlow<Boolean> = MutableStateFlow(false)
 
     @StringRes
-    override val label = R.string.becs_widget_account_number
+    override val label = R.string.stripe_becs_widget_account_number
     override val keyboard = KeyboardType.Number
 
     override fun filter(userTyped: String) =
@@ -43,7 +43,7 @@ class AuBankAccountNumberConfig : TextFieldConfig {
 
         if (input.length < LENGTH) {
             return TextFieldStateConstants.Error.Incomplete(
-                R.string.becs_widget_account_number_incomplete
+                R.string.stripe_becs_widget_account_number_incomplete
             )
         }
 

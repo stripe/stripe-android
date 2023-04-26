@@ -63,7 +63,7 @@ fun LinkInlineSignedIn(
                         .padding(16.dp)
                 ) {
                     Text(
-                        text = stringResource(id = R.string.this_card_will_be_saved),
+                        text = stringResource(id = R.string.stripe_this_card_will_be_saved),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     Divider(
@@ -79,7 +79,7 @@ fun LinkInlineSignedIn(
                             color = MaterialTheme.stripeColors.subtitle
                         )
                         ClickableText(
-                            text = AnnotatedString(text = stringResource(id = R.string.logout)),
+                            text = AnnotatedString(text = stringResource(id = R.string.stripe_logout)),
                             style = TextStyle.Default.copy(color = MaterialTheme.colors.primary),
                             onClick = {
                                 viewModel.logout()

@@ -52,7 +52,7 @@ internal enum class SupportedPaymentMethod(
         override fun primaryButtonLabel(
             stripeIntent: StripeIntent,
             resources: Resources
-        ) = resources.getString(R.string.add_bank_account)
+        ) = resources.getString(R.string.stripe_add_bank_account)
     };
 
     val showsForm = formSpec.isNotEmpty()

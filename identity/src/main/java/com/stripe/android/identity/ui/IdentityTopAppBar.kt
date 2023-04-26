@@ -37,8 +37,8 @@ internal fun IdentityTopAppBar(
                         CLOSE -> painterResource(id = R.drawable.ic_baseline_close_24)
                     },
                     contentDescription = when (topBarState) {
-                        GO_BACK -> stringResource(id = R.string.description_go_back)
-                        CLOSE -> stringResource(id = R.string.description_close)
+                        GO_BACK -> stringResource(id = R.string.stripe_description_go_back)
+                        CLOSE -> stringResource(id = R.string.stripe_description_close)
                     }
                 )
             }

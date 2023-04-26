@@ -56,7 +56,7 @@ internal fun ScanCardButtonUI(
         Image(
             painter = painterResource(R.drawable.ic_photo_camera),
             contentDescription = stringResource(
-                R.string.scan_card
+                R.string.stripe_scan_card
             ),
             colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
             modifier = Modifier
@@ -64,7 +64,7 @@ internal fun ScanCardButtonUI(
                 .height(18.dp)
         )
         Text(
-            stringResource(R.string.scan_card),
+            stringResource(R.string.stripe_scan_card),
             Modifier
                 .padding(start = 4.dp),
             color = MaterialTheme.colors.primary,

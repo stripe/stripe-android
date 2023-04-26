@@ -1,73 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Caption for Address field on address form -->
-  <string name="address_label_address">Endereço</string>
+  <string name="stripe_address_label_address">Endereço</string>
   <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">Linha de endereço 2</string>
+  <string name="stripe_address_label_address_line2">Linha de endereço 2</string>
   <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">Emirado</string>
+  <string name="stripe_address_label_ae_emirate">Emirado</string>
   <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Subúrbio ou cidade</string>
+  <string name="stripe_address_label_au_suburb_or_city">Subúrbio ou cidade</string>
   <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Paróquia</string>
+  <string name="stripe_address_label_bb_jm_parish">Paróquia</string>
   <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">Cedex</string>
+  <string name="stripe_address_label_cedex">Cedex</string>
   <!-- Label of an address field -->
-  <string name="address_label_department">Departamento</string>
+  <string name="stripe_address_label_department">Departamento</string>
   <!-- Label for the district field on an address form -->
-  <string name="address_label_district">Distrito</string>
+  <string name="stripe_address_label_district">Distrito</string>
   <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">Área</string>
+  <string name="stripe_address_label_hk_area">Área</string>
   <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">Eircode</string>
+  <string name="stripe_address_label_ie_eircode">Eircode</string>
   <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">Townland</string>
+  <string name="stripe_address_label_ie_townland">Townland</string>
   <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">Pin</string>
+  <string name="stripe_address_label_in_pin">Pin</string>
   <!-- Used to describe part of an address -->
-  <string name="address_label_island">Ilha</string>
+  <string name="stripe_address_label_island">Ilha</string>
   <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">Câmara municipal</string>
+  <string name="stripe_address_label_jp_prefecture">Câmara municipal</string>
   <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">Do Si</string>
+  <string name="stripe_address_label_kr_do_si">Do Si</string>
   <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">Freguesia</string>
+  <string name="stripe_address_label_neighborhood">Freguesia</string>
   <!-- Label of an address field -->
-  <string name="address_label_oblast">Oblast</string>
+  <string name="stripe_address_label_oblast">Oblast</string>
   <!-- Label for input requesting phone number, used for all locations -->
-  <string name="address_label_phone_number">Número de telefone</string>
+  <string name="stripe_address_label_phone_number">Número de telefone</string>
   <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">Posto ou localidade</string>
+  <string name="stripe_address_label_post_town">Posto ou localidade</string>
   <!-- Label of an address field -->
-  <string name="address_label_suburb">Subúrbio</string>
+  <string name="stripe_address_label_suburb">Subúrbio</string>
   <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">Município ou localidade</string>
+  <string name="stripe_address_label_village_township">Município ou localidade</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
-  <string name="address_search_content_description">Pesquisar</string>
+  <string name="stripe_address_search_content_description">Pesquisar</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
-  <string name="address_zip_invalid">O seu código postal é inválido.</string>
+  <string name="stripe_address_zip_invalid">O seu código postal é inválido.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
-  <string name="address_zip_postal_invalid">O seu código postal é inválido</string>
+  <string name="stripe_address_zip_postal_invalid">O seu código postal é inválido</string>
   <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
-  <string name="billing_same_as_shipping">O endereço de faturação é igual ao endereço de envio</string>
+  <string name="stripe_billing_same_as_shipping">O endereço de faturação é igual ao endereço de envio</string>
   <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">Este campo não pode estar em branco.</string>
+  <string name="stripe_blank_and_required">Este campo não pode estar em branco.</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Alterar</string>
+  <string name="stripe_change">Alterar</string>
   <!-- Caption for Email field on address form -->
-  <string name="email">E-mail</string>
+  <string name="stripe_email">E-mail</string>
   <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">O seu email é inválido.</string>
+  <string name="stripe_email_is_invalid">O seu email é inválido.</string>
   <!-- label for text field to enter card expiry -->
-  <string name="expiration_date_hint">MM/AA</string>
+  <string name="stripe_expiration_date_hint">MM/AA</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="form_label_optional">%s (opcional)</string>
+  <string name="stripe_form_label_optional">%s (opcional)</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">A data de validade do seu cartão está incompleta.</string>
+  <string name="stripe_incomplete_expiry_date">A data de validade do seu cartão está incompleta.</string>
   <!-- Error description for incomplete phone number -->
-  <string name="incomplete_phone_number">Número de telefone incompleto</string>
+  <string name="stripe_incomplete_phone_number">Número de telefone incompleto</string>
   <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">O mês de validade do seu cartão é inválido.</string>
+  <string name="stripe_invalid_expiry_month">O mês de validade do seu cartão é inválido.</string>
   <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">O ano de validade do seu cartão é inválido.</string>
+  <string name="stripe_invalid_expiry_year">O ano de validade do seu cartão é inválido.</string>
 </resources>

@@ -127,7 +127,7 @@ internal fun CardEditBody(
 ) {
     ScrollableTopLevelColumn {
         Text(
-            text = stringResource(R.string.wallet_update_card),
+            text = stringResource(R.string.stripe_wallet_update_card),
             modifier = Modifier
                 .padding(top = 4.dp, bottom = 32.dp),
             textAlign = TextAlign.Center,
@@ -154,7 +154,7 @@ internal fun CardEditBody(
             )
         }
         PrimaryButton(
-            label = stringResource(R.string.wallet_update_card),
+            label = stringResource(R.string.stripe_wallet_update_card),
             state = when {
                 isProcessing -> PrimaryButtonState.Processing
                 primaryButtonEnabled -> PrimaryButtonState.Enabled
@@ -164,7 +164,7 @@ internal fun CardEditBody(
         )
         SecondaryButton(
             enabled = !isProcessing,
-            label = stringResource(id = R.string.cancel),
+            label = stringResource(id = R.string.stripe_cancel),
             onClick = onCancelClick
         )
     }
@@ -183,7 +183,7 @@ private fun DefaultPaymentMethodCheckbox(
     CheckboxElementUI(
         automationTestTag = DEFAULT_PAYMENT_METHOD_CHECKBOX_TAG,
         isChecked = isChecked,
-        label = stringResource(R.string.pm_set_as_default),
+        label = stringResource(R.string.stripe_pm_set_as_default),
         isEnabled = canCheck,
         onValueChange = {
             onSetAsDefaultClick(!setAsDefaultChecked)

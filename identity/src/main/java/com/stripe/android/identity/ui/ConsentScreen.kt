@@ -161,7 +161,7 @@ private fun SuccessUI(
                     StripeImage(
                         url = merchantLogoUri.urlWithoutQuery(),
                         imageLoader = imageLoader,
-                        contentDescription = stringResource(id = R.string.description_merchant_logo),
+                        contentDescription = stringResource(id = R.string.stripe_description_merchant_logo),
                         modifier = Modifier
                             .width(32.dp)
                             .height(32.dp)
@@ -176,7 +176,7 @@ private fun SuccessUI(
                         modifier = Modifier
                             .width(32.dp)
                             .height(32.dp),
-                        contentDescription = stringResource(id = R.string.description_merchant_logo)
+                        contentDescription = stringResource(id = R.string.stripe_description_merchant_logo)
                     )
                 }
                 Image(
@@ -184,7 +184,7 @@ private fun SuccessUI(
                     modifier = Modifier
                         .width(16.dp)
                         .height(16.dp),
-                    contentDescription = stringResource(id = R.string.description_plus)
+                    contentDescription = stringResource(id = R.string.stripe_description_plus)
                 )
 
                 Image(
@@ -192,7 +192,7 @@ private fun SuccessUI(
                     modifier = Modifier
                         .width(32.dp)
                         .height(32.dp),
-                    contentDescription = stringResource(id = R.string.description_stripe_logo)
+                    contentDescription = stringResource(id = R.string.stripe_description_stripe_logo)
                 )
             }
             Text(
@@ -217,7 +217,7 @@ private fun SuccessUI(
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.time_estimate_icon),
-                        contentDescription = stringResource(id = R.string.description_time_estimate)
+                        contentDescription = stringResource(id = R.string.stripe_description_time_estimate)
                     )
                     Html(
                         html = timeEstimateString,

@@ -10,17 +10,17 @@ import kotlinx.serialization.Serializable
 enum class TranslationId(val resourceId: Int) {
     // https://git.corp.stripe.com/stripe-internal/stripe-js-v3/blob/master/src/lib/inner/messages/en.json
     @SerialName("upe.labels.ideal.bank")
-    IdealBank(R.string.ideal_bank),
+    IdealBank(R.string.stripe_ideal_bank),
 
     @SerialName("upe.labels.p24.bank")
-    P24Bank(R.string.p24_bank),
+    P24Bank(R.string.stripe_p24_bank),
 
     @SerialName("upe.labels.eps.bank")
-    EpsBank(R.string.eps_bank),
+    EpsBank(R.string.stripe_eps_bank),
 
     @SerialName("address.label.name")
-    AddressName(R.string.address_label_full_name),
+    AddressName(R.string.stripe_address_label_full_name),
 
     @SerialName("upe.labels.name.onAccount")
-    AuBecsAccountName(R.string.au_becs_account_name)
+    AuBecsAccountName(R.string.stripe_au_becs_account_name)
 }

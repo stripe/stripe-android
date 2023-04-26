@@ -16,7 +16,7 @@ import com.stripe.android.uicore.text.Html
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun AffirmElementUI() {
     Html(
-        html = stringResource(id = R.string.affirm_buy_now_pay_later),
+        html = stringResource(id = R.string.stripe_affirm_buy_now_pay_later),
         imageLoader = mapOf(
             "affirm" to EmbeddableImage.Drawable(
                 R.drawable.stripe_ic_affirm_logo,

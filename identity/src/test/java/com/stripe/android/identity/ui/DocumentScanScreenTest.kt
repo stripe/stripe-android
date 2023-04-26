@@ -73,8 +73,8 @@ class DocumentScanScreenTest {
     fun verifyNullState() {
         testDocumentScanScreen {
             verify(mockIdentityViewModel, times(0)).resetDocumentUploadedState()
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.front_of_id))
-            onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.position_id_front))
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
+            onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_id_front))
             onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
@@ -84,8 +84,8 @@ class DocumentScanScreenTest {
     fun verifyNullStateWithShouldStartFromBack() {
         testDocumentScanScreen(shouldStartFromBack = true) {
             verify(mockIdentityViewModel).resetDocumentUploadedState()
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.front_of_id))
-            onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.position_id_front))
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
+            onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_id_front))
             onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
@@ -97,8 +97,8 @@ class DocumentScanScreenTest {
             displayState = mock<IdentityScanState.Initial>(),
             targetScanType = IdentityScanState.ScanType.ID_FRONT
         ) {
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.front_of_id))
-            onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.position_id_front))
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
+            onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_id_front))
             onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
@@ -110,8 +110,8 @@ class DocumentScanScreenTest {
             displayState = mock<IdentityScanState.Initial>(),
             targetScanType = IdentityScanState.ScanType.ID_BACK
         ) {
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.back_of_id))
-            onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.position_id_back))
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_back_of_id))
+            onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_id_back))
             onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
@@ -123,8 +123,8 @@ class DocumentScanScreenTest {
             displayState = mock<IdentityScanState.Finished>(),
             targetScanType = IdentityScanState.ScanType.ID_FRONT
         ) {
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.front_of_id))
-            onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.scanned))
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
+            onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_scanned))
             onNodeWithTag(CHECK_MARK_TAG).assertExists()
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsEnabled()
 
@@ -160,10 +160,10 @@ class DocumentScanScreenTest {
                 backScanType = IdentityScanState.ScanType.ID_BACK,
                 shouldStartFromBack = shouldStartFromBack,
                 messageRes = DocumentScanMessageRes(
-                    R.string.front_of_id,
-                    R.string.back_of_id,
-                    R.string.position_id_front,
-                    R.string.position_id_back
+                    R.string.stripe_front_of_id,
+                    R.string.stripe_back_of_id,
+                    R.string.stripe_position_id_front,
+                    R.string.stripe_position_id_back
                 ),
                 collectedDataParamType = CollectedDataParam.Type.IDCARD,
                 route = IDScanDestination.ROUTE.route

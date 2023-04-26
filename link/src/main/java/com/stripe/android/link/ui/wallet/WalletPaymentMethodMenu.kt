@@ -18,15 +18,15 @@ internal sealed class WalletPaymentMethodMenuItem(
     ) : WalletPaymentMethodMenuItem(textResId, true)
 
     object EditCard : WalletPaymentMethodMenuItem(
-        textResId = R.string.wallet_update_card
+        textResId = R.string.stripe_wallet_update_card
     )
 
     object SetAsDefault : WalletPaymentMethodMenuItem(
-        textResId = R.string.wallet_set_as_default
+        textResId = R.string.stripe_wallet_set_as_default
     )
 
     object Cancel : WalletPaymentMethodMenuItem(
-        textResId = R.string.cancel
+        textResId = R.string.stripe_cancel
     )
 }
 
