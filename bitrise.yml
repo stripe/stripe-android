@@ -54,12 +54,13 @@ workflows:
     steps:
       - avd-manager@1: { }
       - wait-for-android-emulator@1: { }
-      - script-runner@0:
+      - script@1:
           title: Execute Maestro tests
           inputs:
-            - file_path: ./scripts/execute_maestro_tests.sh
+            - content: bash ./scripts/execute_maestro_tests.sh $FINANCIAL_CONNECTIONS_MERCHANT
       - slack@3:
           is_always_run: true
+          run_if: ".IsBuildFailed"
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
