@@ -16,6 +16,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ElementsSession
@@ -351,6 +352,13 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         requestOptions: ApiRequest.Options,
         expandFields: List<String>
     ): Result<SetupIntent> {
+        return Result.failure(NotImplementedError())
+    }
+
+    override suspend fun createFinancialConnectionsSessionForDeferredPayments(
+        params: CreateFinancialConnectionsSessionForDeferredPaymentParams,
+        requestOptions: ApiRequest.Options
+    ): Result<FinancialConnectionsSession> {
         return Result.failure(NotImplementedError())
     }
 

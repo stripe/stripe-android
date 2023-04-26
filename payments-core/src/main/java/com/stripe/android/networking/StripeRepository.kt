@@ -20,6 +20,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ElementsSession
@@ -372,6 +373,11 @@ abstract class StripeRepository {
     ): ConsumerPaymentDetails?
 
     // ACHv2 endpoints
+
+    internal abstract suspend fun createFinancialConnectionsSessionForDeferredPayments(
+        params: CreateFinancialConnectionsSessionForDeferredPaymentParams,
+        requestOptions: ApiRequest.Options
+    ): Result<FinancialConnectionsSession>
 
     internal abstract suspend fun createPaymentIntentFinancialConnectionsSession(
         paymentIntentId: String,
