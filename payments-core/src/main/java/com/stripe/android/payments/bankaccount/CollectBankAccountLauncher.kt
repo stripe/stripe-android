@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
-import com.stripe.android.payments.bankaccount.navigation.toPublicType
+import com.stripe.android.payments.bankaccount.navigation.toExposedResult
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -65,7 +65,7 @@ interface CollectBankAccountLauncher {
         ): CollectBankAccountLauncher {
             return StripeCollectBankAccountLauncher(
                 activity.registerForActivityResult(CollectBankAccountContract()) {
-                    callback(it.toPublicType())
+                    callback(it.toExposedResult())
                 }
             )
         }
@@ -82,7 +82,7 @@ interface CollectBankAccountLauncher {
         ): CollectBankAccountLauncher {
             return StripeCollectBankAccountLauncher(
                 fragment.registerForActivityResult(CollectBankAccountContract()) {
-                    callback(it.toPublicType())
+                    callback(it.toExposedResult())
                 }
             )
         }

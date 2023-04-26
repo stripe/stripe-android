@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnectionsSession
@@ -131,21 +132,24 @@ internal class CollectBankAccountViewModel @Inject constructor(
         financialConnectionsSession: FinancialConnectionsSession
     ) {
         viewModelScope.launch {
-            finishWithResult(
-                CollectBankAccountResultInternal.Completed(
-                    CollectBankAccountResponseInternal(
-                        intent = args.clientSecret?.let { clientSecret ->
-                            retrieveStripeIntent(
-                                args.publishableKey,
-                                clientSecret
-                            ).onFailure {
-                                finishWithError(it)
-                            }.getOrNull()
-                        },
-                        financialConnectionsSession = financialConnectionsSession
+            val retrieveIntentResult: Result<StripeIntent?> =
+                when (val intentSecret = args.clientSecret) {
+                    // client secret is null for deferred intents.
+                    null -> Result.success(null)
+                    else -> retrieveStripeIntent(args.publishableKey, intentSecret)
+                }
+            retrieveIntentResult
+                .onFailure { finishWithError(it) }
+                .onSuccess { intent ->
+                    finishWithResult(
+                        CollectBankAccountResultInternal.Completed(
+                            CollectBankAccountResponseInternal(
+                                intent,
+                                financialConnectionsSession = financialConnectionsSession
+                            )
+                        )
                     )
-                )
-            )
+                }
         }
     }
 

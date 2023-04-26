@@ -36,6 +36,8 @@ class CollectBankAccountContract :
 
     /**
      * @param attachToIntent enable this to attach the link account session to the given intent
+     * @param clientSecret the client secret of the StripeIntent, null when running in the deferred
+     * intent flow.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Args(
@@ -139,18 +141,23 @@ class CollectBankAccountContract :
     }
 }
 
-internal fun CollectBankAccountResultInternal.toPublicType(): CollectBankAccountResult {
+internal fun CollectBankAccountResultInternal.toExposedResult(): CollectBankAccountResult {
     return when (this) {
         is CollectBankAccountResultInternal.Cancelled -> {
             CollectBankAccountResult.Cancelled
         }
         is CollectBankAccountResultInternal.Completed -> {
-            CollectBankAccountResult.Completed(
-                response = CollectBankAccountResponse(
-                    intent = response.intent!!,
-                    financialConnectionsSession = response.financialConnectionsSession
+            when (response.intent) {
+                null -> CollectBankAccountResult.Failed(
+                    IllegalArgumentException("StripeIntent not set for this session")
                 )
-            )
+                else -> CollectBankAccountResult.Completed(
+                    response = CollectBankAccountResponse(
+                        intent = response.intent,
+                        financialConnectionsSession = response.financialConnectionsSession
+                    )
+                )
+            }
         }
         is CollectBankAccountResultInternal.Failed -> {
             CollectBankAccountResult.Failed(error)
