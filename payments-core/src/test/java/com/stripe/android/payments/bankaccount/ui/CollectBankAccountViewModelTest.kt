@@ -16,9 +16,8 @@ import com.stripe.android.payments.bankaccount.domain.RetrieveStripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Completed
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Failed
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,6 +33,7 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession as PaymentsFinancialConnectionsSession
 
+@Suppress("MaxLineLength")
 @RunWith(RobolectricTestRunner::class)
 class CollectBankAccountViewModelTest {
 
@@ -88,6 +88,52 @@ class CollectBankAccountViewModelTest {
 
             // When
             buildViewModel(viewEffect, setupIntentConfiguration())
+
+            // Then
+            assertThat(awaitItem()).isEqualTo(
+                OpenConnectionsFlow(
+                    publishableKey = publishableKey,
+                    financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
+                    stripeAccountId = stripeAccountId
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `init - when createFinancialConnectionsSession succeeds for deferred payment, opens connection flow`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        viewEffect.test {
+            // Given
+            givenCreateAccountSessionForDeferredPaymentsReturns(
+                Result.success(financialConnectionsSession)
+            )
+
+            // When
+            buildViewModel(viewEffect, deferredPaymentIntentConfiguration())
+
+            // Then
+            assertThat(awaitItem()).isEqualTo(
+                OpenConnectionsFlow(
+                    publishableKey = publishableKey,
+                    financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
+                    stripeAccountId = stripeAccountId
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `init - when createFinancialConnectionsSession succeeds for deferred setup, opens connection flow`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        viewEffect.test {
+            // Given
+            givenCreateAccountSessionForDeferredSetupReturns(
+                Result.success(financialConnectionsSession)
+            )
+
+            // When
+            buildViewModel(viewEffect, deferredSetupIntentConfiguration())
 
             // Then
             assertThat(awaitItem()).isEqualTo(
@@ -164,7 +210,7 @@ class CollectBankAccountViewModelTest {
             // Then
             assertThat(awaitItem()).isEqualTo(
                 FinishWithResult(
-                    Failed(expectedException)
+                    CollectBankAccountResultInternal.Failed(expectedException)
                 )
             )
         }
@@ -189,7 +235,12 @@ class CollectBankAccountViewModelTest {
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(
                 FinishWithResult(
-                    Completed(CollectBankAccountResponse(paymentIntent, paymentsFinancialConnectionsSession))
+                    CollectBankAccountResultInternal.Completed(
+                        CollectBankAccountResponseInternal(
+                            paymentIntent,
+                            paymentsFinancialConnectionsSession
+                        )
+                    )
                 )
             )
         }
@@ -213,7 +264,70 @@ class CollectBankAccountViewModelTest {
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(
                 FinishWithResult(
-                    Completed(CollectBankAccountResponse(setupIntent, paymentsFinancialConnectionsSession))
+                    CollectBankAccountResultInternal.Completed(
+                        CollectBankAccountResponseInternal(
+                            setupIntent,
+                            paymentsFinancialConnectionsSession
+                        )
+                    )
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `connectionsResult - when createFinancialConnectionsSession succeeds for deferred payments, finish with success`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        viewEffect.test {
+            // Given
+            givenCreateAccountSessionForDeferredPaymentsReturns(
+                Result.success(financialConnectionsSession)
+            )
+
+            // When
+            val viewModel = buildViewModel(viewEffect, deferredPaymentIntentConfiguration())
+            viewModel.onConnectionsResult(
+                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
+            )
+
+            // Then
+            assertThat(expectMostRecentItem()).isEqualTo(
+                FinishWithResult(
+                    CollectBankAccountResultInternal.Completed(
+                        CollectBankAccountResponseInternal(
+                            intent = null,
+                            financialConnectionsSession = paymentsFinancialConnectionsSession
+                        )
+                    )
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `connectionsResult - when createFinancialConnectionsSession succeeds for deferred setup, finish with success`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        viewEffect.test {
+            // Given
+            givenCreateAccountSessionForDeferredSetupReturns(
+                Result.success(financialConnectionsSession)
+            )
+
+            // When
+            val viewModel = buildViewModel(viewEffect, deferredSetupIntentConfiguration())
+            viewModel.onConnectionsResult(
+                FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
+            )
+
+            // Then
+            assertThat(expectMostRecentItem()).isEqualTo(
+                FinishWithResult(
+                    CollectBankAccountResultInternal.Completed(
+                        CollectBankAccountResponseInternal(
+                            intent = null,
+                            financialConnectionsSession = paymentsFinancialConnectionsSession
+                        )
+                    )
                 )
             )
         }
@@ -237,7 +351,7 @@ class CollectBankAccountViewModelTest {
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(
                 FinishWithResult(
-                    Failed(expectedException)
+                    CollectBankAccountResultInternal.Failed(expectedException)
                 )
             )
         }
@@ -305,6 +419,40 @@ class CollectBankAccountViewModelTest {
         }
     }
 
+    private fun givenCreateAccountSessionForDeferredPaymentsReturns(
+        result: Result<FinancialConnectionsSession>
+    ) {
+        createFinancialConnectionsSession.stub {
+            onBlocking {
+                forDeferredPayments(
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId,
+                    elementsSessionId = "elements_session_id",
+                    customerId = "customer_id",
+                    amount = 1000,
+                    currency = "usd"
+                )
+            }.doReturn(result)
+        }
+    }
+
+    private fun givenCreateAccountSessionForDeferredSetupReturns(
+        result: Result<FinancialConnectionsSession>
+    ) {
+        createFinancialConnectionsSession.stub {
+            onBlocking {
+                forDeferredPayments(
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId,
+                    elementsSessionId = "elements_session_id",
+                    customerId = "customer_id",
+                    amount = null,
+                    currency = null
+                )
+            }.doReturn(result)
+        }
+    }
+
     private fun givenRetrieveStripeIntentReturns(
         result: Result<StripeIntent>
     ) {
@@ -358,6 +506,34 @@ class CollectBankAccountViewModelTest {
                 email
             ),
             attachToIntent = attachToIntent
+        )
+    }
+
+    private fun deferredPaymentIntentConfiguration(): CollectBankAccountContract.Args.ForDeferredPaymentIntent {
+        return CollectBankAccountContract.Args.ForDeferredPaymentIntent(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            configuration = CollectBankAccountConfiguration.USBankAccount(
+                name,
+                email
+            ),
+            elementsSessionId = "elements_session_id",
+            customerId = "customer_id",
+            amount = 1000,
+            currency = "usd"
+        )
+    }
+
+    private fun deferredSetupIntentConfiguration(): CollectBankAccountContract.Args.ForDeferredSetupIntent {
+        return CollectBankAccountContract.Args.ForDeferredSetupIntent(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+            configuration = CollectBankAccountConfiguration.USBankAccount(
+                name,
+                email
+            ),
+            elementsSessionId = "elements_session_id",
+            customerId = "customer_id"
         )
     }
 }

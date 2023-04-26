@@ -84,10 +84,6 @@
             android:name=".payments.bankaccount.ui.CollectBankAccountActivity"
             android:theme="@style/StripeTransparentTheme"
             android:exported="false" />
-        <activity
-            android:name=".payments.bankaccount.ui.CollectSessionForDeferredPaymentsActivity"
-            android:theme="@style/StripeTransparentTheme"
-            android:exported="false" />
     </application>
 
     <!--

@@ -15,12 +15,8 @@ import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnections
 import com.stripe.android.payments.bankaccount.domain.CreateFinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.domain.RetrieveStripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Cancelled
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Completed
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -58,20 +54,40 @@ internal class CollectBankAccountViewModel @Inject constructor(
     private suspend fun createFinancialConnectionsSession() {
         when (val configuration = args.configuration) {
             is CollectBankAccountConfiguration.USBankAccount -> when (args) {
-                is ForPaymentIntent -> createFinancialConnectionsSession.forPaymentIntent(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.stripeAccountId,
-                    clientSecret = args.clientSecret,
-                    customerName = configuration.name,
-                    customerEmail = configuration.email
-                )
-                is ForSetupIntent -> createFinancialConnectionsSession.forSetupIntent(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.stripeAccountId,
-                    clientSecret = args.clientSecret,
-                    customerName = configuration.name,
-                    customerEmail = configuration.email
-                )
+                is CollectBankAccountContract.Args.ForDeferredPaymentIntent ->
+                    createFinancialConnectionsSession.forDeferredPayments(
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.stripeAccountId,
+                        elementsSessionId = args.elementsSessionId,
+                        customerId = args.customerId,
+                        amount = args.amount,
+                        currency = args.currency
+                    )
+                is CollectBankAccountContract.Args.ForDeferredSetupIntent ->
+                    createFinancialConnectionsSession.forDeferredPayments(
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.stripeAccountId,
+                        elementsSessionId = args.elementsSessionId,
+                        customerId = args.customerId,
+                        amount = null,
+                        currency = null
+                    )
+                is CollectBankAccountContract.Args.ForPaymentIntent ->
+                    createFinancialConnectionsSession.forPaymentIntent(
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.stripeAccountId,
+                        clientSecret = args.clientSecret,
+                        customerName = configuration.name,
+                        customerEmail = configuration.email
+                    )
+                is CollectBankAccountContract.Args.ForSetupIntent ->
+                    createFinancialConnectionsSession.forSetupIntent(
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.stripeAccountId,
+                        clientSecret = args.clientSecret,
+                        customerName = configuration.name,
+                        customerEmail = configuration.email
+                    )
             }
                 .mapCatching { requireNotNull(it.clientSecret) }
                 .onSuccess { financialConnectionsSessionSecret: String ->
@@ -94,7 +110,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (result) {
                 is FinancialConnectionsSheetResult.Canceled ->
-                    finishWithResult(Cancelled)
+                    finishWithResult(CollectBankAccountResultInternal.Cancelled)
                 is FinancialConnectionsSheetResult.Failed ->
                     finishWithError(result.error)
                 is FinancialConnectionsSheetResult.Completed ->
@@ -107,55 +123,63 @@ internal class CollectBankAccountViewModel @Inject constructor(
         }
     }
 
-    private suspend fun finishWithResult(result: CollectBankAccountResult) {
+    private suspend fun finishWithResult(result: CollectBankAccountResultInternal) {
         _viewEffect.emit(CollectBankAccountViewEffect.FinishWithResult(result))
     }
 
-    private fun finishWithFinancialConnectionsSession(financialConnectionsSession: FinancialConnectionsSession) {
+    private fun finishWithFinancialConnectionsSession(
+        financialConnectionsSession: FinancialConnectionsSession
+    ) {
         viewModelScope.launch {
-            retrieveStripeIntent(
-                args.publishableKey,
-                args.clientSecret
-            ).onSuccess { stripeIntent ->
-                finishWithResult(
-                    Completed(
-                        CollectBankAccountResponse(
-                            intent = stripeIntent,
-                            financialConnectionsSession = financialConnectionsSession
-                        )
+            finishWithResult(
+                CollectBankAccountResultInternal.Completed(
+                    CollectBankAccountResponseInternal(
+                        intent = args.clientSecret?.let { clientSecret ->
+                            retrieveStripeIntent(
+                                args.publishableKey,
+                                clientSecret
+                            ).onFailure {
+                                finishWithError(it)
+                            }.getOrNull()
+                        },
+                        financialConnectionsSession = financialConnectionsSession
                     )
                 )
-            }.onFailure {
-                finishWithError(it)
-            }
+            )
         }
     }
 
     private fun attachFinancialConnectionsSessionToIntent(financialConnectionsSession: FinancialConnectionsSession) {
         viewModelScope.launch {
             when (args) {
-                is ForPaymentIntent -> attachFinancialConnectionsSession.forPaymentIntent(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.stripeAccountId,
-                    clientSecret = args.clientSecret,
-                    linkedAccountSessionId = financialConnectionsSession.id
-                )
-                is ForSetupIntent -> attachFinancialConnectionsSession.forSetupIntent(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.stripeAccountId,
-                    clientSecret = args.clientSecret,
-                    linkedAccountSessionId = financialConnectionsSession.id
-                )
+                is CollectBankAccountContract.Args.ForDeferredPaymentIntent ->
+                    error("Attach requires client secret")
+                is CollectBankAccountContract.Args.ForDeferredSetupIntent ->
+                    error("Attach requires client secret")
+                is CollectBankAccountContract.Args.ForPaymentIntent ->
+                    attachFinancialConnectionsSession.forPaymentIntent(
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.stripeAccountId,
+                        clientSecret = args.clientSecret,
+                        linkedAccountSessionId = financialConnectionsSession.id
+                    )
+                is CollectBankAccountContract.Args.ForSetupIntent ->
+                    attachFinancialConnectionsSession.forSetupIntent(
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.stripeAccountId,
+                        clientSecret = args.clientSecret,
+                        linkedAccountSessionId = financialConnectionsSession.id
+                    )
             }
                 .mapCatching {
-                    Completed(
-                        CollectBankAccountResponse(
+                    CollectBankAccountResultInternal.Completed(
+                        CollectBankAccountResponseInternal(
                             it,
                             financialConnectionsSession
                         )
                     )
                 }
-                .onSuccess { result: Completed ->
+                .onSuccess { result: CollectBankAccountResultInternal.Completed ->
                     logger.debug("Bank account session attached to  intent!!")
                     finishWithResult(result)
                 }
@@ -165,7 +189,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
     private suspend fun finishWithError(throwable: Throwable) {
         logger.error("Error", Exception(throwable))
-        finishWithResult(CollectBankAccountResult.Failed(throwable))
+        finishWithResult(CollectBankAccountResultInternal.Failed(throwable))
     }
 
     class Factory(

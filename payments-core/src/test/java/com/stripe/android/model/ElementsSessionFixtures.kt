@@ -1,9 +1,7 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import org.json.JSONObject
 
-@Suppress("LargeClass")
 internal object ElementsSessionFixtures {
     val EXPANDED_PAYMENT_INTENT_JSON = JSONObject(
         """
@@ -608,19 +606,4 @@ internal object ElementsSessionFixtures {
             }
         """.trimIndent()
     )
-
-    val DEFERRED_INTENT = ElementsSessionJsonParser(
-        ElementsSessionParams.DeferredIntentType(
-            deferredIntentParams = DeferredIntentParams(
-                mode = DeferredIntentParams.Mode.Payment(
-                    amount = 2000,
-                    currency = "usd"
-                )
-            )
-        ),
-        apiKey = "test",
-        timeProvider = { 1 }
-    ).parse(
-        DEFERRED_INTENT_JSON
-    )!!
 }
