@@ -52,9 +52,9 @@
 
                 <!-- Returning from app2app: return_url is triggered to reopen web AuthFlow and poll accounts. -->
                 <data
-                    android:host="fce"
-                    android:scheme="fce"
-                    android:pathPrefix="/" />
+                    android:scheme="zzz-custom"
+                    android:host="open"
+                    android:pathPattern="/customtab_return" />
 
             </intent-filter>
         </activity>
