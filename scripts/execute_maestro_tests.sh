@@ -2,6 +2,18 @@
 set -o pipefail
 set -x
 
+# Reads merchant parameter, or defaults to "Test" merchant if none provided.
+MERCHANT="${1:-Test}"
+
+build_args() {
+  local args=""
+  args+=" --format junit"
+  args+=" --output maestroReport.xml"
+  args+=" -e APP_ID=com.stripe.android.financialconnections.example"
+  args+=" -e MERCHANT=$MERCHANT"
+  echo "$args"
+}
+
 now=$(date +%F_%H-%M-%S)
 echo $now
 
@@ -11,7 +23,9 @@ export PATH="$PATH":"$HOME/.maestro/bin"
 maestro -v
 
 # Compile and install APK.
-./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:installDebug
+./gradlew \
+-PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL \
+:financial-connections-example:installDebug
 
 # Start screen record (adb screenrecord has a 3 min limit).
 adb shell "screenrecord /sdcard/$now-1.mp4" &
@@ -19,8 +33,7 @@ adb shell "screenrecord /sdcard/$now-1.mp4" &
 # Store the process ID
 childpid=$!
 
-# Clear and start collecting logs
-maestro test -e APP_ID=com.stripe.android.financialconnections.example --format junit --output maestroReport.xml maestro/financial-connections/
+maestro test $(build_args) maestro/financial-connections/
 result=$?
 
 # Wait for the recording process to finish

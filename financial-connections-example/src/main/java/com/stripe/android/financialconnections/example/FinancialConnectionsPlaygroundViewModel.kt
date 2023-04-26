@@ -215,7 +215,11 @@ class FinancialConnectionsPlaygroundViewModel(
 }
 
 enum class Merchant(val flow: String) {
-    Test("testmode"), Live("mx"), App2App("app2app"), Other("other")
+    Test("testmode"),
+    Live("mx"),
+    App2App("app2app"),
+    Edge("edge"),
+    Other("other")
 }
 
 enum class Flow {
