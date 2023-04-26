@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### All SDKs
+* [FIXED][6602](https://github.com/stripe/stripe-android/pull/6602) Fixed an issue which caused a compiler error (duplicate class) when including payments *and* identity SDKs.
+
 ## 20.24.0 - 2023-04-24
 
 ### PaymentSheet
