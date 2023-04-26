@@ -81,7 +81,7 @@ class CountryUtilsTest {
         val input = "aland"
         val expectedOutput = "aland"
 
-        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+        assertThat(CountryUtils.formatNameForSorting(input)).isEqualTo(expectedOutput)
     }
 
     @Test
@@ -89,7 +89,7 @@ class CountryUtilsTest {
         val input = "Dziękuję Åland"
         val expectedOutput = "dziekuje aland"
 
-        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+        assertThat(CountryUtils.formatNameForSorting(input)).isEqualTo(expectedOutput)
     }
 
     @Test
@@ -97,7 +97,7 @@ class CountryUtilsTest {
         val input = "Aland"
         val expectedOutput = "aland"
 
-        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+        assertThat(CountryUtils.formatNameForSorting(input)).isEqualTo(expectedOutput)
     }
 
     @Test
@@ -105,6 +105,6 @@ class CountryUtilsTest {
         val input = "aºland1!!!"
         val expectedOutput = "aland"
 
-        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+        assertThat(CountryUtils.formatNameForSorting(input)).isEqualTo(expectedOutput)
     }
 }

@@ -53,6 +53,8 @@ object CountryUtils {
         // After regex: aland islands
         return Normalizer.normalize(name.lowercase(), Normalizer.Form.NFD)
             .replace("\\p{Mn}+".toRegex(), "")
+            .replace("[^A-Za-z ]".toRegex(), "")
+            .replace("[^\\p{ASCII}]".toRegex(), "")
     }
 
     @Deprecated(
