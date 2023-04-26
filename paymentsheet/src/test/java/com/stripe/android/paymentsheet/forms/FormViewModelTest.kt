@@ -105,7 +105,7 @@ internal class FormViewModelTest {
 
         // Set all the card fields, billing is set in the args
         val emailController =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+            getSectionFieldTextControllerWithLabel(formViewModel, R.string.stripe_email)
 
         emailController?.onValueChange("joe@email.com")
 
@@ -227,7 +227,7 @@ internal class FormViewModelTest {
         )
 
         val emailController =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+            getSectionFieldTextControllerWithLabel(formViewModel, R.string.stripe_email)
 
         // Add text to the name to make it valid
         emailController?.onValueChange("email@valid.com")
@@ -265,7 +265,7 @@ internal class FormViewModelTest {
             )
 
             val emailController =
-                getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+                getSectionFieldTextControllerWithLabel(formViewModel, R.string.stripe_email)
 
             // Add text to the email to make it invalid
             emailController?.onValueChange("joe")
@@ -321,9 +321,9 @@ internal class FormViewModelTest {
         )
 
         val nameElement =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.address_label_full_name)
+            getSectionFieldTextControllerWithLabel(formViewModel, R.string.stripe_address_label_full_name)
         val emailElement =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+            getSectionFieldTextControllerWithLabel(formViewModel, R.string.stripe_email)
 
         nameElement?.onValueChange("joe")
         assertThat(
@@ -369,7 +369,7 @@ internal class FormViewModelTest {
                     ),
                     MandateTextSpec(
                         IdentifierSpec.Generic("mandate"),
-                        R.string.sepa_mandate
+                        R.string.stripe_sepa_mandate
                     )
                 )
             )
@@ -377,7 +377,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.address_label_full_name
+            R.string.stripe_address_label_full_name
         )?.onValueChange("joe")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
@@ -386,7 +386,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.email
+            R.string.stripe_email
         )?.onValueChange("joe@gmail.com")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
@@ -395,7 +395,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.iban
+            R.string.stripe_iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Generic("iban"))
@@ -453,7 +453,7 @@ internal class FormViewModelTest {
                     ),
                     MandateTextSpec(
                         IdentifierSpec.Generic("mandate"),
-                        R.string.sepa_mandate
+                        R.string.stripe_sepa_mandate
                     )
                 )
             )
@@ -461,7 +461,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.address_label_full_name
+            R.string.stripe_address_label_full_name
         )?.onValueChange("joe")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
@@ -470,7 +470,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.email
+            R.string.stripe_email
         )?.onValueChange("joe@gmail.com")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
@@ -479,7 +479,7 @@ internal class FormViewModelTest {
 
         getSectionFieldTextControllerWithLabel(
             formViewModel,
-            R.string.iban
+            R.string.stripe_iban
         )?.onValueChange("DE89370400440532013000")
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(emailSection.apiPath)
@@ -489,7 +489,7 @@ internal class FormViewModelTest {
         // Fill all address values except line2
         val addressControllers = AddressControllers.create(formViewModel)
         val populateAddressControllers = addressControllers.controllers
-            .filter { it.label.first() != R.string.address_label_address_line2 }
+            .filter { it.label.first() != R.string.stripe_address_label_address_line2 }
         populateAddressControllers
             .forEachIndexed { index, textFieldController ->
                 textFieldController.onValueChange("12345")
@@ -659,17 +659,17 @@ internal class FormViewModelTest {
 
         val nameSection = formElement[0] as SectionElement
         val nameElement = nameSection.fields[0] as SimpleTextElement
-        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_full_name)
+        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.stripe_address_label_full_name)
         assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
 
         val emailSection = formElement[1] as SectionElement
         val emailElement = emailSection.fields[0] as EmailElement
-        assertThat(emailElement.controller.label.first()).isEqualTo(R.string.email)
+        assertThat(emailElement.controller.label.first()).isEqualTo(R.string.stripe_email)
         assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
 
         val phoneSection = formElement[2] as SectionElement
         val phoneElement = phoneSection.fields[0] as PhoneNumberElement
-        assertThat(phoneElement.controller.label.first()).isEqualTo(R.string.address_label_phone_number)
+        assertThat(phoneElement.controller.label.first()).isEqualTo(R.string.stripe_address_label_phone_number)
         assertThat(phoneElement.identifier.v1).isEqualTo("billing_details[phone]")
 
         val addressSection = formElement[3] as SectionElement
@@ -847,23 +847,23 @@ internal class FormViewModelTest {
                     listOfNotNull(
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_address_line1
+                            R.string.stripe_address_label_address_line1
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_address_line2
+                            R.string.stripe_address_label_address_line2
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_city
+                            R.string.stripe_address_label_city
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_state
+                            R.string.stripe_address_label_state
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_zip_code
+                            R.string.stripe_address_label_zip_code
                         )
                     )
                 )

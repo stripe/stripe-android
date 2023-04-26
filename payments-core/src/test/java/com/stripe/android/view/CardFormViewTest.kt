@@ -135,7 +135,7 @@ class CardFormViewTest {
         idleLooper()
 
         standardBinding!!.let {
-            assertThat(it.errors.text).isEqualTo(context.getString(R.string.address_zip_invalid))
+            assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_address_zip_invalid))
             assertThat(it.errors.isVisible).isTrue()
         }
     }
@@ -149,7 +149,7 @@ class CardFormViewTest {
         idleLooper()
 
         standardBinding!!.let {
-            assertThat(it.errors.text).isEqualTo(context.getString(R.string.invalid_card_number))
+            assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_invalid_card_number))
             assertThat(it.errors.isVisible).isTrue()
         }
     }
@@ -163,7 +163,7 @@ class CardFormViewTest {
         idleLooper()
 
         standardBinding!!.let {
-            assertThat(it.errors.text).isEqualTo(context.getString(R.string.invalid_expiry_year))
+            assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_invalid_expiry_year))
             assertThat(it.errors.isVisible).isTrue()
         }
     }
@@ -177,7 +177,7 @@ class CardFormViewTest {
         idleLooper()
 
         standardBinding!!.let {
-            assertThat(it.errors.text).isEqualTo(context.getString(R.string.invalid_cvc))
+            assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_invalid_cvc))
             assertThat(it.errors.isVisible).isTrue()
         }
     }

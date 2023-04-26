@@ -20,7 +20,7 @@ class AdministrativeAreaConfigTest {
             AdministrativeAreaConfig.Country.US()
         )
         Truth.assertThat(config.label)
-            .isEqualTo(com.stripe.android.core.R.string.address_label_state)
+            .isEqualTo(com.stripe.android.core.R.string.stripe_address_label_state)
     }
 
     @Test
@@ -29,7 +29,7 @@ class AdministrativeAreaConfigTest {
             AdministrativeAreaConfig.Country.Canada()
         )
         Truth.assertThat(config.label)
-            .isEqualTo(com.stripe.android.core.R.string.address_label_province)
+            .isEqualTo(com.stripe.android.core.R.string.stripe_address_label_province)
     }
 
     @Test

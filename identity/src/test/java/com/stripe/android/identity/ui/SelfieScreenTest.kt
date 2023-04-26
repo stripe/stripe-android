@@ -129,8 +129,11 @@ class SelfieScreenTest {
     @Test
     fun verifySatisfiedScanState() {
         testSelfieScanScreen(mock<IdentityScanState.Satisfied>()) {
-            onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_captures))
-            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_capture_complete))
+            onNodeWithTag(SELFIE_SCAN_TITLE_TAG)
+                .assertTextEquals(context.getString(R.string.stripe_selfie_captures))
+
+            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG)
+                .assertTextEquals(context.getString(R.string.stripe_selfie_capture_complete))
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
@@ -155,8 +158,11 @@ class SelfieScreenTest {
             on { transitioner } doReturn faceDetectorTransitioner
         }
         testSelfieScanScreen(finishedState) {
-            onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_captures))
-            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_capture_complete))
+            onNodeWithTag(SELFIE_SCAN_TITLE_TAG)
+                .assertTextEquals(context.getString(R.string.stripe_selfie_captures))
+
+            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG)
+                .assertTextEquals(context.getString(R.string.stripe_selfie_capture_complete))
 
             onNodeWithTag(RESULT_VIEW_TAG).assertExists()
             onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertExists()

@@ -61,7 +61,7 @@ class PostalCodeConfigTest {
 
     private fun createConfigForCountry(country: String): PostalCodeConfig {
         return PostalCodeConfig(
-            label = R.string.address_label_postal_code,
+            label = R.string.stripe_address_label_postal_code,
             country = country
         )
     }

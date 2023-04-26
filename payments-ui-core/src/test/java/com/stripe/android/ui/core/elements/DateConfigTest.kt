@@ -29,7 +29,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.incomplete_expiry_date)
+        ).isEqualTo(R.string.stripe_incomplete_expiry_date)
     }
 
     @Test
@@ -39,7 +39,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.incomplete_expiry_date)
+        ).isEqualTo(R.string.stripe_incomplete_expiry_date)
     }
 
     @Test
@@ -49,7 +49,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.incomplete_expiry_date)
+        ).isEqualTo(R.string.stripe_incomplete_expiry_date)
     }
 
     @Test
@@ -59,7 +59,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_expiry_year)
+        ).isEqualTo(R.string.stripe_invalid_expiry_year)
     }
 
     @Test
@@ -69,7 +69,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_expiry_year)
+        ).isEqualTo(R.string.stripe_invalid_expiry_year)
     }
 
     @Test
@@ -117,13 +117,13 @@ class DateConfigTest {
     fun `current month - 1 and year`() {
         var previousMonth = get1BasedCurrentMonth() - 1
         var year = Calendar.getInstance().get(Calendar.YEAR) % 100
-        var expectedErrorMessage = R.string.invalid_expiry_month
+        var expectedErrorMessage = R.string.stripe_invalid_expiry_month
 
         // On January, use December of previous year.
         if (previousMonth == 0) {
             previousMonth = 12
             year -= 1
-            expectedErrorMessage = R.string.invalid_expiry_year
+            expectedErrorMessage = R.string.stripe_invalid_expiry_year
         }
 
         val input = produceInput(
@@ -153,7 +153,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_expiry_year)
+        ).isEqualTo(R.string.stripe_invalid_expiry_year)
     }
 
     @Test
@@ -169,7 +169,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_expiry_year)
+        ).isEqualTo(R.string.stripe_invalid_expiry_year)
     }
 
     @Test
@@ -201,7 +201,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.incomplete_expiry_date)
+        ).isEqualTo(R.string.stripe_incomplete_expiry_date)
     }
 
     @Test
