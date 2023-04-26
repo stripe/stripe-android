@@ -52,8 +52,10 @@
 
                 <!-- Returning from app2app: return_url is triggered to reopen web AuthFlow and poll accounts. -->
                 <data
-                    android:scheme="financial-connections-example"
-                    android:host="link-accounts" />
+                    android:host="fce"
+                    android:scheme="fce"
+                    android:pathPrefix="/" />
+
             </intent-filter>
         </activity>
 
