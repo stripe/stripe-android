@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.example
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.ViewGroup
@@ -31,4 +32,20 @@ class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
         customTabsIntent.launchUrl(context, uri)
     }
 
+}
+
+class FinancialConnectionsWebviewExampleRedirectActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val data = intent?.data
+        if (data != null) {
+            val intent =
+                Intent(this, FinancialConnectionsWebviewExampleActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                }
+            startActivity(intent)
+        }
+        finish()
+    }
 }
