@@ -4,10 +4,17 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.ViewGroup
-import android.widget.FrameLayout
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
+import androidx.compose.material.Divider
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
 
 class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
@@ -15,13 +22,27 @@ class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val frameLayout = FrameLayout(this)
-        frameLayout.layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-        setContentView(frameLayout)
-        openCustomTab(this, "https://night-discreet-femur.glitch.me/")
+        setContent {
+            FinancialConnectionsWebViewScreen {
+                openCustomTab(
+                    this,
+                    "https://night-discreet-femur.glitch.me/"
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun FinancialConnectionsWebViewScreen(onButtonClick: () -> Unit) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+            Button(
+                onClick = { onButtonClick() },
+            ) {
+                Text("Connect Accounts!")
+            }
+
+            Divider(modifier = Modifier.padding(vertical = 5.dp))
+        }
     }
 
     private fun openCustomTab(context: Context, url: String) {
