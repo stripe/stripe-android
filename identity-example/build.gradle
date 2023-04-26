@@ -45,7 +45,15 @@ android {
 }
 
 dependencies {
-    implementation project(':identity')
+
+    def stripeversion = '20.24.0'
+    implementation("com.stripe:identity:$stripeversion") {
+        exclude group: 'com.stripe', module: 'ml-core-default' // exclude the default tflite runtime
+    }
+    implementation("com.stripe:stripecardscan:$stripeversion") {
+        exclude group: 'com.stripe', module: 'ml-core-cardscan' // exclude the cardscan-specific portable tflite runtime
+    }
+    implementation("com.stripe:ml-core-googleplay:$stripeversion")
 
     implementation libs.accompanist.themeAdapter
     implementation libs.androidx.appCompat
