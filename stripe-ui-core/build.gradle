@@ -40,11 +40,14 @@ dependencies {
     implementation libs.compose.material
     implementation libs.compose.ui
     implementation libs.compose.uiToolingPreview
-    implementation libs.dagger
     implementation libs.diskLruCache
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
+
+    // DI
+    implementation libs.dagger
+    kapt libs.daggerCompiler
 
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling
