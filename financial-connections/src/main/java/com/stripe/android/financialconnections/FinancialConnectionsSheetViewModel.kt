@@ -332,10 +332,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
                     else -> {
                         setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
-                        finishWithResult(
-                            state,
-                            Failed(Exception("Error processing FinancialConnectionsSheet intent"))
-                        )
+//                        finishWithResult(
+//                            state,
+//                            Failed(Exception("Error processing FinancialConnectionsSheet intent"))
+//                        )
                     }
                 }
             }
@@ -353,15 +353,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private fun onFinishApp2App(receivedUrl: Uri) {
-        setState {
-            val authFlowResumeUrl =
-                "${manifest!!.hostedAuthUrl}&startPolling=true&${receivedUrl.fragment}"
-            copy(
-                webAuthFlowStatus = AuthFlowStatus.INTERMEDIATE_DEEPLINK,
-                activityRecreated = false,
-                viewEffect = OpenAuthFlowWithUrl(authFlowResumeUrl)
-            )
-        }
+        setState { copy(viewEffect = null) }
     }
 
     private fun onFlowSuccess(state: FinancialConnectionsSheetState, receivedUrl: Uri?) {

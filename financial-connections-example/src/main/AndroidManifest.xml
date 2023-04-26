@@ -13,13 +13,56 @@
             android:value="${STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL}" />
 
         <activity
-            android:name=".FinancialConnectionsLauncherActivity"
+            android:name=".YourChromeCustomTabActivity"
+            android:launchMode="singleTask"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="zzz-custom"
+                    android:host="open"
+                    android:pathPattern="/customtab_return" />
+            </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ReturnToCustomTabActivity"
+            android:exported="true">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="zzz-custom"
+                    android:host="open"
+                    android:pathPattern="/customtab_return" />
+            </intent-filter>
+        </activity>
+
+<!--        <activity-->
+<!--            android:name=".FinancialConnectionsLauncherActivity"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--            &lt;!&ndash; Deep link intent filter &ndash;&gt;-->
+<!--            <intent-filter android:autoVerify="true">-->
+<!--                <action android:name="android.intent.action.VIEW" />-->
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
+<!--                <category android:name="android.intent.category.BROWSABLE" />-->
+<!--                <data-->
+<!--                    android:scheme="xxxx-stripe-auth"-->
+<!--                    android:host="just-open"-->
+<!--                    android:pathPattern=".*" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
         <activity
             android:name="com.stripe.android.financialconnections.example.FinancialConnectionsDataExampleActivity"
             android:theme="@style/AppTheme.NoActionBar" />
