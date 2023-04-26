@@ -57,6 +57,10 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
             Item(
                 "Playground",
                 FinancialConnectionsPlaygroundActivity::class.java
+            ),
+            Item(
+                "Webview API",
+                FinancialConnectionsWebviewExampleActivity::class.java
             )
         )
 

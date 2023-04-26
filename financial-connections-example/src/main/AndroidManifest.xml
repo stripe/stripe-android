@@ -32,6 +32,10 @@
         <activity
             android:name="com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name="com.stripe.android.financialconnections.example.FinancialConnectionsWebviewExampleActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
