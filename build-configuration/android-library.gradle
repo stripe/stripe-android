@@ -51,6 +51,7 @@ android {
 
     lintOptions {
         enable "Interoperability"
+        disable "CoroutineCreationDuringComposition"
         lintConfig file("../settings/lint.xml")
     }
 

@@ -368,31 +368,31 @@ public final class com/stripe/android/stripecardscan/cardscan/exception/UnknownS
 	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
-public final class com/stripe/android/stripecardscan/databinding/ActivityCardscanBinding : androidx/viewbinding/ViewBinding {
+public final class com/stripe/android/stripecardscan/databinding/StripeActivityCardscanBinding : androidx/viewbinding/ViewBinding {
 	public final field cameraView Lcom/stripe/android/camera/scanui/CameraView;
 	public final field closeButton Landroid/widget/ImageView;
 	public final field instructions Landroid/widget/TextView;
 	public final field swapCameraButton Landroid/widget/ImageView;
 	public final field torchButton Landroid/widget/ImageView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/stripecardscan/databinding/ActivityCardscanBinding;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/stripecardscan/databinding/StripeActivityCardscanBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/stripecardscan/databinding/ActivityCardscanBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/stripecardscan/databinding/ActivityCardscanBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/stripecardscan/databinding/StripeActivityCardscanBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/stripecardscan/databinding/StripeActivityCardscanBinding;
 }
 
-public final class com/stripe/android/stripecardscan/databinding/FragmentCardscanBinding : androidx/viewbinding/ViewBinding {
+public final class com/stripe/android/stripecardscan/databinding/StripeFragmentCardscanBinding : androidx/viewbinding/ViewBinding {
 	public final field cameraView Lcom/stripe/android/camera/scanui/CameraView;
 	public final field closeButton Landroid/widget/ImageView;
 	public final field instructions Landroid/widget/TextView;
 	public final field swapCameraButton Landroid/widget/ImageView;
 	public final field title Landroid/widget/TextView;
 	public final field torchButton Landroid/widget/ImageView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/stripecardscan/databinding/FragmentCardscanBinding;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/stripecardscan/databinding/StripeFragmentCardscanBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/stripecardscan/databinding/FragmentCardscanBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/stripecardscan/databinding/FragmentCardscanBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/stripecardscan/databinding/StripeFragmentCardscanBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/stripecardscan/databinding/StripeFragmentCardscanBinding;
 }
 
 public abstract class com/stripe/android/stripecardscan/payment/card/CardIssuer {
