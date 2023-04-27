@@ -31,7 +31,7 @@ data class ContactInformationSpec(
             SimpleTextElement(
                 controller = SimpleTextFieldController(
                     textFieldConfig = SimpleTextFieldConfig(
-                        label = R.string.name_on_card,
+                        label = R.string.stripe_name_on_card,
                         capitalization = KeyboardCapitalization.Words,
                         keyboard = KeyboardType.Text
                     ),
@@ -51,7 +51,7 @@ data class ContactInformationSpec(
         if (elements.isEmpty()) return null
 
         return createSectionElement(
-            label = R.string.contact_information,
+            label = R.string.stripe_contact_information,
             sectionFieldElements = elements,
         )
     }

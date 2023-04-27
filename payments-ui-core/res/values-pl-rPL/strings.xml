@@ -6,6 +6,8 @@
   <string name="stripe_back">Wstecz</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Adres rozliczeniowy</string>
+  <!-- Title for the contact information section -->
+  <string name="stripe_contact_information">Dane kontaktowe</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Kontynuuj</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
@@ -25,6 +27,8 @@
   <string name="stripe_klarna_buy_now_pay_later">Kup teraz lub zapłać za pomocą Klarna później.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Zapłać później za pomocą Klarna.</string>
+  <!-- Label for name on card field -->
+  <string name="stripe_name_on_card">Imię i nazwisko na karcie</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Bank - Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->

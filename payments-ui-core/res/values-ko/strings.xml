@@ -6,6 +6,8 @@
   <string name="stripe_back">뒤로</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">청구 주소</string>
+  <!-- Title for the contact information section -->
+  <string name="stripe_contact_information">연락처 정보</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">계속</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
@@ -25,6 +27,8 @@
   <string name="stripe_klarna_buy_now_pay_later">지금 구매하거나 Klarna로 나중에 결제</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Klarna로 나중에 결제</string>
+  <!-- Label for name on card field -->
+  <string name="stripe_name_on_card">카드 명의자</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 은행</string>
   <!-- Label of a button that initiates payment when tapped -->
