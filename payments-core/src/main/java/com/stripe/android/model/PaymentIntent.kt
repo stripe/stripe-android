@@ -396,6 +396,13 @@ constructor(
         Automatic("automatic"),
 
         /**
+         * Stripe asynchronously captures funds when the customer authorizes the payment.
+         * Recommended over [Automatic] due to improved latency, but may require additional
+         * integration changes.
+         */
+        AutomaticAsync("automatic_async"),
+
+        /**
          * Place a hold on the funds when the customer authorizes the payment, but don’t capture
          * the funds until later. (Not all payment methods support this.)
          */
