@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Payments
+* [FIXED][6612](https://github.com/stripe/stripe-android/pull/6612) Fixed an issue where the Android Gradle Plugin 8.0 and later would cause issues with R8 in full mode related to missing classes.
+
 ### All SDKs
 * [CHANGED][6608](https://github.com/stripe/stripe-android/pull/6608) Added a `stripe` prefix to our string resources to avoid name conflicts.
 * [FIXED][6602](https://github.com/stripe/stripe-android/pull/6602) Fixed an issue which caused a compiler error (duplicate class) when including payments *and* identity SDKs.
