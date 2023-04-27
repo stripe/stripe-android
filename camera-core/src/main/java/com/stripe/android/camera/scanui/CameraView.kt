@@ -26,8 +26,8 @@ import kotlin.math.roundToInt
  * and [ScanFlow].
  *
  * Has the following styleable parameters to configure in xml
- *  [R.styleable.CameraView_viewFinderType] - a enum to decide the type of [ViewFinderType], which dictates the aspect ratio of [viewFinderWindowView].
- *  [R.styleable.CameraView_borderDrawable] - an optional reference for [viewFinderBorderView]'s drawable resource.
+ *  [R.styleable.StripeCameraView_stripeViewFinderType] - a enum to decide the type of [ViewFinderType], which dictates the aspect ratio of [viewFinderWindowView].
+ *  [R.styleable.StripeCameraView_stripeBorderDrawable] - an optional reference for [viewFinderBorderView]'s drawable resource.
  *
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -123,13 +123,13 @@ class CameraView : ConstraintLayout {
     private fun initFromXML(context: Context, attrs: AttributeSet? = null) {
         context.withStyledAttributes(
             attrs,
-            R.styleable.CameraView
+            R.styleable.StripeCameraView
         ) {
             viewFinderType =
-                ViewFinderType.values()[getInt(R.styleable.CameraView_viewFinderType, 0)]
+                ViewFinderType.values()[getInt(R.styleable.StripeCameraView_stripeViewFinderType, 0)]
             borderDrawable =
                 getResourceId(
-                    R.styleable.CameraView_borderDrawable,
+                    R.styleable.StripeCameraView_stripeBorderDrawable,
                     NO_BORDER
                 )
         }

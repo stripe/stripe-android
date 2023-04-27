@@ -10,8 +10,8 @@
         android:id="@+id/camera_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:borderDrawable="@drawable/stripe_card_border_not_found"
-        app:viewFinderType="creditCard" />
+        app:stripeBorderDrawable="@drawable/stripe_card_border_not_found"
+        app:stripeViewFinderType="creditCard" />
 
     <ImageView
         android:id="@+id/close_button"

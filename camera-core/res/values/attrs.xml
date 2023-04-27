@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <declare-styleable name="CameraView" tools:ignore="ResourceName">
+    <declare-styleable name="StripeCameraView">
         <!--defines the shape, aspect ratio of the viewfinder-->
-        <attr name="viewFinderType" format="enum">
+        <attr name="stripeViewFinderType" format="enum">
             <!--viewFinder fills previewView, no background/hole drawn-->
             <enum name="fill" value="0" />
             <!--viewFinder has aspect ratio for credit card, a hole is drawn to highlight the viewfinder-->
@@ -13,11 +13,11 @@
             <enum name="passport" value="3" />
         </attr>
         <!--defines the imageView of the border-->
-        <attr name="borderDrawable" format="reference" />
+        <attr name="stripeBorderDrawable" format="reference" />
     </declare-styleable>
 
-    <declare-styleable name="ViewFinderBackground" tools:ignore="ResourceName">
-        <attr name="backgroundColor" format="color" />
+    <declare-styleable name="StripeViewFinderBackground">
+        <attr name="stripeBackgroundColor" format="color" />
     </declare-styleable>
 
 </resources>
