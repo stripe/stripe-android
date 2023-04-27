@@ -138,19 +138,19 @@ internal fun UploadScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(
-                    start = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    end = dimensionResource(id = R.dimen.page_horizontal_margin),
+                    start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                    end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
                     top = 64.dp,
-                    bottom = dimensionResource(id = R.dimen.page_vertical_margin)
+                    bottom = dimensionResource(id = R.dimen.stripe_page_vertical_margin)
                 )
                 .testTag(SCROLLABLE_COLUMN_TAG)
         ) {
             Text(
                 text = stringResource(id = titleRes),
-                fontSize = dimensionResourceSp(id = R.dimen.upload_title_text_size),
+                fontSize = dimensionResourceSp(id = R.dimen.stripe_upload_title_text_size),
 
                 modifier = Modifier.padding(
-                    vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+                    vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
                 )
             )
             Text(
@@ -224,7 +224,11 @@ internal fun UploadScreen(
 
             if (shouldShowBack) {
                 var shouldShowBackDialog by remember { mutableStateOf(false) }
-                Divider(modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin)))
+                Divider(
+                    modifier = Modifier.padding(
+                        bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
+                    ),
+                )
                 val backUploadedUiState by remember {
                     derivedStateOf {
                         collectedData.idDocumentBack?.let {
@@ -316,13 +320,13 @@ internal fun UploadImageDialog(
             Column(
                 modifier = Modifier
                     .padding(
-                        vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+                        vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
                     )
             ) {
                 Text(
                     modifier = Modifier.padding(
                         bottom = dimensionResource(
-                            id = R.dimen.item_vertical_margin
+                            id = R.dimen.stripe_item_vertical_margin
                         ),
                         start = 24.dp,
                         end = 24.dp
@@ -419,7 +423,7 @@ private fun SingleSideUploadRow(
 ) {
     Row(
         modifier = modifier
-            .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
+            .padding(bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
             .fillMaxWidth()
             .height(48.dp),
         horizontalArrangement = Arrangement.SpaceBetween
@@ -446,7 +450,7 @@ private fun SingleSideUploadRow(
             }
             DocumentUploadUIState.Done -> {
                 Image(
-                    painter = painterResource(id = R.drawable.check_mark),
+                    painter = painterResource(id = R.drawable.stripe_check_mark),
                     contentDescription = stringResource(id = uploadInfo.checkmarkContentDescriptionRes),
                     modifier = Modifier
                         .height(18.dp)

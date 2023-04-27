@@ -146,15 +146,15 @@ private fun AccessibleDataText(
         text = TextResource.StringId(
             value = when {
                 model.isNetworking -> when (model.businessName) {
-                    null -> R.string.data_accessible_callout_through_link_no_business
-                    else -> R.string.data_accessible_callout_through_link
+                    null -> R.string.stripe_data_accessible_callout_through_link_no_business
+                    else -> R.string.stripe_data_accessible_callout_through_link
                 }
 
-                model.isStripeDirect -> R.string.data_accessible_callout_stripe_direct
+                model.isStripeDirect -> R.string.stripe_data_accessible_callout_stripe_direct
 
                 else -> when (model.businessName) {
-                    null -> R.string.data_accessible_callout_through_stripe_no_business
-                    else -> R.string.data_accessible_callout_through_stripe
+                    null -> R.string.stripe_data_accessible_callout_through_stripe_no_business
+                    else -> R.string.stripe_data_accessible_callout_through_stripe
                 }
             },
             args = listOfNotNull(
@@ -212,12 +212,12 @@ private fun readableListOfPermissions(permissionsReadable: List<Int>): String =
 
 private fun List<Permissions>.toStringRes(): List<Int> = mapNotNull {
     when (it) {
-        Permissions.BALANCES -> R.string.data_accessible_type_balances
-        Permissions.OWNERSHIP -> R.string.data_accessible_type_ownership
+        Permissions.BALANCES -> R.string.stripe_data_accessible_type_balances
+        Permissions.OWNERSHIP -> R.string.stripe_data_accessible_type_ownership
         Permissions.PAYMENT_METHOD,
-        Permissions.ACCOUNT_NUMBERS -> R.string.data_accessible_type_accountdetails
+        Permissions.ACCOUNT_NUMBERS -> R.string.stripe_data_accessible_type_accountdetails
 
-        Permissions.TRANSACTIONS -> R.string.data_accessible_type_transactions
+        Permissions.TRANSACTIONS -> R.string.stripe_data_accessible_type_transactions
         Permissions.UNKNOWN -> null
     }
 }.distinct()

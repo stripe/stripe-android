@@ -279,7 +279,7 @@ class Selectors(
 
     fun getCardCvc() = composeTestRule.onNodeWithText(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            com.stripe.android.ui.core.R.string.cvc_number_hint
+            com.stripe.android.ui.core.R.string.stripe_cvc_number_hint
         )
     )
 

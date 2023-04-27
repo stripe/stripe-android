@@ -19,6 +19,6 @@
             L 7.5,197.5
             a 5,5,0,0,1,-5,-5
             Z"
-        android:strokeColor="@color/id_border_initial_color"
-        android:strokeWidth="@integer/view_finder_border_width"/>
+        android:strokeColor="@color/stripe_id_border_initial_color"
+        android:strokeWidth="@integer/stripe_view_finder_border_width"/>
 </vector>

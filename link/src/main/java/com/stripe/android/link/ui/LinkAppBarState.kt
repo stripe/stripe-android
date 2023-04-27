@@ -43,9 +43,9 @@ internal fun rememberLinkAppBarState(
 
         LinkAppBarState(
             navigationIcon = if (isRootScreen) {
-                R.drawable.ic_link_close
+                R.drawable.stripe_link_close
             } else {
-                R.drawable.ic_link_back
+                R.drawable.stripe_link_back
             },
             showHeader = showHeader,
             showOverflowMenu = showOverflowMenu,

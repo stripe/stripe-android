@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
+import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentOptionsScreen
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
@@ -18,7 +18,7 @@ import com.stripe.android.uicore.StripeTheme
 internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>() {
     @VisibleForTesting
     internal val viewBinding by lazy {
-        ActivityPaymentOptionsBinding.inflate(layoutInflater)
+        StripeActivityPaymentOptionsBinding.inflate(layoutInflater)
     }
 
     @VisibleForTesting

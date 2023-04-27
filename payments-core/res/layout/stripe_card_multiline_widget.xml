@@ -61,7 +61,7 @@
             android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
             android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
-            app:placeholderText="@string/cvc_multiline_helper">
+            app:placeholderText="@string/stripe_cvc_multiline_helper">
 
             <com.stripe.android.view.CvcEditText
                 android:id="@+id/et_cvc"

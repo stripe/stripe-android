@@ -98,8 +98,8 @@ fun LinkButton(
                 )
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_link_logo),
-                    contentDescription = stringResource(R.string.link),
+                    painter = painterResource(R.drawable.stripe_link_logo),
+                    contentDescription = stringResource(R.string.stripe_link),
                     modifier = Modifier
                         .height(22.dp)
                         .padding(

@@ -4,7 +4,7 @@ import com.stripe.android.link.R
 import com.stripe.android.model.ConsumerPaymentDetails
 
 internal val ConsumerPaymentDetails.BankAccount.icon
-    get() = R.drawable.ic_link_bank
+    get() = R.drawable.stripe_link_bank
 
 internal val ConsumerPaymentDetails.PaymentDetails.removeLabel
     get() = when (this) {

@@ -434,7 +434,7 @@ internal fun CollapsedPaymentDetails(
         )
         PaymentDetails(paymentDetails = selectedPaymentMethod, enabled = true)
         Icon(
-            painter = painterResource(id = R.drawable.ic_link_chevron),
+            painter = painterResource(id = R.drawable.stripe_link_chevron),
             contentDescription = stringResource(id = R.string.stripe_wallet_expand_accessibility),
             modifier = Modifier
                 .padding(end = 22.dp)
@@ -485,7 +485,7 @@ private fun ExpandedPaymentDetails(
             )
             Spacer(modifier = Modifier.weight(1f))
             Icon(
-                painter = painterResource(id = R.drawable.ic_link_chevron),
+                painter = painterResource(id = R.drawable.stripe_link_chevron),
                 contentDescription = stringResource(id = R.string.stripe_wallet_expand_accessibility),
                 modifier = Modifier
                     .padding(top = 20.dp, end = 22.dp)
@@ -523,7 +523,7 @@ private fun ExpandedPaymentDetails(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_link_add_green),
+                painter = painterResource(id = R.drawable.stripe_link_add_green),
                 contentDescription = null,
                 modifier = Modifier.padding(start = HorizontalPadding, end = 12.dp),
                 tint = Color.Unspecified

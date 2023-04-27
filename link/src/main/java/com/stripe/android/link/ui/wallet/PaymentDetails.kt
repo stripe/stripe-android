@@ -103,7 +103,7 @@ internal fun PaymentDetailsListItem(
                 val showWarning = (paymentDetails as? Card)?.isExpired ?: false
                 if (showWarning && !isSelected) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_link_error),
+                        painter = painterResource(R.drawable.stripe_link_error),
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.linkColors.errorText

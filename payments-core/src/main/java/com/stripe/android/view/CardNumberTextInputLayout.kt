@@ -40,7 +40,7 @@ class CardNumberTextInputLayout @JvmOverloads internal constructor(
             attachProgressView()
         }
 
-        placeholderText = resources.getString(R.string.card_number_hint)
+        placeholderText = resources.getString(R.string.stripe_card_number_hint)
     }
 
     private fun attachProgressView() {

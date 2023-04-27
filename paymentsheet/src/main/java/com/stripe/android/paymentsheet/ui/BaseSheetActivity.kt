@@ -131,7 +131,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     }
 
     private fun setSheetWidthForTablets() {
-        if (!resources.getBoolean(R.bool.isTablet)) {
+        if (!resources.getBoolean(R.bool.stripe_is_tablet)) {
             return
         }
 

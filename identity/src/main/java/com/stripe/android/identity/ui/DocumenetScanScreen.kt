@@ -211,8 +211,8 @@ internal fun DocumentScanScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    vertical = dimensionResource(id = R.dimen.page_vertical_margin),
-                    horizontal = dimensionResource(id = R.dimen.page_horizontal_margin)
+                    vertical = dimensionResource(id = R.dimen.stripe_page_vertical_margin),
+                    horizontal = dimensionResource(id = R.dimen.stripe_page_horizontal_margin)
                 )
         ) {
             var loadingButtonState by remember(newDisplayState) {
@@ -245,7 +245,7 @@ internal fun DocumentScanScreen(
                         .fillMaxWidth()
                         .height(100.dp)
                         .padding(
-                            top = dimensionResource(id = R.dimen.item_vertical_margin),
+                            top = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
                             bottom = 48.dp
                         )
                         .semantics {
@@ -296,7 +296,7 @@ private fun CameraViewFinder(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(VIEW_FINDER_ASPECT_RATIO)
-            .clip(RoundedCornerShape(dimensionResource(id = R.dimen.view_finder_corner_radius)))
+            .clip(RoundedCornerShape(dimensionResource(id = R.dimen.stripe_view_finder_corner_radius)))
     ) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
@@ -304,7 +304,7 @@ private fun CameraViewFinder(
                 CameraView(
                     it,
                     CameraView.ViewFinderType.ID,
-                    R.drawable.viewfinder_border_initial
+                    R.drawable.stripe_viewfinder_border_initial
                 )
             },
             update =
@@ -317,7 +317,7 @@ private fun CameraViewFinder(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
-                        colorResource(id = R.color.check_mark_background)
+                        colorResource(id = R.color.stripe_check_mark_background)
                     )
                     .testTag(CHECK_MARK_TAG)
             ) {
@@ -325,7 +325,7 @@ private fun CameraViewFinder(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(60.dp),
-                    painter = painterResource(id = R.drawable.check_mark),
+                    painter = painterResource(id = R.drawable.stripe_check_mark),
                     contentDescription = stringResource(id = R.string.stripe_check_mark),
                     colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
                 )

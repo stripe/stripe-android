@@ -38,7 +38,7 @@ class CvcEditText @JvmOverloads constructor(
 
     init {
         setErrorMessage(resources.getString(R.string.stripe_invalid_cvc))
-        setHint(R.string.cvc_number_hint)
+        setHint(R.string.stripe_cvc_number_hint)
         maxLines = 1
         filters = createFilters(CardBrand.Unknown)
 
@@ -89,9 +89,9 @@ class CvcEditText @JvmOverloads constructor(
 
         val hintText = customHintText
             ?: if (cardBrand == CardBrand.AmericanExpress) {
-                resources.getString(R.string.cvc_amex_hint)
+                resources.getString(R.string.stripe_cvc_amex_hint)
             } else {
-                resources.getString(R.string.cvc_number_hint)
+                resources.getString(R.string.stripe_cvc_number_hint)
             }
 
         // Only show an error when we update the branch if text is entered
@@ -107,8 +107,8 @@ class CvcEditText @JvmOverloads constructor(
             textInputLayout.placeholderText = customPlaceholderText
                 ?: resources.getString(
                     when (cardBrand) {
-                        CardBrand.AmericanExpress -> R.string.cvc_multiline_helper_amex
-                        else -> R.string.cvc_multiline_helper
+                        CardBrand.AmericanExpress -> R.string.stripe_cvc_multiline_helper_amex
+                        else -> R.string.stripe_cvc_multiline_helper
                     }
                 )
         } else {

@@ -9,7 +9,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
-import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
+import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
@@ -20,7 +20,7 @@ import java.security.InvalidParameterException
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     @VisibleForTesting
     internal val viewBinding by lazy {
-        ActivityPaymentSheetBinding.inflate(layoutInflater)
+        StripeActivityPaymentSheetBinding.inflate(layoutInflater)
     }
 
     @VisibleForTesting

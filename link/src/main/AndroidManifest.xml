@@ -4,9 +4,9 @@
     <application>
         <activity
             android:name=".LinkActivity"
-            android:theme="@style/LinkBaseTheme"
+            android:theme="@style/StripeLinkBaseTheme"
             android:exported="false"
-            android:label="@string/link"
+            android:label="@string/stripe_link"
             android:windowSoftInputMode="adjustResize" />
     </application>
 

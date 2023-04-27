@@ -34,7 +34,7 @@ internal enum class SupportedPaymentMethod(
         ConsumerPaymentDetails.Card.type,
         LinkCardForm.items,
         R.string.stripe_paymentsheet_payment_method_card,
-        R.drawable.ic_link_card,
+        R.drawable.stripe_link_card,
         primaryButtonEndIconResourceId = R.drawable.stripe_ic_lock
     ) {
         override fun primaryButtonLabel(
@@ -46,8 +46,8 @@ internal enum class SupportedPaymentMethod(
         ConsumerPaymentDetails.BankAccount.type,
         emptyList(),
         R.string.stripe_payment_method_bank,
-        R.drawable.ic_link_bank,
-        primaryButtonStartIconResourceId = R.drawable.ic_link_add
+        R.drawable.stripe_link_bank,
+        primaryButtonStartIconResourceId = R.drawable.stripe_link_add
     ) {
         override fun primaryButtonLabel(
             stripeIntent: StripeIntent,

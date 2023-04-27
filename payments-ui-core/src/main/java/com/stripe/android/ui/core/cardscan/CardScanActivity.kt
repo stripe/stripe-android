@@ -6,11 +6,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.StripeCardScanProxy
-import com.stripe.android.ui.core.databinding.ActivityCardScanBinding
+import com.stripe.android.ui.core.databinding.StripeActivityCardScanBinding
 
 internal class CardScanActivity : AppCompatActivity() {
     private val viewBinding by lazy {
-        ActivityCardScanBinding.inflate(layoutInflater)
+        StripeActivityCardScanBinding.inflate(layoutInflater)
     }
 
     private lateinit var stripeCardScanProxy: StripeCardScanProxy

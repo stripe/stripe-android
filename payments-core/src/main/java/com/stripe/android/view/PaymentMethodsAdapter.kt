@@ -11,9 +11,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
-import com.stripe.android.databinding.AddPaymentMethodRowBinding
-import com.stripe.android.databinding.GooglePayRowBinding
-import com.stripe.android.databinding.MaskedCardRowBinding
+import com.stripe.android.databinding.StripeAddPaymentMethodRowBinding
+import com.stripe.android.databinding.StripeGooglePayRowBinding
+import com.stripe.android.databinding.StripeMaskedCardRowBinding
 import com.stripe.android.model.PaymentMethod
 
 /**
@@ -271,10 +271,10 @@ internal class PaymentMethodsAdapter constructor(
 
     internal sealed class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal class AddCardPaymentMethodViewHolder(
-            viewBinding: AddPaymentMethodRowBinding
+            viewBinding: StripeAddPaymentMethodRowBinding
         ) : RecyclerView.ViewHolder(viewBinding.root) {
             constructor(context: Context, parent: ViewGroup) : this(
-                AddPaymentMethodRowBinding.inflate(
+                StripeAddPaymentMethodRowBinding.inflate(
                     LayoutInflater.from(context),
                     parent,
                     false
@@ -291,10 +291,10 @@ internal class PaymentMethodsAdapter constructor(
         }
 
         internal class AddFpxPaymentMethodViewHolder(
-            viewBinding: AddPaymentMethodRowBinding
+            viewBinding: StripeAddPaymentMethodRowBinding
         ) : RecyclerView.ViewHolder(viewBinding.root) {
             constructor(context: Context, parent: ViewGroup) : this(
-                AddPaymentMethodRowBinding.inflate(
+                StripeAddPaymentMethodRowBinding.inflate(
                     LayoutInflater.from(context),
                     parent,
                     false
@@ -311,10 +311,10 @@ internal class PaymentMethodsAdapter constructor(
         }
 
         internal class GooglePayViewHolder(
-            private val viewBinding: GooglePayRowBinding
+            private val viewBinding: StripeGooglePayRowBinding
         ) : RecyclerView.ViewHolder(viewBinding.root) {
             constructor(context: Context, parent: ViewGroup) : this(
-                GooglePayRowBinding.inflate(
+                StripeGooglePayRowBinding.inflate(
                     LayoutInflater.from(context),
                     parent,
                     false
@@ -346,10 +346,10 @@ internal class PaymentMethodsAdapter constructor(
         }
 
         internal class PaymentMethodViewHolder constructor(
-            private val viewBinding: MaskedCardRowBinding
+            private val viewBinding: StripeMaskedCardRowBinding
         ) : ViewHolder(viewBinding.root) {
             constructor(parent: ViewGroup) : this(
-                MaskedCardRowBinding.inflate(
+                StripeMaskedCardRowBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false

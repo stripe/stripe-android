@@ -286,7 +286,7 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
 
     private companion object {
         const val INVALID_COUNTRY_AUTO_COMPLETE_STYLE = 0
-        val DEFAULT_ITEM_LAYOUT = R.layout.country_text_view
+        val DEFAULT_ITEM_LAYOUT = R.layout.stripe_country_text_view
     }
 
     @Parcelize

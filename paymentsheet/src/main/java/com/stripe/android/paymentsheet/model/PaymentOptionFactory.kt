@@ -59,7 +59,7 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceId = R.drawable.stripe_google_pay_mark,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
-                    label = resources.getString(R.string.google_pay),
+                    label = resources.getString(R.string.stripe_google_pay),
                     imageLoader = ::loadPaymentOption,
                 )
             }
@@ -68,7 +68,7 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceId = R.drawable.stripe_ic_paymentsheet_link,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
-                    label = resources.getString(R.string.link),
+                    label = resources.getString(R.string.stripe_link),
                     imageLoader = ::loadPaymentOption,
                 )
             }

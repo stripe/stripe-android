@@ -129,7 +129,7 @@ internal fun ManualEntrySuccessContent(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                Text(text = stringResource(R.string.success_pane_done))
+                Text(text = stringResource(R.string.stripe_success_pane_done))
             }
         }
     }

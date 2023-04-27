@@ -118,7 +118,7 @@ fun DropDown(
                     )
                     if (!shouldDisableDropdownWithSingleItem) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_chevron_down),
+                            painter = painterResource(id = R.drawable.stripe_ic_chevron_down),
                             contentDescription = null,
                             modifier = Modifier.height(24.dp),
                             tint = MaterialTheme.stripeColors.placeholderText
@@ -153,7 +153,7 @@ fun DropDown(
                     if (!shouldDisableDropdownWithSingleItem) {
                         Column(modifier = Modifier.align(Alignment.CenterVertically)) {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_chevron_down),
+                                painter = painterResource(id = R.drawable.stripe_ic_chevron_down),
                                 contentDescription = null,
                                 modifier = Modifier.height(24.dp),
                                 tint = currentTextColor

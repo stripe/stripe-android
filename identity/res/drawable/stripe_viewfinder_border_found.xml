@@ -22,7 +22,7 @@
                     Z"
                 android:trimPathStart="0"
                 android:trimPathEnd="0.5"
-                android:strokeColor="@color/viewfinder_border_center"
+                android:strokeColor="@color/stripe_viewfinder_border_center"
                 android:strokeWidth="5" />
         </vector>
     </aapt:attr>

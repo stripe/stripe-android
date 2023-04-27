@@ -25,7 +25,7 @@ import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentSheetPrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
 import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.stripeColors
@@ -120,7 +120,7 @@ internal fun PaymentSheetScreenContent(
         }
 
         AndroidViewBinding(
-            factory = FragmentPaymentSheetPrimaryButtonBinding::inflate,
+            factory = StripeFragmentPaymentSheetPrimaryButtonBinding::inflate,
             modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
         )
 

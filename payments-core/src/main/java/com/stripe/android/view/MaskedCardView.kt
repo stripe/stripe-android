@@ -11,7 +11,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import com.stripe.android.R
-import com.stripe.android.databinding.MaskedCardViewBinding
+import com.stripe.android.databinding.StripeMaskedCardViewBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 
@@ -34,7 +34,7 @@ internal class MaskedCardView @JvmOverloads constructor(
     var last4: String? = null
         private set
 
-    internal val viewBinding = MaskedCardViewBinding.inflate(
+    internal val viewBinding = StripeMaskedCardViewBinding.inflate(
         LayoutInflater.from(context),
         this
     )

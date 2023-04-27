@@ -54,7 +54,7 @@ internal fun ScanCardButtonUI(
         )
     ) {
         Image(
-            painter = painterResource(R.drawable.ic_photo_camera),
+            painter = painterResource(R.drawable.stripe_ic_photo_camera),
             contentDescription = stringResource(
                 R.string.stripe_scan_card
             ),
