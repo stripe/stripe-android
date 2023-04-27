@@ -147,11 +147,12 @@ internal fun CollectBankAccountResultInternal.toExposedResult(): CollectBankAcco
             CollectBankAccountResult.Cancelled
         }
         is CollectBankAccountResultInternal.Completed -> {
-            when (response.intent) {
-                null -> CollectBankAccountResult.Failed(
+            if (response.intent == null) {
+                CollectBankAccountResult.Failed(
                     IllegalArgumentException("StripeIntent not set for this session")
                 )
-                else -> CollectBankAccountResult.Completed(
+            } else {
+                CollectBankAccountResult.Completed(
                     response = CollectBankAccountResponse(
                         intent = response.intent,
                         financialConnectionsSession = response.financialConnectionsSession

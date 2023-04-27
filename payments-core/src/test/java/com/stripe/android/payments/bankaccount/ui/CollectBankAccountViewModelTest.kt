@@ -33,7 +33,6 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession as PaymentsFinancialConnectionsSession
 
-@Suppress("MaxLineLength")
 @RunWith(RobolectricTestRunner::class)
 class CollectBankAccountViewModelTest {
 
@@ -101,7 +100,7 @@ class CollectBankAccountViewModelTest {
     }
 
     @Test
-    fun `init - when createFinancialConnectionsSession succeeds for deferred payment, opens connection flow`() = runTest {
+    fun `init - when create session succeeds for deferred payment, opens connection flow`() = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
             // Given
@@ -276,7 +275,7 @@ class CollectBankAccountViewModelTest {
     }
 
     @Test
-    fun `connectionsResult - when createFinancialConnectionsSession succeeds for deferred payments, finish with success`() = runTest {
+    fun `connectionsResult - when create succeeds for deferred payments, finish with success`() = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
             // Given
@@ -305,7 +304,7 @@ class CollectBankAccountViewModelTest {
     }
 
     @Test
-    fun `connectionsResult - when createFinancialConnectionsSession succeeds for deferred setup, finish with success`() = runTest {
+    fun `connectionsResult - when create session succeeds for deferred setup, finish with success`() = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
             // Given

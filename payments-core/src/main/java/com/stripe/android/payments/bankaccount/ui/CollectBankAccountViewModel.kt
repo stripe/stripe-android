@@ -9,7 +9,6 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnectionsSession
@@ -18,6 +17,9 @@ import com.stripe.android.payments.bankaccount.domain.RetrieveStripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Cancelled
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Completed
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Failed
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -111,7 +113,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (result) {
                 is FinancialConnectionsSheetResult.Canceled ->
-                    finishWithResult(CollectBankAccountResultInternal.Cancelled)
+                    finishWithResult(Cancelled)
                 is FinancialConnectionsSheetResult.Failed ->
                     finishWithError(result.error)
                 is FinancialConnectionsSheetResult.Completed ->
@@ -132,17 +134,18 @@ internal class CollectBankAccountViewModel @Inject constructor(
         financialConnectionsSession: FinancialConnectionsSession
     ) {
         viewModelScope.launch {
-            val retrieveIntentResult: Result<StripeIntent?> =
-                when (val intentSecret = args.clientSecret) {
-                    // client secret is null for deferred intents.
-                    null -> Result.success(null)
-                    else -> retrieveStripeIntent(args.publishableKey, intentSecret)
-                }
+            val clientSecret = args.clientSecret
+            val retrieveIntentResult = if (clientSecret == null) {
+                // client secret is null for deferred intents.
+                Result.success(null)
+            } else {
+                retrieveStripeIntent(args.publishableKey, clientSecret)
+            }
             retrieveIntentResult
                 .onFailure { finishWithError(it) }
                 .onSuccess { intent ->
                     finishWithResult(
-                        CollectBankAccountResultInternal.Completed(
+                        Completed(
                             CollectBankAccountResponseInternal(
                                 intent,
                                 financialConnectionsSession = financialConnectionsSession
@@ -176,14 +179,14 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     )
             }
                 .mapCatching {
-                    CollectBankAccountResultInternal.Completed(
+                    Completed(
                         CollectBankAccountResponseInternal(
                             it,
                             financialConnectionsSession
                         )
                     )
                 }
-                .onSuccess { result: CollectBankAccountResultInternal.Completed ->
+                .onSuccess { result: Completed ->
                     logger.debug("Bank account session attached to  intent!!")
                     finishWithResult(result)
                 }
@@ -193,7 +196,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
     private suspend fun finishWithError(throwable: Throwable) {
         logger.error("Error", Exception(throwable))
-        finishWithResult(CollectBankAccountResultInternal.Failed(throwable))
+        finishWithResult(Failed(throwable))
     }
 
     class Factory(
