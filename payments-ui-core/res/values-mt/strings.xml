@@ -6,6 +6,8 @@
   <string name="stripe_back">Lura</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Indirizz tal-kont</string>
+  <!-- Title for the contact information section -->
+  <string name="stripe_contact_information">Id-dettalji tal-kuntatt</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Kompli</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
@@ -25,6 +27,8 @@
   <string name="stripe_klarna_buy_now_pay_later">Ixtri issa jew ħallas iktar tard bil-Klarna.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Ħlas aktar tard bil-Klarna.</string>
+  <!-- Label for name on card field -->
+  <string name="stripe_name_on_card">L-isem fuq il-karta</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Bank Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->

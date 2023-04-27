@@ -6,6 +6,8 @@
   <string name="stripe_back">Atpakaļ</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Norēķinu adrese</string>
+  <!-- Title for the contact information section -->
+  <string name="stripe_contact_information">Kontaktinformācija</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Turpināt</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
@@ -25,6 +27,8 @@
   <string name="stripe_klarna_buy_now_pay_later">Pērciet tagad vai maksājiet vēlāk ar Klarna.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Maksāt vēlāk ar Klarna.</string>
+  <!-- Label for name on card field -->
+  <string name="stripe_name_on_card">Uz kartes norādītais vārds</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 banka</string>
   <!-- Label of a button that initiates payment when tapped -->

@@ -6,6 +6,8 @@
   <string name="stripe_back">Natrag</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Adresa za naplatu</string>
+  <!-- Title for the contact information section -->
+  <string name="stripe_contact_information">Podaci za kontakt</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Nastavi</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
@@ -25,6 +27,8 @@
   <string name="stripe_klarna_buy_now_pay_later">Kupite sada ili platite kasnije pomoću Klarne</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Platite kasnije pomoću Klarne.</string>
+  <!-- Label for name on card field -->
+  <string name="stripe_name_on_card">Ime na kartici</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Banka Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
