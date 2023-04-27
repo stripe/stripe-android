@@ -246,13 +246,13 @@ class PaymentIntentTest {
     @Test
     fun `Determines SFU correctly if setup_future_usage exists in payment method options`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            paymentMethodOptionsJsonString = """
-                {
-                  "card": {
-                    "setup_future_usage": ""
-                  }
-                }
-            """.trimIndent()
+            paymentMethodOptionsMap = PaymentMethodOptionsMap(
+                options = mapOf(
+                    "card" to PaymentMethodOptionsMap.Options(
+                        setupFutureUsage = PaymentMethodOptionsMap.SetupFutureUsage.OnSession
+                    )
+                )
+            )
         )
 
         val result = paymentIntent.isSetupFutureUsageSet("card")
@@ -262,16 +262,38 @@ class PaymentIntentTest {
     @Test
     fun `Determines SFU correctly if setup_future_usage does not exist in payment method options`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            paymentMethodOptionsJsonString = """
-                {
-                  "card": {
-                    "some_other_key_that_has_nothing_to_do_with_sfu": ""
-                  }
-                }
-            """.trimIndent()
+            paymentMethodOptionsMap = PaymentMethodOptionsMap(
+                options = mapOf(
+                    "card" to PaymentMethodOptionsMap.Options()
+                )
+            )
         )
 
         val result = paymentIntent.isSetupFutureUsageSet("card")
         assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `getPaymentMethodOptions returns expected results`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsMap = PaymentMethodOptionsMap(
+                options = mapOf(
+                    "us_bank_account" to PaymentMethodOptionsMap.Options(
+                        setupFutureUsage = PaymentMethodOptionsMap.SetupFutureUsage.OnSession,
+                        verificationMethod = PaymentMethodOptionsMap.VerificationMethod.Automatic
+                    )
+                )
+            )
+        )
+
+        assertThat(paymentIntent.getPaymentMethodOptions())
+            .isEqualTo(
+                mapOf(
+                    "us_bank_account" to mapOf(
+                        "setup_future_usage" to "on_session",
+                        "verification_method" to "automatic"
+                    )
+                )
+            )
     }
 }

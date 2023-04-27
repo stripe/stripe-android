@@ -23,6 +23,10 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
             paymentMethod == null
         } ?: paymentMethod?.id
 
+        val paymentMethodOptions = json.optJSONObject(FIELD_PAYMENT_METHOD_OPTIONS)?.let {
+            PaymentMethodOptionsJsonParser().parse(it)
+        }
+
         val unactivatedPaymentMethods = jsonArrayToList(
             json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
         )
@@ -54,7 +58,8 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
             linkFundingSources = linkFundingSources,
             nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
                 NextActionDataParser().parse(it)
-            }
+            },
+            paymentMethodOptionsMap = paymentMethodOptions,
         )
     }
 
@@ -101,6 +106,7 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         private const val FIELD_STATUS = "status"
         private const val FIELD_USAGE = "usage"
         private const val FIELD_PAYMENT_METHOD = "payment_method"
+        private const val FIELD_PAYMENT_METHOD_OPTIONS = "payment_method_options"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES =
             "unactivated_payment_method_types"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"

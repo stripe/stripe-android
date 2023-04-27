@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethodOptionsMap
 import com.stripe.android.model.SetupIntentFixtures
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -36,5 +37,20 @@ class SetupIntentJsonParserTest {
             SetupIntentJsonParser().parse(SetupIntentFixtures.SI_WITH_COUNTRY_CODE)
         )
         assertThat(setupIntent.countryCode).isEqualTo("CA")
+    }
+
+    @Test
+    fun parse_withExpandedPaymentMethodOptions_shouldCreateExpectedObject() {
+        val setupIntent = requireNotNull(
+            SetupIntentJsonParser().parse(SetupIntentFixtures.EXPANDED_PAYMENT_METHOD)
+        )
+        assertThat(setupIntent.paymentMethodOptionsMap)
+            .isEqualTo(
+                PaymentMethodOptionsMap(
+                    options = mapOf(
+                        "card" to PaymentMethodOptionsMap.Options()
+                    )
+                )
+            )
     }
 }

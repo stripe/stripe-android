@@ -381,9 +381,9 @@ internal object PaymentIntentFixtures {
                 "card"
             ],
             "payment_method_options": {
-               "card": {
-                "setup_future_usage": null
-               }
+                 "card": {
+                   "setup_future_usage": "on_session"
+                 }
             },
             "receipt_email": null,
             "setup_future_usage": null,

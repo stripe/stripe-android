@@ -9,6 +9,7 @@ import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.MicrodepositType
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodOptionsMap
 import com.stripe.android.model.StripeIntent
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -141,6 +142,23 @@ class PaymentIntentJsonParserTest {
                     1647241200,
                     "https://payments.stripe.com/microdeposit/pacs_test_YWNjdF8xS2J1SjlGbmt1bWlGVUZ4LHBhX25vbmNlX0xJcFVEaERaU0JOVVR3akhxMXc5eklOQkl3UTlwNWo0000v3GS1Jej",
                     MicrodepositType.AMOUNTS
+                )
+            )
+    }
+
+    @Test
+    fun `parse us bank account payment method options`() {
+        val paymentIntent = PaymentIntentJsonParser().parse(
+            PaymentIntentFixtures.PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS_JSON
+        )
+        assertThat(paymentIntent?.paymentMethodOptionsMap)
+            .isEqualTo(
+                PaymentMethodOptionsMap(
+                    options = mapOf(
+                        "us_bank_account" to PaymentMethodOptionsMap.Options(
+                            verificationMethod = PaymentMethodOptionsMap.VerificationMethod.Automatic
+                        )
+                    )
                 )
             )
     }

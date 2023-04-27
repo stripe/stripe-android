@@ -69,6 +69,9 @@ sealed interface StripeIntent : StripeModel {
      */
     val linkFundingSources: List<String>
 
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val paymentMethodOptionsMap: PaymentMethodOptionsMap?
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean

@@ -54,7 +54,9 @@ class PaymentIntentJsonParser(
             optString(json, FIELD_STATUS)
         )
 
-        val paymentMethodOptions = json.optJSONObject(FIELD_PAYMENT_METHOD_OPTIONS)?.toString()
+        val paymentMethodOptions = json.optJSONObject(FIELD_PAYMENT_METHOD_OPTIONS)?.let {
+            PaymentMethodOptionsJsonParser().parse(it)
+        }
 
         val setupFutureUsage = StripeIntent.Usage.fromCode(
             optString(json, FIELD_SETUP_FUTURE_USAGE)
@@ -116,7 +118,7 @@ class PaymentIntentJsonParser(
             unactivatedPaymentMethods = unactivatedPaymentMethods,
             linkFundingSources = linkFundingSources,
             nextActionData = nextActionData,
-            paymentMethodOptionsJsonString = paymentMethodOptions
+            paymentMethodOptionsMap = paymentMethodOptions,
         )
     }
 

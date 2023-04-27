@@ -400,6 +400,13 @@ internal object SetupIntentFixtures {
                 "metadata": {},
                 "type": "card"
             },
+            "payment_method_options": {
+                "card": {
+                    "mandate_options": null,
+                    "network": null,
+                    "request_three_d_secure": "automatic"
+                }
+            },
             "payment_method_types": ["card"],
             "status": "requires_action",
             "usage": "off_session"
