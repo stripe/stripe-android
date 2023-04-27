@@ -2419,7 +2419,7 @@ internal class StripeApiRepositoryTest {
                     mode = DeferredIntentParams.Mode.Payment(
                         amount = 2000,
                         currency = "usd",
-                        captureMethod = null,
+                        captureMethod = DeferredIntentParams.CaptureMethod.Automatic,
                         setupFutureUsage = null,
                     ),
                     paymentMethodTypes = listOf("card", "link"),

@@ -344,6 +344,13 @@ class PaymentSheet internal constructor(
             Automatic,
 
             /**
+             * Stripe asynchronously captures funds when the customer authorizes the payment.
+             * Recommended over [CaptureMethod.Automatic] due to improved latency, but may require
+             * additional integration changes.
+             */
+            AutomaticAsync,
+
+            /**
              * Place a hold on the funds when the customer authorizes the payment, but don't capture
              * the funds until later.
              *
