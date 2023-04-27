@@ -9,9 +9,8 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class DeferredIntentParams(
     val mode: Mode,
-    val setupFutureUsage: StripeIntent.Usage? = null,
-    val captureMethod: CaptureMethod? = null,
-    val paymentMethodTypes: Set<String> = emptySet()
+    val paymentMethodTypes: List<String>,
+    val onBehalfOf: String?,
 ) : StripeModel {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -23,7 +22,9 @@ data class DeferredIntentParams(
         @Parcelize
         data class Payment(
             val amount: Long,
-            val currency: String
+            val currency: String,
+            val setupFutureUsage: StripeIntent.Usage?,
+            val captureMethod: CaptureMethod?,
         ) : Mode {
             override val code: String get() = "payment"
         }
@@ -31,7 +32,7 @@ data class DeferredIntentParams(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Setup(
-            val currency: String?
+            val currency: String?,
         ) : Mode {
             override val code: String get() = "setup"
         }
@@ -40,7 +41,7 @@ data class DeferredIntentParams(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class CaptureMethod(val code: String) {
         Manual("manual"),
-        Automatic("automatic")
+        Automatic("automatic"),
     }
 
     fun toQueryParams(): Map<String, Any?> {
@@ -48,8 +49,9 @@ data class DeferredIntentParams(
             "deferred_intent[mode]" to mode.code,
             "deferred_intent[amount]" to (mode as? Mode.Payment)?.amount,
             "deferred_intent[currency]" to (mode as? Mode.Payment)?.currency,
-            "deferred_intent[setup_future_usage]" to setupFutureUsage?.code,
-            "deferred_intent[capture_method]" to captureMethod?.code,
+            "deferred_intent[setup_future_usage]" to (mode as? Mode.Payment)?.setupFutureUsage?.code,
+            "deferred_intent[capture_method]" to (mode as? Mode.Payment)?.captureMethod?.code,
+            "deferred_intent[on_behalf_of]" to onBehalfOf,
         ) + paymentMethodTypes.mapIndexed { index, paymentMethodType ->
             "deferred_intent[payment_method_types][$index]" to paymentMethodType
         }

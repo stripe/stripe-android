@@ -136,9 +136,8 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): Elements
             ElementsSessionParams.DeferredIntentType(
                 deferredIntentParams = DeferredIntentParams(
                     mode = intentConfiguration.mode.toElementsSessionParam(),
-                    setupFutureUsage = intentConfiguration.setupFutureUse?.toElementsSessionParam(),
-                    captureMethod = intentConfiguration.captureMethod?.toElementsSessionParam(),
-                    paymentMethodTypes = intentConfiguration.paymentMethodTypes.toSet(),
+                    paymentMethodTypes = intentConfiguration.paymentMethodTypes,
+                    onBehalfOf = intentConfiguration.onBehalfOf,
                 ),
             )
         }
@@ -148,8 +147,17 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): Elements
 @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 private fun PaymentSheet.IntentConfiguration.Mode.toElementsSessionParam(): Mode {
     return when (this) {
-        is PaymentSheet.IntentConfiguration.Mode.Payment -> Mode.Payment(amount, currency)
-        is PaymentSheet.IntentConfiguration.Mode.Setup -> Mode.Setup(currency)
+        is PaymentSheet.IntentConfiguration.Mode.Payment -> {
+            Mode.Payment(
+                amount = amount,
+                currency = currency,
+                setupFutureUsage = setupFutureUse?.toElementsSessionParam(),
+                captureMethod = captureMethod.toElementsSessionParam(),
+            )
+        }
+        is PaymentSheet.IntentConfiguration.Mode.Setup -> {
+            Mode.Setup(currency)
+        }
     }
 }
 

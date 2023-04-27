@@ -4,14 +4,13 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
-import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DeferredSetupIntentJsonParser(
     private val elementsSessionId: String?,
-    private val params: DeferredIntentParams,
     private val apiKey: String,
     private val timeProvider: () -> Long
 ) : ModelJsonParser<SetupIntent> {
@@ -43,7 +42,7 @@ class DeferredSetupIntentJsonParser(
             paymentMethodId = null,
             created = timeProvider(),
             status = null,
-            usage = params.setupFutureUsage,
+            usage = StripeIntent.Usage.OffSession,
         )
     }
 

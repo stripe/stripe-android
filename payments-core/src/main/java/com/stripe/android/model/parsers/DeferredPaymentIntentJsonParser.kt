@@ -28,8 +28,9 @@ class DeferredPaymentIntentJsonParser(
             .map { it.lowercase() }
 
         val countryCode = optString(json, FIELD_COUNTRY_CODE)
+        val paymentMode = params.mode as DeferredIntentParams.Mode.Payment
 
-        val captureMethod = when (params.captureMethod) {
+        val captureMethod = when (paymentMode.captureMethod) {
             DeferredIntentParams.CaptureMethod.Manual -> PaymentIntent.CaptureMethod.Manual
             DeferredIntentParams.CaptureMethod.Automatic -> PaymentIntent.CaptureMethod.Automatic
             null -> PaymentIntent.CaptureMethod.Automatic
@@ -45,9 +46,9 @@ class DeferredPaymentIntentJsonParser(
             unactivatedPaymentMethods = unactivatedPaymentMethods,
             isLiveMode = apiKey.contains("live"),
             created = timeProvider(),
-            setupFutureUsage = params.setupFutureUsage,
-            amount = (params.mode as DeferredIntentParams.Mode.Payment).amount,
-            currency = params.mode.currency
+            setupFutureUsage = paymentMode.setupFutureUsage,
+            amount = paymentMode.amount,
+            currency = paymentMode.currency
         )
     }
 
