@@ -65,6 +65,17 @@ class CountryUtilsTest {
     }
 
     @Test
+    // https://github.com/stripe/stripe-android/issues/6501
+    fun countryIsAvailableEvenWhenNotReturnedFrom_getISOCountries() {
+        // We used to use Locale.getISOCountries instead of our hardcoded set.
+        // Some countries (notably Kosovo) wasn't available on some older Android versions.
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.create("XK"), Locale.US))
+            .isEqualTo("Kosovo")
+        val country = CountryUtils.getCountryByCode(CountryCode.create("XK"), Locale.US)
+        assertThat(country).isEqualTo(Country("XK", "Kosovo"))
+    }
+
+    @Test
     fun `getOrderedCountriesLocaleLanguage() in the language of the current locale`() {
         val currentLocale = Locale("de", "DE")
         val germany = CountryUtils.getOrderedCountries(currentLocale)
