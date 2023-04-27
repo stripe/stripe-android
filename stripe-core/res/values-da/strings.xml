@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">Adresselinje 1</string>
+  <string name="stripe_address_label_address_line1">Adresselinje 1</string>
   <!-- Caption for City field on address form -->
-  <string name="address_label_city">By</string>
+  <string name="stripe_address_label_city">By</string>
   <!-- Caption for Country field on address form -->
-  <string name="address_label_country">Land</string>
+  <string name="stripe_address_label_country">Land</string>
   <!-- Country selector and postal code entry form header title -->
-  <string name="address_label_country_or_region">Land eller region</string>
+  <string name="stripe_address_label_country_or_region">Land eller region</string>
   <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
-  <string name="address_label_county">Amt</string>
+  <string name="stripe_address_label_county">Amt</string>
   <!-- Placeholder string for name entry field. -->
-  <string name="address_label_full_name">Fulde navn</string>
+  <string name="stripe_address_label_full_name">Fulde navn</string>
   <!-- Caption for Name field on address form -->
-  <string name="address_label_name">Navn</string>
+  <string name="stripe_address_label_name">Navn</string>
   <!-- Short string for postal code (text used in non-US countries) -->
-  <string name="address_label_postal_code">Postnummer</string>
+  <string name="stripe_address_label_postal_code">Postnummer</string>
   <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
-  <string name="address_label_province">Provins</string>
+  <string name="stripe_address_label_province">Provins</string>
   <!-- Caption for State field on address form (only countries that use state , like United States) -->
-  <string name="address_label_state">Stat</string>
+  <string name="stripe_address_label_state">Stat</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
-  <string name="address_label_zip_code">ZIP-kode</string>
+  <string name="stripe_address_label_zip_code">ZIP-kode</string>
 </resources>

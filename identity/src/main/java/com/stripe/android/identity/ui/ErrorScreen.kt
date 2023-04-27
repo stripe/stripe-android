@@ -62,7 +62,7 @@ internal fun ErrorScreen(
                 modifier = Modifier
                     .size(92.dp)
                     .align(Alignment.CenterHorizontally),
-                contentDescription = stringResource(id = R.string.description_exclamation)
+                contentDescription = stringResource(id = R.string.stripe_description_exclamation)
             )
             Spacer(modifier = Modifier.height(26.dp))
             Text(

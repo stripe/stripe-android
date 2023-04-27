@@ -415,7 +415,7 @@ internal class USBankAccountFormFragment : Fragment() {
             contentAlignment = Alignment.CenterEnd
         ) {
             Column {
-                Section(R.string.billing_details, sectionErrorString) {
+                Section(R.string.stripe_billing_details, sectionErrorString) {
                     AddressElementUI(
                         enabled = !processing.value,
                         controller = viewModel.addressElement.controller,
@@ -446,7 +446,7 @@ internal class USBankAccountFormFragment : Fragment() {
                 .padding(bottom = 8.dp)
         ) {
             H6Text(
-                text = stringResource(R.string.title_bank_account),
+                text = stringResource(R.string.stripe_title_bank_account),
                 modifier = Modifier.padding(vertical = 8.dp)
             )
             SectionCard(modifier = Modifier.fillMaxWidth()) {
@@ -503,14 +503,14 @@ internal class USBankAccountFormFragment : Fragment() {
                     id = R.string.stripe_paymentsheet_remove_bank_account_title
                 ),
                 messageText = stringResource(
-                    id = R.string.bank_account_ending_in,
+                    id = R.string.stripe_bank_account_ending_in,
                     last4
                 ),
                 confirmText = stringResource(
-                    id = R.string.remove
+                    id = R.string.stripe_remove
                 ),
                 dismissText = stringResource(
-                    id = R.string.cancel
+                    id = R.string.stripe_cancel
                 ),
                 onConfirmListener = {
                     openDialog.value = false

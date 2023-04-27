@@ -83,7 +83,7 @@ class BillingDetailsHelpersTest {
                 ),
                 SimpleTextSpec(
                     apiPath = IdentifierSpec.Generic("dummy"),
-                    label = R.string.affirm_buy_now_pay_later,
+                    label = R.string.stripe_affirm_buy_now_pay_later,
                 ),
             ),
         )
@@ -94,7 +94,7 @@ class BillingDetailsHelpersTest {
             EmailSpec(),
             SimpleTextSpec(
                 apiPath = IdentifierSpec.Generic("dummy"),
-                label = R.string.affirm_buy_now_pay_later,
+                label = R.string.stripe_affirm_buy_now_pay_later,
             ),
             PhoneSpec(),
             AddressSpec(),

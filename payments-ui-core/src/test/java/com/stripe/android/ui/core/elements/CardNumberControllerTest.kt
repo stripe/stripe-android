@@ -51,7 +51,7 @@ internal class CardNumberControllerTest {
         idleLooper()
 
         assertThat(errorFlowValues[errorFlowValues.size - 1]?.errorMessage)
-            .isEqualTo(R.string.invalid_card_number)
+            .isEqualTo(R.string.stripe_invalid_card_number)
     }
 
     @Test

@@ -53,7 +53,7 @@ internal class AutocompleteViewModel @Inject constructor(
     val addressResult = MutableStateFlow<Result<AddressDetails?>?>(null)
 
     private val config = SimpleTextFieldConfig(
-        label = R.string.address_label_address,
+        label = R.string.stripe_address_label_address,
         trailingIcon = MutableStateFlow(null)
     )
 

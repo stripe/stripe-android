@@ -35,7 +35,7 @@ class CvcConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_cvc)
+        ).isEqualTo(R.string.stripe_invalid_cvc)
     }
 
     @Test
@@ -45,7 +45,7 @@ class CvcConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_cvc)
+        ).isEqualTo(R.string.stripe_invalid_cvc)
     }
 
     @Test

@@ -17,10 +17,10 @@ internal class BecsDebitAccountNumberEditText @JvmOverloads constructor(
         get() {
             errorMessage = when {
                 fieldText.isBlank() -> {
-                    resources.getString(R.string.becs_widget_account_number_required)
+                    resources.getString(R.string.stripe_becs_widget_account_number_required)
                 }
                 fieldText.length < minLength -> {
-                    resources.getString(R.string.becs_widget_account_number_incomplete)
+                    resources.getString(R.string.stripe_becs_widget_account_number_incomplete)
                 }
                 else -> {
                     null

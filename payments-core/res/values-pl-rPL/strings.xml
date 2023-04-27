@@ -1,169 +1,169 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Label for card number entry text field -->
-  <string name="acc_label_card_number">Nr karty</string>
-  <string name="acc_label_card_number_node">%s, nr karty</string>
-  <string name="acc_label_cvc_node">%s, CVC</string>
-  <string name="acc_label_expiry_date">Data ważności</string>
-  <string name="acc_label_expiry_date_node">%s, data ważności</string>
+  <string name="stripe_acc_label_card_number">Nr karty</string>
+  <string name="stripe_acc_label_card_number_node">%s, nr karty</string>
+  <string name="stripe_acc_label_cvc_node">%s, CVC</string>
+  <string name="stripe_acc_label_expiry_date">Data ważności</string>
+  <string name="stripe_acc_label_expiry_date_node">%s, data ważności</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-  <string name="acc_label_zip">Kod pocztowy</string>
+  <string name="stripe_acc_label_zip">Kod pocztowy</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
-  <string name="acc_label_zip_short">Kod p</string>
+  <string name="stripe_acc_label_zip_short">Kod p</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="added">Dodano: %s</string>
+  <string name="stripe_added">Dodano: %s</string>
   <!-- Error text indicating that city is required, used for all locations -->
-  <string name="address_city_required">Podaj miejscowość</string>
+  <string name="stripe_address_city_required">Podaj miejscowość</string>
   <!-- Error text indicating country is invalid -->
-  <string name="address_country_invalid">Nieprawidłowy kraj</string>
+  <string name="stripe_address_country_invalid">Nieprawidłowy kraj</string>
   <!-- Error text indicating that county is required, used for UK addresses -->
-  <string name="address_county_required">Podaj kraj</string>
+  <string name="stripe_address_county_required">Podaj kraj</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
-  <string name="address_label_address_line1_optional">Linia adresu 1 (opcja)</string>
+  <string name="stripe_address_label_address_line1_optional">Linia adresu 1 (opcja)</string>
   <!-- Address line 2 placeholder for billing address form. -->
-  <string name="address_label_address_line2_optional">Linia adresu 2 (opcja)</string>
+  <string name="stripe_address_label_address_line2_optional">Linia adresu 2 (opcja)</string>
   <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
-  <string name="address_label_address_optional">Adres (opcja)</string>
+  <string name="stripe_address_label_address_optional">Adres (opcja)</string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
-  <string name="address_label_apt_optional">Nr lokalu (opcja)</string>
+  <string name="stripe_address_label_apt_optional">Nr lokalu (opcja)</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
-  <string name="address_label_city_optional">Miejscowość (opcja)</string>
+  <string name="stripe_address_label_city_optional">Miejscowość (opcja)</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
-  <string name="address_label_county_optional">Hrabstwo (opcja)</string>
+  <string name="stripe_address_label_county_optional">Hrabstwo (opcja)</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
-  <string name="address_label_phone_number_optional">Nr telefonu (opcja)</string>
+  <string name="stripe_address_label_phone_number_optional">Nr telefonu (opcja)</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
-  <string name="address_label_postal_code_optional">Kod pocztowy (opcja)</string>
+  <string name="stripe_address_label_postal_code_optional">Kod pocztowy (opcja)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
-  <string name="address_label_postcode">Kod pocztowy</string>
+  <string name="stripe_address_label_postcode">Kod pocztowy</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
-  <string name="address_label_postcode_optional">Kod pocztowy (opcja)</string>
+  <string name="stripe_address_label_postcode_optional">Kod pocztowy (opcja)</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
-  <string name="address_label_province_optional">Prowincja (opcja)</string>
+  <string name="stripe_address_label_province_optional">Prowincja (opcja)</string>
   <!-- Label for input requesting the region, used for international addresses -->
-  <string name="address_label_region_generic">Województwo/prowincja/region</string>
+  <string name="stripe_address_label_region_generic">Województwo/prowincja/region</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
-  <string name="address_label_region_generic_optional">Województwo/prowincja/region (opcja)</string>
+  <string name="stripe_address_label_region_generic_optional">Województwo/prowincja/region (opcja)</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
-  <string name="address_label_state_optional">Stan (opcja)</string>
+  <string name="stripe_address_label_state_optional">Stan (opcja)</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
-  <string name="address_label_zip_code_optional">Kod pocztowy (opcja)</string>
+  <string name="stripe_address_label_zip_code_optional">Kod pocztowy (opcja)</string>
   <!-- Label for input requesting postal code, used for international addresses -->
-  <string name="address_label_zip_postal_code">Kod pocztowy</string>
+  <string name="stripe_address_label_zip_postal_code">Kod pocztowy</string>
   <!-- Label for input requesting postal code where input is optional, used for international addresses -->
-  <string name="address_label_zip_postal_code_optional">Kod pocztowy (opcja)</string>
+  <string name="stripe_address_label_zip_postal_code_optional">Kod pocztowy (opcja)</string>
   <!-- Error text indicating name is required -->
-  <string name="address_name_required">Podaj imię i nazwisko</string>
+  <string name="stripe_address_name_required">Podaj imię i nazwisko</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
-  <string name="address_phone_number_required">Podaj nr telefonu</string>
+  <string name="stripe_address_phone_number_required">Podaj nr telefonu</string>
   <!-- Error message for when postal code in form is invalid -->
-  <string name="address_postal_code_invalid">Nieprawidłowy kod pocztowy.</string>
+  <string name="stripe_address_postal_code_invalid">Nieprawidłowy kod pocztowy.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
-  <string name="address_postcode_invalid">Nieprawidłowy kod pocztowy</string>
+  <string name="stripe_address_postcode_invalid">Nieprawidłowy kod pocztowy</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->
-  <string name="address_province_required">Podaj prowincję</string>
+  <string name="stripe_address_province_required">Podaj prowincję</string>
   <!-- Error text indicating that region is required, used for international addresses -->
-  <string name="address_region_generic_required">Podaj województwo/prowincję/region</string>
+  <string name="stripe_address_region_generic_required">Podaj województwo/prowincję/region</string>
   <!-- Error text indicating that address is required, used for all locations -->
-  <string name="address_required">Podaj adres</string>
+  <string name="stripe_address_required">Podaj adres</string>
   <!-- Error text indicating that state is required, used for US addresses -->
-  <string name="address_state_required">Podaj stan</string>
+  <string name="stripe_address_state_required">Podaj stan</string>
   <!-- Pay over time with Affirm copy -->
-  <string name="affirm_buy_now_pay_later">Zapłać później, korzystając z &lt;img src=\"affirm\"&gt;.</string>
+  <string name="stripe_affirm_buy_now_pay_later">Zapłać później, korzystając z &lt;img src=\"affirm\"&gt;.</string>
   <!-- Label for Name on account field on form -->
-  <string name="au_becs_account_name">Imię i nazwisko na rachunku</string>
+  <string name="stripe_au_becs_account_name">Imię i nazwisko na rachunku</string>
   <!-- Placeholder for AU BECS BSB number -->
-  <string name="au_becs_bsb_number">Numer BSB</string>
+  <string name="stripe_au_becs_bsb_number">Numer BSB</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="au_becs_mandate">Podając dane swojego konta bankowego i potwierdzając tę płatność, wyrażasz zgodę na niniejsze żądanie polecenia zapłaty oraz &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;umowę dotyczącą usługi polecenia zapłaty&lt;/a&gt;, a także upoważniasz podmiot Stripe Payments Australia Pty Ltd ACN 160 180 343 o identyfikatorze użytkownika polecenia zapłaty 507156 („Stripe”) do obciążenia Twojego konta przez system Bulk Electronic Clearing System (BECS) w imieniu podmiotu %s („Sprzedawca”) na każdą kwotę osobno zakomunikowaną Ci przez Sprzedawcę. Potwierdzasz, że jesteś właścicielem konta lub upoważnionym sygnatariuszem wyżej wymienionego konta.</string>
+  <string name="stripe_au_becs_mandate">Podając dane swojego konta bankowego i potwierdzając tę płatność, wyrażasz zgodę na niniejsze żądanie polecenia zapłaty oraz &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;umowę dotyczącą usługi polecenia zapłaty&lt;/a&gt;, a także upoważniasz podmiot Stripe Payments Australia Pty Ltd ACN 160 180 343 o identyfikatorze użytkownika polecenia zapłaty 507156 („Stripe”) do obciążenia Twojego konta przez system Bulk Electronic Clearing System (BECS) w imieniu podmiotu %s („Sprzedawca”) na każdą kwotę osobno zakomunikowaną Ci przez Sprzedawcę. Potwierdzasz, że jesteś właścicielem konta lub upoważnionym sygnatariuszem wyżej wymienionego konta.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="becs_mandate_acceptance">\n    Podając dane konta bankowego i zatwierdzając tę płatność, wyrażasz zgodę na\n    niniejsze żądanie polecenia zapłaty i warunki umowy oraz upoważniasz podmiot\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 o numerze użytkownika Direct Debit 507156\n    („Stripe”) do obciążenia Twojego konta poprzez Bulk Electronic Clearing System (BECS) w\n    imieniu podmiotu %1$s („Partner handlowy”) na dowolną kwotę osobno zakomunikowaną Ci\n    przez Partnera handlowego. Zaświadczasz, że jesteś właścicielem konta lub upoważnioną\n    osobą podpisującą, reprezentującą wyżej wymienione konto.\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    Podając dane konta bankowego i zatwierdzając tę płatność, wyrażasz zgodę na\n    niniejsze żądanie polecenia zapłaty i warunki umowy oraz upoważniasz podmiot\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 o numerze użytkownika Direct Debit 507156\n    („Stripe”) do obciążenia Twojego konta poprzez Bulk Electronic Clearing System (BECS) w\n    imieniu podmiotu %1$s („Partner handlowy”) na dowolną kwotę osobno zakomunikowaną Ci\n    przez Partnera handlowego. Zaświadczasz, że jesteś właścicielem konta lub upoważnioną\n    osobą podpisującą, reprezentującą wyżej wymienione konto.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
-  <string name="becs_widget_account_number">Numer konta</string>
+  <string name="stripe_becs_widget_account_number">Numer konta</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="becs_widget_account_number_incomplete">Numer konta jest niekompletny.</string>
+  <string name="stripe_becs_widget_account_number_incomplete">Numer konta jest niekompletny.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
-  <string name="becs_widget_account_number_required">Wymagany jest numer konta.</string>
+  <string name="stripe_becs_widget_account_number_required">Wymagany jest numer konta.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
-  <string name="becs_widget_bsb">BSB</string>
+  <string name="stripe_becs_widget_bsb">BSB</string>
   <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
-  <string name="becs_widget_bsb_incomplete">Wprowadzony numer BSB jest niepełny.</string>
+  <string name="stripe_becs_widget_bsb_incomplete">Wprowadzony numer BSB jest niepełny.</string>
   <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
-  <string name="becs_widget_bsb_invalid">Wprowadzony numer BSB jest nieprawidłowy.</string>
+  <string name="stripe_becs_widget_bsb_invalid">Wprowadzony numer BSB jest nieprawidłowy.</string>
   <!-- BECS Debit Widget - email address field - label -->
-  <string name="becs_widget_email">Adres e-mail</string>
+  <string name="stripe_becs_widget_email">Adres e-mail</string>
   <!-- BECS Debit Widget - email address field - invalid error message -->
-  <string name="becs_widget_email_invalid">Twój adres e-mail jest nieprawidłowy.</string>
+  <string name="stripe_becs_widget_email_invalid">Twój adres e-mail jest nieprawidłowy.</string>
   <!-- BECS Debit Widget - email address field - required error message -->
-  <string name="becs_widget_email_required">Wymagany jest adres e-mail.</string>
+  <string name="stripe_becs_widget_email_required">Wymagany jest adres e-mail.</string>
   <!-- BECS Debit Widget - name field - label -->
-  <string name="becs_widget_name">Imię i nazwisko</string>
+  <string name="stripe_becs_widget_name">Imię i nazwisko</string>
   <!-- BECS Debit Widget - name field - required error message -->
-  <string name="becs_widget_name_required">Wymagane jest imię i nazwisko.</string>
+  <string name="stripe_becs_widget_name_required">Wymagane jest imię i nazwisko.</string>
   <!-- Button title to cancel action in an alert -->
-  <string name="cancel">Anuluj</string>
+  <string name="stripe_cancel">Anuluj</string>
   <!-- Error when the card was declined by the credit card networks -->
-  <string name="card_declined">Karta została odrzucona</string>
+  <string name="stripe_card_declined">Karta została odrzucona</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="card_ending_in">%1$s kończy się %2$s</string>
+  <string name="stripe_card_ending_in">%1$s kończy się %2$s</string>
   <!-- Text for close button -->
-  <string name="close">Zamknij</string>
+  <string name="stripe_close">Zamknij</string>
   <!-- Accessibility action for deleting a payment method -->
-  <string name="delete_payment_method">Usuń metodę płatności</string>
-  <string name="delete_payment_method_prompt_title">Czy usunąć metodę płatności?</string>
+  <string name="stripe_delete_payment_method">Usuń metodę płatności</string>
+  <string name="stripe_delete_payment_method_prompt_title">Czy usunąć metodę płatności?</string>
   <!-- Done button title -->
-  <string name="done">Gotowe</string>
+  <string name="stripe_done">Gotowe</string>
   <!-- Button title to enter editing mode -->
-  <string name="edit">Edytuj</string>
+  <string name="stripe_edit">Edytuj</string>
   <!-- Error when the card has already expired -->
-  <string name="expired_card">Ważność Twojej karty wygasła</string>
+  <string name="stripe_expired_card">Ważność Twojej karty wygasła</string>
   <!-- label for text field to enter card expiry -->
-  <string name="expiry_date_hint">MM/RR</string>
-  <string name="expiry_label_short">Data ważności</string>
-  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="fpx_bank_offline">%s – offline</string>
-  <!-- Error message when a payment method gets declined. -->
-  <string name="generic_decline">Twoja metoda płatności została odrzucona.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="invalid_bank_account_iban">Podany IBAN jest nieprawidłowy.</string>
-  <string name="invalid_card_number">Nieprawidłowy nr karty.</string>
-  <!-- Error message for card entry form when CVC/CVV is invalid -->
-  <string name="invalid_cvc">Kod bezpieczeństwa karty jest nieprawidłowy.</string>
-  <!-- Error when customer's name is invalid -->
-  <string name="invalid_owner_name">Twoje imię i nazwisko jest nieprawidłowe.</string>
-  <!-- Shipping form error message -->
-  <string name="invalid_shipping_information">Nieprawidłowy adres dostawy</string>
-  <!-- Error message for when postal code in form is incomplete -->
-  <string name="invalid_zip">Kod pocztowy jest niekompletny.</string>
-  <string name="payment_method_add_new_card">Dodaj nową kartę…</string>
-  <string name="payment_method_add_new_fpx">Wybierz konto bankowe (FPX)…</string>
-  <!-- Label for free shipping method -->
-  <string name="price_free">Bezpłatnie</string>
-  <!-- Error when there is a problem processing the credit card -->
-  <string name="processing_error">Podczas przetwarzania Twojej karty wystąpił błąd – spróbuj ponownie za kilka sekund</string>
-  <!-- Button title for confirmation alert to remove a saved payment method
-   Text for remove button -->
-  <string name="remove">Usuń</string>
-  <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="removed">Usunięto: %s</string>
-  <string name="secure_checkout">Bezpieczna płatność</string>
+  <string name="stripe_expiry_date_hint">MM/RR</string>
+  <string name="stripe_expiry_label_short">Data ważności</string>
   <!-- Generic error message shown when payment cannot be processed. -->
   <string name="stripe_failure_connection_error">Wystąpiły trudności z nawiązaniem połączenia z dostawcą usług płatniczych. Sprawdź połączenie z Internetem i spróbuj ponownie.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Nie możemy wykonać uwierzytelnienia Twojej metody płatności. Wybierz inną metodę i spróbuj ponownie.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Przekroczono czas uwierzytelnienia metody płatności – spróbuj ponownie</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="stripe_fpx_bank_offline">%s – offline</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="stripe_generic_decline">Twoja metoda płatności została odrzucona.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Wystąpił wewnętrzny błąd.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="stripe_invalid_bank_account_iban">Podany IBAN jest nieprawidłowy.</string>
+  <string name="stripe_invalid_card_number">Nieprawidłowy nr karty.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="stripe_invalid_cvc">Kod bezpieczeństwa karty jest nieprawidłowy.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="stripe_invalid_owner_name">Twoje imię i nazwisko jest nieprawidłowe.</string>
+  <!-- Shipping form error message -->
+  <string name="stripe_invalid_shipping_information">Nieprawidłowy adres dostawy</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="stripe_invalid_zip">Kod pocztowy jest niekompletny.</string>
+  <string name="stripe_payment_method_add_new_card">Dodaj nową kartę…</string>
+  <string name="stripe_payment_method_add_new_fpx">Wybierz konto bankowe (FPX)…</string>
+  <!-- Label for free shipping method -->
+  <string name="stripe_price_free">Bezpłatnie</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="stripe_processing_error">Podczas przetwarzania Twojej karty wystąpił błąd – spróbuj ponownie za kilka sekund</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="stripe_remove">Usuń</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="stripe_removed">Usunięto: %s</string>
+  <string name="stripe_secure_checkout">Bezpieczna płatność</string>
+  <string name="stripe_title_add_a_card">Dodaj kartę</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="stripe_title_add_an_address">Ustaw adres</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="stripe_title_bank_account">Konto bankowe</string>
+  <!-- Title for Payment Method screen -->
+  <string name="stripe_title_payment_method">Metoda płatności</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="stripe_title_select_shipping_method">Wybierz metodę przesyłki</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Zweryfikuj płatność</string>
-  <string name="title_add_a_card">Dodaj kartę</string>
-  <!-- Screen title telling users they should add an address -->
-  <string name="title_add_an_address">Ustaw adres</string>
-  <!-- Label for Bank Account selection or detail entry form -->
-  <string name="title_bank_account">Konto bankowe</string>
-  <!-- Title for Payment Method screen -->
-  <string name="title_payment_method">Metoda płatności</string>
-  <!-- Screen title telling users they should select a shipping address -->
-  <string name="title_select_shipping_method">Wybierz metodę przesyłki</string>
 </resources>

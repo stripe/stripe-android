@@ -33,7 +33,7 @@ internal class CvcControllerTest {
         idleLooper()
 
         assertThat(errorFlowValues[errorFlowValues.size - 1]?.errorMessage)
-            .isEqualTo(R.string.invalid_cvc)
+            .isEqualTo(R.string.stripe_invalid_cvc)
     }
 
     @Test

@@ -235,10 +235,10 @@ class CardFormView @JvmOverloads constructor(
     private fun updatePostalCodeViewLocale(countryCode: CountryCode?) {
         if (CountryCode.isUS(countryCode)) {
             postalCodeView.config = PostalCodeEditText.Config.US
-            postalCodeView.setErrorMessage(resources.getString(R.string.address_zip_invalid))
+            postalCodeView.setErrorMessage(resources.getString(R.string.stripe_address_zip_invalid))
         } else {
             postalCodeView.config = PostalCodeEditText.Config.Global
-            postalCodeView.setErrorMessage(resources.getString(R.string.address_postal_code_invalid))
+            postalCodeView.setErrorMessage(resources.getString(R.string.stripe_address_postal_code_invalid))
         }
     }
 
@@ -283,7 +283,7 @@ class CardFormView @JvmOverloads constructor(
 
         cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
         cardMultilineWidget.expirationDatePlaceholderRes = null
-        cardMultilineWidget.expiryTextInputLayout.hint = context.getString(R.string.expiration_date_hint)
+        cardMultilineWidget.expiryTextInputLayout.hint = context.getString(R.string.stripe_expiration_date_hint)
         cardMultilineWidget.cardNumberTextInputLayout.placeholderText = null
         cardMultilineWidget.setCvcPlaceholderText("")
 

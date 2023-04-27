@@ -52,7 +52,7 @@ internal fun LinkAppBar(
         ) {
             Icon(
                 painter = painterResource(state.navigationIcon),
-                contentDescription = stringResource(id = R.string.back),
+                contentDescription = stringResource(id = R.string.stripe_back),
                 tint = MaterialTheme.linkColors.closeButton
             )
         }
@@ -68,7 +68,7 @@ internal fun LinkAppBar(
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_link_logo),
-                contentDescription = stringResource(R.string.link),
+                contentDescription = stringResource(R.string.stripe_link),
                 tint = MaterialTheme.linkColors.linkLogo
             )
 
@@ -115,7 +115,7 @@ internal fun LinkAppBar(
         ) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
-                contentDescription = stringResource(R.string.show_menu),
+                contentDescription = stringResource(R.string.stripe_show_menu),
                 tint = MaterialTheme.linkColors.closeButton
             )
         }

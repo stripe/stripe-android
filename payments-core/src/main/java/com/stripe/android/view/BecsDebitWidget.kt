@@ -130,7 +130,7 @@ class BecsDebitWidget @JvmOverloads constructor(
         )
 
         viewBinding.nameEditText.errorMessage = resources.getString(
-            R.string.becs_widget_name_required
+            R.string.stripe_becs_widget_name_required
         )
         viewBinding.nameEditText.setErrorMessageListener(
             ErrorListener(viewBinding.nameTextInputLayout)

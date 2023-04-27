@@ -69,7 +69,7 @@ internal fun AddressSection(
         }
     }
     val sectionElement = remember(selectedCountryCode) {
-        SectionElement.wrap(sectionList, R.string.address_label_address)
+        SectionElement.wrap(sectionList, R.string.stripe_address_label_address)
     }
     val formFieldValues by sectionElement.getFormFieldValueFlow()
         .collectAsState(initial = emptyList())

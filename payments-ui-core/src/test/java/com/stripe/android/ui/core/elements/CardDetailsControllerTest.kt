@@ -34,14 +34,14 @@ class CardDetailsControllerTest {
         idleLooper()
 
         assertThat(flowValues[flowValues.size - 1]?.errorMessage).isEqualTo(
-            R.string.invalid_card_number
+            R.string.stripe_invalid_card_number
         )
 
         cardController.numberElement.controller.onValueChange("4242424242424242")
         idleLooper()
 
         assertThat(flowValues[flowValues.size - 1]?.errorMessage).isEqualTo(
-            R.string.incomplete_expiry_date
+            R.string.stripe_incomplete_expiry_date
         )
     }
 

@@ -11,7 +11,7 @@ class TextFieldStateTest {
     @Test
     fun `Accepts input on a text field that's not full`() {
         val fieldState = TextFieldStateConstants.Error.Incomplete(
-            errorMessageResId = R.string.invalid_cvc
+            errorMessageResId = R.string.stripe_invalid_cvc
         )
 
         val didAccept = fieldState.canAcceptInput(

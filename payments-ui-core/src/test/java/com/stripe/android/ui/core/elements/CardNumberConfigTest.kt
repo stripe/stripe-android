@@ -54,7 +54,7 @@ class CardNumberConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_card_number)
+        ).isEqualTo(R.string.stripe_invalid_card_number)
     }
 
     @Test
@@ -64,7 +64,7 @@ class CardNumberConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_card_number)
+        ).isEqualTo(R.string.stripe_invalid_card_number)
     }
 
     @Test
@@ -74,7 +74,7 @@ class CardNumberConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_card_number)
+        ).isEqualTo(R.string.stripe_invalid_card_number)
     }
 
     @Test
@@ -84,7 +84,7 @@ class CardNumberConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_card_number)
+        ).isEqualTo(R.string.stripe_invalid_card_number)
     }
 
     @Test

@@ -56,7 +56,7 @@ data class CardBillingSpec(
                 addressElement,
                 sameAsShippingElement
             ),
-            R.string.billing_details
+            R.string.stripe_billing_details
         )
     }
 }

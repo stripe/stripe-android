@@ -29,7 +29,7 @@ internal fun ConfirmRemoveDialog(
                     }
                 ) {
                     Text(
-                        text = stringResource(R.string.remove),
+                        text = stringResource(R.string.stripe_remove),
                         color = MaterialTheme.linkColors.actionLabel
                     )
                 }
@@ -41,7 +41,7 @@ internal fun ConfirmRemoveDialog(
                     }
                 ) {
                     Text(
-                        text = stringResource(R.string.cancel),
+                        text = stringResource(R.string.stripe_cancel),
                         color = MaterialTheme.linkColors.actionLabel
                     )
                 }

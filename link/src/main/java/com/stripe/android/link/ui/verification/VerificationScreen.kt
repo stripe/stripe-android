@@ -58,8 +58,8 @@ private fun VerificationBodyPreview() {
     DefaultLinkTheme {
         Surface {
             VerificationBody(
-                headerStringResId = R.string.verification_header,
-                messageStringResId = R.string.verification_message,
+                headerStringResId = R.string.stripe_verification_header,
+                messageStringResId = R.string.stripe_verification_message,
                 showChangeEmailMessage = true,
                 redactedPhoneNumber = "+1********23",
                 email = "test@stripe.com",
@@ -82,8 +82,8 @@ internal fun VerificationBodyFullFlow(
     injector: NonFallbackInjector
 ) {
     VerificationBody(
-        headerStringResId = R.string.verification_header,
-        messageStringResId = R.string.verification_message,
+        headerStringResId = R.string.stripe_verification_header,
+        messageStringResId = R.string.stripe_verification_message,
         showChangeEmailMessage = true,
         linkAccount = linkAccount,
         injector = injector
@@ -138,7 +138,7 @@ internal fun VerificationBody(
 
     LaunchedEffect(viewState.didSendNewCode) {
         if (viewState.didSendNewCode) {
-            Toast.makeText(context, R.string.verification_code_sent, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.stripe_verification_code_sent, Toast.LENGTH_SHORT).show()
             viewModel.didShowCodeSentNotification()
         }
     }
@@ -240,7 +240,7 @@ private fun ChangeEmailRow(
         horizontalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(id = R.string.verification_not_email, email),
+            text = stringResource(id = R.string.stripe_verification_not_email, email),
             modifier = Modifier.weight(weight = 1f, fill = false),
             color = MaterialTheme.colors.onSecondary,
             overflow = TextOverflow.Ellipsis,
@@ -248,7 +248,7 @@ private fun ChangeEmailRow(
             style = MaterialTheme.typography.body2
         )
         Text(
-            text = stringResource(id = R.string.verification_change_email),
+            text = stringResource(id = R.string.stripe_verification_change_email),
             modifier = Modifier
                 .padding(start = 4.dp)
                 .clickable(
@@ -292,7 +292,7 @@ private fun ResendCodeButton(
         }
 
         Text(
-            text = stringResource(id = R.string.verification_resend),
+            text = stringResource(id = R.string.stripe_verification_resend),
             style = MaterialTheme.typography.button,
             color = MaterialTheme.colors.onPrimary,
             modifier = Modifier

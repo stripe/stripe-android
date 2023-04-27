@@ -8,12 +8,12 @@ internal val ConsumerPaymentDetails.BankAccount.icon
 
 internal val ConsumerPaymentDetails.PaymentDetails.removeLabel
     get() = when (this) {
-        is ConsumerPaymentDetails.Card -> R.string.wallet_remove_card
-        is ConsumerPaymentDetails.BankAccount -> R.string.wallet_remove_linked_account
+        is ConsumerPaymentDetails.Card -> R.string.stripe_wallet_remove_card
+        is ConsumerPaymentDetails.BankAccount -> R.string.stripe_wallet_remove_linked_account
     }
 
 internal val ConsumerPaymentDetails.PaymentDetails.removeConfirmation
     get() = when (this) {
-        is ConsumerPaymentDetails.Card -> R.string.wallet_remove_card_confirmation
-        is ConsumerPaymentDetails.BankAccount -> R.string.wallet_remove_account_confirmation
+        is ConsumerPaymentDetails.Card -> R.string.stripe_wallet_remove_card_confirmation
+        is ConsumerPaymentDetails.BankAccount -> R.string.stripe_wallet_remove_account_confirmation
     }

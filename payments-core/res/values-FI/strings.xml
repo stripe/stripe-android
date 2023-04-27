@@ -1,169 +1,169 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Label for card number entry text field -->
-  <string name="acc_label_card_number">Kortin numero</string>
-  <string name="acc_label_card_number_node">%s, kortin numero</string>
-  <string name="acc_label_cvc_node">%s, CVC</string>
-  <string name="acc_label_expiry_date">Erääntymispäivä</string>
-  <string name="acc_label_expiry_date_node">%s, erääntymispäivä</string>
+  <string name="stripe_acc_label_card_number">Kortin numero</string>
+  <string name="stripe_acc_label_card_number_node">%s, kortin numero</string>
+  <string name="stripe_acc_label_cvc_node">%s, CVC</string>
+  <string name="stripe_acc_label_expiry_date">Erääntymispäivä</string>
+  <string name="stripe_acc_label_expiry_date_node">%s, erääntymispäivä</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-  <string name="acc_label_zip">Postinumero</string>
+  <string name="stripe_acc_label_zip">Postinumero</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
-  <string name="acc_label_zip_short">Postinumero</string>
+  <string name="stripe_acc_label_zip_short">Postinumero</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="added">Lisätty %s</string>
+  <string name="stripe_added">Lisätty %s</string>
   <!-- Error text indicating that city is required, used for all locations -->
-  <string name="address_city_required">Kirjoita paikkakunta</string>
+  <string name="stripe_address_city_required">Kirjoita paikkakunta</string>
   <!-- Error text indicating country is invalid -->
-  <string name="address_country_invalid">Maa ei kelpaa</string>
+  <string name="stripe_address_country_invalid">Maa ei kelpaa</string>
   <!-- Error text indicating that county is required, used for UK addresses -->
-  <string name="address_county_required">Kirjoita lääni</string>
+  <string name="stripe_address_county_required">Kirjoita lääni</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
-  <string name="address_label_address_line1_optional">Osoiterivi 1 (valinnainen)</string>
+  <string name="stripe_address_label_address_line1_optional">Osoiterivi 1 (valinnainen)</string>
   <!-- Address line 2 placeholder for billing address form. -->
-  <string name="address_label_address_line2_optional">Osoiterivi 2 (valinnainen)</string>
+  <string name="stripe_address_label_address_line2_optional">Osoiterivi 2 (valinnainen)</string>
   <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
-  <string name="address_label_address_optional">Osoite (valinnainen) </string>
+  <string name="stripe_address_label_address_optional">Osoite (valinnainen) </string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
-  <string name="address_label_apt_optional">Asunto (valinnainen)</string>
+  <string name="stripe_address_label_apt_optional">Asunto (valinnainen)</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
-  <string name="address_label_city_optional">Paikkakunta (valinnainen)</string>
+  <string name="stripe_address_label_city_optional">Paikkakunta (valinnainen)</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
-  <string name="address_label_county_optional">Lääni (valinnainen)</string>
+  <string name="stripe_address_label_county_optional">Lääni (valinnainen)</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
-  <string name="address_label_phone_number_optional">Puhelinnumero (valinnainen)</string>
+  <string name="stripe_address_label_phone_number_optional">Puhelinnumero (valinnainen)</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
-  <string name="address_label_postal_code_optional">Postinumero (valinnainen)</string>
+  <string name="stripe_address_label_postal_code_optional">Postinumero (valinnainen)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
-  <string name="address_label_postcode">Postinumero</string>
+  <string name="stripe_address_label_postcode">Postinumero</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
-  <string name="address_label_postcode_optional">Postinumero (valinnainen)</string>
+  <string name="stripe_address_label_postcode_optional">Postinumero (valinnainen)</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
-  <string name="address_label_province_optional">Maakunta (valinnainen)</string>
+  <string name="stripe_address_label_province_optional">Maakunta (valinnainen)</string>
   <!-- Label for input requesting the region, used for international addresses -->
-  <string name="address_label_region_generic">Osavaltio/maakunta/alue</string>
+  <string name="stripe_address_label_region_generic">Osavaltio/maakunta/alue</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
-  <string name="address_label_region_generic_optional">Osavaltio/maakunta/alue (valinnainen)</string>
+  <string name="stripe_address_label_region_generic_optional">Osavaltio/maakunta/alue (valinnainen)</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
-  <string name="address_label_state_optional">Osavaltio (valinnainen)</string>
+  <string name="stripe_address_label_state_optional">Osavaltio (valinnainen)</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
-  <string name="address_label_zip_code_optional">Postinumero (valinnainen)</string>
+  <string name="stripe_address_label_zip_code_optional">Postinumero (valinnainen)</string>
   <!-- Label for input requesting postal code, used for international addresses -->
-  <string name="address_label_zip_postal_code">Postinumero</string>
+  <string name="stripe_address_label_zip_postal_code">Postinumero</string>
   <!-- Label for input requesting postal code where input is optional, used for international addresses -->
-  <string name="address_label_zip_postal_code_optional">Postinumero (valinnainen)</string>
+  <string name="stripe_address_label_zip_postal_code_optional">Postinumero (valinnainen)</string>
   <!-- Error text indicating name is required -->
-  <string name="address_name_required">Kirjoita nimesi</string>
+  <string name="stripe_address_name_required">Kirjoita nimesi</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
-  <string name="address_phone_number_required">Kirjoita puhelinnumerosi</string>
+  <string name="stripe_address_phone_number_required">Kirjoita puhelinnumerosi</string>
   <!-- Error message for when postal code in form is invalid -->
-  <string name="address_postal_code_invalid">Postinumeroon virheellinen.</string>
+  <string name="stripe_address_postal_code_invalid">Postinumeroon virheellinen.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
-  <string name="address_postcode_invalid">Postinumerosi ei kelpaa</string>
+  <string name="stripe_address_postcode_invalid">Postinumerosi ei kelpaa</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->
-  <string name="address_province_required">Kirjoita maakunta</string>
+  <string name="stripe_address_province_required">Kirjoita maakunta</string>
   <!-- Error text indicating that region is required, used for international addresses -->
-  <string name="address_region_generic_required">Kirjoita osavaltio/maakunta/alue</string>
+  <string name="stripe_address_region_generic_required">Kirjoita osavaltio/maakunta/alue</string>
   <!-- Error text indicating that address is required, used for all locations -->
-  <string name="address_required">Kirjoita osoite</string>
+  <string name="stripe_address_required">Kirjoita osoite</string>
   <!-- Error text indicating that state is required, used for US addresses -->
-  <string name="address_state_required">Kirjoita osavaltio</string>
+  <string name="stripe_address_state_required">Kirjoita osavaltio</string>
   <!-- Pay over time with Affirm copy -->
-  <string name="affirm_buy_now_pay_later">Maksa aikanaan kohteella &lt;img src=\"affirm\"&gt;.</string>
+  <string name="stripe_affirm_buy_now_pay_later">Maksa aikanaan kohteella &lt;img src=\"affirm\"&gt;.</string>
   <!-- Label for Name on account field on form -->
-  <string name="au_becs_account_name">Tilin nimi</string>
+  <string name="stripe_au_becs_account_name">Tilin nimi</string>
   <!-- Placeholder for AU BECS BSB number -->
-  <string name="au_becs_bsb_number">BSB-numero</string>
+  <string name="stripe_au_becs_bsb_number">BSB-numero</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="au_becs_mandate">Antamalla pankkitilisi tiedot ja vahvistamalla tämän maksun hyväksyt suoraveloituspyynnön ja &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;suoraveloituspyynnön palvelusopimuksen&lt;/a&gt; ja valtuutat Stripe Payments Australia Pty Ltd:n ACN, 160 180 343 suoraveloituksen käyttäjätunnus 507156 (\"Stripe\"), veloittamaan tililtäsi BECS:n kautta kohteen %s (\"Merchant\") puolesta kaikista kauppiaan erikseen ilmoittamista summista. Vakuutat, että olet joko tilinhaltija tai valtuutettu allekirjoittaja yllä mainitulla tilillä.</string>
+  <string name="stripe_au_becs_mandate">Antamalla pankkitilisi tiedot ja vahvistamalla tämän maksun hyväksyt suoraveloituspyynnön ja &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;suoraveloituspyynnön palvelusopimuksen&lt;/a&gt; ja valtuutat Stripe Payments Australia Pty Ltd:n ACN, 160 180 343 suoraveloituksen käyttäjätunnus 507156 (\"Stripe\"), veloittamaan tililtäsi BECS:n kautta kohteen %s (\"Merchant\") puolesta kaikista kauppiaan erikseen ilmoittamista summista. Vakuutat, että olet joko tilinhaltija tai valtuutettu allekirjoittaja yllä mainitulla tilillä.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="becs_mandate_acceptance">\n    Antamalla pankkitilisi tiedot ja vahvistamalla tämän maksun hyväksyt tämän\n    suoraveloituspyynnön ja suoraveloituspyyntöpalvelusopimuksen ja valtuutat\n    Stripe Payments Australia Pty Ltd:n ACN, 160 180 343 suoraveloituksen käyttäjätunnus 507156,\n     veloittamaan tililtäsi BECS:n kautta (\"Kauppias\")\n     kohteen %1$s puolesta kaikista kauppiaan erikseen ilmoittamista summista.\n     Vakuutat, että olet joko tilinomistaja tai valtuutettu allekirjoittaja\n     yllä mainitulla tilillä.\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    Antamalla pankkitilisi tiedot ja vahvistamalla tämän maksun hyväksyt tämän\n    suoraveloituspyynnön ja suoraveloituspyyntöpalvelusopimuksen ja valtuutat\n    Stripe Payments Australia Pty Ltd:n ACN, 160 180 343 suoraveloituksen käyttäjätunnus 507156,\n     veloittamaan tililtäsi BECS:n kautta (\"Kauppias\")\n     kohteen %1$s puolesta kaikista kauppiaan erikseen ilmoittamista summista.\n     Vakuutat, että olet joko tilinomistaja tai valtuutettu allekirjoittaja\n     yllä mainitulla tilillä.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
-  <string name="becs_widget_account_number">Tilinumero</string>
+  <string name="stripe_becs_widget_account_number">Tilinumero</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="becs_widget_account_number_incomplete">Tilinumerosi on puutteellinen.</string>
+  <string name="stripe_becs_widget_account_number_incomplete">Tilinumerosi on puutteellinen.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
-  <string name="becs_widget_account_number_required">Tilinumerosi vaaditaan.</string>
+  <string name="stripe_becs_widget_account_number_required">Tilinumerosi vaaditaan.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
-  <string name="becs_widget_bsb">BSB</string>
+  <string name="stripe_becs_widget_bsb">BSB</string>
   <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
-  <string name="becs_widget_bsb_incomplete">Antamasi BSB-numero on puutteellinen.</string>
+  <string name="stripe_becs_widget_bsb_incomplete">Antamasi BSB-numero on puutteellinen.</string>
   <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
-  <string name="becs_widget_bsb_invalid">Antamasi BSB-numero on virheellinen.</string>
+  <string name="stripe_becs_widget_bsb_invalid">Antamasi BSB-numero on virheellinen.</string>
   <!-- BECS Debit Widget - email address field - label -->
-  <string name="becs_widget_email">Sähköpostiosoite</string>
+  <string name="stripe_becs_widget_email">Sähköpostiosoite</string>
   <!-- BECS Debit Widget - email address field - invalid error message -->
-  <string name="becs_widget_email_invalid">Sähköpostiosoitteesi on virheellinen.</string>
+  <string name="stripe_becs_widget_email_invalid">Sähköpostiosoitteesi on virheellinen.</string>
   <!-- BECS Debit Widget - email address field - required error message -->
-  <string name="becs_widget_email_required">Sähköpostiosoitteesi vaaditaan.</string>
+  <string name="stripe_becs_widget_email_required">Sähköpostiosoitteesi vaaditaan.</string>
   <!-- BECS Debit Widget - name field - label -->
-  <string name="becs_widget_name">Nimi</string>
+  <string name="stripe_becs_widget_name">Nimi</string>
   <!-- BECS Debit Widget - name field - required error message -->
-  <string name="becs_widget_name_required">Nimesi vaaditaan.</string>
+  <string name="stripe_becs_widget_name_required">Nimesi vaaditaan.</string>
   <!-- Button title to cancel action in an alert -->
-  <string name="cancel">Peruuta</string>
+  <string name="stripe_cancel">Peruuta</string>
   <!-- Error when the card was declined by the credit card networks -->
-  <string name="card_declined">Korttiasi ei hyväksytty</string>
+  <string name="stripe_card_declined">Korttiasi ei hyväksytty</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="card_ending_in">%1$s päättyy numeroihin %2$s</string>
+  <string name="stripe_card_ending_in">%1$s päättyy numeroihin %2$s</string>
   <!-- Text for close button -->
-  <string name="close">Sulje</string>
+  <string name="stripe_close">Sulje</string>
   <!-- Accessibility action for deleting a payment method -->
-  <string name="delete_payment_method">Poista maksutapa</string>
-  <string name="delete_payment_method_prompt_title">Poista maksutapa?</string>
+  <string name="stripe_delete_payment_method">Poista maksutapa</string>
+  <string name="stripe_delete_payment_method_prompt_title">Poista maksutapa?</string>
   <!-- Done button title -->
-  <string name="done">Valmis</string>
+  <string name="stripe_done">Valmis</string>
   <!-- Button title to enter editing mode -->
-  <string name="edit">Muokkaa</string>
+  <string name="stripe_edit">Muokkaa</string>
   <!-- Error when the card has already expired -->
-  <string name="expired_card">Korttisi on vanhentunut</string>
+  <string name="stripe_expired_card">Korttisi on vanhentunut</string>
   <!-- label for text field to enter card expiry -->
-  <string name="expiry_date_hint">KK/VV</string>
-  <string name="expiry_label_short">Vanheneminen</string>
-  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="fpx_bank_offline">%s - Offline-tilassa</string>
-  <!-- Error message when a payment method gets declined. -->
-  <string name="generic_decline">Maksutapasi on hylätty.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="invalid_bank_account_iban">Antamasi IBAN on virheellinen.</string>
-  <string name="invalid_card_number">Kortin numero ei kelpaa.</string>
-  <!-- Error message for card entry form when CVC/CVV is invalid -->
-  <string name="invalid_cvc">Kortin turvakoodi on virheellinen.</string>
-  <!-- Error when customer's name is invalid -->
-  <string name="invalid_owner_name">Nimi on virheellinen.</string>
-  <!-- Shipping form error message -->
-  <string name="invalid_shipping_information">Toimitusosoite ei kelpaa</string>
-  <!-- Error message for when postal code in form is incomplete -->
-  <string name="invalid_zip">Postinumero on puutteellinen.</string>
-  <string name="payment_method_add_new_card">Lisää uusi kortti...</string>
-  <string name="payment_method_add_new_fpx">Valitse pankkitili (FPX)...</string>
-  <!-- Label for free shipping method -->
-  <string name="price_free">Maksuton</string>
-  <!-- Error when there is a problem processing the credit card -->
-  <string name="processing_error">Kortin käsittelyssä tapahtui virhe – kokeile uudelleen muutaman sekunnin kuluttua</string>
-  <!-- Button title for confirmation alert to remove a saved payment method
-   Text for remove button -->
-  <string name="remove">Poista</string>
-  <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="removed">Poistettu %s</string>
-  <string name="secure_checkout">Turvallinen maksu</string>
+  <string name="stripe_expiry_date_hint">KK/VV</string>
+  <string name="stripe_expiry_label_short">Vanheneminen</string>
   <!-- Generic error message shown when payment cannot be processed. -->
   <string name="stripe_failure_connection_error">Yhteydessä maksun käsittelijään esiintyi ongelmia. Tarkista Internet-yhteys ja yritä uudelleen.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Emme pystyneet todentamaan maksutapaasi. Valitse toinen maksutapa ja yritä uudelleen.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Maksutapasi todennus aikakatkaistiin – yritä uudelleen.</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="stripe_fpx_bank_offline">%s - Offline-tilassa</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="stripe_generic_decline">Maksutapasi on hylätty.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Sisäinen virhe on tapahtunut.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="stripe_invalid_bank_account_iban">Antamasi IBAN on virheellinen.</string>
+  <string name="stripe_invalid_card_number">Kortin numero ei kelpaa.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="stripe_invalid_cvc">Kortin turvakoodi on virheellinen.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="stripe_invalid_owner_name">Nimi on virheellinen.</string>
+  <!-- Shipping form error message -->
+  <string name="stripe_invalid_shipping_information">Toimitusosoite ei kelpaa</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="stripe_invalid_zip">Postinumero on puutteellinen.</string>
+  <string name="stripe_payment_method_add_new_card">Lisää uusi kortti...</string>
+  <string name="stripe_payment_method_add_new_fpx">Valitse pankkitili (FPX)...</string>
+  <!-- Label for free shipping method -->
+  <string name="stripe_price_free">Maksuton</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="stripe_processing_error">Kortin käsittelyssä tapahtui virhe – kokeile uudelleen muutaman sekunnin kuluttua</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="stripe_remove">Poista</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="stripe_removed">Poistettu %s</string>
+  <string name="stripe_secure_checkout">Turvallinen maksu</string>
+  <string name="stripe_title_add_a_card">Lisää kortti</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="stripe_title_add_an_address">Lisää osoite</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="stripe_title_bank_account">Pankkitili</string>
+  <!-- Title for Payment Method screen -->
+  <string name="stripe_title_payment_method">Maksutapa</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="stripe_title_select_shipping_method">Valitse lähetysmenetelmä</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Vahvista maksu</string>
-  <string name="title_add_a_card">Lisää kortti</string>
-  <!-- Screen title telling users they should add an address -->
-  <string name="title_add_an_address">Lisää osoite</string>
-  <!-- Label for Bank Account selection or detail entry form -->
-  <string name="title_bank_account">Pankkitili</string>
-  <!-- Title for Payment Method screen -->
-  <string name="title_payment_method">Maksutapa</string>
-  <!-- Screen title telling users they should select a shipping address -->
-  <string name="title_select_shipping_method">Valitse lähetysmenetelmä</string>
 </resources>

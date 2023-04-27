@@ -349,7 +349,7 @@ private fun AllowedDocumentTypes(
             )
 
             StyledClickableText(
-                text = AnnotatedString(stringResource(id = R.string.driver_license)),
+                text = AnnotatedString(stringResource(id = R.string.stripe_driver_license)),
                 onClick = {
                     onSubmissionStateChangedListener(
                         identitySubmissionState.copy(
@@ -372,7 +372,7 @@ private fun AllowedDocumentTypes(
                 )
             })
             StyledClickableText(
-                text = AnnotatedString(stringResource(id = R.string.passport)),
+                text = AnnotatedString(stringResource(id = R.string.stripe_passport)),
                 onClick = {
                     onSubmissionStateChangedListener(
                         identitySubmissionState.copy(
@@ -395,7 +395,7 @@ private fun AllowedDocumentTypes(
                 )
             })
             StyledClickableText(
-                text = AnnotatedString(stringResource(id = R.string.id_card)),
+                text = AnnotatedString(stringResource(id = R.string.stripe_id_card)),
                 onClick = {
                     onSubmissionStateChangedListener(
                         identitySubmissionState.copy(

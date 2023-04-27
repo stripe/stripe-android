@@ -33,7 +33,7 @@ internal fun rememberPaymentSheetTopBarState(
         }
 
         val contentDescription = if (screen == PaymentSheetScreen.AddAnotherPaymentMethod) {
-            R.string.back
+            R.string.stripe_back
         } else {
             R.string.stripe_paymentsheet_close
         }
@@ -41,9 +41,9 @@ internal fun rememberPaymentSheetTopBarState(
         val showOptionsMenu = screen is PaymentSheetScreen.SelectSavedPaymentMethods
 
         val editMenuLabel = if (isEditing) {
-            R.string.done
+            R.string.stripe_done
         } else {
-            R.string.edit
+            R.string.stripe_edit
         }
 
         PaymentSheetTopBarState(

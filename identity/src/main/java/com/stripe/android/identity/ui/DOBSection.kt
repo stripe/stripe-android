@@ -55,7 +55,7 @@ internal fun DOBSection(
                 identifier = IdentifierSpec.Generic(DOB_SPEC),
                 controller = dateController
             ),
-            label = R.string.dob
+            label = R.string.stripe_dob
         )
     }
 
@@ -78,7 +78,7 @@ internal fun DOBSection(
 }
 
 internal object DobTextFieldConfig : SimpleTextFieldConfig(
-    label = R.string.dob_placeholder
+    label = R.string.stripe_dob_placeholder
 ) {
     /**
      * Check if the string is a valid date and is between 01-01-1990 and now.
@@ -112,7 +112,7 @@ internal object DobTextFieldConfig : SimpleTextFieldConfig(
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getError(): FieldError = FieldError(R.string.invalid_dob_error)
+        override fun getError(): FieldError = FieldError(R.string.stripe_invalid_dob_error)
 
         override fun isFull(): Boolean = input.length == DATE_LENGTH
 

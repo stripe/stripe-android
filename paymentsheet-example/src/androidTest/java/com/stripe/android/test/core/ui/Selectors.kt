@@ -221,7 +221,7 @@ class Selectors(
 
     // Note: Compose will take care of scrolling to the field if not in view.
     fun getEmail() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.email)
+        getResourceString(R.string.stripe_email)
     )
 
     fun getName(@StringRes resourceId: Int) = composeTestRule.onNodeWithText(
@@ -229,34 +229,34 @@ class Selectors(
     )
 
     fun getLine1() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_address_line1)
+        getResourceString(R.string.stripe_address_label_address_line1)
     )
 
     fun getCity() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_city)
+        getResourceString(R.string.stripe_address_label_city)
     )
 
     fun getState() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_state)
+        getResourceString(R.string.stripe_address_label_state)
     )
 
     fun selectState(value: String) {
-        composeTestRule.onNodeWithText(getResourceString(R.string.address_label_state))
+        composeTestRule.onNodeWithText(getResourceString(R.string.stripe_address_label_state))
             .performClick()
         composeTestRule.onNodeWithText(value)
             .performClick()
     }
 
     fun getZip() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_zip_code)
+        getResourceString(R.string.stripe_address_label_zip_code)
     )
 
     fun getAuBsb() = composeTestRule.onNodeWithText(
-        getResourceString(com.stripe.android.ui.core.R.string.becs_widget_bsb)
+        getResourceString(com.stripe.android.ui.core.R.string.stripe_becs_widget_bsb)
     )
 
     fun getAuAccountNumber() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.becs_widget_account_number)
+        getResourceString(R.string.stripe_becs_widget_account_number)
     )
 
     fun getGoogleDividerText() = composeTestRule.onNodeWithText(
@@ -267,13 +267,13 @@ class Selectors(
 
     fun getCardNumber() = composeTestRule.onNodeWithText(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            com.stripe.android.R.string.acc_label_card_number
+            com.stripe.android.R.string.stripe_acc_label_card_number
         )
     )
 
     fun getCardExpiration() = composeTestRule.onNodeWithText(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            R.string.expiration_date_hint
+            R.string.stripe_expiration_date_hint
         )
     )
 

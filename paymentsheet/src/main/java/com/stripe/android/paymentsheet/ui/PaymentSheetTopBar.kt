@@ -172,10 +172,10 @@ internal fun PaymentSheetTopBar_Preview() {
     StripeTheme(colors = StripeThemeDefaults.colorsLight.copy(appBarIcon = Color.Red)) {
         val state = PaymentSheetTopBarState(
             icon = R.drawable.stripe_ic_paymentsheet_back,
-            contentDescription = R.string.back,
+            contentDescription = R.string.stripe_back,
             showTestModeLabel = true,
             showEditMenu = true,
-            editMenuLabel = R.string.edit,
+            editMenuLabel = R.string.stripe_edit,
             isEnabled = true,
         )
 

@@ -1,148 +1,148 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Opens the app's settings in the Settings app -->
-  <string name="app_settings">Rakenduse sätted</string>
+  <string name="stripe_app_settings">Rakenduse sätted</string>
   <!-- Description of back of driver's license image -->
-  <string name="back_of_dl">Juhiloa tagakülg</string>
+  <string name="stripe_back_of_dl">Juhiloa tagakülg</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
-  <string name="back_of_dl_selected">Valitud on juhiloa tagakülg</string>
+  <string name="stripe_back_of_dl_selected">Valitud on juhiloa tagakülg</string>
   <!-- Description of back of identity card image -->
-  <string name="back_of_id">ID-kaardi tagakülg</string>
+  <string name="stripe_back_of_id">ID-kaardi tagakülg</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
-  <string name="back_of_id_selected">Valitud on ID-kaardi tagakülg</string>
+  <string name="stripe_back_of_id_selected">Valitud on ID-kaardi tagakülg</string>
   <!-- Title displayed when requesting camera permissions -->
-  <string name="camera_permission">Kaamera luba</string>
-  <string name="camera_permission_rationale">See rakendus kasutab teie isikut tõendavate dokumentide skannimiseks kaamerat ja pildistab teie isiku kinnitamiseks.</string>
+  <string name="stripe_camera_permission">Kaamera luba</string>
+  <string name="stripe_camera_permission_rationale">See rakendus kasutab teie isikut tõendavate dokumentide skannimiseks kaamerat ja pildistab teie isiku kinnitamiseks.</string>
   <!-- Instructional text during selfie is being captured -->
-  <string name="capturing">Pildistamine …</string>
+  <string name="stripe_capturing">Pildistamine …</string>
   <!-- Description of the check mark, used for A11Y -->
-  <string name="check_mark">Dokumendi edukat jäädvustamist tähistav märge</string>
+  <string name="stripe_check_mark">Dokumendi edukat jäädvustamist tähistav märge</string>
   <!-- Text for choosing a photo from gallery -->
-  <string name="choose_file">Vali foto</string>
+  <string name="stripe_choose_file">Vali foto</string>
   <!-- Line1 body text of error screen when live capture fails -->
-  <string name="could_not_capture_body1">Meil ei õnnestunud teha kõrge kvaliteediga pilti.</string>
+  <string name="stripe_could_not_capture_body1">Meil ei õnnestunud teha kõrge kvaliteediga pilti.</string>
   <!-- Line2 body text of error screen when live capture fails -->
-  <string name="could_not_capture_body2">Võite kas uuesti proovida või pildi oma seadmest üles laadida.</string>
+  <string name="stripe_could_not_capture_body2">Võite kas uuesti proovida või pildi oma seadmest üles laadida.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
-  <string name="could_not_capture_title">Pilti ei saanud teha</string>
+  <string name="stripe_could_not_capture_title">Pilti ei saanud teha</string>
   <!-- Description of the clock icon, used for A11Y -->
-  <string name="description_clock">Kellaikoon</string>
+  <string name="stripe_description_clock">Kellaikoon</string>
   <!-- Content description for close button -->
-  <string name="description_close">sulge kinnitusleht</string>
+  <string name="stripe_description_close">sulge kinnitusleht</string>
   <!-- Content description for exclamation icon -->
-  <string name="description_exclamation">hüüumärgi ikoon</string>
+  <string name="stripe_description_exclamation">hüüumärgi ikoon</string>
   <!-- Content description for back button -->
-  <string name="description_go_back">mine tagasi eelmisele ekraanile</string>
+  <string name="stripe_description_go_back">mine tagasi eelmisele ekraanile</string>
   <!-- Content description for merchant logo -->
-  <string name="description_merchant_logo">Kaupleja logo</string>
+  <string name="stripe_description_merchant_logo">Kaupleja logo</string>
   <!-- Content description for plus icon -->
-  <string name="description_plus">plussikoon</string>
+  <string name="stripe_description_plus">plussikoon</string>
   <!-- Content description for the icon for privacy policy -->
-  <string name="description_privacy_policy">privaatsuspoliitika ikoon</string>
+  <string name="stripe_description_privacy_policy">privaatsuspoliitika ikoon</string>
   <!-- Content description for stripe logo -->
-  <string name="description_stripe_logo">stripe\'i logo</string>
+  <string name="stripe_description_stripe_logo">stripe\'i logo</string>
   <!-- Content description for the icon for estimated time to complete verification -->
-  <string name="description_time_estimate">hinnanguline aeg kinnitamise lõpuleviimiseks</string>
+  <string name="stripe_description_time_estimate">hinnanguline aeg kinnitamise lõpuleviimiseks</string>
   <!-- Label for Date of birth field -->
-  <string name="dob">Sünnikuupäev</string>
+  <string name="stripe_dob">Sünnikuupäev</string>
   <!-- Label of the driver's license option for document type selection -->
-  <string name="driver_license">Juhiluba</string>
+  <string name="stripe_driver_license">Juhiluba</string>
   <!-- Text for error labels -->
-  <string name="error">Viga</string>
+  <string name="stripe_error">Viga</string>
   <!-- Button that opens file upload screen -->
-  <string name="file_upload">Faili üleslaadimine</string>
+  <string name="stripe_file_upload">Faili üleslaadimine</string>
   <!-- Instructions for uploading images of drivers license -->
-  <string name="file_upload_content_dl">Laadige üles oma juhiloa esi- ja tagakülje pildid</string>
+  <string name="stripe_file_upload_content_dl">Laadige üles oma juhiloa esi- ja tagakülje pildid</string>
   <!-- Instructions for uploading images of identity card -->
-  <string name="file_upload_content_id">Laadige üles oma ID-kaardi esi- ja tagakülje pildid</string>
+  <string name="stripe_file_upload_content_id">Laadige üles oma ID-kaardi esi- ja tagakülje pildid</string>
   <!-- Instructions for uploading images of passport -->
-  <string name="file_upload_content_passport">Laadige üles oma passi pilt</string>
+  <string name="stripe_file_upload_content_passport">Laadige üles oma passi pilt</string>
   <!-- Label for first (given) name field -->
-  <string name="first_name">Esimene</string>
+  <string name="stripe_first_name">Esimene</string>
   <!-- Content description of selfie flash animation mask -->
-  <string name="flash_mask">Selfi flash-animatsiooni mask</string>
+  <string name="stripe_flash_mask">Selfi flash-animatsiooni mask</string>
   <!-- Description of front of driver's license image -->
-  <string name="front_of_dl">Juhiloa esikülg</string>
+  <string name="stripe_front_of_dl">Juhiloa esikülg</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
-  <string name="front_of_dl_selected">Valitud on juhiloa esikülg</string>
+  <string name="stripe_front_of_dl_selected">Valitud on juhiloa esikülg</string>
   <!-- Description of front of identity card image -->
-  <string name="front_of_id">ID-kaardi esikülg</string>
+  <string name="stripe_front_of_id">ID-kaardi esikülg</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
-  <string name="front_of_id_selected">Valitud on ID-kaardi esikülg</string>
+  <string name="stripe_front_of_id_selected">Valitud on ID-kaardi esikülg</string>
   <!-- Button to go back to the previous screen -->
-  <string name="go_back">Mine tagasi</string>
+  <string name="stripe_go_back">Mine tagasi</string>
   <!-- Text displayed when requesting camera permissions -->
-  <string name="grant_camera_permission_text">Vajame teie kaamera kasutamiseks luba. Andke rakenduse sätete kaudu juurdepääs kaamerale.</string>
+  <string name="stripe_grant_camera_permission_text">Vajame teie kaamera kasutamiseks luba. Andke rakenduse sätete kaudu juurdepääs kaamerale.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
-  <string name="hold_still">Hoidke paigal, skannimine</string>
+  <string name="stripe_hold_still">Hoidke paigal, skannimine</string>
   <!-- display name for ID -->
-  <string name="id_card">ID-kaart</string>
+  <string name="stripe_id_card">ID-kaart</string>
   <!-- Label for ID number section -->
-  <string name="id_number">Isikukood</string>
+  <string name="stripe_id_number">Isikukood</string>
   <!-- An error message. -->
-  <string name="incomplete_id_number">Sisestatud isikukood on puudulik.</string>
+  <string name="stripe_incomplete_id_number">Sisestatud isikukood on puudulik.</string>
   <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
-  <string name="individual_cpf">Eraisiku CPF</string>
+  <string name="stripe_individual_cpf">Eraisiku CPF</string>
   <!-- Message for invalid Date of birth field -->
-  <string name="invalid_dob_error">Sünnikuupäev ei näi olevat õige</string>
+  <string name="stripe_invalid_dob_error">Sünnikuupäev ei näi olevat õige</string>
   <!-- Continue button text -->
-  <string name="kontinue">jätka</string>
+  <string name="stripe_kontinue">jätka</string>
   <!-- Label for the ID field to collect last 4 of social security number for US ID -->
-  <string name="last_4_of_ssn">Sotsiaalkindlustuse numbri viimased 4 numbrit</string>
+  <string name="stripe_last_4_of_ssn">Sotsiaalkindlustuse numbri viimased 4 numbrit</string>
   <!-- Label for last (family) name field -->
-  <string name="last_name">Viimane</string>
+  <string name="stripe_last_name">Viimane</string>
   <!-- Status while screen is loading -->
-  <string name="loading">Laadimine</string>
+  <string name="stripe_loading">Laadimine</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
-  <string name="nric_or_fin">NRIC või FIN</string>
+  <string name="stripe_nric_or_fin">NRIC või FIN</string>
   <!-- No comment provided by engineer. -->
-  <string name="ok">OK</string>
+  <string name="stripe_ok">OK</string>
   <!-- Label of the passport option for document type selection -->
-  <string name="passport">Pass</string>
+  <string name="stripe_passport">Pass</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
-  <string name="passport_selected">Valitud on pass</string>
+  <string name="stripe_passport_selected">Valitud on pass</string>
   <!-- Instructional text for scanning back of a driver's license -->
-  <string name="position_dl_back">Pöörake juhiluba ümber</string>
+  <string name="stripe_position_dl_back">Pöörake juhiluba ümber</string>
   <!-- Instructional text for scanning front of a driver's license -->
-  <string name="position_dl_front">Jälgige, et juhiluba oleks raami keskel</string>
+  <string name="stripe_position_dl_front">Jälgige, et juhiluba oleks raami keskel</string>
   <!-- Instructional text for scanning back of a identity card -->
-  <string name="position_id_back">Pöörake ID-kaart ümber</string>
+  <string name="stripe_position_id_back">Pöörake ID-kaart ümber</string>
   <!-- Instructional text for scanning front of a identity card -->
-  <string name="position_id_front">Jälgige, et ID-kaart oleks raami keskel</string>
+  <string name="stripe_position_id_front">Jälgige, et ID-kaart oleks raami keskel</string>
   <!-- Instructional text for scanning a passport -->
-  <string name="position_passport">Jälgige, et pass oleks raami keskel</string>
+  <string name="stripe_position_passport">Jälgige, et pass oleks raami keskel</string>
   <!-- Instructional text for capturing selfie -->
-  <string name="position_selfie">Jälgige, et nägu oleks raami keskel.</string>
+  <string name="stripe_position_selfie">Jälgige, et nägu oleks raami keskel.</string>
   <!-- Button text displayed to the user to retake photo -->
-  <string name="retake_photos">Tee fotod uuesti</string>
+  <string name="stripe_retake_photos">Tee fotod uuesti</string>
   <!-- State when identity document has been successfully scanned -->
-  <string name="scanned">Skannitud</string>
+  <string name="stripe_scanned">Skannitud</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
-  <string name="select">Vali</string>
+  <string name="stripe_select">Vali</string>
   <!-- Instructional text when selfie is captured -->
-  <string name="selfie_capture_complete">Selfi on jäädvustatud</string>
+  <string name="stripe_selfie_capture_complete">Selfi on jäädvustatud</string>
   <!-- Title of selfie capture screen -->
-  <string name="selfie_captures">Selfi pildistamine</string>
+  <string name="stripe_selfie_captures">Selfi pildistamine</string>
   <!-- Content description of a captured selfie -->
-  <string name="selfie_item_description">jäädvustatud üks selfi</string>
+  <string name="stripe_selfie_item_description">jäädvustatud üks selfi</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
-  <string name="selfie_not_saved_warning">Teie selfi pilte pole salvestatud. Kas soovite lahkuda?</string>
+  <string name="stripe_selfie_not_saved_warning">Teie selfi pilte pole salvestatud. Kas soovite lahkuda?</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
-  <string name="take_photo">Pildista</string>
+  <string name="stripe_take_photo">Pildista</string>
   <!-- Button to attempt to re-scan identity document image -->
-  <string name="try_again">Proovi uuesti</string>
+  <string name="stripe_try_again">Proovi uuesti</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="unexpected_error_try_again">Esines ootamatu tõrge – proovige mõne sekundi pärast uuesti</string>
+  <string name="stripe_unexpected_error_try_again">Esines ootamatu tõrge – proovige mõne sekundi pärast uuesti</string>
   <!-- Title of dialog to upload back of driver license -->
-  <string name="upload_dialog_title_dl_back">Juhiloa tagakülje üleslaadimine</string>
+  <string name="stripe_upload_dialog_title_dl_back">Juhiloa tagakülje üleslaadimine</string>
   <!-- Title of dialog to upload front of driver license -->
-  <string name="upload_dialog_title_dl_front">Juhiloa esikülje üleslaadimine</string>
+  <string name="stripe_upload_dialog_title_dl_front">Juhiloa esikülje üleslaadimine</string>
   <!-- Title of dialog to upload back of ID -->
-  <string name="upload_dialog_title_id_back">ID-kaardi tagakülje üleslaadimine</string>
+  <string name="stripe_upload_dialog_title_id_back">ID-kaardi tagakülje üleslaadimine</string>
   <!-- Title of dialog to upload front of ID -->
-  <string name="upload_dialog_title_id_front">ID-kaardi esikülje üleslaadimine</string>
+  <string name="stripe_upload_dialog_title_id_front">ID-kaardi esikülje üleslaadimine</string>
   <!-- Title of dialog to upload passport -->
-  <string name="upload_dialog_title_passport">Passi üleslaadimine</string>
+  <string name="stripe_upload_dialog_title_passport">Passi üleslaadimine</string>
   <!-- Message for alternative options when uploading a document -->
-  <string name="upload_file_text">Samuti võite oma %1$s foto käsitsi üles laadida</string>
+  <string name="stripe_upload_file_text">Samuti võite oma %1$s foto käsitsi üles laadida</string>
 </resources>

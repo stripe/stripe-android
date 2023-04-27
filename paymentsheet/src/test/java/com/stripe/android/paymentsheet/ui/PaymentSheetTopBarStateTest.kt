@@ -131,7 +131,7 @@ class PaymentSheetTopBarStateTest {
             isEditing = false,
         )
 
-        assertThat(state.editMenuLabel).isEqualTo(R.string.edit)
+        assertThat(state.editMenuLabel).isEqualTo(R.string.stripe_edit)
     }
 
     @Test
@@ -144,7 +144,7 @@ class PaymentSheetTopBarStateTest {
             isEditing = true,
         )
 
-        assertThat(state.editMenuLabel).isEqualTo(R.string.done)
+        assertThat(state.editMenuLabel).isEqualTo(R.string.stripe_done)
     }
 
     @Test

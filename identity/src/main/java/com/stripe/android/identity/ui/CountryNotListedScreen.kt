@@ -102,7 +102,7 @@ private fun BodyContent(
             modifier = Modifier
                 .width(26.dp)
                 .height(26.dp),
-            contentDescription = stringResource(id = R.string.description_plus)
+            contentDescription = stringResource(id = R.string.stripe_description_plus)
         )
     }
     Text(

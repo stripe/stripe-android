@@ -38,7 +38,7 @@ internal fun LoadingScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CircularProgressIndicator(modifier = Modifier.padding(bottom = 32.dp))
-        Text(text = stringResource(id = R.string.loading), fontSize = 24.sp)
+        Text(text = stringResource(id = R.string.stripe_loading), fontSize = 24.sp)
     }
 }
 

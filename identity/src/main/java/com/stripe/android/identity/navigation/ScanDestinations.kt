@@ -112,8 +112,8 @@ internal class PassportScanDestination(
     shouldPopUpToDocSelection = shouldPopUpToDocSelection,
     frontScanType = IdentityScanState.ScanType.PASSPORT,
     backScanType = IdentityScanState.ScanType.PASSPORT,
-    frontTitleStringRes = R.string.passport,
-    frontMessageStringRes = R.string.position_passport,
+    frontTitleStringRes = R.string.stripe_passport,
+    frontMessageStringRes = R.string.stripe_position_passport,
     collectedDataParamType = CollectedDataParam.Type.PASSPORT
 ) {
     override val destinationRoute = ROUTE
@@ -132,10 +132,10 @@ internal class IDScanDestination(
     shouldPopUpToDocSelection = shouldPopUpToDocSelection,
     frontScanType = IdentityScanState.ScanType.ID_FRONT,
     backScanType = IdentityScanState.ScanType.ID_BACK,
-    frontTitleStringRes = R.string.front_of_id,
-    backTitleStringRes = R.string.back_of_id,
-    frontMessageStringRes = R.string.position_id_front,
-    backMessageStringRes = R.string.position_id_back,
+    frontTitleStringRes = R.string.stripe_front_of_id,
+    backTitleStringRes = R.string.stripe_back_of_id,
+    frontMessageStringRes = R.string.stripe_position_id_front,
+    backMessageStringRes = R.string.stripe_position_id_back,
     collectedDataParamType = CollectedDataParam.Type.IDCARD
 ) {
     override val destinationRoute = ROUTE
@@ -154,10 +154,10 @@ internal class DriverLicenseScanDestination(
     shouldPopUpToDocSelection = shouldPopUpToDocSelection,
     frontScanType = IdentityScanState.ScanType.DL_FRONT,
     backScanType = IdentityScanState.ScanType.DL_BACK,
-    frontTitleStringRes = R.string.front_of_dl,
-    backTitleStringRes = R.string.back_of_dl,
-    frontMessageStringRes = R.string.position_dl_front,
-    backMessageStringRes = R.string.position_dl_back,
+    frontTitleStringRes = R.string.stripe_front_of_dl,
+    backTitleStringRes = R.string.stripe_back_of_dl,
+    frontMessageStringRes = R.string.stripe_position_dl_front,
+    backMessageStringRes = R.string.stripe_position_dl_back,
     collectedDataParamType = CollectedDataParam.Type.DRIVINGLICENSE
 ) {
     override val destinationRoute = ROUTE

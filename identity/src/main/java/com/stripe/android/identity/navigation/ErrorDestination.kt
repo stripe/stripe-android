@@ -80,8 +80,8 @@ internal class ErrorDestination(
 
 internal fun Context.finalErrorDestination(): ErrorDestination =
     ErrorDestination(
-        errorTitle = getString(R.string.error),
-        errorContent = getString(R.string.unexpected_error_try_again),
-        backButtonText = getString(R.string.go_back),
+        errorTitle = getString(R.string.stripe_error),
+        errorContent = getString(R.string.stripe_unexpected_error_try_again),
+        backButtonText = getString(R.string.stripe_go_back),
         shouldFail = true
     )

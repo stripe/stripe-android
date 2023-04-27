@@ -72,13 +72,13 @@ class AddPaymentMethodActivity : StripeActivity() {
         get() {
             return when (paymentMethodType) {
                 PaymentMethod.Type.Card -> {
-                    R.string.title_add_a_card
+                    R.string.stripe_title_add_a_card
                 }
                 PaymentMethod.Type.Fpx -> {
-                    R.string.title_bank_account
+                    R.string.stripe_title_bank_account
                 }
                 PaymentMethod.Type.Netbanking -> {
-                    R.string.title_bank_account
+                    R.string.stripe_title_bank_account
                 }
                 else -> {
                     throw IllegalArgumentException(

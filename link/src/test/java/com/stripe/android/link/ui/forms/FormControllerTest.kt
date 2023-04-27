@@ -56,9 +56,9 @@ class FormControllerTest {
         )
 
         val nameElement =
-            getSectionFieldTextControllerWithLabel(formController, R.string.address_label_full_name)
+            getSectionFieldTextControllerWithLabel(formController, R.string.stripe_address_label_full_name)
         val emailElement =
-            getSectionFieldTextControllerWithLabel(formController, R.string.email)
+            getSectionFieldTextControllerWithLabel(formController, R.string.stripe_email)
 
         nameElement?.onValueChange("joe")
         assertThat(

@@ -33,7 +33,7 @@ class TransformAddressToElementTest {
 
         val addressLine1 = TestTextSpec(
             IdentifierSpec.Line1,
-            R.string.address_label_address_line1,
+            R.string.stripe_address_label_address_line1,
             KeyboardCapitalization.Words,
             KeyboardType.Text,
             showOptionalLabel = false
@@ -41,7 +41,7 @@ class TransformAddressToElementTest {
 
         val addressLine2 = TestTextSpec(
             IdentifierSpec.Line2,
-            R.string.address_label_address_line2,
+            R.string.stripe_address_label_address_line2,
             KeyboardCapitalization.Words,
             KeyboardType.Text,
             showOptionalLabel = true
@@ -49,7 +49,7 @@ class TransformAddressToElementTest {
 
         val city = TestTextSpec(
             IdentifierSpec.City,
-            R.string.address_label_city,
+            R.string.stripe_address_label_city,
             KeyboardCapitalization.Words,
             KeyboardType.Text,
             showOptionalLabel = false
@@ -57,7 +57,7 @@ class TransformAddressToElementTest {
 
         val zip = TestTextSpec(
             IdentifierSpec.PostalCode,
-            R.string.address_label_zip_code,
+            R.string.stripe_address_label_zip_code,
             KeyboardCapitalization.None,
             KeyboardType.NumberPassword,
             showOptionalLabel = false
@@ -89,7 +89,7 @@ class TransformAddressToElementTest {
             AdministrativeAreaConfig.Country.US().administrativeAreas.map { it.second }
         )
         assertThat(stateDropdownController.label.first()).isEqualTo(
-            R.string.address_label_state
+            R.string.stripe_address_label_state
         )
     }
 

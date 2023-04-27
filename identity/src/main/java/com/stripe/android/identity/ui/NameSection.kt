@@ -25,12 +25,12 @@ internal fun NameSection(
 ) {
     val firstNameController = remember {
         SimpleTextFieldController(
-            textFieldConfig = SimpleTextFieldConfig(R.string.first_name)
+            textFieldConfig = SimpleTextFieldConfig(R.string.stripe_first_name)
         )
     }
     val lastNameController = remember {
         SimpleTextFieldController(
-            textFieldConfig = SimpleTextFieldConfig(R.string.last_name)
+            textFieldConfig = SimpleTextFieldConfig(R.string.stripe_last_name)
         )
     }
     val nameSectionElement = remember {
@@ -45,7 +45,7 @@ internal fun NameSection(
                     controller = lastNameController
                 )
             ),
-            label = R.string.address_label_name
+            label = R.string.stripe_address_label_name
         )
     }
 

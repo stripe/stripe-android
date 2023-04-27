@@ -12,7 +12,7 @@ import com.stripe.android.uicore.elements.TextFieldStateConstants
 internal class CardNumberConfig : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "Card number"
-    override val label: Int = R.string.acc_label_card_number
+    override val label: Int = R.string.stripe_acc_label_card_number
     override val keyboard: KeyboardType = KeyboardType.NumberPassword
     override val visualTransformation: VisualTransformation = CardNumberVisualTransformation(' ')
 
@@ -23,15 +23,15 @@ internal class CardNumberConfig : CardDetailsTextFieldConfig {
         return if (number.isBlank()) {
             TextFieldStateConstants.Error.Blank
         } else if (brand == CardBrand.Unknown) {
-            TextFieldStateConstants.Error.Invalid(R.string.invalid_card_number)
+            TextFieldStateConstants.Error.Invalid(R.string.stripe_invalid_card_number)
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
-            TextFieldStateConstants.Error.Incomplete(R.string.invalid_card_number)
+            TextFieldStateConstants.Error.Incomplete(R.string.stripe_invalid_card_number)
         } else if (!luhnValid) {
-            TextFieldStateConstants.Error.Invalid(R.string.invalid_card_number)
+            TextFieldStateConstants.Error.Invalid(R.string.stripe_invalid_card_number)
         } else if (isDigitLimit && number.length == numberAllowedDigits) {
             TextFieldStateConstants.Valid.Full
         } else {
-            TextFieldStateConstants.Error.Invalid(R.string.invalid_card_number)
+            TextFieldStateConstants.Error.Invalid(R.string.stripe_invalid_card_number)
         }
     }
 
