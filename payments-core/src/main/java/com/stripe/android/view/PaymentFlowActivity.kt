@@ -241,7 +241,7 @@ class PaymentFlowActivity : StripeActivity() {
         if (!errorMessage.isNullOrEmpty()) {
             showError(errorMessage)
         } else {
-            showError(getString(R.string.invalid_shipping_information))
+            showError(getString(R.string.stripe_invalid_shipping_information))
         }
         viewModel.paymentSessionData = viewModel.paymentSessionData.copy(
             shippingInformation = null

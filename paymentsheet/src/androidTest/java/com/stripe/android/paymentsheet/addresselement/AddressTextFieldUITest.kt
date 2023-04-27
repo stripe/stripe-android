@@ -39,7 +39,7 @@ class AddressTextFieldUITest {
             DefaultStripeTheme {
                 AddressTextFieldUI(
                     controller = AddressTextFieldController(
-                        SimpleTextFieldConfig(label = R.string.address_label_address)
+                        SimpleTextFieldConfig(label = R.string.stripe_address_label_address)
                     ),
                     onClick = onClick
                 )

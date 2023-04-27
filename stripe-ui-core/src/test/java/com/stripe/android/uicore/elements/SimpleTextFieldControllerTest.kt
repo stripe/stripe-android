@@ -230,7 +230,7 @@ internal class SimpleTextFieldControllerTest {
     @Test
     fun `Verify non-null label`() {
         val controller = createControllerWithState(nullLabel = false)
-        assertThat(controller.label.value).isEqualTo(R.string.address_label_full_name)
+        assertThat(controller.label.value).isEqualTo(R.string.stripe_address_label_full_name)
     }
 
     @Test
@@ -273,7 +273,7 @@ internal class SimpleTextFieldControllerTest {
             if (nullLabel) {
                 on { label } doReturn null
             } else {
-                on { label } doReturn R.string.address_label_full_name
+                on { label } doReturn R.string.stripe_address_label_full_name
             }
 
             if (!nullPlaceHolder) {

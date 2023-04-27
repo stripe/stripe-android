@@ -105,7 +105,7 @@ fun DropDown(
                 }
                 .clickable(
                     enabled = shouldEnable,
-                    onClickLabel = stringResource(R.string.change)
+                    onClickLabel = stringResource(R.string.stripe_change)
                 ) {
                     expanded = true
                 }

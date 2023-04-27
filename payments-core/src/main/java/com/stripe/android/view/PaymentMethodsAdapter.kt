@@ -208,7 +208,7 @@ internal class PaymentMethodsAdapter constructor(
         if (canDeletePaymentMethods) {
             ViewCompat.addAccessibilityAction(
                 viewHolder.itemView,
-                parent.context.getString(R.string.delete_payment_method)
+                parent.context.getString(R.string.stripe_delete_payment_method)
             ) { _, _ ->
                 listener?.onDeletePaymentMethodAction(
                     paymentMethod = getPaymentMethodAtPosition(viewHolder.bindingAdapterPosition)
@@ -284,9 +284,9 @@ internal class PaymentMethodsAdapter constructor(
             init {
                 itemView.id = R.id.stripe_payment_methods_add_card
                 itemView.contentDescription =
-                    itemView.resources.getString(R.string.payment_method_add_new_card)
+                    itemView.resources.getString(R.string.stripe_payment_method_add_new_card)
                 viewBinding.label.text =
-                    itemView.resources.getString(R.string.payment_method_add_new_card)
+                    itemView.resources.getString(R.string.stripe_payment_method_add_new_card)
             }
         }
 
@@ -304,9 +304,9 @@ internal class PaymentMethodsAdapter constructor(
             init {
                 itemView.id = R.id.stripe_payment_methods_add_fpx
                 itemView.contentDescription =
-                    itemView.resources.getString(R.string.payment_method_add_new_fpx)
+                    itemView.resources.getString(R.string.stripe_payment_method_add_new_fpx)
                 viewBinding.label.text =
-                    itemView.resources.getString(R.string.payment_method_add_new_fpx)
+                    itemView.resources.getString(R.string.stripe_payment_method_add_new_fpx)
             }
         }
 

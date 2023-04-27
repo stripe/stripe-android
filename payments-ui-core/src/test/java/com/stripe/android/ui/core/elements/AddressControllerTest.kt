@@ -52,14 +52,14 @@ class AddressControllerTest {
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             assertThat(addressController.error.first()?.errorMessage)
-                .isEqualTo(R.string.email_is_invalid)
+                .isEqualTo(R.string.stripe_email_is_invalid)
 
             emailController.onValueChange("joe@email.com")
 
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             assertThat(addressController.error.first()?.errorMessage)
-                .isEqualTo(R.string.iban_invalid_start)
+                .isEqualTo(R.string.stripe_iban_invalid_start)
         }
     }
 }

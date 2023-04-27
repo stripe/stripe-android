@@ -102,8 +102,8 @@ fun LinkVerificationDialog(
                                     )
 
                                     VerificationBody(
-                                        headerStringResId = R.string.verification_header_prefilled,
-                                        messageStringResId = R.string.verification_message,
+                                        headerStringResId = R.string.stripe_verification_header_prefilled,
+                                        messageStringResId = R.string.stripe_verification_message,
                                         showChangeEmailMessage = false,
                                         linkAccount = account,
                                         injector = component.injector,

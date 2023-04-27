@@ -295,7 +295,7 @@ internal fun WalletBody(
 
         if (uiState.selectedItem is ConsumerPaymentDetails.BankAccount) {
             Html(
-                html = stringResource(R.string.wallet_bank_account_terms).replaceHyperlinks(),
+                html = stringResource(R.string.stripe_wallet_bank_account_terms).replaceHyperlinks(),
                 color = MaterialTheme.colors.onSecondary,
                 style = MaterialTheme.typography.caption,
                 modifier = Modifier
@@ -338,7 +338,7 @@ internal fun WalletBody(
 
         SecondaryButton(
             enabled = !uiState.primaryButtonState.isBlocking,
-            label = stringResource(id = R.string.wallet_pay_another_way),
+            label = stringResource(id = R.string.stripe_wallet_pay_another_way),
             onClick = onPayAnotherWayClick
         )
     }
@@ -374,9 +374,9 @@ internal fun CardDetailsRecollectionForm(
     }
 
     val errorTextResId = if (isCardExpired) {
-        R.string.wallet_update_expired_card_error
+        R.string.stripe_wallet_update_expired_card_error
     } else {
-        R.string.wallet_recollect_cvc_error
+        R.string.stripe_wallet_recollect_cvc_error
     }
 
     StripeThemeForLink {
@@ -425,7 +425,7 @@ internal fun CollapsedPaymentDetails(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(id = R.string.wallet_collapsed_payment),
+            text = stringResource(id = R.string.stripe_wallet_collapsed_payment),
             modifier = Modifier.padding(
                 start = HorizontalPadding,
                 end = 8.dp
@@ -435,7 +435,7 @@ internal fun CollapsedPaymentDetails(
         PaymentDetails(paymentDetails = selectedPaymentMethod, enabled = true)
         Icon(
             painter = painterResource(id = R.drawable.ic_link_chevron),
-            contentDescription = stringResource(id = R.string.wallet_expand_accessibility),
+            contentDescription = stringResource(id = R.string.stripe_wallet_expand_accessibility),
             modifier = Modifier
                 .padding(end = 22.dp)
                 .semantics {
@@ -477,7 +477,7 @@ private fun ExpandedPaymentDetails(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(id = R.string.wallet_expanded_title),
+                text = stringResource(id = R.string.stripe_wallet_expanded_title),
                 modifier = Modifier
                     .padding(start = HorizontalPadding, top = 20.dp),
                 color = MaterialTheme.colors.onPrimary,
@@ -486,7 +486,7 @@ private fun ExpandedPaymentDetails(
             Spacer(modifier = Modifier.weight(1f))
             Icon(
                 painter = painterResource(id = R.drawable.ic_link_chevron),
-                contentDescription = stringResource(id = R.string.wallet_expand_accessibility),
+                contentDescription = stringResource(id = R.string.stripe_wallet_expand_accessibility),
                 modifier = Modifier
                     .padding(top = 20.dp, end = 22.dp)
                     .rotate(180f)
@@ -529,7 +529,7 @@ private fun ExpandedPaymentDetails(
                 tint = Color.Unspecified
             )
             Text(
-                text = stringResource(id = R.string.add_payment_method),
+                text = stringResource(id = R.string.stripe_add_payment_method),
                 modifier = Modifier.padding(end = HorizontalPadding, bottom = 4.dp),
                 color = MaterialTheme.linkColors.actionLabel,
                 style = MaterialTheme.typography.button

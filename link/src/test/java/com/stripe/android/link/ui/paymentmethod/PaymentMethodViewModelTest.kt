@@ -406,14 +406,14 @@ class PaymentMethodViewModelTest {
     fun `when screen is root then secondaryButtonLabel is correct`() = runTest {
         whenever(navigator.isOnRootScreen()).thenReturn(true)
 
-        assertThat(createViewModel().secondaryButtonLabel).isEqualTo(R.string.wallet_pay_another_way)
+        assertThat(createViewModel().secondaryButtonLabel).isEqualTo(R.string.stripe_wallet_pay_another_way)
     }
 
     @Test
     fun `when screen is not root then secondaryButtonLabel is correct`() = runTest {
         whenever(navigator.isOnRootScreen()).thenReturn(false)
 
-        assertThat(createViewModel().secondaryButtonLabel).isEqualTo(R.string.cancel)
+        assertThat(createViewModel().secondaryButtonLabel).isEqualTo(R.string.stripe_cancel)
     }
 
     @Test

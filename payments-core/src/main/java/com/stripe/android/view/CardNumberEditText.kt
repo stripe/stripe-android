@@ -149,7 +149,7 @@ class CardNumberEditText internal constructor(
     init {
         setNumberOnlyInputType()
 
-        setErrorMessage(resources.getString(R.string.invalid_card_number))
+        setErrorMessage(resources.getString(R.string.stripe_invalid_card_number))
         addTextChangedListener(CardNumberTextWatcher())
 
         internalFocusChangeListeners.add { _, hasFocus ->
@@ -180,7 +180,7 @@ class CardNumberEditText internal constructor(
 
     override val accessibilityText: String
         get() {
-            return resources.getString(R.string.acc_label_card_number_node, text)
+            return resources.getString(R.string.stripe_acc_label_card_number_node, text)
         }
 
     override fun onDetachedFromWindow() {

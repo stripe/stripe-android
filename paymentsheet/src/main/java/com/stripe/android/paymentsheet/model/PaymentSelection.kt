@@ -17,7 +17,12 @@ import kotlinx.parcelize.Parcelize
 internal sealed class PaymentSelection : Parcelable {
 
     abstract val requiresConfirmation: Boolean
-    abstract fun mandateText(context: Context): String?
+
+    abstract fun mandateText(
+        context: Context,
+        merchantName: String,
+        isSaveForFutureUseSelected: Boolean,
+    ): String?
 
     @Parcelize
     object GooglePay : PaymentSelection() {
@@ -25,7 +30,11 @@ internal sealed class PaymentSelection : Parcelable {
         override val requiresConfirmation: Boolean
             get() = false
 
-        override fun mandateText(context: Context): String? {
+        override fun mandateText(
+            context: Context,
+            merchantName: String,
+            isSaveForFutureUseSelected: Boolean,
+        ): String? {
             return null
         }
     }
@@ -36,7 +45,11 @@ internal sealed class PaymentSelection : Parcelable {
         override val requiresConfirmation: Boolean
             get() = false
 
-        override fun mandateText(context: Context): String? {
+        override fun mandateText(
+            context: Context,
+            merchantName: String,
+            isSaveForFutureUseSelected: Boolean,
+        ): String? {
             return null
         }
     }
@@ -50,9 +63,13 @@ internal sealed class PaymentSelection : Parcelable {
         override val requiresConfirmation: Boolean
             get() = paymentMethod.type == USBankAccount
 
-        override fun mandateText(context: Context): String? {
+        override fun mandateText(
+            context: Context,
+            merchantName: String,
+            isSaveForFutureUseSelected: Boolean,
+        ): String? {
             return if (paymentMethod.type == USBankAccount) {
-                ACHText.getContinueMandateText(context)
+                ACHText.getContinueMandateText(context, merchantName, isSaveForFutureUseSelected)
             } else {
                 null
             }
@@ -73,7 +90,11 @@ internal sealed class PaymentSelection : Parcelable {
         override val requiresConfirmation: Boolean
             get() = false
 
-        override fun mandateText(context: Context): String? {
+        override fun mandateText(
+            context: Context,
+            merchantName: String,
+            isSaveForFutureUseSelected: Boolean,
+        ): String? {
             return null
         }
 

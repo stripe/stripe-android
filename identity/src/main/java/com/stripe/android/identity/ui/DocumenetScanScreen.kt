@@ -129,8 +129,8 @@ internal fun DocumentScanScreen(
         }
 
         val message = when (newDisplayState) {
-            is IdentityScanState.Finished -> stringResource(id = R.string.scanned)
-            is IdentityScanState.Found -> stringResource(id = R.string.hold_still)
+            is IdentityScanState.Finished -> stringResource(id = R.string.stripe_scanned)
+            is IdentityScanState.Found -> stringResource(id = R.string.stripe_hold_still)
             is IdentityScanState.Initial -> {
                 if (targetScanType.isNullOrFront()) {
                     stringResource(id = messageRes.frontMessageStringRes)
@@ -139,7 +139,7 @@ internal fun DocumentScanScreen(
                 }
             }
 
-            is IdentityScanState.Satisfied -> stringResource(id = R.string.scanned)
+            is IdentityScanState.Satisfied -> stringResource(id = R.string.stripe_scanned)
             is IdentityScanState.TimeOut -> ""
             is IdentityScanState.Unsatisfied -> ""
             null -> {
@@ -258,7 +258,7 @@ internal fun DocumentScanScreen(
             }
             LoadingButton(
                 modifier = Modifier.testTag(CONTINUE_BUTTON_TAG),
-                text = stringResource(id = R.string.kontinue).uppercase(),
+                text = stringResource(id = R.string.stripe_kontinue).uppercase(),
                 state = loadingButtonState
             ) {
                 loadingButtonState = LoadingButtonState.Loading
@@ -326,7 +326,7 @@ private fun CameraViewFinder(
                         .fillMaxSize()
                         .padding(60.dp),
                     painter = painterResource(id = R.drawable.check_mark),
-                    contentDescription = stringResource(id = R.string.check_mark),
+                    contentDescription = stringResource(id = R.string.stripe_check_mark),
                     colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
                 )
             }

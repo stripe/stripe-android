@@ -17,7 +17,7 @@ fun AuBecsDebitMandateElementUI(
     element: AuBecsDebitMandateTextElement
 ) {
     Html(
-        html = stringResource(id = R.string.au_becs_mandate, element.merchantName ?: ""),
+        html = stringResource(id = R.string.stripe_au_becs_mandate, element.merchantName ?: ""),
         color = MaterialTheme.stripeColors.subtitle,
         style = MaterialTheme.typography.body2,
         modifier = Modifier.padding(vertical = 8.dp)

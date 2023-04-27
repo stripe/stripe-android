@@ -88,7 +88,7 @@ class HeaderTextFactoryTest {
             types = listOf("card"),
         )
 
-        assertThat(resource).isEqualTo(R.string.title_add_a_card)
+        assertThat(resource).isEqualTo(R.string.stripe_title_add_a_card)
     }
 
     @Test

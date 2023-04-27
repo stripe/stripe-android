@@ -71,9 +71,9 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val isRootScreen = navigator.isOnRootScreen() == true
 
     val secondaryButtonLabel = if (isRootScreen) {
-        R.string.wallet_pay_another_way
+        R.string.stripe_wallet_pay_another_way
     } else {
-        R.string.cancel
+        R.string.stripe_cancel
     }
 
     val supportedTypes = args.stripeIntent.supportedPaymentMethodTypes(linkAccount)

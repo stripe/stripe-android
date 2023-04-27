@@ -33,7 +33,7 @@ class CountryConfig(
     override val debugLabel = "country"
 
     @StringRes
-    override val label = R.string.address_label_country_or_region
+    override val label = R.string.stripe_address_label_country_or_region
 
     internal val countries = CountryUtils.getOrderedCountries(locale)
         .filter {

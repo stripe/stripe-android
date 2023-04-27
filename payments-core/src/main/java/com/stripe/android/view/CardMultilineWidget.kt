@@ -266,7 +266,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
     internal var expirationDatePlaceholderRes: Int? by Delegates.observable(
-        R.string.expiry_date_hint
+        R.string.stripe_expiry_date_hint
     ) { _, _, newValue ->
         expiryTextInputLayout.placeholderText = newValue?.let {
             resources.getString(it)
@@ -596,9 +596,9 @@ class CardMultilineWidget @JvmOverloads constructor(
     private fun adjustViewForPostalCodeAttribute(shouldShowPostalCode: Boolean) {
         // Set the label/hint to the shorter value if we have three things in a row.
         @StringRes val expiryLabel = if (shouldShowPostalCode) {
-            R.string.expiry_label_short
+            R.string.stripe_expiry_label_short
         } else {
-            R.string.acc_label_expiry_date
+            R.string.stripe_acc_label_expiry_date
         }
         expiryTextInputLayout.hint = resources.getString(expiryLabel)
 

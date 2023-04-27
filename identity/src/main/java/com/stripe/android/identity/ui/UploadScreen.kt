@@ -283,7 +283,7 @@ internal fun UploadScreen(
             }
             LoadingButton(
                 modifier = Modifier.testTag(UPLOAD_SCREEN_CONTINUE_BUTTON_TAG),
-                text = stringResource(id = R.string.kontinue).uppercase(),
+                text = stringResource(id = R.string.stripe_kontinue).uppercase(),
                 state = continueButtonState
             ) {
                 continueButtonState = LoadingButtonState.Loading
@@ -333,7 +333,7 @@ internal fun UploadImageDialog(
                 )
                 if (shouldShowTakePhoto) {
                     DialogListItem(
-                        text = stringResource(id = R.string.take_photo),
+                        text = stringResource(id = R.string.stripe_take_photo),
                         testTag = SHOULD_SHOW_TAKE_PHOTO_TAG
                     ) {
                         onUploadMethodSelected()
@@ -342,7 +342,7 @@ internal fun UploadImageDialog(
                 }
                 if (shouldShowChoosePhoto) {
                     DialogListItem(
-                        text = stringResource(id = R.string.choose_file),
+                        text = stringResource(id = R.string.stripe_choose_file),
                         testTag = SHOULD_SHOW_CHOOSE_PHOTO_TAG
                     ) {
                         onUploadMethodSelected()
@@ -386,19 +386,19 @@ private fun DialogListItem(
 private fun getTitleFromScanType(scanType: IdentityScanState.ScanType): String {
     return when (scanType) {
         IdentityScanState.ScanType.ID_FRONT -> {
-            stringResource(R.string.upload_dialog_title_id_front)
+            stringResource(R.string.stripe_upload_dialog_title_id_front)
         }
         IdentityScanState.ScanType.ID_BACK -> {
-            stringResource(R.string.upload_dialog_title_id_back)
+            stringResource(R.string.stripe_upload_dialog_title_id_back)
         }
         IdentityScanState.ScanType.DL_FRONT -> {
-            stringResource(R.string.upload_dialog_title_dl_front)
+            stringResource(R.string.stripe_upload_dialog_title_dl_front)
         }
         IdentityScanState.ScanType.DL_BACK -> {
-            stringResource(R.string.upload_dialog_title_dl_back)
+            stringResource(R.string.stripe_upload_dialog_title_dl_back)
         }
         IdentityScanState.ScanType.PASSPORT -> {
-            stringResource(R.string.upload_dialog_title_passport)
+            stringResource(R.string.stripe_upload_dialog_title_passport)
         }
         else -> {
             throw java.lang.IllegalArgumentException("invalid scan type: $scanType")
@@ -433,7 +433,7 @@ private fun SingleSideUploadRow(
                 TextButton(onClick = {
                     onSelectButtonClicked()
                 }) {
-                    Text(text = stringResource(id = R.string.select).uppercase())
+                    Text(text = stringResource(id = R.string.stripe_select).uppercase())
                 }
             }
             DocumentUploadUIState.Loading -> {

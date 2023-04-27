@@ -100,7 +100,7 @@ class LpmSerializerTest {
                     "api_path": {
                       "v1": "something_bogus"
                     },
-                    "label": ${R.string.ideal_bank},
+                    "label": ${R.string.stripe_ideal_bank},
                     "capitalization": "sentences",
                     "keyboard_type": "phone",
                     "show_optional_label": true
@@ -116,7 +116,7 @@ class LpmSerializerTest {
         assertThat(result.isSuccess).isTrue()
         result.onSuccess {
             val addressSpec = it.fields[0] as SimpleTextSpec
-            assertThat(addressSpec.label).isEqualTo(R.string.ideal_bank)
+            assertThat(addressSpec.label).isEqualTo(R.string.stripe_ideal_bank)
             assertThat(addressSpec.capitalization).isEqualTo(Capitalization.Sentences)
             assertThat(addressSpec.keyboardType).isEqualTo(KeyboardType.Phone)
             assertThat(addressSpec.showOptionalLabel).isTrue()
@@ -135,7 +135,7 @@ class LpmSerializerTest {
                     "api_path": {
                       "v1": "something_bogus"
                     },
-                    "label": ${R.string.ideal_bank}
+                    "label": ${R.string.stripe_ideal_bank}
                   }
                 ]
               }
@@ -148,7 +148,7 @@ class LpmSerializerTest {
         assertThat(result.isSuccess).isTrue()
         result.onSuccess {
             val addressSpec = it.fields[0] as SimpleTextSpec
-            assertThat(addressSpec.label).isEqualTo(R.string.ideal_bank)
+            assertThat(addressSpec.label).isEqualTo(R.string.stripe_ideal_bank)
             assertThat(addressSpec.capitalization).isEqualTo(Capitalization.None)
             assertThat(addressSpec.keyboardType).isEqualTo(KeyboardType.Ascii)
             assertThat(addressSpec.showOptionalLabel).isFalse()
@@ -254,7 +254,7 @@ class LpmSerializerTest {
                     "api_path": {
                       "v1": "something_bogus"
                     },
-                    "stringResId": ${R.string.email}
+                    "stringResId": ${R.string.stripe_email}
                   }
                 ]
               }
@@ -304,7 +304,7 @@ class LpmSerializerTest {
                 "fields": [
                   {
                     "type": "$key",
-                    "stringResId": ${R.string.email}
+                    "stringResId": ${R.string.stripe_email}
                   }
                 ]
               }

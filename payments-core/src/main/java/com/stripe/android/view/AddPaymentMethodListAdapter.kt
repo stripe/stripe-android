@@ -87,7 +87,7 @@ internal class AddPaymentMethodListAdapter(
                 bank.displayName
             } else {
                 resources.getString(
-                    R.string.fpx_bank_offline,
+                    R.string.stripe_fpx_bank_offline,
                     bank.displayName
                 )
             }

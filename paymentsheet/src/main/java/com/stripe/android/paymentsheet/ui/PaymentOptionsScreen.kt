@@ -48,6 +48,8 @@ internal fun PaymentOptionsScreenContent(
     val notesText by viewModel.notesText.collectAsState()
 
     val showLinkDialog by viewModel.linkHandler.showLinkVerificationDialog.collectAsState()
+
+    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
     val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
 
     Column(
@@ -65,7 +67,7 @@ internal fun PaymentOptionsScreenContent(
                 text = stringResource(text),
                 modifier = Modifier
                     .padding(bottom = 2.dp)
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = horizontalPadding),
             )
         }
 
@@ -74,7 +76,9 @@ internal fun PaymentOptionsScreenContent(
         errorMessage?.let { error ->
             ErrorMessage(
                 error = error,
-                modifier = Modifier.padding(vertical = 2.dp),
+                modifier = Modifier
+                    .padding(vertical = 2.dp)
+                    .padding(horizontal = horizontalPadding),
             )
         }
 
@@ -88,7 +92,9 @@ internal fun PaymentOptionsScreenContent(
                 html = text,
                 color = MaterialTheme.stripeColors.subtitle,
                 style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .padding(horizontal = horizontalPadding),
             )
         }
     }

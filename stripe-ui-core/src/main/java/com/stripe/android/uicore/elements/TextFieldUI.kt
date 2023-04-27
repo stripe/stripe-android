@@ -218,7 +218,7 @@ fun TextField(
                 FormLabel(
                     text = if (textFieldController.showOptionalLabel) {
                         stringResource(
-                            R.string.form_label_optional,
+                            R.string.stripe_form_label_optional,
                             stringResource(it)
                         )
                     } else {

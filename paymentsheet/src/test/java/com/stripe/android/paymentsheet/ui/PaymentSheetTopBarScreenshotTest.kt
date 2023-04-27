@@ -26,10 +26,10 @@ class PaymentSheetTopBarScreenshotTest {
     fun testLoading() {
         val state = PaymentSheetTopBarState(
             icon = R.drawable.stripe_ic_paymentsheet_close,
-            contentDescription = R.string.close,
+            contentDescription = R.string.stripe_close,
             showTestModeLabel = false,
             showEditMenu = false,
-            editMenuLabel = R.string.edit,
+            editMenuLabel = R.string.stripe_edit,
             isEnabled = true,
         )
 
@@ -47,10 +47,10 @@ class PaymentSheetTopBarScreenshotTest {
     fun testPaymentMethodsScreen() {
         val state = PaymentSheetTopBarState(
             icon = R.drawable.stripe_ic_paymentsheet_close,
-            contentDescription = R.string.close,
+            contentDescription = R.string.stripe_close,
             showTestModeLabel = true,
             showEditMenu = true,
-            editMenuLabel = R.string.edit,
+            editMenuLabel = R.string.stripe_edit,
             isEnabled = true,
         )
 
@@ -68,10 +68,10 @@ class PaymentSheetTopBarScreenshotTest {
     fun testPaymentMethodsScreenEditing() {
         val state = PaymentSheetTopBarState(
             icon = R.drawable.stripe_ic_paymentsheet_close,
-            contentDescription = R.string.close,
+            contentDescription = R.string.stripe_close,
             showTestModeLabel = true,
             showEditMenu = true,
-            editMenuLabel = R.string.done,
+            editMenuLabel = R.string.stripe_done,
             isEnabled = true,
         )
 
@@ -89,10 +89,10 @@ class PaymentSheetTopBarScreenshotTest {
     fun testAddPaymentMethodScreen() {
         val state = PaymentSheetTopBarState(
             icon = R.drawable.stripe_ic_paymentsheet_back,
-            contentDescription = R.string.back,
+            contentDescription = R.string.stripe_back,
             showTestModeLabel = true,
             showEditMenu = false,
-            editMenuLabel = R.string.edit,
+            editMenuLabel = R.string.stripe_edit,
             isEnabled = true,
         )
 

@@ -187,8 +187,8 @@ internal class VerificationScreenTest {
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             VerificationBody(
-                headerStringResId = R.string.verification_header,
-                messageStringResId = R.string.verification_message,
+                headerStringResId = R.string.stripe_verification_header,
+                messageStringResId = R.string.stripe_verification_message,
                 showChangeEmailMessage = true,
                 redactedPhoneNumber = redactedPhoneNumber,
                 isSendingNewCode = isSendingNewCode,

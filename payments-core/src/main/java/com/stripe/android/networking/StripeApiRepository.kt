@@ -54,6 +54,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ElementsSession
@@ -1286,6 +1287,22 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override suspend fun createFinancialConnectionsSessionForDeferredPayments(
+        params: CreateFinancialConnectionsSessionForDeferredPaymentParams,
+        requestOptions: ApiRequest.Options
+    ): Result<FinancialConnectionsSession> {
+        return fetchStripeModelResult(
+            apiRequestFactory.createPost(
+                url = deferredFinancialConnectionsSessionUrl,
+                options = requestOptions,
+                params = params.toMap()
+            ),
+            FinancialConnectionsSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
     override suspend fun createPaymentIntentFinancialConnectionsSession(
         paymentIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
@@ -1898,6 +1915,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val linkFinancialConnectionsSessionUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/link_account_sessions")
+
+        /**
+         * @return `https://api.stripe.com/v1/connections/link_account_sessions_for_deferred_payment`
+         */
+        internal val deferredFinancialConnectionsSessionUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("connections/link_account_sessions_for_deferred_payment")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/:id`

@@ -13,7 +13,7 @@ class BecsDebitMandateAcceptanceTextFactory(
 ) {
     fun create(companyName: String): CharSequence {
         val mandateAcceptanceText = context.getString(
-            R.string.becs_mandate_acceptance,
+            R.string.stripe_becs_mandate_acceptance,
             companyName
         )
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

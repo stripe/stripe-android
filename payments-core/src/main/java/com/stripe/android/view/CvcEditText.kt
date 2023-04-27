@@ -37,7 +37,7 @@ class CvcEditText @JvmOverloads constructor(
     internal var completionCallback: () -> Unit = {}
 
     init {
-        setErrorMessage(resources.getString(R.string.invalid_cvc))
+        setErrorMessage(resources.getString(R.string.stripe_invalid_cvc))
         setHint(R.string.cvc_number_hint)
         maxLines = 1
         filters = createFilters(CardBrand.Unknown)
@@ -67,7 +67,7 @@ class CvcEditText @JvmOverloads constructor(
 
     override val accessibilityText: String
         get() {
-            return resources.getString(R.string.acc_label_cvc_node, text)
+            return resources.getString(R.string.stripe_acc_label_cvc_node, text)
         }
 
     /**

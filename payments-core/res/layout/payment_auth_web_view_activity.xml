@@ -32,7 +32,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:theme="@style/StripeToolBarStyle"
-            app:title="@string/secure_checkout" />
+            app:title="@string/stripe_secure_checkout" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <com.google.android.material.progressindicator.CircularProgressIndicator

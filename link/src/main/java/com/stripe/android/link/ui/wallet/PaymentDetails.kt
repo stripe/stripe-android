@@ -91,7 +91,7 @@ internal fun PaymentDetailsListItem(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = stringResource(id = R.string.wallet_default),
+                            text = stringResource(id = R.string.stripe_wallet_default),
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                             color = MaterialTheme.linkColors.disabledText,
                             fontSize = 12.sp,
@@ -112,7 +112,7 @@ internal fun PaymentDetailsListItem(
             }
             if (!isSupported) {
                 ErrorText(
-                    text = stringResource(id = R.string.wallet_unavailable),
+                    text = stringResource(id = R.string.stripe_wallet_unavailable),
                     style = ErrorTextStyle.Small,
                     modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
                 )
@@ -137,7 +137,7 @@ internal fun PaymentDetailsListItem(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.MoreVert,
-                        contentDescription = stringResource(R.string.edit),
+                        contentDescription = stringResource(R.string.stripe_edit),
                         tint = MaterialTheme.linkColors.actionLabelLight,
                         modifier = Modifier.size(24.dp)
                     )

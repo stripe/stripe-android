@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
@@ -12,7 +13,6 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
-import com.stripe.android.uicore.elements.supportedBillingCountries
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -30,7 +30,7 @@ data class AddressSpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("billing_details[address]"),
 
     @SerialName("allowed_country_codes")
-    val allowedCountryCodes: Set<String> = supportedBillingCountries,
+    val allowedCountryCodes: Set<String> = CountryUtils.supportedBillingCountries,
 
     @SerialName("display_fields")
     val displayFields: Set<DisplayField> = emptySet(),
@@ -56,7 +56,7 @@ data class AddressSpec(
         addressRepository: AddressRepository,
         shippingValues: Map<IdentifierSpec, String?>?,
     ): SectionElement? {
-        val label = if (showLabel) R.string.billing_details else null
+        val label = if (showLabel) R.string.stripe_billing_details else null
         return if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
             createSectionElement(
                 sectionFieldElement = CountryElement(

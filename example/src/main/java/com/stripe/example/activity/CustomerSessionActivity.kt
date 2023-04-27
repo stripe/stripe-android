@@ -81,7 +81,7 @@ class CustomerSessionActivity : AppCompatActivity() {
     }
 
     private fun buildCardString(data: PaymentMethod.Card): String {
-        return getString(R.string.card_ending_in, data.brand, data.last4)
+        return getString(R.string.stripe_card_ending_in, data.brand, data.last4)
     }
 
     internal class ActivityViewModel : ViewModel() {

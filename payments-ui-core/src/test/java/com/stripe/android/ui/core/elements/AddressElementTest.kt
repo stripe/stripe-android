@@ -88,7 +88,7 @@ class AddressElementTest {
             assertThat(addressElement.controller.error.first())
                 .isNotNull()
             assertThat(addressElement.controller.error.first()?.errorMessage)
-                .isEqualTo(R.string.email_is_invalid)
+                .isEqualTo(R.string.stripe_email_is_invalid)
 
             countryDropdownFieldController.onValueChange(1)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
@@ -102,7 +102,7 @@ class AddressElementTest {
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             assertThat(addressElement.controller.error.first()?.errorMessage)
-                .isEqualTo(R.string.iban_invalid_start)
+                .isEqualTo(R.string.stripe_iban_invalid_start)
         }
     }
 
@@ -433,7 +433,7 @@ class AddressElementTest {
 
         val line1TrailingIcon = addressElement.trailingIconFor(IdentifierSpec.Line1)
         assertThat(line1TrailingIcon?.contentDescription)
-            .isEqualTo(R.string.address_search_content_description)
+            .isEqualTo(R.string.stripe_address_search_content_description)
         assertThat(addressElement.trailingIconFor(IdentifierSpec.Line2)).isNull()
 
         line1TrailingIcon?.onClick?.invoke()

@@ -38,7 +38,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/address1_layout"
                 style="@style/StripePaymentSheetTextInputLayout"
-                android:hint="@string/address_label_address_line1"
+                android:hint="@string/stripe_address_label_address_line1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toTopOf="@+id/address2_divider"
@@ -66,7 +66,7 @@
                 android:id="@+id/address2_layout"
                 style="@style/StripePaymentSheetTextInputLayout"
                 android:visibility="gone"
-                android:hint="@string/address_label_address_line2_optional"
+                android:hint="@string/stripe_address_label_address_line2_optional"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toTopOf="@+id/city_postal_divider"
@@ -103,7 +103,7 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/city_layout"
                     style="@style/StripePaymentSheetTextInputLayout"
-                    android:hint="@string/address_label_city"
+                    android:hint="@string/stripe_address_label_city"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content">
@@ -142,7 +142,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/state_layout"
                 style="@style/StripePaymentSheetTextInputLayout"
-                android:hint="@string/address_label_state"
+                android:hint="@string/stripe_address_label_state"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"

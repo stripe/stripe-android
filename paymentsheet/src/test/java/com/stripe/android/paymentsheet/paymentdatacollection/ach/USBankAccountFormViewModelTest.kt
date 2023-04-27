@@ -218,26 +218,16 @@ class USBankAccountFormViewModelTest {
         }
 
     @Test
-    fun `when reset, save for future usage should be true`() {
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel()
-            viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+    fun `when reset, save for future usage should be false`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.collectBankAccountLauncher = collectBankAccountLauncher
 
-            viewModel.saveForFutureUseElement.controller.onValueChange(false)
+        viewModel.saveForFutureUseElement.controller.onValueChange(false)
 
-            assertThat(
-                viewModel.saveForFutureUseElement.controller.saveForFutureUse.stateIn(
-                    viewModel.viewModelScope
-                ).value
-            ).isFalse()
-
+        viewModel.saveForFutureUseElement.controller.saveForFutureUse.test {
+            assertThat(awaitItem()).isFalse()
             viewModel.reset()
-
-            assertThat(
-                viewModel.saveForFutureUseElement.controller.saveForFutureUse.stateIn(
-                    viewModel.viewModelScope
-                ).value
-            ).isTrue()
+            assertThat(awaitItem()).isTrue()
         }
     }
 
@@ -418,6 +408,19 @@ class USBankAccountFormViewModelTest {
         viewModel.addressElement.countryElement.controller.onRawValueChange("CA")
         assertThat(viewModel.phoneController.countryDropdownController.rawFieldValue.first())
             .isEqualTo("CA")
+    }
+
+    @Test
+    fun `Doesn't save for future use by default`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    showCheckbox = true,
+                    showCheckboxControlledFields = true,
+                ),
+            ),
+        )
+        assertThat(viewModel.saveForFutureUse.value).isFalse()
     }
 
     private fun createViewModel(

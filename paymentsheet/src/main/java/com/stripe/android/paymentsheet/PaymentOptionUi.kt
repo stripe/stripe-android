@@ -122,8 +122,8 @@ internal fun PaymentOptionUi(
             openDialog = openRemoveDialog,
             titleText = removePmDialogTitle,
             messageText = description,
-            confirmText = stringResource(R.string.remove),
-            dismissText = stringResource(R.string.cancel),
+            confirmText = stringResource(R.string.stripe_remove),
+            dismissText = stringResource(R.string.stripe_cancel),
             onConfirmListener = onRemoveListener
         )
     }

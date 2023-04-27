@@ -15,10 +15,10 @@ internal class EmailEditText @JvmOverloads constructor(
         get() {
             errorMessage = when {
                 fieldText.isBlank() -> {
-                    resources.getString(R.string.becs_widget_email_required)
+                    resources.getString(R.string.stripe_becs_widget_email_required)
                 }
                 !Patterns.EMAIL_ADDRESS.matcher(fieldText).matches() -> {
-                    resources.getString(R.string.becs_widget_email_invalid)
+                    resources.getString(R.string.stripe_becs_widget_email_invalid)
                 }
                 else -> null
             }

@@ -13,4 +13,14 @@ object PaymentMethodFactory {
             code = PaymentMethod.Type.CashAppPay.code,
         )
     }
+
+    fun usBankAccount(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.USBankAccount,
+            code = PaymentMethod.Type.USBankAccount.code,
+        )
+    }
 }

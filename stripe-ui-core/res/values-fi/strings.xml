@@ -1,73 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Caption for Address field on address form -->
-  <string name="address_label_address">Osoite</string>
+  <string name="stripe_address_label_address">Osoite</string>
   <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">Osoiterivi 2</string>
+  <string name="stripe_address_label_address_line2">Osoiterivi 2</string>
   <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">Emiraatti</string>
+  <string name="stripe_address_label_ae_emirate">Emiraatti</string>
   <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Esikaupunki tai kaupunki</string>
+  <string name="stripe_address_label_au_suburb_or_city">Esikaupunki tai kaupunki</string>
   <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Kunta</string>
+  <string name="stripe_address_label_bb_jm_parish">Kunta</string>
   <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">Cedex</string>
+  <string name="stripe_address_label_cedex">Cedex</string>
   <!-- Label of an address field -->
-  <string name="address_label_department">Osasto</string>
+  <string name="stripe_address_label_department">Osasto</string>
   <!-- Label for the district field on an address form -->
-  <string name="address_label_district">Piirikunta</string>
+  <string name="stripe_address_label_district">Piirikunta</string>
   <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">Alue</string>
+  <string name="stripe_address_label_hk_area">Alue</string>
   <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">EIR-koodi</string>
+  <string name="stripe_address_label_ie_eircode">EIR-koodi</string>
   <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">Kaupunkikunta</string>
+  <string name="stripe_address_label_ie_townland">Kaupunkikunta</string>
   <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">Pin</string>
+  <string name="stripe_address_label_in_pin">Pin</string>
   <!-- Used to describe part of an address -->
-  <string name="address_label_island">Saari</string>
+  <string name="stripe_address_label_island">Saari</string>
   <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">Prefektuuri</string>
+  <string name="stripe_address_label_jp_prefecture">Prefektuuri</string>
   <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">Do Si</string>
+  <string name="stripe_address_label_kr_do_si">Do Si</string>
   <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">Naapurusto</string>
+  <string name="stripe_address_label_neighborhood">Naapurusto</string>
   <!-- Label of an address field -->
-  <string name="address_label_oblast">Oblasti</string>
+  <string name="stripe_address_label_oblast">Oblasti</string>
   <!-- Label for input requesting phone number, used for all locations -->
-  <string name="address_label_phone_number">Puhelinnumero</string>
+  <string name="stripe_address_label_phone_number">Puhelinnumero</string>
   <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">Toimipaikka tai kylä</string>
+  <string name="stripe_address_label_post_town">Toimipaikka tai kylä</string>
   <!-- Label of an address field -->
-  <string name="address_label_suburb">Esikaupunki</string>
+  <string name="stripe_address_label_suburb">Esikaupunki</string>
   <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">Kylä tai kaupunkikunta</string>
+  <string name="stripe_address_label_village_township">Kylä tai kaupunkikunta</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
-  <string name="address_search_content_description">Etsi</string>
+  <string name="stripe_address_search_content_description">Etsi</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
-  <string name="address_zip_invalid">Postinumero ei kelpaa.</string>
+  <string name="stripe_address_zip_invalid">Postinumero ei kelpaa.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
-  <string name="address_zip_postal_invalid">Postinumero ei kelpaa</string>
+  <string name="stripe_address_zip_postal_invalid">Postinumero ei kelpaa</string>
   <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
-  <string name="billing_same_as_shipping">Laskutusosoite on sama kuin toimitusosoite</string>
+  <string name="stripe_billing_same_as_shipping">Laskutusosoite on sama kuin toimitusosoite</string>
   <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">Tämä kenttä ei voi olla tyhjä</string>
+  <string name="stripe_blank_and_required">Tämä kenttä ei voi olla tyhjä</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Vaihda</string>
+  <string name="stripe_change">Vaihda</string>
   <!-- Caption for Email field on address form -->
-  <string name="email">Sähköposti</string>
+  <string name="stripe_email">Sähköposti</string>
   <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Sähköposti on virheellinen.</string>
+  <string name="stripe_email_is_invalid">Sähköposti on virheellinen.</string>
   <!-- label for text field to enter card expiry -->
-  <string name="expiration_date_hint">KK/VV</string>
+  <string name="stripe_expiration_date_hint">KK/VV</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="form_label_optional">%s (valinnainen)</string>
+  <string name="stripe_form_label_optional">%s (valinnainen)</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">Kortin voimassaoloaika on puutteellinen.</string>
+  <string name="stripe_incomplete_expiry_date">Kortin voimassaoloaika on puutteellinen.</string>
   <!-- Error description for incomplete phone number -->
-  <string name="incomplete_phone_number">Puutteellinen puhelinnumero</string>
+  <string name="stripe_incomplete_phone_number">Puutteellinen puhelinnumero</string>
   <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Kortin erääntymiskuukausi ei kelpaa.</string>
+  <string name="stripe_invalid_expiry_month">Kortin erääntymiskuukausi ei kelpaa.</string>
   <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">Kortin voimassaolovuosi ei kelpaa.</string>
+  <string name="stripe_invalid_expiry_year">Kortin voimassaolovuosi ei kelpaa.</string>
 </resources>

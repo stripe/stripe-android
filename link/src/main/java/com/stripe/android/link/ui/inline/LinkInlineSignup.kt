@@ -185,13 +185,13 @@ internal fun LinkInlineSignup(
                         )
                         Column {
                             Text(
-                                text = stringResource(id = R.string.inline_sign_up_header),
+                                text = stringResource(id = R.string.stripe_inline_sign_up_header),
                                 style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colors.onSurface
                                     .copy(alpha = LocalContentAlpha.current)
                             )
                             Text(
-                                text = stringResource(R.string.sign_up_message, merchantName),
+                                text = stringResource(R.string.stripe_sign_up_message, merchantName),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 4.dp),
@@ -281,7 +281,7 @@ internal fun LinkInlineSignup(
                             Row(modifier = Modifier.padding(16.dp)) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_link_logo),
-                                    contentDescription = stringResource(id = R.string.link),
+                                    contentDescription = stringResource(id = R.string.stripe_link),
                                     modifier = Modifier
                                         .semantics {
                                             testTag = "LinkLogoIcon"

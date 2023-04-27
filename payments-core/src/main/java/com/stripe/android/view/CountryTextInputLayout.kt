@@ -146,7 +146,7 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
         selectedCountryCode = countryAdapter.firstItem.code
         updateInitialCountry()
 
-        val errorMessage = resources.getString(R.string.address_country_invalid)
+        val errorMessage = resources.getString(R.string.stripe_address_country_invalid)
 
         countryAutocomplete.validator = CountryAutoCompleteTextViewValidator(
             countryAdapter

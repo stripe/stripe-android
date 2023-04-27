@@ -132,17 +132,17 @@ internal fun SelfieScanScreen(
 
         val message = when (newDisplayState) {
             is IdentityScanState.Finished ->
-                stringResource(id = R.string.selfie_capture_complete)
+                stringResource(id = R.string.stripe_selfie_capture_complete)
             is IdentityScanState.Found ->
-                stringResource(id = R.string.capturing)
+                stringResource(id = R.string.stripe_capturing)
             is IdentityScanState.Initial ->
-                stringResource(id = R.string.position_selfie)
+                stringResource(id = R.string.stripe_position_selfie)
             is IdentityScanState.Satisfied ->
-                stringResource(id = R.string.selfie_capture_complete)
+                stringResource(id = R.string.stripe_selfie_capture_complete)
             is IdentityScanState.TimeOut -> ""
             is IdentityScanState.Unsatisfied -> ""
             null -> {
-                stringResource(id = R.string.position_selfie)
+                stringResource(id = R.string.stripe_position_selfie)
             }
         }
 
@@ -220,7 +220,7 @@ internal fun SelfieScanScreen(
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(
-                    text = stringResource(id = R.string.selfie_captures),
+                    text = stringResource(id = R.string.stripe_selfie_captures),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
@@ -267,7 +267,7 @@ internal fun SelfieScanScreen(
                 modifier = Modifier
                     .testTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG)
                     .padding(dimensionResource(id = R.dimen.page_horizontal_margin)),
-                text = stringResource(id = R.string.kontinue).uppercase(),
+                text = stringResource(id = R.string.stripe_kontinue).uppercase(),
                 state = loadingButtonState
             ) {
                 loadingButtonState = LoadingButtonState.Loading
@@ -322,7 +322,7 @@ private fun ResultView(
                     .height(200.dp)
                     .clip(RoundedCornerShape(dimensionResource(id = R.dimen.view_finder_corner_radius))),
                 contentScale = ContentScale.Crop,
-                contentDescription = stringResource(id = R.string.selfie_item_description)
+                contentDescription = stringResource(id = R.string.stripe_selfie_item_description)
             )
         }
     }
@@ -343,10 +343,10 @@ private fun ResultView(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.camera_icon),
-                contentDescription = stringResource(id = R.string.description_camera),
+                contentDescription = stringResource(id = R.string.stripe_description_camera),
                 modifier = Modifier.padding(end = 5.dp)
             )
-            Text(text = stringResource(id = R.string.retake_photos))
+            Text(text = stringResource(id = R.string.stripe_retake_photos))
         }
     }
 
