@@ -5,6 +5,7 @@
 ### All SDKs
 * [CHANGED][6608](https://github.com/stripe/stripe-android/pull/6608) Added a `stripe` prefix to our string resources to avoid name conflicts.
 * [FIXED][6602](https://github.com/stripe/stripe-android/pull/6602) Fixed an issue which caused a compiler error (duplicate class) when including payments *and* identity SDKs.
+* [FIXED][6611](https://github.com/stripe/stripe-android/pull/6611) Fixed an issue where countries might be filtered out on old Android versions (notably Kosovo).
 
 ## 20.24.0 - 2023-04-24
 
