@@ -57,6 +57,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -75,9 +76,20 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val defaultBillingDetails = args.formArgs.billingDetails
     private val collectionConfiguration = args.formArgs.billingDetailsCollectionConfiguration
 
+    private val collectingAddress =
+        args.formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full
+
+    private val collectingPhone =
+        args.formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always
+
+    private val collectingName =
+        args.formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never
+
+    private val collectingEmail =
+        args.formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never
+
     private val defaultName = if (
-        collectionConfiguration.name != CollectionMode.Never ||
-        collectionConfiguration.attachDefaultsToPaymentMethod
+        collectingName || collectionConfiguration.attachDefaultsToPaymentMethod
     ) {
         defaultBillingDetails?.name
     } else {
@@ -92,8 +104,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, defaultName ?: "")
 
     private val defaultEmail = if (
-        collectionConfiguration.email != CollectionMode.Never ||
-        collectionConfiguration.attachDefaultsToPaymentMethod
+        collectingEmail || collectionConfiguration.attachDefaultsToPaymentMethod
     ) {
         defaultBillingDetails?.email
     } else {
@@ -107,8 +118,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, defaultEmail)
 
     private val defaultPhoneCountry = if (
-        collectionConfiguration.phone == CollectionMode.Always ||
-        collectionConfiguration.attachDefaultsToPaymentMethod
+        collectingPhone || collectionConfiguration.attachDefaultsToPaymentMethod
     ) {
         defaultBillingDetails?.address?.country
     } else {
@@ -116,8 +126,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private val defaultPhone = if (
-        collectionConfiguration.phone == CollectionMode.Always ||
-        collectionConfiguration.attachDefaultsToPaymentMethod
+        collectingPhone || collectionConfiguration.attachDefaultsToPaymentMethod
     ) {
         defaultBillingDetails?.phone
     } else {
@@ -134,8 +143,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val defaultAddress = if (
-        collectionConfiguration.address == AddressCollectionMode.Full ||
-        collectionConfiguration.attachDefaultsToPaymentMethod
+        collectingAddress || collectionConfiguration.attachDefaultsToPaymentMethod
     ) {
         defaultBillingDetails?.address?.asAddressModel()
     } else {
@@ -173,8 +181,16 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
     }
 
-    val lastTextFieldIdentifier = addressElement.getTextFieldIdentifiers().map {
-        it.last()
+    val lastTextFieldIdentifier: Flow<IdentifierSpec?> = if (collectingAddress) {
+        addressElement.getTextFieldIdentifiers().map { it.last() }
+    } else if (collectingPhone) {
+        flowOf(IdentifierSpec.Phone)
+    } else if (collectingEmail) {
+        flowOf(IdentifierSpec.Email)
+    } else if (collectingName) {
+        flowOf(IdentifierSpec.Name)
+    } else {
+        flowOf(null)
     }
 
     private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount>(replay = 1)
@@ -259,12 +275,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         val hasDefaultName = args.formArgs.billingDetails?.name != null &&
             args.formArgs.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
-        val collectingName =
-            args.formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never
         val hasDefaultEmail = args.formArgs.billingDetails?.email != null &&
             args.formArgs.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
-        val collectingEmail =
-            args.formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never
 
         assert((hasDefaultName || collectingName) && (hasDefaultEmail || collectingEmail)) {
             "If name or email are not collected, they must be provided through defaults"

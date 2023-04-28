@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -421,6 +422,136 @@ class USBankAccountFormViewModelTest {
             ),
         )
         assertThat(viewModel.saveForFutureUse.value).isFalse()
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier for default config`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    showCheckbox = true,
+                    showCheckboxControlledFields = true,
+                ),
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isEqualTo(IdentifierSpec.Email)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier when collecting phone number`() = runTest {
+        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Automatic,
+            email = CollectionMode.Automatic,
+            phone = CollectionMode.Always,
+            address = AddressCollectionMode.Never,
+        )
+
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    showCheckbox = true,
+                    showCheckboxControlledFields = true,
+                    billingDetailsCollectionConfiguration = billingDetailsConfig,
+                ),
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isEqualTo(IdentifierSpec.Phone)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier when collecting address`() = runTest {
+        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Automatic,
+            email = CollectionMode.Automatic,
+            phone = CollectionMode.Always,
+            address = AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    showCheckbox = true,
+                    showCheckboxControlledFields = true,
+                    billingDetailsCollectionConfiguration = billingDetailsConfig,
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = "My myself and I",
+                        email = "myself@me.com",
+                    ),
+                ),
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isEqualTo(IdentifierSpec.PostalCode)
+        }
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier when only address`() = runTest {
+        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Never,
+            email = CollectionMode.Never,
+            phone = CollectionMode.Never,
+            address = AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    showCheckbox = true,
+                    showCheckboxControlledFields = true,
+                    billingDetailsCollectionConfiguration = billingDetailsConfig,
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = "My myself and I",
+                        email = "myself@me.com",
+                    ),
+                ),
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isEqualTo(IdentifierSpec.PostalCode)
+        }
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier when collecting no fields`() = runTest {
+        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Never,
+            email = CollectionMode.Never,
+            phone = CollectionMode.Never,
+            address = AddressCollectionMode.Never,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    showCheckbox = true,
+                    showCheckboxControlledFields = true,
+                    billingDetailsCollectionConfiguration = billingDetailsConfig,
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = "My myself and I",
+                        email = "myself@me.com",
+                    ),
+                ),
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isNull()
+            awaitComplete()
+        }
     }
 
     private fun createViewModel(
