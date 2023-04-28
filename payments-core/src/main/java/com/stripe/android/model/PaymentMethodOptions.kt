@@ -15,21 +15,15 @@ import org.json.JSONObject
  * SetupIntent PMO: https://stripe.com/docs/api/setup_intents/object#setup_intent_object-payment_method_options
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Serializable
 @Parcelize
-data class PaymentMethodOptionsMap(
-    val options: Map<String, Options>
+data class PaymentMethodOptions(
+    @SerialName("setup_future_usage")
+    val setupFutureUsage: SetupFutureUsage? = null,
+
+    @SerialName("verification_method")
+    val verificationMethod: VerificationMethod? = null
 ) : StripeModel {
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
-    @Serializable
-    data class Options(
-        @SerialName("setup_future_usage")
-        val setupFutureUsage: SetupFutureUsage? = null,
-
-        @SerialName("verification_method")
-        val verificationMethod: VerificationMethod? = null
-    ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Serializable
@@ -56,8 +50,8 @@ data class PaymentMethodOptionsMap(
         @SerialName("microdeposits")
         Microdeposits("microdeposits")
     }
+}
 
-    internal fun toJson(): JSONObject {
-        return JSONObject(Json.encodeToString(options))
-    }
+internal fun Map<String, PaymentMethodOptions>.toJson(): JSONObject {
+    return JSONObject(Json.encodeToString(this))
 }

@@ -246,11 +246,9 @@ class PaymentIntentTest {
     @Test
     fun `Determines SFU correctly if setup_future_usage exists in payment method options`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            paymentMethodOptionsMap = PaymentMethodOptionsMap(
-                options = mapOf(
-                    "card" to PaymentMethodOptionsMap.Options(
-                        setupFutureUsage = PaymentMethodOptionsMap.SetupFutureUsage.OnSession
-                    )
+            paymentMethodOptionsMap = mapOf(
+                "card" to PaymentMethodOptions(
+                    setupFutureUsage = PaymentMethodOptions.SetupFutureUsage.OnSession
                 )
             )
         )
@@ -262,10 +260,8 @@ class PaymentIntentTest {
     @Test
     fun `Determines SFU correctly if setup_future_usage does not exist in payment method options`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            paymentMethodOptionsMap = PaymentMethodOptionsMap(
-                options = mapOf(
-                    "card" to PaymentMethodOptionsMap.Options()
-                )
+            paymentMethodOptionsMap = mapOf(
+                "card" to PaymentMethodOptions()
             )
         )
 
@@ -276,12 +272,10 @@ class PaymentIntentTest {
     @Test
     fun `getPaymentMethodOptions returns expected results`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            paymentMethodOptionsMap = PaymentMethodOptionsMap(
-                options = mapOf(
-                    "us_bank_account" to PaymentMethodOptionsMap.Options(
-                        setupFutureUsage = PaymentMethodOptionsMap.SetupFutureUsage.OnSession,
-                        verificationMethod = PaymentMethodOptionsMap.VerificationMethod.Automatic
-                    )
+            paymentMethodOptionsMap = mapOf(
+                "us_bank_account" to PaymentMethodOptions(
+                    setupFutureUsage = PaymentMethodOptions.SetupFutureUsage.OnSession,
+                    verificationMethod = PaymentMethodOptions.VerificationMethod.Automatic
                 )
             )
         )

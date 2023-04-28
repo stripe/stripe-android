@@ -1,7 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.PaymentMethodOptionsMap
+import com.stripe.android.model.PaymentMethodOptions
 import com.stripe.android.model.SetupIntentFixtures
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -46,10 +46,8 @@ class SetupIntentJsonParserTest {
         )
         assertThat(setupIntent.paymentMethodOptionsMap)
             .isEqualTo(
-                PaymentMethodOptionsMap(
-                    options = mapOf(
-                        "card" to PaymentMethodOptionsMap.Options()
-                    )
+                mapOf(
+                    "card" to PaymentMethodOptions()
                 )
             )
     }

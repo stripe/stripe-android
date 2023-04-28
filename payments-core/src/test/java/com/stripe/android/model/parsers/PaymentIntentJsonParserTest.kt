@@ -9,7 +9,7 @@ import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.MicrodepositType
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethodOptionsMap
+import com.stripe.android.model.PaymentMethodOptions
 import com.stripe.android.model.StripeIntent
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -153,11 +153,9 @@ class PaymentIntentJsonParserTest {
         )
         assertThat(paymentIntent?.paymentMethodOptionsMap)
             .isEqualTo(
-                PaymentMethodOptionsMap(
-                    options = mapOf(
-                        "us_bank_account" to PaymentMethodOptionsMap.Options(
-                            verificationMethod = PaymentMethodOptionsMap.VerificationMethod.Automatic
-                        )
+                mapOf(
+                    "us_bank_account" to PaymentMethodOptions(
+                        verificationMethod = PaymentMethodOptions.VerificationMethod.Automatic
                     )
                 )
             )

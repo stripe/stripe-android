@@ -24,7 +24,11 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         } ?: paymentMethod?.id
 
         val paymentMethodOptions = json.optJSONObject(FIELD_PAYMENT_METHOD_OPTIONS)?.let {
-            PaymentMethodOptionsJsonParser().parse(it)
+            it.keys()
+                .asSequence()
+                .associateWith { key ->
+                    PaymentMethodOptionsJsonParser().parse(it.getJSONObject(key))
+                }
         }
 
         val unactivatedPaymentMethods = jsonArrayToList(

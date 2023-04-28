@@ -105,8 +105,11 @@ data class SetupIntent internal constructor(
 
     override val nextActionData: StripeIntent.NextActionData?,
 
+    /**
+     * Payment method options for this PaymentIntent.
+     */
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    override val paymentMethodOptionsMap: PaymentMethodOptionsMap? = null,
+    override val paymentMethodOptionsMap: Map<String, PaymentMethodOptions>? = emptyMap(),
 ) : StripeIntent {
 
     override val nextActionType: StripeIntent.NextActionType?

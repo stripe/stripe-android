@@ -152,13 +152,15 @@ constructor(
 
     override val nextActionData: StripeIntent.NextActionData? = null,
 
+    /**
+     * Payment method options for this PaymentIntent.
+     */
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    override val paymentMethodOptionsMap: PaymentMethodOptionsMap? = null,
-
+    override val paymentMethodOptionsMap: Map<String, PaymentMethodOptions>? = emptyMap(),
 ) : StripeIntent {
-    fun getPaymentMethodOptions() = paymentMethodOptionsMap?.let {
-        StripeJsonUtils.jsonObjectToMap(it.toJson())
-    } ?: emptyMap()
+    fun getPaymentMethodOptions() = StripeJsonUtils.jsonObjectToMap(
+        paymentMethodOptionsMap?.toJson()
+    ) ?: emptyMap()
 
     override val nextActionType: StripeIntent.NextActionType?
         get() = when (nextActionData) {
@@ -227,7 +229,7 @@ constructor(
 
     private fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
         return paymentMethodOptionsMap?.let { options ->
-            options.options[code]?.setupFutureUsage != null
+            options[code]?.setupFutureUsage != null
         } ?: false
     }
 
