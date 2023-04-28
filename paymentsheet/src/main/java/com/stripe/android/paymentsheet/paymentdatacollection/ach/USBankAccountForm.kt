@@ -114,18 +114,49 @@ internal fun USBankAccountForm(
         )
     }
 
+    USBankAccountForm(
+        screenState = currentScreenState,
+        formArgs = formArgs,
+        processing = processing,
+        nameController = viewModel.nameController,
+        emailController = viewModel.emailController,
+        phoneController = viewModel.phoneController,
+        addressController = viewModel.addressElement.controller,
+        lastTextFieldIdentifier = lastTextFieldIdentifier,
+        sameAsShippingElement = viewModel.sameAsShippingElement,
+        saveForFutureUseElement = viewModel.saveForFutureUseElement,
+        onRemoveAccount = viewModel::reset,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun USBankAccountForm(
+    screenState: USBankAccountFormScreenState,
+    formArgs: FormArguments,
+    processing: Boolean,
+    nameController: TextFieldController,
+    emailController: TextFieldController,
+    phoneController: PhoneNumberController,
+    addressController: AddressController,
+    lastTextFieldIdentifier: IdentifierSpec?,
+    sameAsShippingElement: SameAsShippingElement?,
+    saveForFutureUseElement: SaveForFutureUseElement,
+    onRemoveAccount: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Box(modifier) {
-        when (val screenState = currentScreenState) {
+        when (screenState) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
                 BillingDetailsCollectionScreen(
                     formArgs = formArgs,
                     processing = processing,
-                    nameController = viewModel.nameController,
-                    emailController = viewModel.emailController,
-                    phoneController = viewModel.phoneController,
-                    addressController = viewModel.addressElement.controller,
+                    nameController = nameController,
+                    emailController = emailController,
+                    phoneController = phoneController,
+                    addressController = addressController,
                     lastTextFieldIdentifier = lastTextFieldIdentifier,
-                    sameAsShippingElement = viewModel.sameAsShippingElement,
+                    sameAsShippingElement = sameAsShippingElement,
                 )
             }
             is USBankAccountFormScreenState.MandateCollection -> {
@@ -133,14 +164,14 @@ internal fun USBankAccountForm(
                     formArgs = formArgs,
                     processing = processing,
                     screenState = screenState,
-                    nameController = viewModel.nameController,
-                    emailController = viewModel.emailController,
-                    phoneController = viewModel.phoneController,
-                    addressController = viewModel.addressElement.controller,
+                    nameController = nameController,
+                    emailController = emailController,
+                    phoneController = phoneController,
+                    addressController = addressController,
                     lastTextFieldIdentifier = lastTextFieldIdentifier,
-                    sameAsShippingElement = viewModel.sameAsShippingElement,
-                    saveForFutureUseElement = viewModel.saveForFutureUseElement,
-                    onRemoveAccount = viewModel::reset,
+                    sameAsShippingElement = sameAsShippingElement,
+                    saveForFutureUseElement = saveForFutureUseElement,
+                    onRemoveAccount = onRemoveAccount,
                 )
             }
             is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
@@ -148,14 +179,14 @@ internal fun USBankAccountForm(
                     formArgs = formArgs,
                     processing = processing,
                     screenState = screenState,
-                    nameController = viewModel.nameController,
-                    emailController = viewModel.emailController,
-                    phoneController = viewModel.phoneController,
-                    addressController = viewModel.addressElement.controller,
+                    nameController = nameController,
+                    emailController = emailController,
+                    phoneController = phoneController,
+                    addressController = addressController,
                     lastTextFieldIdentifier = lastTextFieldIdentifier,
-                    sameAsShippingElement = viewModel.sameAsShippingElement,
-                    saveForFutureUseElement = viewModel.saveForFutureUseElement,
-                    onRemoveAccount = viewModel::reset,
+                    sameAsShippingElement = sameAsShippingElement,
+                    saveForFutureUseElement = saveForFutureUseElement,
+                    onRemoveAccount = onRemoveAccount,
                 )
             }
             is USBankAccountFormScreenState.SavedAccount -> {
@@ -163,14 +194,14 @@ internal fun USBankAccountForm(
                     formArgs = formArgs,
                     processing = processing,
                     screenState = screenState,
-                    nameController = viewModel.nameController,
-                    emailController = viewModel.emailController,
-                    phoneController = viewModel.phoneController,
-                    addressController = viewModel.addressElement.controller,
+                    nameController = nameController,
+                    emailController = emailController,
+                    phoneController = phoneController,
+                    addressController = addressController,
                     lastTextFieldIdentifier = lastTextFieldIdentifier,
-                    sameAsShippingElement = viewModel.sameAsShippingElement,
-                    saveForFutureUseElement = viewModel.saveForFutureUseElement,
-                    onRemoveAccount = viewModel::reset,
+                    sameAsShippingElement = sameAsShippingElement,
+                    saveForFutureUseElement = saveForFutureUseElement,
+                    onRemoveAccount = onRemoveAccount,
                 )
             }
         }
