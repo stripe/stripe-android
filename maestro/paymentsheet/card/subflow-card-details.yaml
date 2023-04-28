@@ -3,7 +3,7 @@ appId: com.stripe.android.paymentsheet.example
 ####### Enter card details #######
 - tapOn: "Card"
 - tapOn: "Card number"
-- inputText: "4242 4242 4242 4242"
+- inputText: ${CARD_NUMBER}
 - tapOn: "MM / YY"
 - inputText: "444"
 - tapOn: "CVC"

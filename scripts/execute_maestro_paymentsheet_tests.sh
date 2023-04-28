@@ -33,6 +33,7 @@ sleep 3
 # Pull the video file from the device
 mkdir -p /tmp/test_results
 cd /tmp/test_results
+adb logcat -d > /tmp/test_results/log.txt
 adb pull "/sdcard/$now-1.mp4" || true
 adb pull "/sdcard/$now-2.mp4" || true
 
