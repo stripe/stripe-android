@@ -3,6 +3,7 @@ package com.stripe.android.payments.bankaccount
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
@@ -52,7 +53,13 @@ interface CollectBankAccountLauncher {
         customerId: String?,
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun unregister()
+
     companion object {
+
+        private const val LAUNCHER_KEY = "CollectBankAccountLauncher"
+
         /**
          * Create a [CollectBankAccountLauncher] instance with [ComponentActivity].
          *
@@ -119,6 +126,21 @@ interface CollectBankAccountLauncher {
             return StripeCollectBankAccountLauncher(
                 fragment.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it)
+                }
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun create(
+            activityResultRegistryOwner: ActivityResultRegistryOwner,
+            callback: (CollectBankAccountResult) -> Unit,
+        ): CollectBankAccountLauncher {
+            return StripeCollectBankAccountLauncher(
+                activityResultRegistryOwner.activityResultRegistry.register(
+                    LAUNCHER_KEY,
+                    CollectBankAccountContract(),
+                ) { result ->
+                    callback(result.toExposedResult())
                 }
             )
         }
@@ -201,6 +223,10 @@ internal class StripeCollectBankAccountLauncher constructor(
                 customerId = customerId,
             )
         )
+    }
+
+    override fun unregister() {
+        hostActivityLauncher.unregister()
     }
 }
 
