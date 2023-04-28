@@ -11,7 +11,7 @@ import org.json.JSONObject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DeferredPaymentIntentJsonParser(
     private val elementsSessionId: String?,
-    private val params: DeferredIntentParams,
+    private val paymentMode: DeferredIntentParams.Mode.Payment,
     private val apiKey: String,
     private val timeProvider: () -> Long
 ) : ModelJsonParser<PaymentIntent> {
@@ -28,7 +28,6 @@ class DeferredPaymentIntentJsonParser(
             .map { it.lowercase() }
 
         val countryCode = optString(json, FIELD_COUNTRY_CODE)
-        val paymentMode = params.mode as DeferredIntentParams.Mode.Payment
 
         val captureMethod = when (paymentMode.captureMethod) {
             DeferredIntentParams.CaptureMethod.Manual -> PaymentIntent.CaptureMethod.Manual

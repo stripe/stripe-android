@@ -289,6 +289,7 @@ class ElementsSessionJsonParserTest {
                 deferredIntentParams = DeferredIntentParams(
                     mode = DeferredIntentParams.Mode.Setup(
                         currency = "usd",
+                        setupFutureUsage = StripeIntent.Usage.OffSession,
                     ),
                     paymentMethodTypes = emptyList(),
                     onBehalfOf = null,
