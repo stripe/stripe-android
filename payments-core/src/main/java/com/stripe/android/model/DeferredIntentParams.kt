@@ -33,6 +33,7 @@ data class DeferredIntentParams(
         @Parcelize
         data class Setup(
             val currency: String?,
+            val setupFutureUsage: StripeIntent.Usage,
         ) : Mode {
             override val code: String get() = "setup"
         }

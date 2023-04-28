@@ -111,6 +111,7 @@ internal class ElementsSessionJsonParser(
                         is DeferredIntentParams.Mode.Setup -> {
                             DeferredSetupIntentJsonParser(
                                 elementsSessionId = elementsSessionId,
+                                params = params.deferredIntentParams,
                                 apiKey = apiKey,
                                 timeProvider = timeProvider
                             ).parse(json)

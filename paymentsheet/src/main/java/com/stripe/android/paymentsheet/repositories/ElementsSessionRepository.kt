@@ -156,7 +156,10 @@ private fun PaymentSheet.IntentConfiguration.Mode.toElementsSessionParam(): Mode
             )
         }
         is PaymentSheet.IntentConfiguration.Mode.Setup -> {
-            Mode.Setup(currency)
+            Mode.Setup(
+                currency = currency,
+                setupFutureUsage = setupFutureUse.toElementsSessionParam(),
+            )
         }
     }
 }
