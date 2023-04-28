@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.app.Application
-import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
@@ -25,7 +25,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
@@ -287,24 +287,24 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
         set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 
-    fun register(activity: ComponentActivity) {
+    fun register(activityResultRegistryOwner: ActivityResultRegistryOwner) {
         collectBankAccountLauncher = CollectBankAccountLauncher.create(
-            activity,
-            ::handleCollectBankAccountResult
+            activityResultRegistryOwner = activityResultRegistryOwner,
+            callback = ::handleCollectBankAccountResult,
         )
     }
 
     @VisibleForTesting
-    fun handleCollectBankAccountResult(result: CollectBankAccountResult) {
+    fun handleCollectBankAccountResult(result: CollectBankAccountResultInternal) {
         hasLaunched = false
         when (result) {
-            is CollectBankAccountResult.Completed -> {
+            is CollectBankAccountResultInternal.Completed -> {
                 when (
                     val paymentAccount =
                         result.response.financialConnectionsSession.paymentAccount
                 ) {
                     is BankAccount -> {
-                        result.response.intent.id?.let { intentId ->
+                        result.response.intent?.id?.let { intentId ->
                             _currentScreenState.update {
                                 USBankAccountFormScreenState.VerifyWithMicrodeposits(
                                     name = name.value,
@@ -323,7 +323,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         }
                     }
                     is FinancialConnectionsAccount -> {
-                        result.response.intent.id?.let { intentId ->
+                        result.response.intent?.id?.let { intentId ->
                             _currentScreenState.update {
                                 USBankAccountFormScreenState.MandateCollection(
                                     name = name.value,
@@ -346,10 +346,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     }
                 }
             }
-            is CollectBankAccountResult.Failed -> {
+            is CollectBankAccountResultInternal.Failed -> {
                 reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
             }
-            is CollectBankAccountResult.Cancelled -> {
+            is CollectBankAccountResultInternal.Cancelled -> {
                 reset()
             }
         }
@@ -434,6 +434,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             )
         }
 
+        collectBankAccountLauncher?.unregister()
         collectBankAccountLauncher = null
     }
 

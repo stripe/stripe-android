@@ -15,8 +15,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
@@ -571,7 +571,7 @@ class USBankAccountFormViewModelTest {
         )
     }
 
-    private suspend fun mockUnverifiedBankAccount(): CollectBankAccountResult.Completed {
+    private suspend fun mockUnverifiedBankAccount(): CollectBankAccountResultInternal.Completed {
         val paymentIntent = mock<PaymentIntent>()
         val financialConnectionsSession = mock<FinancialConnectionsSession>()
         whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret?.value)
@@ -594,15 +594,15 @@ class USBankAccountFormViewModelTest {
             )
         ).thenReturn(Result.success(paymentIntent))
 
-        return CollectBankAccountResult.Completed(
-            CollectBankAccountResponse(
+        return CollectBankAccountResultInternal.Completed(
+            CollectBankAccountResponseInternal(
                 intent = paymentIntent,
                 financialConnectionsSession = financialConnectionsSession
             )
         )
     }
 
-    private suspend fun mockVerifiedBankAccount(): CollectBankAccountResult.Completed {
+    private suspend fun mockVerifiedBankAccount(): CollectBankAccountResultInternal.Completed {
         val paymentIntent = mock<PaymentIntent>()
         val financialConnectionsSession = mock<FinancialConnectionsSession>()
         whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret?.value)
@@ -627,8 +627,8 @@ class USBankAccountFormViewModelTest {
             )
         ).thenReturn(Result.success(paymentIntent))
 
-        return CollectBankAccountResult.Completed(
-            CollectBankAccountResponse(
+        return CollectBankAccountResultInternal.Completed(
+            CollectBankAccountResponseInternal(
                 intent = paymentIntent,
                 financialConnectionsSession = financialConnectionsSession
             )

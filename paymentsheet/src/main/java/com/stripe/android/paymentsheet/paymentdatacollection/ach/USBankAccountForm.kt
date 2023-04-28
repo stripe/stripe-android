@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import android.content.Context
-import android.content.ContextWrapper
-import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -66,6 +64,7 @@ internal fun USBankAccountForm(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
 
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
@@ -91,7 +90,7 @@ internal fun USBankAccountForm(
     )
 
     DisposableEffect(Unit) {
-        viewModel.register(context.requireActivity())
+        viewModel.register(activityResultRegistryOwner!!)
 
         onDispose {
             sheetViewModel.resetUSBankPrimaryButton()
@@ -552,15 +551,4 @@ private fun AccountDetailsForm(
             }
         )
     }
-}
-
-private fun Context.requireActivity(): ComponentActivity {
-    var currentContext = this
-    while (currentContext is ContextWrapper) {
-        if (currentContext is ComponentActivity) {
-            return currentContext
-        }
-        currentContext = currentContext.baseContext
-    }
-    error("Failed to find an Activity from the current Context")
 }
