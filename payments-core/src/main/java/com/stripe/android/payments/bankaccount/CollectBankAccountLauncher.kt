@@ -53,6 +53,7 @@ interface CollectBankAccountLauncher {
     )
 
     companion object {
+
         /**
          * Create a [CollectBankAccountLauncher] instance with [ComponentActivity].
          *
