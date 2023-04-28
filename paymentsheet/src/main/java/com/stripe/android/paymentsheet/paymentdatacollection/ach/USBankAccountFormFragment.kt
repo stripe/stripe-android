@@ -4,32 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -40,8 +18,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
@@ -53,17 +29,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
-import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.elements.AddressElementUI
-import com.stripe.android.uicore.elements.H6Text
-import com.stripe.android.uicore.elements.PhoneNumberElementUI
-import com.stripe.android.uicore.elements.SameAsShippingElementUI
-import com.stripe.android.uicore.elements.Section
-import com.stripe.android.uicore.elements.SectionCard
-import com.stripe.android.uicore.elements.TextFieldSection
-import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.launch
 
@@ -202,6 +168,8 @@ internal class USBankAccountFormFragment : Fragment() {
         setContent {
             StripeTheme {
                 val currentScreenState by viewModel.currentScreenState.collectAsState()
+                val processing by viewModel.processing.collectAsState()
+                val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState(null)
 
                 LaunchedEffect(currentScreenState) {
                     handleScreenStateChanged(currentScreenState)
@@ -209,16 +177,62 @@ internal class USBankAccountFormFragment : Fragment() {
 
                 when (val screenState = currentScreenState) {
                     is BillingDetailsCollection -> {
-                        BillingDetailsCollectionScreen(screenState)
+                        BillingDetailsCollectionScreen(
+                            formArgs = formArgs,
+                            processing = processing,
+                            screenState = screenState,
+                            nameController = viewModel.nameController,
+                            emailController = viewModel.emailController,
+                            phoneController = viewModel.phoneController,
+                            addressController = viewModel.addressElement.controller,
+                            lastTextFieldIdentifier = lastTextFieldIdentifier,
+                            sameAsShippingElement = viewModel.sameAsShippingElement,
+                        )
                     }
                     is USBankAccountFormScreenState.MandateCollection -> {
-                        MandateCollectionScreen(screenState)
+                        MandateCollectionScreen(
+                            formArgs = formArgs,
+                            processing = processing,
+                            screenState = screenState,
+                            nameController = viewModel.nameController,
+                            emailController = viewModel.emailController,
+                            phoneController = viewModel.phoneController,
+                            addressController = viewModel.addressElement.controller,
+                            lastTextFieldIdentifier = lastTextFieldIdentifier,
+                            sameAsShippingElement = viewModel.sameAsShippingElement,
+                            saveForFutureUseElement = viewModel.saveForFutureUseElement,
+                            onRemoveAccount = viewModel::reset,
+                        )
                     }
                     is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
-                        VerifyWithMicrodepositsScreen(screenState)
+                        VerifyWithMicrodepositsScreen(
+                            formArgs = formArgs,
+                            processing = processing,
+                            screenState = screenState,
+                            nameController = viewModel.nameController,
+                            emailController = viewModel.emailController,
+                            phoneController = viewModel.phoneController,
+                            addressController = viewModel.addressElement.controller,
+                            lastTextFieldIdentifier = lastTextFieldIdentifier,
+                            sameAsShippingElement = viewModel.sameAsShippingElement,
+                            saveForFutureUseElement = viewModel.saveForFutureUseElement,
+                            onRemoveAccount = viewModel::reset,
+                        )
                     }
                     is USBankAccountFormScreenState.SavedAccount -> {
-                        SavedAccountScreen(screenState)
+                        SavedAccountScreen(
+                            formArgs = formArgs,
+                            processing = processing,
+                            screenState = screenState,
+                            nameController = viewModel.nameController,
+                            emailController = viewModel.emailController,
+                            phoneController = viewModel.phoneController,
+                            addressController = viewModel.addressElement.controller,
+                            lastTextFieldIdentifier = lastTextFieldIdentifier,
+                            sameAsShippingElement = viewModel.sameAsShippingElement,
+                            saveForFutureUseElement = viewModel.saveForFutureUseElement,
+                            onRemoveAccount = viewModel::reset,
+                        )
                     }
                 }
             }
@@ -249,278 +263,6 @@ internal class USBankAccountFormFragment : Fragment() {
         sheetViewModel?.resetUSBankPrimaryButton()
         viewModel.onDestroy()
         super.onDetach()
-    }
-
-    @Composable
-    private fun BillingDetailsCollectionScreen(
-        screenState: BillingDetailsCollection
-    ) {
-        Column(Modifier.fillMaxWidth()) {
-            BillingDetailsForm(
-                screenState.name,
-                screenState.email,
-            )
-        }
-    }
-
-    @Composable
-    private fun MandateCollectionScreen(
-        screenState: USBankAccountFormScreenState.MandateCollection
-    ) {
-        Column(Modifier.fillMaxWidth()) {
-            BillingDetailsForm(
-                screenState.name,
-                screenState.email,
-            )
-            AccountDetailsForm(
-                screenState.paymentAccount.institutionName,
-                screenState.paymentAccount.last4,
-                screenState.saveForFutureUsage
-            )
-        }
-    }
-
-    @Composable
-    private fun VerifyWithMicrodepositsScreen(
-        screenState: USBankAccountFormScreenState.VerifyWithMicrodeposits
-    ) {
-        Column(Modifier.fillMaxWidth()) {
-            BillingDetailsForm(
-                screenState.name,
-                screenState.email,
-            )
-            AccountDetailsForm(
-                screenState.paymentAccount.bankName,
-                screenState.paymentAccount.last4,
-                screenState.saveForFutureUsage
-            )
-        }
-    }
-
-    @Composable
-    private fun SavedAccountScreen(
-        screenState: USBankAccountFormScreenState.SavedAccount
-    ) {
-        Column(Modifier.fillMaxWidth()) {
-            BillingDetailsForm(
-                screenState.name,
-                screenState.email,
-            )
-            AccountDetailsForm(
-                screenState.bankName,
-                screenState.last4,
-                screenState.saveForFutureUsage
-            )
-        }
-    }
-
-    @Composable
-    private fun BillingDetailsForm(name: String, email: String?) {
-        val processing = viewModel.processing.collectAsState(false)
-        Column(Modifier.fillMaxWidth()) {
-            H6Text(
-                text = stringResource(R.string.stripe_paymentsheet_pay_with_bank_title),
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-            )
-            if (formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(0.dp),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    TextFieldSection(
-                        textFieldController = viewModel.nameController.apply {
-                            onRawValueChange(name)
-                        },
-                        imeAction = ImeAction.Next,
-                        enabled = !processing.value
-                    )
-                }
-            }
-            if (formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(0.dp),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    TextFieldSection(
-                        textFieldController = viewModel.emailController.apply {
-                            onRawValueChange(email ?: "")
-                        },
-                        imeAction = ImeAction.Next,
-                        enabled = !processing.value
-                    )
-                }
-            }
-            if (formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always) {
-                phoneSection()
-            }
-            if (formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full) {
-                addressSection()
-            }
-        }
-    }
-
-    @Suppress("SpreadOperator")
-    @Composable
-    private fun phoneSection() {
-        val processing = viewModel.processing.collectAsState(false)
-        val error by viewModel.phoneController.error.collectAsState(null)
-        val sectionErrorString = error?.let {
-            it.formatArgs?.let { args ->
-                stringResource(
-                    it.errorMessage,
-                    *args
-                )
-            } ?: stringResource(it.errorMessage)
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(0.dp),
-            contentAlignment = Alignment.CenterEnd
-        ) {
-            Section(null, sectionErrorString) {
-                PhoneNumberElementUI(
-                    enabled = !processing.value,
-                    controller = viewModel.phoneController,
-                    imeAction = ImeAction.Next,
-                )
-            }
-        }
-    }
-
-    @Suppress("SpreadOperator")
-    @Composable
-    fun addressSection() {
-        val processing = viewModel.processing.collectAsState(false)
-        val error by viewModel.addressElement.controller.error.collectAsState(null)
-        val sectionErrorString = error?.let {
-            it.formatArgs?.let { args ->
-                stringResource(
-                    it.errorMessage,
-                    *args
-                )
-            } ?: stringResource(it.errorMessage)
-        }
-        val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState(
-            null
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(0.dp),
-            contentAlignment = Alignment.CenterEnd
-        ) {
-            Column {
-                Section(R.string.stripe_billing_details, sectionErrorString) {
-                    AddressElementUI(
-                        enabled = !processing.value,
-                        controller = viewModel.addressElement.controller,
-                        hiddenIdentifiers = emptySet(),
-                        lastTextFieldIdentifier = lastTextFieldIdentifier,
-                    )
-                }
-                viewModel.sameAsShippingElement?.let {
-                    SameAsShippingElementUI(it.controller)
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun AccountDetailsForm(
-        bankName: String?,
-        last4: String?,
-        saveForFutureUsage: Boolean
-    ) {
-        val openDialog = remember { mutableStateOf(false) }
-        val bankIcon = TransformToBankIcon(bankName)
-        val processing = viewModel.processing.collectAsState(false)
-
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp)
-        ) {
-            H6Text(
-                text = stringResource(R.string.stripe_title_bank_account),
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            SectionCard(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(all = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            painter = painterResource(bankIcon),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .height(40.dp)
-                                .width(56.dp)
-                        )
-                        Text(
-                            text = "$bankName ••••$last4",
-                            modifier = Modifier.alpha(if (processing.value) 0.5f else 1f),
-                            color = MaterialTheme.stripeColors.onComponent
-                        )
-                    }
-                    Image(
-                        painter = painterResource(R.drawable.stripe_ic_clear),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .height(20.dp)
-                            .width(20.dp)
-                            .alpha(if (processing.value) 0.5f else 1f)
-                            .clickable {
-                                if (!processing.value) {
-                                    openDialog.value = true
-                                }
-                            }
-                    )
-                }
-            }
-            if (formArgs.showCheckbox) {
-                SaveForFutureUseElementUI(
-                    enabled = true,
-                    element = viewModel.saveForFutureUseElement.apply {
-                        this.controller.onValueChange(saveForFutureUsage)
-                    },
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-        }
-        last4?.let {
-            SimpleDialogElementUI(
-                openDialog = openDialog,
-                titleText = stringResource(
-                    id = R.string.stripe_paymentsheet_remove_bank_account_title
-                ),
-                messageText = stringResource(
-                    id = R.string.stripe_bank_account_ending_in,
-                    last4
-                ),
-                confirmText = stringResource(
-                    id = R.string.stripe_remove
-                ),
-                dismissText = stringResource(
-                    id = R.string.stripe_cancel
-                ),
-                onConfirmListener = {
-                    openDialog.value = false
-                    viewModel.reset()
-                },
-                onDismissListener = {
-                    openDialog.value = false
-                }
-            )
-        }
     }
 
     private fun updatePrimaryButton(
