@@ -235,7 +235,11 @@ internal fun BillingDetailsForm(
                     textFieldController = emailController.apply {
                         onRawValueChange(email ?: "")
                     },
-                    imeAction = ImeAction.Next,
+                    imeAction = if (lastTextFieldIdentifier == IdentifierSpec.Email) {
+                        ImeAction.Done
+                    } else {
+                        ImeAction.Next
+                    },
                     enabled = !processing
                 )
             }
@@ -244,7 +248,11 @@ internal fun BillingDetailsForm(
             PhoneSection(
                 processing = processing,
                 phoneController = phoneController,
-                imeAction = ImeAction.Next,
+                imeAction = if (lastTextFieldIdentifier == IdentifierSpec.Phone) {
+                    ImeAction.Done
+                } else {
+                    ImeAction.Next
+                },
             )
         }
         if (formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full) {
