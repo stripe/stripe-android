@@ -9,6 +9,7 @@ import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
@@ -31,7 +32,11 @@ internal class CompleteFlowViewModel(
     )
     val state: StateFlow<CompleteFlowViewState> = _state
 
-    fun checkout() {
+    init {
+        init()
+    }
+
+    private fun init() {
         viewModelScope.launch(Dispatchers.IO) {
             val currentState = _state.updateAndGet {
                 it.copy(isProcessing = true)
@@ -55,7 +60,8 @@ internal class CompleteFlowViewModel(
                     val paymentInfo = CompleteFlowViewState.PaymentInfo(
                         clientSecret = apiResult.value.paymentIntent,
                         customerConfiguration = apiResult.value.makeCustomerConfig(),
-                        shouldPresent = true,
+                        shippingDetails = null,
+                        shouldPresent = false,
                     )
 
                     _state.update {
@@ -79,6 +85,18 @@ internal class CompleteFlowViewModel(
         }
     }
 
+    fun checkout() {
+        _state.update {
+            it.copy(
+                isProcessing = false,
+                paymentInfo = it.paymentInfo?.copy(
+                    shouldPresent = true
+                ),
+                status = null,
+            )
+        }
+    }
+
     fun handlePaymentSheetResult(paymentResult: PaymentSheetResult) {
         val status = when (paymentResult) {
             is PaymentSheetResult.Canceled -> null
@@ -92,6 +110,29 @@ internal class CompleteFlowViewModel(
                 status = status,
                 didComplete = paymentResult is PaymentSheetResult.Completed,
             )
+        }
+    }
+
+    fun handleAddressResult(addressResult: AddressLauncherResult) {
+        when (addressResult) {
+            is AddressLauncherResult.Canceled -> {
+                _state.update {
+                    it.copy(
+                        paymentInfo = it.paymentInfo?.copy(
+                            shippingDetails = null
+                        )
+                    )
+                }
+            }
+            is AddressLauncherResult.Succeeded -> {
+                _state.update {
+                    it.copy(
+                        paymentInfo = it.paymentInfo?.copy(
+                            shippingDetails = addressResult.address
+                        )
+                    )
+                }
+            }
         }
     }
 

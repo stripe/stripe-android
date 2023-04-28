@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.samples.ui.complete_flow
 
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 
 data class CompleteFlowViewState(
@@ -14,6 +15,7 @@ data class CompleteFlowViewState(
     data class PaymentInfo(
         val clientSecret: String,
         val customerConfiguration: PaymentSheet.CustomerConfiguration?,
+        val shippingDetails: AddressDetails?,
         val shouldPresent: Boolean,
     ) {
 
@@ -27,7 +29,8 @@ data class CompleteFlowViewState(
                 ),
                 // Set `allowsDelayedPaymentMethods` to true if your business can handle payment
                 // methods that complete payment after a delay, like SEPA Debit and Sofort.
-                allowsDelayedPaymentMethods = true
+                allowsDelayedPaymentMethods = true,
+                shippingDetails = shippingDetails
             )
     }
 }

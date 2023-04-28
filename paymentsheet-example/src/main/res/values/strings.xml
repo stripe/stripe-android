@@ -42,6 +42,7 @@
     <string name="checkout_custom">Checkout (Custom)</string>
     <string name="checkout_complete">Checkout (Complete)</string>
     <string name="add_shipping_address">Add Shipping Address</string>
+    <string name="ship_to">Ship to</string>
     <string name="currency">Currency</string>
     <string name="default_billing_address">Default Billing Address</string>
     <string name="shipping_address">Shipping Address</string>
