@@ -3187,6 +3187,7 @@ public final class com/stripe/android/model/PaymentIntent$CancellationReason : j
 
 public final class com/stripe/android/model/PaymentIntent$CaptureMethod : java/lang/Enum {
 	public static final field Automatic Lcom/stripe/android/model/PaymentIntent$CaptureMethod;
+	public static final field AutomaticAsync Lcom/stripe/android/model/PaymentIntent$CaptureMethod;
 	public static final field Manual Lcom/stripe/android/model/PaymentIntent$CaptureMethod;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/PaymentIntent$CaptureMethod;
 	public static fun values ()[Lcom/stripe/android/model/PaymentIntent$CaptureMethod;
