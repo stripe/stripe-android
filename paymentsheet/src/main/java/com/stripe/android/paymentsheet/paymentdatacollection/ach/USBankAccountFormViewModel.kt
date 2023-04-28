@@ -16,13 +16,11 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -32,10 +30,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
-import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
@@ -62,6 +57,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Provider
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -69,7 +65,6 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
     private val application: Application,
-    private val stripeRepository: StripeRepository,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     private val savedStateHandle: SavedStateHandle,
     addressRepository: AddressRepository,
@@ -305,41 +300,37 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         result.response.financialConnectionsSession.paymentAccount
                 ) {
                     is BankAccount -> {
-                        result.response.intent?.id?.let { intentId ->
-                            _currentScreenState.update {
-                                USBankAccountFormScreenState.VerifyWithMicrodeposits(
-                                    name = name.value,
-                                    email = email.value,
-                                    phone = phone.value,
-                                    address = address.value,
-                                    paymentAccount = paymentAccount,
-                                    financialConnectionsSessionId =
-                                    result.response.financialConnectionsSession.id,
-                                    intentId = intentId,
-                                    primaryButtonText = buildPrimaryButtonText(),
-                                    mandateText = buildMandateText(),
-                                    saveForFutureUsage = saveForFutureUse.value
-                                )
-                            }
+                        _currentScreenState.update {
+                            USBankAccountFormScreenState.VerifyWithMicrodeposits(
+                                name = name.value,
+                                email = email.value,
+                                phone = phone.value,
+                                address = address.value,
+                                paymentAccount = paymentAccount,
+                                financialConnectionsSessionId =
+                                result.response.financialConnectionsSession.id,
+                                intentId = result.response.intent?.id,
+                                primaryButtonText = buildPrimaryButtonText(),
+                                mandateText = buildMandateText(),
+                                saveForFutureUsage = saveForFutureUse.value
+                            )
                         }
                     }
                     is FinancialConnectionsAccount -> {
-                        result.response.intent?.id?.let { intentId ->
-                            _currentScreenState.update {
-                                USBankAccountFormScreenState.MandateCollection(
-                                    name = name.value,
-                                    email = email.value,
-                                    phone = phone.value,
-                                    address = address.value,
-                                    paymentAccount = paymentAccount,
-                                    financialConnectionsSessionId =
-                                    result.response.financialConnectionsSession.id,
-                                    intentId = intentId,
-                                    primaryButtonText = buildPrimaryButtonText(),
-                                    mandateText = buildMandateText(),
-                                    saveForFutureUsage = saveForFutureUse.value
-                                )
-                            }
+                        _currentScreenState.update {
+                            USBankAccountFormScreenState.MandateCollection(
+                                name = name.value,
+                                email = email.value,
+                                phone = phone.value,
+                                address = address.value,
+                                paymentAccount = paymentAccount,
+                                financialConnectionsSessionId =
+                                result.response.financialConnectionsSession.id,
+                                intentId = result.response.intent?.id,
+                                primaryButtonText = buildPrimaryButtonText(),
+                                mandateText = buildMandateText(),
+                                saveForFutureUsage = saveForFutureUse.value
+                            )
                         }
                     }
                     null -> {
@@ -366,41 +357,30 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         )
         when (screenState) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
-                args.clientSecret?.let {
-                    collectBankAccount(it)
-                }
+                collectBankAccount(args.clientSecret)
             }
             is USBankAccountFormScreenState.MandateCollection ->
-                args.clientSecret?.let {
-                    attachFinancialAccountToIntent(
-                        clientSecret = it,
-                        intentId = screenState.intentId,
-                        linkAccountId = screenState.financialConnectionsSessionId,
-                        bankName = screenState.paymentAccount.institutionName,
-                        last4 = screenState.paymentAccount.last4
-                    )
-                }
+                updatePaymentSelection(
+                    intentId = screenState.intentId,
+                    linkAccountId = screenState.financialConnectionsSessionId,
+                    bankName = screenState.paymentAccount.institutionName,
+                    last4 = screenState.paymentAccount.last4
+                )
             is USBankAccountFormScreenState.VerifyWithMicrodeposits ->
-                args.clientSecret?.let {
-                    attachFinancialAccountToIntent(
-                        clientSecret = it,
-                        intentId = screenState.intentId,
-                        linkAccountId = screenState.financialConnectionsSessionId,
-                        bankName = screenState.paymentAccount.bankName,
-                        last4 = screenState.paymentAccount.last4
-                    )
-                }
+                updatePaymentSelection(
+                    intentId = screenState.intentId,
+                    linkAccountId = screenState.financialConnectionsSessionId,
+                    bankName = screenState.paymentAccount.bankName,
+                    last4 = screenState.paymentAccount.last4
+                )
             is USBankAccountFormScreenState.SavedAccount -> {
-                args.clientSecret?.let {
-                    screenState.financialConnectionsSessionId?.let { linkAccountId ->
-                        attachFinancialAccountToIntent(
-                            clientSecret = it,
-                            intentId = screenState.intentId,
-                            linkAccountId = linkAccountId,
-                            bankName = screenState.bankName,
-                            last4 = screenState.last4
-                        )
-                    }
+                screenState.financialConnectionsSessionId?.let { linkAccountId ->
+                    updatePaymentSelection(
+                        intentId = screenState.intentId,
+                        linkAccountId = linkAccountId,
+                        bankName = screenState.bankName,
+                        last4 = screenState.last4
+                    )
                 }
             }
         }
@@ -447,128 +427,144 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         _processing.update { enabled }
     }
 
-    private fun collectBankAccount(clientSecret: ClientSecret) {
+    private fun collectBankAccount(clientSecret: String?) {
         if (hasLaunched) return
         hasLaunched = true
-        when (clientSecret) {
-            is PaymentIntentClientSecret -> {
+        clientSecret?.let {
+            if (args.isPaymentFlow) {
                 collectBankAccountLauncher?.presentWithPaymentIntent(
                     publishableKey = lazyPaymentConfig.get().publishableKey,
                     stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                    clientSecret = clientSecret.value,
+                    clientSecret = clientSecret,
                     configuration = CollectBankAccountConfiguration.USBankAccount(
                         name.value,
                         email.value
                     )
                 )
-            }
-            is SetupIntentClientSecret -> {
+            } else {
                 collectBankAccountLauncher?.presentWithSetupIntent(
                     publishableKey = lazyPaymentConfig.get().publishableKey,
                     stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                    clientSecret = clientSecret.value,
+                    clientSecret = clientSecret,
                     configuration = CollectBankAccountConfiguration.USBankAccount(
                         name.value,
                         email.value
                     )
                 )
             }
-        }
-    }
-
-    private fun attachFinancialAccountToIntent(
-        clientSecret: ClientSecret,
-        intentId: String,
-        linkAccountId: String,
-        bankName: String?,
-        last4: String?
-    ) {
-        bankName?.let {
-            last4?.let {
-                viewModelScope.launch {
-                    when (clientSecret) {
-                        is PaymentIntentClientSecret -> {
-                            stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(
-                                clientSecret.value,
-                                intentId,
-                                linkAccountId,
-                                ApiRequest.Options(
-                                    apiKey = lazyPaymentConfig.get().publishableKey,
-                                    stripeAccount = lazyPaymentConfig.get().stripeAccountId
-                                ),
-                                expandFields = emptyList()
-                            )
-                        }
-                        is SetupIntentClientSecret -> {
-                            stripeRepository.attachFinancialConnectionsSessionToSetupIntent(
-                                clientSecret.value,
-                                intentId,
-                                linkAccountId,
-                                ApiRequest.Options(
-                                    apiKey = lazyPaymentConfig.get().publishableKey,
-                                    stripeAccount = lazyPaymentConfig.get().stripeAccountId
-                                ),
-                                expandFields = emptyList()
-                            )
-                        }
-                    }
-
-                    val paymentSelection = PaymentSelection.New.USBankAccount(
-                        labelResource = application.getString(
-                            R.string.stripe_paymentsheet_payment_method_item_card_number,
-                            last4
+        } ?: run {
+            // Decoupled Flow
+            args.stripeIntentId?.let { elementsSessionId ->
+                val sessionId = "$elementsSessionId--${UUID.randomUUID()}"
+                if (args.isPaymentFlow) {
+                    collectBankAccountLauncher?.presentWithDeferredPayment(
+                        publishableKey = lazyPaymentConfig.get().publishableKey,
+                        stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                        configuration = CollectBankAccountConfiguration.USBankAccount(
+                            name.value,
+                            email.value
                         ),
-                        iconResource = TransformToBankIcon(
-                            bankName
-                        ),
-                        paymentMethodCreateParams =
-                        PaymentMethodCreateParams.create(
-                            usBankAccount = PaymentMethodCreateParams.USBankAccount(
-                                linkAccountSessionId = linkAccountId
-                            ),
-                            billingDetails = PaymentMethod.BillingDetails(
-                                name = name.value,
-                                email = email.value,
-                                phone = phone.value,
-                                address = address.value,
-                            )
-                        ),
-                        customerRequestedSave = if (args.formArgs.showCheckbox) {
-                            if (saveForFutureUse.value) {
-                                PaymentSelection.CustomerRequestedSave.RequestReuse
-                            } else {
-                                PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                            }
-                        } else {
-                            PaymentSelection.CustomerRequestedSave.NoRequest
-                        },
-                        bankName = bankName,
-                        last4 = last4,
-                        financialConnectionsSessionId = linkAccountId,
-                        intentId = intentId
+                        elementsSessionId = sessionId,
+                        customerId = null,
+                        amount = args.formArgs.amount?.value?.toInt(),
+                        currency = args.formArgs.amount?.currencyCode
                     )
-
-                    _currentScreenState.update { screenState ->
-                        if (screenState is USBankAccountFormScreenState.SavedAccount) {
-                            screenState.copy(
-                                bankName = bankName,
-                                last4 = last4
-                            )
-                        } else {
-                            screenState
-                        }
-                    }
-
-                    _result.tryEmit(paymentSelection)
+                } else {
+                    collectBankAccountLauncher?.presentWithDeferredSetup(
+                        publishableKey = lazyPaymentConfig.get().publishableKey,
+                        stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                        configuration = CollectBankAccountConfiguration.USBankAccount(
+                            name.value,
+                            email.value
+                        ),
+                        elementsSessionId = sessionId,
+                        customerId = null
+                    )
                 }
             }
         }
     }
 
+    private fun updatePaymentSelection(
+        intentId: String?,
+        linkAccountId: String,
+        bankName: String?,
+        last4: String?
+    ) {
+        if (bankName == null || last4 == null) return
+
+        val paymentSelection = createNewPaymentSelection(
+            last4 = last4,
+            bankName = bankName,
+            linkAccountId = linkAccountId,
+            intentId = intentId,
+        )
+
+        if (args.isCompleteFlow) {
+            viewModelScope.launch {
+                _result.tryEmit(paymentSelection)
+            }
+        } else {
+            _currentScreenState.update { screenState ->
+                if (screenState is USBankAccountFormScreenState.SavedAccount) {
+                    screenState.copy(
+                        bankName = bankName,
+                        last4 = last4
+                    )
+                } else {
+                    screenState
+                }
+            }
+            _result.tryEmit(paymentSelection)
+        }
+    }
+
+    private fun createNewPaymentSelection(
+        last4: String,
+        bankName: String,
+        linkAccountId: String,
+        intentId: String?,
+    ): PaymentSelection.New.USBankAccount {
+        return PaymentSelection.New.USBankAccount(
+            labelResource = application.getString(
+                R.string.stripe_paymentsheet_payment_method_item_card_number,
+                last4
+            ),
+            iconResource = TransformToBankIcon(
+                bankName
+            ),
+            paymentMethodCreateParams =
+            PaymentMethodCreateParams.create(
+                usBankAccount = PaymentMethodCreateParams.USBankAccount(
+                    linkAccountSessionId = linkAccountId
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = name.value,
+                    email = email.value,
+                    phone = phone.value,
+                    address = address.value,
+                )
+            ),
+            customerRequestedSave = if (args.formArgs.showCheckbox) {
+                if (saveForFutureUse.value) {
+                    PaymentSelection.CustomerRequestedSave.RequestReuse
+                } else {
+                    PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                }
+            } else {
+                PaymentSelection.CustomerRequestedSave.NoRequest
+            },
+            bankName = bankName,
+            last4 = last4,
+            financialConnectionsSessionId = linkAccountId,
+            intentId = intentId
+        )
+    }
+
     private fun buildPrimaryButtonText(): String {
         return when {
             args.isCompleteFlow -> {
-                if (args.clientSecret is PaymentIntentClientSecret) {
+                if (args.isPaymentFlow) {
                     args.formArgs.amount!!.buildPayButtonLabel(application.resources)
                 } else {
                     application.getString(
@@ -628,7 +624,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     data class Args(
         val formArgs: FormArguments,
         val isCompleteFlow: Boolean,
-        val clientSecret: ClientSecret?,
+        val isPaymentFlow: Boolean,
+        val stripeIntentId: String?,
+        val clientSecret: String?,
+        val customerId: String?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY

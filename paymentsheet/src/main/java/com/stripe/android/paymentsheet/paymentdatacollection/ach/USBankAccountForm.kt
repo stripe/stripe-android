@@ -30,14 +30,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -67,19 +64,17 @@ internal fun USBankAccountForm(
 ) {
     val context = LocalContext.current
     val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
+    val stripeIntent = sheetViewModel.stripeIntent.collectAsState().value
 
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
-            val clientSecret = when (val intent = sheetViewModel.stripeIntent.value) {
-                is PaymentIntent -> PaymentIntentClientSecret(intent.clientSecret!!)
-                is SetupIntent -> SetupIntentClientSecret(intent.clientSecret!!)
-                else -> error("Launched USBankAccountForm with invalid intent: $intent")
-            }
-
             USBankAccountFormViewModel.Args(
                 formArgs = formArgs,
                 isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
-                clientSecret = clientSecret,
+                isPaymentFlow = stripeIntent is PaymentIntent,
+                stripeIntentId = stripeIntent?.id,
+                clientSecret = stripeIntent?.clientSecret,
+                customerId = sheetViewModel.config?.customer?.id,
                 savedPaymentMethod = sheetViewModel.newPaymentSelection as? New.USBankAccount,
                 shippingDetails = sheetViewModel.config?.shippingDetails,
             )
