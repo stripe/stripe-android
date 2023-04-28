@@ -12,7 +12,7 @@ import android.widget.LinearLayout
 import com.stripe.android.R
 import com.stripe.android.core.model.Country
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.databinding.AddressWidgetBinding
+import com.stripe.android.databinding.StripeAddressWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.ShippingInformation
 import java.util.Locale
@@ -26,8 +26,8 @@ class ShippingInfoWidget @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
-    private val viewBinding: AddressWidgetBinding by lazy {
-        AddressWidgetBinding.inflate(
+    private val viewBinding: StripeAddressWidgetBinding by lazy {
+        StripeAddressWidgetBinding.inflate(
             LayoutInflater.from(context),
             this
         )

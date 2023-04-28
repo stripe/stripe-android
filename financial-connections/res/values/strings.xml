@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="consent_pane_tc">You agree to Stripe\'s <annotation clickable="terms">Terms</annotation> and <annotation clickable="privacy">Privacy Policy</annotation>. <annotation clickable="privacy_center">Learn more</annotation></string>
-    <string name="consent_pane_manual_entry"><annotation clickable="manual_entry">Enter account details manually instead</annotation></string>
-    <string name="consent_pane_manual_entry_microdeposits"><annotation clickable="manual_entry">Enter account details manually instead</annotation> (takes 1–2 business days)</string>
+    <string name="stripe_consent_pane_tc">You agree to Stripe\'s <annotation clickable="terms">Terms</annotation> and <annotation clickable="privacy">Privacy Policy</annotation>. <annotation clickable="privacy_center">Learn more</annotation></string>
+    <string name="stripe_consent_pane_manual_entry"><annotation clickable="manual_entry">Enter account details manually instead</annotation></string>
+    <string name="stripe_consent_pane_manual_entry_microdeposits"><annotation clickable="manual_entry">Enter account details manually instead</annotation> (takes 1–2 business days)</string>
     <string name="stripe_ok">OK</string>
     <string name="stripe_prepane_title">Link with %1$s</string>
     <string name="stripe_prepane_continue">Continue</string>
@@ -42,17 +42,17 @@
     <string name="stripe_success_title">Success!</string>
     <string name="stripe_search">Search</string>
     <string name="stripe_account_picker_dropdown_hint">Choose one</string>
-    <string name="data_accessible_callout_stripe_direct"><annotation bold="accessible_data">Data accessible to Stripe: </annotation>%2$s. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="data_accessible_callout_through_stripe"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Stripe. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="data_accessible_callout_through_stripe_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Stripe. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="data_accessible_callout_through_link"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Link. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="data_accessible_callout_through_link_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Link. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="data_accessible_type_accountdetails">account details</string>
-    <string name="data_accessible_type_balances">balances</string>
-    <string name="data_accessible_type_transactions">transactions</string>
-    <string name="data_accessible_type_ownership">account ownership details</string>
-    <string name="success_pane_done">Done</string>
-    <string name="success_pane_disconnect">You can <annotation clickable="disconnect">disconnect your account</annotation> any time.</string>
+    <string name="stripe_data_accessible_callout_stripe_direct"><annotation bold="accessible_data">Data accessible to Stripe: </annotation>%2$s. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="stripe_data_accessible_callout_through_stripe"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Stripe. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="stripe_data_accessible_callout_through_stripe_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Stripe. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="stripe_data_accessible_callout_through_link"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Link. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="stripe_data_accessible_callout_through_link_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Link. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="stripe_data_accessible_type_accountdetails">account details</string>
+    <string name="stripe_data_accessible_type_balances">balances</string>
+    <string name="stripe_data_accessible_type_transactions">transactions</string>
+    <string name="stripe_data_accessible_type_ownership">account ownership details</string>
+    <string name="stripe_success_pane_done">Done</string>
+    <string name="stripe_success_pane_disconnect">You can <annotation clickable="disconnect">disconnect your account</annotation> any time.</string>
     <string name="stripe_prepane_partner_callout">Stripe works with partners like %1$s to reliably offer access to thousands of financial institutions. <annotation clickable="privacy_center">Learn more</annotation></string>
     <string name="stripe_account_picker_error_no_payment_method_title">No checking or savings account available</string>
     <string name="stripe_account_picker_error_no_payment_method_desc">We found %1$s %2$s accounts but you can only link checking or savings to %3$s. Please try selecting another bank.</string>
@@ -78,7 +78,7 @@
     <string name="stripe_manualentrysuccess_desc_descriptorcode">Expect a $0.01 deposit to the account ending in ••••%1$s in 1–2 business days and an email with additional instructions to verify your bank account.</string>
     <string name="stripe_manualentrysuccess_desc_noaccount_descriptorcode">Expect a $0.01 deposit to your account in 1–2 business days and an email with additional instructions to verify your bank account.</string>
     <string name="stripe_manualentrysuccess_table_title">••••%1$s BANK STATEMENT</string>
-    <string name="success_pane_link_more_accounts">Link another account</string>
+    <string name="stripe_success_pane_link_more_accounts">Link another account</string>
     <plurals name="stripe_attachlinkedpaymentaccount_title">
         <item quantity="one">Linking account</item>
         <item quantity="other">Linking accounts</item>

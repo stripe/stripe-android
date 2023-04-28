@@ -14,7 +14,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintDimensionRatio="1:1"
-        app:viewFinderType="creditCard" />
+        app:stripeViewFinderType="creditCard" />
 
     <ImageView
         android:id="@+id/close_button"

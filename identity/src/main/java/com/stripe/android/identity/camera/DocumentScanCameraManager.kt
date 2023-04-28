@@ -24,7 +24,7 @@ internal class DocumentScanCameraManager(
     override fun onInitialized() {
         requireCameraView().viewFinderWindowView
             .setBackgroundResource(
-                R.drawable.viewfinder_background
+                R.drawable.stripe_viewfinder_background
             )
     }
 
@@ -32,17 +32,17 @@ internal class DocumentScanCameraManager(
         requireCameraView().viewFinderBackgroundView.visibility = View.VISIBLE
         requireCameraView().viewFinderWindowView.visibility = View.VISIBLE
         requireCameraView().viewFinderBorderView.visibility = View.VISIBLE
-        requireCameraView().viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
+        requireCameraView().viewFinderBorderView.startAnimation(R.drawable.stripe_viewfinder_border_initial)
     }
 
     internal fun toggleFound() {
-        requireCameraView().viewFinderBorderView.startAnimationIfNotRunning(R.drawable.viewfinder_border_found)
+        requireCameraView().viewFinderBorderView.startAnimationIfNotRunning(R.drawable.stripe_viewfinder_border_found)
     }
 
     internal fun toggleFinished() {
         requireCameraView().viewFinderBackgroundView.visibility = View.INVISIBLE
         requireCameraView().viewFinderWindowView.visibility = View.INVISIBLE
         requireCameraView().viewFinderBorderView.visibility = View.INVISIBLE
-        requireCameraView().viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
+        requireCameraView().viewFinderBorderView.startAnimation(R.drawable.stripe_viewfinder_border_initial)
     }
 }

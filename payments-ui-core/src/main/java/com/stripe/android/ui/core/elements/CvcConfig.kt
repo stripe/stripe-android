@@ -13,7 +13,7 @@ import com.stripe.android.uicore.elements.TextFieldStateConstants
 class CvcConfig : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "cvc"
-    override val label: Int = R.string.cvc_number_hint
+    override val label: Int = R.string.stripe_cvc_number_hint
     override val keyboard: KeyboardType = KeyboardType.NumberPassword
     override val visualTransformation: VisualTransformation = VisualTransformation.None
 

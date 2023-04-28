@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
-import com.stripe.android.databinding.BankListPaymentMethodBinding
+import com.stripe.android.databinding.StripeBankListPaymentMethodBinding
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.PaymentMethodCreateParams
 
@@ -46,7 +46,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         }
 
     init {
-        val viewBinding = BankListPaymentMethodBinding.inflate(
+        val viewBinding = StripeBankListPaymentMethodBinding.inflate(
             activity.layoutInflater,
             this,
             true

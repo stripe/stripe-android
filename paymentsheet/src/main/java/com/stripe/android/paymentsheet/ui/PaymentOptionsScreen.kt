@@ -16,7 +16,7 @@ import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentOptionsPrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentOptionsPrimaryButtonBinding
 import com.stripe.android.paymentsheet.navigation.Content
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.stripeColors
@@ -83,7 +83,7 @@ internal fun PaymentOptionsScreenContent(
         }
 
         AndroidViewBinding(
-            factory = FragmentPaymentOptionsPrimaryButtonBinding::inflate,
+            factory = StripeFragmentPaymentOptionsPrimaryButtonBinding::inflate,
             modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
         )
 

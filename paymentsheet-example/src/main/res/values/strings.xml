@@ -23,8 +23,8 @@
     <string name="customer_guest">Guest</string>
     <string name="customer_new">New</string>
     <string name="customer_returning">Returning</string>
-    <string name="link">Link</string>
-    <string name="google_pay">Google Pay</string>
+    <string name="stripe_link">Link</string>
+    <string name="stripe_google_pay">Google Pay</string>
     <string name="on">On</string>
     <string name="on_with_defaults">On w/ defaults</string>
     <string name="off">Off</string>

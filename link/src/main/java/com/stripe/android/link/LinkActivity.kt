@@ -74,7 +74,7 @@ internal class LinkActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        overridePendingTransition(R.anim.slide_up, 0)
+        overridePendingTransition(R.anim.stripe_slide_up, 0)
 
         setContent {
             var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
@@ -259,7 +259,7 @@ internal class LinkActivity : ComponentActivity() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(0, R.anim.slide_down)
+        overridePendingTransition(0, R.anim.stripe_slide_down)
     }
 
     private fun dismiss(result: LinkActivityResult) {

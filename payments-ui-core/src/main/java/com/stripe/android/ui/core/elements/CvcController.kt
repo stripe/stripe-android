@@ -31,9 +31,9 @@ class CvcController constructor(
 
     private val _label = cardBrandFlow.map { cardBrand ->
         if (cardBrand == CardBrand.AmericanExpress) {
-            R.string.cvc_amex_hint
+            R.string.stripe_cvc_amex_hint
         } else {
-            R.string.cvc_number_hint
+            R.string.stripe_cvc_number_hint
         }
     }
     override val label: Flow<Int> = _label

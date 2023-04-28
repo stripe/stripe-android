@@ -22,7 +22,7 @@ import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.uicore.PrimaryButtonStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
@@ -54,7 +54,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     internal var externalLabel: String? = null
 
     @VisibleForTesting
-    internal val viewBinding = PrimaryButtonBinding.inflate(
+    internal val viewBinding = StripePrimaryButtonBinding.inflate(
         LayoutInflater.from(context),
         this
     )

@@ -49,7 +49,7 @@ class AuBankAccountNumberConfig : TextFieldConfig {
 
         if (input.length > LENGTH) {
             return TextFieldStateConstants.Error.Invalid(
-                R.string.becs_widget_account_number_invalid
+                R.string.stripe_becs_widget_account_number_invalid
             )
         }
 

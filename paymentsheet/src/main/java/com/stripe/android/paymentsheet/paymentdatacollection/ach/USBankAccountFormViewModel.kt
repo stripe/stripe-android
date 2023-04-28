@@ -513,7 +513,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
                     val paymentSelection = PaymentSelection.New.USBankAccount(
                         labelResource = application.getString(
-                            R.string.paymentsheet_payment_method_item_card_number,
+                            R.string.stripe_paymentsheet_payment_method_item_card_number,
                             last4
                         ),
                         iconResource = TransformToBankIcon(

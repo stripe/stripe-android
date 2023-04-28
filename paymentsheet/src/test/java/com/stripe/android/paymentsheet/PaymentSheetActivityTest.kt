@@ -49,8 +49,8 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
-import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentSheetBinding
+import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.forms.MandateRequirement
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
@@ -194,7 +194,7 @@ internal class PaymentSheetActivityTest {
         )
     }
 
-    private val ActivityPaymentSheetBinding.buyButton: PrimaryButton
+    private val StripeActivityPaymentSheetBinding.buyButton: PrimaryButton
         get() = root.findViewById(R.id.primary_button)
 
     @Test
@@ -537,7 +537,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             viewModel.viewState.value = PaymentSheetViewState.Reset(null)
 
-            val buyBinding = PrimaryButtonBinding.bind(activity.viewBinding.buyButton)
+            val buyBinding = StripePrimaryButtonBinding.bind(activity.viewBinding.buyButton)
 
             assertThat(buyBinding.confirmedIcon.isVisible)
                 .isFalse()

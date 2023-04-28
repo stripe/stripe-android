@@ -18,14 +18,14 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.databinding.PaymentAuthWebViewActivityBinding
+import com.stripe.android.databinding.StripePaymentAuthWebViewActivityBinding
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 
 class PaymentAuthWebViewActivity : AppCompatActivity() {
 
-    private val viewBinding: PaymentAuthWebViewActivityBinding by lazy {
-        PaymentAuthWebViewActivityBinding.inflate(layoutInflater)
+    private val viewBinding: StripePaymentAuthWebViewActivityBinding by lazy {
+        StripePaymentAuthWebViewActivityBinding.inflate(layoutInflater)
     }
 
     private val _args: PaymentBrowserAuthContract.Args? by lazy {
@@ -138,7 +138,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         logger.debug("PaymentAuthWebViewActivity#onCreateOptionsMenu()")
-        menuInflater.inflate(R.menu.payment_auth_web_view_menu, menu)
+        menuInflater.inflate(R.menu.stripe_payment_auth_web_view_menu, menu)
 
         viewModel.buttonText?.let {
             logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating close button text")

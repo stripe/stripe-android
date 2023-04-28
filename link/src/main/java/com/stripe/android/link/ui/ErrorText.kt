@@ -79,7 +79,7 @@ internal fun ErrorText(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.ic_link_error),
+            painter = painterResource(id = R.drawable.stripe_link_error),
             contentDescription = null,
             modifier = style.iconModifier,
             tint = MaterialTheme.linkColors.errorText

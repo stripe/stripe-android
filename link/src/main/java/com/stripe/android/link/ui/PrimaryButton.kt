@@ -122,7 +122,7 @@ internal fun PrimaryButton(
                         strokeWidth = 2.dp
                     )
                     PrimaryButtonState.Completed -> Icon(
-                        painter = painterResource(id = R.drawable.ic_link_complete),
+                        painter = painterResource(id = R.drawable.stripe_link_complete),
                         contentDescription = null,
                         modifier = Modifier
                             .size(24.dp)

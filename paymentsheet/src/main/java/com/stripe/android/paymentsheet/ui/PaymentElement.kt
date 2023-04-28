@@ -21,7 +21,7 @@ import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.FragmentAchBinding
+import com.stripe.android.paymentsheet.databinding.StripeFragmentAchBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -70,7 +70,7 @@ internal fun PaymentElement(
             (activity as BaseSheetActivity<*>).formArgs = formArguments
 
             Column(modifier = Modifier.padding(horizontal = horizontalPadding)) {
-                AndroidViewBinding(FragmentAchBinding::inflate)
+                AndroidViewBinding(StripeFragmentAchBinding::inflate)
             }
         } else {
             PaymentMethodForm(

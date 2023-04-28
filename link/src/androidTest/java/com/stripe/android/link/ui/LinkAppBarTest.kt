@@ -57,7 +57,7 @@ internal class LinkAppBarTest {
         DefaultLinkTheme {
             LinkAppBar(
                 state = LinkAppBarState(
-                    navigationIcon = R.drawable.ic_link_close,
+                    navigationIcon = R.drawable.stripe_link_close,
                     showHeader = true,
                     showOverflowMenu = true,
                     email = email,

@@ -21,7 +21,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
-import com.stripe.android.databinding.CardMultilineWidgetBinding
+import com.stripe.android.databinding.StripeCardMultilineWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
@@ -46,7 +46,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     private var shouldShowPostalCode: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
-    private val viewBinding = CardMultilineWidgetBinding.inflate(
+    private val viewBinding = StripeCardMultilineWidgetBinding.inflate(
         LayoutInflater.from(context),
         this
     )

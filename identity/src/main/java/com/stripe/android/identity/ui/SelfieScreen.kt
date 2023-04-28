@@ -211,7 +211,7 @@ internal fun SelfieScanScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    vertical = dimensionResource(id = R.dimen.page_vertical_margin)
+                    vertical = dimensionResource(id = R.dimen.stripe_page_vertical_margin)
                 )
         ) {
             Column(
@@ -224,12 +224,12 @@ internal fun SelfieScanScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            horizontal = dimensionResource(id = R.dimen.page_horizontal_margin)
+                            horizontal = dimensionResource(id = R.dimen.stripe_page_horizontal_margin)
                         )
                         .semantics {
                             testTag = SELFIE_SCAN_TITLE_TAG
                         },
-                    fontSize = dimensionResourceSp(id = R.dimen.scan_title_text_size),
+                    fontSize = dimensionResourceSp(id = R.dimen.stripe_scan_title_text_size),
                     fontWeight = FontWeight.Bold
                 )
                 Text(
@@ -239,9 +239,9 @@ internal fun SelfieScanScreen(
                         .height(100.dp)
                         .padding(
                             top = 20.dp,
-                            bottom = dimensionResource(id = R.dimen.item_vertical_margin),
-                            start = dimensionResource(id = R.dimen.page_horizontal_margin),
-                            end = dimensionResource(id = R.dimen.page_horizontal_margin)
+                            bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
+                            start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                            end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin)
                         )
                         .semantics {
                             testTag = SELFIE_SCAN_MESSAGE_TAG
@@ -266,7 +266,7 @@ internal fun SelfieScanScreen(
             LoadingButton(
                 modifier = Modifier
                     .testTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG)
-                    .padding(dimensionResource(id = R.dimen.page_horizontal_margin)),
+                    .padding(dimensionResource(id = R.dimen.stripe_page_horizontal_margin)),
                 text = stringResource(id = R.string.stripe_kontinue).uppercase(),
                 state = loadingButtonState
             ) {
@@ -320,7 +320,7 @@ private fun ResultView(
                 modifier = Modifier
                     .width(200.dp)
                     .height(200.dp)
-                    .clip(RoundedCornerShape(dimensionResource(id = R.dimen.view_finder_corner_radius))),
+                    .clip(RoundedCornerShape(dimensionResource(id = R.dimen.stripe_view_finder_corner_radius))),
                 contentScale = ContentScale.Crop,
                 contentDescription = stringResource(id = R.string.stripe_selfie_item_description)
             )
@@ -330,8 +330,8 @@ private fun ResultView(
     Row(
         modifier = Modifier
             .padding(
-                start = dimensionResource(id = R.dimen.page_horizontal_margin),
-                end = dimensionResource(id = R.dimen.page_horizontal_margin),
+                start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
                 top = 20.dp
             )
             .fillMaxWidth(),
@@ -342,7 +342,7 @@ private fun ResultView(
             onClick = { navController.navigateTo(SelfieDestination) }
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.camera_icon),
+                painter = painterResource(id = R.drawable.stripe_camera_icon),
                 contentDescription = stringResource(id = R.string.stripe_description_camera),
                 modifier = Modifier.padding(end = 5.dp)
             )
@@ -352,8 +352,8 @@ private fun ResultView(
 
     Row(
         modifier = Modifier.padding(
-            start = dimensionResource(id = R.dimen.page_horizontal_margin),
-            end = dimensionResource(id = R.dimen.page_horizontal_margin),
+            start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+            end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
             top = 20.dp
         )
     ) {
@@ -385,9 +385,9 @@ private fun SelfieCameraViewFinder(
             .fillMaxWidth()
             .aspectRatio(SELFIE_VIEW_FINDER_ASPECT_RATIO)
             .padding(
-                horizontal = dimensionResource(id = R.dimen.page_horizontal_margin)
+                horizontal = dimensionResource(id = R.dimen.stripe_page_horizontal_margin)
             )
-            .clip(RoundedCornerShape(dimensionResource(id = R.dimen.view_finder_corner_radius)))
+            .clip(RoundedCornerShape(dimensionResource(id = R.dimen.stripe_view_finder_corner_radius)))
             .testTag(SCAN_VIEW_TAG)
     ) {
         AndroidView(
@@ -406,7 +406,7 @@ private fun SelfieCameraViewFinder(
             modifier = Modifier
                 .fillMaxSize()
                 .alpha(imageAlpha)
-                .background(colorResource(id = R.color.flash_mask_color))
+                .background(colorResource(id = R.color.stripe_flash_mask_color))
         )
     }
 }

@@ -280,7 +280,7 @@ internal fun LinkInlineSignup(
                             )
                             Row(modifier = Modifier.padding(16.dp)) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.ic_link_logo),
+                                    painter = painterResource(id = R.drawable.stripe_link_logo),
                                     contentDescription = stringResource(id = R.string.stripe_link),
                                     modifier = Modifier
                                         .semantics {

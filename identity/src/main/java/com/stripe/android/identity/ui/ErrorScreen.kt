@@ -42,8 +42,8 @@ internal fun ErrorScreen(
         modifier = modifier
             .fillMaxSize()
             .padding(
-                vertical = dimensionResource(id = R.dimen.page_vertical_margin),
-                horizontal = dimensionResource(id = R.dimen.page_horizontal_margin)
+                vertical = dimensionResource(id = R.dimen.stripe_page_vertical_margin),
+                horizontal = dimensionResource(id = R.dimen.stripe_page_horizontal_margin)
             )
     ) {
         val scrollState = rememberScrollState()
@@ -58,7 +58,7 @@ internal fun ErrorScreen(
         ) {
             Spacer(modifier = Modifier.height(180.dp))
             Image(
-                painter = painterResource(id = R.drawable.ic_exclamation),
+                painter = painterResource(id = R.drawable.stripe_exclamation),
                 modifier = Modifier
                     .size(92.dp)
                     .align(Alignment.CenterHorizontally),
@@ -70,11 +70,11 @@ internal fun ErrorScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        top = dimensionResource(id = R.dimen.item_vertical_margin),
+                        top = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
                         bottom = 12.dp
                     )
                     .testTag(ErrorTitleTag),
-                fontSize = dimensionResource(id = R.dimen.camera_permission_title_text_size).value.sp,
+                fontSize = dimensionResource(id = R.dimen.stripe_camera_permission_title_text_size).value.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
@@ -85,7 +85,7 @@ internal fun ErrorScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            bottom = dimensionResource(id = R.dimen.item_vertical_margin)
+                            bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
                         )
                         .testTag(ErrorMessage1Tag),
                     textAlign = TextAlign.Center

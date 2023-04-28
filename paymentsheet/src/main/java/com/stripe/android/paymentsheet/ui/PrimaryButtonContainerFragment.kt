@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
-import com.stripe.android.paymentsheet.databinding.FragmentPrimaryButtonContainerBinding
+import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonContainerBinding
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -18,7 +18,7 @@ import com.stripe.android.uicore.getBackgroundColor
 
 internal abstract class BasePrimaryButtonContainerFragment : Fragment() {
 
-    protected var viewBinding: FragmentPrimaryButtonContainerBinding? = null
+    protected var viewBinding: StripeFragmentPrimaryButtonContainerBinding? = null
 
     abstract val viewModel: BaseSheetViewModel
 
@@ -27,7 +27,7 @@ internal abstract class BasePrimaryButtonContainerFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewBinding = FragmentPrimaryButtonContainerBinding.inflate(inflater, container, false)
+        viewBinding = StripeFragmentPrimaryButtonContainerBinding.inflate(inflater, container, false)
         return viewBinding?.root
     }
 

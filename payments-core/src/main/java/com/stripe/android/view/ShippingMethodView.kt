@@ -8,7 +8,7 @@ import android.widget.RelativeLayout
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import com.stripe.android.R
-import com.stripe.android.databinding.ShippingMethodViewBinding
+import com.stripe.android.databinding.StripeShippingMethodViewBinding
 import com.stripe.android.model.ShippingMethod
 
 /**
@@ -30,7 +30,7 @@ internal class ShippingMethodView @JvmOverloads constructor(
     @ColorInt
     private val unselectedTextColorPrimaryInt: Int
 
-    private val viewBinding = ShippingMethodViewBinding.inflate(
+    private val viewBinding = StripeShippingMethodViewBinding.inflate(
         LayoutInflater.from(context),
         this
     )

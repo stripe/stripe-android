@@ -51,21 +51,21 @@ internal fun DebugScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(
-                    start = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    end = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    top = dimensionResource(id = R.dimen.page_vertical_margin),
-                    bottom = dimensionResource(id = R.dimen.page_vertical_margin)
+                    start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                    end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                    top = dimensionResource(id = R.dimen.stripe_page_vertical_margin),
+                    bottom = dimensionResource(id = R.dimen.stripe_page_vertical_margin)
                 )
         ) {
             val context = LocalContext.current
 
             TitleSection()
             Divider(
-                modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.item_vertical_margin))
+                modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
             )
             FinishMobileFlowWithResultSection(verificationFlowFinishable)
             Divider(
-                modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.item_vertical_margin))
+                modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
             )
             PreviewUserExperienceSection {
                 navController.navigateTo(
@@ -85,7 +85,7 @@ private fun TitleSection() {
         modifier = Modifier.fillMaxWidth()
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ic_exclamation),
+            painter = painterResource(id = R.drawable.stripe_exclamation),
             modifier = Modifier
                 .width(32.dp)
                 .height(32.dp)

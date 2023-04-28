@@ -56,10 +56,10 @@ class ViewFinderBackground(
 
     private val theme = context.theme
     private val attributes =
-        theme.obtainStyledAttributes(attrs, R.styleable.ViewFinderBackground, 0, 0)
+        theme.obtainStyledAttributes(attrs, R.styleable.StripeViewFinderBackground, 0, 0)
     private val backgroundColor =
         attributes.getColor(
-            R.styleable.ViewFinderBackground_backgroundColor,
+            R.styleable.StripeViewFinderBackground_stripeBackgroundColor,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 resources.getColor(R.color.stripeNotFoundBackground, theme)
             } else {

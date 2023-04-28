@@ -198,8 +198,8 @@ private fun GooglePay(
         isSelected = isSelected,
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_google_pay_mark,
-        labelText = stringResource(R.string.google_pay),
-        description = stringResource(R.string.google_pay),
+        labelText = stringResource(R.string.stripe_google_pay),
+        description = stringResource(R.string.stripe_google_pay),
         onItemSelectedListener = { onItemSelected(PaymentSelection.GooglePay) },
         modifier = modifier,
     )
@@ -229,8 +229,8 @@ private fun Link(
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_link_mark,
         iconTint = linkLogoColor,
-        labelText = stringResource(R.string.link),
-        description = stringResource(R.string.link),
+        labelText = stringResource(R.string.stripe_link),
+        description = stringResource(R.string.stripe_link),
         onItemSelectedListener = { onItemSelected(PaymentSelection.Link) },
         modifier = modifier,
     )

@@ -54,7 +54,7 @@ abstract class StripeActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.add_payment_method, menu)
+        menuInflater.inflate(R.menu.stripe_add_payment_method, menu)
         menu.findItem(R.id.action_save).isEnabled = !isProgressBarVisible
         return true
     }

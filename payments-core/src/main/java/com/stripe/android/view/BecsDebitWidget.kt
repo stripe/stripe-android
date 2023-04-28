@@ -9,7 +9,7 @@ import android.widget.FrameLayout
 import androidx.core.content.withStyledAttributes
 import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.R
-import com.stripe.android.databinding.BecsDebitWidgetBinding
+import com.stripe.android.databinding.StripeBecsDebitWidgetBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 
@@ -34,8 +34,8 @@ class BecsDebitWidget @JvmOverloads constructor(
     companyName: String = ""
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    internal val viewBinding: BecsDebitWidgetBinding by lazy {
-        BecsDebitWidgetBinding.inflate(
+    internal val viewBinding: StripeBecsDebitWidgetBinding by lazy {
+        StripeBecsDebitWidgetBinding.inflate(
             LayoutInflater.from(context),
             this
         )

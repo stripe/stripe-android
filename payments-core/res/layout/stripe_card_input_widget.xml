@@ -5,8 +5,8 @@
 
     <com.stripe.android.view.CardBrandView
         android:id="@+id/card_brand_view"
-        android:layout_width="@dimen/card_brand_view_width"
-        android:layout_height="@dimen/card_brand_view_height"
+        android:layout_width="@dimen/stripe_card_brand_view_width"
+        android:layout_height="@dimen/stripe_card_brand_view_height"
         android:layout_marginTop="@dimen/stripe_card_icon_padding"
         android:layout_marginBottom="@dimen/stripe_card_icon_padding"
         android:layout_marginEnd="@dimen/stripe_card_icon_padding"
@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:imeOptions="actionNext"
-                android:hint="@string/card_number_hint" />
+                android:hint="@string/stripe_card_number_hint" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -93,7 +93,7 @@
             android:accessibilityTraversalAfter="@+id/text_input_expiry_date"
             android:nextFocusLeft="@id/text_input_expiry_date"
             android:nextFocusUp="@id/text_input_expiry_date"
-            android:contentDescription="@string/cvc_number_hint"
+            android:contentDescription="@string/stripe_cvc_number_hint"
             android:accessibilityLiveRegion="polite"
             app:hintEnabled="false"
             tools:ignore="UnusedAttribute">

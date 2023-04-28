@@ -47,6 +47,6 @@ internal class PollingActivity : AppCompatActivity() {
             Intent().putExtras(result)
         )
         finish()
-        overridePendingTransition(0, R.anim.slide_down)
+        overridePendingTransition(0, R.anim.stripe_slide_down)
     }
 }

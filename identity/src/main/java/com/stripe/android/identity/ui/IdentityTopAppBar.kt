@@ -33,8 +33,8 @@ internal fun IdentityTopAppBar(
             }) {
                 Icon(
                     painter = when (topBarState) {
-                        GO_BACK -> painterResource(id = R.drawable.ic_baseline_arrow_back_24)
-                        CLOSE -> painterResource(id = R.drawable.ic_baseline_close_24)
+                        GO_BACK -> painterResource(id = R.drawable.stripe_arrow_back)
+                        CLOSE -> painterResource(id = R.drawable.stripe_close)
                     },
                     contentDescription = when (topBarState) {
                         GO_BACK -> stringResource(id = R.string.stripe_description_go_back)

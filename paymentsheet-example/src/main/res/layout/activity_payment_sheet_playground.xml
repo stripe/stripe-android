@@ -132,7 +132,7 @@
 
         <TextView
             android:id="@+id/link_text_view"
-            android:text="@string/link"
+            android:text="@string/stripe_link"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
@@ -208,7 +208,7 @@
 
         <TextView
             android:id="@+id/google_pay_text_view"
-            android:text="@string/google_pay"
+            android:text="@string/stripe_google_pay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"

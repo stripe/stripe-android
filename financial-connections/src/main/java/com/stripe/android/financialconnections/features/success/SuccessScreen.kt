@@ -184,7 +184,7 @@ private fun SuccessLoaded(
             }
             Spacer(modifier = Modifier.size(12.dp))
             AnnotatedText(
-                text = TextResource.StringId(R.string.success_pane_disconnect),
+                text = TextResource.StringId(R.string.stripe_success_pane_disconnect),
                 onClickableTextClick = {
                     onDisconnectLinkClick()
                     uriHandler.openUri(disconnectUrl)
@@ -231,7 +231,7 @@ private fun SuccessLoadedFooter(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                Text(text = stringResource(R.string.success_pane_link_more_accounts))
+                Text(text = stringResource(R.string.stripe_success_pane_link_more_accounts))
             }
             Spacer(modifier = Modifier.size(8.dp))
         }
@@ -241,7 +241,7 @@ private fun SuccessLoadedFooter(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(text = stringResource(R.string.success_pane_done))
+            Text(text = stringResource(R.string.stripe_success_pane_done))
         }
     }
 }

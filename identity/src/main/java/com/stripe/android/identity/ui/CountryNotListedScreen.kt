@@ -52,8 +52,8 @@ internal fun CountryNotListedScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    vertical = dimensionResource(id = R.dimen.page_vertical_margin),
-                    horizontal = dimensionResource(id = R.dimen.page_horizontal_margin)
+                    vertical = dimensionResource(id = R.dimen.stripe_page_vertical_margin),
+                    horizontal = dimensionResource(id = R.dimen.stripe_page_horizontal_margin)
                 )
         ) {
             Column(
@@ -98,7 +98,7 @@ private fun BodyContent(
 
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ic_exclamation),
+            painter = painterResource(id = R.drawable.stripe_exclamation),
             modifier = Modifier
                 .width(26.dp)
                 .height(26.dp),
@@ -110,7 +110,7 @@ private fun BodyContent(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+                vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
             )
             .testTag(COUNTRY_NOT_LISTED_TITLE_TAG),
         fontSize = 24.sp,
@@ -122,7 +122,7 @@ private fun BodyContent(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                bottom = dimensionResource(id = R.dimen.item_vertical_margin)
+                bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
             )
             .testTag(COUNTRY_NOT_LISTED_BODY_TAG),
     )

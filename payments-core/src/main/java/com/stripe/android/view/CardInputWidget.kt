@@ -32,7 +32,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.Cvc
-import com.stripe.android.databinding.CardInputWidgetBinding
+import com.stripe.android.databinding.StripeCardInputWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
@@ -59,7 +59,7 @@ class CardInputWidget @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
     private var customCvcLabel: String? = null
-    private val viewBinding = CardInputWidgetBinding.inflate(
+    private val viewBinding = StripeCardInputWidgetBinding.inflate(
         LayoutInflater.from(context),
         this
     )

@@ -67,7 +67,7 @@ internal fun LinkAppBar(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_link_logo),
+                painter = painterResource(R.drawable.stripe_link_logo),
                 contentDescription = stringResource(R.string.stripe_link),
                 tint = MaterialTheme.linkColors.linkLogo
             )
@@ -129,7 +129,7 @@ private fun LinkAppBarPreview() {
         Surface {
             LinkAppBar(
                 state = LinkAppBarState(
-                    navigationIcon = R.drawable.ic_link_close,
+                    navigationIcon = R.drawable.stripe_link_close,
                     showHeader = true,
                     showOverflowMenu = true,
                     email = "email@example.com",
@@ -150,7 +150,7 @@ private fun LinkAppBar_NoEmail() {
         Surface {
             LinkAppBar(
                 state = LinkAppBarState(
-                    navigationIcon = R.drawable.ic_link_close,
+                    navigationIcon = R.drawable.stripe_link_close,
                     showHeader = true,
                     showOverflowMenu = true,
                     email = null,
@@ -171,7 +171,7 @@ private fun LinkAppBar_ChildScreen() {
         Surface {
             LinkAppBar(
                 state = LinkAppBarState(
-                    navigationIcon = R.drawable.ic_link_back,
+                    navigationIcon = R.drawable.stripe_link_back,
                     showHeader = false,
                     showOverflowMenu = false,
                     email = "email@example.com",
@@ -192,7 +192,7 @@ private fun LinkAppBar_ChildScreen_NoEmail() {
         Surface {
             LinkAppBar(
                 state = LinkAppBarState(
-                    navigationIcon = R.drawable.ic_link_back,
+                    navigationIcon = R.drawable.stripe_link_back,
                     showHeader = false,
                     showOverflowMenu = false,
                     email = null,

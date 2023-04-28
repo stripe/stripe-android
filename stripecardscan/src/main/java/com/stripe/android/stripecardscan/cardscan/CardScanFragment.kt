@@ -26,7 +26,7 @@ import com.stripe.android.stripecardscan.cardscan.exception.InvalidStripePublish
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
-import com.stripe.android.stripecardscan.databinding.FragmentCardscanBinding
+import com.stripe.android.stripecardscan.databinding.StripeFragmentCardscanBinding
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.uploadScanStatsOCR
 import com.stripe.android.stripecardscan.framework.util.AppDetails
@@ -54,7 +54,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
     override val minimumAnalysisResolution = MINIMUM_RESOLUTION
 
-    private lateinit var viewBinding: FragmentCardscanBinding
+    private lateinit var viewBinding: StripeFragmentCardscanBinding
 
     override val instructionsText: TextView by lazy { viewBinding.instructions }
 
@@ -178,7 +178,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewBinding = FragmentCardscanBinding.inflate(inflater, container, false)
+        viewBinding = StripeFragmentCardscanBinding.inflate(inflater, container, false)
 
         setupViewFinderConstraints()
 
