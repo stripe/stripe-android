@@ -22,10 +22,14 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -90,6 +94,7 @@ private fun NetworkingLinkLoginWarmupContent(
                     onClickableTextClick = onClickableTextClick,
                     onContinueClick = onContinueClick
                 )
+
                 is Fail -> UnclassifiedErrorContent(
                     error = disableNetworking.error,
                     onCloseFromErrorClick = onCloseFromErrorClick
@@ -193,6 +198,7 @@ private fun Title(onClickableTextClick: (String) -> Unit) {
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun ExistingEmailSection(
     email: String,
@@ -202,6 +208,8 @@ internal fun ExistingEmailSection(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
+            .semantics { testTagsAsResourceId = true }
+            .testTag("existing_email-button")
             .clickable { onContinueClick() }
             .clip(RoundedCornerShape(8.dp))
             .border(

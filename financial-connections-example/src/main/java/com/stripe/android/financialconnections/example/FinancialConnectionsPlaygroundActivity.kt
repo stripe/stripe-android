@@ -221,7 +221,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         onEmailChange: (String) -> Unit
     ) {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .semantics { testTagsAsResourceId = true }
+                .testTag("email_input"),
             value = email,
             onValueChange = onEmailChange,
             label = { Text("Customer email (optional)") }

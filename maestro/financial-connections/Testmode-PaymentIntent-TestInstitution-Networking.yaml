@@ -3,6 +3,9 @@ appId: com.stripe.android.financialconnections.example
 - launchApp
 # Android specific: Navigate to example
 - tapOn: "Playground"
+###########################################
+# CREATE NEW LINK ACCOUNT
+###########################################
 - tapOn:
     id: "Native_checkbox"
 - tapOn: "Mode_Dropdown_Icon"
@@ -10,7 +13,8 @@ appId: com.stripe.android.financialconnections.example
     id: "NetworkingTestMode_checkbox"
 - tapOn:
     id: "PaymentIntent_checkbox"
-- tapOn: Customer email (optional)
+- tapOn:
+    id: "email_input"
 - inputRandomEmail
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
@@ -39,5 +43,29 @@ appId: com.stripe.android.financialconnections.example
 # CONFIRM AND COMPLETE
 - assertVisible: "Success!"
 - assertVisible: ".*through Link.*"
+- tapOn: "Done"
+- assertVisible: ".*Intent Confirmed!.*"
+###########################################
+# REUSE NEWLY CREATED LINK ACCOUNT
+###########################################
+- tapOn: "Connect Accounts!"
+# Common: web AuthFlow - connect OAuth institution
+- extendedWaitUntil:
+    visible: "Agree"
+    timeout: 30000
+- tapOn: "Agree"
+# LOGIN TO NETWORKING
+- tapOn:
+    id: "existing_email-button"
+  # 2FA
+- assertVisible: "●"
+- inputText: "111111"
+# SELECT NETWORKED ACCOUNT
+- tapOn: "Success"
+- tapOn: "Connect account"
+# STEP UP AUTHENTICATION
+- assertVisible: "●"
+- inputText: "111111"
+- assertVisible: "Success!"
 - tapOn: "Done"
 - assertVisible: ".*Intent Confirmed!.*"
