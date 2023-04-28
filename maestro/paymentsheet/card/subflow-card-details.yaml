@@ -8,5 +8,7 @@ appId: com.stripe.android.paymentsheet.example
 - inputText: "444"
 - tapOn: "CVC"
 - inputText: "444"
+- tapOn: "Country or region"
+- tapOn: "\U0001f1fa\U0001f1f8 United States"
 - tapOn: "ZIP code"
 - inputText: "44444"
