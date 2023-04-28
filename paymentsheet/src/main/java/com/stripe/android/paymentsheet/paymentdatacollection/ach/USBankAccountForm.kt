@@ -302,7 +302,7 @@ private fun PhoneSection(
 
 @Suppress("SpreadOperator")
 @Composable
-fun AddressSection(
+private fun AddressSection(
     processing: Boolean,
     addressController: AddressController,
     lastTextFieldIdentifier: IdentifierSpec?,
