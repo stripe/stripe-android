@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.app.Application
-import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
@@ -287,9 +287,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
         set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 
-    fun register(activityResultRegistryOwner: ActivityResultRegistryOwner) {
+    fun register(activity: ComponentActivity) {
         collectBankAccountLauncher = CollectBankAccountLauncher.create(
-            activityResultRegistryOwner,
+            activity,
             ::handleCollectBankAccountResult
         )
     }
@@ -434,7 +434,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             )
         }
 
-        collectBankAccountLauncher?.unregister()
         collectBankAccountLauncher = null
     }
 
