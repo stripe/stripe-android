@@ -407,6 +407,7 @@ private fun ConsentFooter(
             modifier = Modifier
                 .semantics { testTagsAsResourceId = true }
                 .testTag("consent_cta")
+                .fillMaxWidth()
         ) {
             Text(text = consent.cta)
         }
