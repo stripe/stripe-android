@@ -25,9 +25,8 @@
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( stripeIntent: StripeIntent, customerConfig: PaymentSheet.CustomerConfiguration?, config: PaymentSheet.Configuration?, isGooglePayReady: Boolean, ): PaymentSheetLoader.Result</ID>
-    <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun BillingDetailsForm( formArgs: FormArguments, processing: Boolean, name: String, email: String?, nameController: TextFieldController, emailController: TextFieldController, phoneController: PhoneNumberController, addressController: AddressController, lastTextFieldIdentifier: IdentifierSpec?, sameAsShippingElement: SameAsShippingElement?, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun USBankAccountForm( formArgs: FormArguments, sheetViewModel: BaseSheetViewModel, modifier: Modifier = Modifier, )</ID>
-    <ID>LongMethod:USBankAccountForm.kt$@Composable private fun AccountDetailsForm( formArgs: FormArguments, processing: Boolean, bankName: String?, last4: String?, saveForFutureUsage: Boolean, saveForFutureUseElement: SaveForFutureUseElement, onRemoveAccount: () -> Unit, )</ID>
+    <ID>LongMethod:USBankAccountForm.kt$@Composable private fun AccountDetailsForm( formArgs: FormArguments, processing: Boolean, bankName: String?, last4: String?, saveForFutureUseElement: SaveForFutureUseElement, onRemoveAccount: () -> Unit, )</ID>
     <ID>LongMethod:USBankAccountFormViewModel.kt$USBankAccountFormViewModel$private fun attachFinancialAccountToIntent( clientSecret: ClientSecret, intentId: String, linkAccountId: String, bankName: String?, last4: String? )</ID>
     <ID>MagicNumber:AutocompleteScreen.kt$0.07f</ID>
     <ID>MagicNumber:GooglePayButton.kt$GooglePayButton$0.5f</ID>

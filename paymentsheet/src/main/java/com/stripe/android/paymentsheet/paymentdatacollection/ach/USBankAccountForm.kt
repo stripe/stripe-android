@@ -231,7 +231,6 @@ internal fun MandateCollectionScreen(
             processing = processing,
             bankName = screenState.paymentAccount.institutionName,
             last4 = screenState.paymentAccount.last4,
-            saveForFutureUsage = screenState.saveForFutureUsage,
             saveForFutureUseElement = saveForFutureUseElement,
             onRemoveAccount = onRemoveAccount,
         )
@@ -268,7 +267,6 @@ internal fun VerifyWithMicrodepositsScreen(
             processing = processing,
             bankName = screenState.paymentAccount.bankName,
             last4 = screenState.paymentAccount.last4,
-            saveForFutureUsage = screenState.saveForFutureUsage,
             saveForFutureUseElement = saveForFutureUseElement,
             onRemoveAccount = onRemoveAccount,
         )
@@ -305,7 +303,6 @@ internal fun SavedAccountScreen(
             processing = processing,
             bankName = screenState.bankName,
             last4 = screenState.last4,
-            saveForFutureUsage = screenState.saveForFutureUsage,
             saveForFutureUseElement = saveForFutureUseElement,
             onRemoveAccount = onRemoveAccount,
         )
@@ -463,7 +460,6 @@ private fun AccountDetailsForm(
     processing: Boolean,
     bankName: String?,
     last4: String?,
-    saveForFutureUsage: Boolean,
     saveForFutureUseElement: SaveForFutureUseElement,
     onRemoveAccount: () -> Unit,
 ) {
@@ -519,9 +515,7 @@ private fun AccountDetailsForm(
         if (formArgs.showCheckbox) {
             SaveForFutureUseElementUI(
                 enabled = true,
-                element = saveForFutureUseElement.apply {
-                    this.controller.onValueChange(saveForFutureUsage)
-                },
+                element = saveForFutureUseElement,
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
