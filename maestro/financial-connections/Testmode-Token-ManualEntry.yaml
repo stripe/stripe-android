@@ -13,7 +13,8 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
-    visible: "Agree"
+    visible:
+      id: "consent_cta"
     timeout: 30000
 - tapOn: "Enter account details manually instead"
 - assertVisible: "Enter bank account details"
