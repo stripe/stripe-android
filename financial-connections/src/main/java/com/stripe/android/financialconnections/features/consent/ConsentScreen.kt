@@ -1,5 +1,5 @@
 @file:OptIn(
-    ExperimentalMaterialApi::class, ExperimentalMaterialApi::class,
+    ExperimentalMaterialApi::class,
     ExperimentalComposeUiApi::class
 )
 @file:Suppress("LongMethod", "TooManyFunctions")
