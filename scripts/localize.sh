@@ -45,7 +45,6 @@ echo "DOWNLOADING LANGUAGES: ${LANGUAGES}"
 for MODULE in ${MODULES[@]}
 do
     echo ""
-    echo ""
     echo "----------------------------------------------------------"
     echo "DOWNLOADING STRINGS in $MODULE MODULE: $MODULE/strings.xml"
     echo "----------------------------------------------------------"

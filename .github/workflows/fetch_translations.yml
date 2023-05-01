@@ -1,0 +1,38 @@
+name: Fetch Lokalize translations
+on:
+  workflow_dispatch:
+  # Temporary for testing
+  push:
+    branches:
+      - tillh/automate-lokalize
+  schedule:
+    # Every Monday at 10 AM East Coast time / 7 AM West Coast time / 2 PM UTC
+    - cron: "0 14 * * 1"
+jobs:
+  fetch-lokalize-translations:
+    runs-on: macos-latest
+    steps:
+      # Install Brew so that we can use the Lokalize CLI
+      - run: brew tap lokalise/cli-2
+      - run: brew install lokalise2
+
+      # Check out the current state
+      - uses: actions/checkout@v3
+
+      # Fetch translations
+      # Note: The environment variable points to tillh's Lokalize username and token.
+      - name: Run build script
+        run: cd scripts && ./localize.sh
+        shell: bash
+        env:
+          LOKALISE_API_TOKEN: ${{ secrets.LOKALISE_API_TOKEN }}
+
+      # Create the pull request
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: Fetch latest Lokalize translations
+          title: Fetch latest Lokalize translations
+          body: This pull request automatically fetched the latest translations from Lokalize.
+          branch: update-translations-${{ steps.date.outputs.date }}
+          base: master
