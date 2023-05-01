@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.24.1 - 2023-05-01
+
 ### Payments
 * [FIXED][6612](https://github.com/stripe/stripe-android/pull/6612) Fixed an issue where the Android Gradle Plugin 8.0 and later would cause issues with R8 in full mode related to missing classes.
 
