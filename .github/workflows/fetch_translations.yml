@@ -1,10 +1,6 @@
 name: Fetch Lokalize translations
 on:
   workflow_dispatch:
-  # Temporary for testing
-  push:
-    branches:
-      - tillh/automate-lokalize
   schedule:
     # Every Monday at 10 AM East Coast time / 7 AM West Coast time / 2 PM UTC
     - cron: "0 14 * * 1"

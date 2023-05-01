@@ -37,17 +37,10 @@ FINAL_STATUS_ID=587
 
 rm -rf android/*
 
-echo "AVAILABLE LANGUAGES: "
-lokalise2 --token $API_TOKEN --project-id $PROJECT_ID language list | grep iso
-
-echo "DOWNLOADING LANGUAGES: ${LANGUAGES}"
-
 for MODULE in ${MODULES[@]}
 do
     echo ""
-    echo "----------------------------------------------------------"
-    echo "DOWNLOADING STRINGS in $MODULE MODULE: $MODULE/strings.xml"
-    echo "----------------------------------------------------------"
+    echo "Downloading strings for $MODULE/strings.xml"
     lokalise2 --token $API_TOKEN \
           --project-id $PROJECT_ID \
           file download \
@@ -87,11 +80,6 @@ do
 
     # Copy in the new strings files
     cp -R  android/$MODULE/* ../$MODULE/res/
-
-    echo ""
-    echo "TRANSLATED STRINGS (country codes): "
-    echo "----------------------------------------------------------"
-    ls -1 android/$MODULE/ | paste -sd "," - | sed 's/[,]*values[-]*//g'
 done
 
 rm -rf android/*
