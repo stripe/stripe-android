@@ -1,5 +1,7 @@
 package com.stripe.android.test.core.ui
 
+import com.stripe.android.ui.core.R as StripeUiCoreR
+
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
@@ -8,7 +10,6 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
-import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 
 class BuyButton(private val composeTestRule: ComposeTestRule) {
@@ -35,7 +36,7 @@ class BuyButton(private val composeTestRule: ComposeTestRule) {
 
     fun waitProcessingComplete() {
         val expectedText = InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            R.string.stripe_pay_button_amount
+            StripeUiCoreR.string.stripe_pay_button_amount
         ).replace("%s", "")
         composeTestRule.waitUntil(timeoutMillis = 5000L) {
             runCatching {

@@ -8,7 +8,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
-import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
@@ -16,6 +15,7 @@ import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.view.BecsDebitBanks
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import com.stripe.android.R as StripeR
 
 /**
  * A text field configuration for a BSB number, or Bank State Branch Number,
@@ -30,7 +30,7 @@ class BsbConfig(private val banks: List<BecsDebitBanks.Bank>) : TextFieldConfig 
     override val loading: StateFlow<Boolean> = MutableStateFlow(false)
 
     @StringRes
-    override val label = R.string.stripe_becs_widget_bsb
+    override val label = StripeR.string.stripe_becs_widget_bsb
     override val keyboard = KeyboardType.Number
 
     // Displays the BSB number in 2 groups of 3 characters with a dash added between them
@@ -77,7 +77,7 @@ class BsbConfig(private val banks: List<BecsDebitBanks.Bank>) : TextFieldConfig 
 
         if (input.length < LENGTH) {
             return TextFieldStateConstants.Error.Incomplete(
-                R.string.stripe_becs_widget_bsb_incomplete
+                StripeR.string.stripe_becs_widget_bsb_incomplete
             )
         }
 
@@ -87,7 +87,7 @@ class BsbConfig(private val banks: List<BecsDebitBanks.Bank>) : TextFieldConfig 
 
         if (bank == null || input.length > LENGTH) {
             return TextFieldStateConstants.Error.Invalid(
-                R.string.stripe_becs_widget_bsb_invalid
+                StripeR.string.stripe_becs_widget_bsb_invalid
             )
         }
 

@@ -2,9 +2,9 @@ package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth
 import com.stripe.android.model.CardBrand
-import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import org.junit.Test
+import com.stripe.android.R as StripeR
 
 class CvcConfigTest {
     private val cvcConfig = CvcConfig()
@@ -35,7 +35,7 @@ class CvcConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.stripe_invalid_cvc)
+        ).isEqualTo(StripeR.string.stripe_invalid_cvc)
     }
 
     @Test
@@ -45,7 +45,7 @@ class CvcConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.stripe_invalid_cvc)
+        ).isEqualTo(StripeR.string.stripe_invalid_cvc)
     }
 
     @Test

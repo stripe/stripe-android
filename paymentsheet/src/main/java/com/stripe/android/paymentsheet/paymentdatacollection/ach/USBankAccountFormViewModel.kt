@@ -64,6 +64,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
@@ -214,7 +215,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 phone = phone.value,
                 address = address.value,
                 primaryButtonText = application.getString(
-                    R.string.stripe_continue_button_label
+                    StripeUiCoreR.string.stripe_continue_button_label
                 ),
             )
         )
@@ -416,7 +417,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 phone = phone.value,
                 address = address.value,
                 primaryButtonText = application.getString(
-                    R.string.stripe_continue_button_label
+                    StripeUiCoreR.string.stripe_continue_button_label
                 ),
             )
         }
@@ -571,12 +572,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     args.formArgs.amount!!.buildPayButtonLabel(application.resources)
                 } else {
                     application.getString(
-                        R.string.stripe_setup_button_label
+                        StripeUiCoreR.string.stripe_setup_button_label
                     )
                 }
             }
             else -> application.getString(
-                R.string.stripe_continue_button_label
+                StripeUiCoreR.string.stripe_continue_button_label
             )
         }
     }

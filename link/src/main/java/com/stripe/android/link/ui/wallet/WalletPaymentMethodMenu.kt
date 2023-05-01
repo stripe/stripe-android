@@ -7,6 +7,7 @@ import com.stripe.android.link.model.removeLabel
 import com.stripe.android.link.ui.menus.LinkMenu
 import com.stripe.android.link.ui.menus.LinkMenuItem
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.R as StripeR
 
 internal sealed class WalletPaymentMethodMenuItem(
     override val textResId: Int,
@@ -26,7 +27,7 @@ internal sealed class WalletPaymentMethodMenuItem(
     )
 
     object Cancel : WalletPaymentMethodMenuItem(
-        textResId = R.string.stripe_cancel
+        textResId = StripeR.string.stripe_cancel
     )
 }
 

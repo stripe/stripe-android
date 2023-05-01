@@ -41,13 +41,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.R as StripeR
+import com.stripe.android.core.R as CoreR
 
 @RunWith(RobolectricTestRunner::class)
 internal class TransformSpecToElementTest {
 
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(),
-        R.style.StripeDefaultTheme
+        StripeR.style.StripeDefaultTheme
     )
 
     private val nameSection = NameSpec()
@@ -150,7 +152,7 @@ internal class TransformSpecToElementTest {
             as SimpleTextElement
 
         // Verify the correct config is setup for the controller
-        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.stripe_address_label_full_name)
+        assertThat(nameElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_full_name)
         assertThat(nameElement.identifier.v1).isEqualTo("simple")
         assertThat(nameElement.controller.showOptionalLabel).isTrue()
     }

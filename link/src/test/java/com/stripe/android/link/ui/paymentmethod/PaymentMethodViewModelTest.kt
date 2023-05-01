@@ -64,6 +64,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
+import com.stripe.android.R as StripeR
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodViewModelTest {
@@ -413,7 +414,7 @@ class PaymentMethodViewModelTest {
     fun `when screen is not root then secondaryButtonLabel is correct`() = runTest {
         whenever(navigator.isOnRootScreen()).thenReturn(false)
 
-        assertThat(createViewModel().secondaryButtonLabel).isEqualTo(R.string.stripe_cancel)
+        assertThat(createViewModel().secondaryButtonLabel).isEqualTo(StripeR.string.stripe_cancel)
     }
 
     @Test

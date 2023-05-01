@@ -10,6 +10,7 @@ import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.fail
+import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 class LpmSerializerTest {
@@ -254,7 +255,7 @@ class LpmSerializerTest {
                     "api_path": {
                       "v1": "something_bogus"
                     },
-                    "stringResId": ${R.string.stripe_email}
+                    "stringResId": ${UiCoreR.string.stripe_email}
                   }
                 ]
               }
@@ -304,7 +305,7 @@ class LpmSerializerTest {
                 "fields": [
                   {
                     "type": "$key",
-                    "stringResId": ${R.string.stripe_email}
+                    "stringResId": ${UiCoreR.string.stripe_email}
                   }
                 ]
               }

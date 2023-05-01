@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.uicore.image.StripeImageLoader
 import javax.inject.Inject
+import com.stripe.android.R as StripeR
 
 internal class PaymentOptionFactory @Inject constructor(
     private val resources: Resources,
@@ -59,7 +60,7 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceId = R.drawable.stripe_google_pay_mark,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
-                    label = resources.getString(R.string.stripe_google_pay),
+                    label = resources.getString(StripeR.string.stripe_google_pay),
                     imageLoader = ::loadPaymentOption,
                 )
             }
@@ -68,7 +69,7 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceId = R.drawable.stripe_ic_paymentsheet_link,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
-                    label = resources.getString(R.string.stripe_link),
+                    label = resources.getString(StripeR.string.stripe_link),
                     imageLoader = ::loadPaymentOption,
                 )
             }

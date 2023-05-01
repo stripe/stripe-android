@@ -14,6 +14,7 @@ import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.core.R as CoreR
 
 /**
  * Section to collect User's date of birth.
@@ -45,7 +46,7 @@ internal fun NameSection(
                     controller = lastNameController
                 )
             ),
-            label = R.string.stripe_address_label_name
+            label = CoreR.string.stripe_address_label_name
         )
     }
 

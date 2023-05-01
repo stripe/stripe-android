@@ -4,6 +4,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.R as StripeR
 
 internal class HeaderTextFactory(
     private val isCompleteFlow: Boolean,
@@ -45,7 +46,7 @@ internal class HeaderTextFactory(
                 PaymentSheetScreen.AddFirstPaymentMethod,
                 PaymentSheetScreen.AddAnotherPaymentMethod -> {
                     if (types.singleOrNull() == PaymentMethod.Type.Card.code) {
-                        R.string.stripe_title_add_a_card
+                        StripeR.string.stripe_title_add_a_card
                     } else {
                         R.string.stripe_paymentsheet_choose_payment_method
                     }

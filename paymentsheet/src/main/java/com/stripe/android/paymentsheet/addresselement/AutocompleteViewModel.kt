@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -32,6 +31,8 @@ import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Provider
+import com.stripe.android.R as StripeR
+import com.stripe.android.uicore.R as UiCoreR
 
 internal class AutocompleteViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
@@ -53,7 +54,7 @@ internal class AutocompleteViewModel @Inject constructor(
     val addressResult = MutableStateFlow<Result<AddressDetails?>?>(null)
 
     private val config = SimpleTextFieldConfig(
-        label = R.string.stripe_address_label_address,
+        label = UiCoreR.string.stripe_address_label_address,
         trailingIcon = MutableStateFlow(null)
     )
 
@@ -98,7 +99,7 @@ internal class AutocompleteViewModel @Inject constructor(
                 } else {
                     config.trailingIcon.update {
                         TextFieldIcon.Trailing(
-                            idRes = R.drawable.stripe_ic_clear,
+                            idRes = StripeR.drawable.stripe_ic_clear,
                             isTintable = true,
                             onClick = { clearQuery() }
                         )

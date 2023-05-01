@@ -10,6 +10,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import com.stripe.android.R as StripeR
 
 @RunWith(AndroidJUnit4::class)
 class PaymentSheetTopBarStateTest {
@@ -131,7 +132,7 @@ class PaymentSheetTopBarStateTest {
             isEditing = false,
         )
 
-        assertThat(state.editMenuLabel).isEqualTo(R.string.stripe_edit)
+        assertThat(state.editMenuLabel).isEqualTo(StripeR.string.stripe_edit)
     }
 
     @Test
@@ -144,7 +145,7 @@ class PaymentSheetTopBarStateTest {
             isEditing = true,
         )
 
-        assertThat(state.editMenuLabel).isEqualTo(R.string.stripe_done)
+        assertThat(state.editMenuLabel).isEqualTo(StripeR.string.stripe_done)
     }
 
     @Test

@@ -5,7 +5,6 @@ import android.os.Looper.getMainLooper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Invalid
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Full
@@ -19,6 +18,7 @@ import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import com.stripe.android.core.R as CoreR
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
@@ -230,7 +230,7 @@ internal class SimpleTextFieldControllerTest {
     @Test
     fun `Verify non-null label`() {
         val controller = createControllerWithState(nullLabel = false)
-        assertThat(controller.label.value).isEqualTo(R.string.stripe_address_label_full_name)
+        assertThat(controller.label.value).isEqualTo(CoreR.string.stripe_address_label_full_name)
     }
 
     @Test
@@ -273,7 +273,7 @@ internal class SimpleTextFieldControllerTest {
             if (nullLabel) {
                 on { label } doReturn null
             } else {
-                on { label } doReturn R.string.stripe_address_label_full_name
+                on { label } doReturn CoreR.string.stripe_address_label_full_name
             }
 
             if (!nullPlaceHolder) {

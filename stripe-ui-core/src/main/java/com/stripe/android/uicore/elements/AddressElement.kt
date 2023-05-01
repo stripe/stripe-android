@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 open class AddressElement constructor(
@@ -39,7 +40,7 @@ open class AddressElement constructor(
         IdentifierSpec.Name,
         SimpleTextFieldController(
             textFieldConfig = SimpleTextFieldConfig(
-                label = R.string.stripe_address_label_full_name
+                label = CoreR.string.stripe_address_label_full_name
             ),
             initialValue = rawValuesMap[IdentifierSpec.Name]
         )

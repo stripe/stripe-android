@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
+import com.stripe.android.R as StripeR
 
 /**
  * ViewModel that controls the PaymentMethod screen, managing what payment method form to show and
@@ -73,7 +74,7 @@ internal class PaymentMethodViewModel @Inject constructor(
     val secondaryButtonLabel = if (isRootScreen) {
         R.string.stripe_wallet_pay_another_way
     } else {
-        R.string.stripe_cancel
+        StripeR.string.stripe_cancel
     }
 
     val supportedTypes = args.stripeIntent.supportedPaymentMethodTypes(linkAccount)

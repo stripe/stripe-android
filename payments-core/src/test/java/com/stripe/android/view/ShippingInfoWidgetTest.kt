@@ -21,6 +21,8 @@ import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import com.stripe.android.core.R as CoreR
+import com.stripe.android.uicore.R as UiCoreR
 
 /**
  * Test class for [ShippingInfoWidget]
@@ -93,39 +95,39 @@ class ShippingInfoWidgetTest {
     fun shippingInfoWidget_whenCountryChanged_fieldsRenderCorrectly() {
         countryTextInputLayout.updateUiForCountryEntered(Locale.US.getCountryCode())
         assertThat(addressLine1TextInputLayout.hint)
-            .isEqualTo(res.getString(R.string.stripe_address_label_address))
+            .isEqualTo(res.getString(UiCoreR.string.stripe_address_label_address))
         assertThat(addressLine2TextInputLayout.hint)
             .isEqualTo(res.getString(R.string.stripe_address_label_apt_optional))
         assertThat(postalCodeTextInputLayout.hint)
-            .isEqualTo(res.getString(R.string.stripe_address_label_zip_code))
+            .isEqualTo(res.getString(CoreR.string.stripe_address_label_zip_code))
         assertThat(stateTextInputLayout.hint)
-            .isEqualTo(res.getString(R.string.stripe_address_label_state))
+            .isEqualTo(res.getString(CoreR.string.stripe_address_label_state))
 
         countryTextInputLayout.updateUiForCountryEntered(Locale.CANADA.getCountryCode())
         assertThat(addressLine1TextInputLayout.hint)
-            .isEqualTo(res.getString(R.string.stripe_address_label_address))
+            .isEqualTo(res.getString(UiCoreR.string.stripe_address_label_address))
         assertThat(addressLine2TextInputLayout.hint)
             .isEqualTo(res.getString(R.string.stripe_address_label_apt_optional))
         assertThat(postalCodeTextInputLayout.hint)
-            .isEqualTo(res.getString(R.string.stripe_address_label_postal_code))
+            .isEqualTo(res.getString(CoreR.string.stripe_address_label_postal_code))
         assertThat(stateTextInputLayout.hint)
-            .isEqualTo(res.getString(R.string.stripe_address_label_province))
+            .isEqualTo(res.getString(CoreR.string.stripe_address_label_province))
 
         countryTextInputLayout.updateUiForCountryEntered(Locale.UK.getCountryCode())
         assertThat(addressLine1TextInputLayout.hint)
-            .isEqualTo(res.getString(R.string.stripe_address_label_address_line1))
+            .isEqualTo(res.getString(CoreR.string.stripe_address_label_address_line1))
         assertThat(addressLine2TextInputLayout.hint)
             .isEqualTo(res.getString(R.string.stripe_address_label_address_line2_optional))
         assertThat(postalCodeTextInputLayout.hint)
             .isEqualTo(res.getString(R.string.stripe_address_label_postcode))
         assertThat(stateTextInputLayout.hint)
-            .isEqualTo(res.getString(R.string.stripe_address_label_county))
+            .isEqualTo(res.getString(CoreR.string.stripe_address_label_county))
 
         countryTextInputLayout.updateUiForCountryEntered(
             Locale("", NO_POSTAL_CODE_COUNTRY_CODE).getCountryCode()
         )
         assertThat(addressLine1TextInputLayout.hint)
-            .isEqualTo(res.getString(R.string.stripe_address_label_address_line1))
+            .isEqualTo(res.getString(CoreR.string.stripe_address_label_address_line1))
         assertThat(addressLine2TextInputLayout.hint)
             .isEqualTo(res.getString(R.string.stripe_address_label_address_line2_optional))
         assertThat(postalCodeTextInputLayout.visibility)
@@ -229,7 +231,7 @@ class ShippingInfoWidgetTest {
         assertThat(stateTextInputLayout.error)
             .isEqualTo(res.getString(R.string.stripe_address_state_required))
         assertThat(postalCodeTextInputLayout.error)
-            .isEqualTo(res.getString(R.string.stripe_address_zip_invalid))
+            .isEqualTo(res.getString(UiCoreR.string.stripe_address_zip_invalid))
 
         countryTextInputLayout.updateUiForCountryEntered(Locale.UK.getCountryCode())
         assertThat(shippingInfoWidget.validateAllFields())
@@ -258,19 +260,19 @@ class ShippingInfoWidgetTest {
     @Test
     fun shippingInfoWidget_whenFieldsOptional_markedAsOptional() {
         assertThat(postalCodeTextInputLayout.hint.toString())
-            .isEqualTo(res.getString(R.string.stripe_address_label_zip_code))
+            .isEqualTo(res.getString(CoreR.string.stripe_address_label_zip_code))
         assertThat(nameTextInputLayout.hint.toString())
-            .isEqualTo(res.getString(R.string.stripe_address_label_full_name))
+            .isEqualTo(res.getString(CoreR.string.stripe_address_label_full_name))
         shippingInfoWidget.optionalFields = listOf(
             ShippingInfoWidget.CustomizableShippingField.PostalCode
         )
         assertThat(postalCodeTextInputLayout.hint.toString())
             .isEqualTo(res.getString(R.string.stripe_address_label_zip_code_optional))
         assertThat(nameTextInputLayout.hint.toString())
-            .isEqualTo(res.getString(R.string.stripe_address_label_full_name))
+            .isEqualTo(res.getString(CoreR.string.stripe_address_label_full_name))
         countryTextInputLayout.updateUiForCountryEntered(Locale.CANADA.getCountryCode())
         assertThat(stateTextInputLayout.hint.toString())
-            .isEqualTo(res.getString(R.string.stripe_address_label_province))
+            .isEqualTo(res.getString(CoreR.string.stripe_address_label_province))
         shippingInfoWidget.optionalFields = listOf(
             ShippingInfoWidget.CustomizableShippingField.PostalCode,
             ShippingInfoWidget.CustomizableShippingField.State

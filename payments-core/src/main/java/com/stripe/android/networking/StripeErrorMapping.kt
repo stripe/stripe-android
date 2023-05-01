@@ -3,6 +3,7 @@ package com.stripe.android.networking
 import android.content.Context
 import com.stripe.android.R
 import com.stripe.android.core.StripeError
+import com.stripe.android.uicore.R as UiCoreR
 
 @Suppress("ComplexMethod")
 internal fun StripeError.withLocalizedMessage(context: Context): StripeError {
@@ -14,8 +15,8 @@ internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String? {
     val messageResourceId = when (code) {
         "incorrect_number" -> R.string.stripe_invalid_card_number
         "invalid_number" -> R.string.stripe_invalid_card_number
-        "invalid_expiry_month" -> R.string.stripe_invalid_expiry_month
-        "invalid_expiry_year" -> R.string.stripe_invalid_expiry_year
+        "invalid_expiry_month" -> UiCoreR.string.stripe_invalid_expiry_month
+        "invalid_expiry_year" -> UiCoreR.string.stripe_invalid_expiry_year
         "invalid_cvc" -> R.string.stripe_invalid_cvc
         "expired_card" -> R.string.stripe_expired_card
         "incorrect_cvc" -> R.string.stripe_invalid_cvc

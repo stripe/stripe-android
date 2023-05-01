@@ -4,6 +4,8 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import com.stripe.android.R as StripeR
+import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
@@ -19,8 +21,8 @@ enum class TranslationId(val resourceId: Int) {
     EpsBank(R.string.stripe_eps_bank),
 
     @SerialName("address.label.name")
-    AddressName(R.string.stripe_address_label_full_name),
+    AddressName(CoreR.string.stripe_address_label_full_name),
 
     @SerialName("upe.labels.name.onAccount")
-    AuBecsAccountName(R.string.stripe_au_becs_account_name)
+    AuBecsAccountName(StripeR.string.stripe_au_becs_account_name)
 }

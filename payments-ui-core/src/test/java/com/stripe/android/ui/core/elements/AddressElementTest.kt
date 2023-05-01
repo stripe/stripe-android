@@ -29,6 +29,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
 import java.util.concurrent.atomic.AtomicInteger
+import com.stripe.android.uicore.R as UiCoreR
 
 // TODO(ccen) Rewrite the test with generic Element and move it to stripe-ui-core
 @RunWith(RobolectricTestRunner::class)
@@ -88,7 +89,7 @@ class AddressElementTest {
             assertThat(addressElement.controller.error.first())
                 .isNotNull()
             assertThat(addressElement.controller.error.first()?.errorMessage)
-                .isEqualTo(R.string.stripe_email_is_invalid)
+                .isEqualTo(UiCoreR.string.stripe_email_is_invalid)
 
             countryDropdownFieldController.onValueChange(1)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
@@ -433,7 +434,7 @@ class AddressElementTest {
 
         val line1TrailingIcon = addressElement.trailingIconFor(IdentifierSpec.Line1)
         assertThat(line1TrailingIcon?.contentDescription)
-            .isEqualTo(R.string.stripe_address_search_content_description)
+            .isEqualTo(UiCoreR.string.stripe_address_search_content_description)
         assertThat(addressElement.trailingIconFor(IdentifierSpec.Line2)).isNull()
 
         line1TrailingIcon?.onClick?.invoke()

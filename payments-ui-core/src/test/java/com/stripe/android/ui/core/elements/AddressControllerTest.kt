@@ -13,6 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
+import com.stripe.android.uicore.R as UiCoreR
 
 // TODO(ccen) Rewrite the test with generic Element and move it to stripe-ui-core
 @RunWith(RobolectricTestRunner::class)
@@ -52,7 +53,7 @@ class AddressControllerTest {
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             assertThat(addressController.error.first()?.errorMessage)
-                .isEqualTo(R.string.stripe_email_is_invalid)
+                .isEqualTo(UiCoreR.string.stripe_email_is_invalid)
 
             emailController.onValueChange("joe@email.com")
 

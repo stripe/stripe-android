@@ -25,6 +25,7 @@ import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
+import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 class CardFormViewTest {
@@ -135,7 +136,7 @@ class CardFormViewTest {
         idleLooper()
 
         standardBinding!!.let {
-            assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_address_zip_invalid))
+            assertThat(it.errors.text).isEqualTo(context.getString(UiCoreR.string.stripe_address_zip_invalid))
             assertThat(it.errors.isVisible).isTrue()
         }
     }
@@ -163,7 +164,7 @@ class CardFormViewTest {
         idleLooper()
 
         standardBinding!!.let {
-            assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_invalid_expiry_year))
+            assertThat(it.errors.text).isEqualTo(context.getString(UiCoreR.string.stripe_invalid_expiry_year))
             assertThat(it.errors.isVisible).isTrue()
         }
     }

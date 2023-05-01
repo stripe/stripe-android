@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.res.Resources
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.R as StripeR
 
 internal sealed class PaymentOptionsItem {
 
@@ -35,7 +36,7 @@ internal sealed class PaymentOptionsItem {
 
         fun getDescription(resources: Resources) = when (paymentMethod.type) {
             PaymentMethod.Type.Card -> resources.getString(
-                R.string.stripe_card_ending_in,
+                StripeR.string.stripe_card_ending_in,
                 paymentMethod.card?.brand,
                 paymentMethod.card?.last4
             )

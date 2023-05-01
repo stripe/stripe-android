@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.R as StripeR
 
 @Composable
 internal fun PaymentOptions(
@@ -198,8 +199,8 @@ private fun GooglePay(
         isSelected = isSelected,
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_google_pay_mark,
-        labelText = stringResource(R.string.stripe_google_pay),
-        description = stringResource(R.string.stripe_google_pay),
+        labelText = stringResource(StripeR.string.stripe_google_pay),
+        description = stringResource(StripeR.string.stripe_google_pay),
         onItemSelectedListener = { onItemSelected(PaymentSelection.GooglePay) },
         modifier = modifier,
     )
@@ -229,8 +230,8 @@ private fun Link(
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_link_mark,
         iconTint = linkLogoColor,
-        labelText = stringResource(R.string.stripe_link),
-        description = stringResource(R.string.stripe_link),
+        labelText = stringResource(StripeR.string.stripe_link),
+        description = stringResource(StripeR.string.stripe_link),
         onItemSelectedListener = { onItemSelected(PaymentSelection.Link) },
         modifier = modifier,
     )
