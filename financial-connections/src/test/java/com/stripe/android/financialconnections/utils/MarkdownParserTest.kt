@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.features
+package com.stripe.android.financialconnections.utils
 
 import com.google.common.truth.Truth
 import org.junit.Test

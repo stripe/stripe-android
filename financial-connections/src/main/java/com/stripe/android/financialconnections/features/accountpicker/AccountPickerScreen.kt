@@ -5,14 +5,9 @@ package com.stripe.android.financialconnections.features.accountpicker
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,19 +15,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -45,10 +35,10 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
-import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.PartnerAccountUI
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.common.AccountItem
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
@@ -63,8 +53,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
-import com.stripe.android.uicore.text.MiddleEllipsisText
 
 @Composable
 internal fun AccountPickerScreen() {
@@ -167,7 +155,7 @@ private fun AccountPickerLoading() {
 private fun AccountPickerLoaded(
     submitEnabled: Boolean,
     submitLoading: Boolean,
-    accounts: List<PartnerAccountUI>,
+    accounts: List<PartnerAccount>,
     allAccountsSelected: Boolean,
     accessibleDataCalloutModel: AccessibleDataCalloutModel?,
     requiresSingleAccountConfirmation: Boolean,
@@ -263,7 +251,7 @@ private fun AccountPickerLoaded(
 
 @Composable
 private fun SingleSelectContent(
-    accounts: List<PartnerAccountUI>,
+    accounts: List<PartnerAccount>,
     selectedIds: Set<String>,
     onAccountClicked: (PartnerAccount) -> Unit
 ) {
@@ -271,14 +259,15 @@ private fun SingleSelectContent(
         contentPadding = PaddingValues(bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(accounts, key = { it.account.id }) { account ->
+        items(accounts, key = { it.id }) { account ->
             AccountItem(
-                selected = selectedIds.contains(account.account.id),
+                selected = selectedIds.contains(account.id),
                 onAccountClicked = onAccountClicked,
-                accountUI = account,
+                account = account,
+                enabled = account.allowSelection,
                 selectorContent = {
                     FinancialConnectionRadioButton(
-                        checked = selectedIds.contains(account.account.id),
+                        checked = selectedIds.contains(account.id),
                     )
                 },
             )
@@ -288,7 +277,7 @@ private fun SingleSelectContent(
 
 @Composable
 private fun MultiSelectContent(
-    accounts: List<PartnerAccountUI>,
+    accounts: List<PartnerAccount>,
     selectedIds: Set<String>,
     onAccountClicked: (PartnerAccount) -> Unit,
     onSelectAllAccountsClicked: () -> Unit,
@@ -302,34 +291,32 @@ private fun MultiSelectContent(
             AccountItem(
                 selected = allAccountsSelected,
                 onAccountClicked = { onSelectAllAccountsClicked() },
-                accountUI = PartnerAccountUI(
-                    PartnerAccount(
-                        id = "select_all_accounts",
-                        _allowSelection = true,
-                        allowSelectionMessage = "",
-                        authorization = "",
-                        category = FinancialConnectionsAccount.Category.UNKNOWN,
-                        subcategory = FinancialConnectionsAccount.Subcategory.UNKNOWN,
-                        name = stringResource(R.string.stripe_account_picker_select_all_accounts),
-                        supportedPaymentMethodTypes = emptyList()
-                    ),
-                    formattedBalance = null,
-                    institutionIcon = null
-                )
+                enabled = true,
+                account = PartnerAccount(
+                    id = "select_all_accounts",
+                    _allowSelection = true,
+                    allowSelectionMessage = "",
+                    authorization = "",
+                    category = FinancialConnectionsAccount.Category.UNKNOWN,
+                    subcategory = FinancialConnectionsAccount.Subcategory.UNKNOWN,
+                    name = stringResource(R.string.stripe_account_picker_select_all_accounts),
+                    supportedPaymentMethodTypes = emptyList()
+                ),
             ) {
                 FinancialConnectionCheckbox(
                     allAccountsSelected,
                 )
             }
         }
-        items(accounts, key = { it.account.id }) { account ->
+        items(accounts, key = { it.id }) { account ->
             AccountItem(
-                selected = selectedIds.contains(account.account.id),
+                selected = selectedIds.contains(account.id),
                 onAccountClicked = onAccountClicked,
-                accountUI = account
+                enabled = account.allowSelection,
+                account = account
             ) {
                 FinancialConnectionCheckbox(
-                    checked = selectedIds.contains(account.account.id),
+                    checked = selectedIds.contains(account.id),
                 )
             }
         }
@@ -370,87 +357,6 @@ private fun FinancialConnectionRadioButton(
             contentDescription = null,
         )
     }
-}
-
-@Composable
-@Suppress("MagicNumber")
-private fun AccountItem(
-    selected: Boolean,
-    onAccountClicked: (PartnerAccount) -> Unit,
-    accountUI: PartnerAccountUI,
-    selectorContent: @Composable RowScope.() -> Unit
-) {
-    val account = accountUI.account
-    val verticalPadding =
-        remember(account) { if (account.displayableAccountNumbers != null) 10.dp else 12.dp }
-    val shape = remember { RoundedCornerShape(8.dp) }
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .border(
-                width = if (selected) 2.dp else 1.dp,
-                color = when {
-                    selected -> colors.textBrand
-                    else -> colors.borderDefault
-                },
-                shape = shape
-            )
-            .clickable(enabled = accountUI.account.allowSelection) { onAccountClicked(account) }
-            .padding(vertical = verticalPadding, horizontal = 16.dp)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            selectorContent()
-            Spacer(modifier = Modifier.size(16.dp))
-            val (title, subtitle) = getAccountTexts(accountUI = accountUI)
-            Column(
-                Modifier.weight(0.7f)
-            ) {
-                MiddleEllipsisText(
-                    text = title,
-                    color = if (accountUI.account.allowSelection) {
-                        colors.textPrimary
-                    } else {
-                        colors.textDisabled
-                    },
-                    style = FinancialConnectionsTheme.typography.bodyEmphasized
-                )
-                subtitle?.let {
-                    Spacer(modifier = Modifier.size(4.dp))
-                    Text(
-                        text = it,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                        color = colors.textDisabled,
-                        style = FinancialConnectionsTheme.typography.captionTight
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun getAccountTexts(
-    accountUI: PartnerAccountUI,
-): Pair<String, String?> {
-    val account = accountUI.account
-    val title = when {
-        account.allowSelection.not() ||
-            accountUI.formattedBalance != null -> "${account.name} ${account.encryptedNumbers}"
-
-        else -> account.name
-    }
-    val subtitle = when {
-        account.allowSelection.not() -> account.allowSelectionMessage
-        accountUI.formattedBalance != null -> accountUI.formattedBalance
-        account.encryptedNumbers.isNotEmpty() -> account.encryptedNumbers
-        else -> null
-    }
-    return title to subtitle
 }
 
 @Preview(

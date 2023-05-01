@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.features
+package com.stripe.android.financialconnections.utils
 
 internal object MarkdownParser {
 

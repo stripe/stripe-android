@@ -96,6 +96,7 @@
     <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Please enter your bank details manually or select another bank.</string>
     <string name="stripe_close_dialog_title">Are you sure you want to cancel?</string>
     <string name="stripe_close_dialog_desc">You haven\'t finished linking your bank account.</string>
+    <string name="stripe_close_dialog_networking_desc">If you cancel now, your account will be linked to %1$s but it will not be saved to Link.</string>
     <string name="stripe_close_dialog_confirm">Yes, cancel</string>
     <string name="stripe_close_dialog_back">Back</string>
     <string name="stripe_error_cta_close">Close</string>
@@ -107,15 +108,60 @@
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
     <string name="stripe_success_pane_skip_title">Finishing up</string>
     <string name="stripe_success_pane_skip_desc">Hold on, we\'re almost done…</string>
-    <plurals name="stripe_success_desc">
-        <item quantity="zero" />
+    <string name="stripe_networking_signup_phone_number_disclaimer">We’ll use this to verify and manage your account.</string>
+    <string name="stripe_networking_link_login_warmup_email_label">Continue as</string>
+    <string name="stripe_networking_link_login_warmup_skip">Not you? <annotation clickable="skip_login">Continue without signing in</annotation></string>
+    <string name="stripe_networking_link_login_warmup_description">It looks like you have a Link account. Signing in will let you quickly access your saved bank accounts.</string>
+    <string name="stripe_networking_link_login_warmup_title">Sign in to Link</string>
+    <string name="stripe_networking_verification_title">Save your account to Link</string>
+    <string name="stripe_networking_verification_desc">Enter the code sent to %1$s</string>
+    <string name="stripe_networking_verification_email">Signing in as %1$s</string>
+    <string name="stripe_link_account_picker_title">Select an account to connect to %1$s</string>
+    <string name="stripe_link_account_picker_title_nobusiness">Select an account to connect to this business</string>
+    <string name="stripe_link_account_picker_new_account">New bank account</string>
+    <string name="stripe_link_account_picker_cta">Connect account</string>
+    <string name="stripe_link_stepup_verification_title">Check your email to confirm your identity</string>
+    <string name="stripe_link_stepup_verification_desc">To keep your Link account safe, we periodically need to confirm you\'re you. Enter the code sent to your email %1$s.</string>
+    <string name="stripe_link_stepup_verification_resend_code"><annotation clickable="resend_code">Resend code</annotation></string>
+    <string name="stripe_networking_save_to_link_verification_title">Sign in to Link</string>
+    <string name="stripe_networking_save_to_link_verification_cta_negative">Not now</string>
+    <string name="stripe_verification.codeInvalid">Hmm, that code didn’t work. Double check it and try again.</string>
+    <string name="stripe_verification.codeExpired">It looks like the verification code you provided is not valid anymore. Get a new code and try again.</string>
+    <string name="stripe_verification.codeExpiredEmail">It looks like the verification code you provided is not valid anymore. Click “Resend code” and try again, or <annotation clickable="contact_us">Contact us</annotation>.</string>
+    <string name="stripe_verification.codeExpiredSms">It looks like the verification code you provided is not valid anymore. Try again, or <annotation clickable="contact_us">Contact us</annotation>.</string>
+    <string name="stripe_verification.maxAttemptsExceeded">We\'re experiencing high volumes. Try again in an hour and if you need immediate assistance, please contact us.</string>
+    <string name="stripe_verification.unexpectedError">Something went wrong.</string>
+    <plurals name="stripe_success_networking_save_to_link_failed">
+        <item quantity="one">Your account was connected to %1$s but could not be saved to Link with Stripe at this time.</item>
+        <item quantity="other">Your accounts were connected to %1$s but could not be saved to Link with Stripe at this time.</item>
+    </plurals>
+    <plurals name="stripe_success_pane_networking_save_to_link_failed_no_business">
+        <item quantity="one">Your account was connected to this business but could not be saved to Link with Stripe at this time.</item>
+        <item quantity="other">Your accounts were connected to this business but could not be saved to Link with Stripe at this time.</item>
+    </plurals>
+    <plurals name="stripe_success_pane_link_with_connected_account_name">
+        <item quantity="one">Your account was successfully connected to %1$s and %2$s through Link.</item>
+        <item quantity="other">Your accounts were successfully connected to %1$s and %2$s through Link.</item>
+    </plurals>
+    <plurals name="stripe_success_pane_link_with_business_name">
+        <item quantity="one">Your account was successfully connected to %1$s through Link.</item>
+        <item quantity="other">Your accounts were successfully connected to %1$s through Link.</item>
+    </plurals>
+    <plurals name="stripe_success_pane_link_with_no_business_name">
+        <item quantity="one">Your account was successfully connected to Link.</item>
+        <item quantity="other">Your accounts were successfully connected to Link.</item>
+    </plurals>
+    <plurals name="stripe_success_pane_has_connected_account_name">
+        <item quantity="one">Your account was successfully linked to %1$s and %2$s through Stripe.</item>
+        <item quantity="other">Your accounts were successfully linked to %1$s and %2$s through Stripe.</item>
+    </plurals>
+    <plurals name="stripe_success_pane_has_business_name">
         <item quantity="one">Your account was successfully linked to %1$s through Stripe.</item>
         <item quantity="other">Your accounts were successfully linked to %1$s through Stripe.</item>
     </plurals>
-    <plurals name="stripe_success_desc_no_business">
-        <item quantity="zero" />
-        <item quantity="one">Your account was successfully linked through Stripe.</item>
-        <item quantity="other">Your accounts were successfully linked through Stripe.</item>
+    <plurals name="stripe_success_pane_no_business_name">
+        <item quantity="one">Your account was successfully linked to Stripe.</item>
+        <item quantity="other">Your accounts were successfully linked to Stripe.</item>
     </plurals>
 </resources>
 

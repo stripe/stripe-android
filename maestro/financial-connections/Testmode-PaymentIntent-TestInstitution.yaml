@@ -24,7 +24,7 @@ appId: com.stripe.android.financialconnections.example
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
 ###############################################
-# SELECT ALL ACCOUNTS
+# SELECT SUCCESS ACCOUNT
 - extendedWaitUntil:
     visible: "Success"
     timeout: 60000

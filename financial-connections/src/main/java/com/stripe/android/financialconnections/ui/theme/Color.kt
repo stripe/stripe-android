@@ -15,6 +15,11 @@ internal val Neutral300 = Color(0xffA3ACBA)
 internal val Neutral500 = Color(0xff6A7383)
 internal val Neutral800 = Color(0xff30313D)
 
+internal val Attention500 = Color(0xffC84801)
+internal val Attention400 = Color(0xffED6704)
+internal val Attention100 = Color(0xffFCEDB9)
+internal val Attention50 = Color(0xffFEF9DA)
+
 internal val Brand100 = Color(0xffF2EBFF)
 internal val Brand400 = Color(0xff8D7FFA)
 internal val Brand500 = Color(0xff625AFA)
@@ -53,5 +58,6 @@ internal data class FinancialConnectionsColors(
     // icons
     val iconBrand: Color,
     val iconInfo: Color,
-    val iconSuccess: Color
+    val iconSuccess: Color,
+    val iconAttention: Color
 )

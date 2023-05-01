@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
+import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.financialconnections.BuildConfig
@@ -38,4 +39,10 @@ internal object FinancialConnectionsSheetConfigurationModule {
     fun providesApplicationId(
         application: Application
     ): String = application.packageName
+
+    @Provides
+    @Singleton
+    fun providesApiVersion(): ApiVersion = ApiVersion(
+        betas = setOf("financial_connections_client_api_beta=v1")
+    )
 }

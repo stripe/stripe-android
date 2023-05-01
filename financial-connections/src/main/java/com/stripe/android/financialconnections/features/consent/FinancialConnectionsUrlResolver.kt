@@ -57,4 +57,5 @@ internal object FinancialConnectionsUrlResolver {
     }
 
     const val supportUrl: String = "https://support.stripe.com/contact"
+    const val linkVerificationSupportUrl: String = "https://support.link.co/contact/email?skipVerification=true"
 }

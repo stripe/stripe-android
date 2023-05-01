@@ -9,23 +9,27 @@ class BackendRepository(
 
     suspend fun createLinkAccountSession(
         flow: String? = null,
-        keys: Pair<String, String>? = null
+        keys: Pair<String, String>? = null,
+        customerEmail: String? = null
     ) = backendService.createLinkAccountSession(
         LinkAccountSessionBody(
             flow = flow,
             publishableKey = keys?.first,
-            secretKey = keys?.second
+            secretKey = keys?.second,
+            customerEmail = customerEmail
         )
     )
 
     suspend fun createLinkAccountSessionForToken(
         flow: String? = null,
-        keys: Pair<String, String>? = null
+        keys: Pair<String, String>? = null,
+        customerEmail: String? = null
     ) = backendService.createLinkAccountSessionForToken(
         LinkAccountSessionBody(
             flow = flow,
             publishableKey = keys?.first,
-            secretKey = keys?.second
+            secretKey = keys?.second,
+            customerEmail = customerEmail,
         )
     )
 
@@ -34,7 +38,8 @@ class BackendRepository(
         flow: String? = null,
         customerId: String? = null,
         supportedPaymentMethods: String? = null,
-        keys: Pair<String, String>? = null
+        keys: Pair<String, String>? = null,
+        customerEmail: String? = null
     ): CreateIntentResponse = backendService.createPaymentIntent(
         PaymentIntentBody(
             flow = flow,
@@ -42,7 +47,8 @@ class BackendRepository(
             customerId = customerId,
             supportedPaymentMethods = supportedPaymentMethods,
             publishableKey = keys?.first,
-            secretKey = keys?.second
+            secretKey = keys?.second,
+            customerEmail = customerEmail
         )
     )
 }

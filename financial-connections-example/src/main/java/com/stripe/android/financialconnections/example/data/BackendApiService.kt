@@ -31,7 +31,9 @@ data class LinkAccountSessionBody(
     @SerializedName("custom_pk")
     val publishableKey: String?,
     @SerializedName("custom_sk")
-    val secretKey: String?
+    val secretKey: String?,
+    @SerializedName("customer_email")
+    val customerEmail: String?
 )
 
 @Keep
@@ -47,5 +49,7 @@ data class PaymentIntentBody(
     @SerializedName("custom_pk")
     val publishableKey: String?,
     @SerializedName("custom_sk")
-    val secretKey: String?
+    val secretKey: String?,
+    @SerializedName("customer_email")
+    val customerEmail: String?
 )

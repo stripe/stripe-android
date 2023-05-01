@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -10,7 +9,6 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
@@ -29,8 +27,8 @@ import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
+import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.financialconnections.utils.measureTimeMillis
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import javax.inject.Inject
 
@@ -116,17 +114,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
         }.execute {
             copy(searchInstitutions = if (it.isCancellationError()) Loading() else it)
         }
-    }
-
-    /**
-     * Prevents [CancellationException] to map to [Fail] when coroutine being cancelled
-     * due to search query changes. In these cases, re-map the [Async] instance to [Loading]
-     */
-    private fun Async<InstitutionResponse>.isCancellationError(): Boolean = when {
-        this !is Fail -> false
-        error is CancellationException -> true
-        error is StripeException && error.cause is CancellationException -> true
-        else -> false
     }
 
     fun onInstitutionSelected(institution: FinancialConnectionsInstitution, fromFeatured: Boolean) {

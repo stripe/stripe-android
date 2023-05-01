@@ -4,23 +4,33 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * The result of a call to Link consumer sign up.
  */
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Serializable
 data class ConsumerSession(
-    val clientSecret: String,
+    @SerialName("client_secret")
+    val clientSecret: String = "",
+    @SerialName("email_address")
     val emailAddress: String,
+    @SerialName("redacted_phone_number")
     val redactedPhoneNumber: String,
-    val verificationSessions: List<VerificationSession>,
-    val authSessionClientSecret: String?,
-    val publishableKey: String?
+    @SerialName("verification_sessions")
+    val verificationSessions: List<VerificationSession> = emptyList(),
+    @SerialName("auth_session_client_secret")
+    val authSessionClientSecret: String? = null,
+    @SerialName("publishable_key")
+    val publishableKey: String? = null
 ) : StripeModel {
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Serializable
     data class VerificationSession constructor(
         val type: SessionType,
         val state: SessionState

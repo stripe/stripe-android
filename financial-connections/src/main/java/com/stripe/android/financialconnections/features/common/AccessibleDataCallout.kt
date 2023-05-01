@@ -24,12 +24,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
-import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Permissions
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
@@ -228,19 +225,7 @@ internal data class AccessibleDataCalloutModel(
     val isStripeDirect: Boolean,
     val isNetworking: Boolean,
     val dataPolicyUrl: String
-) {
-
-    companion object {
-        fun fromManifest(manifest: FinancialConnectionsSessionManifest): AccessibleDataCalloutModel =
-            AccessibleDataCalloutModel(
-                businessName = ConsentTextBuilder.getBusinessName(manifest),
-                permissions = manifest.permissions,
-                isNetworking = manifest.isNetworkingUserFlow ?: false,
-                isStripeDirect = manifest.isStripeDirect ?: false,
-                dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
-            )
-    }
-}
+)
 
 @Preview(
     group = "Data Callout",

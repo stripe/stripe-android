@@ -19,7 +19,7 @@ internal class GoNext @Inject constructor(
         nextPane: Pane,
         args: Map<String, Any?> = emptyMap()
     ): NavigationCommand {
-        val nextPaneDirection = nextPane.toNavigationCommand(logger, args)
+        val nextPaneDirection = nextPane.toNavigationCommand(args)
         logger.debug("Navigating to next pane: ${nextPaneDirection.destination}")
         navigationManager.navigate(nextPaneDirection)
         return nextPaneDirection
@@ -28,7 +28,6 @@ internal class GoNext @Inject constructor(
 
 @Suppress("ComplexMethod")
 internal fun Pane.toNavigationCommand(
-    logger: Logger,
     args: Map<String, Any?>
 ): NavigationCommand = when (this) {
     Pane.INSTITUTION_PICKER -> NavigationDirections.institutionPicker
@@ -40,15 +39,15 @@ internal fun Pane.toNavigationCommand(
     Pane.MANUAL_ENTRY_SUCCESS -> NavigationDirections.ManualEntrySuccess(args)
     Pane.ATTACH_LINKED_PAYMENT_ACCOUNT -> NavigationDirections.attachLinkedPaymentAccount
     Pane.RESET -> NavigationDirections.reset
-    Pane.NETWORKING_LINK_SIGNUP_PANE -> {
-        logger.error("Link not supported on native flows yet. Navigating to Success.")
-        NavigationDirections.success
-    }
+    Pane.NETWORKING_LINK_SIGNUP_PANE -> NavigationDirections.networkingLinkSignup
+    Pane.NETWORKING_LINK_LOGIN_WARMUP -> NavigationDirections.networkingLinkLoginWarmup
+    Pane.NETWORKING_LINK_VERIFICATION -> NavigationDirections.networkingLinkVerification
+    Pane.LINK_STEP_UP_VERIFICATION -> NavigationDirections.linkStepUpVerification
+    Pane.LINK_ACCOUNT_PICKER -> NavigationDirections.linkAccountPicker
+    Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION -> NavigationDirections.networkingSaveToLinkVerification
     Pane.AUTH_OPTIONS,
     Pane.LINK_CONSENT,
     Pane.LINK_LOGIN,
-    Pane.NETWORKING_LINK_LOGIN_WARMUP,
-    Pane.NETWORKING_LINK_VERIFICATION,
     Pane.UNEXPECTED_ERROR -> {
         TODO("Unimplemented navigation command: ${this.value}")
     }
