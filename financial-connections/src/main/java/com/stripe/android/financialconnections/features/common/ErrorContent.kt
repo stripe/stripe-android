@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
@@ -151,8 +152,9 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
         title = stringResource(
             R.string.stripe_account_picker_error_no_payment_method_title
         ),
-        content = stringResource(
-            R.string.stripe_account_picker_error_no_payment_method_desc,
+        content = pluralStringResource(
+            id = R.plurals.stripe_account_picker_error_no_payment_method_desc,
+            count = exception.accountsCount,
             exception.accountsCount.toString(),
             exception.institution.name,
             exception.merchantName

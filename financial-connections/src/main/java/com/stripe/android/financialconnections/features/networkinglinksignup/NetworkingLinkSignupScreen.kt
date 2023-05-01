@@ -16,11 +16,8 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -60,7 +57,6 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
-import kotlinx.coroutines.flow.first
 
 @Composable
 internal fun NetworkingLinkSignupScreen() {
@@ -306,12 +302,6 @@ internal fun EmailSection(
     showFullForm: Boolean,
     loading: Boolean
 ) {
-    val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        if (emailController.fieldValue.first().isEmpty()) {
-            focusRequester.requestFocus()
-        }
-    }
     StripeThemeForConnections {
         Box(
             modifier = Modifier
@@ -326,9 +316,7 @@ internal fun EmailSection(
                 } else {
                     ImeAction.Done
                 },
-                enabled = enabled,
-                modifier = Modifier
-                    .focusRequester(focusRequester)
+                enabled = enabled
             )
             if (loading) {
                 CircularProgressIndicator(
