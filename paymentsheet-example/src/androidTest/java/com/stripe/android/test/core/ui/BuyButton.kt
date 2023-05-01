@@ -1,7 +1,5 @@
 package com.stripe.android.test.core.ui
 
-import com.stripe.android.ui.core.R as StripeUiCoreR
-
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
@@ -11,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 class BuyButton(private val composeTestRule: ComposeTestRule) {
     fun click() {

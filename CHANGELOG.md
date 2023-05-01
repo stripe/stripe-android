@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### All SDKs
+* [CHANGED][6635](https://github.com/stripe/stripe-android/pull/6635) Use non transitive R classes.
+
 ## 20.24.1 - 2023-05-01
 
 ### Payments

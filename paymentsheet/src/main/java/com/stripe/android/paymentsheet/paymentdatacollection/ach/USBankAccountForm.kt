@@ -56,6 +56,8 @@ import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.R as StripeR
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @Composable
 internal fun USBankAccountForm(
@@ -439,7 +441,7 @@ private fun AddressSection(
         contentAlignment = Alignment.CenterEnd
     ) {
         Column {
-            Section(R.string.stripe_billing_details, sectionErrorString) {
+            Section(PaymentsUiCoreR.string.stripe_billing_details, sectionErrorString) {
                 AddressElementUI(
                     enabled = !processing,
                     controller = addressController,
@@ -472,7 +474,7 @@ private fun AccountDetailsForm(
             .padding(bottom = 8.dp)
     ) {
         H6Text(
-            text = stringResource(R.string.stripe_title_bank_account),
+            text = stringResource(StripeR.string.stripe_title_bank_account),
             modifier = Modifier.padding(vertical = 8.dp)
         )
         SectionCard(modifier = Modifier.fillMaxWidth()) {
@@ -498,7 +500,7 @@ private fun AccountDetailsForm(
                     )
                 }
                 Image(
-                    painter = painterResource(R.drawable.stripe_ic_clear),
+                    painter = painterResource(StripeR.drawable.stripe_ic_clear),
                     contentDescription = null,
                     modifier = Modifier
                         .height(20.dp)
@@ -531,10 +533,10 @@ private fun AccountDetailsForm(
                 last4
             ),
             confirmText = stringResource(
-                id = R.string.stripe_remove
+                id = StripeR.string.stripe_remove
             ),
             dismissText = stringResource(
-                id = R.string.stripe_cancel
+                id = StripeR.string.stripe_cancel
             ),
             onConfirmListener = {
                 openDialog.value = false
