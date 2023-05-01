@@ -17,13 +17,15 @@ data class DeferredIntentParams(
     @Parcelize
     sealed interface Mode : Parcelable {
         val code: String
+        val currency: String?
+        val setupFutureUsage: StripeIntent.Usage?
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Payment(
             val amount: Long,
-            val currency: String,
-            val setupFutureUsage: StripeIntent.Usage?,
+            override val currency: String,
+            override val setupFutureUsage: StripeIntent.Usage?,
             val captureMethod: CaptureMethod?,
         ) : Mode {
             override val code: String get() = "payment"
@@ -32,8 +34,8 @@ data class DeferredIntentParams(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Setup(
-            val currency: String?,
-            val setupFutureUsage: StripeIntent.Usage,
+            override val currency: String?,
+            override val setupFutureUsage: StripeIntent.Usage,
         ) : Mode {
             override val code: String get() = "setup"
         }
@@ -49,8 +51,8 @@ data class DeferredIntentParams(
         return mapOf(
             "deferred_intent[mode]" to mode.code,
             "deferred_intent[amount]" to (mode as? Mode.Payment)?.amount,
-            "deferred_intent[currency]" to (mode as? Mode.Payment)?.currency,
-            "deferred_intent[setup_future_usage]" to (mode as? Mode.Payment)?.setupFutureUsage?.code,
+            "deferred_intent[currency]" to mode.currency,
+            "deferred_intent[setup_future_usage]" to mode.setupFutureUsage?.code,
             "deferred_intent[capture_method]" to (mode as? Mode.Payment)?.captureMethod?.code,
             "deferred_intent[on_behalf_of]" to onBehalfOf,
         ) + paymentMethodTypes.mapIndexed { index, paymentMethodType ->
