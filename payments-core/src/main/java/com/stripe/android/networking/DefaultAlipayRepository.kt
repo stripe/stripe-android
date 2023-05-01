@@ -28,20 +28,27 @@ internal class DefaultAlipayRepository(
         val nextActionData = paymentIntent.nextActionData
         return if (nextActionData is StripeIntent.NextActionData.AlipayRedirect) {
             val output = authenticator.onAuthenticationRequest(nextActionData.data)
-            val result = AlipayAuthResult(
-                when (output[ALIPAY_RESULT_FIELD]) {
-                    AlipayAuthResult.RESULT_CODE_SUCCESS -> {
-                        nextActionData.authCompleteUrl?.let { authCompleteUrl ->
+
+            val outcome = when (output[ALIPAY_RESULT_FIELD]) {
+                AlipayAuthResult.RESULT_CODE_SUCCESS -> {
+                    val result = nextActionData.authCompleteUrl?.let { authCompleteUrl ->
+                        runCatching {
                             stripeRepository.retrieveObject(authCompleteUrl, requestOptions)
                         }
+                    }
+
+                    if (result != null && result.isFailure) {
+                        StripeIntentResult.Outcome.FAILED
+                    } else {
                         StripeIntentResult.Outcome.SUCCEEDED
                     }
-                    AlipayAuthResult.RESULT_CODE_FAILED -> StripeIntentResult.Outcome.FAILED
-                    AlipayAuthResult.RESULT_CODE_CANCELLED -> StripeIntentResult.Outcome.CANCELED
-                    else -> StripeIntentResult.Outcome.UNKNOWN
                 }
-            )
-            Result.success(result)
+                AlipayAuthResult.RESULT_CODE_FAILED -> StripeIntentResult.Outcome.FAILED
+                AlipayAuthResult.RESULT_CODE_CANCELLED -> StripeIntentResult.Outcome.CANCELED
+                else -> StripeIntentResult.Outcome.UNKNOWN
+            }
+
+            Result.success(AlipayAuthResult(outcome))
         } else {
             Result.failure(
                 RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")
