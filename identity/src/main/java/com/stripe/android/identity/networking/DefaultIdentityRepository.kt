@@ -94,6 +94,40 @@ internal class DefaultIdentityRepository @Inject constructor(
         VerificationPageData.serializer()
     )
 
+    override suspend fun verifyTestVerificationSession(
+        id: String,
+        ephemeralKey: String,
+        simulateDelay: Boolean
+    ) = executeRequestWithKSerializer(
+        apiRequestFactory.createPost(
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$TESTING/$VERIFY",
+            options = ApiRequest.Options(
+                apiKey = ephemeralKey
+            ),
+            params = mapOf(
+                SIMULATE_DELAY to simulateDelay
+            )
+        ),
+        VerificationPageData.serializer()
+    )
+
+    override suspend fun unverifyTestVerificationSession(
+        id: String,
+        ephemeralKey: String, // todo - need to add this to the request
+        simulateDelay: Boolean
+    ) = executeRequestWithKSerializer(
+        apiRequestFactory.createPost(
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$TESTING/$UNVERIFY",
+            options = ApiRequest.Options(
+                apiKey = ephemeralKey
+            ),
+            params = mapOf(
+                SIMULATE_DELAY to simulateDelay
+            )
+        ),
+        VerificationPageData.serializer()
+    )
+
     override suspend fun uploadImage(
         verificationId: String,
         ephemeralKey: String,
@@ -252,8 +286,6 @@ internal class DefaultIdentityRepository @Inject constructor(
     }
 
     internal companion object {
-        const val SUBMIT = "submit"
-        const val DATA = "data"
         val TAG: String = DefaultIdentityRepository::class.java.simpleName
     }
 }

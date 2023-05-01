@@ -13,8 +13,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -23,15 +29,26 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.navigation.DebugDestination
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.models.Requirement.Companion.nextDestination
+import com.stripe.android.identity.ui.CompleteOption.FAILURE
+import com.stripe.android.identity.ui.CompleteOption.FAILURE_ASYNC
+import com.stripe.android.identity.ui.CompleteOption.SUCCESS
+import com.stripe.android.identity.ui.CompleteOption.SUCCESS_ASYNC
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.text.Html
+import kotlinx.coroutines.launch
+
+internal enum class CompleteOption {
+    SUCCESS, FAILURE, SUCCESS_ASYNC, FAILURE_ASYNC
+}
 
 /**
  * Screen to show debug options for test mode verification.
@@ -58,15 +75,71 @@ internal fun DebugScreen(
                 )
         ) {
             val context = LocalContext.current
+            var proceedState by remember {
+                mutableStateOf(LoadingButtonState.Idle)
+            }
+
+            val coroutineScope = rememberCoroutineScope()
 
             TitleSection()
+
             Divider(
                 modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
             )
+
+            CompleteWithTestDataSection { completeOption ->
+                proceedState = LoadingButtonState.Disabled
+
+                when (completeOption) {
+                    SUCCESS -> {
+                        coroutineScope.launch {
+                            identityViewModel.verifySessionAndTransition(
+                                fromRoute = DebugDestination.ROUTE.route,
+                                simulateDelay = false,
+                                navController = navController
+                            )
+                        }
+                    }
+                    FAILURE -> {
+                        coroutineScope.launch {
+                            identityViewModel.unverifySessionAndTransition(
+                                fromRoute = DebugDestination.ROUTE.route,
+                                simulateDelay = false,
+                                navController = navController
+                            )
+                        }
+                    }
+                    SUCCESS_ASYNC -> {
+                        coroutineScope.launch {
+                            identityViewModel.verifySessionAndTransition(
+                                fromRoute = DebugDestination.ROUTE.route,
+                                simulateDelay = true,
+                                navController = navController
+                            )
+                        }
+                    }
+                    FAILURE_ASYNC -> {
+                        coroutineScope.launch {
+                            identityViewModel.unverifySessionAndTransition(
+                                fromRoute = DebugDestination.ROUTE.route,
+                                simulateDelay = true,
+                                navController = navController
+                            )
+                        }
+                    }
+                }
+            }
+
+            Divider(
+                modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
+            )
+
             FinishMobileFlowWithResultSection(verificationFlowFinishable)
+
             Divider(
                 modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
             )
+
             PreviewUserExperienceSection {
                 navController.navigateTo(
                     verificationPage.requirements.missing.nextDestination(
@@ -106,6 +179,79 @@ private fun TitleSection() {
 }
 
 @Composable
+internal fun CompleteWithTestDataSection(
+    onClickSubmit: (CompleteOption) -> Unit
+) {
+    var submitState: LoadingButtonState by remember {
+        mutableStateOf(LoadingButtonState.Disabled)
+    }
+
+    var completeOption: CompleteOption? by remember {
+        mutableStateOf(null)
+    }
+
+    Text(
+        text = stringResource(id = R.string.stripe_complete_with_test_data),
+        style = MaterialTheme.typography.h4
+    )
+    Html(
+        html = stringResource(id = R.string.stripe_complete_with_test_data_details),
+        modifier = Modifier.padding(vertical = 8.dp)
+    )
+
+    CompleteOptionRow(
+        content = stringResource(id = R.string.stripe_verification_success),
+        selected = completeOption == SUCCESS,
+        enabled = submitState != LoadingButtonState.Loading,
+        testTag = TEST_TAG_SUCCESS,
+        onClick = {
+            completeOption = SUCCESS
+            submitState = LoadingButtonState.Idle
+        }
+    )
+    CompleteOptionRow(
+        content = stringResource(id = R.string.stripe_verification_failure),
+        selected = completeOption == FAILURE,
+        enabled = submitState != LoadingButtonState.Loading,
+        testTag = TEST_TAG_FAILURE,
+        onClick = {
+            completeOption = FAILURE
+            submitState = LoadingButtonState.Idle
+        }
+    )
+    CompleteOptionRow(
+        content = stringResource(id = R.string.stripe_verification_success_async),
+        selected = completeOption == SUCCESS_ASYNC,
+        enabled = submitState != LoadingButtonState.Loading,
+        testTag = TEST_TAG_SUCCESS_ASYNC,
+        onClick = {
+            completeOption = SUCCESS_ASYNC
+            submitState = LoadingButtonState.Idle
+        }
+    )
+    CompleteOptionRow(
+        content = stringResource(id = R.string.stripe_verification_failure_async),
+        selected = completeOption == FAILURE_ASYNC,
+        enabled = submitState != LoadingButtonState.Loading,
+        testTag = TEST_TAG_FAILURE_ASYNC,
+        onClick = {
+            completeOption = FAILURE_ASYNC
+            submitState = LoadingButtonState.Idle
+        }
+    )
+
+    LoadingButton(
+        text = stringResource(id = R.string.stripe_submit),
+        state = submitState,
+        modifier = Modifier.testTag(TEST_TAG_SUBMIT_BUTTON),
+        onClick = {
+            submitState = LoadingButtonState.Loading
+            onClickSubmit(requireNotNull(completeOption))
+        }
+    )
+}
+
+@Composable
 private fun FinishMobileFlowWithResultSection(
     finishable: VerificationFlowFinishable
 ) {
@@ -119,41 +265,37 @@ private fun FinishMobileFlowWithResultSection(
         modifier = Modifier.padding(vertical = 8.dp)
     )
 
-    Button(
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag(TEST_TAG_COMPLETE_BUTTON),
-        onClick = {
-            finishable.finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Completed)
-        }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = stringResource(id = R.string.stripe_completed))
-    }
-
-    Button(
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag(TEST_TAG_CANCELLED_BUTTON),
-        onClick = {
-            finishable.finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Canceled)
+        Button(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 10.dp)
+                .testTag(TEST_TAG_CANCELLED_BUTTON),
+            onClick = {
+                finishable.finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Canceled)
+            }
+        ) {
+            Text(text = stringResource(id = R.string.stripe_cancelled))
         }
-    ) {
-        Text(text = stringResource(id = R.string.stripe_cancelled))
-    }
 
-    Button(
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag(TEST_TAG_FAILED_BUTTON),
-        onClick = {
-            finishable.finishWithResult(
-                IdentityVerificationSheet.VerificationFlowResult.Failed(
-                    Exception(failureExceptionMessage)
+        Button(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 10.dp)
+                .testTag(TEST_TAG_FAILED_BUTTON),
+            onClick = {
+                finishable.finishWithResult(
+                    IdentityVerificationSheet.VerificationFlowResult.Failed(
+                        Exception(failureExceptionMessage)
+                    )
                 )
-            )
+            }
+        ) {
+            Text(text = stringResource(id = R.string.stripe_failed))
         }
-    ) {
-        Text(text = stringResource(id = R.string.stripe_failed))
     }
 }
 
@@ -179,7 +321,35 @@ private fun PreviewUserExperienceSection(
     }
 }
 
-internal const val TEST_TAG_COMPLETE_BUTTON = "Completed"
+@Composable
+private fun CompleteOptionRow(
+    content: String,
+    selected: Boolean,
+    enabled: Boolean,
+    testTag: String,
+    onClick: () -> Unit
+) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        RadioButton(
+            selected = selected,
+            enabled = enabled,
+            modifier = Modifier.testTag(testTag),
+            onClick = onClick
+        )
+        StyledClickableText(
+            text = AnnotatedString(content),
+            modifier = Modifier.padding(start = 8.dp),
+            enabled = enabled,
+            onClick = { onClick() }
+        )
+    }
+}
+
 internal const val TEST_TAG_CANCELLED_BUTTON = "Cancelled"
 internal const val TEST_TAG_FAILED_BUTTON = "Failed"
 internal const val TEST_TAG_PROCEED_BUTTON = "Proceed"
+internal const val TEST_TAG_SUBMIT_BUTTON = "Submit"
+internal const val TEST_TAG_SUCCESS = "success"
+internal const val TEST_TAG_SUCCESS_ASYNC = "success_async"
+internal const val TEST_TAG_FAILURE = "failure"
+internal const val TEST_TAG_FAILURE_ASYNC = "failure_async"
