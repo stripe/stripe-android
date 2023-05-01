@@ -7,6 +7,7 @@ import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 import org.junit.Test
 
@@ -246,8 +247,12 @@ class ElementsSessionJsonParserTest {
                 deferredIntentParams = DeferredIntentParams(
                     mode = DeferredIntentParams.Mode.Payment(
                         amount = 2000,
-                        currency = "usd"
-                    )
+                        currency = "usd",
+                        captureMethod = null,
+                        setupFutureUsage = null,
+                    ),
+                    paymentMethodTypes = emptyList(),
+                    onBehalfOf = null,
                 )
             ),
             apiKey = "test",
@@ -283,8 +288,11 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.DeferredIntentType(
                 deferredIntentParams = DeferredIntentParams(
                     mode = DeferredIntentParams.Mode.Setup(
-                        currency = "usd"
-                    )
+                        currency = "usd",
+                        setupFutureUsage = StripeIntent.Usage.OffSession,
+                    ),
+                    paymentMethodTypes = emptyList(),
+                    onBehalfOf = null,
                 )
             ),
             apiKey = "test",
@@ -309,7 +317,7 @@ class ElementsSessionJsonParserTest {
                 countryCode = "CA",
                 created = 1,
                 isLiveMode = false,
-                usage = null,
+                usage = StripeIntent.Usage.OffSession,
                 unactivatedPaymentMethods = listOf(),
                 paymentMethodTypes = listOf("card", "link", "cashapp"),
                 linkFundingSources = listOf("card")

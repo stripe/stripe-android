@@ -2418,9 +2418,12 @@ internal class StripeApiRepositoryTest {
                 deferredIntentParams = DeferredIntentParams(
                     mode = DeferredIntentParams.Mode.Payment(
                         amount = 2000,
-                        currency = "usd"
+                        currency = "usd",
+                        captureMethod = null,
+                        setupFutureUsage = null,
                     ),
-                    paymentMethodTypes = setOf("card", "link")
+                    paymentMethodTypes = listOf("card", "link"),
+                    onBehalfOf = null,
                 )
             ),
             options = DEFAULT_OPTIONS,
