@@ -54,8 +54,11 @@
     <string name="stripe_success_pane_done">Done</string>
     <string name="stripe_success_pane_disconnect">You can <annotation clickable="disconnect">disconnect your account</annotation> any time.</string>
     <string name="stripe_prepane_partner_callout">Stripe works with partners like %1$s to reliably offer access to thousands of financial institutions. <annotation clickable="privacy_center">Learn more</annotation></string>
-    <string name="stripe_account_picker_error_no_payment_method_title">No checking or savings account available</string>
-    <string name="stripe_account_picker_error_no_payment_method_desc">We found %1$s %2$s accounts but you can only link checking or savings to %3$s. Please try selecting another bank.</string>
+    <string name="stripe_account_picker_error_no_payment_method_title">No payment accounts available</string>
+    <plurals name="stripe_account_picker_error_no_payment_method_desc">
+        <item quantity="one">We found %1$s %2$s account but you can only link checking or savings accounts to %3$s. Please try selecting another bank.</item>
+        <item quantity="other">We found %1$s %2$s accounts but you can only link checking or savings accounts to %3$s. Please try selecting another bank.</item>
+    </plurals>
     <string name="stripe_account_picker_error_no_account_available_title">There was a problem accessing your %1$s account</string>
     <string name="stripe_account_picker_error_no_account_available_desc">Please select another bank or try again</string>
     <string name="stripe_manualentry_title">Enter bank account details</string>
@@ -131,6 +134,7 @@
     <string name="stripe_verification.codeExpiredSms">It looks like the verification code you provided is not valid anymore. Try again, or <annotation clickable="contact_us">Contact us</annotation>.</string>
     <string name="stripe_verification.maxAttemptsExceeded">We\'re experiencing high volumes. Try again in an hour and if you need immediate assistance, please contact us.</string>
     <string name="stripe_verification.unexpectedError">Something went wrong.</string>
+    <string name="stripe_link_account_picker_disconnected">Disconnected</string>
     <plurals name="stripe_success_networking_save_to_link_failed">
         <item quantity="one">Your account was connected to %1$s but could not be saved to Link with Stripe at this time.</item>
         <item quantity="other">Your accounts were connected to %1$s but could not be saved to Link with Stripe at this time.</item>

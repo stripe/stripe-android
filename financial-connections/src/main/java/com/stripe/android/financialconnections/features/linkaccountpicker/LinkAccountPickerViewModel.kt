@@ -56,6 +56,9 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             val accountsResponse = pollNetworkedAccounts(consumerSession.clientSecret)
             val accounts = accountsResponse
                 .data
+                // Override allow selection to disable disconnected accounts
+                // TODO@carlosmuvi update once native supports account repairability
+                .map { it.copy(_allowSelection = it.status == Status.ACTIVE) }
                 .sortedBy { it.allowSelection.not() }
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
@@ -173,7 +176,5 @@ internal data class LinkAccountPickerState(
         val consumerSessionClientSecret: String,
         val repairAuthorizationEnabled: Boolean,
         val stepUpAuthenticationRequired: Boolean
-    ) {
-        fun PartnerAccount.enabled() = status == Status.ACTIVE
-    }
+    )
 }
