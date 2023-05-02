@@ -56,6 +56,9 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             val accountsResponse = pollNetworkedAccounts(consumerSession.clientSecret)
             val accounts = accountsResponse
                 .data
+                // Override allow selection to disable disconnected accounts
+                // TODO@carlosmuvi update once native supports account repairability
+                .map { it.copy(_allowSelection = it.status == Status.ACTIVE) }
                 .sortedBy { it.allowSelection.not() }
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
@@ -63,11 +66,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 stepUpAuthenticationRequired = manifest.stepUpAuthenticationRequired ?: false,
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 businessName = manifest.businessName,
-                accounts = accounts.map { account ->
-                    account.copy(
-                        _allowSelection = account.status == Status.ACTIVE,
-                    )
-                },
+                accounts = accounts,
                 // We always want to refer to Link rather than Stripe on Link panes.
                 accessibleData = accessibleData.copy(isStripeDirect = false)
             )

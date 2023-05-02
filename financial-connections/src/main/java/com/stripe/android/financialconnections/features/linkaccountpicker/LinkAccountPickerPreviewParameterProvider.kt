@@ -66,8 +66,8 @@ internal class LinkAccountPickerPreviewParameterProvider :
             id = "id2",
             name = "With balance disabled",
             balanceAmount = 1000,
-            _allowSelection = true,
-            allowSelectionMessage = "",
+            _allowSelection = false,
+            allowSelectionMessage = "Disconnected",
             subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
             supportedPaymentMethodTypes = emptyList()
         ),
@@ -78,8 +78,8 @@ internal class LinkAccountPickerPreviewParameterProvider :
             name = "No balance",
             displayableAccountNumbers = "1234",
             subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
-            _allowSelection = false,
-            allowSelectionMessage = "Cannot be selected",
+            _allowSelection = true,
+            allowSelectionMessage = "",
             supportedPaymentMethodTypes = emptyList()
         ),
         PartnerAccount(
@@ -90,7 +90,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             displayableAccountNumbers = "1234",
             subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
             _allowSelection = false,
-            allowSelectionMessage = "Cannot be selected",
+            allowSelectionMessage = "Disconnected",
             supportedPaymentMethodTypes = emptyList()
         ),
         PartnerAccount(

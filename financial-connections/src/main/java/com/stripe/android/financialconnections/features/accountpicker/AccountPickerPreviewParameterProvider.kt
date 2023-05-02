@@ -90,8 +90,8 @@ internal class AccountPickerPreviewParameterProvider :
             id = "id2",
             name = "With balance disabled",
             balanceAmount = 1000,
-            _allowSelection = true,
-            allowSelectionMessage = "",
+            _allowSelection = false,
+            allowSelectionMessage = "Cannot be selected",
             subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
             supportedPaymentMethodTypes = emptyList()
         ),
@@ -102,7 +102,7 @@ internal class AccountPickerPreviewParameterProvider :
             name = "No balance",
             displayableAccountNumbers = "1234",
             subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
-            _allowSelection = false,
+            _allowSelection = true,
             allowSelectionMessage = "Cannot be selected",
             supportedPaymentMethodTypes = emptyList()
         ),
