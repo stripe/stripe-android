@@ -26,6 +26,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
@@ -45,6 +46,34 @@
                 android:layout_height="wrap_content" />
         </RadioGroup>
 
+        <LinearLayout
+            android:id="@+id/deferred_options_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintTop_toBottomOf="@id/initialization_radio_group"
+            app:layout_constraintBottom_toTopOf="@id/customer_text_view"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <CheckBox
+                android:id="@+id/manual_confirmation_checkbox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Manual confirmation" />
+
+            <CheckBox
+                android:id="@+id/multiprocessor_checkbox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Multiprocessor" />
+
+        </LinearLayout>
+
         <TextView
             android:id="@+id/customer_text_view"
             android:text="@string/customer"
@@ -54,7 +83,7 @@
             android:layout_marginTop="16dp"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/initialization_radio_group" />
+            app:layout_constraintTop_toBottomOf="@id/deferred_options_container" />
 
         <RadioGroup
             android:id="@+id/customer_radio_group"

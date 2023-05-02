@@ -10,6 +10,16 @@ enum class InitializationType(val value: String) {
     Deferred("deferred"),
 }
 
+enum class DeferredManualConfirmation(val value: String) {
+    On("on"),
+    Off("off"),
+}
+
+enum class DeferredMultiprocessor(val value: String) {
+    On("on"),
+    Off("off"),
+}
+
 enum class CheckoutMode(val value: String) {
     Setup("setup"),
     Payment("payment"),
@@ -53,6 +63,8 @@ data class CheckoutCurrency(val value: String) {
 
 data class SavedToggles(
     val initialization: String,
+    val deferredManualConfirmation: Boolean,
+    val deferredMultiprocessor: Boolean,
     val customer: String,
     val googlePay: Boolean,
     val currency: String,
@@ -72,6 +84,8 @@ data class SavedToggles(
 
 enum class Toggle(val key: String, val default: Any) {
     Initialization("initialization", InitializationType.Normal.value),
+    ManualConfirmation("manual_confirmation", false),
+    Multiprocessor("multiprocessor", false),
     Customer("customer", CheckoutCustomer.Guest.value),
     Link("link", true),
     GooglePay("googlePayConfig", true),
@@ -108,15 +122,17 @@ data class CheckoutRequest(
     @SerialName("mode")
     val mode: String,
     @SerialName("set_shipping_address")
-    val set_shipping_address: Boolean,
+    val setShippingAddress: Boolean,
     @SerialName("automatic_payment_methods")
-    val automatic_payment_methods: Boolean,
+    val automaticPaymentMethods: Boolean,
     @SerialName("use_link")
-    val use_link: Boolean,
+    val useLink: Boolean,
     @SerialName("merchant_country_code")
-    val merchant_country_code: String,
+    val merchantCountryCode: String,
     @SerialName("supported_payment_methods")
-    val supported_payment_methods: List<String>? = null,
+    val supportedPaymentMethods: List<String>? = null,
+    @SerialName("use_manual_confirmation")
+    val useManualConfirmation: Boolean,
 )
 
 @Serializable

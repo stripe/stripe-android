@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.MenuProvider
 import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -203,13 +204,17 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         paymentSheet = PaymentSheet(
             activity = this,
             createIntentCallback = { paymentMethodId ->
-                viewModel.createIntent(
-                    paymentMethodId = paymentMethodId,
-                    merchantCountryCode = merchantCountryCode.value,
-                    mode = mode.value,
-                    returnUrl = returnUrl,
-                    backendUrl = settings.playgroundBackendUrl,
-                )
+                if (viewBinding.multiprocessorCheckbox.isChecked) {
+                    TODO("Handle multiprocessor")
+                } else {
+                    viewModel.createIntent(
+                        paymentMethodId = paymentMethodId,
+                        merchantCountryCode = merchantCountryCode.value,
+                        mode = mode.value,
+                        returnUrl = returnUrl,
+                        backendUrl = settings.playgroundBackendUrl,
+                    )
+                }
             },
             paymentResultCallback = ::onPaymentSheetResult,
         )
@@ -218,14 +223,18 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             activity = this,
             paymentOptionCallback = ::onPaymentOption,
             createIntentCallbackForServerSideConfirmation = { paymentMethodId, shouldSavePaymentMethod ->
-                viewModel.createAndConfirmIntent(
-                    paymentMethodId = paymentMethodId,
-                    shouldSavePaymentMethod = shouldSavePaymentMethod,
-                    merchantCountryCode = merchantCountryCode.value,
-                    mode = mode.value,
-                    returnUrl = returnUrl,
-                    backendUrl = settings.playgroundBackendUrl,
-                )
+                if (viewBinding.multiprocessorCheckbox.isChecked) {
+                    TODO("Handle multiprocessor")
+                } else {
+                    viewModel.createAndConfirmIntent(
+                        paymentMethodId = paymentMethodId,
+                        shouldSavePaymentMethod = shouldSavePaymentMethod,
+                        merchantCountryCode = merchantCountryCode.value,
+                        mode = mode.value,
+                        returnUrl = returnUrl,
+                        backendUrl = settings.playgroundBackendUrl,
+                    )
+                }
             },
             paymentResultCallback = ::onPaymentSheetResult,
         )
@@ -239,6 +248,20 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 else -> error("🤔")
             }
             viewModel.initializationType.value = type
+
+            val showDeferredOptions = type == InitializationType.Deferred
+            viewBinding.manualConfirmationCheckbox.isVisible = showDeferredOptions
+            viewBinding.multiprocessorCheckbox.isVisible = showDeferredOptions
+        }
+
+        viewBinding.manualConfirmationCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            // Only allow one
+            viewBinding.multiprocessorCheckbox.isEnabled = !isChecked
+        }
+
+        viewBinding.multiprocessorCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            // Only allow one
+            viewBinding.manualConfirmationCheckbox.isEnabled = !isChecked
         }
 
         viewBinding.modeRadioGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -270,6 +293,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
             setToggles(
                 initialization = Toggle.Initialization.default.toString(),
+                manualConfirmation = Toggle.ManualConfirmation.default as Boolean,
+                multiprocessor = Toggle.Multiprocessor.default as Boolean,
                 customer = Toggle.Customer.default.toString(),
                 link = Toggle.Link.default as Boolean,
                 googlePay = Toggle.GooglePay.default as Boolean,
@@ -313,6 +338,11 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     collectAddress = collectAddress.value,
                 )
 
+                val manualConfirmation = initializationType == InitializationType.Deferred &&
+                    viewBinding.manualConfirmationCheckbox.isChecked
+
+                val automaticPaymentMethods = setAutomaticPaymentMethods && !manualConfirmation
+
                 viewModel.prepareCheckout(
                     initializationType = initializationType,
                     customer = customer,
@@ -321,9 +351,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     mode = mode,
                     linkEnabled = linkEnabled,
                     setShippingAddress = setDefaultShippingAddress,
-                    setAutomaticPaymentMethod = setAutomaticPaymentMethods,
+                    setAutomaticPaymentMethod = automaticPaymentMethods,
                     backendUrl = settings.playgroundBackendUrl,
                     supportedPaymentMethods = intent.extras?.getStringArray(SUPPORTED_PAYMENT_METHODS_EXTRA)?.toList(),
+                    manualConfirmation = manualConfirmation,
                 )
             }
         }
@@ -403,6 +434,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             val savedToggles = viewModel.getSavedToggleState()
             setToggles(
                 initialization = savedToggles.initialization,
+                manualConfirmation = savedToggles.deferredManualConfirmation,
+                multiprocessor = savedToggles.deferredMultiprocessor,
                 customer = savedToggles.customer,
                 link = savedToggles.link,
                 googlePay = savedToggles.googlePay,
@@ -424,6 +457,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     private fun setToggles(
         initialization: String?,
+        manualConfirmation: Boolean,
+        multiprocessor: Boolean,
         customer: String?,
         link: Boolean,
         googlePay: Boolean,
@@ -447,6 +482,16 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             InitializationType.Deferred.value -> {
                 viewBinding.initializationRadioGroup.check(R.id.deferred_initialization_button)
             }
+        }
+
+        val showDeferredOptions = initialization == InitializationType.Deferred.value
+
+        viewBinding.manualConfirmationCheckbox.isVisible = showDeferredOptions
+        viewBinding.multiprocessorCheckbox.isVisible = showDeferredOptions
+
+        if (showDeferredOptions) {
+            viewBinding.manualConfirmationCheckbox.isChecked = manualConfirmation
+            viewBinding.multiprocessorCheckbox.isChecked = multiprocessor
         }
 
         when (customer) {

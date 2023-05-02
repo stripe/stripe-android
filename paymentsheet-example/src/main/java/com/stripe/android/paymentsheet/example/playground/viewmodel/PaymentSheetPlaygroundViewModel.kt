@@ -114,6 +114,14 @@ class PaymentSheetPlaygroundViewModel(
             Toggle.Initialization.key,
             Toggle.Initialization.default.toString(),
         )
+        val manualConfirmation = sharedPreferences.getBoolean(
+            Toggle.ManualConfirmation.key,
+            Toggle.ManualConfirmation.default as Boolean,
+        )
+        val multiprocessor = sharedPreferences.getBoolean(
+            Toggle.Multiprocessor.key,
+            Toggle.Multiprocessor.default as Boolean,
+        )
         val customer = sharedPreferences.getString(
             Toggle.Customer.key,
             Toggle.Customer.default.toString()
@@ -177,6 +185,8 @@ class PaymentSheetPlaygroundViewModel(
 
         SavedToggles(
             initialization = initialization.toString(),
+            deferredManualConfirmation = manualConfirmation,
+            deferredMultiprocessor = multiprocessor,
             customer = customer.toString(),
             googlePay = googlePay,
             currency = currency.toString(),
@@ -201,6 +211,7 @@ class PaymentSheetPlaygroundViewModel(
      */
     fun prepareCheckout(
         initializationType: InitializationType,
+        manualConfirmation: Boolean,
         customer: CheckoutCustomer,
         currency: CheckoutCurrency,
         merchantCountry: CountryCode,
@@ -221,11 +232,12 @@ class PaymentSheetPlaygroundViewModel(
             customer = customer.value,
             currency = currency.value.lowercase(),
             mode = mode.value,
-            set_shipping_address = setShippingAddress,
-            automatic_payment_methods = setAutomaticPaymentMethod,
-            use_link = linkEnabled,
-            merchant_country_code = merchantCountry.value,
-            supported_payment_methods = supportedPaymentMethods
+            setShippingAddress = setShippingAddress,
+            automaticPaymentMethods = setAutomaticPaymentMethod,
+            useLink = linkEnabled,
+            merchantCountryCode = merchantCountry.value,
+            supportedPaymentMethods = supportedPaymentMethods,
+            useManualConfirmation = manualConfirmation,
         )
 
         Fuel.post(backendUrl + "checkout")
