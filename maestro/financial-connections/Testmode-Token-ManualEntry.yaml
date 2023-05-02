@@ -31,7 +31,8 @@ appId: com.stripe.android.financialconnections.example
 - tapOn:
     id: "ConfirmAccountInput"
 - inputText: "000123456789"
-- tapOn: "Continue"
-  retryTapIfNoChange: false
+- tapOn:
+    text: "Continue"
+    retryTapIfNoChange: false
 - tapOn: "Done"
 - assertVisible: ".*Completed!.*"

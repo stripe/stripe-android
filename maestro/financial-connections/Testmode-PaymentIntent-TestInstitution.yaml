@@ -13,11 +13,11 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
-      visible:
-          id: "consent_cta"
-      timeout: 30000
-- tapOn:
+    visible:
       id: "consent_cta"
+    timeout: 30000
+- tapOn:
+    id: "consent_cta"
 # SELECT LEGACY INSTITUTION
 - tapOn: "Test Institution"
 ####### Bypass Chrome on-boarding screen #######
@@ -29,8 +29,9 @@ appId: com.stripe.android.financialconnections.example
     visible: "Success"
     timeout: 60000
 - tapOn: "Success" # select all accounts
-- tapOn: "Link account"
-  retryTapIfNoChange: false
+- tapOn:
+    text: "Link account"
+    retryTapIfNoChange: false
 # CONFIRM AND COMPLETE
 - tapOn: "Done"
 - assertVisible: ".*Intent Confirmed!.*"
