@@ -61,7 +61,6 @@ class USBankAccountFormViewModelTest {
         isPaymentFlow = true,
         stripeIntentId = "id_12345",
         clientSecret = "pi_12345_secret_54321",
-        customerId = "customer_12345",
         savedPaymentMethod = null,
         shippingDetails = null,
     )

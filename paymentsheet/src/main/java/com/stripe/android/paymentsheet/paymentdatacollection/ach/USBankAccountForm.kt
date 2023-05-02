@@ -64,17 +64,16 @@ internal fun USBankAccountForm(
 ) {
     val context = LocalContext.current
     val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
-    val stripeIntent = sheetViewModel.stripeIntent.collectAsState().value
 
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
+            val stripeIntent = sheetViewModel.stripeIntent.value
             USBankAccountFormViewModel.Args(
                 formArgs = formArgs,
                 isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
                 isPaymentFlow = stripeIntent is PaymentIntent,
                 stripeIntentId = stripeIntent?.id,
                 clientSecret = stripeIntent?.clientSecret,
-                customerId = sheetViewModel.config?.customer?.id,
                 savedPaymentMethod = sheetViewModel.newPaymentSelection as? New.USBankAccount,
                 shippingDetails = sheetViewModel.config?.shippingDetails,
             )

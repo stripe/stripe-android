@@ -57,7 +57,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Provider
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -430,7 +429,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun collectBankAccount(clientSecret: String?) {
         if (hasLaunched) return
         hasLaunched = true
-        clientSecret?.let {
+        if (clientSecret != null) {
             if (args.isPaymentFlow) {
                 collectBankAccountLauncher?.presentWithPaymentIntent(
                     publishableKey = lazyPaymentConfig.get().publishableKey,
@@ -452,10 +451,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     )
                 )
             }
-        } ?: run {
+        } else {
             // Decoupled Flow
             args.stripeIntentId?.let { elementsSessionId ->
-                val sessionId = "$elementsSessionId--${UUID.randomUUID()}"
                 if (args.isPaymentFlow) {
                     collectBankAccountLauncher?.presentWithDeferredPayment(
                         publishableKey = lazyPaymentConfig.get().publishableKey,
@@ -464,7 +462,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             name.value,
                             email.value
                         ),
-                        elementsSessionId = sessionId,
+                        elementsSessionId = elementsSessionId,
                         customerId = null,
                         amount = args.formArgs.amount?.value?.toInt(),
                         currency = args.formArgs.amount?.currencyCode
@@ -477,7 +475,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             name.value,
                             email.value
                         ),
-                        elementsSessionId = sessionId,
+                        elementsSessionId = elementsSessionId,
                         customerId = null
                     )
                 }
@@ -500,23 +498,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             intentId = intentId,
         )
 
-        if (args.isCompleteFlow) {
-            viewModelScope.launch {
-                _result.tryEmit(paymentSelection)
-            }
-        } else {
-            _currentScreenState.update { screenState ->
-                if (screenState is USBankAccountFormScreenState.SavedAccount) {
-                    screenState.copy(
-                        bankName = bankName,
-                        last4 = last4
-                    )
-                } else {
-                    screenState
-                }
-            }
-            _result.tryEmit(paymentSelection)
-        }
+        _result.tryEmit(paymentSelection)
     }
 
     private fun createNewPaymentSelection(
@@ -627,7 +609,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val isPaymentFlow: Boolean,
         val stripeIntentId: String?,
         val clientSecret: String?,
-        val customerId: String?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
