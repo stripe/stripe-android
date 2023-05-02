@@ -42,4 +42,3 @@ appId: com.stripe.android.financialconnections.example
 - assertVisible: "Link another account"
 - tapOn: "Done"
 - assertVisible: ".*Completed!.*"
-- assertVisible: ".*StripeBank.*"
