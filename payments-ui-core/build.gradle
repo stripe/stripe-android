@@ -76,9 +76,8 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
-
-    lintOptions {
-        disable "UnrememberedMutableState"
+    lint {
+        disable 'UnrememberedMutableState'
     }
 
     kotlinOptions {
