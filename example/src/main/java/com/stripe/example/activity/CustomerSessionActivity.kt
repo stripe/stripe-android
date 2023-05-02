@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.PaymentMethodsActivityStarter
 import com.stripe.example.R
 import com.stripe.example.databinding.CustomerSessionActivityBinding
+import com.stripe.android.R as StripeR
 
 /**
  * An example activity that handles working with a [CustomerSession], allowing you to
@@ -81,7 +82,7 @@ class CustomerSessionActivity : AppCompatActivity() {
     }
 
     private fun buildCardString(data: PaymentMethod.Card): String {
-        return getString(R.string.stripe_card_ending_in, data.brand, data.last4)
+        return getString(StripeR.string.stripe_card_ending_in, data.brand, data.last4)
     }
 
     internal class ActivityViewModel : ViewModel() {

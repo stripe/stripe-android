@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.math.BigInteger
 import java.util.Locale
+import com.stripe.android.R as StripeR
 
 /**
  * A text field configuration for an IBAN, or International Bank Account Number, as defined in
@@ -35,7 +36,7 @@ class IbanConfig : TextFieldConfig {
 
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(
         TextFieldIcon.Trailing(
-            R.drawable.stripe_ic_bank_generic,
+            StripeR.drawable.stripe_ic_bank_generic,
             isTintable = true
         )
     )
@@ -105,7 +106,7 @@ class IbanConfig : TextFieldConfig {
             }
         } else {
             TextFieldStateConstants.Error.Incomplete(
-                R.string.stripe_invalid_bank_account_iban
+                StripeR.string.stripe_invalid_bank_account_iban
             )
         }
     }

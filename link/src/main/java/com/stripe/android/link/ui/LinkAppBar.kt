@@ -31,6 +31,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.theme.AppBarHeight
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @Composable
 internal fun LinkAppBar(
@@ -52,7 +53,7 @@ internal fun LinkAppBar(
         ) {
             Icon(
                 painter = painterResource(state.navigationIcon),
-                contentDescription = stringResource(id = R.string.stripe_back),
+                contentDescription = stringResource(id = StripeUiCoreR.string.stripe_back),
                 tint = MaterialTheme.linkColors.closeButton
             )
         }

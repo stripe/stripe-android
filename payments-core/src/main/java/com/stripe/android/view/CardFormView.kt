@@ -28,6 +28,8 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.view.CardFormView.Style
 import com.stripe.android.view.CardValidCallback.Fields
+import com.stripe.android.uicore.R as UiCoreR
+import com.stripe.payments.model.R as PaymentsModelR
 
 /**
  * A view to collect credit card information and provide [CardParams] for API invocation.
@@ -235,7 +237,7 @@ class CardFormView @JvmOverloads constructor(
     private fun updatePostalCodeViewLocale(countryCode: CountryCode?) {
         if (CountryCode.isUS(countryCode)) {
             postalCodeView.config = PostalCodeEditText.Config.US
-            postalCodeView.setErrorMessage(resources.getString(R.string.stripe_address_zip_invalid))
+            postalCodeView.setErrorMessage(resources.getString(UiCoreR.string.stripe_address_zip_invalid))
         } else {
             postalCodeView.config = PostalCodeEditText.Config.Global
             postalCodeView.setErrorMessage(resources.getString(R.string.stripe_address_postal_code_invalid))
@@ -283,7 +285,7 @@ class CardFormView @JvmOverloads constructor(
 
         cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
         cardMultilineWidget.expirationDatePlaceholderRes = null
-        cardMultilineWidget.expiryTextInputLayout.hint = context.getString(R.string.stripe_expiration_date_hint)
+        cardMultilineWidget.expiryTextInputLayout.hint = context.getString(UiCoreR.string.stripe_expiration_date_hint)
         cardMultilineWidget.cardNumberTextInputLayout.placeholderText = null
         cardMultilineWidget.setCvcPlaceholderText("")
 
@@ -314,7 +316,7 @@ class CardFormView @JvmOverloads constructor(
             layout.error = null
         }
 
-        cardMultilineWidget.setCvcIcon(R.drawable.stripe_ic_cvc)
+        cardMultilineWidget.setCvcIcon(PaymentsModelR.drawable.stripe_ic_cvc)
 
         cardMultilineWidget.cardNumberErrorListener =
             StripeEditText.ErrorMessageListener { errorMessage ->

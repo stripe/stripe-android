@@ -6,11 +6,12 @@ import android.text.InputFilter
 import android.text.InputType
 import android.util.AttributeSet
 import com.stripe.android.R
+import androidx.appcompat.R as AppCompatR
 
 internal class BecsDebitBsbEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
+    defStyleAttr: Int = AppCompatR.attr.editTextStyle
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     private val banks = BecsDebitBanks(context)

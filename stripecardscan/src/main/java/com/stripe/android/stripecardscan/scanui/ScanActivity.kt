@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
+import com.stripe.android.camera.R as CameraR
 
 sealed interface CancellationReason : Parcelable {
 
@@ -147,9 +148,9 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
      */
     protected open fun showCameraNotSupportedDialog() {
         AlertDialog.Builder(this)
-            .setTitle(R.string.stripe_error_camera_title)
-            .setMessage(R.string.stripe_error_camera_unsupported)
-            .setPositiveButton(R.string.stripe_error_camera_acknowledge_button) { _, _ ->
+            .setTitle(CameraR.string.stripe_error_camera_title)
+            .setMessage(CameraR.string.stripe_error_camera_unsupported)
+            .setPositiveButton(CameraR.string.stripe_error_camera_acknowledge_button) { _, _ ->
                 scanFailure()
             }
             .show()

@@ -35,6 +35,8 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeTypography
+import com.stripe.android.R as StripeR
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @Composable
 internal fun PaymentSheetTopBar(
@@ -172,10 +174,10 @@ internal fun PaymentSheetTopBar_Preview() {
     StripeTheme(colors = StripeThemeDefaults.colorsLight.copy(appBarIcon = Color.Red)) {
         val state = PaymentSheetTopBarState(
             icon = R.drawable.stripe_ic_paymentsheet_back,
-            contentDescription = R.string.stripe_back,
+            contentDescription = StripeUiCoreR.string.stripe_back,
             showTestModeLabel = true,
             showEditMenu = true,
-            editMenuLabel = R.string.stripe_edit,
+            editMenuLabel = StripeR.string.stripe_edit,
             isEnabled = true,
         )
 

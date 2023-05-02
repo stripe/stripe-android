@@ -43,6 +43,7 @@ import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ErrorTextStyle
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
+import com.stripe.android.R as StripeR
 
 @Composable
 internal fun PaymentDetailsListItem(
@@ -137,7 +138,7 @@ internal fun PaymentDetailsListItem(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.MoreVert,
-                        contentDescription = stringResource(R.string.stripe_edit),
+                        contentDescription = stringResource(StripeR.string.stripe_edit),
                         tint = MaterialTheme.linkColors.actionLabelLight,
                         modifier = Modifier.size(24.dp)
                     )

@@ -44,6 +44,7 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.min
 import kotlin.math.roundToInt
+import com.stripe.android.camera.R as CameraR
 
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 const val CARD_SCAN_FRAGMENT_REQUEST_KEY = "CardScanRequestKey"
@@ -232,7 +233,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
         val viewFinderMargin = (
             min(screenSize.width, screenSize.height) *
-                (context?.getFloatResource(R.dimen.stripeViewFinderMargin) ?: 0F)
+                (context?.getFloatResource(CameraR.dimen.stripeViewFinderMargin) ?: 0F)
             ).roundToInt()
 
         listOf(viewFinderWindow, viewFinderBorder).forEach { view ->

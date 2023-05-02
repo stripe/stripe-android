@@ -14,8 +14,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
-import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.menu.Checkbox
+import androidx.compose.ui.R as ComposeUiR
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -29,9 +29,9 @@ fun CheckboxElementUI(
 ) {
     val accessibilityDescription = stringResource(
         if (isChecked) {
-            R.string.selected
+            ComposeUiR.string.selected
         } else {
-            R.string.not_selected
+            ComposeUiR.string.not_selected
         }
     )
 

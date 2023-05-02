@@ -6,7 +6,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth
-import com.stripe.android.R
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.elements.AddressTextFieldController
 import com.stripe.android.uicore.elements.AddressTextFieldUI
@@ -14,6 +13,7 @@ import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(AndroidJUnit4::class)
 class AddressTextFieldUITest {
@@ -39,7 +39,7 @@ class AddressTextFieldUITest {
             DefaultStripeTheme {
                 AddressTextFieldUI(
                     controller = AddressTextFieldController(
-                        SimpleTextFieldConfig(label = R.string.stripe_address_label_address)
+                        SimpleTextFieldConfig(label = UiCoreR.string.stripe_address_label_address)
                     ),
                     onClick = onClick
                 )

@@ -76,6 +76,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+import com.stripe.android.R as StripeR
 
 @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal class PaymentSheetViewModel @Inject internal constructor(
@@ -578,8 +579,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 onError(
                     when (result.errorCode) {
                         GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
-                            R.string.stripe_failure_connection_error
-                        else -> R.string.stripe_internal_error
+                            StripeR.string.stripe_failure_connection_error
+                        else -> StripeR.string.stripe_internal_error
                     }
                 )
             }

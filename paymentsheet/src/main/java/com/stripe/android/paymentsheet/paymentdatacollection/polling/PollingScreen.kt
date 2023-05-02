@@ -39,6 +39,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.stripeColors
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 private object Spacing {
     val extended = 12.dp
@@ -150,7 +151,7 @@ private fun FailedPolling(
                     IconButton(onClick = onCancel) {
                         Icon(
                             painter = painterResource(R.drawable.stripe_ic_paymentsheet_back),
-                            contentDescription = stringResource(R.string.stripe_back),
+                            contentDescription = stringResource(StripeUiCoreR.string.stripe_back),
                         )
                     }
                 },

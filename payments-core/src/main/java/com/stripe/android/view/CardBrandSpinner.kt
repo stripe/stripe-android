@@ -15,11 +15,12 @@ import com.stripe.android.R
 import com.stripe.android.databinding.StripeCardBrandSpinnerDropdownBinding
 import com.stripe.android.databinding.StripeCardBrandSpinnerMainBinding
 import com.stripe.android.model.CardBrand
+import androidx.appcompat.R as AppCompatR
 
 internal class CardBrandSpinner @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.spinnerStyle
+    defStyleAttr: Int = AppCompatR.attr.spinnerStyle
 ) : AppCompatSpinner(context, attrs, defStyleAttr, MODE_DROPDOWN) {
     private val cardBrandsAdapter = Adapter(context)
     private var defaultBackground: Drawable? = null

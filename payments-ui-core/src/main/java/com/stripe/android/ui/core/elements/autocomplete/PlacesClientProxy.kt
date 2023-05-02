@@ -11,7 +11,6 @@ import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.stripe.android.BuildConfig
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
@@ -20,6 +19,7 @@ import com.stripe.android.ui.core.elements.autocomplete.model.Place
 import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
 import com.stripe.android.uicore.elements.IsPlacesAvailable
 import kotlinx.coroutines.tasks.await
+import com.google.android.libraries.places.R as PlacesR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface PlacesClientProxy {
@@ -57,9 +57,9 @@ interface PlacesClientProxy {
         ): Int? {
             return if (isPlacesAvailable()) {
                 if (isSystemDarkTheme) {
-                    R.drawable.places_powered_by_google_dark
+                    PlacesR.drawable.places_powered_by_google_dark
                 } else {
-                    R.drawable.places_powered_by_google_light
+                    PlacesR.drawable.places_powered_by_google_light
                 }
             } else {
                 if (BuildConfig.DEBUG) {

@@ -4,9 +4,9 @@ import androidx.compose.ui.text.AnnotatedString
 import com.google.common.truth.Truth
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.CardNumberFixtures
-import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import org.junit.Test
+import com.stripe.android.R as StripeR
 
 class CardNumberConfigTest {
     private val cardNumberConfig = CardNumberConfig()
@@ -54,7 +54,7 @@ class CardNumberConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.stripe_invalid_card_number)
+        ).isEqualTo(StripeR.string.stripe_invalid_card_number)
     }
 
     @Test
@@ -64,7 +64,7 @@ class CardNumberConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.stripe_invalid_card_number)
+        ).isEqualTo(StripeR.string.stripe_invalid_card_number)
     }
 
     @Test
@@ -74,7 +74,7 @@ class CardNumberConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.stripe_invalid_card_number)
+        ).isEqualTo(StripeR.string.stripe_invalid_card_number)
     }
 
     @Test
@@ -84,7 +84,7 @@ class CardNumberConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.stripe_invalid_card_number)
+        ).isEqualTo(StripeR.string.stripe_invalid_card_number)
     }
 
     @Test

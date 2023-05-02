@@ -9,7 +9,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.PaymentIntentFactory
@@ -20,6 +19,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 class FormArgumentsFactoryTest {
@@ -66,8 +66,8 @@ class FormArgumentsFactoryTest {
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             amount = Amount(50, "USD"),
             newLpm = PaymentSelection.New.GenericPaymentMethod(
-                labelResource = resources.getString(R.string.stripe_paymentsheet_payment_method_bancontact),
-                iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+                labelResource = resources.getString(StripeUiCoreR.string.stripe_paymentsheet_payment_method_bancontact),
+                iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_bancontact,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
                 paymentMethodCreateParams = paymentMethodCreateParams,

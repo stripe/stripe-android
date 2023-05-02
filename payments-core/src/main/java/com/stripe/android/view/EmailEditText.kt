@@ -4,11 +4,12 @@ import android.content.Context
 import android.util.AttributeSet
 import android.util.Patterns
 import com.stripe.android.R
+import androidx.appcompat.R as AppCompatR
 
 internal class EmailEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
+    defStyleAttr: Int = AppCompatR.attr.editTextStyle
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     val email: String?

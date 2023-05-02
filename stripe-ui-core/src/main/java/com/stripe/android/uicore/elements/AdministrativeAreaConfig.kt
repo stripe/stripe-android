@@ -2,7 +2,7 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
-import com.stripe.android.uicore.R
+import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AdministrativeAreaConfig(
@@ -38,7 +38,7 @@ class AdministrativeAreaConfig(
     ) {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class Canada(
-            override val label: Int = R.string.stripe_address_label_province,
+            override val label: Int = CoreR.string.stripe_address_label_province,
             override val administrativeAreas: List<Pair<String, String>> = listOf(
                 Pair("AB", "Alberta"),
                 Pair("BC", "British Columbia"),
@@ -58,7 +58,7 @@ class AdministrativeAreaConfig(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class US(
-            override val label: Int = R.string.stripe_address_label_state,
+            override val label: Int = CoreR.string.stripe_address_label_state,
             override val administrativeAreas: List<Pair<String, String>> = listOf(
                 Pair("AL", "Alabama"),
                 Pair("AK", "Alaska"),

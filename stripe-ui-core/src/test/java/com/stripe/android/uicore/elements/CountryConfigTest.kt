@@ -2,9 +2,9 @@ package com.stripe.android.uicore.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.uicore.R
 import org.junit.Test
 import java.util.Locale
+import com.stripe.android.core.R as CoreR
 
 class CountryConfigTest {
 
@@ -17,7 +17,7 @@ class CountryConfigTest {
     @Test
     fun `Verify the label`() {
         assertThat(CountryConfig(locale = Locale.US).label)
-            .isEqualTo(R.string.stripe_address_label_country_or_region)
+            .isEqualTo(CoreR.string.stripe_address_label_country_or_region)
     }
 
     @Test
