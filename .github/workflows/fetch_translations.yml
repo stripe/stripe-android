@@ -8,22 +8,16 @@ jobs:
   fetch-lokalize-translations:
     runs-on: macos-latest
     steps:
-      # Check out the current state
-      - uses: actions/checkout@v3
-
-      # Fetch translations
-      - name: Run build script
+      - name: Check out the current state
+        uses: actions/checkout@v3
+      - name: Fetch translations
         run: cd scripts && ./localize.sh
         shell: bash
         env:
           LOKALISE_API_TOKEN: ${{ secrets.LOKALISE_API_TOKEN }}
-
-      # Create timestamp
-      - name: Get timestamp
+      - name: Compute timestamp
         id: timestamp
         run: echo "TIMESTAMP=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
-
-      # Create the pull request
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
