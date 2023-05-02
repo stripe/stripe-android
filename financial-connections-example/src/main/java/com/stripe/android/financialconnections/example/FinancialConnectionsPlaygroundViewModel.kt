@@ -235,6 +235,7 @@ enum class Merchant(val flow: String) {
     Live("mx"),
     App2App("app2app"),
     Networking("networking"),
+    Strash("strash"),
     NetworkingTestMode("networking_testmode"),
     Other("other")
 }
