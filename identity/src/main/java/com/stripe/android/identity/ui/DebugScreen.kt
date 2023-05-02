@@ -46,10 +46,6 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.launch
 
-internal enum class CompleteOption {
-    SUCCESS, FAILURE, SUCCESS_ASYNC, FAILURE_ASYNC
-}
-
 /**
  * Screen to show debug options for test mode verification.
  */
@@ -75,21 +71,12 @@ internal fun DebugScreen(
                 )
         ) {
             val context = LocalContext.current
-            var proceedState by remember {
-                mutableStateOf(LoadingButtonState.Idle)
-            }
-
+            var proceedState by remember { mutableStateOf(LoadingButtonState.Idle) }
             val coroutineScope = rememberCoroutineScope()
-
             TitleSection()
-
-            Divider(
-                modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
-            )
-
+            Divider(modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)))
             CompleteWithTestDataSection { completeOption ->
                 proceedState = LoadingButtonState.Disabled
-
                 when (completeOption) {
                     SUCCESS -> {
                         coroutineScope.launch {
@@ -129,17 +116,9 @@ internal fun DebugScreen(
                     }
                 }
             }
-
-            Divider(
-                modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
-            )
-
+            Divider(modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)))
             FinishMobileFlowWithResultSection(verificationFlowFinishable)
-
-            Divider(
-                modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
-            )
-
+            Divider(modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)))
             PreviewUserExperienceSection {
                 navController.navigateTo(
                     verificationPage.requirements.missing.nextDestination(
@@ -182,23 +161,13 @@ private fun TitleSection() {
 internal fun CompleteWithTestDataSection(
     onClickSubmit: (CompleteOption) -> Unit
 ) {
-    var submitState: LoadingButtonState by remember {
-        mutableStateOf(LoadingButtonState.Disabled)
-    }
-
-    var completeOption: CompleteOption? by remember {
-        mutableStateOf(null)
-    }
-
-    Text(
-        text = stringResource(id = R.string.stripe_complete_with_test_data),
-        style = MaterialTheme.typography.h4
-    )
+    var submitState: LoadingButtonState by remember { mutableStateOf(LoadingButtonState.Disabled) }
+    var completeOption: CompleteOption? by remember { mutableStateOf(null) }
+    Text(text = stringResource(id = R.string.stripe_complete_with_test_data), style = MaterialTheme.typography.h4)
     Html(
         html = stringResource(id = R.string.stripe_complete_with_test_data_details),
         modifier = Modifier.padding(vertical = 8.dp)
     )
-
     CompleteOptionRow(
         content = stringResource(id = R.string.stripe_verification_success),
         selected = completeOption == SUCCESS,
@@ -239,7 +208,6 @@ internal fun CompleteWithTestDataSection(
             submitState = LoadingButtonState.Idle
         }
     )
-
     LoadingButton(
         text = stringResource(id = R.string.stripe_submit),
         state = submitState,
@@ -343,6 +311,10 @@ private fun CompleteOptionRow(
             onClick = { onClick() }
         )
     }
+}
+
+internal enum class CompleteOption {
+    SUCCESS, FAILURE, SUCCESS_ASYNC, FAILURE_ASYNC
 }
 
 internal const val TEST_TAG_CANCELLED_BUTTON = "Cancelled"
