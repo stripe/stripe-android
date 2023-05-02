@@ -40,9 +40,9 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Success"
 - tapOn: "Link Account"
 # ENTER PHONE FOR NEW NETWORKED USER
+- hideKeyboard
 - tapOn: "Phone number"
 - inputText: "6223115555"
-- hideKeyboard
 - tapOn: "Save to Link"
 # CONFIRM AND COMPLETE
 - assertVisible: "Success!"
