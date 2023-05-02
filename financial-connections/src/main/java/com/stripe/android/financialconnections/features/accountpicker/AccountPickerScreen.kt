@@ -122,8 +122,7 @@ private fun AccountPickerContent(
                 is AccountNoneEligibleForPaymentMethodError ->
                     NoSupportedPaymentMethodTypeAccountsErrorContent(
                         exception = error,
-                        onSelectAnotherBank = onSelectAnotherBank,
-                        onEnterDetailsManually = onEnterDetailsManually
+                        onSelectAnotherBank = onSelectAnotherBank
                     )
 
                 is AccountLoadError -> NoAccountsAvailableErrorContent(

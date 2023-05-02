@@ -144,8 +144,7 @@ internal fun InstitutionPlannedDowntimeErrorContent(
 @Composable
 internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
     exception: AccountNoneEligibleForPaymentMethodError,
-    onSelectAnotherBank: () -> Unit,
-    onEnterDetailsManually: () -> Unit
+    onSelectAnotherBank: () -> Unit
 ) {
     ErrorContent(
         iconUrl = exception.institution.icon?.default ?: "",
@@ -163,14 +162,7 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
             stringResource(R.string.stripe_error_cta_select_another_bank),
             onSelectAnotherBank
         ),
-        secondaryCta = if (exception.allowManualEntry) {
-            Pair(
-                stringResource(R.string.stripe_error_cta_manual_entry),
-                onEnterDetailsManually
-            )
-        } else {
-            null
-        }
+        secondaryCta = null
     )
 }
 
