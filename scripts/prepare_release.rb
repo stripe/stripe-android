@@ -119,8 +119,7 @@ def open_pull_request(branch_name, title, body)
       "master",
       branch_name,
       title,
-      body,
-      options
+      body
     )
 end
 
