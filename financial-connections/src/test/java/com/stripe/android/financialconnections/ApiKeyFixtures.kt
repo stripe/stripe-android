@@ -96,6 +96,7 @@ internal object ApiKeyFixtures {
         authorization = "test",
         name = "Partner account",
         id = "id",
+        _allowSelection = true,
         category = FinancialConnectionsAccount.Category.CASH,
         status = FinancialConnectionsAccount.Status.ACTIVE,
         subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,

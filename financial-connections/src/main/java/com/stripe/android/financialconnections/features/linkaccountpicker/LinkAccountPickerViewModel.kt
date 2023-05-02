@@ -64,7 +64,9 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 businessName = manifest.businessName,
                 accounts = accounts.map { account ->
-                    account.copy(_allowSelection = account.status == Status.ACTIVE)
+                    account.copy(
+                        _allowSelection = account.status == Status.ACTIVE,
+                    )
                 },
                 // We always want to refer to Link rather than Stripe on Link panes.
                 accessibleData = accessibleData.copy(isStripeDirect = false)

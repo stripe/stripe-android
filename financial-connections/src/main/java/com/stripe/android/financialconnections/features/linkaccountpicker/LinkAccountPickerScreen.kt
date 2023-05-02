@@ -196,7 +196,12 @@ private fun NetworkedAccountItem(
     AccountItem(
         selected = selected,
         onAccountClicked = onAccountClicked,
-        account = account
+        // Override the default disabled to show that the account is disconnected
+        account = account.copy(
+            allowSelectionMessage = stringResource(
+                id = R.string.stripe_link_account_picker_disconnected
+            )
+        )
     ) {
         val modifier = Modifier
             .size(24.dp)
