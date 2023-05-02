@@ -157,7 +157,6 @@ private fun LinkAccountPickerLoaded(
             Spacer(modifier = Modifier.size(24.dp))
             payload.accounts.forEach { account ->
                 NetworkedAccountItem(
-                    enabled = payload.run { account.enabled() },
                     selected = account.id == selectedAccountId,
                     account = account,
                     onAccountClicked = { selected ->
@@ -192,12 +191,10 @@ private fun LinkAccountPickerLoaded(
 private fun NetworkedAccountItem(
     account: PartnerAccount,
     onAccountClicked: (PartnerAccount) -> Unit,
-    enabled: Boolean,
     selected: Boolean
 ) {
     AccountItem(
         selected = selected,
-        enabled = enabled,
         onAccountClicked = onAccountClicked,
         account = account
     ) {

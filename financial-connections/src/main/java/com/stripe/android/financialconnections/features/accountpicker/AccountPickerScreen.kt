@@ -264,7 +264,6 @@ private fun SingleSelectContent(
                 selected = selectedIds.contains(account.id),
                 onAccountClicked = onAccountClicked,
                 account = account,
-                enabled = account.allowSelection,
                 selectorContent = {
                     FinancialConnectionRadioButton(
                         checked = selectedIds.contains(account.id),
@@ -291,7 +290,6 @@ private fun MultiSelectContent(
             AccountItem(
                 selected = allAccountsSelected,
                 onAccountClicked = { onSelectAllAccountsClicked() },
-                enabled = true,
                 account = PartnerAccount(
                     id = "select_all_accounts",
                     _allowSelection = true,
@@ -312,7 +310,6 @@ private fun MultiSelectContent(
             AccountItem(
                 selected = selectedIds.contains(account.id),
                 onAccountClicked = onAccountClicked,
-                enabled = account.allowSelection,
                 account = account
             ) {
                 FinancialConnectionCheckbox(

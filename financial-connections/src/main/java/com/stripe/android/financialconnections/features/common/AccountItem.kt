@@ -35,7 +35,6 @@ internal fun AccountItem(
     selected: Boolean,
     onAccountClicked: (PartnerAccount) -> Unit,
     account: PartnerAccount,
-    enabled: Boolean,
     selectorContent: @Composable RowScope.() -> Unit
 ) {
     val verticalPadding =
@@ -53,7 +52,7 @@ internal fun AccountItem(
                 },
                 shape = shape
             )
-            .clickable(enabled = enabled) { onAccountClicked(account) }
+            .clickable(enabled = account.allowSelection) { onAccountClicked(account) }
             .padding(vertical = verticalPadding, horizontal = 16.dp)
     ) {
         Row(
