@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -71,6 +72,35 @@ class LinkAccountPickerViewModelTest {
 
         assertThat(viewModel.awaitState().payload()!!.accounts)
             .isEqualTo(accounts.data)
+    }
+
+    @Test
+    fun `init - non active accounts are rendered as disabled`() = runTest {
+        whenever(getManifest()).thenReturn(sessionManifest())
+        whenever(getCachedConsumerSession()).thenReturn(consumerSession())
+        whenever(pollNetworkedAccounts(any())).thenReturn(
+            partnerAccountList().copy(
+                count = 3,
+                data = listOf(
+                    partnerAccount().copy(_allowSelection = null, status = Status.DISCONNECTED),
+                    partnerAccount().copy(_allowSelection = null, status = Status.ACTIVE),
+                    partnerAccount().copy(_allowSelection = null, status = Status.DISCONNECTED)
+                )
+            )
+        )
+
+        val viewModel = buildViewModel(LinkAccountPickerState())
+
+        // accounts are sorted by status, so the first account should be active
+        // allow selection should be true for active accounts, false for others
+        assertThat(viewModel.awaitState().payload()!!.accounts)
+            .isEqualTo(
+                listOf(
+                    partnerAccount().copy(_allowSelection = true, status = Status.ACTIVE),
+                    partnerAccount().copy(_allowSelection = false, status = Status.DISCONNECTED),
+                    partnerAccount().copy(_allowSelection = false, status = Status.DISCONNECTED)
+                )
+            )
     }
 
     @Test
