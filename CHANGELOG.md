@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 1.2.4 - 2023-05-02
+
 ### All SDKs
 * [CHANGED][6635](https://github.com/stripe/stripe-android/pull/6635) Use non transitive R classes.
 
