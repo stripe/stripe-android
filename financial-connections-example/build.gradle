@@ -58,6 +58,7 @@ dependencies {
     implementation libs.material
     implementation libs.retrofit
     implementation libs.retrofitGsonConverter
+    implementation 'androidx.browser:browser:1.3.0'
 
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling

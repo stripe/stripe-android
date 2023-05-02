@@ -13,6 +13,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+
+
                 <!-- Returning from app2app: return_url is triggered to reopen web AuthFlow and poll accounts. -->
                 <data
                     android:host="link-accounts"

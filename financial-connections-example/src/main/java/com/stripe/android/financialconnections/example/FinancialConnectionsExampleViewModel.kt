@@ -36,8 +36,8 @@ class FinancialConnectionsExampleViewModel(application: Application) : AndroidVi
                     _viewEffect.emit(
                         OpenFinancialConnectionsSheetExample(
                             configuration = FinancialConnectionsSheet.Configuration(
-                                it.clientSecret,
-                                it.publishableKey
+                                "fcsess_client_secret_BfBxWn1FI4Y3H00NG5RMDHG7",
+                                "pk_test_51MyzOfEpvQJZLSSco4TCx12m1Auq3a3P34R932DO4BzcRbekARiU0b1RMIVXx103IsR0ddiSYWWkiT0hry4XcFfU00ruQe5dVf"
                             )
                         )
                     )

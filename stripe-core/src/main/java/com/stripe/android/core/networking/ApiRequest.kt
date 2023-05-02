@@ -200,7 +200,7 @@ data class ApiRequest internal constructor(
 
         val API_HOST: String
             get() {
-                return apiTestHost ?: "https://api.stripe.com"
+                return apiTestHost ?: "https://vardges-api.tunnel.stripe.me"
             }
     }
 }
