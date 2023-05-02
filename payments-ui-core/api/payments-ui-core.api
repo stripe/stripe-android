@@ -755,8 +755,10 @@ public final class com/stripe/android/ui/core/forms/LinkCardFormKt {
 }
 
 public final class com/stripe/android/ui/core/forms/resources/LpmRepository$Companion {
+	public final fun getEnableACHV2InDeferredFlow ()Z
 	public final fun getHardcodedCard ()Lcom/stripe/android/ui/core/forms/resources/LpmRepository$SupportedPaymentMethod;
 	public final fun getInstance (Lcom/stripe/android/ui/core/forms/resources/LpmRepository$LpmRepositoryArguments;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository;
+	public final fun setEnableACHV2InDeferredFlow (Z)V
 }
 
 public final class com/stripe/android/ui/core/forms/resources/LpmRepository$LpmInitialFormData {

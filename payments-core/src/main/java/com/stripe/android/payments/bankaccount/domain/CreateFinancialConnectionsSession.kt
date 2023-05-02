@@ -88,6 +88,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         stripeAccountId: String?,
         elementsSessionId: String,
         customerId: String?,
+        onBehalfOf: String?,
         amount: Int?,
         currency: String?
     ): Result<FinancialConnectionsSession> {
@@ -96,6 +97,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                 uniqueId = elementsSessionId,
                 verificationMethod = VerificationMethodParam.Automatic,
                 customer = customerId,
+                onBehalfOf = onBehalfOf,
                 amount = amount,
                 currency = currency
             ),

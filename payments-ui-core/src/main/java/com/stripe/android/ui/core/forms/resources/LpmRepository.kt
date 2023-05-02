@@ -427,18 +427,22 @@ class LpmRepository constructor(
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.USBankAccount.code -> {
-            SupportedPaymentMethod(
-                code = "us_bank_account",
-                requiresMandate = true,
-                mandateRequirement = MandateRequirement.Always,
-                displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
-                iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
-                lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-                darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-                tintIconOnSelection = true,
-                requirement = USBankAccountRequirement,
-                formSpec = LayoutSpec(sharedDataSpec.fields)
-            )
+            if (stripeIntent.clientSecret != null || enableACHV2InDeferredFlow) {
+                SupportedPaymentMethod(
+                    code = "us_bank_account",
+                    requiresMandate = true,
+                    mandateRequirement = MandateRequirement.Always,
+                    displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
+                    iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
+                    lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+                    darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+                    tintIconOnSelection = true,
+                    requirement = USBankAccountRequirement,
+                    formSpec = LayoutSpec(sharedDataSpec.fields)
+                )
+            } else {
+                null
+            }
         }
         PaymentMethod.Type.Upi.code -> SupportedPaymentMethod(
             code = "upi",
@@ -557,6 +561,11 @@ class LpmRepository constructor(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val HardcodedCard = hardcodedCardSpec(CardBillingDetailsCollectionConfiguration())
+
+        // Whether to enable ACHv2 in the deferred flow.
+        // To be deleted when https://jira.corp.stripe.com/browse/BANKCON-6731 is completed.
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        var enableACHV2InDeferredFlow: Boolean = false
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun hardcodedCardSpec(

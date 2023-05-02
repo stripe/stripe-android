@@ -464,6 +464,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         ),
                         elementsSessionId = elementsSessionId,
                         customerId = null,
+                        onBehalfOf = args.onBehalfOf,
                         amount = args.formArgs.amount?.value?.toInt(),
                         currency = args.formArgs.amount?.currencyCode
                     )
@@ -476,7 +477,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             email.value
                         ),
                         elementsSessionId = elementsSessionId,
-                        customerId = null
+                        customerId = null,
+                        onBehalfOf = args.onBehalfOf,
                     )
                 }
             }
@@ -609,6 +611,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val isPaymentFlow: Boolean,
         val stripeIntentId: String?,
         val clientSecret: String?,
+        val onBehalfOf: String?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY

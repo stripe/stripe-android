@@ -6559,8 +6559,8 @@ public final class com/stripe/android/payments/bankaccount/CollectBankAccountLau
 }
 
 public final class com/stripe/android/payments/bankaccount/CollectBankAccountLauncher$DefaultImpls {
-	public static synthetic fun presentWithDeferredPayment$default (Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;ILjava/lang/Object;)V
-	public static synthetic fun presentWithDeferredSetup$default (Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public static synthetic fun presentWithDeferredPayment$default (Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;ILjava/lang/Object;)V
+	public static synthetic fun presentWithDeferredSetup$default (Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun presentWithPaymentIntent$default (Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;ILjava/lang/Object;)V
 	public static synthetic fun presentWithSetupIntent$default (Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;ILjava/lang/Object;)V
 }

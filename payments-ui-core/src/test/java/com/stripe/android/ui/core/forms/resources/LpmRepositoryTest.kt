@@ -3,6 +3,8 @@ package com.stripe.android.ui.core.forms.resources
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethod.Type.Card
+import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
@@ -12,6 +14,7 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.ContactInformationSpec
 import com.stripe.android.ui.core.elements.EmptyFormSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -324,6 +327,32 @@ class LpmRepositoryTest {
         )
 
         assertThat(lpmRepository.fromCode("upi")).isNotNull()
+    }
+
+    @Test
+    fun `Verify LpmRepository filters out USBankAccount if flag is disabled`() = runTest {
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+        )
+
+        LpmRepository.enableACHV2InDeferredFlow = false
+
+        val deferredPaymentIntent = PaymentIntentFactory.create(
+            paymentMethodTypes = listOf("card", "us_bank_account", "cashapp"),
+        ).copy(
+            clientSecret = null,
+        )
+
+        lpmRepository.update(
+            stripeIntent = deferredPaymentIntent,
+            serverLpmSpecs = null,
+        )
+
+        val supportedPaymentMethods = lpmRepository.values().map { it.code }
+        assertThat(supportedPaymentMethods).containsExactly(Card.code, CashAppPay.code)
     }
 
     @Test

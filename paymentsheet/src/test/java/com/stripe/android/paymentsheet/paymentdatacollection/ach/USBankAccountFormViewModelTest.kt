@@ -61,6 +61,7 @@ class USBankAccountFormViewModelTest {
         isPaymentFlow = true,
         stripeIntentId = "id_12345",
         clientSecret = "pi_12345_secret_54321",
+        onBehalfOf = "on_behalf_of_id",
         savedPaymentMethod = null,
         shippingDetails = null,
     )
@@ -583,6 +584,7 @@ class USBankAccountFormViewModelTest {
             configuration = any(),
             elementsSessionId = any(),
             customerId = anyOrNull(),
+            onBehalfOf = any(),
             amount = any(),
             currency = any()
         )
@@ -618,6 +620,7 @@ class USBankAccountFormViewModelTest {
             configuration = any(),
             elementsSessionId = any(),
             customerId = anyOrNull(),
+            onBehalfOf = any(),
         )
     }
 
