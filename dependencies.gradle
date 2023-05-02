@@ -1,7 +1,7 @@
 ext.versions = [
         accompanist                 : '0.28.0',
         alipay                      : '15.8.12',
-        androidGradlePlugin         : '7.4.2',
+        androidGradlePlugin         : '8.0.1',
         androidTest                 : '1.5.0',
         androidTestJunit            : '1.1.5',
         androidTestOrchestrator     : '1.4.2',
