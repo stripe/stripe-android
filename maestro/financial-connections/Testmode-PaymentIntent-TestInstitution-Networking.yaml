@@ -16,6 +16,7 @@ appId: com.stripe.android.financialconnections.example
 - tapOn:
     id: "email_input"
 - inputRandomEmail
+- hideKeyboard
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
@@ -41,6 +42,7 @@ appId: com.stripe.android.financialconnections.example
 # ENTER PHONE FOR NEW NETWORKED USER
 - tapOn: "Phone number"
 - inputText: "6223115555"
+- hideKeyboard
 - tapOn: "Save to Link"
 # CONFIRM AND COMPLETE
 - assertVisible: "Success!"
