@@ -30,6 +30,7 @@ appId: com.stripe.android.financialconnections.example
     timeout: 60000
 - tapOn: "Success" # select all accounts
 - tapOn: "Link account"
+  retryTapIfNoChange: false
 # CONFIRM AND COMPLETE
 - tapOn: "Done"
 - assertVisible: ".*Intent Confirmed!.*"
