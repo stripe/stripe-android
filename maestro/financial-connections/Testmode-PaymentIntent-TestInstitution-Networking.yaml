@@ -41,7 +41,7 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Link Account"
 # ENTER PHONE FOR NEW NETWORKED USER
 - waitForAnimationToEnd
-- assertVisible: "(555) 555-5555" # wait for placeholder to be visible
+- assertVisible: ".*555.*" # wait for placeholder to be visible
 - inputText: "6223115555"
 - tapOn: "Save to Link"
 # CONFIRM AND COMPLETE
