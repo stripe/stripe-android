@@ -37,6 +37,7 @@ import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.ui.forms.Form
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
 import com.stripe.android.uicore.elements.CheckboxElementUI
+import com.stripe.android.R as StripeR
 
 internal const val DEFAULT_PAYMENT_METHOD_CHECKBOX_TAG = "DEFAULT_PAYMENT_METHOD_CHECKBOX"
 
@@ -164,7 +165,7 @@ internal fun CardEditBody(
         )
         SecondaryButton(
             enabled = !isProcessing,
-            label = stringResource(id = R.string.stripe_cancel),
+            label = stringResource(id = StripeR.string.stripe_cancel),
             onClick = onCancelClick
         )
     }

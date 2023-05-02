@@ -10,7 +10,7 @@
     <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun SubmitView( submissionState: IdentitySubmissionState, scaffoldState: ScaffoldState, configuration: IdentityVerificationSheet.Configuration, viewModel: IdentityExampleViewModel, )</ID>
     <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun TypeSelectUI( verificationType: VerificationType, integrationType: IntegrationType, onVerificationTypeChanged: (VerificationType) -> Unit )</ID>
     <ID>MaxLineLength:ComposeExampleUI.kt$resultString = "Error generating verificationSessionId and ephemeralKeySecret: ${it.getException().message}"</ID>
-    <ID>MaximumLineLength:com.stripe.android.identity.example.ui.ComposeExampleUI.kt:631</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.example.ui.ComposeExampleUI.kt:632</ID>
     <ID>TooGenericExceptionCaught:IdentityExampleViewModel.kt$IdentityExampleViewModel$t: Throwable</ID>
   </CurrentIssues>
 </SmellBaseline>

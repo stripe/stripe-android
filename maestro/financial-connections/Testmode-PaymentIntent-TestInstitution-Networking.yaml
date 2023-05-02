@@ -16,12 +16,15 @@ appId: com.stripe.android.financialconnections.example
 - tapOn:
     id: "email_input"
 - inputRandomEmail
+- hideKeyboard
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
-    visible: "Agree"
+    visible:
+      id: "consent_cta"
     timeout: 30000
-- tapOn: "Agree"
+- tapOn:
+    id: "consent_cta"
 # SELECT LEGACY INSTITUTION
 - tapOn: "Test Institution"
 ####### Bypass Chrome on-boarding screen #######
@@ -37,7 +40,7 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Success"
 - tapOn: "Link Account"
 # ENTER PHONE FOR NEW NETWORKED USER
-- tapOn: "Phone number"
+- waitForAnimationToEnd
 - inputText: "6223115555"
 - tapOn: "Save to Link"
 # CONFIRM AND COMPLETE
@@ -51,9 +54,11 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
-    visible: "Agree"
+    visible:
+      id: "consent_cta"
     timeout: 30000
-- tapOn: "Agree"
+- tapOn:
+    id: "consent_cta"
 # LOGIN TO NETWORKING
 - tapOn:
     id: "existing_email-button"

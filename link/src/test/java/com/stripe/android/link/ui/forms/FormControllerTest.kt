@@ -6,7 +6,6 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.FormController
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
@@ -24,12 +23,15 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.R as StripeR
+import com.stripe.android.core.R as CoreR
+import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 class FormControllerTest {
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(),
-        R.style.StripeDefaultTheme
+        StripeR.style.StripeDefaultTheme
     )
 
     private val transformSpecToElements = TransformSpecToElements(
@@ -56,9 +58,9 @@ class FormControllerTest {
         )
 
         val nameElement =
-            getSectionFieldTextControllerWithLabel(formController, R.string.stripe_address_label_full_name)
+            getSectionFieldTextControllerWithLabel(formController, CoreR.string.stripe_address_label_full_name)
         val emailElement =
-            getSectionFieldTextControllerWithLabel(formController, R.string.stripe_email)
+            getSectionFieldTextControllerWithLabel(formController, UiCoreR.string.stripe_email)
 
         nameElement?.onValueChange("joe")
         assertThat(

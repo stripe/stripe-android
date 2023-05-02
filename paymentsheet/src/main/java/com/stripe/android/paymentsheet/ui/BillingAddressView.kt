@@ -22,11 +22,12 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryCode.Companion.isUS
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.model.Address
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.view.PostalCodeValidator
 import java.util.Locale
 import kotlin.properties.Delegates
+import com.stripe.android.R as StripeR
+import com.stripe.android.core.R as CoreR
 
 internal class BillingAddressView @JvmOverloads constructor(
     context: Context,
@@ -279,16 +280,16 @@ internal class BillingAddressView @JvmOverloads constructor(
     private fun updateStateView(countryCode: CountryCode?) {
         when {
             isUS(countryCode) -> {
-                R.string.stripe_address_label_state
+                CoreR.string.stripe_address_label_state
             }
             CountryCode.isCA(countryCode) -> {
-                R.string.stripe_address_label_province
+                CoreR.string.stripe_address_label_province
             }
             CountryCode.isGB(countryCode) -> {
-                R.string.stripe_address_label_county
+                CoreR.string.stripe_address_label_county
             }
             else -> {
-                R.string.stripe_address_label_region_generic
+                StripeR.string.stripe_address_label_region_generic
             }
         }.let {
             stateLayout.hint = resources.getString(it)
@@ -313,9 +314,9 @@ internal class BillingAddressView @JvmOverloads constructor(
 
         viewBinding.postalCodeLayout.hint = resources.getString(
             if (isUS(countryCode)) {
-                R.string.stripe_acc_label_zip_short
+                StripeR.string.stripe_acc_label_zip_short
             } else {
-                R.string.stripe_address_label_postal_code
+                CoreR.string.stripe_address_label_postal_code
             }
         )
     }

@@ -76,6 +76,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.flow.flowOf
 import java.util.UUID
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @Preview
 @Composable
@@ -333,7 +334,7 @@ internal fun WalletBody(
             label = primaryButtonLabel,
             state = uiState.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
-            iconEnd = R.drawable.stripe_ic_lock
+            iconEnd = StripeUiCoreR.drawable.stripe_ic_lock
         )
 
         SecondaryButton(

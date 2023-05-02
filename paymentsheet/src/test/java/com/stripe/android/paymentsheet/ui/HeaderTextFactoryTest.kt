@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import org.junit.Test
+import com.stripe.android.R as StripeR
 
 class HeaderTextFactoryTest {
 
@@ -88,7 +89,7 @@ class HeaderTextFactoryTest {
             types = listOf("card"),
         )
 
-        assertThat(resource).isEqualTo(R.string.stripe_title_add_a_card)
+        assertThat(resource).isEqualTo(StripeR.string.stripe_title_add_a_card)
     }
 
     @Test

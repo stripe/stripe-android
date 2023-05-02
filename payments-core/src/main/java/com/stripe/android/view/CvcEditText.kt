@@ -10,6 +10,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import com.stripe.android.cards.Cvc
 import com.stripe.android.model.CardBrand
+import androidx.appcompat.R as AppCompatR
 
 /**
  * A [StripeEditText] for CVC input.
@@ -17,7 +18,7 @@ import com.stripe.android.model.CardBrand
 class CvcEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
+    defStyleAttr: Int = AppCompatR.attr.editTextStyle
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     private val unvalidatedCvc: Cvc.Unvalidated

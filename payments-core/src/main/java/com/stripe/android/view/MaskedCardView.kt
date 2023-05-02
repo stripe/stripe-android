@@ -14,6 +14,7 @@ import com.stripe.android.R
 import com.stripe.android.databinding.StripeMaskedCardViewBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.payments.model.R as PaymentsModelR
 
 /**
  * View that displays card information without revealing the entire number, usually for
@@ -85,7 +86,7 @@ internal class MaskedCardView @JvmOverloads constructor(
                     CardBrand.MasterCard -> R.drawable.stripe_ic_mastercard_template_32
                     CardBrand.UnionPay -> R.drawable.stripe_ic_unionpay_template_32
                     CardBrand.CartesBancaires -> R.drawable.stripe_ic_cartebancaire_template_32
-                    CardBrand.Unknown -> R.drawable.stripe_ic_unknown
+                    CardBrand.Unknown -> PaymentsModelR.drawable.stripe_ic_unknown
                 }
             )
         )

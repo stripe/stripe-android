@@ -1,17 +1,17 @@
 package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.uicore.elements.canAcceptInput
 import org.junit.Test
+import com.stripe.android.R as StripeR
 
 class TextFieldStateTest {
 
     @Test
     fun `Accepts input on a text field that's not full`() {
         val fieldState = TextFieldStateConstants.Error.Incomplete(
-            errorMessageResId = R.string.stripe_invalid_cvc
+            errorMessageResId = StripeR.string.stripe_invalid_cvc
         )
 
         val didAccept = fieldState.canAcceptInput(

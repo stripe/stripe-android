@@ -37,7 +37,9 @@ appId: com.stripe.android.financialconnections.example
     visible: "Select all accounts"
     timeout: 60000
 - tapOn: "Select all accounts" # select all accounts
-- tapOn: "Link accounts"
+- tapOn:
+    text: "Link accounts"
+    retryTapIfNoChange: false
 # CONFIRM AND COMPLETE
 - assertVisible: "Link another account"
 - tapOn: "Done"

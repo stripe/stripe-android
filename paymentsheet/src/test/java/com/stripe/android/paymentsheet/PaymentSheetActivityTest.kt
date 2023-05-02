@@ -102,6 +102,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
@@ -774,7 +775,7 @@ internal class PaymentSheetActivityTest {
     fun `notes visibility is visible`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity {
-            val text = context.getString(R.string.stripe_paymentsheet_payment_method_us_bank_account)
+            val text = context.getString(StripeUiCoreR.string.stripe_paymentsheet_payment_method_us_bank_account)
             viewModel.updateBelowButtonText(text)
 
             composeTestRule
@@ -1032,8 +1033,8 @@ internal class PaymentSheetActivityTest {
                     code = PaymentMethod.Type.Card.code,
                     requiresMandate = false,
                     mandateRequirement = MandateRequirement.Never,
-                    displayNameResource = com.stripe.android.ui.core.R.string.stripe_paymentsheet_payment_method_card,
-                    iconResource = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
+                    displayNameResource = StripeUiCoreR.string.stripe_paymentsheet_payment_method_card,
+                    iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_card,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                     tintIconOnSelection = true,

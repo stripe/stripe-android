@@ -5,16 +5,16 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class NameConfig : TextFieldConfig {
     @StringRes
-    override val label = R.string.stripe_address_label_full_name
+    override val label = CoreR.string.stripe_address_label_full_name
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.Words
     override val debugLabel = "name"
     override val keyboard = KeyboardType.Text

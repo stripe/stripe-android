@@ -14,11 +14,13 @@ import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import java.util.regex.Pattern
 import kotlin.properties.Delegates
+import androidx.appcompat.R as AppCompatR
+import com.stripe.android.core.R as CoreR
 
 class PostalCodeEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
+    defStyleAttr: Int = AppCompatR.attr.editTextStyle
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     internal var config: Config by Delegates.observable(
@@ -63,7 +65,7 @@ class PostalCodeEditText @JvmOverloads constructor(
      * Configure the field for United States users
      */
     private fun configureForUs() {
-        updateHint(R.string.stripe_address_label_zip_code)
+        updateHint(CoreR.string.stripe_address_label_zip_code)
         filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH_US))
         keyListener = DigitsKeyListener.getInstance(false, true)
         setNumberOnlyInputType()
@@ -73,7 +75,7 @@ class PostalCodeEditText @JvmOverloads constructor(
      * Configure the field for global users
      */
     private fun configureForGlobal() {
-        updateHint(R.string.stripe_address_label_postal_code)
+        updateHint(CoreR.string.stripe_address_label_postal_code)
         keyListener = TextKeyListener.getInstance()
         inputType = InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS
         filters = arrayOf()

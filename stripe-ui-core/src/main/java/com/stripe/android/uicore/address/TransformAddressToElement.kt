@@ -24,6 +24,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.util.UUID
+import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
@@ -36,7 +37,7 @@ enum class FieldType(
     AddressLine1(
         "addressLine1",
         IdentifierSpec.Line1,
-        R.string.stripe_address_label_address_line1
+        CoreR.string.stripe_address_label_address_line1
     ),
 
     @SerialName("addressLine2")
@@ -50,21 +51,21 @@ enum class FieldType(
     Locality(
         "locality",
         IdentifierSpec.City,
-        R.string.stripe_address_label_city
+        CoreR.string.stripe_address_label_city
     ),
 
     @SerialName("dependentLocality")
     DependentLocality(
         "dependentLocality",
         IdentifierSpec.DependentLocality,
-        R.string.stripe_address_label_city
+        CoreR.string.stripe_address_label_city
     ),
 
     @SerialName("postalCode")
     PostalCode(
         "postalCode",
         IdentifierSpec.PostalCode,
-        R.string.stripe_address_label_postal_code
+        CoreR.string.stripe_address_label_postal_code
     ) {
         override fun capitalization() = KeyboardCapitalization.None
     },
@@ -73,7 +74,7 @@ enum class FieldType(
     SortingCode(
         "sortingCode",
         IdentifierSpec.SortingCode,
-        R.string.stripe_address_label_postal_code
+        CoreR.string.stripe_address_label_postal_code
     ) {
         override fun capitalization() = KeyboardCapitalization.None
     },
@@ -89,7 +90,7 @@ enum class FieldType(
     Name(
         "name",
         IdentifierSpec.Name,
-        R.string.stripe_address_label_full_name
+        CoreR.string.stripe_address_label_full_name
     );
 
     open fun capitalization() = KeyboardCapitalization.Words
@@ -112,13 +113,13 @@ enum class NameType(@StringRes val stringResId: Int) {
     Cedex(R.string.stripe_address_label_cedex),
 
     @SerialName("city")
-    City(R.string.stripe_address_label_city),
+    City(CoreR.string.stripe_address_label_city),
 
     @SerialName("country")
-    Country(R.string.stripe_address_label_country_or_region),
+    Country(CoreR.string.stripe_address_label_country_or_region),
 
     @SerialName("county")
-    County(R.string.stripe_address_label_county),
+    County(CoreR.string.stripe_address_label_county),
 
     @SerialName("department")
     Department(R.string.stripe_address_label_department),
@@ -154,16 +155,16 @@ enum class NameType(@StringRes val stringResId: Int) {
     PostTown(R.string.stripe_address_label_post_town),
 
     @SerialName("postal")
-    Postal(R.string.stripe_address_label_postal_code),
+    Postal(CoreR.string.stripe_address_label_postal_code),
 
     @SerialName("prefecture")
     Perfecture(R.string.stripe_address_label_jp_prefecture),
 
     @SerialName("province")
-    Province(R.string.stripe_address_label_province),
+    Province(CoreR.string.stripe_address_label_province),
 
     @SerialName("state")
-    State(R.string.stripe_address_label_state),
+    State(CoreR.string.stripe_address_label_state),
 
     @SerialName("suburb")
     Suburb(R.string.stripe_address_label_suburb),
@@ -178,7 +179,7 @@ enum class NameType(@StringRes val stringResId: Int) {
     VillageTownship(R.string.stripe_address_label_village_township),
 
     @SerialName("zip")
-    Zip(R.string.stripe_address_label_zip_code)
+    Zip(CoreR.string.stripe_address_label_zip_code)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

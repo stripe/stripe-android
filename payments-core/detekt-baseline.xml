@@ -111,6 +111,7 @@
     <ID>MaxLineLength:DefaultAlipayRepositoryTest.kt$DefaultAlipayRepositoryTest$"https://hooks.stripe.com/adapter/alipay/redirect/complete/src_1HDEFWKlwPmebFhp6tcpln8T/src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K"</ID>
     <ID>MaxLineLength:EphemeralKey.kt$EphemeralKey$*</ID>
     <ID>MaxLineLength:EphemeralKeyManagerTest.kt$EphemeralKeyManagerTest$"Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details."</ID>
+    <ID>MaxLineLength:ExpiryDateEditTextTest.kt$ExpiryDateEditTextTest$verify(errorMessageListener).displayErrorMessage(context.getString(UiCoreR.string.stripe_incomplete_expiry_date))</ID>
     <ID>MaxLineLength:GooglePayConfig.kt$GooglePayConfig$*</ID>
     <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory$*</ID>
     <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory$* [IsReadyToPayRequest](https://developers.google.com/pay/api/android/reference/request-objects#IsReadyToPayRequest)</ID>
@@ -197,7 +198,6 @@
     <ID>ReturnCount:DefaultPaymentAuthenticatorRegistry.kt$DefaultPaymentAuthenticatorRegistry$@Suppress("UNCHECKED_CAST") override fun &lt;Authenticatable> getAuthenticator( authenticatable: Authenticatable ): PaymentAuthenticator&lt;Authenticatable></ID>
     <ID>ReturnCount:FraudDetectionDataJsonParser.kt$FraudDetectionDataJsonParser$override fun parse(json: JSONObject): FraudDetectionData?</ID>
     <ID>ReturnCount:PaymentAuthWebViewClient.kt$PaymentAuthWebViewClient$private fun isReturnUrl(uri: Uri): Boolean</ID>
-    <ID>ReturnCount:PaymentFlowResult.kt$PaymentFlowResult.Unvalidated$internal fun validate(): Result&lt;Validated></ID>
     <ID>ReturnCount:WalletJsonParser.kt$WalletJsonParser$override fun parse(json: JSONObject): Wallet?</ID>
     <ID>SwallowedException:ActivityUtils.kt$e: IllegalArgumentException</ID>
     <ID>SwallowedException:PaymentUtils.kt$PaymentUtils$e: ClassCastException</ID>
