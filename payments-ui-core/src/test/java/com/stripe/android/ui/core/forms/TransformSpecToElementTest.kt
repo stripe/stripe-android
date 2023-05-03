@@ -41,15 +41,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
-import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
+import com.stripe.android.stripecardscan.R as CardScanR
 
 @RunWith(RobolectricTestRunner::class)
 internal class TransformSpecToElementTest {
 
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(),
-        StripeR.style.StripeDefaultTheme
+        CardScanR.style.StripeCardScanDefaultTheme
     )
 
     private val nameSection = NameSpec()
