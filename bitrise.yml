@@ -5,8 +5,8 @@ project_type: android
 trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
-  - pull_request_source_branch: 'carlosmuvi/generic-loading'
-    workflow: maestro-financial-connections
+  - pull_request_source_branch: '*'
+    pipeline: main-trigger-pipeline
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -65,28 +65,28 @@ workflows:
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-#      - script@1:
-#          title: Notify failure endpoint
-#          inputs:
-#            - content: |
-#                #!/usr/bin/env bash
-#                set -e
-#                set -o pipefail
-#                set -x
-#
-#                ruby ./scripts/notify_failure_endpoint.rb \
-#                $SDK_FAILURE_NOTIFICATION_ENDPOINT \
-#                $SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY \
-#                $BITRISE_BUILD_URL \
-#                RUN_BANKCON_MOBILE
-#          is_always_run: true
-#          run_if: ".IsBuildFailed"
-#      - pagerduty@0:
-#          inputs:
-#            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL.
-#            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
-#          is_always_run: true
-#          run_if: .IsBuildFailed
+      - script@1:
+          title: Notify failure endpoint
+          inputs:
+            - content: |
+                #!/usr/bin/env bash
+                set -e
+                set -o pipefail
+                set -x
+                
+                ruby ./scripts/notify_failure_endpoint.rb \
+                $SDK_FAILURE_NOTIFICATION_ENDPOINT \
+                $SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY \
+                $BITRISE_BUILD_URL \
+                RUN_BANKCON_MOBILE
+          is_always_run: true
+          run_if: ".IsBuildFailed"
+      - pagerduty@0:
+          inputs:
+            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
+            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
+          is_always_run: true
+          run_if: .IsBuildFailed
       - custom-test-results-export@0:
           inputs:
             - search_pattern: '*/maestroReport.xml'
