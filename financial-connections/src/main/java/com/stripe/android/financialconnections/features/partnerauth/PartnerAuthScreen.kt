@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
@@ -40,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -52,16 +52,12 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.domain.Body
-import com.stripe.android.financialconnections.domain.Cta
-import com.stripe.android.financialconnections.domain.Display
 import com.stripe.android.financialconnections.domain.Entry
 import com.stripe.android.financialconnections.domain.OauthPrepane
-import com.stripe.android.financialconnections.domain.PartnerNotice
-import com.stripe.android.financialconnections.domain.Text
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
+import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
 import com.stripe.android.financialconnections.features.common.InstitutionPlannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.InstitutionUnknownErrorContent
@@ -72,11 +68,7 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
-import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession.Flow
-import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -270,7 +262,7 @@ private fun LoadedContent(
             )
         }
 
-        is Loading -> BrowserLoadingContent()
+        is Loading -> FullScreenGenericLoading()
 
         is Success -> LoadingContent(
             title = stringResource(R.string.stripe_account_picker_loading_title),
@@ -281,15 +273,6 @@ private fun LoadedContent(
             // TODO@carlosmuvi translate error type to specific error screen.
             InstitutionUnknownErrorContent(onSelectAnotherBank)
         }
-    }
-}
-
-@Composable
-private fun BrowserLoadingContent() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(
-            color = FinancialConnectionsTheme.colors.iconBrand
-        )
     }
 }
 
@@ -444,79 +427,16 @@ private fun GifWebView(
 }
 
 @Preview(
-    group = "Partner Auth",
-    name = "Institutional prepane"
+    group = "Partner Auth Pane"
 )
 @Composable
-internal fun InstitutionalPrepaneContentPreview() {
+internal fun PartnerAuthPreview(
+    @PreviewParameter(PartnerAuthPreviewParameterProvider::class)
+    state: PartnerAuthState
+) {
     FinancialConnectionsPreview {
-        val sampleImage =
-            "https://b.stripecdn.com/connections-statics-srv/assets/PrepaneAsset--account_numbers-capitalone-2x.gif"
         PartnerAuthScreenContent(
-            state = PartnerAuthState(
-                payload = Success(
-                    PartnerAuthState.Payload(
-                        institution = FinancialConnectionsInstitution(
-                            id = "id",
-                            name = "name",
-                            url = "url",
-                            featured = true,
-                            icon = null,
-                            logo = null,
-                            featuredOrder = null,
-                            mobileHandoffCapable = false
-                        ),
-                        authSession = FinancialConnectionsAuthorizationSession(
-                            flow = Flow.FINICITY_CONNECT_V2_OAUTH,
-                            showPartnerDisclosure = true,
-                            _isOAuth = true,
-                            nextPane = Pane.PARTNER_AUTH,
-                            id = "1234",
-                            display = Display(
-                                Text(
-                                    oauthPrepane = OauthPrepane(
-                                        title = "Sign in with Sample bank",
-                                        body = Body(
-                                            listOf(
-                                                Entry.Text(
-                                                    "Some very large text will most likely go here!" +
-                                                        "Some very large text will most likely go here!"
-                                                ),
-                                                Entry.Image(
-                                                    Image(sampleImage)
-                                                ),
-                                                Entry.Text(
-                                                    "Some very large text will most likely go here!"
-                                                ),
-                                                Entry.Text(
-                                                    "Some very large text will most likely go here!"
-                                                ),
-                                                Entry.Text(
-                                                    "Some very large text will most likely go here!"
-                                                )
-                                            )
-                                        ),
-                                        cta = Cta(
-                                            icon = null,
-                                            text = "Continue!"
-                                        ),
-                                        institutionIcon = Image(sampleImage),
-                                        partnerNotice = PartnerNotice(
-                                            partnerIcon = Image(sampleImage),
-                                            text = "Stripe works with partners like MX to reliably" +
-                                                " offer access to thousands of financial institutions." +
-                                                " Learn more"
-                                        )
-                                    )
-                                )
-                            )
-                        ),
-                        isStripeDirect = false
-                    )
-                ),
-                authenticationStatus = Uninitialized,
-                viewEffect = null
-            ),
+            state = state,
             onContinueClick = {},
             onSelectAnotherBank = {},
             onEnterDetailsManually = {},
