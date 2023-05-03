@@ -13,11 +13,11 @@
         <activity
             android:name=".cardimageverification.CardImageVerificationActivity"
             android:screenOrientation="nosensor"
-            android:theme="@style/StripeDefaultTheme" />
+            android:theme="@style/StripeCardScanDefaultTheme" />
 
         <activity
             android:name=".cardscan.CardScanActivity"
             android:screenOrientation="nosensor"
-            android:theme="@style/StripeDefaultTheme" />
+            android:theme="@style/StripeCardScanDefaultTheme" />
     </application>
 </manifest>

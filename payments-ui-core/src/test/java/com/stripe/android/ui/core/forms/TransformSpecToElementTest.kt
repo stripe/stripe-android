@@ -47,7 +47,7 @@ internal class TransformSpecToElementTest {
 
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(),
-        R.style.StripeDefaultTheme
+        R.style.StripeCardScanDefaultTheme
     )
 
     private val nameSection = NameSpec()
