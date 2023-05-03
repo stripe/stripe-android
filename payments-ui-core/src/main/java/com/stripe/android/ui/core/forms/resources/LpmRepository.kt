@@ -10,6 +10,7 @@ import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodOptions
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
@@ -427,7 +428,13 @@ class LpmRepository constructor(
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.USBankAccount.code -> {
-            if (stripeIntent.clientSecret != null) {
+            val verificationMethod = stripeIntent.paymentMethodOptionsMap
+                ?.get(PaymentMethod.Type.USBankAccount.code)
+                ?.verificationMethod
+            val supportsVerificationMethod =
+                verificationMethod == PaymentMethodOptions.VerificationMethod.Instant ||
+                    verificationMethod == PaymentMethodOptions.VerificationMethod.Automatic
+            if (stripeIntent.clientSecret != null && supportsVerificationMethod) {
                 SupportedPaymentMethod(
                     code = "us_bank_account",
                     requiresMandate = true,
