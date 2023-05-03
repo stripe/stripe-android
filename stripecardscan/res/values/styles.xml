@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="StripeBaseTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+    <style name="StripeCardScanBaseTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowFullscreen">true</item>
@@ -9,7 +9,7 @@
     </style>
 
     <!-- Base application theme. -->
-    <style name="StripeDefaultTheme" parent="StripeBaseTheme">
+    <style name="StripeCardScanDefaultTheme" parent="StripeCardScanBaseTheme">
         <item name="background">@color/stripeNotFoundBackground</item>
 
         <item name="stripeNotFoundBackgroundColor">@color/stripeNotFoundBackground</item>

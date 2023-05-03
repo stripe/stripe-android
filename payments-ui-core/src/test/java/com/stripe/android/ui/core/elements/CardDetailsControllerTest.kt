@@ -4,6 +4,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.stripecardscan.R
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Test
@@ -16,7 +17,7 @@ import com.stripe.android.uicore.R as UiCoreR
 class CardDetailsControllerTest {
 
     private val context =
-        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), StripeR.style.StripeDefaultTheme)
+        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeCardScanDefaultTheme)
 
     @Test
     fun `Verify the first field in error is returned in error flow`() {
