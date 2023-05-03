@@ -17,7 +17,7 @@ import org.robolectric.RobolectricTestRunner
 class CardDetailsElementTest {
 
     private val context =
-        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme)
+        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeCardScanDefaultTheme)
 
     @Test
     fun `test form field values returned and expiration date parsing`() = runTest {

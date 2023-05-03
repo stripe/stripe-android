@@ -15,7 +15,7 @@ import org.robolectric.RobolectricTestRunner
 class CardDetailsControllerTest {
 
     private val context =
-        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme)
+        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeCardScanDefaultTheme)
 
     @Test
     fun `Verify the first field in error is returned in error flow`() {
