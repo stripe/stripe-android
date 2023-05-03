@@ -114,7 +114,7 @@ internal class PartnerAuthPreviewParameterProvider :
                 icon = null,
                 text = "Continue!"
             ),
-            institutionIcon = Image(sampleImage),
+            institutionIcon = null,
             partnerNotice = PartnerNotice(
                 partnerIcon = Image(sampleImage),
                 text = "Stripe works with partners like MX to reliably" +

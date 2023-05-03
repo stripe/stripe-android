@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -168,7 +167,7 @@ private fun NetworkingLinkSignupLoaded(
                 emailController = payload.emailController,
                 enabled = true,
             )
-            AnimatedVisibility(visible = showFullForm) {
+            if (showFullForm) {
                 PhoneNumberSection(
                     payload = payload,
                     onClickableTextClick = onClickableTextClick
@@ -177,9 +176,7 @@ private fun NetworkingLinkSignupLoaded(
             Spacer(modifier = Modifier.weight(1f))
         }
         PaneFooter(elevation = scrollState.elevation) {
-            AnimatedVisibility(
-                visible = showFullForm
-            ) {
+            if (showFullForm) {
                 SaveToLinkCta(
                     text = payload.content.cta,
                     aboveCta = payload.content.aboveCta,
