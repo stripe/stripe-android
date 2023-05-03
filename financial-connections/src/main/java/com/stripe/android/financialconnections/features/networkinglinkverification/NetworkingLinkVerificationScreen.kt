@@ -32,7 +32,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError.Type
-import com.stripe.android.financialconnections.features.common.LoadingContent
+import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
@@ -76,7 +76,7 @@ private fun NetworkingLinkVerificationContent(
         }
     ) {
         when (val payload = state.payload) {
-            Uninitialized, is Loading -> LoadingContent()
+            Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingLinkVerificationLoaded(
                 scrollState = scrollState,
                 payload = payload(),

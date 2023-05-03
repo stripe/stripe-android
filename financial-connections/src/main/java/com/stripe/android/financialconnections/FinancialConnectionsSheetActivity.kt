@@ -7,18 +7,14 @@ import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import com.airbnb.mvrx.Mavericks
 import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.withState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
-import com.stripe.android.financialconnections.features.common.LoadingSpinner
+import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
@@ -60,12 +56,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity(), Maverick
     @Composable
     private fun Loading() {
         FinancialConnectionsTheme {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                LoadingSpinner()
-            }
+            FullScreenGenericLoading()
         }
     }
 
