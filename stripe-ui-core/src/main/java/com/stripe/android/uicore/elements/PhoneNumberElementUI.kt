@@ -74,6 +74,7 @@ fun PhoneNumberCollectionSection(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
+@Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PhoneNumberElementUI(
     enabled: Boolean,
