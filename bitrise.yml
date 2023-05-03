@@ -56,13 +56,12 @@ workflows:
           inputs:
             - profile: "pixel_3a"
       - wait-for-android-emulator@1: { }
-      - script@1:
+      - script-runner@0:
           title: Execute Maestro tests
           inputs:
-            - content: bash ./scripts/execute_maestro_tests.sh $FINANCIAL_CONNECTIONS_MERCHANT
+            - file_path: ./scripts/execute_maestro_tests.sh
       - slack@3:
           is_always_run: true
-          run_if: ".IsBuildFailed"
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO

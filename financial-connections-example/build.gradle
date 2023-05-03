@@ -3,6 +3,8 @@ apply from: configs.androidApplication
 apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'com.google.gms.google-services'
 
+def testEnvironment = System.getenv("test_environment") ?: "production"
+
 android {
     defaultConfig {
         applicationId "com.stripe.android.financialconnections.example"
@@ -11,6 +13,8 @@ android {
 
         versionName VERSION_NAME
         versionCode getVersionCode(versionName)
+
+        buildConfigField "String", "TEST_ENVIRONMENT", "\"${testEnvironment}\""
 
         manifestPlaceholders = [
             STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: getBackendUrl()
