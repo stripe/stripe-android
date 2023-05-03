@@ -45,7 +45,7 @@ internal sealed class USBankAccountFormScreenState(
         val address: Address?,
         val paymentAccount: FinancialConnectionsAccount,
         val financialConnectionsSessionId: String,
-        val intentId: String,
+        val intentId: String?,
         override val primaryButtonText: String,
         override val mandateText: String?,
         val saveForFutureUsage: Boolean
@@ -72,7 +72,7 @@ internal sealed class USBankAccountFormScreenState(
         val address: Address?,
         val paymentAccount: BankAccount,
         val financialConnectionsSessionId: String,
-        val intentId: String,
+        val intentId: String?,
         override val primaryButtonText: String,
         override val mandateText: String?,
         val saveForFutureUsage: Boolean
@@ -98,7 +98,7 @@ internal sealed class USBankAccountFormScreenState(
         val phone: String?,
         val address: Address?,
         val financialConnectionsSessionId: String?,
-        val intentId: String,
+        val intentId: String?,
         val bankName: String,
         val last4: String?,
         override val primaryButtonText: String,

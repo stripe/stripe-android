@@ -16,7 +16,7 @@ internal fun SyncViewModels(
 
     LaunchedEffect(Unit) {
         viewModel.result.collect { result ->
-            sheetViewModel.handleUSBankAccountConfirmed(result)
+            sheetViewModel.handleConfirmUSBankAccount(result)
         }
     }
 

@@ -428,6 +428,7 @@ class CollectBankAccountViewModelTest {
                     stripeAccountId = stripeAccountId,
                     elementsSessionId = "elements_session_id",
                     customerId = "customer_id",
+                    onBehalfOf = "on_behalf_of_id",
                     amount = 1000,
                     currency = "usd"
                 )
@@ -445,6 +446,7 @@ class CollectBankAccountViewModelTest {
                     stripeAccountId = stripeAccountId,
                     elementsSessionId = "elements_session_id",
                     customerId = "customer_id",
+                    onBehalfOf = "on_behalf_of_id",
                     amount = null,
                     currency = null
                 )
@@ -518,6 +520,7 @@ class CollectBankAccountViewModelTest {
             ),
             elementsSessionId = "elements_session_id",
             customerId = "customer_id",
+            onBehalfOf = "on_behalf_of_id",
             amount = 1000,
             currency = "usd"
         )
@@ -532,7 +535,8 @@ class CollectBankAccountViewModelTest {
                 email
             ),
             elementsSessionId = "elements_session_id",
-            customerId = "customer_id"
+            customerId = "customer_id",
+            onBehalfOf = "on_behalf_of_id",
         )
     }
 }

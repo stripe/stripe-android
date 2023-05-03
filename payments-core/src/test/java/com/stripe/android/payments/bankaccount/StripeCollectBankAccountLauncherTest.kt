@@ -64,6 +64,7 @@ class StripeCollectBankAccountLauncherTest {
             configuration = CONFIGURATION,
             elementsSessionId = "elements_session_id",
             customerId = "customer_id",
+            onBehalfOf = "on_behalf_of_id",
             amount = 1000,
             currency = "usd"
         )
@@ -75,6 +76,7 @@ class StripeCollectBankAccountLauncherTest {
                 configuration = CONFIGURATION,
                 elementsSessionId = "elements_session_id",
                 customerId = "customer_id",
+                onBehalfOf = "on_behalf_of_id",
                 amount = 1000,
                 currency = "usd"
             )
@@ -89,6 +91,7 @@ class StripeCollectBankAccountLauncherTest {
             configuration = CONFIGURATION,
             elementsSessionId = "elements_session_id",
             customerId = "customer_id",
+            onBehalfOf = "on_behalf_of_id",
         )
 
         verify(mockHostActivityLauncher).launch(
@@ -98,6 +101,7 @@ class StripeCollectBankAccountLauncherTest {
                 configuration = CONFIGURATION,
                 elementsSessionId = "elements_session_id",
                 customerId = "customer_id",
+                onBehalfOf = "on_behalf_of_id",
             )
         )
     }
