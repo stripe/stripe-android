@@ -54,7 +54,7 @@ workflows:
     steps:
       - avd-manager@1:
           inputs:
-            - profile: "pixel_3a"
+            - profile: "pixel_6a"
       - wait-for-android-emulator@1: { }
       - script-runner@0:
           title: Execute Maestro tests

@@ -162,7 +162,6 @@ private fun NetworkingLinkSignupLoaded(
                 )
                 Spacer(modifier = Modifier.size(12.dp))
             }
-            Spacer(modifier = Modifier.size(12.dp))
             EmailSection(
                 showFullForm = showFullForm,
                 loading = lookupAccountSync is Loading,
@@ -235,7 +234,7 @@ private fun SaveToLinkCta(
                     .copy(color = FinancialConnectionsTheme.colors.textSecondary),
             )
         )
-        Spacer(modifier = Modifier.size(16.dp))
+        Spacer(modifier = Modifier.size(8.dp))
         FinancialConnectionsButton(
             loading = saveAccountToLinkSync is Loading,
             enabled = validForm,
