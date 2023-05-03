@@ -25,7 +25,8 @@ class LpmRepositoryTest {
     private val lpmRepository = LpmRepository(
         LpmRepository.LpmRepositoryArguments(
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
-            isFinancialConnectionsAvailable = { true }
+            isFinancialConnectionsAvailable = { true },
+            enableACHV2InDeferredFlow = true
         )
     )
 
@@ -335,10 +336,9 @@ class LpmRepositoryTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                enableACHV2InDeferredFlow = false
             ),
         )
-
-        LpmRepository.enableACHV2InDeferredFlow = false
 
         val deferredPaymentIntent = PaymentIntentFactory.create(
             paymentMethodTypes = listOf("card", "us_bank_account", "cashapp"),

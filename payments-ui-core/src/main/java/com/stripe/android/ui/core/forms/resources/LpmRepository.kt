@@ -427,7 +427,7 @@ class LpmRepository constructor(
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.USBankAccount.code -> {
-            if (stripeIntent.clientSecret != null || enableACHV2InDeferredFlow) {
+            if (stripeIntent.clientSecret != null || arguments.enableACHV2InDeferredFlow) {
                 SupportedPaymentMethod(
                     code = "us_bank_account",
                     requiresMandate = true,
@@ -562,11 +562,6 @@ class LpmRepository constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val HardcodedCard = hardcodedCardSpec(CardBillingDetailsCollectionConfiguration())
 
-        // Whether to enable ACHv2 in the deferred flow.
-        // To be deleted when https://jira.corp.stripe.com/browse/BANKCON-6731 is completed.
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        var enableACHV2InDeferredFlow: Boolean = false
-
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun hardcodedCardSpec(
             billingDetailsCollectionConfiguration: CardBillingDetailsCollectionConfiguration
@@ -615,6 +610,9 @@ class LpmRepository constructor(
         val resources: Resources?,
         val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
             DefaultIsFinancialConnectionsAvailable(),
+        // Whether to enable ACHv2 in the deferred flow.
+        // To be deleted when https://jira.corp.stripe.com/browse/BANKCON-6731 is completed.
+        val enableACHV2InDeferredFlow: Boolean = false,
     )
 }
 
