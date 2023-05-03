@@ -10,6 +10,8 @@ appId: com.stripe.android.paymentsheet.example
     timeout: 60000
 - runFlow:
     file: ./card/subflow-card-details.yaml
+    env:
+        CARD_NUMBER: 4242424242424242
 - scroll
 - tapOn: "Pay.*"
 - assertVisible: ".*Success.*"
