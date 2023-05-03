@@ -1,6 +1,9 @@
 # CHANGELOG
 
-## XX.XX.XX - 2023-XX-XX
+## 20.24.2 - 2023-05-03
+
+### Payments
+* [FIXED][6664](https://github.com/stripe/stripe-android/pull/6664) Fixed an where 3DS2 would crash when using payments SDKs with the card scan SDK.
 
 ## 20.24.1 - 2023-05-01
 
