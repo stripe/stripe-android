@@ -160,7 +160,7 @@ private fun NetworkingLinkSignupLoaded(
                     bullet = BulletUI.from(it),
                     onClickableTextClick = onClickableTextClick
                 )
-                Spacer(modifier = Modifier.size(12.dp))
+                Spacer(modifier = Modifier.size(8.dp))
             }
             EmailSection(
                 showFullForm = showFullForm,
