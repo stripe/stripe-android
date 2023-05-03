@@ -236,12 +236,12 @@ internal fun IdentityNavGraph(
                     CameraPermissionDeniedDestination.collectedDataParamType(it)
                 ErrorScreen(
                     identityViewModel = identityViewModel,
-                    title = stringResource(id = R.string.camera_permission),
-                    message1 = stringResource(id = R.string.grant_camera_permission_text),
+                    title = stringResource(id = R.string.stripe_camera_permission),
+                    message1 = stringResource(id = R.string.stripe_grant_camera_permission_text),
                     message2 =
                     if (collectedDataParamType != CollectedDataParam.Type.INVALID) {
                         stringResource(
-                            R.string.upload_file_text,
+                            R.string.stripe_upload_file_text,
                             collectedDataParamType.getDisplayName(context)
                         )
                     } else {
@@ -250,7 +250,7 @@ internal fun IdentityNavGraph(
                     topButton =
                     if (collectedDataParamType != CollectedDataParam.Type.INVALID) {
                         ErrorScreenButton(
-                            buttonText = stringResource(id = R.string.file_upload)
+                            buttonText = stringResource(id = R.string.stripe_file_upload)
                         ) {
                             identityViewModel.screenTracker.screenTransitionStart(
                                 IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
@@ -266,7 +266,7 @@ internal fun IdentityNavGraph(
                         null
                     },
                     bottomButton = ErrorScreenButton(
-                        buttonText = stringResource(id = R.string.app_settings)
+                        buttonText = stringResource(id = R.string.stripe_app_settings)
                     ) {
                         appSettingsOpenable.openAppSettings()
                         // navigate back to DocSelection, so that when user is back to the app
@@ -281,20 +281,20 @@ internal fun IdentityNavGraph(
                 val requireLiveCapture = CouldNotCaptureDestination.requireLiveCapture(it)
                 ErrorScreen(
                     identityViewModel = identityViewModel,
-                    title = stringResource(id = R.string.could_not_capture_title),
-                    message1 = stringResource(id = R.string.could_not_capture_body1),
+                    title = stringResource(id = R.string.stripe_could_not_capture_title),
+                    message1 = stringResource(id = R.string.stripe_could_not_capture_body1),
                     message2 = if (scanType == IdentityScanState.ScanType.SELFIE) {
                         null
                     } else {
                         stringResource(
-                            R.string.could_not_capture_body2
+                            R.string.stripe_could_not_capture_body2
                         )
                     },
                     topButton = if (scanType == IdentityScanState.ScanType.SELFIE) {
                         null
                     } else {
                         ErrorScreenButton(
-                            buttonText = stringResource(id = R.string.file_upload),
+                            buttonText = stringResource(id = R.string.stripe_file_upload),
                         ) {
                             identityViewModel.screenTracker.screenTransitionStart(
                                 IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
@@ -309,7 +309,7 @@ internal fun IdentityNavGraph(
                     },
                     bottomButton =
                     ErrorScreenButton(
-                        buttonText = stringResource(id = R.string.try_again)
+                        buttonText = stringResource(id = R.string.stripe_try_again)
                     ) {
                         identityViewModel.screenTracker.screenTransitionStart(
                             IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR

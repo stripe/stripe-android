@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.stripe.android.databinding.ShippingMethodWidgetBinding
+import com.stripe.android.databinding.StripeShippingMethodWidgetBinding
 import com.stripe.android.model.ShippingMethod
 
 /**
@@ -26,7 +26,7 @@ internal class SelectShippingMethodWidget @JvmOverloads constructor(
         get() = shippingMethodAdapter.selectedShippingMethod
 
     init {
-        val viewBinding = ShippingMethodWidgetBinding.inflate(
+        val viewBinding = StripeShippingMethodWidgetBinding.inflate(
             LayoutInflater.from(context),
             this
         )

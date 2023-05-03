@@ -6,7 +6,7 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentResultListener
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.link.R as LinkR
 
 internal class PollingActivity : AppCompatActivity() {
 
@@ -47,6 +47,6 @@ internal class PollingActivity : AppCompatActivity() {
             Intent().putExtras(result)
         )
         finish()
-        overridePendingTransition(0, R.anim.slide_down)
+        overridePendingTransition(0, LinkR.anim.stripe_slide_down)
     }
 }

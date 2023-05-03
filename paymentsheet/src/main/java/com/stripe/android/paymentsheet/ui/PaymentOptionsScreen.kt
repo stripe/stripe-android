@@ -16,7 +16,7 @@ import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentOptionsPrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentOptionsPrimaryButtonBinding
 import com.stripe.android.paymentsheet.navigation.Content
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.stripeColors
@@ -48,6 +48,8 @@ internal fun PaymentOptionsScreenContent(
     val notesText by viewModel.notesText.collectAsState()
 
     val showLinkDialog by viewModel.linkHandler.showLinkVerificationDialog.collectAsState()
+
+    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
     val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
 
     Column(
@@ -65,7 +67,7 @@ internal fun PaymentOptionsScreenContent(
                 text = stringResource(text),
                 modifier = Modifier
                     .padding(bottom = 2.dp)
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = horizontalPadding),
             )
         }
 
@@ -74,12 +76,14 @@ internal fun PaymentOptionsScreenContent(
         errorMessage?.let { error ->
             ErrorMessage(
                 error = error,
-                modifier = Modifier.padding(vertical = 2.dp),
+                modifier = Modifier
+                    .padding(vertical = 2.dp)
+                    .padding(horizontal = horizontalPadding),
             )
         }
 
         AndroidViewBinding(
-            factory = FragmentPaymentOptionsPrimaryButtonBinding::inflate,
+            factory = StripeFragmentPaymentOptionsPrimaryButtonBinding::inflate,
             modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
         )
 
@@ -88,7 +92,9 @@ internal fun PaymentOptionsScreenContent(
                 html = text,
                 color = MaterialTheme.stripeColors.subtitle,
                 style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .padding(horizontal = horizontalPadding),
             )
         }
     }

@@ -20,6 +20,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
 import com.stripe.android.R
 import kotlinx.parcelize.Parcelize
+import androidx.appcompat.R as AppCompatR
 
 /**
  * Extension of [TextInputEditText] that listens for users pressing the delete key when
@@ -31,7 +32,7 @@ import kotlinx.parcelize.Parcelize
 open class StripeEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
+    defStyleAttr: Int = AppCompatR.attr.editTextStyle
 ) : TextInputEditText(context, attrs, defStyleAttr) {
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     internal var isLastKeyDelete: Boolean = false

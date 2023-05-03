@@ -1,0 +1,16 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="16dp"
+    android:viewportHeight="16"
+    android:viewportWidth="16"
+    android:width="16dp">
+    <path
+        android:fillColor="@color/stripe_privacy_policy_icon_tint"
+        android:fillType="evenOdd"
+        android:pathData="M12.5,2H3.5C2.6716,2 2,2.6716 2,3.5V12.5C2,13.3284 2.6716,14 3.5,14H12.5C13.3284,14 14,13.3284 14,12.5V3.5C14,2.6716 13.3284,2 12.5,2ZM3.5,0.5C1.8432,0.5 0.5,1.8432 0.5,3.5V12.5C0.5,14.1569 1.8432,15.5 3.5,15.5H12.5C14.1569,15.5 15.5,14.1569 15.5,12.5V3.5C15.5,1.8432 14.1569,0.5 12.5,0.5H3.5Z" />
+    <path
+        android:fillColor="@color/stripe_privacy_policy_icon_tint"
+        android:pathData="M7,6.5C6.5858,6.5 6.25,6.8358 6.25,7.25C6.25,7.6642 6.5858,8 7,8H7.25V11.75C7.25,12.1642 7.5858,12.5 8,12.5C8.4142,12.5 8.75,12.1642 8.75,11.75V7.25C8.75,6.8358 8.4142,6.5 8,6.5H7Z" />
+    <path
+        android:fillColor="@color/stripe_privacy_policy_icon_tint"
+        android:pathData="M7,4.5C7,3.95 7.45,3.5 8,3.5C8.55,3.5 9,3.95 9,4.5C9,5.05 8.55,5.5 8,5.5C7.45,5.51 7,5.06 7,4.5Z" />
+</vector>

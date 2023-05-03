@@ -52,7 +52,9 @@ workflows:
     after_run:
       - conclude_all
     steps:
-      - avd-manager@1: { }
+      - avd-manager@1:
+          inputs:
+            - profile: "pixel_3a"
       - wait-for-android-emulator@1: { }
       - script@1:
           title: Execute Maestro tests
@@ -97,7 +99,9 @@ workflows:
     after_run:
       - conclude_all
     steps:
-      - avd-manager@1: { }
+      - avd-manager@1:
+          inputs:
+            - api_level: 30
       - wait-for-android-emulator@1: { }
       - script-runner@0:
           title: Execute Maestro tests
@@ -132,6 +136,9 @@ workflows:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - git-clone@8: { }
       - cache-pull@2: { }
+      - set-java-version@1:
+          inputs:
+            - set_java_version: 17
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties

@@ -17,6 +17,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.stripe.android.R as StripeR
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -46,11 +47,11 @@ class CreateCardTokenActivityTest {
         )
 
         // fill out card details
-        onView(withId(R.id.card_number_edit_text))
+        onView(withId(StripeR.id.card_number_edit_text))
             .perform(replaceText("4242424242424242"))
-        onView(withId(R.id.expiry_date_edit_text))
+        onView(withId(StripeR.id.expiry_date_edit_text))
             .perform(replaceText("01/25"))
-        onView(withId(R.id.cvc_edit_text))
+        onView(withId(StripeR.id.cvc_edit_text))
             .perform(replaceText("111"))
 
         // click create card button

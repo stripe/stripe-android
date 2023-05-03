@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.stripe.android.view.CountryTextInputLayout
+        android:id="@+id/country_autocomplete_aaw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/stripe_address_label_country" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tl_name_aaw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin">
+
+        <com.stripe.android.view.StripeEditText
+            android:id="@+id/et_name_aaw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tl_address_line1_aaw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin">
+
+        <com.stripe.android.view.StripeEditText
+            android:id="@+id/et_address_line_one_aaw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tl_address_line2_aaw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin">
+
+        <com.stripe.android.view.StripeEditText
+            android:id="@+id/et_address_line_two_aaw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tl_city_aaw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin">
+
+        <com.stripe.android.view.StripeEditText
+            android:id="@+id/et_city_aaw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tl_state_aaw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin">
+
+        <com.stripe.android.view.StripeEditText
+            android:id="@+id/et_state_aaw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tl_postal_code_aaw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin">
+
+        <com.stripe.android.view.StripeEditText
+            android:id="@+id/et_postal_code_aaw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tl_phone_number_aaw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/stripe_add_address_vertical_margin"
+        android:hint="@string/stripe_address_label_phone_number">
+
+        <com.stripe.android.view.StripeEditText
+            android:id="@+id/et_phone_number_aaw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:inputType="phone" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+</merge>

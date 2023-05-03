@@ -3,6 +3,7 @@
 package com.stripe.android.financialconnections.features.common
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,9 +18,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
+import com.stripe.android.financialconnections.ui.ImageResource
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
@@ -201,7 +204,7 @@ internal fun BulletItem(
     onClickableTextClick: (String) -> Unit
 ) {
     Row {
-        BulletIcon(iconUrl = bullet.icon)
+        BulletIcon(icon = bullet.imageResource)
         Spacer(modifier = Modifier.size(8.dp))
         Column {
             when {
@@ -281,11 +284,11 @@ internal fun BulletItem(
 }
 
 @Composable
-private fun BulletIcon(iconUrl: String?) {
+private fun BulletIcon(icon: ImageResource?) {
     val modifier = Modifier
         .size(16.dp)
         .offset(y = 2.dp)
-    if (iconUrl == null) {
+    if (icon == null) {
         val color = colors.textPrimary
         Canvas(
             modifier = Modifier
@@ -295,20 +298,28 @@ private fun BulletIcon(iconUrl: String?) {
             onDraw = { drawCircle(color = color) }
         )
     } else {
-        StripeImage(
-            url = iconUrl,
-            errorContent = {
-                val color = colors.textSecondary
-                Canvas(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .align(Alignment.Center),
-                    onDraw = { drawCircle(color = color) }
-                )
-            },
-            imageLoader = LocalImageLoader.current,
-            contentDescription = null,
-            modifier = modifier
-        )
+        when (icon) {
+            is ImageResource.Local -> Image(
+                modifier = modifier,
+                painter = painterResource(id = icon.resId),
+                contentDescription = null,
+            )
+
+            is ImageResource.Network -> StripeImage(
+                url = icon.url,
+                errorContent = {
+                    val color = colors.textSecondary
+                    Canvas(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .align(Alignment.Center),
+                        onDraw = { drawCircle(color = color) }
+                    )
+                },
+                imageLoader = LocalImageLoader.current,
+                contentDescription = null,
+                modifier = modifier
+            )
+        }
     }
 }

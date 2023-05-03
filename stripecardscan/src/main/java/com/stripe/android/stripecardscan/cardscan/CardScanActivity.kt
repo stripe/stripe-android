@@ -25,7 +25,7 @@ import com.stripe.android.stripecardscan.cardscan.exception.InvalidStripePublish
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
-import com.stripe.android.stripecardscan.databinding.ActivityCardscanBinding
+import com.stripe.android.stripecardscan.databinding.StripeActivityCardscanBinding
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.uploadScanStatsOCR
 import com.stripe.android.stripecardscan.framework.util.AppDetails
@@ -70,7 +70,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     override val minimumAnalysisResolution = MINIMUM_RESOLUTION
 
     private val viewBinding by lazy {
-        ActivityCardscanBinding.inflate(layoutInflater)
+        StripeActivityCardscanBinding.inflate(layoutInflater)
     }
 
     override val previewFrame: ViewGroup by lazy {

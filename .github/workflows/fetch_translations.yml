@@ -1,0 +1,34 @@
+name: Fetch Lokalize translations
+on:
+  workflow_dispatch:
+  schedule:
+    # Every Monday at 10 AM East Coast time / 7 AM West Coast time / 2 PM UTC
+    - cron: "0 14 * * 1"
+jobs:
+  fetch-lokalize-translations:
+    runs-on: macos-latest
+    steps:
+      - name: Check out the current state
+        uses: actions/checkout@v3
+      - name: Fetch translations
+        run: cd scripts && ./localize.sh
+        shell: bash
+        env:
+          LOKALISE_API_TOKEN: ${{ secrets.LOKALISE_API_TOKEN }}
+      - name: Compute timestamp
+        id: timestamp
+        run: echo "TIMESTAMP=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        id: create-pull-request
+        with:
+          commit-message: Fetch latest Lokalize translations
+          title: Update translations
+          body: This pull request contains the latest translations from Lokalize.
+          branch: update-translations-${{ steps.timestamp.outputs.TIMESTAMP }}
+          base: master
+      - name: Enable Auto-Merge
+        if: ${{ steps.create-pull-request.outputs.pull-request-url }}
+        run: gh pr merge --squash --auto ${{ steps.create-pull-request.outputs.pull-request-url }}
+        env:
+          GH_TOKEN: ${{ github.token }}

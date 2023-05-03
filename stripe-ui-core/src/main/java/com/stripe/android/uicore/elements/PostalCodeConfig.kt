@@ -40,10 +40,10 @@ class PostalCodeConfig(
         override fun getError(): FieldError? {
             return when {
                 input.isNotBlank() && !isValid() && country == "US" -> {
-                    FieldError(R.string.address_zip_invalid)
+                    FieldError(R.string.stripe_address_zip_invalid)
                 }
                 input.isNotBlank() && !isValid() -> {
-                    FieldError(R.string.address_zip_postal_invalid)
+                    FieldError(R.string.stripe_address_zip_postal_invalid)
                 }
                 else -> null
             }

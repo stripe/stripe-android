@@ -23,8 +23,11 @@ if (System.getenv("JITPACK")) {
 
 android {
     namespace STRIPE_ANDROID_NAMESPACE
+    resourcePrefix 'Stripe'
+
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
+
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion rootProject.ext.compileSdkVersion
@@ -46,10 +49,10 @@ android {
         }
     }
 
-    lintOptions {
-        enable "Interoperability"
-        disable "CoroutineCreationDuringComposition"
-        lintConfig file("../settings/lint.xml")
+    lint {
+        enable 'Interoperability'
+        disable 'CoroutineCreationDuringComposition'
+        lintConfig file('../settings/lint.xml')
     }
 
     dokkaHtml {

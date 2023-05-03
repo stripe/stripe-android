@@ -150,7 +150,7 @@ private fun IDNumberContent(
                     }
                 }
             ),
-            label = R.string.id_number
+            label = R.string.stripe_id_number
         )
     }
     val textIdentifiers by idNumberSectionElement.getTextFieldIdentifiers()
@@ -192,7 +192,7 @@ private fun IDNumberContent(
 }
 
 private object USIDConfig : SimpleTextFieldConfig(
-    label = R.string.last_4_of_ssn
+    label = R.string.stripe_last_4_of_ssn
 ) {
     override val placeHolder = US_ID_PLACEHOLDER
     override val keyboard = KeyboardType.Number
@@ -202,7 +202,7 @@ private object USIDConfig : SimpleTextFieldConfig(
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getError(): FieldError = FieldError(R.string.incomplete_id_number)
+        override fun getError(): FieldError = FieldError(R.string.stripe_incomplete_id_number)
 
         override fun isFull(): Boolean = input.length == 4
 
@@ -211,7 +211,7 @@ private object USIDConfig : SimpleTextFieldConfig(
 }
 
 private object BRIDConfig : SimpleTextFieldConfig(
-    label = R.string.individual_cpf
+    label = R.string.stripe_individual_cpf
 ) {
     override val placeHolder = BRAZIL_ID_PLACEHOLDER
     override val keyboard = KeyboardType.Number
@@ -221,7 +221,7 @@ private object BRIDConfig : SimpleTextFieldConfig(
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getError(): FieldError = FieldError(R.string.incomplete_id_number)
+        override fun getError(): FieldError = FieldError(R.string.stripe_incomplete_id_number)
 
         override fun isFull(): Boolean = input.length == 11
 
@@ -230,7 +230,7 @@ private object BRIDConfig : SimpleTextFieldConfig(
 }
 
 private object SGIDConfig : SimpleTextFieldConfig(
-    label = R.string.nric_or_fin
+    label = R.string.stripe_nric_or_fin
 ) {
     override val placeHolder = SINGAPORE_ID_PLACEHOLDER
     override fun determineState(input: String): TextFieldState = object : TextFieldState {

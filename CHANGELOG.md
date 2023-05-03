@@ -2,6 +2,24 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### All SDKs
+* [CHANGED][6635](https://github.com/stripe/stripe-android/pull/6635) Use non transitive R classes.
+
+## 20.24.2 - 2023-05-03
+
+### Payments
+* [FIXED][6664](https://github.com/stripe/stripe-android/pull/6664) Fixed an issue where 3DS2 would crash when using payments SDKs with the card scan SDK.
+
+## 20.24.1 - 2023-05-01
+
+### Payments
+* [FIXED][6612](https://github.com/stripe/stripe-android/pull/6612) Fixed an issue where the Android Gradle Plugin 8.0 and later would cause issues with R8 in full mode related to missing classes.
+
+### All SDKs
+* [CHANGED][6603](https://github.com/stripe/stripe-android/pull/6603) Added a `stripe` prefix to our resources to avoid name conflicts.
+* [FIXED][6602](https://github.com/stripe/stripe-android/pull/6602) Fixed an issue which caused a compiler error (duplicate class) when including payments *and* identity SDKs.
+* [FIXED][6611](https://github.com/stripe/stripe-android/pull/6611) Fixed an issue where countries might be filtered out on old Android versions (notably Kosovo).
+
 ## 20.24.0 - 2023-04-24
 
 ### PaymentSheet

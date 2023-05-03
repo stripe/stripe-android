@@ -1,169 +1,169 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Label for card number entry text field -->
-  <string name="acc_label_card_number">In-numru tal-kard</string>
-  <string name="acc_label_card_number_node">%s, In-numru tal-kard</string>
-  <string name="acc_label_cvc_node">%s, CVC</string>
-  <string name="acc_label_expiry_date">Id-data tal-iskadenza</string>
-  <string name="acc_label_expiry_date_node">%s, Data tal-iskadenza</string>
+  <string name="stripe_acc_label_card_number">In-numru tal-kard</string>
+  <string name="stripe_acc_label_card_number_node">%s, In-numru tal-kard</string>
+  <string name="stripe_acc_label_cvc_node">%s, CVC</string>
+  <string name="stripe_acc_label_expiry_date">Id-data tal-iskadenza</string>
+  <string name="stripe_acc_label_expiry_date_node">%s, Data tal-iskadenza</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-  <string name="acc_label_zip">Kodiċi Postali</string>
+  <string name="stripe_acc_label_zip">Kodiċi Postali</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
-  <string name="acc_label_zip_short">Kodiċi Postali</string>
+  <string name="stripe_acc_label_zip_short">Kodiċi Postali</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="added">Miżjud %s</string>
+  <string name="stripe_added">Miżjud %s</string>
   <!-- Error text indicating that city is required, used for all locations -->
-  <string name="address_city_required">Jekk jogħġbok daħħal il-belt tiegħek</string>
+  <string name="stripe_address_city_required">Jekk jogħġbok daħħal il-belt tiegħek</string>
   <!-- Error text indicating country is invalid -->
-  <string name="address_country_invalid">Il-pajjiż tiegħek mhux validu</string>
+  <string name="stripe_address_country_invalid">Il-pajjiż tiegħek mhux validu</string>
   <!-- Error text indicating that county is required, used for UK addresses -->
-  <string name="address_county_required">Jekk jogħġbok daħħal il-kontea tiegħek</string>
+  <string name="stripe_address_county_required">Jekk jogħġbok daħħal il-kontea tiegħek</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
-  <string name="address_label_address_line1_optional">Indirizz linja 1 (mhux obbligatorju)</string>
+  <string name="stripe_address_label_address_line1_optional">Indirizz linja 1 (mhux obbligatorju)</string>
   <!-- Address line 2 placeholder for billing address form. -->
-  <string name="address_label_address_line2_optional">Indirizz linja 2 (mhux obbligatorju)</string>
+  <string name="stripe_address_label_address_line2_optional">Indirizz linja 2 (mhux obbligatorju)</string>
   <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
-  <string name="address_label_address_optional">Indirizz (mhux obbligatorju)</string>
+  <string name="stripe_address_label_address_optional">Indirizz (mhux obbligatorju)</string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
-  <string name="address_label_apt_optional">Appartament (mhux obbligatorju)</string>
+  <string name="stripe_address_label_apt_optional">Appartament (mhux obbligatorju)</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
-  <string name="address_label_city_optional">Belt (mhux obbligatorju)</string>
+  <string name="stripe_address_label_city_optional">Belt (mhux obbligatorju)</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
-  <string name="address_label_county_optional">Kontea (mhux obbligatorja)</string>
+  <string name="stripe_address_label_county_optional">Kontea (mhux obbligatorja)</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
-  <string name="address_label_phone_number_optional">Numru tat-telefon (mhux obbligatorju)</string>
+  <string name="stripe_address_label_phone_number_optional">Numru tat-telefon (mhux obbligatorju)</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
-  <string name="address_label_postal_code_optional">Kodiċi postali (mhux obbligatorju)</string>
+  <string name="stripe_address_label_postal_code_optional">Kodiċi postali (mhux obbligatorju)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
-  <string name="address_label_postcode">Kodiċi postali</string>
+  <string name="stripe_address_label_postcode">Kodiċi postali</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
-  <string name="address_label_postcode_optional">Kodiċi postali (mhux obbligatorju)</string>
+  <string name="stripe_address_label_postcode_optional">Kodiċi postali (mhux obbligatorju)</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
-  <string name="address_label_province_optional">Provinċja (mhux obbligatorja)</string>
+  <string name="stripe_address_label_province_optional">Provinċja (mhux obbligatorja)</string>
   <!-- Label for input requesting the region, used for international addresses -->
-  <string name="address_label_region_generic">Stat / Provinċja / Reġjun</string>
+  <string name="stripe_address_label_region_generic">Stat / Provinċja / Reġjun</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
-  <string name="address_label_region_generic_optional">Stat / Provinċja / Reġjun (mhux obbligatorju)</string>
+  <string name="stripe_address_label_region_generic_optional">Stat / Provinċja / Reġjun (mhux obbligatorju)</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
-  <string name="address_label_state_optional">Stat (mhux obbligatorju)</string>
+  <string name="stripe_address_label_state_optional">Stat (mhux obbligatorju)</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
-  <string name="address_label_zip_code_optional">Kodiċi postali (mhux obbligatorju)</string>
+  <string name="stripe_address_label_zip_code_optional">Kodiċi postali (mhux obbligatorju)</string>
   <!-- Label for input requesting postal code, used for international addresses -->
-  <string name="address_label_zip_postal_code">Kodiċi postali</string>
+  <string name="stripe_address_label_zip_postal_code">Kodiċi postali</string>
   <!-- Label for input requesting postal code where input is optional, used for international addresses -->
-  <string name="address_label_zip_postal_code_optional">Kodiċi postali (mhux obbligatorju)</string>
+  <string name="stripe_address_label_zip_postal_code_optional">Kodiċi postali (mhux obbligatorju)</string>
   <!-- Error text indicating name is required -->
-  <string name="address_name_required">Jekk jogħġbok daħħal ismek</string>
+  <string name="stripe_address_name_required">Jekk jogħġbok daħħal ismek</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
-  <string name="address_phone_number_required">Jekk jogħġbok daħħal in-numru tat-telefon tiegħek</string>
+  <string name="stripe_address_phone_number_required">Jekk jogħġbok daħħal in-numru tat-telefon tiegħek</string>
   <!-- Error message for when postal code in form is invalid -->
-  <string name="address_postal_code_invalid">Il-kodiċi postali tiegħek mhux validu.</string>
+  <string name="stripe_address_postal_code_invalid">Il-kodiċi postali tiegħek mhux validu.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
-  <string name="address_postcode_invalid">Il-kodiċi postali tiegħek mhux validu</string>
+  <string name="stripe_address_postcode_invalid">Il-kodiċi postali tiegħek mhux validu</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->
-  <string name="address_province_required">Jekk jogħġbok daħħal il-provinċja tiegħek</string>
+  <string name="stripe_address_province_required">Jekk jogħġbok daħħal il-provinċja tiegħek</string>
   <!-- Error text indicating that region is required, used for international addresses -->
-  <string name="address_region_generic_required">Jekk jogħġbok daħħal l-Istat/Provinċja/Reġjun tiegħek</string>
+  <string name="stripe_address_region_generic_required">Jekk jogħġbok daħħal l-Istat/Provinċja/Reġjun tiegħek</string>
   <!-- Error text indicating that address is required, used for all locations -->
-  <string name="address_required">Jekk jogħġbok daħħal l-indirizz tiegħek</string>
+  <string name="stripe_address_required">Jekk jogħġbok daħħal l-indirizz tiegħek</string>
   <!-- Error text indicating that state is required, used for US addresses -->
-  <string name="address_state_required">Jekk jogħġbok daħħal l-istat tiegħek</string>
+  <string name="stripe_address_state_required">Jekk jogħġbok daħħal l-istat tiegħek</string>
   <!-- Pay over time with Affirm copy -->
-  <string name="affirm_buy_now_pay_later">Ħallas bin-nifs grazzi għal &lt;img src=\"affirm\"&gt;.</string>
+  <string name="stripe_affirm_buy_now_pay_later">Ħallas bin-nifs grazzi għal &lt;img src=\"affirm\"&gt;.</string>
   <!-- Label for Name on account field on form -->
-  <string name="au_becs_account_name">Isem sid il-kont</string>
+  <string name="stripe_au_becs_account_name">Isem sid il-kont</string>
   <!-- Placeholder for AU BECS BSB number -->
-  <string name="au_becs_bsb_number">Numru BSB</string>
+  <string name="stripe_au_becs_bsb_number">Numru BSB</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="au_becs_mandate">Meta tagħti d-dettalji tal-kont tal-bank tiegħek u tikkonferma dal-pagament tkun qed taqbel mat-Talba tad-Debitu Dirett u mal-&lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;ftehim tas-servizz tat-Talba tad-Debitu Dirett&lt;/a&gt; u tkun qed tawtorizza lil Stripe Payments Australia Pty Ltd ACN 160 180 343 bin-numru tal-identità tal-Utent tad-Debitu Dirett 507156 (\"Stripe\") biex, f\'isem %s (\"in-Negozjant\"), tiġbor mill-kont tiegħek permezz tal-Bulk Electronic Clearing System (BECS) il-flus kollha li talbek in-Negozjant permezz ta\' messaġġ ieħor. Int tagħti kelmtek li int jew sid il-kont jew firmatarju awtorizzat tal-kont muri hawn fuq.</string>
+  <string name="stripe_au_becs_mandate">Meta tagħti d-dettalji tal-kont tal-bank tiegħek u tikkonferma dal-pagament tkun qed taqbel mat-Talba tad-Debitu Dirett u mal-&lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;ftehim tas-servizz tat-Talba tad-Debitu Dirett&lt;/a&gt; u tkun qed tawtorizza lil Stripe Payments Australia Pty Ltd ACN 160 180 343 bin-numru tal-identità tal-Utent tad-Debitu Dirett 507156 (\"Stripe\") biex, f\'isem %s (\"in-Negozjant\"), tiġbor mill-kont tiegħek permezz tal-Bulk Electronic Clearing System (BECS) il-flus kollha li talbek in-Negozjant permezz ta\' messaġġ ieħor. Int tagħti kelmtek li int jew sid il-kont jew firmatarju awtorizzat tal-kont muri hawn fuq.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="becs_mandate_acceptance">\n    Meta tipprovdi d-dettalji tal-kont bankarju tiegħek u tikkonferma dan il-ħlas, inti\n    taqbel ma\' din it-Talba ta\' Debitu Dirett u l-ftehim ta\' servizz tat-Talba ta\'\n    Debitu Dirett, u tawtorizza lil Stripe Payments Australia Pty Ltd ACN 160 180 343\n    Utent ta\' Debitu Dirett bin-numru tal-ID 507156 (“Stripe”) biex tiddebita l-kont tiegħek\n    permezz tas-Sistema tal-Ikklirjar Elettroniku bl-Ingrossa (BECS) f\'isem %1$s\n    (in-“Negozjant”) għal kwalunkwe ammonti kkomunikati b\'mod separat lilek min-Negozjant.\n    Inti tiċċertifika li inti detentur ta\' kont jew li inti firmatarju awtorizzat fil-kont elenkat hawn fuq.\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    Meta tipprovdi d-dettalji tal-kont bankarju tiegħek u tikkonferma dan il-ħlas, inti\n    taqbel ma\' din it-Talba ta\' Debitu Dirett u l-ftehim ta\' servizz tat-Talba ta\'\n    Debitu Dirett, u tawtorizza lil Stripe Payments Australia Pty Ltd ACN 160 180 343\n    Utent ta\' Debitu Dirett bin-numru tal-ID 507156 (“Stripe”) biex tiddebita l-kont tiegħek\n    permezz tas-Sistema tal-Ikklirjar Elettroniku bl-Ingrossa (BECS) f\'isem %1$s\n    (in-“Negozjant”) għal kwalunkwe ammonti kkomunikati b\'mod separat lilek min-Negozjant.\n    Inti tiċċertifika li inti detentur ta\' kont jew li inti firmatarju awtorizzat fil-kont elenkat hawn fuq.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
-  <string name="becs_widget_account_number">In-numru tal-kont</string>
+  <string name="stripe_becs_widget_account_number">In-numru tal-kont</string>
   <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="becs_widget_account_number_incomplete">In-numru tal-kont tiegħek mhux komplut.</string>
+  <string name="stripe_becs_widget_account_number_incomplete">In-numru tal-kont tiegħek mhux komplut.</string>
   <!-- BECS Debit Widget - account number field - required error message -->
-  <string name="becs_widget_account_number_required">In-numru tal-kont tiegħek huwa meħtieġ.</string>
+  <string name="stripe_becs_widget_account_number_required">In-numru tal-kont tiegħek huwa meħtieġ.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
-  <string name="becs_widget_bsb">BSB</string>
+  <string name="stripe_becs_widget_bsb">BSB</string>
   <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
-  <string name="becs_widget_bsb_incomplete">Il-BSB li daħħalt mhux komplut.</string>
+  <string name="stripe_becs_widget_bsb_incomplete">Il-BSB li daħħalt mhux komplut.</string>
   <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
-  <string name="becs_widget_bsb_invalid">Il-BSB li daħħalt mhux validu.</string>
+  <string name="stripe_becs_widget_bsb_invalid">Il-BSB li daħħalt mhux validu.</string>
   <!-- BECS Debit Widget - email address field - label -->
-  <string name="becs_widget_email">Indirizz Elettroniku</string>
+  <string name="stripe_becs_widget_email">Indirizz Elettroniku</string>
   <!-- BECS Debit Widget - email address field - invalid error message -->
-  <string name="becs_widget_email_invalid">L-indirizz elettroniku tiegħek huwa invalidu.</string>
+  <string name="stripe_becs_widget_email_invalid">L-indirizz elettroniku tiegħek huwa invalidu.</string>
   <!-- BECS Debit Widget - email address field - required error message -->
-  <string name="becs_widget_email_required">L-indirizz elettroniku tiegħek huwa meħtieġ.</string>
+  <string name="stripe_becs_widget_email_required">L-indirizz elettroniku tiegħek huwa meħtieġ.</string>
   <!-- BECS Debit Widget - name field - label -->
-  <string name="becs_widget_name">Isem</string>
+  <string name="stripe_becs_widget_name">Isem</string>
   <!-- BECS Debit Widget - name field - required error message -->
-  <string name="becs_widget_name_required">Ismek huwa meħtieġ.</string>
+  <string name="stripe_becs_widget_name_required">Ismek huwa meħtieġ.</string>
   <!-- Button title to cancel action in an alert -->
-  <string name="cancel">Ikkanċella</string>
+  <string name="stripe_cancel">Ikkanċella</string>
   <!-- Error when the card was declined by the credit card networks -->
-  <string name="card_declined">Il-kard tiegħek ma ġietx aċċettata</string>
+  <string name="stripe_card_declined">Il-kard tiegħek ma ġietx aċċettata</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="card_ending_in">%1$s li jispiċċa %2$s</string>
+  <string name="stripe_card_ending_in">%1$s li jispiċċa %2$s</string>
   <!-- Text for close button -->
-  <string name="close">Agħlaq</string>
+  <string name="stripe_close">Agħlaq</string>
   <!-- Accessibility action for deleting a payment method -->
-  <string name="delete_payment_method">Ħassar il-Metodu tal-Ħlas</string>
-  <string name="delete_payment_method_prompt_title">Tħassar il-metodu tal-ħlas?</string>
+  <string name="stripe_delete_payment_method">Ħassar il-Metodu tal-Ħlas</string>
+  <string name="stripe_delete_payment_method_prompt_title">Tħassar il-metodu tal-ħlas?</string>
   <!-- Done button title -->
-  <string name="done">Bil-lest</string>
+  <string name="stripe_done">Bil-lest</string>
   <!-- Button title to enter editing mode -->
-  <string name="edit">Editja</string>
+  <string name="stripe_edit">Editja</string>
   <!-- Error when the card has already expired -->
-  <string name="expired_card">Il-kard tiegħek skadiet</string>
+  <string name="stripe_expired_card">Il-kard tiegħek skadiet</string>
   <!-- label for text field to enter card expiry -->
-  <string name="expiry_date_hint">XX/SS</string>
-  <string name="expiry_label_short">Skadenza</string>
-  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
-  <string name="fpx_bank_offline">%s - Offline</string>
-  <!-- Error message when a payment method gets declined. -->
-  <string name="generic_decline">Il-metodu tal-pagament tiegħek m\'għaddiex.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="invalid_bank_account_iban">L-IBAN li daħħalt mhux tajjeb.</string>
-  <string name="invalid_card_number">In-numru tal-kard tiegħek mhux validu.</string>
-  <!-- Error message for card entry form when CVC/CVV is invalid -->
-  <string name="invalid_cvc">Il-kodiċi tas-sigurtà tal-kard tiegħek mhux validu.</string>
-  <!-- Error when customer's name is invalid -->
-  <string name="invalid_owner_name">L-isem li daħħalt mhux tajjeb.</string>
-  <!-- Shipping form error message -->
-  <string name="invalid_shipping_information">L-Indirizz għat-Trasport tal-Merkanzija Mhux Validu</string>
-  <!-- Error message for when postal code in form is incomplete -->
-  <string name="invalid_zip">Il-kodiċi postali tiegħek mhux komplut.</string>
-  <string name="payment_method_add_new_card">Żid kard ġdida…</string>
-  <string name="payment_method_add_new_fpx">Agħżel Kont Bankarju (FPX)…</string>
-  <!-- Label for free shipping method -->
-  <string name="price_free">Bla ħlas</string>
-  <!-- Error when there is a problem processing the credit card -->
-  <string name="processing_error">Kien hemm żball fl-ipproċessar tal-kard tiegħek -- erġa\' pprova wara ftit sekondi</string>
-  <!-- Button title for confirmation alert to remove a saved payment method
-   Text for remove button -->
-  <string name="remove">Neħħi</string>
-  <!-- Message displayed when a payment method is removed, stating its name. -->
-  <string name="removed">Imneħħi %s</string>
-  <string name="secure_checkout">Checkout Sigur</string>
+  <string name="stripe_expiry_date_hint">XX/SS</string>
+  <string name="stripe_expiry_label_short">Skadenza</string>
   <!-- Generic error message shown when payment cannot be processed. -->
   <string name="stripe_failure_connection_error">Qed nesperjenzaw problemi fil-konnessjoni mal-fornitur tal-pagamenti tagħna. Jekk jogħġbok iċċekkja l-konnessjoni tal-internet tiegħek u erġa\' pprova.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Ma nistgħux nawtentikaw il-metodu tal-ħlas tiegħek. Jekk jogħġbok agħżel metodu tal-ħlas differenti u erġa\' pprova.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Skada l-ħin tal-awtentikazzjoni tal-metodu tal-ħlas tiegħek -- erġa\' pprova</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="stripe_fpx_bank_offline">%s - Offline</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="stripe_generic_decline">Il-metodu tal-pagament tiegħek m\'għaddiex.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Seħħ żball intern.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="stripe_invalid_bank_account_iban">L-IBAN li daħħalt mhux tajjeb.</string>
+  <string name="stripe_invalid_card_number">In-numru tal-kard tiegħek mhux validu.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="stripe_invalid_cvc">Il-kodiċi tas-sigurtà tal-kard tiegħek mhux validu.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="stripe_invalid_owner_name">L-isem li daħħalt mhux tajjeb.</string>
+  <!-- Shipping form error message -->
+  <string name="stripe_invalid_shipping_information">L-Indirizz għat-Trasport tal-Merkanzija Mhux Validu</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="stripe_invalid_zip">Il-kodiċi postali tiegħek mhux komplut.</string>
+  <string name="stripe_payment_method_add_new_card">Żid kard ġdida…</string>
+  <string name="stripe_payment_method_add_new_fpx">Agħżel Kont Bankarju (FPX)…</string>
+  <!-- Label for free shipping method -->
+  <string name="stripe_price_free">Bla ħlas</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="stripe_processing_error">Kien hemm żball fl-ipproċessar tal-kard tiegħek -- erġa\' pprova wara ftit sekondi</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="stripe_remove">Neħħi</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="stripe_removed">Imneħħi %s</string>
+  <string name="stripe_secure_checkout">Checkout Sigur</string>
+  <string name="stripe_title_add_a_card">Żid Kard</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="stripe_title_add_an_address">Issettja l-Indirizz</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="stripe_title_bank_account">Kont bankarju</string>
+  <!-- Title for Payment Method screen -->
+  <string name="stripe_title_payment_method">Metodu tal-Ħlas</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="stripe_title_select_shipping_method">Agħżel il-Mod tat-Trasport tal-Merkanzija</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Ivverifika l-pagament tiegħek</string>
-  <string name="title_add_a_card">Żid Kard</string>
-  <!-- Screen title telling users they should add an address -->
-  <string name="title_add_an_address">Issettja l-Indirizz</string>
-  <!-- Label for Bank Account selection or detail entry form -->
-  <string name="title_bank_account">Kont bankarju</string>
-  <!-- Title for Payment Method screen -->
-  <string name="title_payment_method">Metodu tal-Ħlas</string>
-  <!-- Screen title telling users they should select a shipping address -->
-  <string name="title_select_shipping_method">Agħżel il-Mod tat-Trasport tal-Merkanzija</string>
 </resources>

@@ -76,6 +76,8 @@ internal data class PartnerAccount(
 
     @SerialName(value = "currency") val currency: String? = null,
 
+    @SerialName(value = "institution") val institution: FinancialConnectionsInstitution? = null,
+
     @SerialName(value = "displayable_account_numbers") val displayableAccountNumbers: String? = null,
 
     @SerialName(value = "initial_balance_amount") val initialBalanceAmount: Int? = null,

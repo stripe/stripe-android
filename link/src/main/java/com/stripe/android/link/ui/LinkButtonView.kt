@@ -41,6 +41,7 @@ import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.R as StripeR
 
 private val LinkButtonVerticalPadding = 6.dp
 private val LinkButtonHorizontalPadding = 10.dp
@@ -98,8 +99,8 @@ fun LinkButton(
                 )
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_link_logo),
-                    contentDescription = stringResource(R.string.link),
+                    painter = painterResource(R.drawable.stripe_link_logo),
+                    contentDescription = stringResource(StripeR.string.stripe_link),
                     modifier = Modifier
                         .height(22.dp)
                         .padding(

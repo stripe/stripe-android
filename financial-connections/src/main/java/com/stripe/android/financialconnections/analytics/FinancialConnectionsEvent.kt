@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.analytics
 
+import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.exception.FinancialConnectionsError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
@@ -159,6 +160,88 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class NetworkingNewConsumer(
+        pane: Pane,
+    ) : FinancialConnectionsEvent(
+        name = "networking.new_consumer",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class NetworkingReturningConsumer(
+        pane: Pane,
+    ) : FinancialConnectionsEvent(
+        name = "networking.returning_consumer",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class VerificationSuccess(
+        pane: Pane,
+    ) : FinancialConnectionsEvent(
+        name = "networking.verification.success",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class VerificationSuccessNoAccounts(
+        pane: Pane,
+    ) : FinancialConnectionsEvent(
+        name = "networking.verification.success_no_accounts",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class VerificationError(
+        pane: Pane,
+        error: Error
+    ) : FinancialConnectionsEvent(
+        name = "networking.verification.error",
+        mapOf(
+            "pane" to pane.value,
+            "error" to error.value,
+        ).filterNotNullValues()
+    ) {
+        enum class Error(val value: String) {
+            ConsumerNotFoundError("ConsumerNotFoundError"),
+            LookupConsumerSession("LookupConsumerSession"),
+            StartVerificationSessionError("StartVerificationSessionError"),
+            ConfirmVerificationSessionError("ConfirmVerificationSessionError"),
+            NetworkedAccountsRetrieveMethodError("NetworkedAccountsRetrieveMethodError"),
+        }
+    }
+
+    class VerificationStepUpSuccess(
+        pane: Pane,
+    ) : FinancialConnectionsEvent(
+        name = "networking.verification.step_up.success",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class VerificationStepUpError(
+        pane: Pane,
+        error: Error
+    ) : FinancialConnectionsEvent(
+        name = "networking.verification.step_up.error",
+        mapOf(
+            "pane" to pane.value,
+            "error" to error.value,
+        ).filterNotNullValues()
+    ) {
+        enum class Error(val value: String) {
+            ConsumerNotFoundError("ConsumerNotFoundError"),
+            LookupConsumerSession("LookupConsumerSession"),
+            StartVerificationError("StartVerificationSessionError"),
+            MarkLinkVerifiedError("MarkLinkStepUpAuthenticationVerifiedError"),
+        }
+    }
+
     class ClickDone(
         pane: Pane,
     ) : FinancialConnectionsEvent(
@@ -172,7 +255,11 @@ internal sealed class FinancialConnectionsEvent(
         pane: Pane,
         exception: Throwable
     ) : FinancialConnectionsEvent(
-        name = if (exception is FinancialConnectionsError) "error.expected" else "error.unexpected",
+        name = when (exception) {
+            is FinancialConnectionsError,
+            is OTPError -> "error.expected"
+            else -> "error.unexpected"
+        },
         params = (
             mapOf("pane" to pane.value)
                 .plus(exception.toEventParams())

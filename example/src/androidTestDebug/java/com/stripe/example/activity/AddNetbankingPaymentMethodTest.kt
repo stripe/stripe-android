@@ -19,6 +19,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.stripe.android.R as StripeR
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -47,7 +48,7 @@ class AddNetbankingPaymentMethodTest {
         launchBankSelector()
 
         // click on first bank in the list
-        onView(withId(R.id.bank_list)).perform(
+        onView(withId(StripeR.id.bank_list)).perform(
             RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click())
         )
     }
@@ -57,7 +58,7 @@ class AddNetbankingPaymentMethodTest {
         launchBankSelector()
 
         // confirm selection without selecting a bank
-        onView(withId(R.id.action_save)).perform(click())
+        onView(withId(StripeR.id.action_save)).perform(click())
 
         // Nothing should happen as no bank was selected
     }

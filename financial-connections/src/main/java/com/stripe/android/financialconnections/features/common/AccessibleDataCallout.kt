@@ -24,12 +24,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
-import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Permissions
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
@@ -146,15 +143,15 @@ private fun AccessibleDataText(
         text = TextResource.StringId(
             value = when {
                 model.isNetworking -> when (model.businessName) {
-                    null -> R.string.data_accessible_callout_through_link_no_business
-                    else -> R.string.data_accessible_callout_through_link
+                    null -> R.string.stripe_data_accessible_callout_through_link_no_business
+                    else -> R.string.stripe_data_accessible_callout_through_link
                 }
 
-                model.isStripeDirect -> R.string.data_accessible_callout_stripe_direct
+                model.isStripeDirect -> R.string.stripe_data_accessible_callout_stripe_direct
 
                 else -> when (model.businessName) {
-                    null -> R.string.data_accessible_callout_through_stripe_no_business
-                    else -> R.string.data_accessible_callout_through_stripe
+                    null -> R.string.stripe_data_accessible_callout_through_stripe_no_business
+                    else -> R.string.stripe_data_accessible_callout_through_stripe
                 }
             },
             args = listOfNotNull(
@@ -212,12 +209,12 @@ private fun readableListOfPermissions(permissionsReadable: List<Int>): String =
 
 private fun List<Permissions>.toStringRes(): List<Int> = mapNotNull {
     when (it) {
-        Permissions.BALANCES -> R.string.data_accessible_type_balances
-        Permissions.OWNERSHIP -> R.string.data_accessible_type_ownership
+        Permissions.BALANCES -> R.string.stripe_data_accessible_type_balances
+        Permissions.OWNERSHIP -> R.string.stripe_data_accessible_type_ownership
         Permissions.PAYMENT_METHOD,
-        Permissions.ACCOUNT_NUMBERS -> R.string.data_accessible_type_accountdetails
+        Permissions.ACCOUNT_NUMBERS -> R.string.stripe_data_accessible_type_accountdetails
 
-        Permissions.TRANSACTIONS -> R.string.data_accessible_type_transactions
+        Permissions.TRANSACTIONS -> R.string.stripe_data_accessible_type_transactions
         Permissions.UNKNOWN -> null
     }
 }.distinct()
@@ -228,19 +225,7 @@ internal data class AccessibleDataCalloutModel(
     val isStripeDirect: Boolean,
     val isNetworking: Boolean,
     val dataPolicyUrl: String
-) {
-
-    companion object {
-        fun fromManifest(manifest: FinancialConnectionsSessionManifest): AccessibleDataCalloutModel =
-            AccessibleDataCalloutModel(
-                businessName = ConsentTextBuilder.getBusinessName(manifest),
-                permissions = manifest.permissions,
-                isNetworking = manifest.isNetworkingUserFlow ?: false,
-                isStripeDirect = manifest.isStripeDirect ?: false,
-                dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
-            )
-    }
-}
+)
 
 @Preview(
     group = "Data Callout",

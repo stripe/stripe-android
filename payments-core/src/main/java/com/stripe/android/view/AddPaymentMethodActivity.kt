@@ -17,7 +17,7 @@ import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.Stripe
-import com.stripe.android.databinding.AddPaymentMethodActivityBinding
+import com.stripe.android.databinding.StripeAddPaymentMethodActivityBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.utils.argsAreInvalid
@@ -72,13 +72,13 @@ class AddPaymentMethodActivity : StripeActivity() {
         get() {
             return when (paymentMethodType) {
                 PaymentMethod.Type.Card -> {
-                    R.string.title_add_a_card
+                    R.string.stripe_title_add_a_card
                 }
                 PaymentMethod.Type.Fpx -> {
-                    R.string.title_bank_account
+                    R.string.stripe_title_bank_account
                 }
                 PaymentMethod.Type.Netbanking -> {
-                    R.string.title_bank_account
+                    R.string.stripe_title_bank_account
                 }
                 else -> {
                     throw IllegalArgumentException(
@@ -114,9 +114,9 @@ class AddPaymentMethodActivity : StripeActivity() {
             window.addFlags(it)
         }
 
-        viewStub.layoutResource = R.layout.add_payment_method_activity
+        viewStub.layoutResource = R.layout.stripe_add_payment_method_activity
         val scrollView = viewStub.inflate() as ViewGroup
-        val viewBinding = AddPaymentMethodActivityBinding.bind(scrollView)
+        val viewBinding = StripeAddPaymentMethodActivityBinding.bind(scrollView)
 
         viewBinding.root.addView(addPaymentMethodView)
         createFooterView(viewBinding.root)?.let {

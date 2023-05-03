@@ -348,7 +348,7 @@ class LpmRepository constructor(
         )
         PaymentMethod.Type.PayPal.code -> {
             val localLayoutSpecs: List<FormItemSpec> = if (stripeIntent.payPalRequiresMandate()) {
-                listOf(MandateTextSpec(stringResId = R.string.paypal_mandate))
+                listOf(MandateTextSpec(stringResId = R.string.stripe_paypal_mandate))
             } else {
                 emptyList()
             }

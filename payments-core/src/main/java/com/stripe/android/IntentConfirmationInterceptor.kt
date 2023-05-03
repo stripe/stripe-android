@@ -68,7 +68,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
 ) : IntentConfirmationInterceptor {
 
     private val genericErrorMessage: String
-        get() = context.getString(R.string.unable_to_complete_operation)
+        get() = context.getString(R.string.stripe_unable_to_complete_operation)
 
     private val requestOptions: ApiRequest.Options
         get() = ApiRequest.Options(

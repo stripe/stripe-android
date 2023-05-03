@@ -8,8 +8,14 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
+import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerSubcomponent
+import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationSubcomponent
 import com.stripe.android.financialconnections.features.manualentry.ManualEntrySubcomponent
 import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessSubcomponent
+import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupSubcomponent
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupSubcomponent
+import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationSubcomponent
+import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationSubcomponent
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
 import com.stripe.android.financialconnections.features.reset.ResetSubcomponent
 import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
@@ -46,6 +52,12 @@ internal interface FinancialConnectionsSheetNativeComponent {
     val successSubcomponent: SuccessSubcomponent.Builder
     val attachPaymentSubcomponent: AttachPaymentSubcomponent.Builder
     val resetSubcomponent: ResetSubcomponent.Builder
+    val networkingLinkSignupSubcomponent: NetworkingLinkSignupSubcomponent.Builder
+    val networkingLinkLoginWarmupSubcomponent: NetworkingLinkLoginWarmupSubcomponent.Builder
+    val networkingLinkVerificationSubcomponent: NetworkingLinkVerificationSubcomponent.Builder
+    val networkingSaveToLinkVerificationSubcomponent: NetworkingSaveToLinkVerificationSubcomponent.Builder
+    val linkAccountPickerSubcomponent: LinkAccountPickerSubcomponent.Builder
+    val linkStepUpVerificationSubcomponent: LinkStepUpVerificationSubcomponent.Builder
 
     @Component.Builder
     interface Builder {

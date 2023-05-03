@@ -37,6 +37,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 /**
  * Represent the possible states for the primary button on a Link screen.
@@ -69,7 +70,7 @@ internal fun completePaymentButtonLabel(
         requireNotNull(stripeIntent.amount),
         requireNotNull(stripeIntent.currency)
     ).buildPayButtonLabel(resources)
-    is SetupIntent -> resources.getString(R.string.stripe_setup_button_label)
+    is SetupIntent -> resources.getString(StripeUiCoreR.string.stripe_setup_button_label)
 }
 
 @Composable
@@ -80,7 +81,7 @@ private fun PrimaryButton() {
             label = "Testing",
             state = PrimaryButtonState.Enabled,
             onButtonClick = { },
-            iconEnd = R.drawable.stripe_ic_lock
+            iconEnd = StripeUiCoreR.drawable.stripe_ic_lock
         )
     }
 }
@@ -122,7 +123,7 @@ internal fun PrimaryButton(
                         strokeWidth = 2.dp
                     )
                     PrimaryButtonState.Completed -> Icon(
-                        painter = painterResource(id = R.drawable.ic_link_complete),
+                        painter = painterResource(id = R.drawable.stripe_link_complete),
                         contentDescription = null,
                         modifier = Modifier
                             .size(24.dp)

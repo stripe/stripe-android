@@ -32,6 +32,9 @@ import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import java.util.Locale
+import com.stripe.android.R as StripeR
+import com.stripe.android.core.R as CoreR
+import com.stripe.android.uicore.R as UiCoreR
 
 /**
  * This contains the Android specific code such as for accessing UI elements, detecting
@@ -221,7 +224,7 @@ class Selectors(
 
     // Note: Compose will take care of scrolling to the field if not in view.
     fun getEmail() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.email)
+        getResourceString(UiCoreR.string.stripe_email)
     )
 
     fun getName(@StringRes resourceId: Int) = composeTestRule.onNodeWithText(
@@ -229,34 +232,34 @@ class Selectors(
     )
 
     fun getLine1() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_address_line1)
+        getResourceString(CoreR.string.stripe_address_label_address_line1)
     )
 
     fun getCity() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_city)
+        getResourceString(CoreR.string.stripe_address_label_city)
     )
 
     fun getState() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_state)
+        getResourceString(CoreR.string.stripe_address_label_state)
     )
 
     fun selectState(value: String) {
-        composeTestRule.onNodeWithText(getResourceString(R.string.address_label_state))
+        composeTestRule.onNodeWithText(getResourceString(CoreR.string.stripe_address_label_state))
             .performClick()
         composeTestRule.onNodeWithText(value)
             .performClick()
     }
 
     fun getZip() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_zip_code)
+        getResourceString(CoreR.string.stripe_address_label_zip_code)
     )
 
     fun getAuBsb() = composeTestRule.onNodeWithText(
-        getResourceString(com.stripe.android.ui.core.R.string.becs_widget_bsb)
+        getResourceString(StripeR.string.stripe_becs_widget_bsb)
     )
 
     fun getAuAccountNumber() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.becs_widget_account_number)
+        getResourceString(StripeR.string.stripe_becs_widget_account_number)
     )
 
     fun getGoogleDividerText() = composeTestRule.onNodeWithText(
@@ -267,19 +270,19 @@ class Selectors(
 
     fun getCardNumber() = composeTestRule.onNodeWithText(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            com.stripe.android.R.string.acc_label_card_number
+            StripeR.string.stripe_acc_label_card_number
         )
     )
 
     fun getCardExpiration() = composeTestRule.onNodeWithText(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            R.string.expiration_date_hint
+            UiCoreR.string.stripe_expiration_date_hint
         )
     )
 
     fun getCardCvc() = composeTestRule.onNodeWithText(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            com.stripe.android.ui.core.R.string.cvc_number_hint
+            StripeR.string.stripe_cvc_number_hint
         )
     )
 

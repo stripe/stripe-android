@@ -12,10 +12,12 @@ import android.widget.LinearLayout
 import com.stripe.android.R
 import com.stripe.android.core.model.Country
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.databinding.AddressWidgetBinding
+import com.stripe.android.databinding.StripeAddressWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.ShippingInformation
 import java.util.Locale
+import com.stripe.android.core.R as CoreR
+import com.stripe.android.uicore.R as UiCoreR
 
 /**
  * A widget used to collect address data from a user.
@@ -26,8 +28,8 @@ class ShippingInfoWidget @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
-    private val viewBinding: AddressWidgetBinding by lazy {
-        AddressWidgetBinding.inflate(
+    private val viewBinding: StripeAddressWidgetBinding by lazy {
+        StripeAddressWidgetBinding.inflate(
             LayoutInflater.from(context),
             this
         )
@@ -237,30 +239,29 @@ class ShippingInfoWidget @JvmOverloads constructor(
         postalCodeEditText.setErrorMessageListener(ErrorListener(postalCodeTextInputLayout))
         stateEditText.setErrorMessageListener(ErrorListener(stateTextInputLayout))
         phoneNumberEditText.setErrorMessageListener(ErrorListener(phoneNumberTextInputLayout))
-        addressEditText.setErrorMessage(resources.getString(R.string.address_required))
-        cityEditText.setErrorMessage(resources.getString(R.string.address_city_required))
-        nameEditText.setErrorMessage(resources.getString(R.string.address_name_required))
+        addressEditText.setErrorMessage(resources.getString(R.string.stripe_address_required))
+        cityEditText.setErrorMessage(resources.getString(R.string.stripe_address_city_required))
+        nameEditText.setErrorMessage(resources.getString(R.string.stripe_address_name_required))
         phoneNumberEditText.setErrorMessage(
             resources.getString(
-                R.string
-                    .address_phone_number_required
+                R.string.stripe_address_phone_number_required
             )
         )
     }
 
     private fun renderLabels() {
-        nameTextInputLayout.hint = resources.getString(R.string.address_label_full_name)
+        nameTextInputLayout.hint = resources.getString(CoreR.string.stripe_address_label_full_name)
         cityTextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.City)) {
-                resources.getString(R.string.address_label_city_optional)
+                resources.getString(R.string.stripe_address_label_city_optional)
             } else {
-                resources.getString(R.string.address_label_city)
+                resources.getString(CoreR.string.stripe_address_label_city)
             }
         phoneNumberTextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.Phone)) {
-                resources.getString(R.string.address_label_phone_number_optional)
+                resources.getString(R.string.stripe_address_label_phone_number_optional)
             } else {
-                resources.getString(R.string.address_label_phone_number)
+                resources.getString(UiCoreR.string.stripe_address_label_phone_number)
             }
         hideHiddenFields()
     }
@@ -316,87 +317,84 @@ class ShippingInfoWidget @JvmOverloads constructor(
     private fun renderUSForm() {
         addressLine1TextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.Line1)) {
-                resources.getString(R.string.address_label_address_optional)
+                resources.getString(R.string.stripe_address_label_address_optional)
             } else {
-                resources.getString(R.string.address_label_address)
+                resources.getString(UiCoreR.string.stripe_address_label_address)
             }
         addressLine2TextInputLayout.hint = resources.getString(
-            R.string
-                .address_label_apt_optional
+            R.string.stripe_address_label_apt_optional
         )
         postalCodeTextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.PostalCode)) {
-                resources.getString(R.string.address_label_zip_code_optional)
+                resources.getString(R.string.stripe_address_label_zip_code_optional)
             } else {
-                resources.getString(R.string.address_label_zip_code)
+                resources.getString(CoreR.string.stripe_address_label_zip_code)
             }
         stateTextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.State)) {
-                resources.getString(R.string.address_label_state_optional)
+                resources.getString(R.string.stripe_address_label_state_optional)
             } else {
-                resources.getString(R.string.address_label_state)
+                resources.getString(CoreR.string.stripe_address_label_state)
             }
-        postalCodeEditText.setErrorMessage(resources.getString(R.string.address_zip_invalid))
-        stateEditText.setErrorMessage(resources.getString(R.string.address_state_required))
+        postalCodeEditText.setErrorMessage(resources.getString(UiCoreR.string.stripe_address_zip_invalid))
+        stateEditText.setErrorMessage(resources.getString(R.string.stripe_address_state_required))
     }
 
     private fun renderGreatBritainForm() {
         addressLine1TextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.Line1)) {
-                resources.getString(R.string.address_label_address_line1_optional)
+                resources.getString(R.string.stripe_address_label_address_line1_optional)
             } else {
-                resources.getString(R.string.address_label_address_line1)
+                resources.getString(CoreR.string.stripe_address_label_address_line1)
             }
         addressLine2TextInputLayout.hint = resources.getString(
-            R.string.address_label_address_line2_optional
+            R.string.stripe_address_label_address_line2_optional
         )
         postalCodeTextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.PostalCode)) {
-                resources.getString(R.string.address_label_postcode_optional)
+                resources.getString(R.string.stripe_address_label_postcode_optional)
             } else {
-                resources.getString(R.string.address_label_postcode)
+                resources.getString(R.string.stripe_address_label_postcode)
             }
         stateTextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.State)) {
-                resources.getString(R.string.address_label_county_optional)
+                resources.getString(R.string.stripe_address_label_county_optional)
             } else {
-                resources.getString(R.string.address_label_county)
+                resources.getString(CoreR.string.stripe_address_label_county)
             }
-        postalCodeEditText.setErrorMessage(resources.getString(R.string.address_postcode_invalid))
-        stateEditText.setErrorMessage(resources.getString(R.string.address_county_required))
+        postalCodeEditText.setErrorMessage(resources.getString(R.string.stripe_address_postcode_invalid))
+        stateEditText.setErrorMessage(resources.getString(R.string.stripe_address_county_required))
     }
 
     private fun renderCanadianForm() {
         addressLine1TextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.Line1)) {
-                resources.getString(R.string.address_label_address_optional)
+                resources.getString(R.string.stripe_address_label_address_optional)
             } else {
-                resources.getString(R.string.address_label_address)
+                resources.getString(UiCoreR.string.stripe_address_label_address)
             }
-        addressLine2TextInputLayout.hint = resources.getString(R.string.address_label_apt_optional)
+        addressLine2TextInputLayout.hint = resources.getString(R.string.stripe_address_label_apt_optional)
         postalCodeTextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.PostalCode)) {
-                resources.getString(R.string.address_label_postal_code_optional)
+                resources.getString(R.string.stripe_address_label_postal_code_optional)
             } else {
-                resources.getString(R.string.address_label_postal_code)
+                resources.getString(CoreR.string.stripe_address_label_postal_code)
             }
         stateTextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.State)) {
-                resources.getString(R.string.address_label_province_optional)
+                resources.getString(R.string.stripe_address_label_province_optional)
             } else {
-                resources.getString(R.string.address_label_province)
+                resources.getString(CoreR.string.stripe_address_label_province)
             }
 
         postalCodeEditText.setErrorMessage(
             resources.getString(
-                R.string
-                    .address_postal_code_invalid
+                R.string.stripe_address_postal_code_invalid
             )
         )
         stateEditText.setErrorMessage(
             resources.getString(
-                R.string
-                    .address_province_required
+                R.string.stripe_address_province_required
             )
         )
     }
@@ -404,37 +402,35 @@ class ShippingInfoWidget @JvmOverloads constructor(
     private fun renderInternationalForm() {
         addressLine1TextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.Line1)) {
-                resources.getString(R.string.address_label_address_line1_optional)
+                resources.getString(R.string.stripe_address_label_address_line1_optional)
             } else {
-                resources.getString(R.string.address_label_address_line1)
+                resources.getString(CoreR.string.stripe_address_label_address_line1)
             }
         addressLine2TextInputLayout.hint =
-            resources.getString(R.string.address_label_address_line2_optional)
+            resources.getString(R.string.stripe_address_label_address_line2_optional)
 
         postalCodeTextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.PostalCode)) {
-                resources.getString(R.string.address_label_zip_postal_code_optional)
+                resources.getString(R.string.stripe_address_label_zip_postal_code_optional)
             } else {
-                resources.getString(R.string.address_label_zip_postal_code)
+                resources.getString(R.string.stripe_address_label_zip_postal_code)
             }
 
         stateTextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.State)) {
-                resources.getString(R.string.address_label_region_generic_optional)
+                resources.getString(R.string.stripe_address_label_region_generic_optional)
             } else {
-                resources.getString(R.string.address_label_region_generic)
+                resources.getString(R.string.stripe_address_label_region_generic)
             }
 
         postalCodeEditText.setErrorMessage(
             resources.getString(
-                R.string
-                    .address_zip_postal_invalid
+                UiCoreR.string.stripe_address_zip_postal_invalid
             )
         )
         stateEditText.setErrorMessage(
             resources.getString(
-                R.string
-                    .address_region_generic_required
+                R.string.stripe_address_region_generic_required
             )
         )
     }

@@ -13,21 +13,25 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
-    visible: "Agree"
+    visible:
+      id: "consent_cta"
     timeout: 30000
-- tapOn: "Agree"
+- tapOn:
+    id: "consent_cta"
 # SELECT LEGACY INSTITUTION
 - tapOn: "Test Institution"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
 ###############################################
-# SELECT ALL ACCOUNTS
+# SELECT SUCCESS ACCOUNT
 - extendedWaitUntil:
     visible: "Success"
     timeout: 60000
 - tapOn: "Success" # select all accounts
-- tapOn: "Link account"
+- tapOn:
+    text: "Link account"
+    retryTapIfNoChange: false
 # CONFIRM AND COMPLETE
 - tapOn: "Done"
 - assertVisible: ".*Intent Confirmed!.*"

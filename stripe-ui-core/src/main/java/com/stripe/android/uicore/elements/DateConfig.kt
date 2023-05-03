@@ -18,7 +18,7 @@ class DateConfig : TextFieldConfig {
     override val debugLabel = "date"
 
     @StringRes
-    override val label = R.string.expiration_date_hint
+    override val label = R.string.stripe_expiration_date_hint
     override val keyboard = KeyboardType.NumberPassword
     override val visualTransformation = ExpiryDateVisualTransformation()
     override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)
@@ -37,10 +37,10 @@ class DateConfig : TextFieldConfig {
             val newString = convertTo4DigitDate(input)
             when {
                 newString.length < 4 -> {
-                    Error.Incomplete(R.string.incomplete_expiry_date)
+                    Error.Incomplete(R.string.stripe_incomplete_expiry_date)
                 }
                 newString.length > 4 -> {
-                    Error.Invalid(R.string.incomplete_expiry_date)
+                    Error.Invalid(R.string.stripe_incomplete_expiry_date)
                 }
                 else -> {
                     determineTextFieldState(
@@ -68,13 +68,13 @@ class DateConfig : TextFieldConfig {
             val twoDigitCurrentYear = currentYear % 100
 
             return if ((twoDigitYear - twoDigitCurrentYear) < 0) {
-                Error.Invalid(R.string.invalid_expiry_year)
+                Error.Invalid(R.string.stripe_invalid_expiry_year)
             } else if ((twoDigitYear - twoDigitCurrentYear) > 50) {
-                Error.Invalid(R.string.invalid_expiry_year)
+                Error.Invalid(R.string.stripe_invalid_expiry_year)
             } else if ((twoDigitYear - twoDigitCurrentYear) == 0 && current1BasedMonth > month1Based) {
-                Error.Invalid(R.string.invalid_expiry_month)
+                Error.Invalid(R.string.stripe_invalid_expiry_month)
             } else if (month1Based !in 1..12) {
-                Error.Incomplete(R.string.invalid_expiry_month)
+                Error.Incomplete(R.string.stripe_invalid_expiry_month)
             } else {
                 Valid.Full
             }

@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.address.AddressRepository
@@ -8,7 +9,6 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
-import com.stripe.android.uicore.elements.supportedBillingCountries
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -18,7 +18,7 @@ data class CardBillingSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("card_billing"),
     @SerialName("allowed_country_codes")
-    val allowedCountryCodes: Set<String> = supportedBillingCountries,
+    val allowedCountryCodes: Set<String> = CountryUtils.supportedBillingCountries,
     @SerialName("collection_mode")
     val collectionMode: CardBillingDetailsCollectionConfiguration.AddressCollectionMode =
         CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
@@ -56,7 +56,7 @@ data class CardBillingSpec(
                 addressElement,
                 sameAsShippingElement
             ),
-            R.string.billing_details
+            R.string.stripe_billing_details
         )
     }
 }

@@ -24,7 +24,7 @@ class UpiConfig : TextFieldConfig {
     }
 
     @StringRes
-    override val label: Int = R.string.upi_id_label
+    override val label: Int = R.string.stripe_upi_id_label
 
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "upi_id"
@@ -41,7 +41,7 @@ class UpiConfig : TextFieldConfig {
         } else if (isValid) {
             TextFieldStateConstants.Valid.Limitless
         } else {
-            TextFieldStateConstants.Error.Incomplete(errorMessageResId = R.string.invalid_upi_id)
+            TextFieldStateConstants.Error.Incomplete(errorMessageResId = R.string.stripe_invalid_upi_id)
         }
     }
 

@@ -23,7 +23,6 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.isSystemDarkTheme
@@ -44,14 +43,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     private val bottomSheetController: BottomSheetController by lazy {
         BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
     }
-
-    /**
-     * This variable is a temporary way of passing parameters to [USBankAccountFormFragment] from
-     * [AddPaymentMethod], while the former is not fully refactored to Compose.
-     * These arguments can't be passed through the Fragment's arguments because the Fragment is
-     * added with an [AndroidViewBinding] from Compose, which doesn't allow that.
-     */
-    var formArgs: FormArguments? = null
 
     abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup
@@ -131,7 +122,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     }
 
     private fun setSheetWidthForTablets() {
-        if (!resources.getBoolean(R.bool.isTablet)) {
+        if (!resources.getBoolean(R.bool.stripe_is_tablet)) {
             return
         }
 

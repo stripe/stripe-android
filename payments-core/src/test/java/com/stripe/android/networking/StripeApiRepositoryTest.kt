@@ -34,6 +34,7 @@ import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSessionFixtures
@@ -54,6 +55,7 @@ import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.model.StripeFileFixtures
 import com.stripe.android.model.TokenFixtures
+import com.stripe.android.model.VerificationMethodParam
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -256,6 +258,14 @@ internal class StripeApiRepositoryTest {
         assertEquals(
             "https://api.stripe.com/v1/consumers/link_account_sessions",
             StripeApiRepository.linkFinancialConnectionsSessionUrl
+        )
+    }
+
+    @Test
+    fun testDeferredFinancialConnectionsSessionUrlUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/connections/link_account_sessions_for_deferred_payment",
+            StripeApiRepository.deferredFinancialConnectionsSessionUrl
         )
     }
 
@@ -1713,6 +1723,48 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun `createDeferredFinancialConnectionsSession() sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                FinancialConnectionsFixtures.SESSION.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            create().createFinancialConnectionsSessionForDeferredPayments(
+                CreateFinancialConnectionsSessionForDeferredPaymentParams(
+                    uniqueId = "uuid",
+                    initialInstitution = "initial_institution",
+                    manualEntryOnly = false,
+                    searchSession = "search_session_id",
+                    verificationMethod = VerificationMethodParam.Automatic,
+                    customer = "customer_id",
+                    onBehalfOf = null,
+                    amount = 1000,
+                    currency = "usd"
+                ),
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+            with(params) {
+                assertEquals("uuid", this["unique_id"])
+                assertEquals("initial_institution", this["initial_institution"])
+                assertEquals(false, this["manual_entry_only"])
+                assertEquals("search_session_id", this["search_session"])
+                assertEquals("automatic", this["verification_method"])
+                assertEquals("customer_id", this["customer"])
+                assertEquals(null, this["on_behalf_of"])
+                assertEquals(1000, this["amount"])
+                assertEquals("usd", this["currency"])
+            }
+        }
+
+    @Test
     fun `createPaymentDetails() for financial connections sends all parameters`() =
         runTest {
             val stripeResponse = StripeResponse(
@@ -2366,9 +2418,12 @@ internal class StripeApiRepositoryTest {
                 deferredIntentParams = DeferredIntentParams(
                     mode = DeferredIntentParams.Mode.Payment(
                         amount = 2000,
-                        currency = "usd"
+                        currency = "usd",
+                        captureMethod = null,
+                        setupFutureUsage = null,
                     ),
-                    paymentMethodTypes = setOf("card", "link")
+                    paymentMethodTypes = listOf("card", "link"),
+                    onBehalfOf = null,
                 )
             ),
             options = DEFAULT_OPTIONS,

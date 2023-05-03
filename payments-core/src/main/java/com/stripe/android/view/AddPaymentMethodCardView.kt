@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
-import com.stripe.android.databinding.AddPaymentMethodCardViewBinding
+import com.stripe.android.databinding.StripeAddPaymentMethodCardViewBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 
@@ -61,7 +61,7 @@ internal class AddPaymentMethodCardView @JvmOverloads internal constructor(
         }
 
     init {
-        val viewBinding = AddPaymentMethodCardViewBinding.inflate(
+        val viewBinding = StripeAddPaymentMethodCardViewBinding.inflate(
             LayoutInflater.from(context),
             this,
             true

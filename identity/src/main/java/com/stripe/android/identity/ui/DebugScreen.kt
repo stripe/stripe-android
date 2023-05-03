@@ -51,21 +51,21 @@ internal fun DebugScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(
-                    start = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    end = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    top = dimensionResource(id = R.dimen.page_vertical_margin),
-                    bottom = dimensionResource(id = R.dimen.page_vertical_margin)
+                    start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                    end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                    top = dimensionResource(id = R.dimen.stripe_page_vertical_margin),
+                    bottom = dimensionResource(id = R.dimen.stripe_page_vertical_margin)
                 )
         ) {
             val context = LocalContext.current
 
             TitleSection()
             Divider(
-                modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.item_vertical_margin))
+                modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
             )
             FinishMobileFlowWithResultSection(verificationFlowFinishable)
             Divider(
-                modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.item_vertical_margin))
+                modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
             )
             PreviewUserExperienceSection {
                 navController.navigateTo(
@@ -85,21 +85,21 @@ private fun TitleSection() {
         modifier = Modifier.fillMaxWidth()
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ic_exclamation),
+            painter = painterResource(id = R.drawable.stripe_exclamation),
             modifier = Modifier
                 .width(32.dp)
                 .height(32.dp)
                 .padding(end = 8.dp),
-            contentDescription = stringResource(id = R.string.description_exclamation),
+            contentDescription = stringResource(id = R.string.stripe_description_exclamation),
             colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
         )
         Column {
             Text(
-                text = stringResource(id = R.string.test_model_title),
+                text = stringResource(id = R.string.stripe_test_model_title),
                 style = MaterialTheme.typography.subtitle2
             )
             Text(
-                text = stringResource(id = R.string.test_model_content)
+                text = stringResource(id = R.string.stripe_test_model_content)
             )
         }
     }
@@ -109,13 +109,13 @@ private fun TitleSection() {
 private fun FinishMobileFlowWithResultSection(
     finishable: VerificationFlowFinishable
 ) {
-    val failureExceptionMessage = stringResource(id = R.string.failure_from_test_mode)
+    val failureExceptionMessage = stringResource(id = R.string.stripe_failure_from_test_mode)
     Text(
-        text = stringResource(id = R.string.finish_mobile_flow),
+        text = stringResource(id = R.string.stripe_finish_mobile_flow),
         style = MaterialTheme.typography.h4
     )
     Html(
-        html = stringResource(id = R.string.finish_mobile_flow_details),
+        html = stringResource(id = R.string.stripe_finish_mobile_flow_details),
         modifier = Modifier.padding(vertical = 8.dp)
     )
 
@@ -127,7 +127,7 @@ private fun FinishMobileFlowWithResultSection(
             finishable.finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Completed)
         }
     ) {
-        Text(text = stringResource(id = R.string.completed))
+        Text(text = stringResource(id = R.string.stripe_completed))
     }
 
     Button(
@@ -138,7 +138,7 @@ private fun FinishMobileFlowWithResultSection(
             finishable.finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Canceled)
         }
     ) {
-        Text(text = stringResource(id = R.string.cancelled))
+        Text(text = stringResource(id = R.string.stripe_cancelled))
     }
 
     Button(
@@ -153,7 +153,7 @@ private fun FinishMobileFlowWithResultSection(
             )
         }
     ) {
-        Text(text = stringResource(id = R.string.failed))
+        Text(text = stringResource(id = R.string.stripe_failed))
     }
 }
 
@@ -162,11 +162,11 @@ private fun PreviewUserExperienceSection(
     onProceedClicked: () -> Unit
 ) {
     Text(
-        text = stringResource(id = R.string.preview_user_experience),
+        text = stringResource(id = R.string.stripe_preview_user_experience),
         style = MaterialTheme.typography.h4
     )
     Text(
-        text = stringResource(id = R.string.preview_user_experience_details),
+        text = stringResource(id = R.string.stripe_preview_user_experience_details),
         modifier = Modifier.padding(vertical = 8.dp)
     )
     Button(
@@ -175,7 +175,7 @@ private fun PreviewUserExperienceSection(
             .testTag(TEST_TAG_PROCEED_BUTTON),
         onClick = onProceedClicked
     ) {
-        Text(text = stringResource(id = R.string.proceed))
+        Text(text = stringResource(id = R.string.stripe_proceed))
     }
 }
 

@@ -59,6 +59,7 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.text.dimensionResourceSp
 import kotlinx.coroutines.launch
+import com.google.android.material.R as MaterialR
 
 internal const val FRONT_ROW_TAG = "frontRow"
 internal const val BACK_ROW_TAG = "backRow"
@@ -138,19 +139,19 @@ internal fun UploadScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(
-                    start = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    end = dimensionResource(id = R.dimen.page_horizontal_margin),
+                    start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                    end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
                     top = 64.dp,
-                    bottom = dimensionResource(id = R.dimen.page_vertical_margin)
+                    bottom = dimensionResource(id = R.dimen.stripe_page_vertical_margin)
                 )
                 .testTag(SCROLLABLE_COLUMN_TAG)
         ) {
             Text(
                 text = stringResource(id = titleRes),
-                fontSize = dimensionResourceSp(id = R.dimen.upload_title_text_size),
+                fontSize = dimensionResourceSp(id = R.dimen.stripe_upload_title_text_size),
 
                 modifier = Modifier.padding(
-                    vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+                    vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
                 )
             )
             Text(
@@ -224,7 +225,11 @@ internal fun UploadScreen(
 
             if (shouldShowBack) {
                 var shouldShowBackDialog by remember { mutableStateOf(false) }
-                Divider(modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin)))
+                Divider(
+                    modifier = Modifier.padding(
+                        bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
+                    ),
+                )
                 val backUploadedUiState by remember {
                     derivedStateOf {
                         collectedData.idDocumentBack?.let {
@@ -283,7 +288,7 @@ internal fun UploadScreen(
             }
             LoadingButton(
                 modifier = Modifier.testTag(UPLOAD_SCREEN_CONTINUE_BUTTON_TAG),
-                text = stringResource(id = R.string.kontinue).uppercase(),
+                text = stringResource(id = R.string.stripe_kontinue).uppercase(),
                 state = continueButtonState
             ) {
                 continueButtonState = LoadingButtonState.Loading
@@ -316,13 +321,13 @@ internal fun UploadImageDialog(
             Column(
                 modifier = Modifier
                     .padding(
-                        vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+                        vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
                     )
             ) {
                 Text(
                     modifier = Modifier.padding(
                         bottom = dimensionResource(
-                            id = R.dimen.item_vertical_margin
+                            id = R.dimen.stripe_item_vertical_margin
                         ),
                         start = 24.dp,
                         end = 24.dp
@@ -333,7 +338,7 @@ internal fun UploadImageDialog(
                 )
                 if (shouldShowTakePhoto) {
                     DialogListItem(
-                        text = stringResource(id = R.string.take_photo),
+                        text = stringResource(id = R.string.stripe_take_photo),
                         testTag = SHOULD_SHOW_TAKE_PHOTO_TAG
                     ) {
                         onUploadMethodSelected()
@@ -342,7 +347,7 @@ internal fun UploadImageDialog(
                 }
                 if (shouldShowChoosePhoto) {
                     DialogListItem(
-                        text = stringResource(id = R.string.choose_file),
+                        text = stringResource(id = R.string.stripe_choose_file),
                         testTag = SHOULD_SHOW_CHOOSE_PHOTO_TAG
                     ) {
                         onUploadMethodSelected()
@@ -365,7 +370,7 @@ private fun DialogListItem(
             .testTag(testTag)
             .height(
                 dimensionResource(
-                    com.google.android.material.R.dimen.abc_list_item_height_small_material
+                    MaterialR.dimen.abc_list_item_height_small_material
                 )
             )
             .clickable { onSelected() },
@@ -386,19 +391,19 @@ private fun DialogListItem(
 private fun getTitleFromScanType(scanType: IdentityScanState.ScanType): String {
     return when (scanType) {
         IdentityScanState.ScanType.ID_FRONT -> {
-            stringResource(R.string.upload_dialog_title_id_front)
+            stringResource(R.string.stripe_upload_dialog_title_id_front)
         }
         IdentityScanState.ScanType.ID_BACK -> {
-            stringResource(R.string.upload_dialog_title_id_back)
+            stringResource(R.string.stripe_upload_dialog_title_id_back)
         }
         IdentityScanState.ScanType.DL_FRONT -> {
-            stringResource(R.string.upload_dialog_title_dl_front)
+            stringResource(R.string.stripe_upload_dialog_title_dl_front)
         }
         IdentityScanState.ScanType.DL_BACK -> {
-            stringResource(R.string.upload_dialog_title_dl_back)
+            stringResource(R.string.stripe_upload_dialog_title_dl_back)
         }
         IdentityScanState.ScanType.PASSPORT -> {
-            stringResource(R.string.upload_dialog_title_passport)
+            stringResource(R.string.stripe_upload_dialog_title_passport)
         }
         else -> {
             throw java.lang.IllegalArgumentException("invalid scan type: $scanType")
@@ -419,7 +424,7 @@ private fun SingleSideUploadRow(
 ) {
     Row(
         modifier = modifier
-            .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
+            .padding(bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
             .fillMaxWidth()
             .height(48.dp),
         horizontalArrangement = Arrangement.SpaceBetween
@@ -433,7 +438,7 @@ private fun SingleSideUploadRow(
                 TextButton(onClick = {
                     onSelectButtonClicked()
                 }) {
-                    Text(text = stringResource(id = R.string.select).uppercase())
+                    Text(text = stringResource(id = R.string.stripe_select).uppercase())
                 }
             }
             DocumentUploadUIState.Loading -> {
@@ -446,7 +451,7 @@ private fun SingleSideUploadRow(
             }
             DocumentUploadUIState.Done -> {
                 Image(
-                    painter = painterResource(id = R.drawable.check_mark),
+                    painter = painterResource(id = R.drawable.stripe_check_mark),
                     contentDescription = stringResource(id = uploadInfo.checkmarkContentDescriptionRes),
                     modifier = Modifier
                         .height(18.dp)

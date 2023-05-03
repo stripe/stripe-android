@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.launch
 import java.util.Locale
+import com.stripe.android.uicore.R as UiCoreR
 
 class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
@@ -662,7 +663,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         val checkboxLabel = if (viewBinding.shippingAddressCheckboxLabel.text.isNotBlank()) {
             viewBinding.shippingAddressCheckboxLabel.text.toString()
         } else {
-            getString(R.string.billing_same_as_shipping)
+            getString(UiCoreR.string.stripe_billing_same_as_shipping)
         }
         builder.additionalFields(
             AddressLauncher.AdditionalFieldsConfiguration(

@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.VerificationType
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.header
@@ -111,11 +112,14 @@ class ConsumersApiServiceImplTest {
         }
 
         val consumerSession = consumersApiService.startConsumerVerification(
-            clientSecret,
-            locale,
-            cookie,
-            "android_payment_element",
-            DEFAULT_OPTIONS
+            consumerSessionClientSecret = clientSecret,
+            locale = locale,
+            authSessionCookie = cookie,
+            requestSurface = "android_payment_element",
+            type = VerificationType.SMS,
+            customEmailType = null,
+            connectionsMerchantName = null,
+            requestOptions = DEFAULT_OPTIONS
         )
 
         assertThat(consumerSession.redactedPhoneNumber).isEqualTo("+1********56")
@@ -152,6 +156,7 @@ class ConsumersApiServiceImplTest {
             verificationCode = verificationCode,
             authSessionCookie = cookie,
             requestSurface = "android_payment_element",
+            type = VerificationType.SMS,
             requestOptions = DEFAULT_OPTIONS
         )
 

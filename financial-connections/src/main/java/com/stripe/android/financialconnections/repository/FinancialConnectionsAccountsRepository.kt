@@ -3,11 +3,17 @@ package com.stripe.android.financialconnections.repository
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
+import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
-import com.stripe.android.financialconnections.network.NetworkConstants
+import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_CLIENT_SECRET
+import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_CONSUMER_CLIENT_SECRET
+import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_ID
+import com.stripe.android.financialconnections.network.NetworkConstants.PARAM_SELECTED_ACCOUNTS
+import com.stripe.android.financialconnections.utils.filterNotNullValues
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -17,20 +23,29 @@ import kotlinx.coroutines.sync.withLock
  */
 internal interface FinancialConnectionsAccountsRepository {
 
-    suspend fun getOrFetchAccounts(
-        clientSecret: String,
-        sessionId: String
-    ): PartnerAccountsList
+    suspend fun getCachedAccounts(): List<PartnerAccount>?
+
+    suspend fun updateCachedAccounts(partnerAccountsList: List<PartnerAccount>?)
 
     suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
         sessionId: String
     ): PartnerAccountsList
 
+    /**
+     * Retrieve the networked accounts for the Link consumer after verification
+     *
+     * This method is called after the account holder has been verified as an existing Link consumer.
+     */
+    suspend fun getNetworkedAccounts(
+        clientSecret: String,
+        consumerSessionClientSecret: String,
+    ): PartnerAccountsList
+
     suspend fun postLinkAccountSessionPaymentAccount(
         clientSecret: String,
         paymentAccount: PaymentAccountParams,
-        consumerSessionClientSecret: String? = null
+        consumerSessionClientSecret: String?
     ): LinkAccountSessionPaymentAccount
 
     suspend fun postAuthorizationSessionSelectedAccounts(
@@ -39,6 +54,12 @@ internal interface FinancialConnectionsAccountsRepository {
         selectAccounts: List<String>,
         updateLocalCache: Boolean
     ): PartnerAccountsList
+
+    suspend fun postShareNetworkedAccount(
+        clientSecret: String,
+        consumerSessionClientSecret: String,
+        selectedAccountId: String
+    ): InstitutionResponse
 
     companion object {
         operator fun invoke(
@@ -64,21 +85,17 @@ private class FinancialConnectionsAccountsRepositoryImpl(
 ) : FinancialConnectionsAccountsRepository {
 
     /**
-     * Ensures that manifest accesses via [getOrFetchAccounts] suspend until
+     * Ensures that [cachedAccounts] accesses via [getCachedAccounts] suspend until
      * current writes are running.
      */
     val mutex = Mutex()
-    private var cachedAccounts: PartnerAccountsList? = null
+    private var cachedAccounts: List<PartnerAccount>? = null
 
-    override suspend fun getOrFetchAccounts(
-        clientSecret: String,
-        sessionId: String
-    ): PartnerAccountsList =
-        mutex.withLock {
-            cachedAccounts ?: run {
-                postAuthorizationSessionAccounts(clientSecret, sessionId)
-            }
-        }
+    override suspend fun getCachedAccounts(): List<PartnerAccount>? =
+        mutex.withLock { cachedAccounts }
+
+    override suspend fun updateCachedAccounts(partnerAccountsList: List<PartnerAccount>?) =
+        mutex.withLock { cachedAccounts = partnerAccountsList }
 
     override suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
@@ -88,16 +105,58 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             url = accountsSessionUrl,
             options = apiOptions,
             params = mapOf(
-                NetworkConstants.PARAMS_ID to sessionId,
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
+                PARAMS_ID to sessionId,
+                PARAMS_CLIENT_SECRET to clientSecret,
+                "expand" to listOf("data.institution"),
             )
         )
         return requestExecutor.execute(
             request,
             PartnerAccountsList.serializer()
         ).also {
-            updateCachedAccounts("getOrFetchAccounts", it)
+            updateCachedAccounts("getOrFetchAccounts", it.data)
         }
+    }
+
+    override suspend fun getNetworkedAccounts(
+        clientSecret: String,
+        consumerSessionClientSecret: String
+    ): PartnerAccountsList {
+        val request = apiRequestFactory.createGet(
+            url = networkedAccountsUrl,
+            options = apiOptions,
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to clientSecret,
+                PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
+                "expand" to listOf("data.institution"),
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            PartnerAccountsList.serializer()
+        ).also {
+            updateCachedAccounts("getNetworkedAccounts", it.data)
+        }
+    }
+
+    override suspend fun postShareNetworkedAccount(
+        clientSecret: String,
+        consumerSessionClientSecret: String,
+        selectedAccountId: String
+    ): InstitutionResponse {
+        val request = apiRequestFactory.createPost(
+            url = shareNetworkedAccountsUrl,
+            options = apiOptions,
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to clientSecret,
+                PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
+                "$PARAM_SELECTED_ACCOUNTS[0]" to selectedAccountId,
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            InstitutionResponse.serializer()
+        )
     }
 
     override suspend fun postLinkAccountSessionPaymentAccount(
@@ -109,8 +168,9 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             url = attachPaymentAccountUrl,
             options = apiOptions,
             params = mapOf(
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
-            ) + paymentAccount.toParamMap()
+                PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
+                PARAMS_CLIENT_SECRET to clientSecret
+            ).filterNotNullValues() + paymentAccount.toParamMap()
         )
         return requestExecutor.execute(
             request,
@@ -128,31 +188,41 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             url = authorizationSessionSelectedAccountsUrl,
             options = apiOptions,
             params = mapOf(
-                NetworkConstants.PARAMS_ID to sessionId,
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
+                PARAMS_ID to sessionId,
+                PARAMS_CLIENT_SECRET to clientSecret,
+                "expand" to listOf("data.institution"),
             ) + selectAccounts.mapIndexed { index, account -> "$PARAM_SELECTED_ACCOUNTS[$index]" to account }
         )
         return requestExecutor.execute(
             request,
             PartnerAccountsList.serializer()
         ).also {
-            if (updateLocalCache) updateCachedAccounts("postAuthorizationSessionSelectedAccounts", it)
+            if (updateLocalCache) {
+                updateCachedAccounts(
+                    "postAuthorizationSessionSelectedAccounts",
+                    it.data
+                )
+            }
         }
     }
 
     private fun updateCachedAccounts(
         source: String,
-        accounts: PartnerAccountsList
+        accounts: List<PartnerAccount>
     ) {
         logger.debug("updating local partner accounts from $source")
         cachedAccounts = accounts
     }
 
     companion object {
-        internal const val PARAM_SELECTED_ACCOUNTS: String = "selected_accounts"
-
         internal val accountsSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/accounts"
+
+        internal val networkedAccountsUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/networked_accounts"
+
+        internal val shareNetworkedAccountsUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/share_networked_account"
 
         internal val attachPaymentAccountUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/attach_payment_account"

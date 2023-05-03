@@ -43,6 +43,7 @@ import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ErrorTextStyle
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
+import com.stripe.android.R as StripeR
 
 @Composable
 internal fun PaymentDetailsListItem(
@@ -91,7 +92,7 @@ internal fun PaymentDetailsListItem(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = stringResource(id = R.string.wallet_default),
+                            text = stringResource(id = R.string.stripe_wallet_default),
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                             color = MaterialTheme.linkColors.disabledText,
                             fontSize = 12.sp,
@@ -103,7 +104,7 @@ internal fun PaymentDetailsListItem(
                 val showWarning = (paymentDetails as? Card)?.isExpired ?: false
                 if (showWarning && !isSelected) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_link_error),
+                        painter = painterResource(R.drawable.stripe_link_error),
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.linkColors.errorText
@@ -112,7 +113,7 @@ internal fun PaymentDetailsListItem(
             }
             if (!isSupported) {
                 ErrorText(
-                    text = stringResource(id = R.string.wallet_unavailable),
+                    text = stringResource(id = R.string.stripe_wallet_unavailable),
                     style = ErrorTextStyle.Small,
                     modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
                 )
@@ -137,7 +138,7 @@ internal fun PaymentDetailsListItem(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.MoreVert,
-                        contentDescription = stringResource(R.string.edit),
+                        contentDescription = stringResource(StripeR.string.stripe_edit),
                         tint = MaterialTheme.linkColors.actionLabelLight,
                         modifier = Modifier.size(24.dp)
                     )

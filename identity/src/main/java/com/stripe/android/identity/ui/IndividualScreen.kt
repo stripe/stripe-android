@@ -73,10 +73,10 @@ internal fun IndividualScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    start = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    end = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    top = dimensionResource(id = R.dimen.page_vertical_margin),
-                    bottom = dimensionResource(id = R.dimen.page_vertical_margin)
+                    start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                    end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                    top = dimensionResource(id = R.dimen.stripe_page_vertical_margin),
+                    bottom = dimensionResource(id = R.dimen.stripe_page_vertical_margin)
                 )
         ) {
             Column(

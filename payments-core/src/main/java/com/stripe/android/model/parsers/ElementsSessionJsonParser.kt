@@ -103,7 +103,7 @@ internal class ElementsSessionJsonParser(
                         is DeferredIntentParams.Mode.Payment -> {
                             DeferredPaymentIntentJsonParser(
                                 elementsSessionId = elementsSessionId,
-                                params = params.deferredIntentParams,
+                                paymentMode = params.deferredIntentParams.mode,
                                 apiKey = apiKey,
                                 timeProvider = timeProvider
                             ).parse(json)
@@ -111,7 +111,7 @@ internal class ElementsSessionJsonParser(
                         is DeferredIntentParams.Mode.Setup -> {
                             DeferredSetupIntentJsonParser(
                                 elementsSessionId = elementsSessionId,
-                                params = params.deferredIntentParams,
+                                setupMode = params.deferredIntentParams.mode,
                                 apiKey = apiKey,
                                 timeProvider = timeProvider
                             ).parse(json)

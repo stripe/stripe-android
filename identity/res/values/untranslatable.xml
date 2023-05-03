@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="dob_placeholder">MM / DD / YYYY</string>
+    <string name="stripe_dob_placeholder" translatable="false">MM / DD / YYYY</string>
 </resources>

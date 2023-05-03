@@ -38,11 +38,12 @@ private val LightColorPalette = FinancialConnectionsColors(
     textBrand = Brand500,
     textInfo = Blue500,
     textSuccess = Green500,
-    textAttention = Color.Unspecified,
+    textAttention = Attention500,
     textCritical = Red500,
     iconBrand = Brand400,
     iconInfo = Blue400,
-    iconSuccess = Green400
+    iconSuccess = Green400,
+    iconAttention = Attention400
 )
 
 private val Typography = FinancialConnectionsTypography(

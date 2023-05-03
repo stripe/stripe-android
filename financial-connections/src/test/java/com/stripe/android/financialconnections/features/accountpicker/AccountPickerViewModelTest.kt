@@ -21,7 +21,6 @@ import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import java.util.Locale
 import kotlin.test.assertEquals
 
 @ExperimentalCoroutinesApi
@@ -40,15 +39,14 @@ internal class AccountPickerViewModelTest {
     private fun buildViewModel(
         state: AccountPickerState
     ) = AccountPickerViewModel(
-        goNext = goNext,
-        locale = Locale.US,
-        pollAuthorizationSessionAccounts = pollAuthorizationSessionAccounts,
-        getManifest = getManifest,
+        initialState = state,
+        eventTracker = eventTracker,
         selectAccounts = selectAccounts,
+        getManifest = getManifest,
+        goNext = goNext,
         navigationManager = navigationManager,
         logger = Logger.noop(),
-        eventTracker = eventTracker,
-        initialState = state
+        pollAuthorizationSessionAccounts = pollAuthorizationSessionAccounts
     )
 
     @Test

@@ -56,7 +56,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:editable="false"
-                android:drawablePadding="@dimen/card_brand_spinner_dropdown_drawable_padding"
+                android:drawablePadding="@dimen/stripe_card_brand_spinner_dropdown_drawable_padding"
                 android:textSize="20sp" />
 
         </com.google.android.material.textfield.TextInputLayout>

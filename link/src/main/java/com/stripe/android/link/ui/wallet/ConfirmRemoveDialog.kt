@@ -6,10 +6,10 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.stripe.android.link.R
 import com.stripe.android.link.model.removeConfirmation
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.R as StripeR
 
 @Composable
 internal fun ConfirmRemoveDialog(
@@ -29,7 +29,7 @@ internal fun ConfirmRemoveDialog(
                     }
                 ) {
                     Text(
-                        text = stringResource(R.string.remove),
+                        text = stringResource(StripeR.string.stripe_remove),
                         color = MaterialTheme.linkColors.actionLabel
                     )
                 }
@@ -41,7 +41,7 @@ internal fun ConfirmRemoveDialog(
                     }
                 ) {
                     Text(
-                        text = stringResource(R.string.cancel),
+                        text = stringResource(StripeR.string.stripe_cancel),
                         color = MaterialTheme.linkColors.actionLabel
                     )
                 }

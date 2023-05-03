@@ -11,12 +11,13 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
+import com.stripe.android.R as StripeR
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun AffirmElementUI() {
     Html(
-        html = stringResource(id = R.string.affirm_buy_now_pay_later),
+        html = stringResource(id = StripeR.string.stripe_affirm_buy_now_pay_later),
         imageLoader = mapOf(
             "affirm" to EmbeddableImage.Drawable(
                 R.drawable.stripe_ic_affirm_logo,

@@ -179,18 +179,18 @@ class UploadScreenTest {
                 identityViewModel = mockIdentityViewModel,
                 collectedDataParamType = CollectedDataParam.Type.IDCARD,
                 route = IDUploadDestination.ROUTE.route,
-                titleRes = R.string.file_upload,
-                contextRes = R.string.file_upload_content_dl,
+                titleRes = R.string.stripe_file_upload,
+                contextRes = R.string.stripe_file_upload_content_dl,
                 frontInfo = DocumentUploadSideInfo(
-                    descriptionRes = R.string.front_of_dl,
-                    checkmarkContentDescriptionRes = R.string.front_of_dl_selected,
+                    descriptionRes = R.string.stripe_front_of_dl,
+                    checkmarkContentDescriptionRes = R.string.stripe_front_of_dl_selected,
                     scanType = FRONT_SCAN_TYPE
                 ),
                 backInfo =
                 if (hasBack) {
                     DocumentUploadSideInfo(
-                        descriptionRes = R.string.back_of_dl,
-                        checkmarkContentDescriptionRes = R.string.back_of_dl_selected,
+                        descriptionRes = R.string.stripe_back_of_dl,
+                        checkmarkContentDescriptionRes = R.string.stripe_back_of_dl_selected,
                         scanType = BACK_SCAN_TYPE
                     )
                 } else {
@@ -210,8 +210,8 @@ class UploadScreenTest {
         composeTestRule.setContent {
             UploadImageDialog(
                 uploadInfo = DocumentUploadSideInfo(
-                    descriptionRes = R.string.front_of_dl,
-                    checkmarkContentDescriptionRes = R.string.front_of_dl_selected,
+                    descriptionRes = R.string.stripe_front_of_dl,
+                    checkmarkContentDescriptionRes = R.string.stripe_front_of_dl_selected,
                     scanType = FRONT_SCAN_TYPE
                 ),
                 shouldShowTakePhoto = true,

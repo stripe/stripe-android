@@ -71,6 +71,7 @@ import com.stripe.android.identity.example.ui.IntegrationType.LINK
 import com.stripe.android.identity.example.ui.IntegrationType.NATIVE
 import com.stripe.android.identity.example.ui.IntegrationType.WEB
 import kotlinx.coroutines.launch
+import com.stripe.android.identity.R as IdentityR
 
 internal enum class VerificationType(val value: String) {
     DOCUMENT("document"), ID_NUMBER("id_number"), ADDRESS("address"), PHONE("phone")
@@ -349,7 +350,7 @@ private fun AllowedDocumentTypes(
             )
 
             StyledClickableText(
-                text = AnnotatedString(stringResource(id = R.string.driver_license)),
+                text = AnnotatedString(stringResource(id = IdentityR.string.stripe_driver_license)),
                 onClick = {
                     onSubmissionStateChangedListener(
                         identitySubmissionState.copy(
@@ -372,7 +373,7 @@ private fun AllowedDocumentTypes(
                 )
             })
             StyledClickableText(
-                text = AnnotatedString(stringResource(id = R.string.passport)),
+                text = AnnotatedString(stringResource(id = IdentityR.string.stripe_passport)),
                 onClick = {
                     onSubmissionStateChangedListener(
                         identitySubmissionState.copy(
@@ -395,7 +396,7 @@ private fun AllowedDocumentTypes(
                 )
             })
             StyledClickableText(
-                text = AnnotatedString(stringResource(id = R.string.id_card)),
+                text = AnnotatedString(stringResource(id = IdentityR.string.stripe_id_card)),
                 onClick = {
                     onSubmissionStateChangedListener(
                         identitySubmissionState.copy(

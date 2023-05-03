@@ -1,4 +1,7 @@
-@file:OptIn(ExperimentalMaterialApi::class, ExperimentalMaterialApi::class)
+@file:OptIn(
+    ExperimentalMaterialApi::class,
+    ExperimentalComposeUiApi::class
+)
 @file:Suppress("LongMethod", "TooManyFunctions")
 
 package com.stripe.android.financialconnections.features.consent
@@ -32,11 +35,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -398,6 +405,8 @@ private fun ConsentFooter(
             loading = acceptConsent is Loading,
             onClick = onContinueClick,
             modifier = Modifier
+                .semantics { testTagsAsResourceId = true }
+                .testTag("consent_cta")
                 .fillMaxWidth()
         ) {
             Text(text = consent.cta)

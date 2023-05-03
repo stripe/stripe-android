@@ -7,13 +7,14 @@ appId: com.stripe.android.financialconnections.example
     id: "Native_checkbox"
 - tapOn: "Mode_Dropdown_Icon"
 - tapOn:
-    id: "${MERCHANT}_checkbox"
+    id: "Test_checkbox"
 - tapOn:
     id: "Token_checkbox"
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
-    visible: "Agree"
+    visible:
+      id: "consent_cta"
     timeout: 30000
 - tapOn: "Enter account details manually instead"
 - assertVisible: "Enter bank account details"
@@ -30,6 +31,8 @@ appId: com.stripe.android.financialconnections.example
 - tapOn:
     id: "ConfirmAccountInput"
 - inputText: "000123456789"
-- tapOn: "Continue"
+- tapOn:
+    text: "Continue"
+    retryTapIfNoChange: false
 - tapOn: "Done"
 - assertVisible: ".*Completed!.*"

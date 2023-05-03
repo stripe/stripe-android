@@ -11,7 +11,7 @@ import org.json.JSONObject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DeferredSetupIntentJsonParser(
     private val elementsSessionId: String?,
-    private val params: DeferredIntentParams,
+    private val setupMode: DeferredIntentParams.Mode.Setup,
     private val apiKey: String,
     private val timeProvider: () -> Long
 ) : ModelJsonParser<SetupIntent> {
@@ -43,7 +43,7 @@ class DeferredSetupIntentJsonParser(
             paymentMethodId = null,
             created = timeProvider(),
             status = null,
-            usage = params.setupFutureUsage,
+            usage = setupMode.setupFutureUsage,
         )
     }
 

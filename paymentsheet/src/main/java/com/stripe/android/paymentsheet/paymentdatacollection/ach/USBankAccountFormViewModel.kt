@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.app.Application
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -25,7 +25,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
@@ -57,12 +57,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
@@ -75,9 +77,20 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val defaultBillingDetails = args.formArgs.billingDetails
     private val collectionConfiguration = args.formArgs.billingDetailsCollectionConfiguration
 
+    private val collectingAddress =
+        args.formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full
+
+    private val collectingPhone =
+        args.formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always
+
+    private val collectingName =
+        args.formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never
+
+    private val collectingEmail =
+        args.formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never
+
     private val defaultName = if (
-        collectionConfiguration.name != CollectionMode.Never ||
-        collectionConfiguration.attachDefaultsToPaymentMethod
+        collectingName || collectionConfiguration.attachDefaultsToPaymentMethod
     ) {
         defaultBillingDetails?.name
     } else {
@@ -92,8 +105,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, defaultName ?: "")
 
     private val defaultEmail = if (
-        collectionConfiguration.email != CollectionMode.Never ||
-        collectionConfiguration.attachDefaultsToPaymentMethod
+        collectingEmail || collectionConfiguration.attachDefaultsToPaymentMethod
     ) {
         defaultBillingDetails?.email
     } else {
@@ -107,8 +119,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, defaultEmail)
 
     private val defaultPhoneCountry = if (
-        collectionConfiguration.phone == CollectionMode.Always ||
-        collectionConfiguration.attachDefaultsToPaymentMethod
+        collectingPhone || collectionConfiguration.attachDefaultsToPaymentMethod
     ) {
         defaultBillingDetails?.address?.country
     } else {
@@ -116,8 +127,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private val defaultPhone = if (
-        collectionConfiguration.phone == CollectionMode.Always ||
-        collectionConfiguration.attachDefaultsToPaymentMethod
+        collectingPhone || collectionConfiguration.attachDefaultsToPaymentMethod
     ) {
         defaultBillingDetails?.phone
     } else {
@@ -134,8 +144,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val defaultAddress = if (
-        collectionConfiguration.address == AddressCollectionMode.Full ||
-        collectionConfiguration.attachDefaultsToPaymentMethod
+        collectingAddress || collectionConfiguration.attachDefaultsToPaymentMethod
     ) {
         defaultBillingDetails?.address?.asAddressModel()
     } else {
@@ -173,8 +182,16 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
     }
 
-    val lastTextFieldIdentifier = addressElement.getTextFieldIdentifiers().map {
-        it.last()
+    val lastTextFieldIdentifier: Flow<IdentifierSpec?> = if (collectingAddress) {
+        addressElement.getTextFieldIdentifiers().map { it.last() }
+    } else if (collectingPhone) {
+        flowOf(IdentifierSpec.Phone)
+    } else if (collectingEmail) {
+        flowOf(IdentifierSpec.Email)
+    } else if (collectingName) {
+        flowOf(IdentifierSpec.Name)
+    } else {
+        flowOf(null)
     }
 
     private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount>(replay = 1)
@@ -198,7 +215,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 phone = phone.value,
                 address = address.value,
                 primaryButtonText = application.getString(
-                    R.string.stripe_continue_button_label
+                    StripeUiCoreR.string.stripe_continue_button_label
                 ),
             )
         )
@@ -207,11 +224,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         get() = _currentScreenState
 
     val saveForFutureUseElement: SaveForFutureUseElement = SaveForFutureUseSpec().transform(
-        initialValue = args.formArgs.showCheckbox,
+        initialValue = false,
         merchantName = args.formArgs.merchantName
     ) as SaveForFutureUseElement
+
     val saveForFutureUse: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
-        .stateIn(viewModelScope, SharingStarted.Lazily, args.formArgs.showCheckbox)
+        .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     val requiredFields = combine(
         nameController.formFieldValue.map { it.isComplete },
@@ -258,12 +276,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         val hasDefaultName = args.formArgs.billingDetails?.name != null &&
             args.formArgs.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
-        val collectingName =
-            args.formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never
         val hasDefaultEmail = args.formArgs.billingDetails?.email != null &&
             args.formArgs.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
-        val collectingEmail =
-            args.formArgs.billingDetailsCollectionConfiguration.email != CollectionMode.Never
 
         assert((hasDefaultName || collectingName) && (hasDefaultEmail || collectingEmail)) {
             "If name or email are not collected, they must be provided through defaults"
@@ -274,24 +288,24 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
         set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 
-    fun registerFragment(fragment: Fragment) {
+    fun register(activityResultRegistryOwner: ActivityResultRegistryOwner) {
         collectBankAccountLauncher = CollectBankAccountLauncher.create(
-            fragment,
-            ::handleCollectBankAccountResult
+            activityResultRegistryOwner = activityResultRegistryOwner,
+            callback = ::handleCollectBankAccountResult,
         )
     }
 
     @VisibleForTesting
-    fun handleCollectBankAccountResult(result: CollectBankAccountResult) {
+    fun handleCollectBankAccountResult(result: CollectBankAccountResultInternal) {
         hasLaunched = false
         when (result) {
-            is CollectBankAccountResult.Completed -> {
+            is CollectBankAccountResultInternal.Completed -> {
                 when (
                     val paymentAccount =
                         result.response.financialConnectionsSession.paymentAccount
                 ) {
                     is BankAccount -> {
-                        result.response.intent.id?.let { intentId ->
+                        result.response.intent?.id?.let { intentId ->
                             _currentScreenState.update {
                                 USBankAccountFormScreenState.VerifyWithMicrodeposits(
                                     name = name.value,
@@ -310,7 +324,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         }
                     }
                     is FinancialConnectionsAccount -> {
-                        result.response.intent.id?.let { intentId ->
+                        result.response.intent?.id?.let { intentId ->
                             _currentScreenState.update {
                                 USBankAccountFormScreenState.MandateCollection(
                                     name = name.value,
@@ -333,10 +347,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     }
                 }
             }
-            is CollectBankAccountResult.Failed -> {
+            is CollectBankAccountResultInternal.Failed -> {
                 reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
             }
-            is CollectBankAccountResult.Cancelled -> {
+            is CollectBankAccountResultInternal.Cancelled -> {
                 reset()
             }
         }
@@ -403,7 +417,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 phone = phone.value,
                 address = address.value,
                 primaryButtonText = application.getString(
-                    R.string.stripe_continue_button_label
+                    StripeUiCoreR.string.stripe_continue_button_label
                 ),
             )
         }
@@ -421,6 +435,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             )
         }
 
+        collectBankAccountLauncher?.unregister()
         collectBankAccountLauncher = null
     }
 
@@ -500,7 +515,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
                     val paymentSelection = PaymentSelection.New.USBankAccount(
                         labelResource = application.getString(
-                            R.string.paymentsheet_payment_method_item_card_number,
+                            R.string.stripe_paymentsheet_payment_method_item_card_number,
                             last4
                         ),
                         iconResource = TransformToBankIcon(
@@ -557,25 +572,22 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     args.formArgs.amount!!.buildPayButtonLabel(application.resources)
                 } else {
                     application.getString(
-                        R.string.stripe_setup_button_label
+                        StripeUiCoreR.string.stripe_setup_button_label
                     )
                 }
             }
             else -> application.getString(
-                R.string.stripe_continue_button_label
+                StripeUiCoreR.string.stripe_continue_button_label
             )
         }
     }
 
     private fun buildMandateText(): String {
-        return if (saveForFutureUse.value) {
-            application.getString(
-                R.string.stripe_paymentsheet_ach_save_mandate,
-                formattedMerchantName()
-            )
-        } else {
-            ACHText.getContinueMandateText(application)
-        }
+        return ACHText.getContinueMandateText(
+            context = application,
+            merchantName = formattedMerchantName(),
+            isSaveForFutureUseSelected = saveForFutureUse.value,
+        )
     }
 
     internal class Factory(

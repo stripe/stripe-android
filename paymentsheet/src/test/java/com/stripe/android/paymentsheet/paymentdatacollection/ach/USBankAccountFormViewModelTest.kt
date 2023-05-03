@@ -15,8 +15,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -218,26 +219,16 @@ class USBankAccountFormViewModelTest {
         }
 
     @Test
-    fun `when reset, save for future usage should be true`() {
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel()
-            viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+    fun `when reset, save for future usage should be false`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.collectBankAccountLauncher = collectBankAccountLauncher
 
-            viewModel.saveForFutureUseElement.controller.onValueChange(false)
+        viewModel.saveForFutureUseElement.controller.onValueChange(false)
 
-            assertThat(
-                viewModel.saveForFutureUseElement.controller.saveForFutureUse.stateIn(
-                    viewModel.viewModelScope
-                ).value
-            ).isFalse()
-
+        viewModel.saveForFutureUseElement.controller.saveForFutureUse.test {
+            assertThat(awaitItem()).isFalse()
             viewModel.reset()
-
-            assertThat(
-                viewModel.saveForFutureUseElement.controller.saveForFutureUse.stateIn(
-                    viewModel.viewModelScope
-                ).value
-            ).isTrue()
+            assertThat(awaitItem()).isTrue()
         }
     }
 
@@ -420,6 +411,149 @@ class USBankAccountFormViewModelTest {
             .isEqualTo("CA")
     }
 
+    @Test
+    fun `Doesn't save for future use by default`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    showCheckbox = true,
+                    showCheckboxControlledFields = true,
+                ),
+            ),
+        )
+        assertThat(viewModel.saveForFutureUse.value).isFalse()
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier for default config`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    showCheckbox = true,
+                    showCheckboxControlledFields = true,
+                ),
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isEqualTo(IdentifierSpec.Email)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier when collecting phone number`() = runTest {
+        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Automatic,
+            email = CollectionMode.Automatic,
+            phone = CollectionMode.Always,
+            address = AddressCollectionMode.Never,
+        )
+
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    showCheckbox = true,
+                    showCheckboxControlledFields = true,
+                    billingDetailsCollectionConfiguration = billingDetailsConfig,
+                ),
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isEqualTo(IdentifierSpec.Phone)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier when collecting address`() = runTest {
+        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Automatic,
+            email = CollectionMode.Automatic,
+            phone = CollectionMode.Always,
+            address = AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    showCheckbox = true,
+                    showCheckboxControlledFields = true,
+                    billingDetailsCollectionConfiguration = billingDetailsConfig,
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = "My myself and I",
+                        email = "myself@me.com",
+                    ),
+                ),
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isEqualTo(IdentifierSpec.PostalCode)
+        }
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier when only address`() = runTest {
+        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Never,
+            email = CollectionMode.Never,
+            phone = CollectionMode.Never,
+            address = AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    showCheckbox = true,
+                    showCheckboxControlledFields = true,
+                    billingDetailsCollectionConfiguration = billingDetailsConfig,
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = "My myself and I",
+                        email = "myself@me.com",
+                    ),
+                ),
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isEqualTo(IdentifierSpec.PostalCode)
+        }
+    }
+
+    @Test
+    fun `Produces correct lastTextFieldIdentifier when collecting no fields`() = runTest {
+        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Never,
+            email = CollectionMode.Never,
+            phone = CollectionMode.Never,
+            address = AddressCollectionMode.Never,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    showCheckbox = true,
+                    showCheckboxControlledFields = true,
+                    billingDetailsCollectionConfiguration = billingDetailsConfig,
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = "My myself and I",
+                        email = "myself@me.com",
+                    ),
+                ),
+            ),
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(awaitItem()).isNull()
+            awaitComplete()
+        }
+    }
+
     private fun createViewModel(
         args: USBankAccountFormViewModel.Args = defaultArgs
     ): USBankAccountFormViewModel {
@@ -437,7 +571,7 @@ class USBankAccountFormViewModelTest {
         )
     }
 
-    private suspend fun mockUnverifiedBankAccount(): CollectBankAccountResult.Completed {
+    private suspend fun mockUnverifiedBankAccount(): CollectBankAccountResultInternal.Completed {
         val paymentIntent = mock<PaymentIntent>()
         val financialConnectionsSession = mock<FinancialConnectionsSession>()
         whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret?.value)
@@ -460,15 +594,15 @@ class USBankAccountFormViewModelTest {
             )
         ).thenReturn(Result.success(paymentIntent))
 
-        return CollectBankAccountResult.Completed(
-            CollectBankAccountResponse(
+        return CollectBankAccountResultInternal.Completed(
+            CollectBankAccountResponseInternal(
                 intent = paymentIntent,
                 financialConnectionsSession = financialConnectionsSession
             )
         )
     }
 
-    private suspend fun mockVerifiedBankAccount(): CollectBankAccountResult.Completed {
+    private suspend fun mockVerifiedBankAccount(): CollectBankAccountResultInternal.Completed {
         val paymentIntent = mock<PaymentIntent>()
         val financialConnectionsSession = mock<FinancialConnectionsSession>()
         whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret?.value)
@@ -493,8 +627,8 @@ class USBankAccountFormViewModelTest {
             )
         ).thenReturn(Result.success(paymentIntent))
 
-        return CollectBankAccountResult.Completed(
-            CollectBankAccountResponse(
+        return CollectBankAccountResultInternal.Completed(
+            CollectBankAccountResponseInternal(
                 intent = paymentIntent,
                 financialConnectionsSession = financialConnectionsSession
             )

@@ -5,7 +5,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.removeCorrespondingPlaceholder
 import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.specForPlaceholderField
 import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.specsForConfiguration
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.NameSpec
@@ -17,6 +16,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.R as StripeR
 
 @RunWith(RobolectricTestRunner::class)
 class BillingDetailsHelpersTest {
@@ -83,7 +83,7 @@ class BillingDetailsHelpersTest {
                 ),
                 SimpleTextSpec(
                     apiPath = IdentifierSpec.Generic("dummy"),
-                    label = R.string.affirm_buy_now_pay_later,
+                    label = StripeR.string.stripe_affirm_buy_now_pay_later,
                 ),
             ),
         )
@@ -94,7 +94,7 @@ class BillingDetailsHelpersTest {
             EmailSpec(),
             SimpleTextSpec(
                 apiPath = IdentifierSpec.Generic("dummy"),
-                label = R.string.affirm_buy_now_pay_later,
+                label = StripeR.string.stripe_affirm_buy_now_pay_later,
             ),
             PhoneSpec(),
             AddressSpec(),

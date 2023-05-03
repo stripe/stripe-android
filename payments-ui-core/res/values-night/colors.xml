@@ -28,7 +28,7 @@
 <!--    <color name="stripe_paymentsheet_googlepay_divider_background">-->
 <!--        @color/stripe_paymentsheet_background-->
 <!--    </color>-->
-    <color name="divider_text_color">#99FFFFFF</color>
+    <color name="stripe_divider_text_color">#99FFFFFF</color>
 
     <!-- CardFormView -->
 </resources>

@@ -10,10 +10,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun CloseDialog(
+    description: TextResource,
     onConfirmClick: () -> Unit,
     onDismissClick: () -> Unit
 ) {
@@ -28,7 +30,7 @@ internal fun CloseDialog(
         },
         text = {
             Text(
-                text = stringResource(R.string.stripe_close_dialog_desc),
+                text = description.toText().toString(),
             )
         },
         confirmButton = {
@@ -54,13 +56,14 @@ internal fun CloseDialog(
     )
 }
 
-@Preview
+@Preview(group = "Close Dialog", name = "Default")
 @Composable
 internal fun CloseDialogPreview() {
     FinancialConnectionsTheme {
         CloseDialog(
-            {},
-            {}
+            description = TextResource.StringId(R.string.stripe_close_dialog_desc),
+            onConfirmClick = {},
+            onDismissClick = {}
         )
     }
 }

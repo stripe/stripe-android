@@ -18,7 +18,7 @@ internal fun LinkTerms(
     textAlign: TextAlign = TextAlign.Center
 ) {
     Html(
-        html = stringResource(R.string.sign_up_terms).replaceHyperlinks(),
+        html = stringResource(R.string.stripe_sign_up_terms).replaceHyperlinks(),
         color = MaterialTheme.stripeColors.placeholderText,
         style = MaterialTheme.typography.subtitle1,
         modifier = modifier,

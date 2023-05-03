@@ -4,6 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
+import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
@@ -38,21 +40,20 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
     )
 
     @Test
-    fun `getOrFetchAccounts - When called twice, second call returns from cache`() = runTest {
+    fun `getCachedAccounts - When called twice, second call returns from cache`() = runTest {
         val repository = buildRepository()
-        val expectedAccounts = ApiKeyFixtures.partnerAccountList()
+        val expectedAccounts = partnerAccountList().copy(
+            data = listOf(partnerAccount())
+        )
         givenRequestReturnsAccounts(expectedAccounts)
 
         // first call calls backend and caches.
-        repository.getOrFetchAccounts(
+        repository.postAuthorizationSessionAccounts(
             configuration.financialConnectionsSessionClientSecret,
             authSessionId
         )
         // second call reads from cache
-        val accounts = repository.getOrFetchAccounts(
-            configuration.financialConnectionsSessionClientSecret,
-            authSessionId
-        )
+        val accounts = repository.getCachedAccounts()
         verify(
             mockRequestExecutor,
             times(1)
@@ -60,7 +61,7 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
             any(),
             eq(PartnerAccountsList.serializer())
         )
-        assertThat(accounts).isEqualTo(expectedAccounts)
+        assertThat(accounts).isEqualTo(expectedAccounts.data)
     }
 
     /**

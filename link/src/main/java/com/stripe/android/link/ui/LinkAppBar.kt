@@ -31,6 +31,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.theme.AppBarHeight
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @Composable
 internal fun LinkAppBar(
@@ -52,7 +53,7 @@ internal fun LinkAppBar(
         ) {
             Icon(
                 painter = painterResource(state.navigationIcon),
-                contentDescription = stringResource(id = R.string.back),
+                contentDescription = stringResource(id = StripeUiCoreR.string.stripe_back),
                 tint = MaterialTheme.linkColors.closeButton
             )
         }
@@ -67,8 +68,8 @@ internal fun LinkAppBar(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_link_logo),
-                contentDescription = stringResource(R.string.link),
+                painter = painterResource(R.drawable.stripe_link_logo),
+                contentDescription = stringResource(R.string.stripe_link),
                 tint = MaterialTheme.linkColors.linkLogo
             )
 
@@ -115,7 +116,7 @@ internal fun LinkAppBar(
         ) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
-                contentDescription = stringResource(R.string.show_menu),
+                contentDescription = stringResource(R.string.stripe_show_menu),
                 tint = MaterialTheme.linkColors.closeButton
             )
         }
@@ -129,7 +130,7 @@ private fun LinkAppBarPreview() {
         Surface {
             LinkAppBar(
                 state = LinkAppBarState(
-                    navigationIcon = R.drawable.ic_link_close,
+                    navigationIcon = R.drawable.stripe_link_close,
                     showHeader = true,
                     showOverflowMenu = true,
                     email = "email@example.com",
@@ -150,7 +151,7 @@ private fun LinkAppBar_NoEmail() {
         Surface {
             LinkAppBar(
                 state = LinkAppBarState(
-                    navigationIcon = R.drawable.ic_link_close,
+                    navigationIcon = R.drawable.stripe_link_close,
                     showHeader = true,
                     showOverflowMenu = true,
                     email = null,
@@ -171,7 +172,7 @@ private fun LinkAppBar_ChildScreen() {
         Surface {
             LinkAppBar(
                 state = LinkAppBarState(
-                    navigationIcon = R.drawable.ic_link_back,
+                    navigationIcon = R.drawable.stripe_link_back,
                     showHeader = false,
                     showOverflowMenu = false,
                     email = "email@example.com",
@@ -192,7 +193,7 @@ private fun LinkAppBar_ChildScreen_NoEmail() {
         Surface {
             LinkAppBar(
                 state = LinkAppBarState(
-                    navigationIcon = R.drawable.ic_link_back,
+                    navigationIcon = R.drawable.stripe_link_back,
                     showHeader = false,
                     showOverflowMenu = false,
                     email = null,

@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.math.BigInteger
 import java.util.Locale
+import com.stripe.android.R as StripeR
 
 /**
  * A text field configuration for an IBAN, or International Bank Account Number, as defined in
@@ -30,12 +31,12 @@ class IbanConfig : TextFieldConfig {
     override val debugLabel = "iban"
 
     @StringRes
-    override val label = R.string.iban
+    override val label = R.string.stripe_iban
     override val keyboard = KeyboardType.Ascii
 
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(
         TextFieldIcon.Trailing(
-            R.drawable.stripe_ic_bank_generic,
+            StripeR.drawable.stripe_ic_bank_generic,
             isTintable = true
         )
     )
@@ -73,27 +74,27 @@ class IbanConfig : TextFieldConfig {
         // First 2 characters represent the country code. Any number means it's invalid
         if (countryCode.any { it.isDigit() }) {
             return TextFieldStateConstants.Error.Invalid(
-                R.string.iban_invalid_start
+                R.string.stripe_iban_invalid_start
             )
         }
 
         if (countryCode.length < 2) {
             // User might still be entering a valid country code
             return TextFieldStateConstants.Error.Incomplete(
-                R.string.iban_incomplete
+                R.string.stripe_iban_incomplete
             )
         }
 
         if (!Locale.getISOCountries().contains(countryCode)) {
             return TextFieldStateConstants.Error.Invalid(
-                R.string.iban_invalid_country,
+                R.string.stripe_iban_invalid_country,
                 arrayOf(countryCode)
             )
         }
 
         if (input.length < MIN_LENGTH) {
             return TextFieldStateConstants.Error.Incomplete(
-                R.string.iban_incomplete
+                R.string.stripe_iban_incomplete
             )
         }
 
@@ -105,7 +106,7 @@ class IbanConfig : TextFieldConfig {
             }
         } else {
             TextFieldStateConstants.Error.Incomplete(
-                R.string.invalid_bank_account_iban
+                StripeR.string.stripe_invalid_bank_account_iban
             )
         }
     }

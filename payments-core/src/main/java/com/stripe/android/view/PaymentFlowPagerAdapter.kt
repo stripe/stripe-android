@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
 import com.stripe.android.PaymentSessionConfig
-import com.stripe.android.databinding.ShippingInfoPageBinding
-import com.stripe.android.databinding.ShippingMethodPageBinding
+import com.stripe.android.databinding.StripeShippingInfoPageBinding
+import com.stripe.android.databinding.StripeShippingMethodPageBinding
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import kotlin.properties.Delegates
@@ -126,12 +126,12 @@ internal class PaymentFlowPagerAdapter(
         itemView: View
     ) : RecyclerView.ViewHolder(itemView) {
         class ShippingInformationViewHolder(
-            viewBinding: ShippingInfoPageBinding
+            viewBinding: StripeShippingInfoPageBinding
         ) : PaymentFlowViewHolder(viewBinding.root) {
             constructor(
                 root: ViewGroup
             ) : this(
-                ShippingInfoPageBinding.inflate(
+                StripeShippingInfoPageBinding.inflate(
                     LayoutInflater.from(root.context),
                     root,
                     false
@@ -155,12 +155,12 @@ internal class PaymentFlowPagerAdapter(
         }
 
         class ShippingMethodViewHolder(
-            viewBinding: ShippingMethodPageBinding
+            viewBinding: StripeShippingMethodPageBinding
         ) : PaymentFlowViewHolder(viewBinding.root) {
             constructor(
                 root: ViewGroup
             ) : this(
-                ShippingMethodPageBinding.inflate(
+                StripeShippingMethodPageBinding.inflate(
                     LayoutInflater.from(root.context),
                     root,
                     false

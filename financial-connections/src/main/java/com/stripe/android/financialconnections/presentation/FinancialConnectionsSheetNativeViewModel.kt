@@ -16,6 +16,7 @@ import com.airbnb.mvrx.ViewModelContext
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarBack
@@ -25,12 +26,14 @@ import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
+import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
@@ -38,8 +41,11 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.CloseDialog
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -53,6 +59,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      */
     val activityRetainedComponent: FinancialConnectionsSheetNativeComponent,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+    private val getManifest: GetManifest,
     private val uriUtils: UriUtils,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
@@ -180,11 +187,22 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    fun onCloseWithConfirmationClick(pane: Pane) {
-        viewModelScope.launch {
-            eventTracker.track(ClickNavBarClose(pane))
-            setState { copy(showCloseDialog = true) }
+    fun onCloseWithConfirmationClick(pane: Pane) = viewModelScope.launch {
+        val manifest = kotlin.runCatching { getManifest() }.getOrNull()
+        val businessName = manifest?.getBusinessName()
+        val isNetworkingSignupPane =
+            manifest?.isNetworkingUserFlow == true && pane == NETWORKING_LINK_SIGNUP_PANE
+        val description = when {
+            isNetworkingSignupPane && businessName != null -> TextResource.StringId(
+                value = R.string.stripe_close_dialog_networking_desc,
+                args = listOf(businessName)
+            )
+            else -> TextResource.StringId(
+                value = R.string.stripe_close_dialog_desc
+            )
         }
+        eventTracker.track(ClickNavBarClose(pane))
+        setState { copy(closeDialog = CloseDialog(description = description)) }
     }
 
     fun onBackClick(pane: Pane) {
@@ -208,7 +226,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         closeAuthFlowError = null
     )
 
-    fun onCloseDismiss() = setState { copy(showCloseDialog = false) }
+    fun onCloseDismiss() = setState { copy(closeDialog = null) }
 
     /**
      * [NavHost] handles back presses except for when backstack is empty, where it delegates
@@ -332,11 +350,19 @@ internal data class FinancialConnectionsSheetNativeState(
     @PersistState
     val firstInit: Boolean,
     val configuration: FinancialConnectionsSheet.Configuration,
-    val showCloseDialog: Boolean,
+    val closeDialog: CloseDialog?,
     val reducedBranding: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
     val initialPane: Pane
 ) : MavericksState {
+
+    /**
+     * Payload for the close confirmation dialog,
+     * which is shown when the user clicks the close button.
+     */
+    data class CloseDialog(
+        val description: TextResource,
+    )
 
     /**
      * Used by Mavericks to build initial state based on args.
@@ -344,11 +370,11 @@ internal data class FinancialConnectionsSheetNativeState(
     @Suppress("Unused")
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
-        reducedBranding = args.initialSyncResponse.visual?.reducedBranding ?: false,
+        reducedBranding = args.initialSyncResponse.visual.reducedBranding,
         firstInit = true,
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
-        showCloseDialog = false,
+        closeDialog = null,
         viewEffect = null
     )
 }

@@ -7,6 +7,8 @@ import androidx.compose.runtime.remember
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.R as StripeR
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal data class PaymentSheetTopBarState(
     @DrawableRes val icon: Int,
@@ -33,7 +35,7 @@ internal fun rememberPaymentSheetTopBarState(
         }
 
         val contentDescription = if (screen == PaymentSheetScreen.AddAnotherPaymentMethod) {
-            R.string.back
+            StripeUiCoreR.string.stripe_back
         } else {
             R.string.stripe_paymentsheet_close
         }
@@ -41,9 +43,9 @@ internal fun rememberPaymentSheetTopBarState(
         val showOptionsMenu = screen is PaymentSheetScreen.SelectSavedPaymentMethods
 
         val editMenuLabel = if (isEditing) {
-            R.string.done
+            StripeR.string.stripe_done
         } else {
-            R.string.edit
+            StripeR.string.stripe_edit
         }
 
         PaymentSheetTopBarState(
