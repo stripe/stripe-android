@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.paymentsheet.forms.UpiRequirement
 import com.stripe.android.paymentsheet.forms.ZipRequirement
+import com.stripe.android.ui.core.BuildConfig
 import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
@@ -612,7 +613,7 @@ class LpmRepository constructor(
             DefaultIsFinancialConnectionsAvailable(),
         // Whether to enable ACHv2 in the deferred flow.
         // To be deleted when https://jira.corp.stripe.com/browse/BANKCON-6731 is completed.
-        val enableACHV2InDeferredFlow: Boolean = false,
+        val enableACHV2InDeferredFlow: Boolean = BuildConfig.DEBUG,
     )
 }
 
