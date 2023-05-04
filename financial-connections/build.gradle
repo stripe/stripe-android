@@ -20,9 +20,12 @@ android {
 }
 
 dependencies {
+
     api project(":stripe-core")
     api project(":stripe-ui-core")
     api project(":payments-model")
+
+    implementation platform(boms.androidx.compose)
 
     implementation libs.accompanist.webView
     implementation libs.androidx.activity

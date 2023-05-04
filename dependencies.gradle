@@ -11,10 +11,6 @@ ext.versions = [
         androidxAppcompat           : '1.6.1',
         androidxArchCore            : '2.2.0',
         androidxBrowser             : '1.5.0',
-        androidxCompose             : '1.4.3',
-        androidxComposeCompiler     : '1.4.3',
-        androidxComposeRuntime      : '1.4.3',
-        androidxComposeUi           : '1.4.3',
         androidxConstraintlayout    : '2.1.4',
         androidxCore                : '1.9.0',
         androidxFragment            : '1.5.5',
@@ -89,6 +85,12 @@ ext.configs = [
         androidApplication: "${project.rootDir}/build-configuration/android-application.gradle",
 ]
 
+ext.boms = [
+        androidx: [
+                compose: "androidx.compose:compose-bom:2023.05.00"
+        ],
+]
+
 ext.libs = [
         accompanist                         : [
                 flowLayout         : "com.google.accompanist:accompanist-flowlayout:${versions.accompanist}",
@@ -124,18 +126,18 @@ ext.libs = [
         ],
         compose                             : [
                 activity             : "androidx.activity:activity-compose:${versions.androidxActivity}",
-                foundation           : "androidx.compose.foundation:foundation:${versions.androidxCompose}",
-                liveData             : "androidx.compose.runtime:runtime-livedata:${versions.androidxComposeRuntime}",
-                material             : "androidx.compose.material:material:${versions.androidxCompose}",
-                materialIcons        : "androidx.compose.material:material-icons-core:${versions.androidxCompose}",
-                materialIconsExtended: "androidx.compose.material:material-icons-extended:${versions.androidxCompose}",
+                foundation           : "androidx.compose.foundation:foundation",
+                liveData             : "androidx.compose.runtime:runtime-livedata",
+                material             : "androidx.compose.material:material",
+                materialIcons        : "androidx.compose.material:material-icons-core",
+                materialIconsExtended: "androidx.compose.material:material-icons-extended",
                 navigation           : "androidx.navigation:navigation-compose:${versions.androidxNavigation}",
-                runtime              : "androidx.compose.runtime:runtime:${versions.androidxComposeRuntime}",
-                ui                   : "androidx.compose.ui:ui:${versions.androidxComposeUi}",
-                uiTestManifest       : "androidx.compose.ui:ui-test-manifest:${versions.androidxComposeUi}",
-                uiTooling            : "androidx.compose.ui:ui-tooling:${versions.androidxComposeUi}",
-                uiToolingPreview     : "androidx.compose.ui:ui-tooling-preview:${versions.androidxComposeUi}",
-                uiViewBinding        : "androidx.compose.ui:ui-viewbinding:${versions.androidxComposeUi}",
+                runtime              : "androidx.compose.runtime:runtime",
+                ui                   : "androidx.compose.ui:ui",
+                uiTestManifest       : "androidx.compose.ui:ui-test-manifest",
+                uiTooling            : "androidx.compose.ui:ui-tooling",
+                uiToolingPreview     : "androidx.compose.ui:ui-tooling-preview",
+                uiViewBinding        : "androidx.compose.ui:ui-viewbinding",
                 viewModels           : "androidx.lifecycle:lifecycle-viewmodel-compose:${versions.androidxLifecycle}",
         ],
         dagger                              : "com.google.dagger:dagger:${versions.dagger}",
@@ -180,7 +182,7 @@ ext.testLibs = [
                 junit      : "androidx.test.ext:junit:${versions.androidTestJunit}",
                 junitKtx   : "androidx.test.ext:junit-ktx:${versions.androidTestJunit}",
                 fragment   : "androidx.fragment:fragment-testing:${versions.androidxFragment}",
-                composeUi  : "androidx.compose.ui:ui-test-junit4:${versions.androidxComposeUi}",
+                composeUi  : "androidx.compose.ui:ui-test-junit4",
                 lifecycle  : "androidx.lifecycle:lifecycle-runtime-testing:${versions.androidxLifecycle}",
                 testRules  : "androidx.test:rules:${versions.androidTest}",
                 testRunner : "androidx.test:runner:${versions.androidTestRunner}",
