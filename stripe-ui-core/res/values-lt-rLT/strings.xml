@@ -34,8 +34,6 @@
   <string name="stripe_address_label_neighborhood">Seniūnija</string>
   <!-- Label of an address field -->
   <string name="stripe_address_label_oblast">Sritis</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="stripe_address_label_phone_number">Telefono numeris</string>
   <!-- Used to describe a field of an address -->
   <string name="stripe_address_label_post_town">Pašto arba miesto kodas</string>
   <!-- Label of an address field -->

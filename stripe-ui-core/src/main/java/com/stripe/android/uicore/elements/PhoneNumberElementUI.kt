@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.R
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import com.stripe.android.core.R as CoreR
 
 @Preview
 @Composable
@@ -89,7 +90,7 @@ fun PhoneNumberElementUI(
     controller.onSelectedCountryIndex(selectedIndex)
     val value by controller.fieldValue.collectAsState("")
     val shouldShowError by controller.error.collectAsState(null)
-    val label by controller.label.collectAsState(R.string.stripe_address_label_phone_number)
+    val label by controller.label.collectAsState(CoreR.string.stripe_address_label_phone_number)
     val placeholder by controller.placeholder.collectAsState("")
     val visualTransformation by controller.visualTransformation.collectAsState(VisualTransformation.None)
     val colors = TextFieldColors(shouldShowError != null)
