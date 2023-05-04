@@ -56,7 +56,7 @@ ext.versions = [
         paparazzi                   : '1.2.0',
         places                      : '3.0.0',
         playServices                : '1.6.4',
-        playServicesTfLite          : '16.0.1',
+        playServicesTfLite          : '16.1.0',
         playServicesWallet          : '19.2.0-beta01',
         retrofit                    : '2.9.0',
         robolectric                 : '4.10.1',
