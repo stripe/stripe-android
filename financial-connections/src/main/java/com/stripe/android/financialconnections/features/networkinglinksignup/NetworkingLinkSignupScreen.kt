@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -33,7 +34,6 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.BulletItem
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
-import com.stripe.android.financialconnections.features.common.PaneFooter
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
@@ -174,8 +174,7 @@ private fun NetworkingLinkSignupLoaded(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-        }
-        PaneFooter(elevation = scrollState.elevation) {
+            Spacer(modifier = Modifier.height(16.dp))
             if (showFullForm) {
                 SaveToLinkCta(
                     text = payload.content.cta,
