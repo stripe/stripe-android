@@ -34,8 +34,6 @@
   <string name="stripe_address_label_neighborhood">Rukun tetangga</string>
   <!-- Label of an address field -->
   <string name="stripe_address_label_oblast">Oblast</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="stripe_address_label_phone_number">Nomor telepon</string>
   <!-- Used to describe a field of an address -->
   <string name="stripe_address_label_post_town">Pos atau Kota</string>
   <!-- Label of an address field -->

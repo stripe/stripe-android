@@ -32,7 +32,7 @@ workflows:
     steps:
       - script@1:
           inputs:
-            - content: ./gradlew ktlint detekt lintRelease apiCheck
+            - content: ./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
   test:
     before_run:
       - prepare_all

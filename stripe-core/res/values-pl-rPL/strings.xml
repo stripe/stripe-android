@@ -14,6 +14,8 @@
   <string name="stripe_address_label_full_name">Imię i nazwisko</string>
   <!-- Caption for Name field on address form -->
   <string name="stripe_address_label_name">Imię i nazwisko</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="stripe_address_label_phone_number">Nr telefonu</string>
   <!-- Short string for postal code (text used in non-US countries) -->
   <string name="stripe_address_label_postal_code">Kod pocztowy</string>
   <!-- Caption for Province field on address form (only countries that use province, like Canada) -->

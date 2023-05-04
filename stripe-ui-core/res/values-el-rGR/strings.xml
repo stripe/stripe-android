@@ -34,8 +34,6 @@
   <string name="stripe_address_label_neighborhood">Συνοικία</string>
   <!-- Label of an address field -->
   <string name="stripe_address_label_oblast">Περιφέρεια</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="stripe_address_label_phone_number">Αριθμός τηλεφώνου</string>
   <!-- Used to describe a field of an address -->
   <string name="stripe_address_label_post_town">Ταχυδρομείο ή πόλη</string>
   <!-- Label of an address field -->

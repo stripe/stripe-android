@@ -34,8 +34,6 @@
   <string name="stripe_address_label_neighborhood">Štvrť</string>
   <!-- Label of an address field -->
   <string name="stripe_address_label_oblast">Oblasť</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="stripe_address_label_phone_number">Telefónne číslo</string>
   <!-- Used to describe a field of an address -->
   <string name="stripe_address_label_post_town">Pošta alebo mesto</string>
   <!-- Label of an address field -->
