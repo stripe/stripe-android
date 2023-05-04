@@ -15,6 +15,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
 import com.stripe.android.financialconnections.features.common.AccountNumberRetrievalErrorContent
+import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.ATTACH_LINKED_PAYMENT_ACCOUNT
@@ -59,7 +60,7 @@ private fun AttachPaymentContent(
         }
     ) {
         when (payload) {
-            Uninitialized, is Loading -> LoadingContent()
+            Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> when (attachPayment) {
                 is Loading,
                 is Uninitialized,

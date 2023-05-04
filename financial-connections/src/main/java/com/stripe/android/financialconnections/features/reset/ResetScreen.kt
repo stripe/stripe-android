@@ -10,7 +10,7 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.stripe.android.financialconnections.features.common.LoadingContent
+import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -45,8 +45,7 @@ private fun ResetContent(
         }
     ) {
         when (payload) {
-            Uninitialized, is Loading -> LoadingContent()
-            is Success -> LoadingContent()
+            Uninitialized, is Loading, is Success -> FullScreenGenericLoading()
             is Fail -> UnclassifiedErrorContent(
                 error = payload.error,
                 onCloseFromErrorClick = onCloseFromErrorClick
