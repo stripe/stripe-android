@@ -4,7 +4,7 @@
 
 ### All SDKs
 * [CHANGED][6635](https://github.com/stripe/stripe-android/pull/6635) Use non transitive R classes.
-* [CHANGED][6676](https://github.com/stripe/stripe-android/pull/6676) Updated Compose to 1.4.3.
+* [CHANGED][6676](https://github.com/stripe/stripe-android/pull/6676) Updated Compose BOM to 2023.05.00.
 
 ## 20.24.2 - 2023-05-03
 
