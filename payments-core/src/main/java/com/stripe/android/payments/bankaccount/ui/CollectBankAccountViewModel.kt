@@ -63,6 +63,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                         stripeAccountId = args.stripeAccountId,
                         elementsSessionId = args.elementsSessionId,
                         customerId = args.customerId,
+                        onBehalfOf = args.onBehalfOf,
                         amount = args.amount,
                         currency = args.currency
                     )
@@ -72,6 +73,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                         stripeAccountId = args.stripeAccountId,
                         elementsSessionId = args.elementsSessionId,
                         customerId = args.customerId,
+                        onBehalfOf = args.onBehalfOf,
                         amount = null,
                         currency = null
                     )

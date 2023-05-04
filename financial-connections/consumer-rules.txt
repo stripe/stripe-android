@@ -11,3 +11,5 @@
 
 # MavericksViewModel companion object factories
 -keep,allowobfuscation class ** implements com.airbnb.mvrx.MavericksViewModelFactory
+
+-dontwarn com.google.crypto.tink.subtle.XChaCha20Poly1305

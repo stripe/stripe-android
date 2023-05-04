@@ -25,7 +25,8 @@ class LpmRepositoryTest {
     private val lpmRepository = LpmRepository(
         LpmRepository.LpmRepositoryArguments(
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
-            isFinancialConnectionsAvailable = { true }
+            isFinancialConnectionsAvailable = { true },
+            enableACHV2InDeferredFlow = true
         )
     )
 
@@ -330,11 +331,12 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify LpmRepository filters out USBankAccount if StripeIntent has no client secret`() = runTest {
+    fun `Verify LpmRepository filters out USBankAccount if flag is disabled`() = runTest {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                enableACHV2InDeferredFlow = false
             ),
         )
 
