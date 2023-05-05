@@ -17,6 +17,8 @@ dependencies {
     implementation project(':stripecardscan')
     implementation project(':financial-connections')
 
+    implementation platform(boms.androidx.compose)
+
     implementation libs.androidx.activity
     implementation libs.androidx.appCompat
     implementation libs.androidx.constraintLayout

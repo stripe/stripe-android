@@ -23,6 +23,8 @@ android {
 }
 
 dependencies {
+    implementation platform(boms.androidx.compose)
+
     implementation project(":stripe-core")
     implementation project(":payments-core")
     implementation project(":payments-ui-core")
