@@ -14,12 +14,14 @@ import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.navigation.ConsentDestination
+import com.stripe.android.identity.navigation.DebugDestination
 import com.stripe.android.identity.navigation.IndividualWelcomeDestination
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,6 +30,7 @@ import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -74,18 +77,77 @@ class DebugScreenTest {
     }
 
     @Test
-    fun testCompleteButton() {
+    fun testSubmitWithSuccess() {
         setComposeTestRuleWith(verificationPageForDoc) {
-            onNodeWithTag(TEST_TAG_COMPLETE_BUTTON).performClick()
-            verify(mockVerificationFlowFinishable).finishWithResult(
-                eq(IdentityVerificationSheet.VerificationFlowResult.Completed)
-            )
+            runBlocking {
+                onNodeWithTag(TEST_TAG_SUBMIT_BUTTON).performScrollTo()
+                onNodeWithTag(TEST_TAG_SUCCESS).performClick()
+                onNodeWithTag(TEST_TAG_SUBMIT_BUTTON).performClick()
+
+                verify(mockIdentityViewModel).verifySessionAndTransition(
+                    fromRoute = eq(DebugDestination.ROUTE.route),
+                    simulateDelay = eq(false),
+                    navController = same(mockNavController)
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testSubmitWithSuccessAsync() {
+        setComposeTestRuleWith(verificationPageForDoc) {
+            runBlocking {
+                onNodeWithTag(TEST_TAG_SUBMIT_BUTTON).performScrollTo()
+                onNodeWithTag(TEST_TAG_SUCCESS_ASYNC).performClick()
+                onNodeWithTag(TEST_TAG_SUBMIT_BUTTON).performClick()
+
+                verify(mockIdentityViewModel).verifySessionAndTransition(
+                    fromRoute = eq(DebugDestination.ROUTE.route),
+                    simulateDelay = eq(true),
+                    navController = same(mockNavController)
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testSubmitWithFailure() {
+        setComposeTestRuleWith(verificationPageForDoc) {
+            runBlocking {
+                onNodeWithTag(TEST_TAG_SUBMIT_BUTTON).performScrollTo()
+                onNodeWithTag(TEST_TAG_FAILURE).performClick()
+                onNodeWithTag(TEST_TAG_SUBMIT_BUTTON).performClick()
+
+                verify(mockIdentityViewModel).unverifySessionAndTransition(
+                    fromRoute = eq(DebugDestination.ROUTE.route),
+                    simulateDelay = eq(false),
+                    navController = same(mockNavController)
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testSubmitWithFailureAsync() {
+        setComposeTestRuleWith(verificationPageForDoc) {
+            runBlocking {
+                onNodeWithTag(TEST_TAG_SUBMIT_BUTTON).performScrollTo()
+                onNodeWithTag(TEST_TAG_FAILURE_ASYNC).performClick()
+                onNodeWithTag(TEST_TAG_SUBMIT_BUTTON).performClick()
+
+                verify(mockIdentityViewModel).unverifySessionAndTransition(
+                    fromRoute = eq(DebugDestination.ROUTE.route),
+                    simulateDelay = eq(true),
+                    navController = same(mockNavController)
+                )
+            }
         }
     }
 
     @Test
     fun testCancelledButton() {
         setComposeTestRuleWith(verificationPageForDoc) {
+            onNodeWithTag(TEST_TAG_CANCELLED_BUTTON).performScrollTo()
             onNodeWithTag(TEST_TAG_CANCELLED_BUTTON).performClick()
             verify(mockVerificationFlowFinishable).finishWithResult(
                 eq(IdentityVerificationSheet.VerificationFlowResult.Canceled)
@@ -96,6 +158,7 @@ class DebugScreenTest {
     @Test
     fun testFailedButton() {
         setComposeTestRuleWith(verificationPageForDoc) {
+            onNodeWithTag(TEST_TAG_FAILED_BUTTON).performScrollTo()
             onNodeWithTag(TEST_TAG_FAILED_BUTTON).performClick()
             verify(mockVerificationFlowFinishable).finishWithResult(
                 argWhere {

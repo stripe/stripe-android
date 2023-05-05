@@ -1,5 +1,6 @@
 package com.stripe.android.identity.navigation
 
+import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
@@ -321,6 +322,10 @@ internal fun IdentityNavGraph(
                 )
             }
             screen(ErrorDestination.ROUTE) {
+                Log.d(
+                    ErrorDestination.TAG,
+                    "About to show error screen with error caused by ${identityViewModel.errorCause.value}"
+                )
                 ErrorScreen(
                     identityViewModel = identityViewModel,
                     title = ErrorDestination.errorTitle(it),

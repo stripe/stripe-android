@@ -291,12 +291,10 @@ public final class com/stripe/android/identity/ui/ComposableSingletons$DebugScre
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public static field lambda-2 Lkotlin/jvm/functions/Function3;
 	public static field lambda-3 Lkotlin/jvm/functions/Function3;
-	public static field lambda-4 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$identity_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-3$identity_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-4$identity_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$SelfieScreenKt {

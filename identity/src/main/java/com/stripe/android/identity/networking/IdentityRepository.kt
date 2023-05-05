@@ -48,6 +48,26 @@ internal interface IdentityRepository {
         APIConnectionException::class,
         APIException::class
     )
+    suspend fun verifyTestVerificationSession(
+        id: String,
+        ephemeralKey: String,
+        simulateDelay: Boolean
+    ): VerificationPageData
+
+    @Throws(
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun unverifyTestVerificationSession(
+        id: String,
+        ephemeralKey: String,
+        simulateDelay: Boolean
+    ): VerificationPageData
+
+    @Throws(
+        APIConnectionException::class,
+        APIException::class
+    )
     suspend fun uploadImage(
         verificationId: String,
         ephemeralKey: String,

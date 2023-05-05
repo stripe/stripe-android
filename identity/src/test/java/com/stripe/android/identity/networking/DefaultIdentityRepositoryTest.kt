@@ -12,8 +12,6 @@ import com.stripe.android.core.networking.HEADER_AUTHORIZATION
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
-import com.stripe.android.identity.networking.DefaultIdentityRepository.Companion.DATA
-import com.stripe.android.identity.networking.DefaultIdentityRepository.Companion.SUBMIT
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -275,6 +273,38 @@ class DefaultIdentityRepositoryTest {
     }
 
     @Test
+    fun testVerifyTestVerificationSessionWithoutDelay() {
+        testVerifyEndpoint(
+            verify = true,
+            simulateDelay = false
+        )
+    }
+
+    @Test
+    fun testVerifyTestVerificationSessionWithDelay() {
+        testVerifyEndpoint(
+            verify = true,
+            simulateDelay = true
+        )
+    }
+
+    @Test
+    fun testUnverifyTestVerificationSessionWithoutDelay() {
+        testVerifyEndpoint(
+            verify = false,
+            simulateDelay = false
+        )
+    }
+
+    @Test
+    fun testUnverifyTestVerificationSessionWithDelay() {
+        testVerifyEndpoint(
+            verify = false,
+            simulateDelay = true
+        )
+    }
+
+    @Test
     fun `retrieveVerificationPage with error response throws APIException from executeRequestWithKSerializer`() {
         runBlocking {
             whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
@@ -476,6 +506,53 @@ class DefaultIdentityRepositoryTest {
             assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
 
             verificationPageBlock(verificationPage)
+        }
+    }
+
+    private fun testVerifyEndpoint(
+        verify: Boolean,
+        simulateDelay: Boolean
+    ) {
+        runBlocking {
+            whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
+                StripeResponse(
+                    code = HTTP_OK,
+                    body = VERIFICATION_PAGE_DATA_JSON_STRING
+                )
+            )
+            val verificationPage =
+                if (verify) {
+                    identityRepository.verifyTestVerificationSession(
+                        id = TEST_ID,
+                        ephemeralKey = TEST_EPHEMERAL_KEY,
+                        simulateDelay = simulateDelay
+                    )
+                } else {
+                    identityRepository.unverifyTestVerificationSession(
+                        id = TEST_ID,
+                        ephemeralKey = TEST_EPHEMERAL_KEY,
+                        simulateDelay = simulateDelay
+                    )
+                }
+
+            assertThat(verificationPage).isInstanceOf(VerificationPageData::class.java)
+            verify(mockStripeNetworkClient).executeRequest(requestCaptor.capture())
+
+            val request = requestCaptor.firstValue
+
+            assertThat(request).isInstanceOf(ApiRequest::class.java)
+            assertThat(request.method).isEqualTo(StripeRequest.Method.POST)
+            if (verify) {
+                assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$TESTING/$VERIFY")
+            } else {
+                assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$TESTING/$UNVERIFY")
+            }
+            assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
+            assertThat((request as ApiRequest).params).isEqualTo(
+                mapOf(
+                    SIMULATE_DELAY to simulateDelay
+                )
+            )
         }
     }
 
