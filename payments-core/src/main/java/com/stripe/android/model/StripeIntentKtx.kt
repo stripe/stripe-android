@@ -1,21 +1,24 @@
 package com.stripe.android.model
 
 import com.stripe.android.StripePaymentController
+import com.stripe.android.model.PaymentMethod.Type.CashAppPay
+import com.stripe.android.model.PaymentMethod.Type.WeChatPay
 
 fun StripeIntent.getRequestCode() = StripePaymentController.getRequestCode(this)
 
 /**
  * Check if this [StripeIntent] needs to be refreshed until it moves out "requires_action" state.
  */
-internal fun StripeIntent.shouldRefresh() =
-    this is PaymentIntent &&
-        REFRESHABLE_PAYMENT_METHODS.contains(this.paymentMethod?.type) &&
-        this.requiresAction()
+internal fun StripeIntent.shouldRefresh(): Boolean {
+    return requiresAction() && paymentMethod?.type in refreshablePaymentMethods
+}
 
 /**
- * A set of PMs that don't transfer the PI status immediately after confirmation, needs to poll
- * the refresh endpoint until the PI status transfers out of "requires_action".
+ * A set of PMs that don't transfer the intent status immediately after confirmation. Needs to poll
+ * the refresh endpoint until the intent status transfers out of "requires_action".
  */
-internal val REFRESHABLE_PAYMENT_METHODS = setOf(
-    PaymentMethod.Type.WeChatPay
-)
+private val StripeIntent.refreshablePaymentMethods: Set<PaymentMethod.Type>
+    get() = when (this) {
+        is PaymentIntent -> setOf(WeChatPay, CashAppPay)
+        is SetupIntent -> setOf(CashAppPay)
+    }
