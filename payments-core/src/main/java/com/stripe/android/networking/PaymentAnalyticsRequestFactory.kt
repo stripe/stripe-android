@@ -3,6 +3,7 @@ package com.stripe.android.networking
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -239,6 +240,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         Oob("04", "oob"),
         Html("05", "html");
 
+        @Keep
         override fun toString(): String = typeName
 
         companion object {
