@@ -87,6 +87,7 @@ internal fun DebugScreen(
                             )
                         }
                     }
+
                     FAILURE -> {
                         coroutineScope.launch {
                             identityViewModel.unverifySessionAndTransition(
@@ -96,6 +97,7 @@ internal fun DebugScreen(
                             )
                         }
                     }
+
                     SUCCESS_ASYNC -> {
                         coroutineScope.launch {
                             identityViewModel.verifySessionAndTransition(
@@ -105,6 +107,7 @@ internal fun DebugScreen(
                             )
                         }
                     }
+
                     FAILURE_ASYNC -> {
                         coroutineScope.launch {
                             identityViewModel.unverifySessionAndTransition(
@@ -302,6 +305,7 @@ private fun CompleteOptionRow(
 ) {
     Row(
         modifier = Modifier
+            .testTag(testTag)
             .padding(vertical = 8.dp)
             .fillMaxWidth()
             .clickable(enabled = enabled, onClick = onClick),
@@ -310,7 +314,6 @@ private fun CompleteOptionRow(
         RadioButton(
             selected = selected,
             enabled = enabled,
-            modifier = Modifier.testTag(testTag),
             onClick = null
         )
 
