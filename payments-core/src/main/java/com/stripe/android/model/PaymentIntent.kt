@@ -152,11 +152,11 @@ constructor(
 
     override val nextActionData: StripeIntent.NextActionData? = null,
 
-    private val paymentMethodOptionsJsonString: String? = null
+    private val paymentMethodOptionsJsonString: String? = null,
 
 ) : StripeIntent {
 
-    fun getPaymentMethodOptions() = paymentMethodOptionsJsonString?.let {
+    override fun getPaymentMethodOptions() = paymentMethodOptionsJsonString?.let {
         StripeJsonUtils.jsonObjectToMap(JSONObject(it))
     } ?: emptyMap()
 

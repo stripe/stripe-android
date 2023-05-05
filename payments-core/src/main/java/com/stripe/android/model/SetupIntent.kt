@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import kotlinx.parcelize.Parcelize
@@ -103,8 +104,15 @@ data class SetupIntent internal constructor(
      */
     override val linkFundingSources: List<String>,
 
-    override val nextActionData: StripeIntent.NextActionData?
+    override val nextActionData: StripeIntent.NextActionData?,
+
+    private val paymentMethodOptionsJsonString: String? = null,
 ) : StripeIntent {
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override fun getPaymentMethodOptions() = paymentMethodOptionsJsonString?.let {
+        StripeJsonUtils.jsonObjectToMap(JSONObject(it))
+    } ?: emptyMap()
 
     override val nextActionType: StripeIntent.NextActionType?
         get() = when (nextActionData) {

@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.net.Uri
+import com.google.common.truth.Truth.assertThat
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -152,5 +153,45 @@ class SetupIntentTest {
             "seti_a1b2c3_secret_x7y8z9",
             SetupIntent.ClientSecret("seti_a1b2c3_secret_x7y8z9").value
         )
+    }
+
+    @Test
+    fun `getPaymentMethodOptions returns expected results`() {
+        val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsJsonString = """
+                {
+                    "card": {
+                        "mandate_options": null,
+                        "network": null,
+                        "request_three_d_secure": "automatic"
+                    },
+                    "us_bank_account": {
+                        "financial_connections": {
+                            "permissions": "balances"
+                        },
+                        "setup_future_usage": "on_session",
+                        "verification_method": "automatic"
+                    }
+                }
+            """.trimIndent()
+        )
+
+        assertThat(setupIntent.getPaymentMethodOptions())
+            .isEqualTo(
+                mapOf(
+                    "card" to mapOf(
+                        "mandate_options" to null,
+                        "network" to null,
+                        "request_three_d_secure" to "automatic"
+                    ),
+                    "us_bank_account" to mapOf(
+                        "financial_connections" to mapOf(
+                            "permissions" to "balances"
+                        ),
+                        "setup_future_usage" to "on_session",
+                        "verification_method" to "automatic"
+                    )
+                )
+            )
     }
 }

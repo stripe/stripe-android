@@ -428,7 +428,14 @@ class LpmRepository constructor(
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.USBankAccount.code -> {
-            if (stripeIntent.clientSecret != null || arguments.enableACHV2InDeferredFlow) {
+            val pmo = stripeIntent.getPaymentMethodOptions()[PaymentMethod.Type.USBankAccount.code]
+            val verificationMethod = (pmo as? Map<*, *>)?.get("verification_method") as? String
+            val supportsVerificationMethod = verificationMethod == "instant" ||
+                verificationMethod == "automatic"
+            val supported =
+                (stripeIntent.clientSecret != null || arguments.enableACHV2InDeferredFlow) &&
+                    supportsVerificationMethod
+            if (supported) {
                 SupportedPaymentMethod(
                     code = "us_bank_account",
                     requiresMandate = true,
