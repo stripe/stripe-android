@@ -46,7 +46,7 @@ internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
         flowController = PaymentSheet.FlowController.create(
             activity = this,
             paymentOptionCallback = viewModel::handlePaymentOptionChanged,
-            createIntentCallbackForServerSideConfirmation = viewModel::createAndConfirmIntent,
+            createIntentCallback = viewModel::createAndConfirmIntent,
             paymentResultCallback = viewModel::handlePaymentSheetResult,
         )
 
