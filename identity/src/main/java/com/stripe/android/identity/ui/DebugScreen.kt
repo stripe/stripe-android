@@ -1,6 +1,7 @@
 package com.stripe.android.identity.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -163,7 +164,10 @@ internal fun CompleteWithTestDataSection(
 ) {
     var submitState: LoadingButtonState by remember { mutableStateOf(LoadingButtonState.Disabled) }
     var completeOption: CompleteOption? by remember { mutableStateOf(null) }
-    Text(text = stringResource(id = R.string.stripe_complete_with_test_data), style = MaterialTheme.typography.h4)
+    Text(
+        text = stringResource(id = R.string.stripe_complete_with_test_data),
+        style = MaterialTheme.typography.h4
+    )
     Html(
         html = stringResource(id = R.string.stripe_complete_with_test_data_details),
         modifier = Modifier.padding(vertical = 8.dp)
@@ -297,18 +301,24 @@ private fun CompleteOptionRow(
     testTag: String,
     onClick: () -> Unit
 ) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .fillMaxWidth()
+            .clickable(enabled = enabled, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         RadioButton(
             selected = selected,
             enabled = enabled,
             modifier = Modifier.testTag(testTag),
-            onClick = onClick
+            onClick = null
         )
-        StyledClickableText(
-            text = AnnotatedString(content),
+
+        Text(
+            text = content,
             modifier = Modifier.padding(start = 8.dp),
-            enabled = enabled,
-            onClick = { onClick() }
+            style = MaterialTheme.typography.button
         )
     }
 }

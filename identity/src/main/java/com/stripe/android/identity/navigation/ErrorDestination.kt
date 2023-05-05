@@ -40,7 +40,7 @@ internal class ErrorDestination(
         // If this happens, set the back button destination to [DEFAULT_BACK_BUTTON_DESTINATION]
         const val UNEXPECTED_ROUTE = "UnexpectedRoute"
 
-        val TAG = ErrorDestination::class.java.simpleName
+        const val TAG = "ErrorDestination"
 
         fun errorTitle(backStackEntry: NavBackStackEntry) =
             backStackEntry.getStringArgument(ARG_ERROR_TITLE)
