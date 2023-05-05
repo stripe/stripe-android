@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -173,5 +174,40 @@ internal class SetupIntentFlowResultProcessorTest {
                         null
                     )
                 )
+        }
+
+    @Test
+    fun `Keeps refreshing when encountering a CashAppPay setup that still requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.cashAppPay(),
+                paymentMethodTypes = listOf("card", "cashapp"),
+            )
+
+            val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
+
+            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+                requiresActionIntent,
+                requiresActionIntent,
+                succeededIntent,
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
+                )
+            ).getOrThrow()
+
+            val expectedResult = SetupIntentResult(
+                intent = succeededIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+                failureMessage = null,
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
         }
 }
