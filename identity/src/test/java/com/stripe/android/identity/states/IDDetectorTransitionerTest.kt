@@ -11,6 +11,8 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
@@ -30,7 +32,8 @@ internal class IDDetectorTransitionerTest {
 
     @Test
     fun `Found transitions to Found when iOUCheckPass failed`() = runBlocking {
-        val transitioner = IDDetectorTransitioner(mockNeverTimeoutClockMark)
+        val transitioner = IDDetectorTransitioner(TIMEOUT_DURATION)
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
 
         val foundState = IdentityScanState.Found(
             ScanType.ID_FRONT,
@@ -58,9 +61,10 @@ internal class IDDetectorTransitionerTest {
         runBlocking {
             val timeRequired = 500
             val transitioner = IDDetectorTransitioner(
-                timeoutAt = mockNeverTimeoutClockMark,
+                timeout = TIMEOUT_DURATION,
                 timeRequired = timeRequired
             )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
 
             val mockFoundState = mock<IdentityScanState.Found>().also {
                 whenever(it.type).thenReturn(ScanType.ID_FRONT)
@@ -100,10 +104,11 @@ internal class IDDetectorTransitionerTest {
             val timeRequired = 500
             val allowedUnmatchedFrames = 2
             val transitioner = IDDetectorTransitioner(
-                timeoutAt = mockNeverTimeoutClockMark,
+                timeout = TIMEOUT_DURATION,
                 timeRequired = timeRequired,
                 allowedUnmatchedFrames = allowedUnmatchedFrames
             )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
 
             // never meets required time
             whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired - 10).milliseconds)
@@ -143,10 +148,11 @@ internal class IDDetectorTransitionerTest {
             val timeRequired = 500
             val allowedUnmatchedFrames = 2
             val transitioner = IDDetectorTransitioner(
-                timeoutAt = mockNeverTimeoutClockMark,
+                timeout = TIMEOUT_DURATION,
                 timeRequired = timeRequired,
                 allowedUnmatchedFrames = allowedUnmatchedFrames
             )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
 
             // never meets required time
             whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired - 10).milliseconds)
@@ -198,10 +204,11 @@ internal class IDDetectorTransitionerTest {
             val timeRequired = 500
             val allowedUnmatchedFrames = 2
             val transitioner = IDDetectorTransitioner(
-                timeoutAt = mockNeverTimeoutClockMark,
+                timeout = TIMEOUT_DURATION,
                 timeRequired = timeRequired,
                 allowedUnmatchedFrames = allowedUnmatchedFrames
             )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
 
             // never meets required time
             whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired - 10).milliseconds)
@@ -249,8 +256,9 @@ internal class IDDetectorTransitionerTest {
     @Test
     fun `Initial transitions to Timeout when timeout`() = runBlocking {
         val transitioner = IDDetectorTransitioner(
-            timeoutAt = mockAlwaysTimeoutClockMark
+            timeout = TIMEOUT_DURATION
         )
+        transitioner.timeoutAt = mockAlwaysTimeoutClockMark
 
         val initialState = IdentityScanState.Initial(
             ScanType.ID_FRONT,
@@ -269,8 +277,9 @@ internal class IDDetectorTransitionerTest {
     @Test
     fun `Initial stays in Initial if type doesn't match`() = runBlocking {
         val transitioner = IDDetectorTransitioner(
-            timeoutAt = mockNeverTimeoutClockMark
+            timeout = TIMEOUT_DURATION
         )
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
 
         val initialState = IdentityScanState.Initial(
             ScanType.ID_FRONT,
@@ -289,8 +298,9 @@ internal class IDDetectorTransitionerTest {
     @Test
     fun `Initial transitions to Found if type does match`() = runBlocking {
         val transitioner = IDDetectorTransitioner(
-            timeoutAt = mockNeverTimeoutClockMark
+            timeout = TIMEOUT_DURATION
         )
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
 
         val initialState = IdentityScanState.Initial(
             ScanType.ID_FRONT,
@@ -313,9 +323,10 @@ internal class IDDetectorTransitionerTest {
             whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION + 1).milliseconds)
 
             val transitioner = IDDetectorTransitioner(
-                timeoutAt = mockNeverTimeoutClockMark,
+                timeout = TIMEOUT_DURATION,
                 displaySatisfiedDuration = DEFAULT_DISPLAY_SATISFIED_DURATION
             )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
 
             assertThat(
                 transitioner.transitionFromSatisfied(
@@ -337,9 +348,10 @@ internal class IDDetectorTransitionerTest {
             whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION - 1).milliseconds)
 
             val transitioner = IDDetectorTransitioner(
-                timeoutAt = mockNeverTimeoutClockMark,
+                timeout = TIMEOUT_DURATION,
                 displaySatisfiedDuration = DEFAULT_DISPLAY_SATISFIED_DURATION
             )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
 
             val satisfiedState =
                 IdentityScanState.Satisfied(
@@ -356,9 +368,10 @@ internal class IDDetectorTransitionerTest {
     @Test
     fun `Unsatisfied transitions to Timeout when timeout`() = runBlocking {
         val transitioner = IDDetectorTransitioner(
-            timeoutAt = mockAlwaysTimeoutClockMark,
+            timeout = TIMEOUT_DURATION,
             displaySatisfiedDuration = DEFAULT_DISPLAY_SATISFIED_DURATION
         )
+        transitioner.timeoutAt = mockAlwaysTimeoutClockMark
 
         assertThat(
             transitioner.transitionFromUnsatisfied(
@@ -380,9 +393,10 @@ internal class IDDetectorTransitionerTest {
             whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION - 1).milliseconds)
 
             val transitioner = IDDetectorTransitioner(
-                timeoutAt = mockNeverTimeoutClockMark,
+                timeout = TIMEOUT_DURATION,
                 displayUnsatisfiedDuration = DEFAULT_DISPLAY_UNSATISFIED_DURATION
             )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
 
             val unsatisfiedState =
                 IdentityScanState.Unsatisfied(
@@ -409,25 +423,29 @@ internal class IDDetectorTransitionerTest {
             whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION + 1).milliseconds)
 
             val transitioner = IDDetectorTransitioner(
-                timeoutAt = mockNeverTimeoutClockMark,
+                timeout = TIMEOUT_DURATION,
                 displayUnsatisfiedDuration = DEFAULT_DISPLAY_UNSATISFIED_DURATION
             )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
+
+            val transitionerSpy = spy(transitioner)
 
             val unsatisfiedState =
                 IdentityScanState.Unsatisfied(
                     "reason",
                     ScanType.ID_FRONT,
-                    transitioner,
+                    transitionerSpy,
                     reachedStateAt = mockReachAtClockMark
                 )
 
             val resultState =
-                transitioner.transitionFromUnsatisfied(
+                transitionerSpy.transitionFromUnsatisfied(
                     unsatisfiedState,
                     mock(),
                     mock()
                 )
 
+            verify(transitionerSpy).resetAndReturn()
             assertThat(resultState).isInstanceOf(IdentityScanState.Initial::class.java)
         }
 
@@ -478,5 +496,7 @@ internal class IDDetectorTransitionerTest {
 
         const val DEFAULT_DISPLAY_SATISFIED_DURATION = 1000
         const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 1000
+
+        val TIMEOUT_DURATION = 8000.milliseconds
     }
 }

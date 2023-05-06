@@ -1,8 +1,10 @@
 package com.stripe.android.identity.states
 
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.ClockMark
+import com.stripe.android.camera.framework.time.Duration
 import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
@@ -30,7 +32,7 @@ import kotlin.math.min
  * [timeRequired], then transitions to [Satisfied], otherwise stays in [Found].
  */
 internal class IDDetectorTransitioner(
-    private val timeoutAt: ClockMark,
+    private val timeout: Duration,
     private val iouThreshold: Float = DEFAULT_IOU_THRESHOLD,
     private val timeRequired: Int = DEFAULT_TIME_REQUIRED,
     private val allowedUnmatchedFrames: Int = DEFAULT_ALLOWED_UNMATCHED_FRAME,
@@ -39,6 +41,22 @@ internal class IDDetectorTransitioner(
 ) : IdentityScanStateTransitioner {
     private var previousBoundingBox: BoundingBox? = null
     private var unmatchedFrame = 0
+
+    @VisibleForTesting
+    var timeoutAt: ClockMark = Clock.markNow() + timeout
+
+    /**
+     * Rest internal state and return itself.
+     */
+    @VisibleForTesting
+    fun resetAndReturn(): IDDetectorTransitioner {
+        previousBoundingBox = null
+        unmatchedFrame = 0
+        timeoutAt = Clock.markNow() + timeout
+        Log.d(TAG, "Reset! timeoutAt: $timeoutAt")
+        return this
+    }
+
     override suspend fun transitionFromInitial(
         initialState: Initial,
         analyzerInput: AnalyzerInput,
@@ -51,6 +69,7 @@ internal class IDDetectorTransitioner(
             timeoutAt.hasPassed() -> {
                 IdentityScanState.TimeOut(initialState.type, this)
             }
+
             analyzerOutput.category.matchesScanType(initialState.type) -> {
                 Log.d(
                     TAG,
@@ -59,6 +78,7 @@ internal class IDDetectorTransitioner(
                 )
                 Found(initialState.type, this)
             }
+
             else -> {
                 Log.d(
                     TAG,
@@ -82,16 +102,19 @@ internal class IDDetectorTransitioner(
             timeoutAt.hasPassed() -> {
                 IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
             }
+
             !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
                 "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
                 foundState.type,
                 foundState.transitioner
             )
+
             !iOUCheckPass(analyzerOutput.boundingBox) -> {
                 // reset timer of the foundState
                 foundState.reachedStateAt = Clock.markNow()
                 foundState
             }
+
             moreResultsRequired(foundState) -> foundState
             else -> {
                 Satisfied(foundState.type, foundState.transitioner)
@@ -121,13 +144,16 @@ internal class IDDetectorTransitioner(
             timeoutAt.hasPassed() -> {
                 IdentityScanState.TimeOut(unsatisfiedState.type, this)
             }
+
             unsatisfiedState.reachedStateAt.elapsedSince() > displayUnsatisfiedDuration.milliseconds -> {
                 Log.d(
                     TAG,
-                    "Scan for ${unsatisfiedState.type} Unsatisfied with reason ${unsatisfiedState.reason}, transition to Initial."
+                    "Scan for ${unsatisfiedState.type} Unsatisfied with reason " +
+                        "${unsatisfiedState.reason}, transition to Initial."
                 )
-                Initial(unsatisfiedState.type, this)
+                Initial(unsatisfiedState.type, this.resetAndReturn())
             }
+
             else -> {
                 unsatisfiedState
             }
