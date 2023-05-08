@@ -27,6 +27,8 @@ import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAc
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.navigation.NavigationDirections.bankAuthRepair
+import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,6 +38,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val pollNetworkedAccounts: PollNetworkedAccounts,
+    private val navigationManager: NavigationManager,
     private val selectNetworkedAccount: SelectNetworkedAccount,
     private val updateLocalManifest: UpdateLocalManifest,
     private val updateCachedAccounts: UpdateCachedAccounts,
@@ -125,7 +128,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
 
     private suspend fun repairAccount() {
         eventTracker.track(Click("click.repair_accounts", PANE))
-        TODO("Account repair flow not yet implemented")
+        navigationManager.navigate(bankAuthRepair)
     }
 
     private suspend fun selectAccount(
@@ -190,12 +193,12 @@ internal data class LinkAccountPickerState(
 
     val ctaText: Int
         @StringRes
-        get() {
-            val selectedAccount =
-                payload.invoke()?.accounts?.find { it.account.id == selectedAccountId }
-            return when (selectedAccount?.repairable) {
-                true -> R.string.stripe_link_account_picker_repair_cta
-                else -> R.string.stripe_link_account_picker_cta
-            }
+        get() = when (
+            payload.invoke()?.accounts
+                ?.find { it.account.id == selectedAccountId }
+                ?.repairable
+        ) {
+            true -> R.string.stripe_link_account_picker_repair_cta
+            else -> R.string.stripe_link_account_picker_cta
         }
 }

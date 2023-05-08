@@ -202,7 +202,7 @@ private fun NetworkedAccountItem(
     AccountItem(
         selected = selected,
         onAccountClicked = onAccountClicked,
-        // Show warning trailing icon if the account is not s
+        // Show warning trailing icon if the account is repairable.
         trailingIcon = if (networkedAccount.repairable) {
             {
                 Icon(

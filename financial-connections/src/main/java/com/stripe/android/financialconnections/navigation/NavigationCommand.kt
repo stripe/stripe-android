@@ -88,6 +88,11 @@ internal object NavigationDirections {
         override val destination = "reset"
     }
 
+    val bankAuthRepair = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "bank_auth_repair"
+    }
+
     object ManualEntrySuccess {
 
         private const val KEY_MICRODEPOSITS = "microdeposits"
