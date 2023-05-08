@@ -243,6 +243,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "networking_save_to_link_verification")
         NETWORKING_SAVE_TO_LINK_VERIFICATION("networking_save_to_link_verification"),
 
+        @SerialName(value = "bank_auth_repair")
+        BANK_AUTH_REPAIR("bank_auth_repair"),
+
         @SerialName(value = "reset")
         RESET("reset");
 

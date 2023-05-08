@@ -30,6 +30,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.domain.toNavigationCommand
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
+import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairScreen
 import com.stripe.android.financialconnections.features.common.CloseDialog
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
@@ -236,6 +237,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     LaunchedPane(Pane.LINK_STEP_UP_VERIFICATION)
                     BackHandler(navController, Pane.LINK_STEP_UP_VERIFICATION)
                     LinkStepUpVerificationScreen()
+                }
+                composable(NavigationDirections.bankAuthRepair.destination) {
+                    LaunchedPane(Pane.BANK_AUTH_REPAIR)
+                    BackHandler(navController, Pane.BANK_AUTH_REPAIR)
+                    BankAuthRepairScreen()
                 }
             }
         }

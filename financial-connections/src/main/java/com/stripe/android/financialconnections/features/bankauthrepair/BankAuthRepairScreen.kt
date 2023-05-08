@@ -1,7 +1,7 @@
 @file:OptIn(ExperimentalMaterialApi::class)
 @file:Suppress("LongMethod")
 
-package com.stripe.android.financialconnections.features.partnerauth
+package com.stripe.android.financialconnections.features.bankauthrepair
 
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
@@ -11,23 +11,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.PartnerAuthScreenContent
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
-import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun PartnerAuthScreen() {
+internal fun BankAuthRepairScreen() {
     // activity view model
     val activityViewModel: FinancialConnectionsSheetNativeViewModel = mavericksActivityViewModel()
     val parentViewModel = parentViewModel()
@@ -35,7 +33,7 @@ internal fun PartnerAuthScreen() {
     val uriHandler = LocalUriHandler.current
 
     // step view model
-    val viewModel: PartnerAuthViewModel = mavericksViewModel()
+    val viewModel: BankAuthRepairViewModel = mavericksViewModel()
 
     val state: State<PartnerAuthState> = viewModel.collectAsState()
 
@@ -74,32 +72,5 @@ internal fun PartnerAuthScreen() {
         onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.PARTNER_AUTH) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
-}
-
-
-
-@Preview(
-    group = "Partner Auth Pane"
-)
-@Composable
-internal fun PartnerAuthPreview(
-    @PreviewParameter(PartnerAuthPreviewParameterProvider::class)
-    state: PartnerAuthState
-) {
-    FinancialConnectionsPreview {
-        PartnerAuthScreenContent(
-            state = state,
-            onContinueClick = {},
-            onSelectAnotherBank = {},
-            onEnterDetailsManually = {},
-            onCloseClick = {},
-            modalBottomSheetState = rememberModalBottomSheetState(
-                initialValue = ModalBottomSheetValue.Hidden
-            ),
-            onClickableTextClick = {},
-            onCloseFromErrorClick = {},
-            onConfirmModalClick = {}
-        )
-    }
 }
 
