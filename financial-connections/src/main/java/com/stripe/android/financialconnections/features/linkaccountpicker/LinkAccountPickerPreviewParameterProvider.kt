@@ -62,7 +62,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                 supportedPaymentMethodTypes = emptyList()
             ),
-            repairable = true
+            repairable = false
         ),
         LinkAccountPickerState.NetworkedAccount(
             PartnerAccount(
@@ -111,14 +111,14 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 authorization = "Authorization",
                 category = FinancialConnectionsAccount.Category.CASH,
                 id = "id5",
-                name = "Very long institution that is already linked",
+                name = "Very long account of a very long institution",
                 displayableAccountNumbers = "1234",
                 linkedAccountId = "linkedAccountId",
                 _allowSelection = true,
                 subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                 supportedPaymentMethodTypes = emptyList()
             ),
-            repairable = true
+            repairable = false
         ),
     )
 

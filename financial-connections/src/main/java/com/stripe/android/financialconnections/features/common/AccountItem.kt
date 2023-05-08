@@ -122,8 +122,8 @@ private fun getAccountTexts(
         else -> account.name
     }
     val subtitle = when {
-        overridenSubtitle != null -> overridenSubtitle
         account.allowSelection.not() -> account.allowSelectionMessage
+        overridenSubtitle != null -> overridenSubtitle
         formattedBalance != null -> formattedBalance
         account.encryptedNumbers.isNotEmpty() -> account.encryptedNumbers
         else -> null
