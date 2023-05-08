@@ -16,7 +16,6 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.TextResource.PluralId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,7 +39,6 @@ internal class SuccessViewModelTest {
     val mavericksRule = MavericksTestRule(testDispatcher = testDispatcher)
 
     private val getManifest = mock<GetManifest>()
-    private val navigationManager = mock<NavigationManager>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
@@ -51,7 +49,6 @@ internal class SuccessViewModelTest {
         state: SuccessState
     ) = SuccessViewModel(
         getManifest = getManifest,
-        navigationManager = navigationManager,
         logger = Logger.noop(),
         eventTracker = eventTracker,
         initialState = state,

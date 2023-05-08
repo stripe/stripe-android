@@ -13,7 +13,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickDisconnectLink
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickDone
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLearnMoreDataAccess
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLinkAnotherAccount
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
@@ -29,8 +28,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
-import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
@@ -46,7 +43,6 @@ internal class SuccessViewModel @Inject constructor(
     private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
-    private val navigationManager: NavigationManager,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
 ) : MavericksViewModel<SuccessState>(initialState) {
@@ -78,9 +74,6 @@ internal class SuccessViewModel @Inject constructor(
                 institution = manifest.activeInstitution!!,
                 businessName = manifest.businessName,
                 disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest),
-                showLinkAnotherAccount = manifest.singleAccount.not() &&
-                    manifest.disableLinkMoreAccounts.not() &&
-                    manifest.isNetworkingUserFlow?.not() == true,
                 accountFailedToLinkMessage = getFailedToLinkMessage(
                     businessName = manifest.businessName,
                     saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
@@ -217,13 +210,6 @@ internal class SuccessViewModel @Inject constructor(
         }.execute { copy(completeSession = it) }
     }
 
-    fun onLinkAnotherAccountClick() {
-        viewModelScope.launch {
-            eventTracker.track(ClickLinkAnotherAccount(Pane.SUCCESS))
-        }
-        navigationManager.navigate(NavigationDirections.reset)
-    }
-
     fun onLearnMoreAboutDataAccessClick() {
         viewModelScope.launch {
             eventTracker.track(ClickLearnMoreDataAccess(Pane.SUCCESS))
@@ -260,7 +246,6 @@ internal data class SuccessState(
 
     data class Payload(
         val accessibleData: AccessibleDataCalloutModel,
-        val showLinkAnotherAccount: Boolean,
         val institution: FinancialConnectionsInstitution,
         val accounts: List<PartnerAccount>,
         val disconnectUrl: String,
