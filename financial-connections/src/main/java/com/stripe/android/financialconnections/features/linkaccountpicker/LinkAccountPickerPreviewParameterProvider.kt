@@ -6,13 +6,15 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.airbnb.mvrx.Success
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.PartnerAccount
 
 internal class LinkAccountPickerPreviewParameterProvider :
     PreviewParameterProvider<LinkAccountPickerState> {
     override val values = sequenceOf(
         canonical(),
-        accountSelected()
+        accountSelected(),
+        repairableAccountSelected(),
     )
 
     override val count: Int
@@ -43,6 +45,20 @@ internal class LinkAccountPickerPreviewParameterProvider :
         ),
     )
 
+    private fun repairableAccountSelected() = LinkAccountPickerState(
+        selectedAccountId = partnerAccountList()
+            .first { it.status != Status.ACTIVE && it.allowSelection }.id,
+        payload = Success(
+            LinkAccountPickerState.Payload(
+                accounts = partnerAccountList(),
+                accessibleData = accessibleCallout(),
+                businessName = "Random business",
+                consumerSessionClientSecret = "secret",
+                stepUpAuthenticationRequired = false,
+            )
+        ),
+    )
+
     private fun partnerAccountList() = listOf(
         PartnerAccount(
             authorization = "Authorization",
@@ -50,7 +66,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             id = "id1",
             name = "With balance",
             balanceAmount = 1000,
-            status = FinancialConnectionsAccount.Status.ACTIVE,
+            status = Status.ACTIVE,
             displayableAccountNumbers = "1234",
             currency = "USD",
             _allowSelection = true,
@@ -63,7 +79,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             category = FinancialConnectionsAccount.Category.CASH,
             id = "id2",
             name = "With balance repairable",
-            status = FinancialConnectionsAccount.Status.INACTIVE,
+            status = Status.INACTIVE,
             balanceAmount = 1000,
             _allowSelection = true,
             allowSelectionMessage = "Select to repair and connect",
@@ -73,9 +89,9 @@ internal class LinkAccountPickerPreviewParameterProvider :
         PartnerAccount(
             authorization = "Authorization",
             category = FinancialConnectionsAccount.Category.CASH,
-            id = "id2",
+            id = "id3",
             name = "Repairable + authRepairEnabled = false",
-            status = FinancialConnectionsAccount.Status.INACTIVE,
+            status = Status.INACTIVE,
             balanceAmount = 1000,
             _allowSelection = false,
             allowSelectionMessage = "Select to repair and connect",
@@ -85,10 +101,10 @@ internal class LinkAccountPickerPreviewParameterProvider :
         PartnerAccount(
             authorization = "Authorization",
             category = FinancialConnectionsAccount.Category.CASH,
-            id = "id3",
+            id = "id4",
             name = "No balance",
             displayableAccountNumbers = "1234",
-            status = FinancialConnectionsAccount.Status.ACTIVE,
+            status = Status.ACTIVE,
             subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
             _allowSelection = true,
             allowSelectionMessage = "",
@@ -99,7 +115,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             category = FinancialConnectionsAccount.Category.CASH,
             id = "id5",
             name = "Very long account of a very long institution",
-            status = FinancialConnectionsAccount.Status.ACTIVE,
+            status = Status.ACTIVE,
             displayableAccountNumbers = "1234",
             linkedAccountId = "linkedAccountId",
             _allowSelection = true,
