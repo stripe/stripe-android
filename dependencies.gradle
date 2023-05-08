@@ -52,7 +52,7 @@ ext.versions = [
         okio                        : '3.3.0',
         paparazzi                   : '1.2.0',
         places                      : '3.0.0',
-        playServices                : '1.6.4',
+        playServices                : '1.7.0',
         playServicesTfLite          : '16.0.1',
         playServicesWallet          : '19.2.0-beta01',
         retrofit                    : '2.9.0',
