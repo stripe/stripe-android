@@ -29,12 +29,25 @@ import com.stripe.android.uicore.format.CurrencyFormatter
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import java.util.Locale
 
+/**
+ * A single account item in the list of accounts.
+ *
+ * @param selected whether this account is selected
+ * @param onAccountClicked callback when this account is clicked
+ * @param account the account to display
+ * @param overridenSubtitle optional subtitle to display.
+ *  If not provided, it'll show account related info (see [getAccountTexts])
+ * @param trailingIcon optional trailing icon to display
+ * @param selectorContent content to display on the left side of the account item
+ */
 @Composable
 @Suppress("MagicNumber")
 internal fun AccountItem(
     selected: Boolean,
     onAccountClicked: (PartnerAccount) -> Unit,
     account: PartnerAccount,
+    overridenSubtitle: String? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
     selectorContent: @Composable RowScope.() -> Unit
 ) {
     val verticalPadding =
@@ -61,7 +74,10 @@ internal fun AccountItem(
         ) {
             selectorContent()
             Spacer(modifier = Modifier.size(16.dp))
-            val (title, subtitle) = getAccountTexts(account = account)
+            val (title, subtitle) = getAccountTexts(
+                account = account,
+                overridenSubtitle = overridenSubtitle
+            )
             Column(
                 Modifier.weight(0.7f)
             ) {
@@ -85,6 +101,10 @@ internal fun AccountItem(
                     )
                 }
             }
+            trailingIcon?.let {
+                Spacer(modifier = Modifier.size(16.dp))
+                it()
+            }
         }
     }
 }
@@ -92,15 +112,17 @@ internal fun AccountItem(
 @Composable
 private fun getAccountTexts(
     account: PartnerAccount,
+    overridenSubtitle: String?
 ): Pair<String, String?> {
     val formattedBalance = account.getFormattedBalance()
     val title = when {
-        account.allowSelection.not() ||
-            formattedBalance != null -> "${account.name} ${account.encryptedNumbers}"
+        account.allowSelection.not() || overridenSubtitle != null || formattedBalance != null ->
+            "${account.name} ${account.encryptedNumbers}"
 
         else -> account.name
     }
     val subtitle = when {
+        overridenSubtitle != null -> overridenSubtitle
         account.allowSelection.not() -> account.allowSelectionMessage
         formattedBalance != null -> formattedBalance
         account.encryptedNumbers.isNotEmpty() -> account.encryptedNumbers

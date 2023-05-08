@@ -32,7 +32,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
     )
 
     private fun accountSelected() = LinkAccountPickerState(
-        selectedAccountId = partnerAccountList().first().id,
+        selectedAccountId = partnerAccountList().first().account.id,
         payload = Success(
             LinkAccountPickerState.Payload(
                 accounts = partnerAccountList(),
@@ -46,63 +46,79 @@ internal class LinkAccountPickerPreviewParameterProvider :
     )
 
     private fun partnerAccountList() = listOf(
-        PartnerAccount(
-            authorization = "Authorization",
-            category = FinancialConnectionsAccount.Category.CASH,
-            id = "id1",
-            name = "With balance",
-            balanceAmount = 1000,
-            status = FinancialConnectionsAccount.Status.ACTIVE,
-            displayableAccountNumbers = "1234",
-            currency = "USD",
-            _allowSelection = true,
-            allowSelectionMessage = "",
-            subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-            supportedPaymentMethodTypes = emptyList()
+
+        LinkAccountPickerState.NetworkedAccount(
+            PartnerAccount(
+                authorization = "Authorization",
+                category = FinancialConnectionsAccount.Category.CASH,
+                id = "id1",
+                name = "With balance",
+                balanceAmount = 1000,
+                status = FinancialConnectionsAccount.Status.ACTIVE,
+                displayableAccountNumbers = "1234",
+                currency = "USD",
+                _allowSelection = true,
+                allowSelectionMessage = "",
+                subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+                supportedPaymentMethodTypes = emptyList()
+            ),
+            repairable = true
         ),
-        PartnerAccount(
-            authorization = "Authorization",
-            category = FinancialConnectionsAccount.Category.CASH,
-            id = "id2",
-            name = "With balance disabled",
-            balanceAmount = 1000,
-            _allowSelection = false,
-            allowSelectionMessage = "Disconnected",
-            subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
-            supportedPaymentMethodTypes = emptyList()
+        LinkAccountPickerState.NetworkedAccount(
+            PartnerAccount(
+                authorization = "Authorization",
+                category = FinancialConnectionsAccount.Category.CASH,
+                id = "id2",
+                name = "With balance disabled",
+                balanceAmount = 1000,
+                _allowSelection = false,
+                allowSelectionMessage = "Disabled",
+                subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+                supportedPaymentMethodTypes = emptyList()
+            ),
+            repairable = false
         ),
-        PartnerAccount(
-            authorization = "Authorization",
-            category = FinancialConnectionsAccount.Category.CASH,
-            id = "id3",
-            name = "No balance",
-            displayableAccountNumbers = "1234",
-            subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
-            _allowSelection = true,
-            allowSelectionMessage = "",
-            supportedPaymentMethodTypes = emptyList()
+        LinkAccountPickerState.NetworkedAccount(
+            PartnerAccount(
+                authorization = "Authorization",
+                category = FinancialConnectionsAccount.Category.CASH,
+                id = "id2",
+                name = "With balance repairable",
+                balanceAmount = 1000,
+                _allowSelection = true,
+                allowSelectionMessage = "Select to repair and connect",
+                subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+                supportedPaymentMethodTypes = emptyList()
+            ),
+            repairable = true
         ),
-        PartnerAccount(
-            authorization = "Authorization",
-            category = FinancialConnectionsAccount.Category.CASH,
-            id = "id4",
-            name = "No balance disabled",
-            displayableAccountNumbers = "1234",
-            subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-            _allowSelection = false,
-            allowSelectionMessage = "Disconnected",
-            supportedPaymentMethodTypes = emptyList()
+        LinkAccountPickerState.NetworkedAccount(
+            PartnerAccount(
+                authorization = "Authorization",
+                category = FinancialConnectionsAccount.Category.CASH,
+                id = "id3",
+                name = "No balance",
+                displayableAccountNumbers = "1234",
+                subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
+                _allowSelection = true,
+                allowSelectionMessage = "",
+                supportedPaymentMethodTypes = emptyList()
+            ),
+            repairable = false
         ),
-        PartnerAccount(
-            authorization = "Authorization",
-            category = FinancialConnectionsAccount.Category.CASH,
-            id = "id5",
-            name = "Very long institution that is already linked",
-            displayableAccountNumbers = "1234",
-            linkedAccountId = "linkedAccountId",
-            _allowSelection = true,
-            subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-            supportedPaymentMethodTypes = emptyList()
+        LinkAccountPickerState.NetworkedAccount(
+            PartnerAccount(
+                authorization = "Authorization",
+                category = FinancialConnectionsAccount.Category.CASH,
+                id = "id5",
+                name = "Very long institution that is already linked",
+                displayableAccountNumbers = "1234",
+                linkedAccountId = "linkedAccountId",
+                _allowSelection = true,
+                subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+                supportedPaymentMethodTypes = emptyList()
+            ),
+            repairable = true
         ),
     )
 
