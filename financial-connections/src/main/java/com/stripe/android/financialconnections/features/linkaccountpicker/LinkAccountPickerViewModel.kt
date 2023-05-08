@@ -23,7 +23,6 @@ import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
-import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.NetworkedAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -63,14 +62,13 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             val accounts = accountsResponse
                 .data
                 .map { account ->
-                    NetworkedAccount(
-                        account = account,
-                        repairable = account.status != Status.ACTIVE
+                    val broken = account.status != Status.ACTIVE
+                    account.copy(
+                        _allowSelection = !broken || accountsResponse.repairAuthorizationEnabled == true
                     )
                 }
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
-                repairAuthorizationEnabled = accountsResponse.repairAuthorizationEnabled ?: false,
                 stepUpAuthenticationRequired = manifest.stepUpAuthenticationRequired ?: false,
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 businessName = manifest.businessName,
@@ -86,7 +84,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             LinkAccountPickerState::payload,
             onSuccess = {
                 // Select first account by default.
-                setState { copy(selectedAccountId = it.accounts.firstOrNull()?.account?.id) }
+                setState { copy(selectedAccountId = it.accounts.firstOrNull()?.id) }
             },
             onFail = { error ->
                 logger.error("Error fetching payload", error)
@@ -117,11 +115,11 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         val state = awaitState()
         val payload = requireNotNull(state.payload())
         val selectedAccount =
-            requireNotNull(payload.accounts.first { it.account.id == state.selectedAccountId })
+            requireNotNull(payload.accounts.first { it.id == state.selectedAccountId })
         when {
-            selectedAccount.repairable -> repairAccount()
+            selectedAccount.broken -> repairAccount()
             payload.stepUpAuthenticationRequired -> goNext(Pane.LINK_STEP_UP_VERIFICATION)
-            else -> selectAccount(payload, selectedAccount.account)
+            else -> selectAccount(payload, selectedAccount)
         }
         Unit
     }.execute { copy(selectNetworkedAccountAsync = it) }
@@ -178,25 +176,19 @@ internal data class LinkAccountPickerState(
 ) : MavericksState {
 
     data class Payload(
-        val accounts: List<NetworkedAccount>,
+        val accounts: List<PartnerAccount>,
         val accessibleData: AccessibleDataCalloutModel,
         val businessName: String?,
         val consumerSessionClientSecret: String,
-        val repairAuthorizationEnabled: Boolean,
         val stepUpAuthenticationRequired: Boolean
-    )
-
-    data class NetworkedAccount(
-        val account: PartnerAccount,
-        val repairable: Boolean
     )
 
     val ctaText: Int
         @StringRes
         get() = when (
             payload.invoke()?.accounts
-                ?.find { it.account.id == selectedAccountId }
-                ?.repairable
+                ?.find { it.id == selectedAccountId }
+                ?.broken
         ) {
             true -> R.string.stripe_link_account_picker_repair_cta
             else -> R.string.stripe_link_account_picker_cta

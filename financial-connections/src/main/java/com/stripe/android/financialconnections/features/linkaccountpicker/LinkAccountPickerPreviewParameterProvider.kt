@@ -25,100 +25,86 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 accessibleData = accessibleCallout(),
                 businessName = "Random business",
                 consumerSessionClientSecret = "secret",
-                repairAuthorizationEnabled = false,
                 stepUpAuthenticationRequired = false,
             )
         ),
     )
 
     private fun accountSelected() = LinkAccountPickerState(
-        selectedAccountId = partnerAccountList().first().account.id,
+        selectedAccountId = partnerAccountList().first().id,
         payload = Success(
             LinkAccountPickerState.Payload(
                 accounts = partnerAccountList(),
                 accessibleData = accessibleCallout(),
                 businessName = "Random business",
                 consumerSessionClientSecret = "secret",
-                repairAuthorizationEnabled = false,
                 stepUpAuthenticationRequired = false,
             )
         ),
     )
 
     private fun partnerAccountList() = listOf(
-
-        LinkAccountPickerState.NetworkedAccount(
-            PartnerAccount(
-                authorization = "Authorization",
-                category = FinancialConnectionsAccount.Category.CASH,
-                id = "id1",
-                name = "With balance",
-                balanceAmount = 1000,
-                status = FinancialConnectionsAccount.Status.ACTIVE,
-                displayableAccountNumbers = "1234",
-                currency = "USD",
-                _allowSelection = true,
-                allowSelectionMessage = "",
-                subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-                supportedPaymentMethodTypes = emptyList()
-            ),
-            repairable = false
+        PartnerAccount(
+            authorization = "Authorization",
+            category = FinancialConnectionsAccount.Category.CASH,
+            id = "id1",
+            name = "With balance",
+            balanceAmount = 1000,
+            status = FinancialConnectionsAccount.Status.ACTIVE,
+            displayableAccountNumbers = "1234",
+            currency = "USD",
+            _allowSelection = true,
+            allowSelectionMessage = "",
+            subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+            supportedPaymentMethodTypes = emptyList()
         ),
-        LinkAccountPickerState.NetworkedAccount(
-            PartnerAccount(
-                authorization = "Authorization",
-                category = FinancialConnectionsAccount.Category.CASH,
-                id = "id2",
-                name = "With balance disabled",
-                balanceAmount = 1000,
-                _allowSelection = false,
-                allowSelectionMessage = "Disabled",
-                subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
-                supportedPaymentMethodTypes = emptyList()
-            ),
-            repairable = false
+        PartnerAccount(
+            authorization = "Authorization",
+            category = FinancialConnectionsAccount.Category.CASH,
+            id = "id2",
+            name = "With balance repairable",
+            status = FinancialConnectionsAccount.Status.INACTIVE,
+            balanceAmount = 1000,
+            _allowSelection = true,
+            allowSelectionMessage = "Select to repair and connect",
+            subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+            supportedPaymentMethodTypes = emptyList()
         ),
-        LinkAccountPickerState.NetworkedAccount(
-            PartnerAccount(
-                authorization = "Authorization",
-                category = FinancialConnectionsAccount.Category.CASH,
-                id = "id2",
-                name = "With balance repairable",
-                balanceAmount = 1000,
-                _allowSelection = true,
-                allowSelectionMessage = "Select to repair and connect",
-                subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
-                supportedPaymentMethodTypes = emptyList()
-            ),
-            repairable = true
+        PartnerAccount(
+            authorization = "Authorization",
+            category = FinancialConnectionsAccount.Category.CASH,
+            id = "id2",
+            name = "Repairable + authRepairEnabled = false",
+            status = FinancialConnectionsAccount.Status.INACTIVE,
+            balanceAmount = 1000,
+            _allowSelection = false,
+            allowSelectionMessage = "Select to repair and connect",
+            subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+            supportedPaymentMethodTypes = emptyList()
         ),
-        LinkAccountPickerState.NetworkedAccount(
-            PartnerAccount(
-                authorization = "Authorization",
-                category = FinancialConnectionsAccount.Category.CASH,
-                id = "id3",
-                name = "No balance",
-                displayableAccountNumbers = "1234",
-                subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
-                _allowSelection = true,
-                allowSelectionMessage = "",
-                supportedPaymentMethodTypes = emptyList()
-            ),
-            repairable = false
+        PartnerAccount(
+            authorization = "Authorization",
+            category = FinancialConnectionsAccount.Category.CASH,
+            id = "id3",
+            name = "No balance",
+            displayableAccountNumbers = "1234",
+            status = FinancialConnectionsAccount.Status.ACTIVE,
+            subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
+            _allowSelection = true,
+            allowSelectionMessage = "",
+            supportedPaymentMethodTypes = emptyList()
         ),
-        LinkAccountPickerState.NetworkedAccount(
-            PartnerAccount(
-                authorization = "Authorization",
-                category = FinancialConnectionsAccount.Category.CASH,
-                id = "id5",
-                name = "Very long account of a very long institution",
-                displayableAccountNumbers = "1234",
-                linkedAccountId = "linkedAccountId",
-                _allowSelection = true,
-                subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-                supportedPaymentMethodTypes = emptyList()
-            ),
-            repairable = false
+        PartnerAccount(
+            authorization = "Authorization",
+            category = FinancialConnectionsAccount.Category.CASH,
+            id = "id5",
+            name = "Very long account of a very long institution",
+            status = FinancialConnectionsAccount.Status.ACTIVE,
+            displayableAccountNumbers = "1234",
+            linkedAccountId = "linkedAccountId",
+            _allowSelection = true,
+            subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+            supportedPaymentMethodTypes = emptyList()
         ),
     )
 

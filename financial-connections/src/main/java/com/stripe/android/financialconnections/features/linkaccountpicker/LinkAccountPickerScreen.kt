@@ -23,7 +23,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -34,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -53,7 +51,6 @@ import com.stripe.android.financialconnections.features.common.InstitutionPlaceh
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PaneFooter
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.NetworkedAccount
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -163,7 +160,7 @@ private fun LinkAccountPickerLoaded(
             Spacer(modifier = Modifier.size(24.dp))
             payload.accounts.forEach { networkedAccount ->
                 NetworkedAccountItem(
-                    selected = networkedAccount.account.id == selectedAccountId,
+                    selected = networkedAccount.id == selectedAccountId,
                     networkedAccount = networkedAccount,
                     onAccountClicked = { selected ->
                         if (selectNetworkedAccountAsync !is Loading) onAccountClick(selected)
@@ -195,41 +192,20 @@ private fun LinkAccountPickerLoaded(
 
 @Composable
 private fun NetworkedAccountItem(
-    networkedAccount: NetworkedAccount,
+    networkedAccount: PartnerAccount,
     onAccountClicked: (PartnerAccount) -> Unit,
     selected: Boolean
 ) {
     AccountItem(
         selected = selected,
         onAccountClicked = onAccountClicked,
-        // Show warning trailing icon if the account is repairable.
-        trailingIcon = when {
-            networkedAccount.repairable -> {
-                {
-                    Icon(
-                        modifier = Modifier.size(16.dp),
-                        tint = FinancialConnectionsTheme.colors.textAttention,
-                        painter = painterResource(R.drawable.stripe_ic_warning),
-                        contentDescription = "Repairable account icon"
-                    )
-                }
-            }
-            else -> null
-        },
         // Override the default disabled to show that the account is disconnected
-        account = networkedAccount.account,
-        overridenSubtitle = when {
-            networkedAccount.repairable -> stringResource(
-                id = R.string.stripe_link_account_picker_disconnected
-            )
-
-            else -> null
-        }
+        account = networkedAccount,
     ) {
         val modifier = Modifier
             .size(24.dp)
             .clip(RoundedCornerShape(3.dp))
-        val institutionIcon = networkedAccount.account.institution?.icon?.default
+        val institutionIcon = networkedAccount.institution?.icon?.default
         when {
             institutionIcon.isNullOrEmpty() -> InstitutionPlaceholder(modifier)
             else -> StripeImage(

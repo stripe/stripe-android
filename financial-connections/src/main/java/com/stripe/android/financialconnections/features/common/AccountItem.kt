@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -20,9 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat.getLocales
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
@@ -35,9 +39,6 @@ import java.util.Locale
  * @param selected whether this account is selected
  * @param onAccountClicked callback when this account is clicked
  * @param account the account to display
- * @param overridenSubtitle optional subtitle to display.
- *  If not provided, it'll show account related info (see [getAccountTexts])
- * @param trailingIcon optional trailing icon to display
  * @param selectorContent content to display on the left side of the account item
  */
 @Composable
@@ -46,8 +47,6 @@ internal fun AccountItem(
     selected: Boolean,
     onAccountClicked: (PartnerAccount) -> Unit,
     account: PartnerAccount,
-    overridenSubtitle: String? = null,
-    trailingIcon: @Composable (() -> Unit)? = null,
     selectorContent: @Composable RowScope.() -> Unit
 ) {
     val verticalPadding =
@@ -74,10 +73,7 @@ internal fun AccountItem(
         ) {
             selectorContent()
             Spacer(modifier = Modifier.size(16.dp))
-            val (title, subtitle) = getAccountTexts(
-                account = account,
-                overridenSubtitle = overridenSubtitle
-            )
+            val (title, subtitle) = getAccountTexts(account = account)
             Column(
                 Modifier.weight(0.7f)
             ) {
@@ -101,9 +97,13 @@ internal fun AccountItem(
                     )
                 }
             }
-            trailingIcon?.let {
-                Spacer(modifier = Modifier.size(16.dp))
-                it()
+            if (account.broken) {
+                Icon(
+                    modifier = Modifier.size(16.dp),
+                    tint = FinancialConnectionsTheme.colors.textAttention,
+                    painter = painterResource(R.drawable.stripe_ic_warning),
+                    contentDescription = "Repairable account icon"
+                )
             }
         }
     }
@@ -112,18 +112,17 @@ internal fun AccountItem(
 @Composable
 private fun getAccountTexts(
     account: PartnerAccount,
-    overridenSubtitle: String?
 ): Pair<String, String?> {
     val formattedBalance = account.getFormattedBalance()
     val title = when {
-        account.allowSelection.not() || overridenSubtitle != null || formattedBalance != null ->
+        account.allowSelection.not() || account.broken || formattedBalance != null ->
             "${account.name} ${account.encryptedNumbers}"
 
         else -> account.name
     }
     val subtitle = when {
+        account.broken -> stringResource(id = R.string.stripe_link_account_picker_disconnected)
         account.allowSelection.not() -> account.allowSelectionMessage
-        overridenSubtitle != null -> overridenSubtitle
         formattedBalance != null -> formattedBalance
         account.encryptedNumbers.isNotEmpty() -> account.encryptedNumbers
         else -> null

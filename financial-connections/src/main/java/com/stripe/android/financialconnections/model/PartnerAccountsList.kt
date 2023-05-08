@@ -102,6 +102,7 @@ internal data class PartnerAccount(
         get() = _allowSelection ?: true
 
     internal val encryptedNumbers get() = displayableAccountNumbers?.let { "••••$it" } ?: ""
+    internal val broken get() = status != FinancialConnectionsAccount.Status.ACTIVE
 
     internal val fullName get() = "${this.name} $encryptedNumbers"
 }
