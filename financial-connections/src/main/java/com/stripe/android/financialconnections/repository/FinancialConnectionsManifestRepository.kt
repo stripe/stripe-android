@@ -7,6 +7,7 @@ import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationRepairSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -169,6 +170,12 @@ internal interface FinancialConnectionsManifestRepository {
     suspend fun postMarkLinkStepUpVerified(
         clientSecret: String,
     ): FinancialConnectionsSessionManifest
+
+
+    suspend fun repairSessionGenerateUrl(
+        clientSecret: String,
+        coreAuthorization: String,
+    ): FinancialConnectionsAuthorizationRepairSession
 
     fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
@@ -470,6 +477,25 @@ private class FinancialConnectionsManifestRepositoryImpl(
         }
     }
 
+    override suspend fun repairSessionGenerateUrl(
+        clientSecret: String,
+        coreAuthorization: String
+    ): FinancialConnectionsAuthorizationRepairSession {
+        val request = apiRequestFactory.createPost(
+            url = repairSessionGenerateUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "core_authorization" to coreAuthorization,
+                "expand" to listOf("institution"),
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsAuthorizationRepairSession.serializer()
+        )
+    }
+
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     ) {
@@ -541,6 +567,9 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal val linkStepUpVerifiedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_step_up_authentication_verified"
+
+        internal val repairSessionGenerateUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/repair_sessions/generate_url"
 
         internal val disableNetworking: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"

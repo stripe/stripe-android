@@ -11,19 +11,16 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
-import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Launched
-import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Loaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.di.APPLICATION_ID
-import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
-import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
+import com.stripe.android.financialconnections.domain.CreateRepairSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
-import com.stripe.android.financialconnections.domain.PostAuthorizationSession
+import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ClickableText
@@ -31,7 +28,8 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationRepairSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -44,12 +42,11 @@ import javax.inject.Named
 
 @Suppress("LongParameterList")
 internal class BankAuthRepairViewModel @Inject constructor(
-    private val completeAuthorizationSession: CompleteAuthorizationSession,
-    private val createAuthorizationSession: PostAuthorizationSession,
-    private val cancelAuthorizationSession: CancelAuthorizationSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     @Named(APPLICATION_ID) private val applicationId: String,
     private val uriUtils: UriUtils,
+    private val createRepairSession: CreateRepairSession,
+    private val updateLocalManifest: UpdateLocalManifest,
     private val postAuthSessionEvent: PostAuthSessionEvent,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
@@ -62,28 +59,39 @@ internal class BankAuthRepairViewModel @Inject constructor(
         logErrors()
         observePayload()
         suspend {
-            val launchedEvent = Launched(Date())
-            val manifest: FinancialConnectionsSessionManifest = getManifest()
-            val authSession = createAuthorizationSession(
-                institution = requireNotNull(manifest.activeInstitution),
-                allowManualEntry = manifest.allowManualEntry
+//            val launchedEvent = Launched(Date())
+            val repairSession = createRepairSession(
+                "coreAuthorization" // TODO consume real core auth.
             )
+            updateLocalManifest {
+                it.copy(activeInstitution = repairSession.institution,)
+            }
             Payload(
-                authSession = authSession,
-                institution = requireNotNull(manifest.activeInstitution),
-                isStripeDirect = manifest.isStripeDirect ?: false
+                authSession = repairSession.toAuthSession(),
+                institution = requireNotNull(repairSession.institution),
+                isStripeDirect = getManifest().isStripeDirect ?: false
             ).also {
                 // just send loaded event on OAuth flows (prepane). Non-OAuth handled by shim.
-                val loadedEvent: Loaded? = Loaded(Date()).takeIf { authSession.isOAuth }
-                postAuthSessionEvent(
-                    authSession.id,
-                    listOfNotNull(launchedEvent, loadedEvent)
-                )
+//                val loadedEvent: Loaded? = Loaded(Date()).takeIf { authSession.isOAuth }
+//                postAuthSessionEvent(
+//                    authSession.id,
+//                    listOfNotNull(launchedEvent, loadedEvent)
+//                )
             }
         }.execute {
             copy(payload = it)
         }
     }
+
+    private fun FinancialConnectionsAuthorizationRepairSession.toAuthSession(): FinancialConnectionsAuthorizationSession {
+        return FinancialConnectionsAuthorizationSession(
+            id = this.id,
+            url = this.url,
+            nextPane = Pane.SUCCESS,
+            _isOAuth = true,
+        )
+    }
+
 
     private fun observePayload() {
         onAsync(
@@ -155,74 +163,74 @@ internal class BankAuthRepairViewModel @Inject constructor(
     private suspend fun onAuthFailed(
         error: Throwable
     ) {
-        kotlin.runCatching {
-            logger.debug("Auth failed, cancelling AuthSession")
-            val authSession = getManifest().activeAuthSession
-            logger.error("Auth failed, cancelling AuthSession", error)
-            when {
-                authSession != null -> {
-                    postAuthSessionEvent(authSession.id, AuthSessionEvent.Failure(Date(), error))
-                    cancelAuthorizationSession(authSession.id)
-                }
-
-                else -> logger.debug("Could not find AuthSession to cancel.")
-            }
-            setState { copy(authenticationStatus = Fail(error)) }
-        }.onFailure {
-            logger.error("failed cancelling session after failed web flow", it)
-        }
+//        kotlin.runCatching {
+//            logger.debug("Auth failed, cancelling AuthSession")
+//            val authSession = getManifest().activeAuthSession
+//            logger.error("Auth failed, cancelling AuthSession", error)
+//            when {
+//                authSession != null -> {
+//                    postAuthSessionEvent(authSession.id, AuthSessionEvent.Failure(Date(), error))
+//                    cancelAuthorizationSession(authSession.id)
+//                }
+//
+//                else -> logger.debug("Could not find AuthSession to cancel.")
+//            }
+//            setState { copy(authenticationStatus = Fail(error)) }
+//        }.onFailure {
+//            logger.error("failed cancelling session after failed web flow", it)
+//        }
     }
 
     private suspend fun onAuthCancelled() {
-        kotlin.runCatching {
-            logger.debug("Auth cancelled, cancelling AuthSession")
-            setState { copy(authenticationStatus = Loading()) }
-            val authSession = requireNotNull(getManifest().activeAuthSession)
-            val result = cancelAuthorizationSession(authSession.id)
-            if (authSession.isOAuth) {
-                // For OAuth institutions, create a new session and navigate to its nextPane (prepane).
-                logger.debug("Creating a new session for this OAuth institution")
-                // Send retry event as we're presenting the prepane again.
-                postAuthSessionEvent(authSession.id, AuthSessionEvent.Retry(Date()))
-                val manifest = getManifest()
-                val newSession = createAuthorizationSession(
-                    institution = requireNotNull(manifest.activeInstitution),
-                    allowManualEntry = manifest.allowManualEntry
-                )
-                goNext(newSession.nextPane)
-            } else {
-                // For OAuth institutions, navigate to Session cancellation's next pane.
-                postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
-                goNext(result.nextPane)
-            }
-        }.onFailure {
-            logger.error("failed cancelling session after cancelled web flow", it)
-            setState { copy(authenticationStatus = Fail(it)) }
-        }
+//        kotlin.runCatching {
+//            logger.debug("Auth cancelled, cancelling AuthSession")
+//            setState { copy(authenticationStatus = Loading()) }
+//            val authSession = requireNotNull(getManifest().activeAuthSession)
+//            val result = cancelAuthorizationSession(authSession.id)
+//            if (authSession.isOAuth) {
+//                // For OAuth institutions, create a new session and navigate to its nextPane (prepane).
+//                logger.debug("Creating a new session for this OAuth institution")
+//                // Send retry event as we're presenting the prepane again.
+//                postAuthSessionEvent(authSession.id, AuthSessionEvent.Retry(Date()))
+//                val manifest = getManifest()
+//                val newSession = createAuthorizationSession(
+//                    institution = requireNotNull(manifest.activeInstitution),
+//                    allowManualEntry = manifest.allowManualEntry
+//                )
+//                goNext(newSession.nextPane)
+//            } else {
+//                // For OAuth institutions, navigate to Session cancellation's next pane.
+//                postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
+//                goNext(result.nextPane)
+//            }
+//        }.onFailure {
+//            logger.error("failed cancelling session after cancelled web flow", it)
+//            setState { copy(authenticationStatus = Fail(it)) }
+//        }
     }
 
     private suspend fun completeAuthorizationSession() {
-        kotlin.runCatching {
-            setState { copy(authenticationStatus = Loading()) }
-            val authSession = requireNotNull(getManifest().activeAuthSession)
-            postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-            if (authSession.isOAuth) {
-                logger.debug("Web AuthFlow completed! waiting for oauth results")
-                val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
-                logger.debug("OAuth results received! completing session")
-                val updatedSession = completeAuthorizationSession(
-                    authorizationSessionId = authSession.id,
-                    publicToken = oAuthResults.publicToken
-                )
-                logger.debug("Session authorized!")
-                goNext(updatedSession.nextPane)
-            } else {
-                goNext(Pane.ACCOUNT_PICKER)
-            }
-        }.onFailure {
-            logger.error("failed authorizing session", it)
-            setState { copy(authenticationStatus = Fail(it)) }
-        }
+//        kotlin.runCatching {
+//            setState { copy(authenticationStatus = Loading()) }
+//            val authSession = requireNotNull(getManifest().activeAuthSession)
+//            postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
+//            if (authSession.isOAuth) {
+//                logger.debug("Web AuthFlow completed! waiting for oauth results")
+//                val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
+//                logger.debug("OAuth results received! completing session")
+//                val updatedSession = completeAuthorizationSession(
+//                    authorizationSessionId = authSession.id,
+//                    publicToken = oAuthResults.publicToken
+//                )
+//                logger.debug("Session authorized!")
+//                goNext(updatedSession.nextPane)
+//            } else {
+//                goNext(Pane.ACCOUNT_PICKER)
+//            }
+//        }.onFailure {
+//            logger.error("failed authorizing session", it)
+//            setState { copy(authenticationStatus = Fail(it)) }
+//        }
     }
 
     fun onEnterDetailsManuallyClick() {

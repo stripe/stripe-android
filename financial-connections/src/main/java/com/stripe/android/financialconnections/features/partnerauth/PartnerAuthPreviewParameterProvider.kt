@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.domain.Text
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.Flow
 import com.stripe.android.financialconnections.model.Image
 
 internal class PartnerAuthPreviewParameterProvider :
@@ -73,7 +74,7 @@ internal class PartnerAuthPreviewParameterProvider :
 
     private fun session() =
         FinancialConnectionsAuthorizationSession(
-            flow = FinancialConnectionsAuthorizationSession.Flow.FINICITY_CONNECT_V2_OAUTH,
+            flow = Flow.FINICITY_CONNECT_V2_OAUTH,
             showPartnerDisclosure = true,
             _isOAuth = true,
             nextPane = FinancialConnectionsSessionManifest.Pane.PARTNER_AUTH,
