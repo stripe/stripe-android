@@ -1,5 +1,6 @@
 package com.stripe.android.networking
 
+import androidx.annotation.Keep
 import com.stripe.android.core.networking.AnalyticsEvent
 
 internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
@@ -97,6 +98,7 @@ internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     CardMetadataLoadFailure("card_metadata_load_failure"),
     CardMetadataMissingRange("card_metadata_missing_range");
 
+    @Keep
     override fun toString(): String {
         return "$PREFIX.$code"
     }

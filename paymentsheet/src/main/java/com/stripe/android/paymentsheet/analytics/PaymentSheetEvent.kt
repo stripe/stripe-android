@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
+import androidx.annotation.Keep
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -196,6 +197,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             Success("success"),
             Failure("failure");
 
+            @Keep
             override fun toString(): String = code
         }
     }
