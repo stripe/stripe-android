@@ -90,7 +90,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             authorization = "Authorization",
             category = FinancialConnectionsAccount.Category.CASH,
             id = "id3",
-            name = "Repairable + authRepairEnabled = false",
+            name = "Repairable + disabled",
             status = Status.INACTIVE,
             balanceAmount = 1000,
             _allowSelection = false,

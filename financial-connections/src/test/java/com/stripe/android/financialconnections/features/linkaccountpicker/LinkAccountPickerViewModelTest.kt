@@ -78,11 +78,12 @@ class LinkAccountPickerViewModelTest {
     }
 
     @Test
-    fun `init - non active accounts are rendered as disabled`() = runTest {
+    fun `init - broken accounts are rendered as disabled if repair disabled`() = runTest {
         whenever(getManifest()).thenReturn(sessionManifest())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(pollNetworkedAccounts(any())).thenReturn(
             partnerAccountList().copy(
+                repairAuthorizationEnabled = false,
                 count = 3,
                 data = listOf(
                     partnerAccount().copy(_allowSelection = null, status = Status.DISCONNECTED),

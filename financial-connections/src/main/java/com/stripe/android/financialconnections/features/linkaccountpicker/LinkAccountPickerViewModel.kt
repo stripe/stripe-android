@@ -63,10 +63,10 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 .data
                 .map { account ->
                     val broken = account.status != Status.ACTIVE
-                    account.copy(
-                        _allowSelection = !broken || accountsResponse.repairAuthorizationEnabled == true
-                    )
+                    val repairEnabled = accountsResponse.repairAuthorizationEnabled == true
+                    account.copy(_allowSelection = !broken || repairEnabled)
                 }
+                .sortedBy { it.allowSelection.not() }
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
                 stepUpAuthenticationRequired = manifest.stepUpAuthenticationRequired ?: false,
