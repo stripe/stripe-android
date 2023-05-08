@@ -203,16 +203,19 @@ private fun NetworkedAccountItem(
         selected = selected,
         onAccountClicked = onAccountClicked,
         // Show warning trailing icon if the account is repairable.
-        trailingIcon = if (networkedAccount.repairable) {
-            {
-                Icon(
-                    modifier = Modifier.size(16.dp),
-                    tint = FinancialConnectionsTheme.colors.textAttention,
-                    painter = painterResource(R.drawable.stripe_ic_warning),
-                    contentDescription = "Repairable account icon"
-                )
+        trailingIcon = when {
+            networkedAccount.repairable -> {
+                {
+                    Icon(
+                        modifier = Modifier.size(16.dp),
+                        tint = FinancialConnectionsTheme.colors.textAttention,
+                        painter = painterResource(R.drawable.stripe_ic_warning),
+                        contentDescription = "Repairable account icon"
+                    )
+                }
             }
-        } else null,
+            else -> null
+        },
         // Override the default disabled to show that the account is disconnected
         account = networkedAccount.account,
         overridenSubtitle = when {

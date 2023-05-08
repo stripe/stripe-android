@@ -20,6 +20,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.navigation.NavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -39,6 +40,7 @@ class LinkAccountPickerViewModelTest {
 
     private val getManifest = mock<GetManifest>()
     private val goNext = mock<GoNext>()
+    private val navigationManager = mock<NavigationManager>()
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
     private val pollNetworkedAccounts = mock<PollNetworkedAccounts>()
     private val updateLocalManifest = mock<UpdateLocalManifest>()
@@ -58,6 +60,7 @@ class LinkAccountPickerViewModelTest {
         selectNetworkedAccount = selectNetworkedAccount,
         updateLocalManifest = updateLocalManifest,
         updateCachedAccounts = updateCachedAccounts,
+        navigationManager = navigationManager,
         initialState = state
     )
 
