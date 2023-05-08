@@ -10,11 +10,8 @@ import org.junit.Test
 
 class LinkAccountPickerStateTest {
 
-    private val partnerAccount1 = partnerAccount().copy(id = "acct1", name = "Account 1")
-    private val partnerAccount2 = partnerAccount().copy(id = "acct2", name = "Account 2")
-
-    private val networkedAccount1 = LinkAccountPickerState.NetworkedAccount(partnerAccount1, true)
-    private val networkedAccount2 = LinkAccountPickerState.NetworkedAccount(partnerAccount2, false)
+    private val partnerAccount1 = partnerAccount().copy(id = "acct1", name = "Account 1", status = FinancialConnectionsAccount.Status.INACTIVE)
+    private val partnerAccount2 = partnerAccount().copy(id = "acct2", name = "Account 2", status = FinancialConnectionsAccount.Status.ACTIVE)
 
     private val accessibleDataCalloutModel = AccessibleDataCalloutModel(
         businessName = "My business",
@@ -30,13 +27,12 @@ class LinkAccountPickerStateTest {
     )
 
     @Test
-    fun `selectedAccountStatus should return repairable when account is repairable`() {
+    fun `ctaText should return repair CTA account is repairable`() {
         val payload = LinkAccountPickerState.Payload(
-            accounts = listOf(networkedAccount1, networkedAccount2),
+            accounts = listOf(partnerAccount1, partnerAccount2),
             accessibleData = accessibleDataCalloutModel,
             businessName = "Business Name",
             consumerSessionClientSecret = "secret",
-            repairAuthorizationEnabled = true,
             stepUpAuthenticationRequired = false
         )
 
@@ -49,13 +45,12 @@ class LinkAccountPickerStateTest {
     }
 
     @Test
-    fun `selectedAccountStatus should return connectable when account is not repairable`() {
+    fun `ctaText should return connect CTA when account is not repairable`() {
         val payload = LinkAccountPickerState.Payload(
-            accounts = listOf(networkedAccount1, networkedAccount2),
+            accounts = listOf(partnerAccount1, partnerAccount2),
             accessibleData = accessibleDataCalloutModel,
             businessName = "Business Name",
             consumerSessionClientSecret = "secret",
-            repairAuthorizationEnabled = true,
             stepUpAuthenticationRequired = false
         )
 
@@ -68,13 +63,12 @@ class LinkAccountPickerStateTest {
     }
 
     @Test
-    fun `selectedAccountStatus should return connectable when no account is selected`() {
+    fun `ctaText should return connect CTA when no account is selected`() {
         val payload = LinkAccountPickerState.Payload(
-            accounts = listOf(networkedAccount1, networkedAccount2),
+            accounts = listOf(partnerAccount1, partnerAccount2),
             accessibleData = accessibleDataCalloutModel,
             businessName = "Business Name",
             consumerSessionClientSecret = "secret",
-            repairAuthorizationEnabled = true,
             stepUpAuthenticationRequired = false
         )
 
