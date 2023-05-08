@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.linkaccountpicker
 
+import androidx.annotation.StringRes
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -7,6 +8,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLearnMoreDataAccess
@@ -185,4 +187,15 @@ internal data class LinkAccountPickerState(
         val account: PartnerAccount,
         val repairable: Boolean
     )
+
+    val ctaText: Int
+        @StringRes
+        get() {
+            val selectedAccount =
+                payload.invoke()?.accounts?.find { it.account.id == selectedAccountId }
+            return when (selectedAccount?.repairable) {
+                true -> R.string.stripe_link_account_picker_repair_cta
+                else -> R.string.stripe_link_account_picker_cta
+            }
+        }
 }

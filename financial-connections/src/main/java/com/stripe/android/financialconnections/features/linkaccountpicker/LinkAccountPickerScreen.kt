@@ -4,6 +4,7 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -109,6 +110,7 @@ private fun LinkAccountPickerContent(
             Uninitialized, is Loading -> LinkAccountPickerLoading()
             is Success -> LinkAccountPickerLoaded(
                 scrollState = scrollState,
+                ctaText = state.ctaText,
                 payload = payload(),
                 selectedAccountId = state.selectedAccountId,
                 selectNetworkedAccountAsync = state.selectNetworkedAccountAsync,
@@ -139,6 +141,7 @@ private fun LinkAccountPickerLoaded(
     selectedAccountId: String?,
     selectNetworkedAccountAsync: Async<Unit>,
     payload: Payload,
+    @StringRes ctaText: Int,
     onLearnMoreAboutDataAccessClick: () -> Unit,
     onSelectAccountClick: () -> Unit,
     onNewBankAccountClick: () -> Unit,
@@ -184,7 +187,7 @@ private fun LinkAccountPickerLoaded(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                Text(text = stringResource(R.string.stripe_link_account_picker_cta))
+                Text(text = stringResource(ctaText))
             }
         }
     }
@@ -216,6 +219,7 @@ private fun NetworkedAccountItem(
             networkedAccount.repairable -> stringResource(
                 id = R.string.stripe_link_account_picker_disconnected
             )
+
             else -> null
         }
     ) {
