@@ -19,8 +19,6 @@ dependencies {
     implementation project(':payments')
     implementation project(':financial-connections')
 
-    implementation platform(boms.androidx.compose)
-
     implementation libs.accompanist.themeAdapter
     implementation libs.alipay
     implementation libs.androidx.appCompat

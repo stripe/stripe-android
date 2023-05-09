@@ -9,8 +9,6 @@ dependencies {
     api project(":payments-model")
     compileOnly project(':financial-connections')
 
-    implementation platform(boms.androidx.compose)
-
     implementation libs.androidx.activity
     implementation libs.androidx.annotation
     implementation libs.androidx.appCompat

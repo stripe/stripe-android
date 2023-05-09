@@ -11,8 +11,6 @@ dependencies {
     implementation project(':financial-connections')
     implementation project(':stripe-ui-core')
 
-    implementation platform(boms.androidx.compose)
-
     implementation libs.androidx.appCompat
     implementation libs.androidx.constraintLayout
     implementation libs.androidx.liveDataKtx
