@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
+* [CHANGED][6676](https://github.com/stripe/stripe-android/pull/6676) Revert BOM change and use compose 1.4.3. 
+
 
 ## 20.25.0 - 2023-05-08
 

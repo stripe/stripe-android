@@ -12,8 +12,6 @@ dependencies {
     implementation project(':stripe-ui-core')
     compileOnly project(':financial-connections')
 
-    implementation platform(boms.androidx.compose)
-
     // Kotlin
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid

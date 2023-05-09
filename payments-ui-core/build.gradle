@@ -11,8 +11,6 @@ dependencies {
     compileOnly project(":stripecardscan")
     compileOnly libs.places
 
-    implementation platform(boms.androidx.compose)
-
     implementation libs.androidx.constraintLayout
     implementation libs.androidx.coreKtx
     implementation libs.androidx.annotation

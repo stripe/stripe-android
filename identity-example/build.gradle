@@ -47,8 +47,6 @@ android {
 dependencies {
     implementation project(':identity')
 
-    implementation platform(boms.androidx.compose)
-
     implementation libs.accompanist.themeAdapter
     implementation libs.androidx.appCompat
     implementation libs.androidx.browser
