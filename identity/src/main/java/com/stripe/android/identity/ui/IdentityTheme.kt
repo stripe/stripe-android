@@ -5,14 +5,12 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.TextStyle
 import com.google.accompanist.themeadapter.material.createMdcTheme
 import com.stripe.android.uicore.LocalColors
 import com.stripe.android.uicore.LocalShapes
@@ -95,35 +93,6 @@ internal fun IdentityTheme(content: @Composable () -> Unit) {
         )
     }
 }
-private fun Typography.makeCopy(
-    h1: TextStyle = this.h1,
-    h2: TextStyle = this.h2,
-    h3: TextStyle = this.h3,
-    h4: TextStyle = this.h4,
-    h5: TextStyle = this.h5,
-    h6: TextStyle = this.h6,
-    subtitle1: TextStyle = this.subtitle1,
-    subtitle2: TextStyle = this.subtitle2,
-    body1: TextStyle = this.body1,
-    body2: TextStyle = this.body2,
-    button: TextStyle = this.button,
-    caption: TextStyle = this.caption,
-    overline: TextStyle = this.overline
-): Typography = Typography(
-    h1 = h1,
-    h2 = h2,
-    h3 = h3,
-    h4 = h4,
-    h5 = h5,
-    h6 = h6,
-    subtitle1 = subtitle1,
-    subtitle2 = subtitle2,
-    body1 = body1,
-    body2 = body2,
-    button = button,
-    caption = caption,
-    overline = overline
-)
 
 /**
  * Copied from MdcTheme.kt
