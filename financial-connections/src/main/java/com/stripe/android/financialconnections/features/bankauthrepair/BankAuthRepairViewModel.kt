@@ -93,6 +93,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
             id = this.id,
             url = this.url,
             nextPane = Pane.SUCCESS,
+            display = this.display,
             _isOAuth = true,
         )
     }
@@ -168,6 +169,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
     private suspend fun onAuthFailed(
         error: Throwable
     ) {
+        logger.error("Auth failed", error)
 //        kotlin.runCatching {
 //            logger.debug("Auth failed, cancelling AuthSession")
 //            val authSession = getManifest().activeAuthSession
@@ -187,6 +189,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
     }
 
     private suspend fun onAuthCancelled() {
+        logger.error("Auth cancelled")
 //        kotlin.runCatching {
 //            logger.debug("Auth cancelled, cancelling AuthSession")
 //            setState { copy(authenticationStatus = Loading()) }
@@ -215,6 +218,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
     }
 
     private suspend fun completeAuthorizationSession() {
+        logger.error("Auth succeeded!")
 //        kotlin.runCatching {
 //            setState { copy(authenticationStatus = Loading()) }
 //            val authSession = requireNotNull(getManifest().activeAuthSession)

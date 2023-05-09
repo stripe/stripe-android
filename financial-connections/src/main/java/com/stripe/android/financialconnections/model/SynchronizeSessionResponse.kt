@@ -128,7 +128,7 @@ internal data class DataAccessNotice(
     val cta: String,
     @SerialName("learn_more")
     @Serializable(with = MarkdownToHtmlSerializer::class)
-    val learnMore: String,
+    val learnMore: String? = null,
     @SerialName("connected_account_notice")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val connectedAccountNotice: String? = null,
