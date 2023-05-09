@@ -28,6 +28,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 businessName = "Random business",
                 consumerSessionClientSecret = "secret",
                 stepUpAuthenticationRequired = false,
+                partnerToCoreAuths = emptyMap(),
             )
         ),
     )
@@ -41,6 +42,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 businessName = "Random business",
                 consumerSessionClientSecret = "secret",
                 stepUpAuthenticationRequired = false,
+                partnerToCoreAuths = emptyMap(),
             )
         ),
     )
@@ -55,6 +57,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 businessName = "Random business",
                 consumerSessionClientSecret = "secret",
                 stepUpAuthenticationRequired = false,
+                partnerToCoreAuths = emptyMap(),
             )
         ),
     )

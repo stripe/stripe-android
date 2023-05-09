@@ -31,7 +31,9 @@ internal data class PartnerAccountsList(
 
     @SerialName(value = "skip_account_selection") val skipAccountSelection: Boolean? = null,
 
-    @SerialName(value = "total_count") val totalCount: Int? = null
+    @SerialName(value = "total_count") val totalCount: Int? = null,
+
+    @SerialName(value = "partner_to_core_auths") val partnerToCoreAuths: Map<String, String>? = null
 
 )
 

@@ -28,6 +28,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.navigation.NavigationDirections.bankAuthRepair
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.repository.PartnerToCoreAuthsRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -41,6 +42,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val selectNetworkedAccount: SelectNetworkedAccount,
     private val updateLocalManifest: UpdateLocalManifest,
     private val updateCachedAccounts: UpdateCachedAccounts,
+    private val partnerToCoreAuthsRepository: PartnerToCoreAuthsRepository,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
     private val logger: Logger
@@ -69,6 +71,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 .sortedBy { it.allowSelection.not() }
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
+                partnerToCoreAuths = accountsResponse.partnerToCoreAuths,
                 stepUpAuthenticationRequired = manifest.stepUpAuthenticationRequired ?: false,
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 businessName = manifest.businessName,
@@ -117,7 +120,10 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         val selectedAccount =
             requireNotNull(payload.accounts.first { it.id == state.selectedAccountId })
         when {
-            selectedAccount.broken -> repairAccount()
+            selectedAccount.broken -> {
+                partnerToCoreAuthsRepository.set(requireNotNull(payload.partnerToCoreAuths))
+                repairAccount()
+            }
             payload.stepUpAuthenticationRequired -> goNext(Pane.LINK_STEP_UP_VERIFICATION)
             else -> selectAccount(payload, selectedAccount)
         }
@@ -180,7 +186,8 @@ internal data class LinkAccountPickerState(
         val accessibleData: AccessibleDataCalloutModel,
         val businessName: String?,
         val consumerSessionClientSecret: String,
-        val stepUpAuthenticationRequired: Boolean
+        val stepUpAuthenticationRequired: Boolean,
+        val partnerToCoreAuths: Map<String, String>?
     )
 
     val ctaText: Int

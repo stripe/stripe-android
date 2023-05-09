@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.CreateRepairSession
+import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
@@ -33,6 +34,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAuthori
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.repository.PartnerToCoreAuthsRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
@@ -48,7 +50,9 @@ internal class BankAuthRepairViewModel @Inject constructor(
     private val createRepairSession: CreateRepairSession,
     private val updateLocalManifest: UpdateLocalManifest,
     private val postAuthSessionEvent: PostAuthSessionEvent,
+    private val partnerToCoreAuthsRepository: PartnerToCoreAuthsRepository,
     private val getManifest: GetManifest,
+    private val getCachedAccounts: GetCachedAccounts,
     private val goNext: GoNext,
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
@@ -60,11 +64,12 @@ internal class BankAuthRepairViewModel @Inject constructor(
         observePayload()
         suspend {
 //            val launchedEvent = Launched(Date())
-            val repairSession = createRepairSession(
-                "coreAuthorization" // TODO consume real core auth.
-            )
+            val selectedAccount = getCachedAccounts().first()
+            val coreAuthorization = partnerToCoreAuthsRepository.get()!!.getValue(selectedAccount.authorization)
+            logger.debug(coreAuthorization)
+            val repairSession = createRepairSession(coreAuthorization)
             updateLocalManifest {
-                it.copy(activeInstitution = repairSession.institution,)
+                it.copy(activeInstitution = repairSession.institution)
             }
             Payload(
                 authSession = repairSession.toAuthSession(),
