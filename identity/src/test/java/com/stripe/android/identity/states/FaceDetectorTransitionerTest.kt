@@ -15,6 +15,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -36,7 +37,8 @@ internal class FaceDetectorTransitionerTest {
     @Test
     fun `Initial transitions to TimeOut when timeout`() = runBlocking {
         val transitioner =
-            FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE, timeoutAt = mockAlwaysTimeoutClockMark)
+            FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE)
+        transitioner.timeoutAt = mockAlwaysTimeoutClockMark
 
         assertThat(
             transitioner.transitionFromInitial(
@@ -55,9 +57,9 @@ internal class FaceDetectorTransitionerTest {
         val transitioner =
             FaceDetectorTransitioner(
                 SELFIE_CAPTURE_PAGE,
-                timeoutAt = mockNeverTimeoutClockMark,
                 selfieFrameSaver = mockSelfieFrameSaver
             )
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
         val initialState = IdentityScanState.Initial(
             IdentityScanState.ScanType.SELFIE,
             transitioner
@@ -83,7 +85,8 @@ internal class FaceDetectorTransitionerTest {
     @Test
     fun `Initial stays in Initial when face is invalid`() = runBlocking {
         val transitioner =
-            FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE, timeoutAt = mockNeverTimeoutClockMark)
+            FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE)
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
         val initialState = IdentityScanState.Initial(
             IdentityScanState.ScanType.SELFIE,
             transitioner
@@ -103,7 +106,8 @@ internal class FaceDetectorTransitionerTest {
     @Test
     fun `Found transitions to TimeOut when timeout`() = runBlocking {
         val transitioner =
-            FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE, timeoutAt = mockAlwaysTimeoutClockMark)
+            FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE)
+        transitioner.timeoutAt = mockAlwaysTimeoutClockMark
 
         assertThat(
             transitioner.transitionFromFound(
@@ -120,7 +124,8 @@ internal class FaceDetectorTransitionerTest {
     @Test
     fun `Found stays in to Found when sample interval not reached`() = runBlocking {
         val transitioner =
-            FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE, timeoutAt = mockNeverTimeoutClockMark)
+            FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE)
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
 
         whenever(mockReachedStateAt.elapsedSince()).thenReturn((SAMPLE_INTERVAL - 10).milliseconds)
 
@@ -145,9 +150,9 @@ internal class FaceDetectorTransitionerTest {
             val transitioner =
                 FaceDetectorTransitioner(
                     selfieCapturePage = SELFIE_CAPTURE_PAGE,
-                    timeoutAt = mockNeverTimeoutClockMark,
                     selfieFrameSaver = mockSelfieFrameSaver
                 )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
 
             whenever(mockReachedStateAt.elapsedSince()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
             whenever(mockSelfieFrameSaver.selfieCollected()).thenReturn(NUM_SAMPLES - 1)
@@ -175,9 +180,9 @@ internal class FaceDetectorTransitionerTest {
             val transitioner =
                 FaceDetectorTransitioner(
                     selfieCapturePage = SELFIE_CAPTURE_PAGE,
-                    timeoutAt = mockNeverTimeoutClockMark,
                     selfieFrameSaver = mockSelfieFrameSaver
                 )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
 
             whenever(mockReachedStateAt.elapsedSince()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
             whenever(mockSelfieFrameSaver.selfieCollected()).thenReturn(NUM_SAMPLES)
@@ -201,9 +206,9 @@ internal class FaceDetectorTransitionerTest {
             val transitioner =
                 FaceDetectorTransitioner(
                     selfieCapturePage = SELFIE_CAPTURE_PAGE,
-                    timeoutAt = mockNeverTimeoutClockMark,
                     selfieFrameSaver = mockSelfieFrameSaver
                 )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
 
             whenever(mockReachedStateAt.elapsedSince()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
             whenever(mockSelfieFrameSaver.selfieCollected()).thenReturn(NUM_SAMPLES - 1)
@@ -221,8 +226,66 @@ internal class FaceDetectorTransitionerTest {
                     INVALID_OUTPUT
                 )
 
-            assertThat(resultState).isNotSameInstanceAs(foundState)
-            assertThat(resultState).isInstanceOf(IdentityScanState.Found::class.java)
+            assertThat(resultState).isSameInstanceAs(foundState)
+        }
+
+    @Test
+    fun `Found transitions to Unsatisfied when wait is stayInFoundDuration`() =
+        runBlocking {
+            val transitioner =
+                FaceDetectorTransitioner(
+                    selfieCapturePage = SELFIE_CAPTURE_PAGE,
+                    selfieFrameSaver = mockSelfieFrameSaver,
+                    stayInFoundDuration = 0 // immediately transition to Unsatisfied
+                )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
+
+            whenever(mockReachedStateAt.elapsedSince()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
+            whenever(mockSelfieFrameSaver.selfieCollected()).thenReturn(NUM_SAMPLES - 1)
+
+            val foundState = IdentityScanState.Found(
+                IdentityScanState.ScanType.SELFIE,
+                transitioner,
+                reachedStateAt = mockReachedStateAt
+            )
+
+            val resultState =
+                transitioner.transitionFromFound(
+                    foundState,
+                    mock(),
+                    INVALID_OUTPUT
+                )
+
+            assertThat(resultState).isInstanceOf(IdentityScanState.Unsatisfied::class.java)
+        }
+
+    @Test
+    fun `Unsatisfied transitions to Initial`() =
+        runBlocking {
+            val transitioner =
+                FaceDetectorTransitioner(
+                    selfieCapturePage = SELFIE_CAPTURE_PAGE,
+                    selfieFrameSaver = mockSelfieFrameSaver,
+                )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
+
+            val transitionerSpy = spy(transitioner)
+
+            val unsatisfiedState = IdentityScanState.Unsatisfied(
+                "reason",
+                IdentityScanState.ScanType.SELFIE,
+                transitionerSpy
+            )
+
+            val resultState =
+                transitionerSpy.transitionFromUnsatisfied(
+                    unsatisfiedState,
+                    mock(),
+                    mock()
+                )
+
+            verify(transitionerSpy).resetAndReturn()
+            assertThat(resultState).isInstanceOf(IdentityScanState.Initial::class.java)
         }
 
     private companion object {
