@@ -10,7 +10,6 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
@@ -18,9 +17,6 @@ import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.CreateRepairSession
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
-import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState
@@ -49,13 +45,10 @@ internal class BankAuthRepairViewModel @Inject constructor(
     private val uriUtils: UriUtils,
     private val createRepairSession: CreateRepairSession,
     private val updateLocalManifest: UpdateLocalManifest,
-    private val postAuthSessionEvent: PostAuthSessionEvent,
     private val partnerToCoreAuthsRepository: PartnerToCoreAuthsRepository,
     private val getManifest: GetManifest,
     private val getCachedAccounts: GetCachedAccounts,
-    private val goNext: GoNext,
     private val navigationManager: NavigationManager,
-    private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
     initialState: PartnerAuthState
 ) : MavericksViewModel<PartnerAuthState>(initialState) {
@@ -63,26 +56,16 @@ internal class BankAuthRepairViewModel @Inject constructor(
         logErrors()
         observePayload()
         suspend {
-//            val launchedEvent = Launched(Date())
             val selectedAccount = getCachedAccounts().first()
-            val coreAuthorization = partnerToCoreAuthsRepository.get()!!.getValue(selectedAccount.authorization)
-            logger.debug(coreAuthorization)
+            val coreAuthorization = requireNotNull(partnerToCoreAuthsRepository.get())
+                .getValue(selectedAccount.authorization)
             val repairSession = createRepairSession(coreAuthorization)
-            updateLocalManifest {
-                it.copy(activeInstitution = repairSession.institution)
-            }
+            updateLocalManifest { it.copy(activeInstitution = repairSession.institution) }
             Payload(
                 authSession = repairSession.toAuthSession(),
                 institution = requireNotNull(repairSession.institution),
                 isStripeDirect = getManifest().isStripeDirect ?: false
-            ).also {
-                // just send loaded event on OAuth flows (prepane). Non-OAuth handled by shim.
-//                val loadedEvent: Loaded? = Loaded(Date()).takeIf { authSession.isOAuth }
-//                postAuthSessionEvent(
-//                    authSession.id,
-//                    listOfNotNull(launchedEvent, loadedEvent)
-//                )
-            }
+            )
         }.execute {
             copy(payload = it)
         }
@@ -92,7 +75,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
         return FinancialConnectionsAuthorizationSession(
             id = this.id,
             url = this.url,
-            nextPane = Pane.SUCCESS,
+            nextPane = Pane.SUCCESS, //TODO check!
             display = this.display,
             _isOAuth = true,
         )
@@ -114,30 +97,27 @@ internal class BankAuthRepairViewModel @Inject constructor(
             PartnerAuthState::payload,
             onFail = {
                 logger.error("Error fetching payload / posting AuthSession", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(Pane.PARTNER_AUTH, it))
+                eventTracker.track(FinancialConnectionsEvent.Error(Pane.BANK_AUTH_REPAIR, it))
             },
-            onSuccess = { eventTracker.track(PaneLoaded(Pane.PARTNER_AUTH)) }
+            onSuccess = { eventTracker.track(PaneLoaded(Pane.BANK_AUTH_REPAIR)) }
         )
     }
 
     fun onLaunchAuthClick() {
         viewModelScope.launch {
-            awaitState().payload()?.authSession?.let {
-                postAuthSessionEvent(it.id, AuthSessionEvent.OAuthLaunched(Date()))
-            }
             launchAuthInBrowser()
         }
     }
 
     private suspend fun launchAuthInBrowser() {
-        kotlin.runCatching { requireNotNull(getManifest().activeAuthSession) }
+        kotlin.runCatching { requireNotNull(awaitState().payload()?.authSession) }
             .onSuccess {
                 it.url
                     ?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
                     ?.let { setState { copy(viewEffect = OpenPartnerAuth(it)) } }
             }
             .onFailure {
-                eventTracker.track(FinancialConnectionsEvent.Error(Pane.PARTNER_AUTH, it))
+                eventTracker.track(FinancialConnectionsEvent.Error(Pane.BANK_AUTH_REPAIR, it))
                 logger.error("failed retrieving active session from cache", it)
                 setState { copy(authenticationStatus = Fail(it)) }
             }
@@ -166,80 +146,21 @@ internal class BankAuthRepairViewModel @Inject constructor(
         }
     }
 
-    private suspend fun onAuthFailed(
+    private fun onAuthFailed(
         error: Throwable
     ) {
-        logger.error("Auth failed", error)
-//        kotlin.runCatching {
-//            logger.debug("Auth failed, cancelling AuthSession")
-//            val authSession = getManifest().activeAuthSession
-//            logger.error("Auth failed, cancelling AuthSession", error)
-//            when {
-//                authSession != null -> {
-//                    postAuthSessionEvent(authSession.id, AuthSessionEvent.Failure(Date(), error))
-//                    cancelAuthorizationSession(authSession.id)
-//                }
-//
-//                else -> logger.debug("Could not find AuthSession to cancel.")
-//            }
-//            setState { copy(authenticationStatus = Fail(error)) }
-//        }.onFailure {
-//            logger.error("failed cancelling session after failed web flow", it)
-//        }
+        // TODO handle auth failures
+        logger.debug("Auth failed " + error.stackTraceToString())
     }
 
-    private suspend fun onAuthCancelled() {
-        logger.error("Auth cancelled")
-//        kotlin.runCatching {
-//            logger.debug("Auth cancelled, cancelling AuthSession")
-//            setState { copy(authenticationStatus = Loading()) }
-//            val authSession = requireNotNull(getManifest().activeAuthSession)
-//            val result = cancelAuthorizationSession(authSession.id)
-//            if (authSession.isOAuth) {
-//                // For OAuth institutions, create a new session and navigate to its nextPane (prepane).
-//                logger.debug("Creating a new session for this OAuth institution")
-//                // Send retry event as we're presenting the prepane again.
-//                postAuthSessionEvent(authSession.id, AuthSessionEvent.Retry(Date()))
-//                val manifest = getManifest()
-//                val newSession = createAuthorizationSession(
-//                    institution = requireNotNull(manifest.activeInstitution),
-//                    allowManualEntry = manifest.allowManualEntry
-//                )
-//                goNext(newSession.nextPane)
-//            } else {
-//                // For OAuth institutions, navigate to Session cancellation's next pane.
-//                postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
-//                goNext(result.nextPane)
-//            }
-//        }.onFailure {
-//            logger.error("failed cancelling session after cancelled web flow", it)
-//            setState { copy(authenticationStatus = Fail(it)) }
-//        }
+    private fun onAuthCancelled() {
+        // TODO handle auth cancellations
+        logger.debug("Auth cancelled")
     }
 
-    private suspend fun completeAuthorizationSession() {
-        logger.error("Auth succeeded!")
-//        kotlin.runCatching {
-//            setState { copy(authenticationStatus = Loading()) }
-//            val authSession = requireNotNull(getManifest().activeAuthSession)
-//            postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-//            if (authSession.isOAuth) {
-//                logger.debug("Web AuthFlow completed! waiting for oauth results")
-//                val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
-//                logger.debug("OAuth results received! completing session")
-//                val updatedSession = completeAuthorizationSession(
-//                    authorizationSessionId = authSession.id,
-//                    publicToken = oAuthResults.publicToken
-//                )
-//                logger.debug("Session authorized!")
-//                goNext(updatedSession.nextPane)
-//            } else {
-//                goNext(Pane.ACCOUNT_PICKER)
-//            }
-//        }.onFailure {
-//            logger.error("failed authorizing session", it)
-//            setState { copy(authenticationStatus = Fail(it)) }
-//        }
+    private fun completeAuthorizationSession() {
+        // TODO handle auth succeeding.
+        logger.debug("Auth succeeded!")
     }
 
     fun onEnterDetailsManuallyClick() {
@@ -253,7 +174,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
                 eventTracker.track(
                     FinancialConnectionsEvent.Click(
                         eventName,
-                        pane = Pane.PARTNER_AUTH
+                        pane = Pane.BANK_AUTH_REPAIR
                     )
                 )
             }
