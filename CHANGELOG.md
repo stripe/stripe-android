@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
+
+## 20.25.1 - 2023-05-10
 * [CHANGED][6697](https://github.com/stripe/stripe-android/pull/6697) Revert BOM change and use compose 1.4.3. 
 * [FIXED][6698](https://github.com/stripe/stripe-android/pull/6698) ImageDecoder: Exception in invokeOnCancellation handler.
 
