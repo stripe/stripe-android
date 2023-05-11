@@ -36,6 +36,10 @@ dependencies {
 }
 
 android {
+    buildFeatures {
+        viewBinding true
+    }
+
     testOptions {
         unitTests {
             // Note: without this, all Robolectric tests using assets will fail.
