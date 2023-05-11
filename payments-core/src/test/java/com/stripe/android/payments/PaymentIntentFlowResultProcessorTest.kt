@@ -363,7 +363,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             val result = processor.processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
-                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
                 )
             ).getOrThrow()
 
