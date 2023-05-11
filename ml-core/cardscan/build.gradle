@@ -4,6 +4,7 @@ android {
     buildFeatures {
         buildConfig = false
     }
+    namespace 'com.stripe.android.mlcore.impl'
 }
 
 dependencies {
