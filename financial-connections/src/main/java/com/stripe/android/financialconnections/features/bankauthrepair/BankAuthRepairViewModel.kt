@@ -75,9 +75,10 @@ internal class BankAuthRepairViewModel @Inject constructor(
         return FinancialConnectionsAuthorizationSession(
             id = this.id,
             url = this.url,
-            nextPane = Pane.SUCCESS, //TODO check!
+            flow = this.flow,
+            _isOAuth = this.isOAuth,
+            nextPane = Pane.SUCCESS,
             display = this.display,
-            _isOAuth = true,
         )
     }
 

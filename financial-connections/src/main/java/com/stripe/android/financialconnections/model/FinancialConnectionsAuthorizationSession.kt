@@ -59,6 +59,9 @@ internal data class FinancialConnectionsAuthorizationRepairSession(
     @SerialName(value = "flow")
     val flow: Flow? = null,
 
+    @SerialName(value = "is_oauth")
+    val isOAuth: Boolean? = false,
+
     @SerialName(value = "institution")
     val institution: FinancialConnectionsInstitution? = null,
 
