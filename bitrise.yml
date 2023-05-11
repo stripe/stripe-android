@@ -4,24 +4,31 @@ default_step_lib_source: 'https://github.com/bitrise-io/bitrise-steplib.git'
 project_type: android
 trigger_map:
   - push_branch: 'master'
-    pipeline: main-trigger-pipeline
+    pipeline: master-push-pipeline
   - pull_request_source_branch: '*'
-    pipeline: main-trigger-pipeline
+    pipeline: pull-request-pipeline
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
 
 pipelines:
-  main-trigger-pipeline:
+  master-push-pipeline:
     stages:
-      - stage-trigger-run-all: { }
+      - stage-run-all-tests: { }
+      - stage-compile-example-apps: { }
+  pull-request-pipeline:
+    stages:
+      - stage-run-all-tests: { }
 
 stages:
-  stage-trigger-run-all:
+  stage-run-all-tests:
     workflows:
       - check: { }
       - test: { }
       - run-instrumentation-tests: { }
+  stage-compile-example-apps:
+    workflows:
+      - compile-financial-connections-example-app: { }
 
 workflows:
   check:
@@ -46,6 +53,22 @@ workflows:
       - script@1:
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
+  compile-financial-connections-example-app:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - android-build@1:
+          inputs:
+            - variant: debug
+            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
+            - module: financial-connections-example
+      - save-cache@1:
+          inputs:
+            - key: |-
+                financial-connections-example-apk
+            - paths: $BITRISE_APK_PATH
   maestro-financial-connections:
     before_run:
       - prepare_all
