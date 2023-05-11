@@ -34,6 +34,9 @@ android {
 
 dependencies {
     implementation project(":stripe-core")
+
+    implementation platform(boms.androidx.compose)
+
     implementation libs.androidx.annotation
     implementation libs.androidx.coreKtx
     implementation libs.compose.foundation
