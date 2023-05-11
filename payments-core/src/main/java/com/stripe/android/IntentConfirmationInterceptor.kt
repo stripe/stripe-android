@@ -165,9 +165,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): IntentConfirmationInterceptor.NextStep {
-        return when (
-            val result = createIntentCallback.onCreateIntent(paymentMethodId = paymentMethod.id!!)
-        ) {
+        return when (val result = createIntentCallback.onCreateIntent(paymentMethod)) {
             is CreateIntentResult.Success -> {
                 createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
             }
@@ -187,8 +185,8 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): IntentConfirmationInterceptor.NextStep {
         val result = createIntentCallback.onCreateIntent(
-            paymentMethodId = paymentMethod.id!!,
-            shouldSavePaymentMethod = shouldSavePaymentMethod
+            paymentMethod = paymentMethod,
+            shouldSavePaymentMethod = shouldSavePaymentMethod,
         )
 
         return when (result) {
