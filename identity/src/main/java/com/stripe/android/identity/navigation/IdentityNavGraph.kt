@@ -295,7 +295,7 @@ internal fun IdentityNavGraph(
                         null
                     } else {
                         ErrorScreenButton(
-                            buttonText = stringResource(id = R.string.stripe_file_upload),
+                            buttonText = stringResource(id = R.string.stripe_upload_a_photo),
                         ) {
                             identityViewModel.screenTracker.screenTransitionStart(
                                 IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR

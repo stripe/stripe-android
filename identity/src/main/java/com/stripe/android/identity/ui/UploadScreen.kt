@@ -391,19 +391,19 @@ private fun DialogListItem(
 private fun getTitleFromScanType(scanType: IdentityScanState.ScanType): String {
     return when (scanType) {
         IdentityScanState.ScanType.ID_FRONT -> {
-            stringResource(R.string.stripe_upload_dialog_title_id_front)
+            stringResource(R.string.stripe_front_of_id)
         }
         IdentityScanState.ScanType.ID_BACK -> {
-            stringResource(R.string.stripe_upload_dialog_title_id_back)
+            stringResource(R.string.stripe_back_of_id)
         }
         IdentityScanState.ScanType.DL_FRONT -> {
-            stringResource(R.string.stripe_upload_dialog_title_dl_front)
+            stringResource(R.string.stripe_front_of_dl)
         }
         IdentityScanState.ScanType.DL_BACK -> {
-            stringResource(R.string.stripe_upload_dialog_title_dl_back)
+            stringResource(R.string.stripe_back_of_dl)
         }
         IdentityScanState.ScanType.PASSPORT -> {
-            stringResource(R.string.stripe_upload_dialog_title_passport)
+            stringResource(R.string.stripe_passport)
         }
         else -> {
             throw java.lang.IllegalArgumentException("invalid scan type: $scanType")
