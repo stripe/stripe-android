@@ -6,7 +6,7 @@ trigger_map:
   - push_branch: 'master'
     pipeline: master-push-pipeline
   - pull_request_source_branch: '*'
-    pipeline: pull-request-pipeline
+    workflow: compile-financial-connections-example-app
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
