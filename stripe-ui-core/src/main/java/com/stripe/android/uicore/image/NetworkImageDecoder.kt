@@ -47,7 +47,7 @@ class NetworkImageDecoder {
     ): Bitmap? = suspendCancellableCoroutine { cont ->
         kotlin.runCatching {
             URL(url).stream()
-                .also { stream -> cont.invokeOnCancellation { stream.close() } }
+                .also { stream -> cont.invokeOnCancellation { runCatching { stream.close() } } }
                 .use { BitmapFactory.decodeStream(it, null, this) }
         }.fold(
             onSuccess = { cont.resume(it) },
