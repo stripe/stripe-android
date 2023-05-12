@@ -9,7 +9,7 @@ android {
 
 dependencies {
     api project(':ml-core:base')
-    implementation "org.tensorflow:tensorflow-lite:2.11.0"
+    implementation project(":stripecardscan-tflite")
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }

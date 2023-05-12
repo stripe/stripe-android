@@ -41,7 +41,6 @@ allprojects {
     group = GROUP
 
     repositories {
-        maven { url 'https://jitpack.io' }
         mavenCentral()
         google()
         gradlePluginPortal()
