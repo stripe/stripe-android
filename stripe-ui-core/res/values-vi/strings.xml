@@ -34,8 +34,6 @@
   <string name="stripe_address_label_neighborhood">Khu dân cư</string>
   <!-- Label of an address field -->
   <string name="stripe_address_label_oblast">Vùng</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="stripe_address_label_phone_number">Số điện thoại</string>
   <!-- Used to describe a field of an address -->
   <string name="stripe_address_label_post_town">Bưu điện hoặc Thị trấn</string>
   <!-- Label of an address field -->

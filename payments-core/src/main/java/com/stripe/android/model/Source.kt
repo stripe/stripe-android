@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import androidx.annotation.Keep
 import androidx.annotation.StringDef
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.Source.Flow
@@ -188,6 +189,7 @@ data class Source internal constructor(
         Failed("failed"),
         Pending("pending");
 
+        @Keep
         override fun toString(): String = code
 
         internal companion object {
@@ -204,6 +206,7 @@ data class Source internal constructor(
         Reusable("reusable"),
         SingleUse("single_use");
 
+        @Keep
         override fun toString(): String = code
 
         internal companion object {
@@ -220,6 +223,7 @@ data class Source internal constructor(
         CodeVerification("code_verification"),
         None("none");
 
+        @Keep
         override fun toString(): String = code
 
         internal companion object {
@@ -260,6 +264,7 @@ data class Source internal constructor(
             NotRequired("not_required"),
             Failed("failed");
 
+            @Keep
             override fun toString(): String = code
 
             internal companion object {
@@ -294,6 +299,7 @@ data class Source internal constructor(
             Succeeded("succeeded"),
             Failed("failed");
 
+            @Keep
             override fun toString(): String = code
 
             internal companion object {

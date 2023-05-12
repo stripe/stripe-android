@@ -14,6 +14,8 @@
   <string name="stripe_address_label_full_name">성명</string>
   <!-- Caption for Name field on address form -->
   <string name="stripe_address_label_name">이름</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="stripe_address_label_phone_number">전화번호</string>
   <!-- Short string for postal code (text used in non-US countries) -->
   <string name="stripe_address_label_postal_code">우편번호</string>
   <!-- Caption for Province field on address form (only countries that use province, like Canada) -->

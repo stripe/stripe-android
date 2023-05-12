@@ -32,7 +32,7 @@ workflows:
     steps:
       - script@1:
           inputs:
-            - content: ./gradlew ktlint detekt lintRelease apiCheck
+            - content: ./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
   test:
     before_run:
       - prepare_all
@@ -100,7 +100,9 @@ workflows:
     steps:
       - avd-manager@1:
           inputs:
+            - profile: "pixel_3a"
             - api_level: 30
+            - tag: "google_apis_playstore"
       - wait-for-android-emulator@1: { }
       - script-runner@0:
           title: Execute Maestro tests

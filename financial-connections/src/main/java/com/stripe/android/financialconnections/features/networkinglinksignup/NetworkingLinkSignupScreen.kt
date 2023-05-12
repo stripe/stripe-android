@@ -1,13 +1,13 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -33,8 +33,7 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.BulletItem
-import com.stripe.android.financialconnections.features.common.LoadingContent
-import com.stripe.android.financialconnections.features.common.PaneFooter
+import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
@@ -105,7 +104,7 @@ private fun NetworkingLinkSignupContent(
         }
     ) {
         when (val payload = state.payload) {
-            Uninitialized, is Loading -> LoadingContent()
+            Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingLinkSignupLoaded(
                 scrollState = scrollState,
                 validForm = state.valid(),
@@ -160,27 +159,23 @@ private fun NetworkingLinkSignupLoaded(
                     bullet = BulletUI.from(it),
                     onClickableTextClick = onClickableTextClick
                 )
-                Spacer(modifier = Modifier.size(12.dp))
+                Spacer(modifier = Modifier.size(8.dp))
             }
-            Spacer(modifier = Modifier.size(12.dp))
             EmailSection(
                 showFullForm = showFullForm,
                 loading = lookupAccountSync is Loading,
                 emailController = payload.emailController,
                 enabled = true,
             )
-            AnimatedVisibility(visible = showFullForm) {
+            if (showFullForm) {
                 PhoneNumberSection(
                     payload = payload,
                     onClickableTextClick = onClickableTextClick
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-        }
-        PaneFooter(elevation = scrollState.elevation) {
-            AnimatedVisibility(
-                visible = showFullForm
-            ) {
+            Spacer(modifier = Modifier.height(16.dp))
+            if (showFullForm) {
                 SaveToLinkCta(
                     text = payload.content.cta,
                     aboveCta = payload.content.aboveCta,
@@ -235,7 +230,7 @@ private fun SaveToLinkCta(
                     .copy(color = FinancialConnectionsTheme.colors.textSecondary),
             )
         )
-        Spacer(modifier = Modifier.size(16.dp))
+        Spacer(modifier = Modifier.size(8.dp))
         FinancialConnectionsButton(
             loading = saveAccountToLinkSync is Loading,
             enabled = validForm,

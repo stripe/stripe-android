@@ -672,7 +672,7 @@ internal class FormViewModelTest {
 
         val phoneSection = formElement[2] as SectionElement
         val phoneElement = phoneSection.fields[0] as PhoneNumberElement
-        assertThat(phoneElement.controller.label.first()).isEqualTo(UiCoreR.string.stripe_address_label_phone_number)
+        assertThat(phoneElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_phone_number)
         assertThat(phoneElement.identifier.v1).isEqualTo("billing_details[phone]")
 
         val addressSection = formElement[3] as SectionElement

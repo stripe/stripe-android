@@ -89,6 +89,7 @@ class CollectBankAccountContract :
             override val configuration: CollectBankAccountConfiguration,
             val elementsSessionId: String,
             val customerId: String?,
+            val onBehalfOf: String?,
             val amount: Int?,
             val currency: String?
         ) : Args(
@@ -107,6 +108,7 @@ class CollectBankAccountContract :
             override val configuration: CollectBankAccountConfiguration,
             val elementsSessionId: String,
             val customerId: String?,
+            val onBehalfOf: String?,
         ) : Args(
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,

@@ -14,6 +14,8 @@
   <string name="stripe_address_label_full_name">Ad ve soyadınız</string>
   <!-- Caption for Name field on address form -->
   <string name="stripe_address_label_name">Ad</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="stripe_address_label_phone_number">Telefon numarası</string>
   <!-- Short string for postal code (text used in non-US countries) -->
   <string name="stripe_address_label_postal_code">Posta kodu</string>
   <!-- Caption for Province field on address form (only countries that use province, like Canada) -->

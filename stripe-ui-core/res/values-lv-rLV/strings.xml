@@ -34,8 +34,6 @@
   <string name="stripe_address_label_neighborhood">Apkaime</string>
   <!-- Label of an address field -->
   <string name="stripe_address_label_oblast">Apgabals</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="stripe_address_label_phone_number">Tālruņa numurs</string>
   <!-- Used to describe a field of an address -->
   <string name="stripe_address_label_post_town">Pasts vai pilsēta</string>
   <!-- Label of an address field -->

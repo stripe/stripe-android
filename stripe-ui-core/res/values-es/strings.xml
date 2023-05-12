@@ -34,8 +34,6 @@
   <string name="stripe_address_label_neighborhood">Barrio</string>
   <!-- Label of an address field -->
   <string name="stripe_address_label_oblast">Óblast</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="stripe_address_label_phone_number">Número de teléfono</string>
   <!-- Used to describe a field of an address -->
   <string name="stripe_address_label_post_town">Puesto o pueblo</string>
   <!-- Label of an address field -->

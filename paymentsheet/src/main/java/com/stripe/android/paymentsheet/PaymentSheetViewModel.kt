@@ -427,8 +427,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override fun handleUSBankAccountConfirmed(paymentSelection: PaymentSelection.New.USBankAccount) {
-        confirmPaymentSelection(paymentSelection)
+    override fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount) {
+        updateSelection(paymentSelection)
+        checkout()
     }
 
     override fun clearErrorMessages() {

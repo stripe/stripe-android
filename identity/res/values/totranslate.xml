@@ -5,23 +5,5 @@
     <string name="stripe_test_model_title">You\'re currently in testmode</string>
     <string name="stripe_test_model_content">This page is only shown in testmode.</string>
     <string name="stripe_complete_with_test_data">Complete with test data</string>
-    <string name="stripe_complete_with_test_data_details"><![CDATA[Save time by choosing a desired result and completing instantly with that outcome. The mobile SDK flow will return with result <b>Completed</b>.]]></string>
-
-    <string name="stripe_verification_success">Verification success</string>
-    <string name="stripe_verification_failure">Verification failure</string>
-    <string name="stripe_verification_success_async">Verification success async</string>
-    <string name="stripe_verification_failure_async">Verification failure async</string>
-    <string name="stripe_submit">SUBMIT</string>
-
-    <string name="stripe_finish_mobile_flow">Terminate mobile SDK flow</string>
-    <string name="stripe_finish_mobile_flow_details"><![CDATA[Terminate mobile SDK flow locally with <b>Completed</b>, <b>Canceled</b> or <b>Failed</b> without changing the verification session on server.]]></string>
-
-    <string name="stripe_failure_from_test_mode">Failure from test mode</string>
-    <string name="stripe_completed">COMPLETED</string>
-    <string name="stripe_cancelled">CANCELLED</string>
-    <string name="stripe_failed">FAILED</string>
-
-    <string name="stripe_preview_user_experience">Preview user experience</string>
-    <string name="stripe_preview_user_experience_details">Proceed to preview as an end user. Information provided will not be verified.</string>
-    <string name="stripe_proceed">PROCEED</string>
+    <string name="stripe_complete_with_test_data_details">Save time by choosing a desired result and completing instantly with that outcome. The mobile SDK flow will return with result Completed.</string>
 </resources>

@@ -29,15 +29,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -59,6 +58,7 @@ import com.stripe.android.uicore.stripeColors
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
+@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 @Composable
 internal fun USBankAccountForm(
     formArgs: FormArguments,
@@ -70,16 +70,20 @@ internal fun USBankAccountForm(
 
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
-            val clientSecret = when (val intent = sheetViewModel.stripeIntent.value) {
-                is PaymentIntent -> PaymentIntentClientSecret(intent.clientSecret!!)
-                is SetupIntent -> SetupIntentClientSecret(intent.clientSecret!!)
-                else -> error("Launched USBankAccountForm with invalid intent: $intent")
-            }
-
+            val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
+                ?.args
+                ?.initializationMode
+            val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+                ?.intentConfiguration
+                ?.onBehalfOf
+            val stripeIntent = sheetViewModel.stripeIntent.value
             USBankAccountFormViewModel.Args(
                 formArgs = formArgs,
                 isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
-                clientSecret = clientSecret,
+                isPaymentFlow = stripeIntent is PaymentIntent,
+                stripeIntentId = stripeIntent?.id,
+                clientSecret = stripeIntent?.clientSecret,
+                onBehalfOf = onBehalfOf,
                 savedPaymentMethod = sheetViewModel.newPaymentSelection as? New.USBankAccount,
                 shippingDetails = sheetViewModel.config?.shippingDetails,
             )

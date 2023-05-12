@@ -13,14 +13,12 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
@@ -35,6 +33,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -59,12 +58,14 @@ class USBankAccountFormViewModelTest {
             )
         ),
         isCompleteFlow = true,
-        clientSecret = PaymentIntentClientSecret("pi_12345_secret_54321"),
+        isPaymentFlow = true,
+        stripeIntentId = "id_12345",
+        clientSecret = "pi_12345_secret_54321",
+        onBehalfOf = "on_behalf_of_id",
         savedPaymentMethod = null,
         shippingDetails = null,
     )
 
-    private val stripeRepository = mock<StripeRepository>()
     private val collectBankAccountLauncher = mock<CollectBankAccountLauncher>()
     private val savedStateHandle = SavedStateHandle()
 
@@ -554,6 +555,75 @@ class USBankAccountFormViewModelTest {
         }
     }
 
+    @Test
+    fun `Launches collect bank account for deferred payment screen when deferred payment`() = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                clientSecret = null
+            )
+        )
+
+        viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+
+        val currentScreenState =
+            viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+
+        assertThat(
+            currentScreenState
+        ).isInstanceOf(
+            USBankAccountFormScreenState.BillingDetailsCollection::class.java
+        )
+
+        viewModel.handlePrimaryButtonClick(
+            currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
+        )
+
+        verify(collectBankAccountLauncher).presentWithDeferredPayment(
+            publishableKey = any(),
+            stripeAccountId = any(),
+            configuration = any(),
+            elementsSessionId = any(),
+            customerId = anyOrNull(),
+            onBehalfOf = any(),
+            amount = any(),
+            currency = any()
+        )
+    }
+
+    @Test
+    fun `Launches collect bank account for deferred setup screen when deferred setup`() = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                clientSecret = null,
+                isPaymentFlow = false
+            )
+        )
+
+        viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+
+        val currentScreenState =
+            viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+
+        assertThat(
+            currentScreenState
+        ).isInstanceOf(
+            USBankAccountFormScreenState.BillingDetailsCollection::class.java
+        )
+
+        viewModel.handlePrimaryButtonClick(
+            currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
+        )
+
+        verify(collectBankAccountLauncher).presentWithDeferredSetup(
+            publishableKey = any(),
+            stripeAccountId = any(),
+            configuration = any(),
+            elementsSessionId = any(),
+            customerId = anyOrNull(),
+            onBehalfOf = any(),
+        )
+    }
+
     private fun createViewModel(
         args: USBankAccountFormViewModel.Args = defaultArgs
     ): USBankAccountFormViewModel {
@@ -564,17 +634,16 @@ class USBankAccountFormViewModelTest {
         return USBankAccountFormViewModel(
             args = args,
             application = ApplicationProvider.getApplicationContext(),
-            stripeRepository = stripeRepository,
             lazyPaymentConfig = { paymentConfiguration },
             savedStateHandle = savedStateHandle,
             addressRepository = createAddressRepository(),
         )
     }
 
-    private suspend fun mockUnverifiedBankAccount(): CollectBankAccountResultInternal.Completed {
+    private fun mockUnverifiedBankAccount(): CollectBankAccountResultInternal.Completed {
         val paymentIntent = mock<PaymentIntent>()
         val financialConnectionsSession = mock<FinancialConnectionsSession>()
-        whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret?.value)
+        whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret)
         whenever(financialConnectionsSession.id).thenReturn("123")
         whenever(financialConnectionsSession.paymentAccount).thenReturn(
             BankAccount(
@@ -584,15 +653,6 @@ class USBankAccountFormViewModelTest {
                 routingNumber = "123"
             )
         )
-        whenever(
-            stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ).thenReturn(Result.success(paymentIntent))
 
         return CollectBankAccountResultInternal.Completed(
             CollectBankAccountResponseInternal(
@@ -602,10 +662,10 @@ class USBankAccountFormViewModelTest {
         )
     }
 
-    private suspend fun mockVerifiedBankAccount(): CollectBankAccountResultInternal.Completed {
+    private fun mockVerifiedBankAccount(): CollectBankAccountResultInternal.Completed {
         val paymentIntent = mock<PaymentIntent>()
         val financialConnectionsSession = mock<FinancialConnectionsSession>()
-        whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret?.value)
+        whenever(paymentIntent.id).thenReturn(defaultArgs.clientSecret)
         whenever(financialConnectionsSession.id).thenReturn("123")
         whenever(financialConnectionsSession.paymentAccount).thenReturn(
             FinancialConnectionsAccount(
@@ -617,15 +677,6 @@ class USBankAccountFormViewModelTest {
                 supportedPaymentMethodTypes = listOf()
             )
         )
-        whenever(
-            stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        ).thenReturn(Result.success(paymentIntent))
 
         return CollectBankAccountResultInternal.Completed(
             CollectBankAccountResponseInternal(

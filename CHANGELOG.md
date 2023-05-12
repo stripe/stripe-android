@@ -2,9 +2,20 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.25.1 - 2023-05-10
+* [CHANGED][6697](https://github.com/stripe/stripe-android/pull/6697) Revert BOM change and use compose 1.4.3. 
+* [FIXED][6698](https://github.com/stripe/stripe-android/pull/6698) ImageDecoder: Exception in invokeOnCancellation handler.
+
+
+## 20.25.0 - 2023-05-08
+
 ### All SDKs
 * [CHANGED][6635](https://github.com/stripe/stripe-android/pull/6635) Use non transitive R classes.
+* [CHANGED][6676](https://github.com/stripe/stripe-android/pull/6676) Updated Compose BOM to 2023.05.00.
 
+### Identity
+* [ADDED][6642](https://github.com/stripe/stripe-android/pull/6642) Support Test mode M1.
+ 
 ## 20.24.2 - 2023-05-03
 
 ### Payments

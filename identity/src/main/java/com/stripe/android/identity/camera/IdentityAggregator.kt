@@ -2,7 +2,6 @@ package com.stripe.android.identity.camera
 
 import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.ResultAggregator
-import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
@@ -42,7 +41,7 @@ internal class IdentityAggregator(
             )
         } else {
             IDDetectorTransitioner(
-                timeoutAt = Clock.markNow() + verificationPage.documentCapture.autocaptureTimeout.milliseconds,
+                timeout = verificationPage.documentCapture.autocaptureTimeout.milliseconds,
                 iouThreshold = verificationPage.documentCapture.motionBlurMinIou,
                 timeRequired = verificationPage.documentCapture.motionBlurMinDuration
             )

@@ -218,6 +218,7 @@ class CreateFinancialConnectionsSessionTest {
             val stripeAccountId = "accountId"
             val elementsSessionId = "unique_id"
             val customerId = "customer_id"
+            val onBehalfOf = "on_behalf_of_id"
             val amount = 1000
             val currency = "usd"
             givenCreateSessionWithDeferredIntentReturns { Result.success(linkedAccountSession) }
@@ -229,6 +230,7 @@ class CreateFinancialConnectionsSessionTest {
                     stripeAccountId = stripeAccountId,
                     elementsSessionId = elementsSessionId,
                     customerId = customerId,
+                    onBehalfOf = onBehalfOf,
                     amount = amount,
                     currency = currency
                 )
@@ -243,7 +245,7 @@ class CreateFinancialConnectionsSessionTest {
                         searchSession = null,
                         verificationMethod = VerificationMethodParam.Automatic,
                         customer = customerId,
-                        onBehalfOf = null,
+                        onBehalfOf = onBehalfOf,
                         amount = amount,
                         currency = currency
                     )
@@ -266,6 +268,7 @@ class CreateFinancialConnectionsSessionTest {
             val publishableKey = "publishable_key"
             val elementsSessionId = "unique_id"
             val customerId = "customer_id"
+            val onBehalfOf = "on_behalf_of_id"
             val amount = 1000
             val currency = "usd"
 
@@ -279,6 +282,7 @@ class CreateFinancialConnectionsSessionTest {
                     stripeAccountId = null,
                     elementsSessionId = elementsSessionId,
                     customerId = customerId,
+                    onBehalfOf = onBehalfOf,
                     amount = amount,
                     currency = currency
                 )
@@ -293,7 +297,7 @@ class CreateFinancialConnectionsSessionTest {
                         searchSession = null,
                         verificationMethod = VerificationMethodParam.Automatic,
                         customer = customerId,
-                        onBehalfOf = null,
+                        onBehalfOf = onBehalfOf,
                         amount = amount,
                         currency = currency
                     )

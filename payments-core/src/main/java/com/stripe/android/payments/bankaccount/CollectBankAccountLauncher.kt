@@ -40,6 +40,7 @@ interface CollectBankAccountLauncher {
         configuration: CollectBankAccountConfiguration,
         elementsSessionId: String,
         customerId: String?,
+        onBehalfOf: String?,
         amount: Int?,
         currency: String?
     )
@@ -51,6 +52,7 @@ interface CollectBankAccountLauncher {
         configuration: CollectBankAccountConfiguration,
         elementsSessionId: String,
         customerId: String?,
+        onBehalfOf: String?,
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -190,6 +192,7 @@ internal class StripeCollectBankAccountLauncher constructor(
         configuration: CollectBankAccountConfiguration,
         elementsSessionId: String,
         customerId: String?,
+        onBehalfOf: String?,
         amount: Int?,
         currency: String?
     ) {
@@ -200,6 +203,7 @@ internal class StripeCollectBankAccountLauncher constructor(
                 elementsSessionId = elementsSessionId,
                 configuration = configuration,
                 customerId = customerId,
+                onBehalfOf = onBehalfOf,
                 amount = amount,
                 currency = currency,
             )
@@ -211,7 +215,8 @@ internal class StripeCollectBankAccountLauncher constructor(
         stripeAccountId: String?,
         configuration: CollectBankAccountConfiguration,
         elementsSessionId: String,
-        customerId: String?
+        customerId: String?,
+        onBehalfOf: String?,
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForDeferredSetupIntent(
@@ -220,6 +225,7 @@ internal class StripeCollectBankAccountLauncher constructor(
                 elementsSessionId = elementsSessionId,
                 configuration = configuration,
                 customerId = customerId,
+                onBehalfOf = onBehalfOf,
             )
         )
     }

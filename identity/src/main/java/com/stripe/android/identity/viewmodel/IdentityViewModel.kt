@@ -855,6 +855,85 @@ internal class IdentityViewModel constructor(
     }
 
     /**
+     * Invoke the verify endpoint and navigate to the [ConfirmationDestination] if successful.
+     */
+    suspend fun verifySessionAndTransition(
+        fromRoute: String,
+        simulateDelay: Boolean,
+        navController: NavController
+    ) {
+        runCatching {
+            identityRepository.verifyTestVerificationSession(
+                id = verificationArgs.verificationSessionId,
+                ephemeralKey = verificationArgs.ephemeralKeySecret,
+                simulateDelay = simulateDelay
+            )
+        }.navigateToConfirmIfSubmitted(fromRoute, navController)
+    }
+
+    /**
+     * Invoke the unverify endpoint and navigate to the [ConfirmationDestination] if successful.
+     */
+    suspend fun unverifySessionAndTransition(
+        fromRoute: String,
+        simulateDelay: Boolean,
+        navController: NavController
+    ) {
+        runCatching {
+            identityRepository.unverifyTestVerificationSession(
+                id = verificationArgs.verificationSessionId,
+                ephemeralKey = verificationArgs.ephemeralKeySecret,
+                simulateDelay = simulateDelay
+            )
+        }.navigateToConfirmIfSubmitted(fromRoute, navController)
+    }
+
+    /**
+     * Check the [Result] of [VerificationPageData] and try to navigate to [ConfirmationDestination].
+     *
+     * If Result is success, check the value of VerificationPageData
+     *   If VerificationPageData has error, navigate to [ErrorDestination] with the error.
+     *   If VerificationPageData is submitted, navigate to [ConfirmationDestination].
+     *   If VerificationPageData is not submitted, navigate to [ErrorDestination].
+     *
+     * If Result is failed, navigate to [ErrorDestination] with the failure information.
+     *
+     */
+    private fun Result<VerificationPageData>.navigateToConfirmIfSubmitted(
+        fromRoute: String,
+        navController: NavController
+    ) {
+        this.onSuccess { submittedVerificationPageData ->
+            verificationPageSubmit.updateStateAndSave {
+                Resource.success(DUMMY_RESOURCE)
+            }
+            when {
+                submittedVerificationPageData.hasError() -> {
+                    submittedVerificationPageData.requirements.errors[0].let { requirementError ->
+                        errorCause.postValue(
+                            IllegalStateException("VerificationPageDataRequirementError: $requirementError")
+                        )
+                        navController.navigateToErrorScreenWithRequirementError(
+                            fromRoute,
+                            requirementError
+                        )
+                    }
+                }
+                submittedVerificationPageData.submitted -> {
+                    navController.navigateTo(ConfirmationDestination)
+                }
+                else -> {
+                    errorCause.postValue(IllegalStateException("VerificationPage submit failed"))
+                    navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                }
+            }
+        }.onFailure {
+            errorCause.postValue(it)
+            navController.navigateToErrorScreenWithDefaultValues(getApplication())
+        }
+    }
+
+    /**
      * Download an ML model and post its value to [target].
      */
     private fun downloadModelAndPost(modelUrl: String, target: MutableLiveData<Resource<File>>) {
@@ -1048,34 +1127,7 @@ internal class IdentityViewModel constructor(
                 verificationArgs.verificationSessionId,
                 verificationArgs.ephemeralKeySecret
             )
-        }.onSuccess { submittedVerificationPageData ->
-            verificationPageSubmit.updateStateAndSave {
-                Resource.success(DUMMY_RESOURCE)
-            }
-            when {
-                submittedVerificationPageData.hasError() -> {
-                    submittedVerificationPageData.requirements.errors[0].let { requirementError ->
-                        errorCause.postValue(
-                            IllegalStateException("VerificationPageDataRequirementError: $requirementError")
-                        )
-                        navController.navigateToErrorScreenWithRequirementError(
-                            fromRoute,
-                            requirementError
-                        )
-                    }
-                }
-                submittedVerificationPageData.submitted -> {
-                    navController.navigateTo(ConfirmationDestination)
-                }
-                else -> {
-                    errorCause.postValue(IllegalStateException("VerificationPage submit failed"))
-                    navController.navigateToErrorScreenWithDefaultValues(getApplication())
-                }
-            }
-        }.onFailure {
-            errorCause.postValue(it)
-            navController.navigateToErrorScreenWithDefaultValues(getApplication())
-        }
+        }.navigateToConfirmIfSubmitted(fromRoute, navController)
     }
 
     /**

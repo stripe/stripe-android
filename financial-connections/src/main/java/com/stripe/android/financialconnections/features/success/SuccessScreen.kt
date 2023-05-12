@@ -67,8 +67,6 @@ internal fun SuccessScreen() {
             skipSuccessPane = payload.skipSuccessPane,
             onDoneClick = viewModel::onDoneClick,
             accountFailedToLinkMessage = payload.accountFailedToLinkMessage,
-            onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
-            showLinkAnotherAccount = payload.showLinkAnotherAccount,
             onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
             onDisconnectLinkClick = viewModel::onDisconnectLinkClick
         ) { parentViewModel.onCloseNoConfirmationClick(Pane.SUCCESS) }
@@ -86,8 +84,6 @@ private fun SuccessContent(
     skipSuccessPane: Boolean,
     accountFailedToLinkMessage: TextResource?,
     onDoneClick: () -> Unit,
-    onLinkAnotherAccountClick: () -> Unit,
-    showLinkAnotherAccount: Boolean,
     onLearnMoreAboutDataAccessClick: () -> Unit,
     onDisconnectLinkClick: () -> Unit,
     onCloseClick: () -> Unit,
@@ -112,12 +108,10 @@ private fun SuccessContent(
                 disconnectUrl = disconnectUrl,
                 institution = institution,
                 loading = loading,
-                showLinkAnotherAccount = showLinkAnotherAccount,
                 successMessage = successMessage,
                 accountFailedToLinkMessage = accountFailedToLinkMessage,
                 onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick,
                 onDisconnectLinkClick = onDisconnectLinkClick,
-                onLinkAnotherAccountClick = onLinkAnotherAccountClick,
                 onDoneClick = onDoneClick
             )
         }
@@ -142,11 +136,9 @@ private fun SuccessLoaded(
     successMessage: TextResource,
     institution: FinancialConnectionsInstitution,
     loading: Boolean,
-    showLinkAnotherAccount: Boolean,
     accountFailedToLinkMessage: TextResource?,
     onLearnMoreAboutDataAccessClick: () -> Unit,
     onDisconnectLinkClick: () -> Unit,
-    onLinkAnotherAccountClick: () -> Unit,
     onDoneClick: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
@@ -213,9 +205,7 @@ private fun SuccessLoaded(
         }
         SuccessLoadedFooter(
             accountFailedToLinkMessage = accountFailedToLinkMessage,
-            showLinkAnotherAccount = showLinkAnotherAccount,
             loading = loading,
-            onLinkAnotherAccountClick = onLinkAnotherAccountClick,
             onDoneClick = onDoneClick
         )
     }
@@ -253,10 +243,8 @@ private fun AccountNotSavedToLinkNotice(message: TextResource) {
 
 @Composable
 private fun SuccessLoadedFooter(
-    showLinkAnotherAccount: Boolean,
     loading: Boolean,
     accountFailedToLinkMessage: TextResource?,
-    onLinkAnotherAccountClick: () -> Unit,
     onDoneClick: () -> Unit
 ) {
     Column(
@@ -269,18 +257,6 @@ private fun SuccessLoadedFooter(
         accountFailedToLinkMessage?.let {
             AccountNotSavedToLinkNotice(it)
             Spacer(modifier = Modifier.size(20.dp))
-        }
-        if (showLinkAnotherAccount) {
-            FinancialConnectionsButton(
-                enabled = loading.not(),
-                type = FinancialConnectionsButton.Type.Secondary,
-                onClick = onLinkAnotherAccountClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(text = stringResource(R.string.stripe_success_pane_link_more_accounts))
-            }
-            Spacer(modifier = Modifier.size(8.dp))
         }
         FinancialConnectionsButton(
             loading = loading,
@@ -335,8 +311,6 @@ internal fun SuccessScreenPreview() {
             skipSuccessPane = false,
             accountFailedToLinkMessage = null,
             onDoneClick = {},
-            onLinkAnotherAccountClick = {},
-            showLinkAnotherAccount = true,
             onLearnMoreAboutDataAccessClick = {},
             onDisconnectLinkClick = {}
         ) {}
@@ -382,8 +356,6 @@ internal fun SuccessScreenPreviewFailedToLink() {
                 listOf("Random Business")
             ),
             onDoneClick = {},
-            onLinkAnotherAccountClick = {},
-            showLinkAnotherAccount = true,
             onLearnMoreAboutDataAccessClick = {},
             onDisconnectLinkClick = {}
         ) {}
