@@ -144,13 +144,13 @@ tasks.dokkaHtmlMultiModule.configure {
 apiValidation {
     ignoredPackages += ["com.stripe.android.databinding"]
     ignoredProjects += [
-//            "example",
-//            "financial-connections-example",
-//            "identity-example",
+            "example",
+            "financial-connections-example",
+            "identity-example",
             "network-testing",
             "payments-core-testing",
-//            "paymentsheet-example",
-//            "stripecardscan-example",
+            "paymentsheet-example",
+            "stripecardscan-example",
     ]
     nonPublicMarkers.add("androidx.annotation.RestrictTo")
     nonPublicMarkers.add("dagger.internal.DaggerGenerated")
