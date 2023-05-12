@@ -7,7 +7,7 @@ appId: com.stripe.android.financialconnections.example
     id: "Native_checkbox"
 - tapOn: "Mode_Dropdown_Icon"
 - tapOn:
-    id: "${MERCHANT}_checkbox"
+    id: "Test_checkbox"
 - tapOn:
     id: "Data_checkbox"
 - tapOn: "Connect Accounts!"
