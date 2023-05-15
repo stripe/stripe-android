@@ -3,7 +3,7 @@ apply from: configs.androidApplication
 apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'com.google.gms.google-services'
 
-def testEnvironment = System.getenv("test_environment") ?: "production"
+def testEnvironment = System.getenv("test_environment") ?: "edge"
 
 android {
     defaultConfig {
