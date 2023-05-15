@@ -2,10 +2,17 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.25.2 - 2023-05-15
+
+### PaymentSheet
+* [FIXED][6680](https://github.com/stripe/stripe-android/pull/6680) Made payments with Cash App Pay more reliable.
+
+### Payments
+* [FIXED][6680](https://github.com/stripe/stripe-android/pull/6680) Made payments with Cash App Pay more reliable.
+
 ## 20.25.1 - 2023-05-10
 * [CHANGED][6697](https://github.com/stripe/stripe-android/pull/6697) Revert BOM change and use compose 1.4.3. 
 * [FIXED][6698](https://github.com/stripe/stripe-android/pull/6698) ImageDecoder: Exception in invokeOnCancellation handler.
-
 
 ## 20.25.0 - 2023-05-08
 
