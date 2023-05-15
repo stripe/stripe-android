@@ -179,9 +179,13 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
-                    Divider(Modifier.padding(vertical = 16.dp))
+                    Divider(Modifier.padding(vertical = 8.dp))
                     Text(
-                        text = "Backend url: ${state.backendUrl}",
+                        text = "backend: ${state.backendUrl}",
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = "env: ${BuildConfig.TEST_ENVIRONMENT}",
                         color = Color.Gray
                     )
                     Button(

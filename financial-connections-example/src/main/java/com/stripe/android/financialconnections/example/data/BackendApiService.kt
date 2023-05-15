@@ -33,7 +33,9 @@ data class LinkAccountSessionBody(
     @SerializedName("custom_sk")
     val secretKey: String?,
     @SerializedName("customer_email")
-    val customerEmail: String?
+    val customerEmail: String?,
+    @SerializedName("test_environment")
+    val testEnvironment: String?
 )
 
 @Keep
@@ -51,5 +53,7 @@ data class PaymentIntentBody(
     @SerializedName("custom_sk")
     val secretKey: String?,
     @SerializedName("customer_email")
-    val customerEmail: String?
+    val customerEmail: String?,
+    @SerializedName("test_environment")
+    val testEnvironment: String?
 )
