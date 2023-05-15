@@ -3,9 +3,9 @@
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">應用設定</string>
   <!-- Description of back of driver's license image -->
-  <string name="stripe_back_of_dl">駕駛證背面</string>
+  <string name="stripe_back_of_dl">駕駛執照背面</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
-  <string name="stripe_back_of_dl_selected">已選擇駕駛證背面</string>
+  <string name="stripe_back_of_dl_selected">已選擇駕駛執照背面</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">身份證背面</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
@@ -46,13 +46,13 @@
   <!-- Label for Date of birth field -->
   <string name="stripe_dob">出生日期</string>
   <!-- Label of the driver's license option for document type selection -->
-  <string name="stripe_driver_license">駕駛證</string>
+  <string name="stripe_driver_license">駕駛執照</string>
   <!-- Text for error labels -->
   <string name="stripe_error">錯誤</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">文件上載</string>
   <!-- Instructions for uploading images of drivers license -->
-  <string name="stripe_file_upload_content_dl">請上載您的駕駛證正反面的照片</string>
+  <string name="stripe_file_upload_content_dl">請上載您的駕駛執照正反面的照片</string>
   <!-- Instructions for uploading images of identity card -->
   <string name="stripe_file_upload_content_id">請上載您的身份證正反面的照片</string>
   <!-- Instructions for uploading images of passport -->
@@ -62,9 +62,9 @@
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">自拍動畫蒙版</string>
   <!-- Description of front of driver's license image -->
-  <string name="stripe_front_of_dl">駕駛證正面</string>
+  <string name="stripe_front_of_dl">駕駛執照正面</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
-  <string name="stripe_front_of_dl_selected">已選擇駕駛證正面</string>
+  <string name="stripe_front_of_dl_selected">已選擇駕駛執照正面</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">身份證正面</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
@@ -102,9 +102,9 @@
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">已選擇護照</string>
   <!-- Instructional text for scanning back of a driver's license -->
-  <string name="stripe_position_dl_back">將駕駛證翻到另一面</string>
+  <string name="stripe_position_dl_back">將駕駛執照翻到另一面</string>
   <!-- Instructional text for scanning front of a driver's license -->
-  <string name="stripe_position_dl_front">將駕駛證放在畫面正中間</string>
+  <string name="stripe_position_dl_front">將駕駛執照放在畫面正中間</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">將身份證翻到另一面</string>
   <!-- Instructional text for scanning front of a identity card -->
@@ -134,9 +134,9 @@
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">發生了意外錯誤 -- 請稍候再試</string>
   <!-- Title of dialog to upload back of driver license -->
-  <string name="stripe_upload_dialog_title_dl_back">上載駕駛證背面</string>
+  <string name="stripe_upload_dialog_title_dl_back">上載駕駛執照背面</string>
   <!-- Title of dialog to upload front of driver license -->
-  <string name="stripe_upload_dialog_title_dl_front">上載駕駛證正面</string>
+  <string name="stripe_upload_dialog_title_dl_front">上載駕駛執照正面</string>
   <!-- Title of dialog to upload back of ID -->
   <string name="stripe_upload_dialog_title_id_back">上載身份證背面</string>
   <!-- Title of dialog to upload front of ID -->
