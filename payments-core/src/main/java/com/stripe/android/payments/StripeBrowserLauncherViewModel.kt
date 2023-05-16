@@ -1,7 +1,9 @@
 package com.stripe.android.payments
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.result.ActivityResult
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.SavedStateHandle
@@ -73,14 +75,18 @@ internal class StripeBrowserLauncherViewModel(
         }
     }
 
-    fun getResultIntent(args: PaymentBrowserAuthContract.Args): Intent {
+    fun getResultIntent(
+        args: PaymentBrowserAuthContract.Args,
+        activityResult: ActivityResult? = null,
+    ): Intent {
         val url = Uri.parse(args.url)
         return Intent().putExtras(
             PaymentFlowResult.Unvalidated(
                 clientSecret = args.clientSecret,
                 sourceId = url.lastPathSegment.orEmpty(),
                 stripeAccountId = args.stripeAccountId,
-                canCancelSource = args.shouldCancelSource
+                canCancelSource = args.shouldCancelSource,
+                didUserCancel = activityResult?.resultCode == Activity.RESULT_CANCELED,
             ).toBundle()
         )
     }

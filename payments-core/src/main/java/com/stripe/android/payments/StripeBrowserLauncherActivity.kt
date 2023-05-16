@@ -37,18 +37,17 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             return
         }
 
-        setResult(
-            Activity.RESULT_OK,
-            viewModel.getResultIntent(args)
-        )
+        val defaultResult = viewModel.getResultIntent(args)
+        setResult(Activity.RESULT_OK, defaultResult)
 
         if (viewModel.hasLaunched) {
             finish()
         } else {
             val launcher = registerForActivityResult(
                 ActivityResultContracts.StartActivityForResult(),
-                ::onResult
-            )
+            ) { activityResult ->
+                onResult(activityResult, args)
+            }
 
             launcher.launch(
                 viewModel.createLaunchIntent(args)
@@ -58,9 +57,13 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         }
     }
 
-    private fun onResult(activityResult: ActivityResult) {
+    private fun onResult(
+        activityResult: ActivityResult,
+        args: PaymentBrowserAuthContract.Args,
+    ) {
         // always dismiss the activity when a result is available
-
+        val defaultResult = viewModel.getResultIntent(args, activityResult)
+        setResult(Activity.RESULT_OK, defaultResult)
         finish()
     }
 

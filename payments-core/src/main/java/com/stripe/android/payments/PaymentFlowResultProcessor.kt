@@ -15,6 +15,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.shouldRefresh
@@ -66,7 +67,11 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                         failureMessageFactory.create(stripeIntent, result.flowOutcome)
                     )
                 }
-                shouldRefreshIntent(stripeIntent, result.flowOutcome) -> {
+                shouldRefreshIntent(
+                    stripeIntent = stripeIntent,
+                    flowOutcome = result.flowOutcome,
+                    didUserCancel = unvalidatedResult.didUserCancel,
+                ) -> {
                     val intent = refreshStripeIntentUntilTerminalState(
                         stripeIntent,
                         result.clientSecret,
@@ -128,7 +133,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 
     private fun shouldRefreshIntent(
         stripeIntent: StripeIntent,
-        @StripeIntentResult.Outcome flowOutcome: Int
+        @StripeIntentResult.Outcome flowOutcome: Int,
+        didUserCancel: Boolean,
     ): Boolean {
         // For some payment methods, after user confirmation(resulting in flowOutCome == SUCCEEDED),
         // there is a delay when Stripe backend transfers its state out of "requires_action".
@@ -152,8 +158,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 
         // For Cash App Pay, the intent status can still be `requires_action` by the time the user
         // gets back to the merchant app. We poll until it's succeeded.
-        val shouldRefreshForCashApp = stripeIntent.requiresAction() &&
-            stripeIntent.paymentMethod?.type == PaymentMethod.Type.CashAppPay
+        val shouldRefreshForCashApp = stripeIntent.paymentMethod?.type == CashAppPay &&
+            !didUserCancel && stripeIntent.requiresAction()
 
         return succeededMaybeRefresh || cancelledMaybeRefresh ||
             actionNotProcessedMaybeRefresh || shouldRefreshForCashApp

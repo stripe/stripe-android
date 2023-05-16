@@ -30,7 +30,8 @@ sealed class PaymentFlowResult {
         internal val canCancelSource: Boolean = false,
         internal val sourceId: String? = null,
         internal val source: Source? = null,
-        internal val stripeAccountId: String? = null
+        internal val stripeAccountId: String? = null,
+        internal val didUserCancel: Boolean = false,
     ) : Parcelable {
         @JvmSynthetic
         fun toBundle() = bundleOf(EXTRA to this)
@@ -63,7 +64,8 @@ sealed class PaymentFlowResult {
                     canCancelSource = parcel.readInt() == 1,
                     sourceId = parcel.readString(),
                     source = parcel.readParcelable(Source::class.java.classLoader),
-                    stripeAccountId = parcel.readString()
+                    stripeAccountId = parcel.readString(),
+                    didUserCancel = parcel.readInt() == 1,
                 )
             }
 
@@ -71,10 +73,11 @@ sealed class PaymentFlowResult {
                 parcel.writeString(clientSecret)
                 parcel.writeInt(flowOutcome)
                 parcel.writeSerializable(exception)
-                parcel.writeInt(1.takeIf { canCancelSource } ?: 0)
+                parcel.writeInt(if (canCancelSource) 1 else 0)
                 parcel.writeString(sourceId)
                 parcel.writeParcelable(source, flags)
                 parcel.writeString(stripeAccountId)
+                parcel.writeInt(if (didUserCancel) 1 else 0)
             }
 
             @JvmSynthetic
