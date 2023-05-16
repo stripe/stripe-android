@@ -361,8 +361,6 @@ class PaymentSheet internal constructor(
             /**
              * Pass this as the client secret into [CreateIntentResult.Success] to force
              * [PaymentSheet] to show success and dismiss.
-             *
-             * **Note**: Only for advanced users, not required for most integrations.
              */
             @DelicatePaymentSheetApi
             const val DISMISS_WITH_SUCCESS = IntentConfirmationInterceptor.DISMISS_WITH_SUCCESS

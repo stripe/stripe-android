@@ -168,9 +168,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): NextStep {
-        return when (
-            val result = createIntentCallback.onCreateIntent(paymentMethod)
-        ) {
+        return when (val result = createIntentCallback.onCreateIntent(paymentMethod)) {
             is CreateIntentResult.Success -> {
                 if (result.clientSecret == IntentConfirmationInterceptor.DISMISS_WITH_SUCCESS) {
                     NextStep.Complete(isForceSuccess = true)
