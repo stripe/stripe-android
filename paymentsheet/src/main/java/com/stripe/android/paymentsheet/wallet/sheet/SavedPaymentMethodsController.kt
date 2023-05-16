@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -13,19 +14,14 @@ import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.customer.CustomerAdapter
-import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
-import com.stripe.android.paymentsheet.flowcontroller.FlowControllerComponent
-import com.stripe.android.paymentsheet.flowcontroller.FlowControllerScope
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-interface SavedPaymentMethodsSheet {
-    suspend fun getPaymentOption(): PaymentOption?
-
-    // TODO: consider moving configuration to initialization path
-    fun presentSavedPaymentMethods(configuration: Configuration)
+interface SavedPaymentMethodsController {
+    suspend fun retrievePaymentOptionSelection(): PaymentOption?
+    fun present()
 
     data class Configuration(
         val merchantDisplayName: String,
@@ -37,11 +33,27 @@ interface SavedPaymentMethodsSheet {
     companion object {
         fun create(
             activity: ComponentActivity,
+            configuration: Configuration,
             customerAdapter: CustomerAdapter,
             callback: SavedPaymentMethodsSheetResultCallback,
-        ) : SavedPaymentMethodsSheet {
-            return SavedPaymentMethodsSheetFactory(
+        ) : SavedPaymentMethodsController {
+            return SavedPaymentMethodsControllerFactory(
                 activity = activity,
+                configuration = configuration,
+                customerAdapter = customerAdapter,
+                callback = callback,
+            ).create()
+        }
+
+        fun create(
+            fragment: Fragment,
+            configuration: Configuration,
+            customerAdapter: CustomerAdapter,
+            callback: SavedPaymentMethodsSheetResultCallback,
+        ) : SavedPaymentMethodsController {
+            return SavedPaymentMethodsControllerFactory(
+                fragment = fragment,
+                configuration = configuration,
                 customerAdapter = customerAdapter,
                 callback = callback,
             ).create()
@@ -49,20 +61,21 @@ interface SavedPaymentMethodsSheet {
     }
 }
 
-@FlowControllerScope
-internal class DefaultSavedPaymentMethodsSheet @Inject internal constructor(
+@SavedPaymentMethodsControllerScope
+internal class DefaultSavedPaymentMethodsController @Inject internal constructor(
     private val lifecycleOwner: LifecycleOwner,
     private val statusBarColor: () -> Int?,
     private val callback: SavedPaymentMethodsSheetResultCallback,
-    activityResultCaller: ActivityResultCaller,
+    private val configuration: SavedPaymentMethodsController.Configuration,
     private val customerAdapter: CustomerAdapter,
-) : SavedPaymentMethodsSheet, NonFallbackInjector {
+    activityResultCaller: ActivityResultCaller,
+) : SavedPaymentMethodsController, NonFallbackInjector {
 
     /**
-     * [FlowControllerComponent] is hold to inject into [Activity]s and created
-     * after [DefaultFlowController].
+     * [SavedPaymentMethodsControllerComponent] is held to inject into [Activity]s and created
+     * after [DefaultSavedPaymentMethodsController].
      */
-    lateinit var savedPaymentMethodsSheetComponent: SavedPaymentMethodsSheetComponent
+    lateinit var savedPaymentMethodsControllerComponent: SavedPaymentMethodsControllerComponent
 
     private val savedPaymentMethodsSheetActivityLauncher: ActivityResultLauncher<SavedPaymentMethodsSheetContract.Args> =
         activityResultCaller.registerForActivityResult(
@@ -71,18 +84,12 @@ internal class DefaultSavedPaymentMethodsSheet @Inject internal constructor(
             callback.onResult(it)
         }
 
-    override suspend fun getPaymentOption(): PaymentOption? {
+    override suspend fun retrievePaymentOptionSelection(): PaymentOption? {
         customerAdapter.fetchSelectedPaymentMethodOption()
         return null
     }
 
-    override fun presentSavedPaymentMethods(configuration: SavedPaymentMethodsSheet.Configuration) {
-        customerAdapter.init(
-            customerId = customerAdapter.customerId,
-            canCreateSetupIntents = true,
-            customerEphemeralKeyProvider = customerAdapter.customerEphemeralKeyProvider,
-            setupIntentClientSecretProvider = null
-        )
+    override fun present() {
         lifecycleOwner.lifecycleScope.launch {
             savedPaymentMethodsSheetActivityLauncher.launch(
                 SavedPaymentMethodsSheetContract.Args(
@@ -104,10 +111,10 @@ internal class DefaultSavedPaymentMethodsSheet @Inject internal constructor(
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is SavedPaymentMethodsSheetViewModel.Factory -> {
-                savedPaymentMethodsSheetComponent.stateComponent.inject(injectable)
+                savedPaymentMethodsControllerComponent.stateComponent.inject(injectable)
             }
             is FormViewModel.Factory -> {
-                savedPaymentMethodsSheetComponent.stateComponent.inject(injectable)
+                savedPaymentMethodsControllerComponent.stateComponent.inject(injectable)
             }
             else -> {
                 throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
@@ -121,31 +128,33 @@ internal class DefaultSavedPaymentMethodsSheet @Inject internal constructor(
             lifecycleOwner: LifecycleOwner,
             activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
+            configuration: SavedPaymentMethodsController.Configuration,
             customerAdapter: CustomerAdapter,
             callback: SavedPaymentMethodsSheetResultCallback,
-        ): SavedPaymentMethodsSheet{
+        ): SavedPaymentMethodsController{
             val injectorKey =
                 WeakMapInjectorRegistry.nextKey(
-                    requireNotNull(SavedPaymentMethodsSheet::class.simpleName)
+                    requireNotNull(SavedPaymentMethodsController::class.simpleName)
                 )
 
-            val savedPaymentMethodsViewModel =
-                ViewModelProvider(viewModelStoreOwner)[SavedPaymentMethodsViewModel::class.java]
+            val savedPaymentMethodsControllerViewModel =
+                ViewModelProvider(viewModelStoreOwner)[SavedPaymentMethodsControllerViewModel::class.java]
 
-            val savedPaymentMethodsStateComponent = savedPaymentMethodsViewModel.savedPaymentMethodsSheetStateComponent
+            val savedPaymentMethodsStateComponent = savedPaymentMethodsControllerViewModel.savedPaymentMethodsControllerStateComponent
 
-            val savedPaymentMethodsSheetComponent: SavedPaymentMethodsSheetComponent =
-                savedPaymentMethodsStateComponent.savedPaymentMethodsSheetComponentBuilder
+            val savedPaymentMethodsControllerComponent: SavedPaymentMethodsControllerComponent =
+                savedPaymentMethodsStateComponent.savedPaymentMethodsControllerComponentBuilder
                     .lifeCycleOwner(lifecycleOwner)
                     .activityResultCaller(activityResultCaller)
                     .statusBarColor(statusBarColor)
                     .savedPaymentMethodsSheetResultCallback(callback)
+                    .configuration(configuration)
                     .customerAdapter(customerAdapter)
                     .injectorKey(injectorKey)
                     .build()
 
-            val savedPaymentMethodsSheet = savedPaymentMethodsSheetComponent.savedPaymentMethodsSheet
-            savedPaymentMethodsSheet.savedPaymentMethodsSheetComponent = savedPaymentMethodsSheetComponent
+            val savedPaymentMethodsSheet = savedPaymentMethodsControllerComponent.savedPaymentMethodsSheet
+            savedPaymentMethodsSheet.savedPaymentMethodsControllerComponent = savedPaymentMethodsControllerComponent
             WeakMapInjectorRegistry.register(savedPaymentMethodsSheet, injectorKey)
             return savedPaymentMethodsSheet
         }

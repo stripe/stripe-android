@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.wallet.controller
+package com.stripe.android.paymentsheet.wallet.wrapping
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCaller
@@ -15,7 +15,7 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.wallet.sheet.SavedPaymentMethodsSheetContract
 import kotlinx.coroutines.launch
 
-interface SavedPaymentMethodsController {
+interface SavedPaymentMethodsWrappedController {
     suspend fun configure(
         merchantDisplayName: String,
         customerAdapterConfig: CustomerAdapterConfig
@@ -34,8 +34,8 @@ interface SavedPaymentMethodsController {
         fun create(
             activity: ComponentActivity,
             callback: SavedPaymentMethodsControllerResultCallback
-        ): SavedPaymentMethodsController {
-            return SavedPaymentMethodsControllerFactory(
+        ): SavedPaymentMethodsWrappedController {
+            return SavedPaymentMethodsWrappedControllerFactory(
                 activity = activity,
                 callback = callback,
             ).create()
@@ -48,13 +48,13 @@ interface SavedPaymentMethodsController {
     }
 }
 
-internal class DefaultSavedPaymentMethodsController(
+internal class DefaultSavedPaymentMethodsWrappedController(
     private val viewModelStoreOwner: ViewModelStoreOwner,
     private val lifecycleOwner: LifecycleOwner,
     private val activityResultCaller: ActivityResultCaller,
     private val statusBarColor: () -> Int?,
     private val callback: SavedPaymentMethodsControllerResultCallback
-) : SavedPaymentMethodsController {
+) : SavedPaymentMethodsWrappedController {
 
     private val savedPaymentMethodsSheetActivityLauncher: ActivityResultLauncher<SavedPaymentMethodsSheetContract.Args> =
         activityResultCaller.registerForActivityResult(
@@ -120,7 +120,7 @@ internal class DefaultSavedPaymentMethodsController(
         merchantDisplayName: String,
         customerAdapterConfig: CustomerAdapterConfig
     ) {
-        SavedPaymentMethodsController.customerAdapterConfig = customerAdapterConfig
+        SavedPaymentMethodsWrappedController.customerAdapterConfig = customerAdapterConfig
         lifecycleOwner.lifecycleScope.launch {
             savedPaymentMethodsSheetActivityLauncher.launch(
                 SavedPaymentMethodsSheetContract.Args(

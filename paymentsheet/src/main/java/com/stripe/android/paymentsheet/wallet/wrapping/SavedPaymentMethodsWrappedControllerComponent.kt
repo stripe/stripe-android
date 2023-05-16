@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.wallet.controller
+package com.stripe.android.paymentsheet.wallet.wrapping
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
@@ -9,8 +9,8 @@ import dagger.Subcomponent
 
 @FlowControllerScope
 @Subcomponent
-internal interface SavedPaymentMethodsControllerComponent {
-    val savedPaymentMethodsSheet: DefaultSavedPaymentMethodsController
+internal interface SavedPaymentMethodsWrappedControllerComponent {
+    val savedPaymentMethodsSheet: DefaultSavedPaymentMethodsWrappedController
 
     @Subcomponent.Builder
     interface Builder {
@@ -29,6 +29,6 @@ internal interface SavedPaymentMethodsControllerComponent {
         @BindsInstance
         fun injectorKey(@InjectorKey injectorKey: String): Builder
 
-        fun build(): SavedPaymentMethodsControllerComponent
+        fun build(): SavedPaymentMethodsWrappedControllerComponent
     }
 }

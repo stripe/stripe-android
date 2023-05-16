@@ -24,7 +24,6 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         CoreCommonModule::class,
         ResourceRepositoryModule::class,
-        SavedPaymentMethodsSheetAbstractModule::class,
     ]
 )
 internal abstract class SavedPaymentMethodsSheetViewModelFactoryComponent : NonFallbackInjector {

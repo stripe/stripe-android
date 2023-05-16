@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
-import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Module
 import dagger.Provides
@@ -19,7 +18,7 @@ import javax.inject.Singleton
         FormViewModelSubcomponent::class
     ]
 )
-internal object SavedPaymentMethodsSheetModule {
+internal object SavedPaymentMethodsControllerModule {
 
     @Provides
     @Singleton
@@ -32,7 +31,7 @@ internal object SavedPaymentMethodsSheetModule {
 
     @Provides
     @Singleton
-    fun provideViewModelScope(viewModel: SavedPaymentMethodsViewModel): CoroutineScope {
+    fun provideViewModelScope(viewModel: SavedPaymentMethodsControllerViewModel): CoroutineScope {
         return viewModel.viewModelScope
     }
 

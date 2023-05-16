@@ -11,7 +11,6 @@ import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.customer.CustomerAdapter
 import com.stripe.android.paymentsheet.customer.CustomerAdapterConfig
 import com.stripe.android.paymentsheet.customer.PersistablePaymentMethodOption
 import com.stripe.android.paymentsheet.model.PaymentSelection

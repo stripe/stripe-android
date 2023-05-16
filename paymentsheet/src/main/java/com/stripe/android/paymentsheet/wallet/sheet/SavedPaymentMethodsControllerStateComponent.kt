@@ -5,7 +5,6 @@ import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
@@ -18,16 +17,15 @@ import javax.inject.Singleton
     modules = [
         StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
-        SavedPaymentMethodsSheetModule::class,
+        SavedPaymentMethodsControllerModule::class,
         GooglePayLauncherModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
         ResourceRepositoryModule::class,
-        SavedPaymentMethodsSheetAbstractModule::class,
     ]
 )
-internal interface SavedPaymentMethodsSheetStateComponent {
-    val savedPaymentMethodsSheetComponentBuilder: SavedPaymentMethodsSheetComponent.Builder
+internal interface SavedPaymentMethodsControllerStateComponent {
+    val savedPaymentMethodsControllerComponentBuilder: SavedPaymentMethodsControllerComponent.Builder
 
     fun inject(savedPaymentMethodsSheetViewModel: SavedPaymentMethodsSheetViewModel.Factory)
     fun inject(factory: FormViewModel.Factory)
@@ -38,8 +36,8 @@ internal interface SavedPaymentMethodsSheetStateComponent {
         fun appContext(appContext: Context): Builder
 
         @BindsInstance
-        fun savedPaymentMethodsViewModel(viewModel: SavedPaymentMethodsViewModel): Builder
+        fun savedPaymentMethodsControllerViewModel(viewModel: SavedPaymentMethodsControllerViewModel): Builder
 
-        fun build(): SavedPaymentMethodsSheetStateComponent
+        fun build(): SavedPaymentMethodsControllerStateComponent
     }
 }

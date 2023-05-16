@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.wallet.controller
+package com.stripe.android.paymentsheet.wallet.wrapping
 
 import com.stripe.android.paymentsheet.model.PaymentOption
 import java.lang.Exception

@@ -4,14 +4,15 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 
-internal class SavedPaymentMethodsViewModel(
+internal class SavedPaymentMethodsControllerViewModel(
     application: Application,
     private val handle: SavedStateHandle,
 ) : AndroidViewModel(application) {
-    val savedPaymentMethodsSheetStateComponent: SavedPaymentMethodsSheetStateComponent =
+
+    val savedPaymentMethodsControllerStateComponent: SavedPaymentMethodsControllerStateComponent =
         DaggerSavedPaymentMethodsSheetStateComponent
             .builder()
             .appContext(application)
-            .savedPaymentMethodsViewModel(this)
+            .savedPaymentMethodsControllerViewModel(this)
             .build()
 }
