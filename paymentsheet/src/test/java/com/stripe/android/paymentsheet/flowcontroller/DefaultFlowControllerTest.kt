@@ -968,7 +968,7 @@ internal class DefaultFlowControllerTest {
             )
         )
 
-        fakeIntentConfirmationInterceptor.enqueueCompleteStep(PaymentIntentFixtures.PI_SUCCEEDED)
+        fakeIntentConfirmationInterceptor.enqueueCompleteStep()
 
         flowController.confirm()
 

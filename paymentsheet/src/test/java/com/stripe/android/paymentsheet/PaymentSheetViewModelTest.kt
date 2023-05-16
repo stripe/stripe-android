@@ -1251,7 +1251,7 @@ internal class PaymentSheetViewModelTest {
             viewModel.updateSelection(savedSelection)
             viewModel.checkout()
 
-            fakeIntentConfirmationInterceptor.enqueueCompleteStep(PaymentIntentFixtures.PI_SUCCEEDED)
+            fakeIntentConfirmationInterceptor.enqueueCompleteStep()
 
             val finishingState = viewModel.viewState.value as PaymentSheetViewState.FinishProcessing
             finishingState.onComplete()
