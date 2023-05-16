@@ -12,16 +12,19 @@ internal class SavedPaymentMethodsSheetFactory(
     private val lifecycleOwner: LifecycleOwner,
     private val activityResultCaller: ActivityResultCaller,
     private val statusBarColor: () -> Int?,
+    private val customerAdapter: CustomerAdapter,
     private val callback: SavedPaymentMethodsSheetResultCallback,
 ) {
     constructor(
         activity: ComponentActivity,
+        customerAdapter: CustomerAdapter,
         callback: SavedPaymentMethodsSheetResultCallback,
     ) : this(
         viewModelStoreOwner = activity,
         lifecycleOwner = activity,
         activityResultCaller = activity,
         statusBarColor = { activity.window.statusBarColor },
+        customerAdapter = customerAdapter,
         callback = callback
     )
 
@@ -31,6 +34,7 @@ internal class SavedPaymentMethodsSheetFactory(
             lifecycleOwner = lifecycleOwner,
             activityResultCaller = activityResultCaller,
             statusBarColor = statusBarColor,
+            customerAdapter = customerAdapter,
             callback = callback,
         )
 }

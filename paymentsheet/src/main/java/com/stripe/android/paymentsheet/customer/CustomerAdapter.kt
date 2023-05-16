@@ -21,6 +21,7 @@ val Context.dataStore by preferencesDataStore(name = "customer_saved_payment_met
 interface CustomerAdapter {
     val customerId: String
     val canCreateSetupIntents: Boolean
+    // TODO: Provider needs a Result type, in case the merchant has an error fetching the EK
     val customerEphemeralKeyProvider: suspend () -> String
     val setupIntentClientSecretProvider: (suspend () -> String)?
     fun init (
@@ -136,10 +137,10 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun fetchPaymentMethods(): List<PaymentMethod> {
-        val ephemeralKey = customerEphemeralKeyProvider()
+        val ephemeralKey = "ek_test_YWNjdF8xSHZUSTdMdTVvM1AxOFpwLEltcW92cWF0S1RYeklYSjdBbVY3TjU0QllTYjdseXE_00o9feAiyf"
         return customerRepository.getPaymentMethods(
             customerConfig = PaymentSheet.CustomerConfiguration(
-                id = customerId,
+                id = "cus_N9wbH9MKEuDikP",
                 ephemeralKeySecret = ephemeralKey
             ),
             types = listOf(
@@ -150,7 +151,7 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun attachPaymentMethod(paymentMethodId: String) {
-        val ephemeralKey = customerEphemeralKeyProvider()
+        val ephemeralKey = "ek_test_YWNjdF8xSHZUSTdMdTVvM1AxOFpwLEltcW92cWF0S1RYeklYSjdBbVY3TjU0QllTYjdseXE_00o9feAiyf"
         customerRepository.attachPaymentMethod(
             customerConfig = PaymentSheet.CustomerConfiguration(
                 id = customerId,
@@ -161,10 +162,10 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun detachPaymentMethod(paymentMethodId: String) {
-        val ephemeralKey = customerEphemeralKeyProvider()
+        val ephemeralKey = "ek_test_YWNjdF8xSHZUSTdMdTVvM1AxOFpwLEltcW92cWF0S1RYeklYSjdBbVY3TjU0QllTYjdseXE_00o9feAiyf"
         customerRepository.detachPaymentMethod(
             customerConfig = PaymentSheet.CustomerConfiguration(
-                id = customerId,
+                id = "cus_N9wbH9MKEuDikP",
                 ephemeralKeySecret = ephemeralKey
             ),
             paymentMethodId = paymentMethodId
@@ -173,14 +174,14 @@ internal class StripeCustomerAdapter @Inject constructor(
 
     override suspend fun setSelectedPaymentMethodOption(paymentOption: PersistablePaymentMethodOption) {
         context.dataStore.edit { customers ->
-            customers[stringPreferencesKey(customerId)] = paymentOption.id
+            customers[stringPreferencesKey("cus_N9wbH9MKEuDikP")] = paymentOption.id
         }
     }
 
     override suspend fun fetchSelectedPaymentMethodOption(): PersistablePaymentMethodOption {
         return suspendCoroutine { continuation ->
             context.dataStore.data.map { customers ->
-                customers[stringPreferencesKey(customerId)]?.let { id ->
+                customers[stringPreferencesKey("cus_N9wbH9MKEuDikP")]?.let { id ->
                     val paymentMethod = PersistablePaymentMethodOption.fromId(id)
                     continuation.resume(paymentMethod)
                 }

@@ -24,9 +24,21 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPayment
  * that matches the capabilities already.
  */
 internal fun SupportedPaymentMethod.getPMAddForm(
-    stripeIntent: StripeIntent,
+    stripeIntent: StripeIntent?,
     config: PaymentSheet.Configuration?
-) = requireNotNull(getSpecWithFullfilledRequirements(stripeIntent, config))
+) : LayoutFormDescriptor {
+    return if (stripeIntent == null) {
+        // We are in wallet mode
+        LayoutFormDescriptor(
+            formSpec,
+            showCheckbox = false,
+            showCheckboxControlledFields = true
+        )
+    } else {
+        // We are in the normal/decoupled flow
+        requireNotNull(getSpecWithFullfilledRequirements(stripeIntent, config))
+    }
+}
 
 /**
  * This function will determine if there is a valid for the payment method

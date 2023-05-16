@@ -12,7 +12,7 @@ internal object FormArgumentsFactory {
 
     fun create(
         paymentMethod: LpmRepository.SupportedPaymentMethod,
-        stripeIntent: StripeIntent,
+        stripeIntent: StripeIntent?,
         config: PaymentSheet.Configuration?,
         merchantName: String,
         amount: Amount? = null,

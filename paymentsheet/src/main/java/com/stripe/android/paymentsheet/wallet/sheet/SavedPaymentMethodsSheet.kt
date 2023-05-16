@@ -24,24 +24,25 @@ import javax.inject.Inject
 interface SavedPaymentMethodsSheet {
     suspend fun getPaymentOption(): PaymentOption?
 
+    // TODO: consider moving configuration to initialization path
     fun presentSavedPaymentMethods(configuration: Configuration)
 
     data class Configuration(
-        val customerId: String,
-        val customerEphemeralKeyProvider: suspend () -> String,
         val merchantDisplayName: String,
         val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
-        val googlePayEnabled: Boolean = true,
+        val googlePayConfiguration: PaymentSheet.GooglePayConfiguration? = null,
         val headerTextForSelectionScreen: String? = null,
     )
 
     companion object {
         fun create(
             activity: ComponentActivity,
+            customerAdapter: CustomerAdapter,
             callback: SavedPaymentMethodsSheetResultCallback,
         ) : SavedPaymentMethodsSheet {
             return SavedPaymentMethodsSheetFactory(
                 activity = activity,
+                customerAdapter = customerAdapter,
                 callback = callback,
             ).create()
         }
@@ -54,7 +55,7 @@ internal class DefaultSavedPaymentMethodsSheet @Inject internal constructor(
     private val statusBarColor: () -> Int?,
     private val callback: SavedPaymentMethodsSheetResultCallback,
     activityResultCaller: ActivityResultCaller,
-    private val customerAdapter: CustomerAdapter
+    private val customerAdapter: CustomerAdapter,
 ) : SavedPaymentMethodsSheet, NonFallbackInjector {
 
     /**
@@ -77,9 +78,9 @@ internal class DefaultSavedPaymentMethodsSheet @Inject internal constructor(
 
     override fun presentSavedPaymentMethods(configuration: SavedPaymentMethodsSheet.Configuration) {
         customerAdapter.init(
-            customerId = configuration.customerId,
+            customerId = customerAdapter.customerId,
             canCreateSetupIntents = true,
-            customerEphemeralKeyProvider = configuration.customerEphemeralKeyProvider,
+            customerEphemeralKeyProvider = customerAdapter.customerEphemeralKeyProvider,
             setupIntentClientSecretProvider = null
         )
         lifecycleOwner.lifecycleScope.launch {
@@ -120,6 +121,7 @@ internal class DefaultSavedPaymentMethodsSheet @Inject internal constructor(
             lifecycleOwner: LifecycleOwner,
             activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
+            customerAdapter: CustomerAdapter,
             callback: SavedPaymentMethodsSheetResultCallback,
         ): SavedPaymentMethodsSheet{
             val injectorKey =
@@ -138,6 +140,7 @@ internal class DefaultSavedPaymentMethodsSheet @Inject internal constructor(
                     .activityResultCaller(activityResultCaller)
                     .statusBarColor(statusBarColor)
                     .savedPaymentMethodsSheetResultCallback(callback)
+                    .customerAdapter(customerAdapter)
                     .injectorKey(injectorKey)
                     .build()
 

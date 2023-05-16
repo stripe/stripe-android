@@ -113,28 +113,12 @@ internal class SavedPaymentMethodsSheetViewModel @Inject constructor(
                 GooglePayState.NotAvailable
             }
 
-            val stripeIntent = SetupIntent.fromJson(
-                JSONObject(
-                    """
-                            {
-                                "object": "setup_intent",
-                                "created": ${System.currentTimeMillis()},
-                                "livemode": false,
-                                "payment_method_types": [
-                                    "card"
-                                ]
-                            }
-                        """.trimIndent()
+            // TODO: How can we improve this?
+            lpmRepository.updateForCard(
+                CardBillingDetailsCollectionConfiguration(
+                    address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 )
             )
-
-            // TODO: How can we improve this?
-            setStripeIntent(
-                stripeIntent
-            )
-
-            linkHandler.prepareLink(null)
-
             supportedPaymentMethods = listOf(
                 LpmRepository.hardcodedCardSpec(
                     CardBillingDetailsCollectionConfiguration(
@@ -142,6 +126,10 @@ internal class SavedPaymentMethodsSheetViewModel @Inject constructor(
                     )
                 )
             )
+
+            linkHandler.prepareLink(null)
+
+
 
             loadCustomerPaymentMethods()
             updateSelection(args.paymentSelection)

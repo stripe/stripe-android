@@ -95,6 +95,14 @@ class LpmRepository constructor(
         )
     }
 
+    fun updateForCard(cardBillingDetailsCollectionConfiguration: CardBillingDetailsCollectionConfiguration) {
+        lpmInitialFormData.putAll(
+            mapOf(
+                "card" to hardcodedCardSpec(cardBillingDetailsCollectionConfiguration)
+            )
+        )
+    }
+
     fun fromCode(code: PaymentMethodCode?) = lpmInitialFormData.fromCode(code)
 
     fun values(): List<SupportedPaymentMethod> = lpmInitialFormData.values()
