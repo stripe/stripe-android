@@ -48,14 +48,14 @@ workflows:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
   maestro-financial-connections:
     before_run:
+      - start_emulator
       - prepare_all
     after_run:
       - conclude_all
     steps:
-      - avd-manager@1:
+      - wait-for-android-emulator@1:
           inputs:
-            - profile: "pixel_3a"
-      - wait-for-android-emulator@1: { }
+            - boot_timeout: 600
       - script-runner@0:
           title: Execute Maestro tests
           inputs:
@@ -78,14 +78,14 @@ workflows:
       - deploy-to-bitrise-io@2: { }
   maestro-edge-financial-connections:
     before_run:
+      - start_emulator
       - prepare_all
     after_run:
       - conclude_all
     steps:
-      - avd-manager@1:
+      - wait-for-android-emulator@1:
           inputs:
-            - profile: "pixel_3a"
-      - wait-for-android-emulator@1: { }
+            - boot_timeout: 600
       - script-runner@0:
           title: Execute Maestro tests
           inputs:
@@ -102,16 +102,14 @@ workflows:
       - deploy-to-bitrise-io@2: { }
   maestro-paymentsheet:
     before_run:
+      - start_emulator
       - prepare_all
     after_run:
       - conclude_all
     steps:
-      - avd-manager@1:
+      - wait-for-android-emulator@1:
           inputs:
-            - profile: "pixel_3a"
-            - api_level: 30
-            - tag: "google_apis_playstore"
-      - wait-for-android-emulator@1: { }
+            - boot_timeout: 600
       - script-runner@0:
           title: Execute Maestro tests
           inputs:
@@ -134,11 +132,20 @@ workflows:
       - conclude_all
     steps:
       - avd-manager@1: { }
-      - wait-for-android-emulator@1: { }
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
       - script-runner@0:
           title: Execute instrumentation tests
           inputs:
             - file_path: ./scripts/execute_instrumentation_tests.sh
+  start_emulator:
+    steps:
+      - avd-manager@1:
+          inputs:
+            - profile: "pixel_3a"
+            - api_level: 30
+            - tag: "google_apis_playstore"
   prepare_all:
     steps:
       - activate-ssh-key@4:
