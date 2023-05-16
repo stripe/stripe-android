@@ -68,7 +68,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.Mockito
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.MockitoAnnotations
