@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.IntentConfirmationInterceptor.NextStep
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -35,7 +36,7 @@ interface IntentConfirmationInterceptor {
         data class HandleNextAction(val clientSecret: String) : NextStep
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Complete(val stripeIntent: StripeIntent) : NextStep
+        data class Complete(val isForceSuccess: Boolean) : NextStep
     }
 
     suspend fun intercept(
@@ -55,6 +56,8 @@ interface IntentConfirmationInterceptor {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         var createIntentCallback: AbsCreateIntentCallback? = null
+
+        const val DISMISS_WITH_SUCCESS = "DISMISS_WITH_SUCCESS"
     }
 }
 
@@ -81,7 +84,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-    ): IntentConfirmationInterceptor.NextStep {
+    ): NextStep {
         return if (clientSecret != null) {
             createConfirmStep(
                 clientSecret = clientSecret,
@@ -105,7 +108,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                     )
                 },
                 onFailure = { error ->
-                    IntentConfirmationInterceptor.NextStep.Fail(
+                    NextStep.Fail(
                         cause = error,
                         message = genericErrorMessage,
                     )
@@ -119,7 +122,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-    ): IntentConfirmationInterceptor.NextStep {
+    ): NextStep {
         return if (clientSecret != null) {
             createConfirmStep(clientSecret, shippingValues, paymentMethod)
         } else {
@@ -164,13 +167,19 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         createIntentCallback: CreateIntentCallback,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?
-    ): IntentConfirmationInterceptor.NextStep {
-        return when (val result = createIntentCallback.onCreateIntent(paymentMethod)) {
+    ): NextStep {
+        return when (
+            val result = createIntentCallback.onCreateIntent(paymentMethod)
+        ) {
             is CreateIntentResult.Success -> {
-                createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
+                if (result.clientSecret == IntentConfirmationInterceptor.DISMISS_WITH_SUCCESS) {
+                    NextStep.Complete(isForceSuccess = true)
+                } else {
+                    createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
+                }
             }
             is CreateIntentResult.Failure -> {
-                IntentConfirmationInterceptor.NextStep.Fail(
+                NextStep.Fail(
                     cause = result.cause,
                     message = result.displayMessage ?: genericErrorMessage,
                 )
@@ -183,7 +192,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-    ): IntentConfirmationInterceptor.NextStep {
+    ): NextStep {
         val result = createIntentCallback.onCreateIntent(
             paymentMethod = paymentMethod,
             shouldSavePaymentMethod = shouldSavePaymentMethod,
@@ -191,31 +200,47 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
 
         return when (result) {
             is CreateIntentResult.Success -> {
-                retrieveStripeIntent(result.clientSecret).fold(
-                    onSuccess = { intent ->
-                        if (intent.isConfirmed) {
-                            IntentConfirmationInterceptor.NextStep.Complete(intent)
-                        } else if (intent.status == StripeIntent.Status.RequiresAction) {
-                            IntentConfirmationInterceptor.NextStep.HandleNextAction(result.clientSecret)
-                        } else {
-                            createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
-                        }
-                    },
-                    onFailure = { error ->
-                        IntentConfirmationInterceptor.NextStep.Fail(
-                            cause = error,
-                            message = genericErrorMessage,
-                        )
-                    }
-                )
+                if (result.clientSecret == IntentConfirmationInterceptor.DISMISS_WITH_SUCCESS) {
+                    NextStep.Complete(isForceSuccess = true)
+                } else {
+                    handleServerSideConfirmationSuccess(
+                        clientSecret = result.clientSecret,
+                        paymentMethod = paymentMethod,
+                        shippingValues = shippingValues,
+                    )
+                }
             }
             is CreateIntentResult.Failure -> {
-                IntentConfirmationInterceptor.NextStep.Fail(
+                NextStep.Fail(
                     cause = result.cause,
                     message = result.displayMessage ?: genericErrorMessage,
                 )
             }
         }
+    }
+
+    private suspend fun handleServerSideConfirmationSuccess(
+        clientSecret: String,
+        paymentMethod: PaymentMethod,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    ): NextStep {
+        return retrieveStripeIntent(clientSecret).fold(
+            onSuccess = { intent ->
+                if (intent.isConfirmed) {
+                    NextStep.Complete(isForceSuccess = false)
+                } else if (intent.status == StripeIntent.Status.RequiresAction) {
+                    NextStep.HandleNextAction(clientSecret)
+                } else {
+                    createConfirmStep(clientSecret, shippingValues, paymentMethod)
+                }
+            },
+            onFailure = { error ->
+                NextStep.Fail(
+                    cause = error,
+                    message = genericErrorMessage,
+                )
+            }
+        )
     }
 
     private suspend fun retrieveStripeIntent(clientSecret: String): Result<StripeIntent> {
@@ -231,14 +256,14 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         clientSecret: String,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         paymentMethod: PaymentMethod,
-    ): IntentConfirmationInterceptor.NextStep.Confirm {
+    ): NextStep.Confirm {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
             shipping = shippingValues,
         )
 
         val confirmParams = factory.create(paymentMethod)
-        return IntentConfirmationInterceptor.NextStep.Confirm(confirmParams)
+        return NextStep.Confirm(confirmParams)
     }
 
     private fun createConfirmStep(
@@ -246,12 +271,12 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-    ): IntentConfirmationInterceptor.NextStep.Confirm {
+    ): NextStep.Confirm {
         val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
             shipping = shippingValues,
         )
         val confirmParams = paramsFactory.create(paymentMethodCreateParams, setupForFutureUsage)
-        return IntentConfirmationInterceptor.NextStep.Confirm(confirmParams)
+        return NextStep.Confirm(confirmParams)
     }
 }

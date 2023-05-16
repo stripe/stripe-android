@@ -10,6 +10,7 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
 import com.stripe.android.CreateIntentResult
+import com.stripe.android.DelicatePaymentSheetApi
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
@@ -52,7 +53,10 @@ class PaymentSheetPlaygroundViewModel(
     ) { type, secret ->
         when (type) {
             InitializationType.Normal -> secret != null
-            InitializationType.Deferred -> paymentMethodTypes.value.isNotEmpty()
+            InitializationType.DeferredClientSideConfirmation,
+            InitializationType.DeferredServerSideConfirmation,
+            InitializationType.DeferredManualConfirmation,
+            InitializationType.DeferredMultiprocessor -> paymentMethodTypes.value.isNotEmpty()
         }
     }
 
@@ -62,7 +66,6 @@ class PaymentSheetPlaygroundViewModel(
     private val sharedPreferencesName = "playgroundToggles"
 
     suspend fun storeToggleState(
-        initializationType: String,
         customer: String,
         link: Boolean,
         googlePay: Boolean,
@@ -85,7 +88,7 @@ class PaymentSheetPlaygroundViewModel(
         )
 
         sharedPreferences.edit {
-            putString(Toggle.Initialization.key, initializationType)
+            putString(Toggle.Initialization.key, initializationType.value.value)
             putString(Toggle.Customer.key, customer)
             putBoolean(Toggle.Link.key, link)
             putBoolean(Toggle.GooglePay.key, googlePay)
@@ -200,7 +203,6 @@ class PaymentSheetPlaygroundViewModel(
      * that will be confirmed on the client using Payment Sheet.
      */
     fun prepareCheckout(
-        initializationType: InitializationType,
         customer: CheckoutCustomer,
         currency: CheckoutCurrency,
         merchantCountry: CountryCode,
@@ -209,12 +211,14 @@ class PaymentSheetPlaygroundViewModel(
         setShippingAddress: Boolean,
         setAutomaticPaymentMethod: Boolean,
         backendUrl: String,
-        supportedPaymentMethods: List<String>?
+        supportedPaymentMethods: List<String>?,
     ) {
         customerConfig.value = null
         clientSecret.value = null
 
         inProgress.postValue(true)
+
+        val initializationType = initializationType.value
 
         val requestBody = CheckoutRequest(
             initialization = initializationType.value,
@@ -264,7 +268,7 @@ class PaymentSheetPlaygroundViewModel(
             }
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
     @Suppress("UNUSED_PARAMETER")
     fun createIntent(
         paymentMethodId: String,
@@ -273,13 +277,44 @@ class PaymentSheetPlaygroundViewModel(
         returnUrl: String,
         backendUrl: String,
     ): CreateIntentResult {
-        // Note: This is not how you'd do this in a real application. Instead, your app would
-        // call your backend and create (and optionally confirm) a payment or setup intent.
-        return CreateIntentResult.Success(clientSecret = clientSecret.value!!)
+        val initializationType = initializationType.value
+
+        val clientSecret = if (initializationType == InitializationType.DeferredMultiprocessor) {
+            PaymentSheet.IntentConfiguration.DISMISS_WITH_SUCCESS
+        } else {
+            // Note: This is not how you'd do this in a real application. Instead, your app would
+            // call your backend and create (and optionally confirm) a payment or setup intent.
+            clientSecret.value!!
+        }
+
+        return CreateIntentResult.Success(clientSecret)
+    }
+
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
+    suspend fun createAndConfirmIntent(
+        paymentMethodId: String,
+        shouldSavePaymentMethod: Boolean,
+        merchantCountryCode: String,
+        mode: String,
+        returnUrl: String,
+        backendUrl: String,
+    ): CreateIntentResult {
+        return if (initializationType.value == InitializationType.DeferredMultiprocessor) {
+            CreateIntentResult.Success(PaymentSheet.IntentConfiguration.DISMISS_WITH_SUCCESS)
+        } else {
+            createAndConfirmIntentInternal(
+                paymentMethodId = paymentMethodId,
+                shouldSavePaymentMethod = shouldSavePaymentMethod,
+                merchantCountryCode = merchantCountryCode,
+                mode = mode,
+                returnUrl = returnUrl,
+                backendUrl = backendUrl,
+            )
+        }
     }
 
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
-    suspend fun createAndConfirmIntent(
+    private suspend fun createAndConfirmIntentInternal(
         paymentMethodId: String,
         shouldSavePaymentMethod: Boolean,
         merchantCountryCode: String,

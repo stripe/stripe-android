@@ -224,6 +224,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    object ForceSuccess : PaymentSheetEvent() {
+        override val eventName: String = "mc_force_success"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_IS_DECOUPLED to true,
+        )
+    }
+
     internal companion object {
         private fun analyticsValue(
             paymentSelection: PaymentSelection?

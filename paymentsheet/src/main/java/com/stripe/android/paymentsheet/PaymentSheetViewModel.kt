@@ -491,6 +491,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     onError(nextStep.message)
                 }
                 is IntentConfirmationInterceptor.NextStep.Complete -> {
+                    if (nextStep.isForceSuccess) {
+                        eventReporter.onForceSuccess()
+                    }
                     processPayment(stripeIntent, PaymentResult.Completed)
                 }
             }

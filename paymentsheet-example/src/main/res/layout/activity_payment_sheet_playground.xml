@@ -20,30 +20,14 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <RadioGroup
-            android:id="@+id/initialization_radio_group"
-            android:layout_width="wrap_content"
+        <Spinner
+            android:id="@+id/initialization_type_spinner"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginStart="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            android:layout_marginHorizontal="16dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/initialization">
-
-            <RadioButton
-                android:id="@+id/normal_initialization_button"
-                android:text="Normal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true" />
-
-            <RadioButton
-                android:id="@+id/deferred_initialization_button"
-                android:text="Deferred"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </RadioGroup>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/initialization" />
 
         <TextView
             android:id="@+id/customer_text_view"
@@ -54,7 +38,7 @@
             android:layout_marginTop="16dp"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/initialization_radio_group" />
+            app:layout_constraintTop_toBottomOf="@id/initialization_type_spinner" />
 
         <RadioGroup
             android:id="@+id/customer_radio_group"
