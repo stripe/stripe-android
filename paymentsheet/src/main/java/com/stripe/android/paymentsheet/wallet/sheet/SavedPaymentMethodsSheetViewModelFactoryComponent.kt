@@ -7,10 +7,8 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
-import com.stripe.android.paymentsheet.customer.CustomerAdapterConfig
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
-import com.stripe.android.paymentsheet.wallet.embeddable.SavedPaymentMethodsViewModelAbstractModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -26,7 +24,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         CoreCommonModule::class,
         ResourceRepositoryModule::class,
-        SavedPaymentMethodsViewModelAbstractModule::class,
+        SavedPaymentMethodsSheetAbstractModule::class,
     ]
 )
 internal abstract class SavedPaymentMethodsSheetViewModelFactoryComponent : NonFallbackInjector {
@@ -50,9 +48,6 @@ internal abstract class SavedPaymentMethodsSheetViewModelFactoryComponent : NonF
 
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        @BindsInstance
-        fun customerAdapterConfig(config: CustomerAdapterConfig): Builder
 
         fun build(): SavedPaymentMethodsSheetViewModelFactoryComponent
     }

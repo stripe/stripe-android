@@ -29,7 +29,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         CoreCommonModule::class,
         ResourceRepositoryModule::class,
-        SavedPaymentMethodsViewModelAbstractModule::class,
+//        SavedPaymentMethodsViewModelAbstractModule::class,
     ]
 )
 internal abstract class SavedPaymentMethodsViewModelFactoryComponent : NonFallbackInjector {

@@ -7,15 +7,29 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.flowcontroller.FlowControllerScope
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.flow.map
+import java.lang.IllegalStateException
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 val Context.dataStore by preferencesDataStore(name = "customer_saved_payment_methods")
 
-internal interface CustomerAdapter {
+interface CustomerAdapter {
+    val customerId: String
+    val canCreateSetupIntents: Boolean
+    val customerEphemeralKeyProvider: suspend () -> String
+    val setupIntentClientSecretProvider: (suspend () -> String)?
+    fun init (
+        customerId: String,
+        canCreateSetupIntents: Boolean,
+        customerEphemeralKeyProvider: suspend () -> String,
+        setupIntentClientSecretProvider: (suspend () -> String)?
+    )
+
     /**
      * Retrieves a list of payment methods attached to a customer
      */
@@ -87,17 +101,45 @@ data class CustomerAdapterConfig(
 /**
  * The default implementation of [CustomerAdapter]
  */
+@Singleton
 internal class StripeCustomerAdapter @Inject constructor(
     private val context: Context,
-    private val config: CustomerAdapterConfig,
     private val customerRepository: CustomerRepository,
 ) : CustomerAdapter {
 
+    private var _customerId: String? = null
+    override val customerId: String
+        get() = _customerId ?: throw IllegalStateException("Must initialize customer ID")
+
+    private var _canCreateSetupIntents: Boolean = false
+    override val canCreateSetupIntents: Boolean
+        get() = _canCreateSetupIntents
+
+    private var _customerEphemeralKeyProvider: (suspend () -> String)? = null
+    override val customerEphemeralKeyProvider: suspend () -> String
+        get() = _customerEphemeralKeyProvider  ?: throw IllegalStateException("Must initialize ephemeral key provider")
+
+    private var _setupIntentClientSecretProvider: (suspend () -> String)? = null
+    override val setupIntentClientSecretProvider: (suspend () -> String)?
+        get() = _setupIntentClientSecretProvider
+
+    override fun init(
+        customerId: String,
+        canCreateSetupIntents: Boolean,
+        customerEphemeralKeyProvider: suspend () -> String,
+        setupIntentClientSecretProvider: (suspend () -> String)?
+    ) {
+        _customerId = customerId
+        _canCreateSetupIntents = canCreateSetupIntents
+        _customerEphemeralKeyProvider = customerEphemeralKeyProvider
+        _setupIntentClientSecretProvider = setupIntentClientSecretProvider
+    }
+
     override suspend fun fetchPaymentMethods(): List<PaymentMethod> {
-        val ephemeralKey = config.customerEphemeralKeyProvider()
+        val ephemeralKey = customerEphemeralKeyProvider()
         return customerRepository.getPaymentMethods(
             customerConfig = PaymentSheet.CustomerConfiguration(
-                id = config.customerId,
+                id = customerId,
                 ephemeralKeySecret = ephemeralKey
             ),
             types = listOf(
@@ -108,10 +150,10 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun attachPaymentMethod(paymentMethodId: String) {
-        val ephemeralKey = config.customerEphemeralKeyProvider()
+        val ephemeralKey = customerEphemeralKeyProvider()
         customerRepository.attachPaymentMethod(
             customerConfig = PaymentSheet.CustomerConfiguration(
-                id = config.customerId,
+                id = customerId,
                 ephemeralKeySecret = ephemeralKey
             ),
             paymentMethodId = paymentMethodId
@@ -119,10 +161,10 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun detachPaymentMethod(paymentMethodId: String) {
-        val ephemeralKey = config.customerEphemeralKeyProvider()
+        val ephemeralKey = customerEphemeralKeyProvider()
         customerRepository.detachPaymentMethod(
             customerConfig = PaymentSheet.CustomerConfiguration(
-                id = config.customerId,
+                id = customerId,
                 ephemeralKeySecret = ephemeralKey
             ),
             paymentMethodId = paymentMethodId
@@ -131,14 +173,14 @@ internal class StripeCustomerAdapter @Inject constructor(
 
     override suspend fun setSelectedPaymentMethodOption(paymentOption: PersistablePaymentMethodOption) {
         context.dataStore.edit { customers ->
-            customers[stringPreferencesKey(config.customerId)] = paymentOption.id
+            customers[stringPreferencesKey(customerId)] = paymentOption.id
         }
     }
 
     override suspend fun fetchSelectedPaymentMethodOption(): PersistablePaymentMethodOption {
         return suspendCoroutine { continuation ->
             context.dataStore.data.map { customers ->
-                customers[stringPreferencesKey(config.customerId)]?.let { id ->
+                customers[stringPreferencesKey(customerId)]?.let { id ->
                     val paymentMethod = PersistablePaymentMethodOption.fromId(id)
                     continuation.resume(paymentMethod)
                 }
@@ -147,8 +189,8 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun setupIntentClientSecretForCustomerAttach(): String? {
-        return config.setupIntentClientSecretProvider?.let { provider ->
-            if (config.canCreateSetupIntents) {
+        return setupIntentClientSecretProvider?.let { provider ->
+            if (canCreateSetupIntents) {
                 provider()
             } else {
                 null

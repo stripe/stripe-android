@@ -1,16 +1,20 @@
-package com.stripe.android.paymentsheet.wallet.controller
+package com.stripe.android.paymentsheet.wallet.sheet
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.paymentsheet.PaymentOptionCallback
+import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.customer.CustomerAdapter
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerScope
 import dagger.BindsInstance
 import dagger.Subcomponent
 
 @FlowControllerScope
 @Subcomponent
-internal interface SavedPaymentMethodsControllerComponent {
-    val savedPaymentMethodsSheet: DefaultSavedPaymentMethodsController
+internal interface SavedPaymentMethodsSheetComponent {
+    val savedPaymentMethodsSheet: DefaultSavedPaymentMethodsSheet
+    val stateComponent: SavedPaymentMethodsSheetStateComponent
 
     @Subcomponent.Builder
     interface Builder {
@@ -24,11 +28,11 @@ internal interface SavedPaymentMethodsControllerComponent {
         fun statusBarColor(statusBarColor: () -> Int?): Builder
 
         @BindsInstance
-        fun callback(callback: SavedPaymentMethodsControllerResultCallback): Builder
+        fun savedPaymentMethodsSheetResultCallback(callback: SavedPaymentMethodsSheetResultCallback): Builder
 
         @BindsInstance
         fun injectorKey(@InjectorKey injectorKey: String): Builder
 
-        fun build(): SavedPaymentMethodsControllerComponent
+        fun build(): SavedPaymentMethodsSheetComponent
     }
 }

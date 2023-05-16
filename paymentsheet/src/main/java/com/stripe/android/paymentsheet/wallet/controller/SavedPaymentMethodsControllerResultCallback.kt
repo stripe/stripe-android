@@ -3,18 +3,18 @@ package com.stripe.android.paymentsheet.wallet.controller
 import com.stripe.android.paymentsheet.model.PaymentOption
 import java.lang.Exception
 
-fun interface SavedPaymentMethodsSheetResultCallback {
-    fun onResult(result: SavedPaymentMethodsSheetResult)
+fun interface SavedPaymentMethodsControllerResultCallback {
+    fun onResult(result: SavedPaymentMethodsControllerResult)
 }
 
-sealed class SavedPaymentMethodsSheetResult {
+sealed class SavedPaymentMethodsControllerResult {
     data class Success(
         val paymentOption: PaymentOption?
-    ): SavedPaymentMethodsSheetResult()
+    ): SavedPaymentMethodsControllerResult()
 
     data class Error(
         val exception: Exception
-    ) : SavedPaymentMethodsSheetResult()
+    ) : SavedPaymentMethodsControllerResult()
 
-    object Canceled : SavedPaymentMethodsSheetResult()
+    object Canceled : SavedPaymentMethodsControllerResult()
 }

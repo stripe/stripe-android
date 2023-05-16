@@ -32,7 +32,7 @@ import javax.inject.Singleton
 internal class SavedPaymentMethodsViewModel @Inject constructor(
     val customerAdapterConfig: CustomerAdapterConfig,
     private val customerRepository: CustomerRepository,
-    private val customerAdapter: CustomerAdapter,
+//    private val customerAdapter: CustomerAdapter,
     private val paymentSheetLoader: PaymentSheetLoader
 ) : ViewModel() {
 
@@ -119,7 +119,7 @@ internal class SavedPaymentMethodsViewModel @Inject constructor(
                 else -> null
             }?.let { option ->
                 _selectedPaymentMethod.update { paymentSelection }
-                customerAdapter.setSelectedPaymentMethodOption(option)
+//                customerAdapter.setSelectedPaymentMethodOption(option)
             }
         }
     }
@@ -127,7 +127,7 @@ internal class SavedPaymentMethodsViewModel @Inject constructor(
     fun removePaymentMethod(paymentMethod: PaymentMethod) {
         viewModelScope.launch {
             paymentMethod.id?.let {
-                customerAdapter.detachPaymentMethod(it)
+//                customerAdapter.detachPaymentMethod(it)
             }
         }
     }

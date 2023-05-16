@@ -250,7 +250,6 @@ internal class SavedPaymentMethodsSheetViewModel @Inject constructor(
         internal data class FallbackInitializeParam(
             val application: Application,
             val productUsage: Set<String>,
-            val customerAdapterConfig: CustomerAdapterConfig,
         )
 
         @Inject
@@ -268,7 +267,6 @@ internal class SavedPaymentMethodsSheetViewModel @Inject constructor(
                 FallbackInitializeParam(
                     application,
                     starterArgs.productUsage,
-                    SavedPaymentMethodsController.customerAdapterConfig
                 )
             )
 
@@ -287,7 +285,6 @@ internal class SavedPaymentMethodsSheetViewModel @Inject constructor(
             val component = DaggerSavedPaymentMethodsSheetViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .productUsage(arg.productUsage)
-                .customerAdapterConfig(arg.customerAdapterConfig)
                 .build()
             component.inject(this)
             return component

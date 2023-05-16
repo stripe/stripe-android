@@ -1,20 +1,22 @@
-package com.stripe.android.paymentsheet.wallet.controller
+package com.stripe.android.paymentsheet.wallet.sheet
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.paymentsheet.customer.CustomerAdapter
+import com.stripe.android.paymentsheet.wallet.controller.SavedPaymentMethodsControllerResultCallback
 
-internal class SavedPaymentMethodsControllerFactory(
+internal class SavedPaymentMethodsSheetFactory(
     private val viewModelStoreOwner: ViewModelStoreOwner,
     private val lifecycleOwner: LifecycleOwner,
     private val activityResultCaller: ActivityResultCaller,
     private val statusBarColor: () -> Int?,
-    private val callback: SavedPaymentMethodsControllerResultCallback
+    private val callback: SavedPaymentMethodsSheetResultCallback,
 ) {
     constructor(
         activity: ComponentActivity,
-        callback: SavedPaymentMethodsControllerResultCallback,
+        callback: SavedPaymentMethodsSheetResultCallback,
     ) : this(
         viewModelStoreOwner = activity,
         lifecycleOwner = activity,
@@ -23,12 +25,12 @@ internal class SavedPaymentMethodsControllerFactory(
         callback = callback
     )
 
-    fun create(): SavedPaymentMethodsController =
-        DefaultSavedPaymentMethodsController(
+    fun create(): SavedPaymentMethodsSheet =
+        DefaultSavedPaymentMethodsSheet.getInstance(
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
             activityResultCaller = activityResultCaller,
             statusBarColor = statusBarColor,
-            callback = callback
+            callback = callback,
         )
 }

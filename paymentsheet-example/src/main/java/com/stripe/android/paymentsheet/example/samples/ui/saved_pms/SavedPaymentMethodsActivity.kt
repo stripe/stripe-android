@@ -20,15 +20,16 @@ import com.stripe.android.paymentsheet.customer.CustomerAdapterConfig
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.wallet.controller.SavedPaymentMethodsController
 import com.stripe.android.paymentsheet.wallet.embeddable.SavedPaymentMethods
+import com.stripe.android.paymentsheet.wallet.sheet.SavedPaymentMethodsSheet
 
 internal class SavedPaymentMethodsActivity : AppCompatActivity() {
     private val viewModel by viewModels<SavedPaymentMethodsViewModel>()
 
-    private lateinit var savedPaymentMethodsSheet: SavedPaymentMethodsController
+    private lateinit var savedPaymentMethodsSheet: SavedPaymentMethodsSheet
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        savedPaymentMethodsSheet = SavedPaymentMethodsController.create(
+        savedPaymentMethodsSheet = SavedPaymentMethodsSheet.create(
             activity = this,
             callback = {
 
@@ -38,20 +39,6 @@ internal class SavedPaymentMethodsActivity : AppCompatActivity() {
         setContent {
             PaymentSheetExampleTheme {
                 val uiState by viewModel.state.collectAsState()
-
-                uiState.customerState?.let { state ->
-                    LaunchedEffect(state) {
-                        savedPaymentMethodsSheet.configure(
-                            merchantDisplayName = "Test",
-                            CustomerAdapterConfig(
-                                customerId = state.customerId,
-                                customerEphemeralKeyProvider = {
-                                    viewModel.fetchEphemeralKey()
-                                }
-                            )
-                        )
-                    }
-                }
 
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text(
@@ -82,19 +69,16 @@ internal class SavedPaymentMethodsActivity : AppCompatActivity() {
                     }
                     uiState.customerState?.let { state ->
                         Column {
-                            /**
-                             * Sheet Prototype
-                             */
                             Row {
                                 TextButton(
                                     onClick = {
-                                        savedPaymentMethodsSheet.presentSavedPaymentMethodsSheet(
-                                            merchantDisplayName = "Test",
-                                            CustomerAdapterConfig(
+                                        savedPaymentMethodsSheet.presentSavedPaymentMethods(
+                                            configuration = SavedPaymentMethodsSheet.Configuration(
                                                 customerId = state.customerId,
                                                 customerEphemeralKeyProvider = {
                                                     viewModel.fetchEphemeralKey()
-                                                }
+                                                },
+                                                merchantDisplayName = "Test",
                                             )
                                         )
                                     }
@@ -102,29 +86,6 @@ internal class SavedPaymentMethodsActivity : AppCompatActivity() {
                                     Text("Sheet Prototype Payment method")
                                 }
                             }
-
-                            /**
-                             * FlowController Wrapper Prototype
-                             */
-                            Row {
-                                TextButton(
-                                    onClick = {
-                                        savedPaymentMethodsSheet.presentSavedPaymentMethods()
-                                    }
-                                ) {
-                                    Text("FlowController Wrapper Prototype Payment method")
-                                }
-                            }
-
-                            /**
-                             * Embeddable View Prototype
-                             */
-                            SavedPaymentMethods(
-                                customerAdapterConfig = CustomerAdapterConfig(
-                                    customerId = state.customerId,
-                                    customerEphemeralKeyProvider = { viewModel.fetchEphemeralKey() },
-                                ),
-                            )
                         }
                     } ?: run {
                         Text("This customer has no payment methods")

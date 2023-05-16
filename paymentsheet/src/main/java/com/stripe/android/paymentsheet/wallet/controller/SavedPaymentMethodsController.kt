@@ -33,7 +33,7 @@ interface SavedPaymentMethodsController {
     companion object {
         fun create(
             activity: ComponentActivity,
-            callback: SavedPaymentMethodsSheetResultCallback
+            callback: SavedPaymentMethodsControllerResultCallback
         ): SavedPaymentMethodsController {
             return SavedPaymentMethodsControllerFactory(
                 activity = activity,
@@ -53,7 +53,7 @@ internal class DefaultSavedPaymentMethodsController(
     private val lifecycleOwner: LifecycleOwner,
     private val activityResultCaller: ActivityResultCaller,
     private val statusBarColor: () -> Int?,
-    private val callback: SavedPaymentMethodsSheetResultCallback
+    private val callback: SavedPaymentMethodsControllerResultCallback
 ) : SavedPaymentMethodsController {
 
     private val savedPaymentMethodsSheetActivityLauncher: ActivityResultLauncher<SavedPaymentMethodsSheetContract.Args> =
@@ -73,7 +73,7 @@ internal class DefaultSavedPaymentMethodsController(
             statusBarColor = statusBarColor,
             paymentOptionCallback = {
                 callback.onResult(
-                    SavedPaymentMethodsSheetResult.Success(it)
+                    SavedPaymentMethodsControllerResult.Success(it)
                 )
             },
             paymentResultCallback = {
