@@ -10,6 +10,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CreateIntentCallback
 import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
+import com.stripe.android.CreateIntentResult
+import com.stripe.android.DelicatePaymentSheetApi
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
@@ -66,6 +68,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.Mockito
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -73,6 +78,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
@@ -1325,6 +1331,33 @@ internal class PaymentSheetViewModelTest {
             isDecoupling = eq(true),
             isServerSideConfirmation = eq(true),
         )
+    }
+
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
+    @Test
+    fun `Sends correct analytics event based on force-success usage`() = runTest {
+        val clientSecrets = listOf(
+            PaymentSheet.IntentConfiguration.DISMISS_WITH_SUCCESS to times(1),
+            "real_client_secret" to never(),
+        )
+
+        for ((clientSecret, verificationMode) in clientSecrets) {
+            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
+                CreateIntentResult.Success(clientSecret)
+            }
+
+            val viewModel = createViewModelForDeferredIntent()
+
+            val savedSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            viewModel.updateSelection(savedSelection)
+            viewModel.checkout()
+
+            val isForceSuccess = clientSecret == PaymentSheet.IntentConfiguration.DISMISS_WITH_SUCCESS
+            fakeIntentConfirmationInterceptor.enqueueCompleteStep(isForceSuccess)
+
+            verify(eventReporter, verificationMode).onForceSuccess()
+            reset(eventReporter)
+        }
     }
 
     private fun createViewModel(
