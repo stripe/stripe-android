@@ -23,6 +23,7 @@ class PaymentSheetTopBarStateTest {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.SelectSavedPaymentMethods,
             paymentMethods = emptyList(),
+            canEdit = true,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -36,6 +37,7 @@ class PaymentSheetTopBarStateTest {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddFirstPaymentMethod,
             paymentMethods = emptyList(),
+            canEdit = true,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -49,6 +51,7 @@ class PaymentSheetTopBarStateTest {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
             paymentMethods = emptyList(),
+            canEdit = true,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -62,6 +65,7 @@ class PaymentSheetTopBarStateTest {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
             paymentMethods = emptyList(),
+            canEdit = true,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -75,6 +79,7 @@ class PaymentSheetTopBarStateTest {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
             paymentMethods = emptyList(),
+            canEdit = true,
             isLiveMode = true,
             isProcessing = false,
             isEditing = false,
@@ -88,6 +93,7 @@ class PaymentSheetTopBarStateTest {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.SelectSavedPaymentMethods,
             paymentMethods = listOf(mock()),
+            canEdit = true,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -101,6 +107,7 @@ class PaymentSheetTopBarStateTest {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.SelectSavedPaymentMethods,
             paymentMethods = emptyList(),
+            canEdit = true,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -114,6 +121,7 @@ class PaymentSheetTopBarStateTest {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
             paymentMethods = listOf(mock()),
+            canEdit = true,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -127,6 +135,7 @@ class PaymentSheetTopBarStateTest {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
             paymentMethods = emptyList(),
+            canEdit = true,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -140,6 +149,7 @@ class PaymentSheetTopBarStateTest {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
             paymentMethods = emptyList(),
+            canEdit = true,
             isLiveMode = true,
             isProcessing = false,
             isEditing = true,
@@ -153,6 +163,7 @@ class PaymentSheetTopBarStateTest {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
             paymentMethods = emptyList(),
+            canEdit = true,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -166,6 +177,7 @@ class PaymentSheetTopBarStateTest {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
             paymentMethods = emptyList(),
+            canEdit = true,
             isLiveMode = false,
             isProcessing = true,
             isEditing = false,
@@ -177,6 +189,7 @@ class PaymentSheetTopBarStateTest {
     private fun buildTopBarState(
         screen: PaymentSheetScreen,
         paymentMethods: List<PaymentMethod>?,
+        canEdit: Boolean,
         isLiveMode: Boolean,
         isProcessing: Boolean,
         isEditing: Boolean,
@@ -187,6 +200,7 @@ class PaymentSheetTopBarStateTest {
             state = rememberPaymentSheetTopBarState(
                 screen = screen,
                 paymentMethods = paymentMethods,
+                canEdit = canEdit,
                 isLiveMode = isLiveMode,
                 isProcessing = isProcessing,
                 isEditing = isEditing,

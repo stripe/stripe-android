@@ -23,6 +23,7 @@ internal data class PaymentSheetTopBarState(
 internal fun rememberPaymentSheetTopBarState(
     screen: PaymentSheetScreen,
     paymentMethods: List<PaymentMethod>?,
+    canEdit: Boolean,
     isLiveMode: Boolean,
     isProcessing: Boolean,
     isEditing: Boolean,
@@ -40,7 +41,7 @@ internal fun rememberPaymentSheetTopBarState(
             R.string.stripe_paymentsheet_close
         }
 
-        val showOptionsMenu = screen is PaymentSheetScreen.SelectSavedPaymentMethods
+        val showOptionsMenu = screen is PaymentSheetScreen.SelectSavedPaymentMethods && canEdit
 
         val editMenuLabel = if (isEditing) {
             StripeR.string.stripe_done

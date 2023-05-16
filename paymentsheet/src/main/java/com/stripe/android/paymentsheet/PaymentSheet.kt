@@ -454,6 +454,11 @@ class PaymentSheet internal constructor(
          */
         val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration(),
+
+        /**
+         * If `true`, allows your customer to delete their saved payment methods. Defaults to `true`.
+         */
+        val allowsDeletionOfPaymentOptions: Boolean = true,
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
@@ -472,6 +477,7 @@ class PaymentSheet internal constructor(
             private var appearance: Appearance = Appearance()
             private var billingDetailsCollectionConfiguration =
                 BillingDetailsCollectionConfiguration()
+            private var allowsDeletionOfPaymentOptions: Boolean = true
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -517,17 +523,22 @@ class PaymentSheet internal constructor(
                 this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
             }
 
+            fun allowsDeletionOfPaymentOptions(allowsDeletionOfPaymentOptions: Boolean) = apply {
+                this.allowsDeletionOfPaymentOptions = allowsDeletionOfPaymentOptions
+            }
+
             fun build() = Configuration(
-                merchantDisplayName,
-                customer,
-                googlePay,
-                primaryButtonColor,
-                defaultBillingDetails,
-                shippingDetails,
-                allowsDelayedPaymentMethods,
-                allowsPaymentMethodsRequiringShippingAddress,
-                appearance,
+                merchantDisplayName = merchantDisplayName,
+                customer = customer,
+                googlePay = googlePay,
+                primaryButtonColor = primaryButtonColor,
+                defaultBillingDetails = defaultBillingDetails,
+                shippingDetails = shippingDetails,
+                allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+                appearance = appearance,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                allowsDeletionOfPaymentOptions = allowsDeletionOfPaymentOptions,
             )
         }
     }

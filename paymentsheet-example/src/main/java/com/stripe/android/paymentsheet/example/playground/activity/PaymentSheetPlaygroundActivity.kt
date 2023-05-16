@@ -770,7 +770,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             allowsPaymentMethodsRequiringShippingAddress = viewBinding.shippingOnButton.isChecked,
             appearance = appearance,
             primaryButtonLabel = customPrimaryButtonLabel,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            allowsDeletionOfPaymentOptions = false,
         )
     }
 

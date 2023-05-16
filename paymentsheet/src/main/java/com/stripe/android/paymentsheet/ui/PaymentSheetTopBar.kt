@@ -52,6 +52,7 @@ internal fun PaymentSheetTopBar(
     val state = rememberPaymentSheetTopBarState(
         screen = screen,
         paymentMethods = paymentMethods,
+        canEdit = viewModel.config?.allowsDeletionOfPaymentOptions ?: true,
         isLiveMode = stripeIntent?.isLiveMode ?: true,
         isProcessing = isProcessing,
         isEditing = isEditing,
