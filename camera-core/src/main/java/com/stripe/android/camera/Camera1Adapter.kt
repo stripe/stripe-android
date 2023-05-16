@@ -98,14 +98,16 @@ class Camera1Adapter(
 
     override fun setTorchState(on: Boolean) {
         mCamera?.apply {
-            val parameters = parameters
-            if (on) {
-                parameters.flashMode = Camera.Parameters.FLASH_MODE_TORCH
-            } else {
-                parameters.flashMode = Camera.Parameters.FLASH_MODE_OFF
+            if (isFlashSupported(this)) {
+                val parameters = parameters
+                if (on) {
+                    parameters.flashMode = Camera.Parameters.FLASH_MODE_TORCH
+                } else {
+                    parameters.flashMode = Camera.Parameters.FLASH_MODE_OFF
+                }
+                setCameraParameters(this, parameters)
+                startCameraPreview()
             }
-            setCameraParameters(this, parameters)
-            startCameraPreview()
         }
     }
 
