@@ -397,7 +397,6 @@ class PaymentSheetEventTest {
             "allows_delayed_payment_methods" to false,
             "appearance" to expectedAppearance,
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
-            "is_server_side_confirmation" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(
@@ -448,7 +447,6 @@ class PaymentSheetEventTest {
             "allows_delayed_payment_methods" to true,
             "appearance" to expectedAppearance,
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
-            "is_server_side_confirmation" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(

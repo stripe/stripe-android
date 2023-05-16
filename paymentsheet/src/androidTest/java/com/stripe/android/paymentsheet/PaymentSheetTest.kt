@@ -180,7 +180,7 @@ internal class PaymentSheetTest {
             PaymentConfiguration.init(it, "pk_test_123")
             paymentSheet = PaymentSheet(
                 activity = it,
-                createIntentCallback = {
+                createIntentCallback = { _, _ ->
                     CreateIntentResult.Success("pi_example_secret_example")
                 }
             ) { result ->
@@ -250,7 +250,7 @@ internal class PaymentSheetTest {
             PaymentConfiguration.init(it, "pk_test_123")
             paymentSheet = PaymentSheet(
                 activity = it,
-                createIntentCallback = {
+                createIntentCallback = { _, _ ->
                     CreateIntentResult.Failure(
                         cause = Exception("We don't accept visa"),
                         displayMessage = "We don't accept visa"

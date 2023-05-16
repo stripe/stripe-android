@@ -8,7 +8,6 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CreateIntentCallback
-import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration

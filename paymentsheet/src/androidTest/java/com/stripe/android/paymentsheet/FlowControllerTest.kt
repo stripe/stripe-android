@@ -356,7 +356,7 @@ internal class FlowControllerTest {
                     assertThat(paymentOption?.label).endsWith("4242")
                     flowController.confirm()
                 },
-                createIntentCallback = {
+                createIntentCallback = { _, _ ->
                     CreateIntentResult.Success(
                         clientSecret = "pi_example_secret_example"
                     )
@@ -441,7 +441,7 @@ internal class FlowControllerTest {
                     assertThat(paymentOption?.label).endsWith("4242")
                     flowController.confirm()
                 },
-                createIntentCallback = {
+                createIntentCallback = { _, _ ->
                     CreateIntentResult.Failure(
                         cause = Exception("We don't accept visa"),
                         displayMessage = "We don't accept visa"
