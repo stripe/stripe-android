@@ -123,9 +123,6 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
-    lint {
-        disable 'UnrememberedMutableState'
-    }
 
     kotlinOptions {
         freeCompilerArgs += ["-opt-in=kotlinx.coroutines.FlowPreview"]

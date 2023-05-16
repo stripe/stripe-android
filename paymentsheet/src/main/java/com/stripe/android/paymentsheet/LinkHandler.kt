@@ -18,7 +18,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -61,8 +63,11 @@ internal class LinkHandler @Inject constructor(
     private val _activeLinkSession = MutableStateFlow(false)
     val activeLinkSession: StateFlow<Boolean> = _activeLinkSession
 
-    private val _linkConfiguration = MutableStateFlow<LinkPaymentLauncher.Configuration?>(null)
-    val linkConfiguration: StateFlow<LinkPaymentLauncher.Configuration?> = _linkConfiguration
+    private val linkConfiguration = MutableStateFlow<LinkPaymentLauncher.Configuration?>(null)
+
+    val accountStatus: Flow<AccountStatus> = linkConfiguration
+        .filterNotNull()
+        .flatMapLatest(linkLauncher::getAccountStatusFlow)
 
     private val linkVerificationChannel = Channel<Boolean>(capacity = 1)
 
@@ -83,7 +88,7 @@ internal class LinkHandler @Inject constructor(
 
         if (state == null) return
 
-        _linkConfiguration.value = state.configuration
+        linkConfiguration.value = state.configuration
     }
 
     fun setupLinkLaunchingEagerly(scope: CoroutineScope, state: LinkState?) {

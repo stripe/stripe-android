@@ -55,9 +55,6 @@ android {
             pickFirsts += ['META-INF/AL2.0', 'META-INF/LGPL2.1']
         }
     }
-    lint {
-        disable 'UnrememberedMutableState'
-    }
 }
 
 ext {
