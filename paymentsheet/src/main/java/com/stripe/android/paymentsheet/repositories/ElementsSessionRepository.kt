@@ -176,6 +176,7 @@ private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toElementsSessionPar
 private fun PaymentSheet.IntentConfiguration.CaptureMethod.toElementsSessionParam(): CaptureMethod {
     return when (this) {
         PaymentSheet.IntentConfiguration.CaptureMethod.Automatic -> CaptureMethod.Automatic
+        PaymentSheet.IntentConfiguration.CaptureMethod.AutomaticAsync -> CaptureMethod.AutomaticAsync
         PaymentSheet.IntentConfiguration.CaptureMethod.Manual -> CaptureMethod.Manual
     }
 }

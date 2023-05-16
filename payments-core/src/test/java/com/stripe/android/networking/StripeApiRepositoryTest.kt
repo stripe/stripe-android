@@ -2419,7 +2419,7 @@ internal class StripeApiRepositoryTest {
                     mode = DeferredIntentParams.Mode.Payment(
                         amount = 2000,
                         currency = "usd",
-                        captureMethod = null,
+                        captureMethod = DeferredIntentParams.CaptureMethod.Automatic,
                         setupFutureUsage = null,
                     ),
                     paymentMethodTypes = listOf("card", "link"),
@@ -2446,7 +2446,7 @@ internal class StripeApiRepositoryTest {
             assertEquals(2000L, this["deferred_intent[amount]"])
             assertEquals("usd", this["deferred_intent[currency]"])
             assertEquals(null, this["deferred_intent[setup_future_usage]"])
-            assertEquals(null, this["deferred_intent[capture_method]"])
+            assertEquals("automatic", this["deferred_intent[capture_method]"])
             assertEquals("card", this["deferred_intent[payment_method_types][0]"])
             assertEquals("link", this["deferred_intent[payment_method_types][1]"])
         }
