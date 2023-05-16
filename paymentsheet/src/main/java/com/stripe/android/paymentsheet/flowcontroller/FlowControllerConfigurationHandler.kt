@@ -1,8 +1,5 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
@@ -98,19 +95,15 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         }
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private fun onInitSuccess(
         state: PaymentSheetState.Full,
         configureRequest: ConfigureRequest,
     ) {
         val isDecoupling = configureRequest.initializationMode is DeferredIntent
-        val isServerSideConfirmation = isDecoupling &&
-            IntentConfirmationInterceptor.createIntentCallback is CreateIntentCallbackForServerSideConfirmation
 
         eventReporter.onInit(
             configuration = state.config,
             isDecoupling = isDecoupling,
-            isServerSideConfirmation = isServerSideConfirmation,
         )
 
         viewModel.paymentSelection = paymentSelectionUpdater(

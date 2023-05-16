@@ -99,7 +99,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
-            isServerSideConfirmation = false,
         )
     }
 
@@ -135,7 +134,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter, never()).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
-            isServerSideConfirmation = false,
         )
     }
 
@@ -173,7 +171,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
-            isServerSideConfirmation = false,
         )
     }
 
@@ -212,7 +209,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
-            isServerSideConfirmation = false,
         )
     }
 
@@ -430,7 +426,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = isNull(),
             isDecoupling = eq(false),
-            isServerSideConfirmation = eq(false),
         )
     }
 
@@ -440,7 +435,7 @@ class FlowControllerConfigurationHandlerTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
+        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
             throw AssertionError("Not expected to be called")
         }
 
@@ -464,7 +459,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = isNull(),
             isDecoupling = eq(true),
-            isServerSideConfirmation = eq(false),
         )
     }
 
@@ -475,7 +469,7 @@ class FlowControllerConfigurationHandlerTest {
         val configurationHandler = createConfigurationHandler()
 
         IntentConfirmationInterceptor.createIntentCallback =
-            CreateIntentCallbackForServerSideConfirmation { _, _ ->
+            CreateIntentCallback { _, _ ->
                 throw AssertionError("Not expected to be called")
             }
 
@@ -499,7 +493,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = isNull(),
             isDecoupling = eq(true),
-            isServerSideConfirmation = eq(true),
         )
     }
 

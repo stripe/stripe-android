@@ -21,7 +21,6 @@ class PaymentSheetEventTest {
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupled = false,
-            isServerSideConfirmation = false,
         )
         assertThat(
             event.eventName
@@ -39,7 +38,6 @@ class PaymentSheetEventTest {
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
             isDecoupled = false,
-            isServerSideConfirmation = false,
         )
         assertThat(
             event.eventName
@@ -406,7 +404,6 @@ class PaymentSheetEventTest {
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
                 isDecoupled = false,
-                isServerSideConfirmation = false,
             ).additionalParams
         ).isEqualTo(
             mapOf(
@@ -458,7 +455,6 @@ class PaymentSheetEventTest {
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
                 isDecoupled = false,
-                isServerSideConfirmation = false,
             ).additionalParams
         ).isEqualTo(
             mapOf(
