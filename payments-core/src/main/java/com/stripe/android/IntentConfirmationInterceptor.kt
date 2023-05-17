@@ -93,27 +93,39 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 setupForFutureUsage = setupForFutureUsage,
             )
         } else {
-            val params = paymentMethodCreateParams.copy(
-                productUsage = paymentMethodCreateParams.attribution + "deferred-intent",
-            )
-
-            createPaymentMethod(params).fold(
-                onSuccess = { paymentMethod ->
-                    intercept(
-                        clientSecret = null,
-                        paymentMethod = paymentMethod,
-                        shippingValues = shippingValues,
-                        setupForFutureUsage = setupForFutureUsage,
-                    )
-                },
-                onFailure = { error ->
-                    NextStep.Fail(
-                        cause = error,
-                        message = genericErrorMessage,
-                    )
-                }
+            handleDeferredIntent(
+                shippingValues = shippingValues,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                setupForFutureUsage = setupForFutureUsage,
             )
         }
+    }
+
+    private suspend fun handleDeferredIntent(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+    ): NextStep {
+        val params = paymentMethodCreateParams.copy(
+            productUsage = paymentMethodCreateParams.attribution + "deferred-intent",
+        )
+
+        return createPaymentMethod(params).fold(
+            onSuccess = { paymentMethod ->
+                intercept(
+                    clientSecret = null,
+                    paymentMethod = paymentMethod,
+                    shippingValues = shippingValues,
+                    setupForFutureUsage = setupForFutureUsage,
+                )
+            },
+            onFailure = { error ->
+                NextStep.Fail(
+                    cause = error,
+                    message = genericErrorMessage,
+                )
+            }
+        )
     }
 
     override suspend fun intercept(
@@ -125,21 +137,29 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         return if (clientSecret != null) {
             createConfirmStep(clientSecret, shippingValues, paymentMethod)
         } else {
-            when (val callback = IntentConfirmationInterceptor.createIntentCallback) {
-                is CreateIntentCallback -> {
-                    handleIntentCreationFromPaymentMethod(
-                        createIntentCallback = callback,
-                        paymentMethod = paymentMethod,
-                        shouldSavePaymentMethod = setupForFutureUsage == OffSession,
-                        shippingValues = shippingValues,
-                    )
-                }
-                else -> {
-                    error(
-                        "${CreateIntentCallback::class.java.simpleName} must be implemented " +
-                            "when using IntentConfiguration with PaymentSheet"
-                    )
-                }
+            handleDeferredIntent(paymentMethod, shippingValues, setupForFutureUsage)
+        }
+    }
+
+    private suspend fun handleDeferredIntent(
+        paymentMethod: PaymentMethod,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+    ): NextStep {
+        return when (val callback = IntentConfirmationInterceptor.createIntentCallback) {
+            is CreateIntentCallback -> {
+                handleIntentCreationFromPaymentMethod(
+                    createIntentCallback = callback,
+                    paymentMethod = paymentMethod,
+                    shouldSavePaymentMethod = setupForFutureUsage == OffSession,
+                    shippingValues = shippingValues,
+                )
+            }
+            else -> {
+                error(
+                    "${CreateIntentCallback::class.java.simpleName} must be implemented " +
+                        "when using IntentConfiguration with PaymentSheet"
+                )
             }
         }
     }
@@ -171,7 +191,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 if (result.clientSecret == IntentConfirmationInterceptor.DISMISS_WITH_SUCCESS) {
                     NextStep.Complete(isForceSuccess = true)
                 } else {
-                    handleServerSideConfirmationSuccess(
+                    handleIntentCreationSuccess(
                         clientSecret = result.clientSecret,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues,
@@ -187,7 +207,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         }
     }
 
-    private suspend fun handleServerSideConfirmationSuccess(
+    private suspend fun handleIntentCreationSuccess(
         clientSecret: String,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -196,7 +216,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
             onSuccess = { intent ->
                 if (intent.isConfirmed) {
                     NextStep.Complete(isForceSuccess = false)
-                } else if (intent.status == StripeIntent.Status.RequiresAction) {
+                } else if (intent.requiresAction()) {
                     NextStep.HandleNextAction(clientSecret)
                 } else {
                     createConfirmStep(clientSecret, shippingValues, paymentMethod)
