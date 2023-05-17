@@ -460,7 +460,7 @@ class PaymentMethodViewModelTest {
         val viewModel = createViewModel()
         viewModel.startPayment(cardFormFieldValues)
 
-        intentConfirmationInterceptor.enqueueCompleteStep(StripeIntentFixtures.PI_SUCCEEDED)
+        intentConfirmationInterceptor.enqueueCompleteStep()
 
         advanceTimeBy(PrimaryButtonState.COMPLETED_DELAY_MS + 1)
         verify(navigator).dismiss(eq(LinkActivityResult.Completed))
