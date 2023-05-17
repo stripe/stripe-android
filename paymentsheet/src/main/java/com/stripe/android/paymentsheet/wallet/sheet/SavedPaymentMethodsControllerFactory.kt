@@ -12,13 +12,11 @@ internal class SavedPaymentMethodsControllerFactory(
     private val lifecycleOwner: LifecycleOwner,
     private val activityResultCaller: ActivityResultCaller,
     private val statusBarColor: () -> Int?,
-    private val configuration: SavedPaymentMethodsController.Configuration,
     private val customerAdapter: CustomerAdapter,
     private val callback: SavedPaymentMethodsSheetResultCallback,
 ) {
     constructor(
         activity: ComponentActivity,
-        configuration: SavedPaymentMethodsController.Configuration,
         customerAdapter: CustomerAdapter,
         callback: SavedPaymentMethodsSheetResultCallback,
     ) : this(
@@ -26,14 +24,12 @@ internal class SavedPaymentMethodsControllerFactory(
         lifecycleOwner = activity,
         activityResultCaller = activity,
         statusBarColor = { activity.window.statusBarColor },
-        configuration = configuration,
         customerAdapter = customerAdapter,
         callback = callback
     )
 
     constructor(
         fragment: Fragment,
-        configuration: SavedPaymentMethodsController.Configuration,
         customerAdapter: CustomerAdapter,
         callback: SavedPaymentMethodsSheetResultCallback,
     ) : this(
@@ -41,7 +37,6 @@ internal class SavedPaymentMethodsControllerFactory(
         lifecycleOwner = fragment,
         activityResultCaller = fragment,
         statusBarColor = { fragment.activity?.window?.statusBarColor },
-        configuration = configuration,
         customerAdapter = customerAdapter,
         callback = callback
     )
@@ -52,7 +47,6 @@ internal class SavedPaymentMethodsControllerFactory(
             lifecycleOwner = lifecycleOwner,
             activityResultCaller = activityResultCaller,
             statusBarColor = statusBarColor,
-            configuration = configuration,
             customerAdapter = customerAdapter,
             callback = callback,
         )

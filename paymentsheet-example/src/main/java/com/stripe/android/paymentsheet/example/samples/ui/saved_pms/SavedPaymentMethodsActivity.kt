@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.customer.StripeCustomerAdapter
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.wallet.sheet.SavedPaymentMethodsController
 
@@ -25,8 +26,11 @@ internal class SavedPaymentMethodsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val customerAdapter = StripeCustomerAdapter(this)
+
         savedPaymentMethodsController = SavedPaymentMethodsController.create(
             activity = this,
+            customerAdapter = customerAdapter,
             callback = {
 
             }
@@ -68,12 +72,14 @@ internal class SavedPaymentMethodsActivity : AppCompatActivity() {
                             Row {
                                 TextButton(
                                     onClick = {
+                                        customerAdapter.init(
+                                            customerId = state.customerId,
+                                            canCreateSetupIntents = true,
+                                            customerEphemeralKeyProvider = { viewModel.fetchEphemeralKey() },
+                                            setupIntentClientSecretProvider = null
+                                        )
                                         savedPaymentMethodsController.present(
                                             configuration = SavedPaymentMethodsController.Configuration(
-                                                customerId = state.customerId,
-                                                customerEphemeralKeyProvider = {
-                                                    viewModel.fetchEphemeralKey()
-                                                },
                                                 merchantDisplayName = "Test",
                                             )
                                         )

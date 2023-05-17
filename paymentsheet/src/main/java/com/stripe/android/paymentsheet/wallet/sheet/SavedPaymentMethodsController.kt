@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 interface SavedPaymentMethodsController {
     suspend fun retrievePaymentOptionSelection(): PaymentOption?
-    fun present()
+    fun present(configuration: Configuration)
 
     data class Configuration(
         val merchantDisplayName: String,
@@ -33,13 +33,11 @@ interface SavedPaymentMethodsController {
     companion object {
         fun create(
             activity: ComponentActivity,
-            configuration: Configuration,
             customerAdapter: CustomerAdapter,
             callback: SavedPaymentMethodsSheetResultCallback,
         ) : SavedPaymentMethodsController {
             return SavedPaymentMethodsControllerFactory(
                 activity = activity,
-                configuration = configuration,
                 customerAdapter = customerAdapter,
                 callback = callback,
             ).create()
@@ -47,13 +45,11 @@ interface SavedPaymentMethodsController {
 
         fun create(
             fragment: Fragment,
-            configuration: Configuration,
             customerAdapter: CustomerAdapter,
             callback: SavedPaymentMethodsSheetResultCallback,
         ) : SavedPaymentMethodsController {
             return SavedPaymentMethodsControllerFactory(
                 fragment = fragment,
-                configuration = configuration,
                 customerAdapter = customerAdapter,
                 callback = callback,
             ).create()
@@ -66,7 +62,6 @@ internal class DefaultSavedPaymentMethodsController @Inject internal constructor
     private val lifecycleOwner: LifecycleOwner,
     private val statusBarColor: () -> Int?,
     private val callback: SavedPaymentMethodsSheetResultCallback,
-    private val configuration: SavedPaymentMethodsController.Configuration,
     private val customerAdapter: CustomerAdapter,
     activityResultCaller: ActivityResultCaller,
 ) : SavedPaymentMethodsController, NonFallbackInjector {
@@ -89,7 +84,7 @@ internal class DefaultSavedPaymentMethodsController @Inject internal constructor
         return null
     }
 
-    override fun present() {
+    override fun present(configuration: SavedPaymentMethodsController.Configuration) {
         lifecycleOwner.lifecycleScope.launch {
             savedPaymentMethodsSheetActivityLauncher.launch(
                 SavedPaymentMethodsSheetContract.Args(
@@ -98,10 +93,6 @@ internal class DefaultSavedPaymentMethodsController @Inject internal constructor
                     productUsage = setOf("savedPaymentMethods"),
                     paymentSheetConfig = PaymentSheet.Configuration(
                         merchantDisplayName = configuration.merchantDisplayName,
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = customerAdapter.customerId,
-                            ephemeralKeySecret = customerAdapter.customerEphemeralKeyProvider()
-                        )
                     )
                 )
             )
@@ -128,7 +119,6 @@ internal class DefaultSavedPaymentMethodsController @Inject internal constructor
             lifecycleOwner: LifecycleOwner,
             activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
-            configuration: SavedPaymentMethodsController.Configuration,
             customerAdapter: CustomerAdapter,
             callback: SavedPaymentMethodsSheetResultCallback,
         ): SavedPaymentMethodsController{
@@ -148,7 +138,6 @@ internal class DefaultSavedPaymentMethodsController @Inject internal constructor
                     .activityResultCaller(activityResultCaller)
                     .statusBarColor(statusBarColor)
                     .savedPaymentMethodsSheetResultCallback(callback)
-                    .configuration(configuration)
                     .customerAdapter(customerAdapter)
                     .injectorKey(injectorKey)
                     .build()

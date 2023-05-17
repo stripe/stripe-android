@@ -26,11 +26,6 @@ val Context.dataStore by preferencesDataStore(name = "customer_saved_payment_met
 
 interface CustomerAdapter {
 
-    val customerId: String
-    val canCreateSetupIntents: Boolean
-    val customerEphemeralKeyProvider: suspend () -> String
-    val setupIntentClientSecretProvider: (suspend () -> String)?
-
     /**
      * Retrieves a list of payment methods attached to a customer
      */
@@ -102,15 +97,53 @@ data class CustomerAdapterConfig(
 /**
  * The default implementation of [CustomerAdapter]
  */
-class StripeCustomerAdapter internal constructor(
-    private val context: Context,
-    override val customerId: String,
-    override val canCreateSetupIntents: Boolean,
-    override val customerEphemeralKeyProvider: suspend () -> String,
-    override val setupIntentClientSecretProvider: (suspend () -> String)?
+class StripeCustomerAdapter(
+    private val context: Context
 ) : CustomerAdapter {
 
-    internal lateinit var customerRepository: CustomerRepository
+    internal var customerRepository: CustomerRepository
+
+    lateinit var customerId: String
+    var canCreateSetupIntents: Boolean = false
+    lateinit var customerEphemeralKeyProvider: suspend () -> String
+    var setupIntentClientSecretProvider: (suspend () -> String)? = null
+
+    init {
+        val paymentConfig = PaymentConfiguration.getInstance(context)
+        val stripeRepository = StripeApiRepository(
+            appContext = context,
+            publishableKeyProvider = { paymentConfig.publishableKey },
+            workContext = Dispatchers.IO,
+            productUsageTokens = setOf(),
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context,
+                paymentConfig.publishableKey,
+                setOf()
+            ),
+            analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(Logger.noop(), Dispatchers.IO),
+            logger = Logger.noop()
+        )
+        val customerRepository = CustomerApiRepository(
+            stripeRepository = stripeRepository,
+            lazyPaymentConfig = { paymentConfig },
+            logger = Logger.noop(),
+            workContext = Dispatchers.IO,
+            productUsageTokens = setOf()
+        )
+        this.customerRepository = customerRepository
+    }
+
+    fun init(
+        customerId: String,
+        canCreateSetupIntents: Boolean,
+        customerEphemeralKeyProvider: suspend () -> String,
+        setupIntentClientSecretProvider: (suspend () -> String)?
+    ) {
+        this.customerId = customerId
+        this.canCreateSetupIntents = canCreateSetupIntents
+        this.customerEphemeralKeyProvider = customerEphemeralKeyProvider
+        this.setupIntentClientSecretProvider = setupIntentClientSecretProvider
+    }
 
     override suspend fun fetchPaymentMethods(): List<PaymentMethod> {
         val ephemeralKey = customerEphemeralKeyProvider()
@@ -171,59 +204,6 @@ class StripeCustomerAdapter internal constructor(
                 provider()
             } else {
                 null
-            }
-        }
-    }
-
-    companion object {
-
-        @JvmSynthetic
-        internal var instance: CustomerAdapter? = null
-        fun initCustomerAdapter(
-            context: Context,
-            customerId: String,
-            canCreateSetupIntents: Boolean,
-            customerEphemeralKeyProvider: suspend () -> String,
-            setupIntentClientSecretProvider: (suspend () -> String)?
-        ) {
-            val paymentConfig = PaymentConfiguration.getInstance(context)
-            val stripeRepository = StripeApiRepository(
-                appContext = context,
-                publishableKeyProvider = { paymentConfig.publishableKey },
-                workContext = Dispatchers.IO,
-                productUsageTokens = setOf(),
-                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                    context,
-                    paymentConfig.publishableKey,
-                    setOf()
-                ),
-                analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(Logger.noop(), Dispatchers.IO),
-                logger = Logger.noop()
-            )
-
-            val customerRepository = CustomerApiRepository(
-                stripeRepository = stripeRepository,
-                lazyPaymentConfig = { paymentConfig },
-                logger = Logger.noop(),
-                workContext = Dispatchers.IO,
-                productUsageTokens = setOf()
-            )
-
-            instance = StripeCustomerAdapter(
-                context = context,
-                customerId = customerId,
-                canCreateSetupIntents = canCreateSetupIntents,
-                customerEphemeralKeyProvider = customerEphemeralKeyProvider,
-                setupIntentClientSecretProvider = setupIntentClientSecretProvider
-            ).apply {
-                this.customerRepository = customerRepository
-            }
-        }
-
-        @JvmStatic
-        fun getInstance(): CustomerAdapter {
-            return checkNotNull(instance) {
-                "Attempted to get instance of CustomerAdapter without initialization."
             }
         }
     }
