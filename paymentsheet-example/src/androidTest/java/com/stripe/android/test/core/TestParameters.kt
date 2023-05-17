@@ -2,7 +2,6 @@ package com.stripe.android.test.core
 
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.example.playground.model.InitializationType
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 
 /**
@@ -36,6 +35,14 @@ data class TestParameters(
     val collectPhone: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
     val collectAddress: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
 )
+
+/**
+ * Indicates if we use the normal or deferred payment sheet initialization
+ */
+enum class InitializationType {
+    Normal,
+    Deferred,
+}
 
 /**
  * Indicates if automatic payment methods are used on the payment intent

@@ -323,7 +323,7 @@ class PlaygroundTestDriver(
         selectors.customer.click()
         selectors.automatic.click()
 
-        selectors.setInitializationType(testParameters.initializationType)
+        selectors.initializationType.click()
 
         // Set the country first because it will update the default currency value
         selectors.setMerchantCountry(testParameters.merchantCountryCode)

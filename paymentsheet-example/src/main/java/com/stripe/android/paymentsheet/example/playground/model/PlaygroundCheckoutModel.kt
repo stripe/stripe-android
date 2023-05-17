@@ -6,11 +6,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 enum class InitializationType(val value: String) {
-    Normal("Normal"),
-    DeferredClientSideConfirmation("Deferred CSC"),
-    DeferredServerSideConfirmation("Deferred SSC"),
-    DeferredManualConfirmation("Deferred SSC + MC"),
-    DeferredMultiprocessor("Deferred SSC + MP"),
+    Normal("normal"),
+    Deferred("deferred"),
 }
 
 enum class CheckoutMode(val value: String) {
