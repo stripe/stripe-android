@@ -22,6 +22,8 @@ import kotlinx.parcelize.Parcelize
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class PaymentFlowResult {
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class Unvalidated constructor(
         val clientSecret: String? = null,
