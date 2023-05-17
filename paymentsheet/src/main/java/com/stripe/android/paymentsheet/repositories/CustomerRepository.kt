@@ -33,4 +33,13 @@ internal interface CustomerRepository {
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodId: String
     ): PaymentMethod?
+
+    /**
+     * Attach a payment method to the Customer and return the modified [PaymentMethod].
+     * Silently handle failures by returning null.
+     */
+    suspend fun attachPaymentMethod(
+        customerConfig: PaymentSheet.CustomerConfiguration,
+        paymentMethodId: String
+    ): PaymentMethod?
 }
