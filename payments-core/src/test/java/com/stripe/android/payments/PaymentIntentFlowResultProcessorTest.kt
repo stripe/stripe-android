@@ -376,6 +376,32 @@ internal class PaymentIntentFlowResultProcessorTest {
             assertThat(result).isEqualTo(expectedResult)
         }
 
+    @Test
+    fun `Doesn't poll when encountering a canceled CashAppPay payment`() = runTest(testDispatcher) {
+        val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+            status = StripeIntent.Status.RequiresAction,
+            paymentMethod = PaymentMethodFactory.cashAppPay(),
+            paymentMethodTypes = listOf("card", "cashapp"),
+        )
+
+        val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+        whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            requiresActionIntent,
+        )
+
+        val result = processor.processResult(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = clientSecret,
+                flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                didUserCancel = true,
+            )
+        ).getOrThrow()
+
+        // Only called a single time, but not for polling
+        verify(mockStripeRepository, times(1)).retrievePaymentIntent(any(), any(), any())
+    }
+
     private suspend fun runCanceledFlow(
         initialIntent: PaymentIntent,
         refreshedIntent: PaymentIntent = initialIntent,
