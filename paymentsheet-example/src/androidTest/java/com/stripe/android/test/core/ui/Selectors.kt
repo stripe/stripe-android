@@ -17,6 +17,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.playground.model.InitializationType
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
@@ -25,7 +26,6 @@ import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
-import com.stripe.android.test.core.InitializationType
 import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.Shipping
@@ -93,11 +93,6 @@ class Selectors(
     val automatic = when (testParameters.automatic) {
         Automatic.Off -> EspressoIdButton(R.id.automatic_pm_off_button)
         Automatic.On -> EspressoIdButton(R.id.automatic_pm_on_button)
-    }
-
-    val initializationType = when (testParameters.initializationType) {
-        InitializationType.Normal -> EspressoIdButton(R.id.normal_initialization_button)
-        InitializationType.Deferred -> EspressoIdButton(R.id.deferred_initialization_button)
     }
 
     val paymentSelection = PaymentSelection(
@@ -285,6 +280,11 @@ class Selectors(
             StripeR.string.stripe_cvc_number_hint
         )
     )
+
+    fun setInitializationType(initializationType: InitializationType) {
+        EspressoIdButton(R.id.initialization_type_spinner).click()
+        EspressoText(initializationType.value).click()
+    }
 
     fun setCurrency(currency: Currency) {
         EspressoIdButton(R.id.currency_spinner).click()

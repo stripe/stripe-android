@@ -21,10 +21,9 @@ fun interface CreateIntentCallback : AbsCreateIntentCallback {
      * Your implementation should create a [PaymentIntent] or [SetupIntent] on your server and
      * return its client secret or an error if one occurred.
      *
-     * @param paymentMethodId The ID of the [PaymentMethod] representing the customer's payment
-     * details
+     * @param paymentMethod The [PaymentMethod] representing the customer's payment details
      */
-    suspend fun onCreateIntent(paymentMethodId: String): CreateIntentResult
+    suspend fun onCreateIntent(paymentMethod: PaymentMethod): CreateIntentResult
 }
 
 /**
@@ -35,10 +34,10 @@ fun interface CreateIntentCallback : AbsCreateIntentCallback {
 sealed interface CreateIntentResult {
 
     @ExperimentalPaymentSheetDecouplingApi
-    data class Success(val clientSecret: String) : CreateIntentResult
+    class Success(internal val clientSecret: String) : CreateIntentResult
 
     @ExperimentalPaymentSheetDecouplingApi
-    data class Failure @JvmOverloads constructor(
+    class Failure @JvmOverloads constructor(
         internal val cause: Exception,
         internal val displayMessage: String? = null,
     ) : CreateIntentResult
@@ -57,14 +56,13 @@ fun interface CreateIntentCallbackForServerSideConfirmation : AbsCreateIntentCal
      * Your implementation should create and confirm a [PaymentIntent] or [SetupIntent] on your
      * server and return its client secret or an error if one occurred.
      *
-     * @param paymentMethodId The ID of the [PaymentMethod] representing the customer's payment
-     * details
+     * @param paymentMethod The [PaymentMethod] representing the customer's payment details
      * @param shouldSavePaymentMethod This is `true` if the customer selected the
      * "Save this payment method for future use" checkbox. Set `setup_future_usage` on the
      * [PaymentIntent] to `off_session` if this is `true`.
      */
     suspend fun onCreateIntent(
-        paymentMethodId: String,
+        paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
     ): CreateIntentResult
 }
