@@ -39,7 +39,9 @@ internal class CustomerRepositoryTest {
     @Test
     fun `getPaymentMethods() should create expected ListPaymentMethodsParams`() =
         runTest {
-            givenGetPaymentMethodsReturns(Result.success(emptyList()))
+            givenGetPaymentMethodsReturns(
+                Result.success(emptyList())
+            )
 
             repository.getPaymentMethods(
                 PaymentSheet.CustomerConfiguration(
@@ -65,7 +67,9 @@ internal class CustomerRepositoryTest {
     @Test
     fun `getPaymentMethods() should return empty list on failure`() =
         runTest {
-            givenGetPaymentMethodsReturns(Result.failure(InvalidParameterException("error")))
+            givenGetPaymentMethodsReturns(
+                Result.failure(InvalidParameterException("error"))
+            )
 
             val result = repository.getPaymentMethods(
                 PaymentSheet.CustomerConfiguration(
@@ -126,7 +130,9 @@ internal class CustomerRepositoryTest {
     @Test
     fun `detachPaymentMethod() should return null on failure`() =
         runTest {
-            givenDetachPaymentMethodReturns(Result.failure(InvalidParameterException("error")))
+            givenDetachPaymentMethodReturns(
+                Result.failure(InvalidParameterException("error"))
+            )
 
             val result = repository.detachPaymentMethod(
                 PaymentSheet.CustomerConfiguration(
@@ -156,13 +162,16 @@ internal class CustomerRepositoryTest {
                 "payment_method_id"
             )
 
-            assertThat(result).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            assertThat(result).isEqualTo(
+                Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
         }
 
     @Test
-    fun `attachPaymentMethod() should return null on failure`() =
+    fun `attachPaymentMethod() should return failure`() =
         runTest {
-            givenAttachPaymentMethodReturns(Result.failure(InvalidParameterException("error")))
+            val error = Result.failure<PaymentMethod>(InvalidParameterException("error"))
+            givenAttachPaymentMethodReturns(error)
 
             val result = repository.attachPaymentMethod(
                 PaymentSheet.CustomerConfiguration(
@@ -172,7 +181,7 @@ internal class CustomerRepositoryTest {
                 "payment_method_id"
             )
 
-            assertThat(result).isNull()
+            assertThat(result).isEqualTo(error)
         }
 
     private suspend fun failsOnceStripeRepository(): StripeRepository {

@@ -92,7 +92,7 @@ internal class CustomerApiRepository @Inject constructor(
     override suspend fun attachPaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodId: String
-    ): PaymentMethod? =
+    ): Result<PaymentMethod?> =
         stripeRepository.attachPaymentMethod(
             customerId = customerConfig.id,
             publishableKey = lazyPaymentConfig.get().publishableKey,
@@ -104,5 +104,5 @@ internal class CustomerApiRepository @Inject constructor(
             )
         ).onFailure {
             logger.error("Failed to attach payment method $paymentMethodId.", it)
-        }.getOrNull()
+        }
 }

@@ -30,5 +30,7 @@ internal class FakeCustomerRepository(
     override suspend fun attachPaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodId: String
-    ): PaymentMethod? = null
+    ): Result<PaymentMethod?> {
+        return Result.failure(NotImplementedError())
+    }
 }
