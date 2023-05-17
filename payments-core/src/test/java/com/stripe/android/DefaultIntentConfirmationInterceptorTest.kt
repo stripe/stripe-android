@@ -13,16 +13,12 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testing.IntentConfirmationInterceptorTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.Objects
 import kotlin.test.assertFailsWith
@@ -178,8 +174,6 @@ class DefaultIntentConfirmationInterceptorTest {
 
     @Test
     fun `Fails if retrieving intent did not succeed`() = runTest {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
         val apiException = APIException(
             requestId = "req_123",
             statusCode = 500,
@@ -201,7 +195,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeAccountIdProvider = { null },
         )
 
-        IntentConfirmationInterceptor.createIntentCallback = succeedingServerSideCallback(paymentMethod)
+        IntentConfirmationInterceptor.createIntentCallback = succeedingServerSideCallback("pm_123456789")
 
         val nextStep = interceptor.intercept(
             clientSecret = null,
@@ -329,6 +323,7 @@ class DefaultIntentConfirmationInterceptorTest {
     @Test
     fun `Returns confirm as next step after creating an unconfirmed intent`() = runTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val expectedPaymentMethodId = requireNotNull(paymentMethod.id)
 
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
@@ -337,7 +332,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeAccountIdProvider = { null },
         )
 
-        IntentConfirmationInterceptor.createIntentCallback = succeedingClientSideCallback(paymentMethod)
+        IntentConfirmationInterceptor.createIntentCallback = succeedingClientSideCallback(expectedPaymentMethodId)
 
         val nextStep = interceptor.intercept(
             clientSecret = null,
@@ -352,6 +347,7 @@ class DefaultIntentConfirmationInterceptorTest {
     @Test
     fun `Returns complete as next step after creating and confirming a succeeded intent`() = runTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val expectedPaymentMethodId = requireNotNull(paymentMethod.id)
 
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
@@ -368,7 +364,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeAccountIdProvider = { null },
         )
 
-        IntentConfirmationInterceptor.createIntentCallback = succeedingServerSideCallback(paymentMethod)
+        IntentConfirmationInterceptor.createIntentCallback = succeedingServerSideCallback(expectedPaymentMethodId)
 
         val nextStep = interceptor.intercept(
             clientSecret = null,
@@ -378,13 +374,14 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         assertThat(nextStep).isEqualTo(
-            IntentConfirmationInterceptor.NextStep.Complete(isForceSuccess = false)
+            IntentConfirmationInterceptor.NextStep.Complete(PaymentIntentFixtures.PI_SUCCEEDED)
         )
     }
 
     @Test
     fun `Returns handleNextAction as next step after creating and confirming a non-succeeded intent`() = runTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val expectedPaymentMethodId = requireNotNull(paymentMethod.id)
 
         val interceptor = DefaultIntentConfirmationInterceptor(
             context = context,
@@ -403,7 +400,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeAccountIdProvider = { null },
         )
 
-        IntentConfirmationInterceptor.createIntentCallback = succeedingServerSideCallback(paymentMethod)
+        IntentConfirmationInterceptor.createIntentCallback = succeedingServerSideCallback(expectedPaymentMethodId)
 
         val nextStep = interceptor.intercept(
             clientSecret = null,
@@ -446,7 +443,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         for (input in inputs) {
             IntentConfirmationInterceptor.createIntentCallback =
-                CreateIntentCallbackForServerSideConfirmation { _, shouldSavePaymentMethod ->
+                CreateIntentCallbackForServerSideConfirmation { paymentMethodId, shouldSavePaymentMethod ->
                     observedValues += shouldSavePaymentMethod
                     CreateIntentResult.Success("pi_123_secret_456")
                 }
@@ -461,81 +458,20 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(observedValues).containsExactly(false, false, true, false).inOrder()
     }
 
-    @Test
-    fun `Returns success as next step if merchant is forcing success in client-side callback`() = runTest {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val stripeRepository = mock<StripeRepository>()
-
-        val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
-            stripeRepository = stripeRepository,
-            publishableKeyProvider = { "pk" },
-            stripeAccountIdProvider = { null },
-        )
-
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
-            CreateIntentResult.Success(IntentConfirmationInterceptor.DISMISS_WITH_SUCCESS)
-        }
-
-        val nextStep = interceptor.intercept(
-            clientSecret = null,
-            paymentMethod = paymentMethod,
-            shippingValues = null,
-            setupForFutureUsage = null,
-        )
-
-        verify(stripeRepository, never()).retrieveStripeIntent(any(), any(), any())
-
-        assertThat(nextStep).isEqualTo(
-            IntentConfirmationInterceptor.NextStep.Complete(isForceSuccess = true)
-        )
-    }
-
-    @Test
-    fun `Returns success as next step if merchant is forcing success in server-side callback`() = runTest {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val stripeRepository = mock<StripeRepository>()
-
-        val interceptor = DefaultIntentConfirmationInterceptor(
-            context = context,
-            stripeRepository = stripeRepository,
-            publishableKeyProvider = { "pk" },
-            stripeAccountIdProvider = { null },
-        )
-
-        IntentConfirmationInterceptor.createIntentCallback =
-            CreateIntentCallbackForServerSideConfirmation { _, _ ->
-                CreateIntentResult.Success(IntentConfirmationInterceptor.DISMISS_WITH_SUCCESS)
-            }
-
-        val nextStep = interceptor.intercept(
-            clientSecret = null,
-            paymentMethod = paymentMethod,
-            shippingValues = null,
-            setupForFutureUsage = null,
-        )
-
-        verify(stripeRepository, never()).retrieveStripeIntent(any(), any(), any())
-
-        assertThat(nextStep).isEqualTo(
-            IntentConfirmationInterceptor.NextStep.Complete(isForceSuccess = true)
-        )
-    }
-
     private fun succeedingClientSideCallback(
-        expectedPaymentMethod: PaymentMethod,
+        expectedPaymentMethodId: String,
     ): CreateIntentCallback {
-        return CreateIntentCallback { paymentMethod ->
-            assertThat(paymentMethod).isEqualTo(expectedPaymentMethod)
+        return CreateIntentCallback { paymentMethodId ->
+            assertThat(paymentMethodId).isEqualTo(expectedPaymentMethodId)
             CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
         }
     }
 
     private fun succeedingServerSideCallback(
-        expectedPaymentMethod: PaymentMethod,
+        expectedPaymentMethodId: String,
     ): CreateIntentCallbackForServerSideConfirmation {
-        return CreateIntentCallbackForServerSideConfirmation { paymentMethod, _ ->
-            assertThat(paymentMethod).isEqualTo(expectedPaymentMethod)
+        return CreateIntentCallbackForServerSideConfirmation { paymentMethodId, _ ->
+            assertThat(paymentMethodId).isEqualTo(expectedPaymentMethodId)
             CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
         }
     }

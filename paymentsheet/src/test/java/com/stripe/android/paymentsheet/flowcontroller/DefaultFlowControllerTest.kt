@@ -13,11 +13,7 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.plusAssign
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.CreateIntentCallback
-import com.stripe.android.CreateIntentResult
-import com.stripe.android.DelicatePaymentSheetApi
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
@@ -59,7 +55,6 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.FakeIntentConfirmationInterceptor
-import com.stripe.android.testing.IntentConfirmationInterceptorTestRule
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.RelayingPaymentSheetLoader
@@ -71,10 +66,8 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
@@ -84,7 +77,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
@@ -97,10 +89,6 @@ import kotlin.test.assertFailsWith
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultFlowControllerTest {
-
-    @get:Rule
-    val intentConfirmationInterceptorRule = IntentConfirmationInterceptorTestRule()
-
     private val paymentOptionCallback = mock<PaymentOptionCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
 
@@ -980,7 +968,7 @@ internal class DefaultFlowControllerTest {
             )
         )
 
-        fakeIntentConfirmationInterceptor.enqueueCompleteStep()
+        fakeIntentConfirmationInterceptor.enqueueCompleteStep(PaymentIntentFixtures.PI_SUCCEEDED)
 
         flowController.confirm()
 
@@ -1133,36 +1121,6 @@ internal class DefaultFlowControllerTest {
         flowController.presentPaymentOptions()
 
         verify(paymentOptionActivityLauncher, never()).launch(any())
-    }
-
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
-    @Test
-    fun `Sends correct analytics event based on force-success usage`() = runTest {
-        val clientSecrets = listOf(
-            PaymentSheet.IntentConfiguration.DISMISS_WITH_SUCCESS to times(1),
-            "real_client_secret" to never(),
-        )
-
-        for ((clientSecret, verificationMode) in clientSecrets) {
-            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
-                CreateIntentResult.Success(clientSecret)
-            }
-
-            val flowController = createAndConfigureFlowControllerForDeferredIntent()
-
-            flowController.onPaymentOptionResult(
-                PaymentOptionResult.Succeeded(
-                    PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                )
-            )
-            flowController.confirm()
-
-            val isForceSuccess = clientSecret == PaymentSheet.IntentConfiguration.DISMISS_WITH_SUCCESS
-            fakeIntentConfirmationInterceptor.enqueueCompleteStep(isForceSuccess)
-
-            verify(eventReporter, verificationMode).onForceSuccess()
-            reset(eventReporter)
-        }
     }
 
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)

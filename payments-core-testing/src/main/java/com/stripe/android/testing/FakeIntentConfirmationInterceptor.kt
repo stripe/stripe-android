@@ -5,6 +5,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.channels.Channel
 
 class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {
@@ -16,10 +17,9 @@ class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {
         channel.trySend(nextStep)
     }
 
-    fun enqueueCompleteStep(
-        isForceSuccess: Boolean = false,
-    ) {
-        channel.trySend(IntentConfirmationInterceptor.NextStep.Complete(isForceSuccess))
+    fun enqueueCompleteStep(stripeIntent: StripeIntent) {
+        val nextStep = IntentConfirmationInterceptor.NextStep.Complete(stripeIntent)
+        channel.trySend(nextStep)
     }
 
     fun enqueueNextActionStep(clientSecret: String) {
