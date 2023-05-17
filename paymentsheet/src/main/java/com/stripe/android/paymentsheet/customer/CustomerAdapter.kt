@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.wallet.sheet.SavedPaymentMethodsController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
+import javax.inject.Provider
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -185,6 +186,29 @@ class StripeCustomerAdapter internal constructor(
             customerEphemeralKeyProvider: suspend () -> String,
             setupIntentClientSecretProvider: (suspend () -> String)?
         ) {
+            val paymentConfig = PaymentConfiguration.getInstance(context)
+            val stripeRepository = StripeApiRepository(
+                appContext = context,
+                publishableKeyProvider = { paymentConfig.publishableKey },
+                workContext = Dispatchers.IO,
+                productUsageTokens = setOf(),
+                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                    context,
+                    paymentConfig.publishableKey,
+                    setOf()
+                ),
+                analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(Logger.noop(), Dispatchers.IO),
+                logger = Logger.noop()
+            )
+
+            val customerRepository = CustomerApiRepository(
+                stripeRepository = stripeRepository,
+                lazyPaymentConfig = { paymentConfig },
+                logger = Logger.noop(),
+                workContext = Dispatchers.IO,
+                productUsageTokens = setOf()
+            )
+
             instance = StripeCustomerAdapter(
                 context = context,
                 customerId = customerId,
@@ -192,8 +216,7 @@ class StripeCustomerAdapter internal constructor(
                 customerEphemeralKeyProvider = customerEphemeralKeyProvider,
                 setupIntentClientSecretProvider = setupIntentClientSecretProvider
             ).apply {
-                // DI stuff here?
-                customerRepository
+                this.customerRepository = customerRepository
             }
         }
 
