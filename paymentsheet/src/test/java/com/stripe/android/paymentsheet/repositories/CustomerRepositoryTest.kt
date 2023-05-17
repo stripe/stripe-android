@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
@@ -75,7 +75,7 @@ internal class CustomerRepositoryTest {
                 listOf(PaymentMethod.Type.Card)
             )
 
-            Truth.assertThat(result).isEmpty()
+            assertThat(result).isEmpty()
         }
 
     @Test
@@ -97,7 +97,7 @@ internal class CustomerRepositoryTest {
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card)
             )
 
-            Truth.assertThat(result).containsExactly(
+            assertThat(result).containsExactly(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
@@ -120,7 +120,7 @@ internal class CustomerRepositoryTest {
                 "payment_method_id"
             )
 
-            Truth.assertThat(result).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            assertThat(result).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
     @Test
@@ -136,7 +136,7 @@ internal class CustomerRepositoryTest {
                 "payment_method_id"
             )
 
-            Truth.assertThat(result).isNull()
+            assertThat(result).isNull()
         }
 
     @Test
@@ -156,7 +156,7 @@ internal class CustomerRepositoryTest {
                 "payment_method_id"
             )
 
-            Truth.assertThat(result).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            assertThat(result).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
     @Test
@@ -172,7 +172,7 @@ internal class CustomerRepositoryTest {
                 "payment_method_id"
             )
 
-            Truth.assertThat(result).isNull()
+            assertThat(result).isNull()
         }
 
     private suspend fun failsOnceStripeRepository(): StripeRepository {

@@ -77,36 +77,32 @@ internal class CustomerApiRepository @Inject constructor(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodId: String
     ): PaymentMethod? =
-        withContext(workContext) {
-            stripeRepository.detachPaymentMethod(
-                publishableKey = lazyPaymentConfig.get().publishableKey,
-                productUsageTokens = productUsageTokens,
-                paymentMethodId = paymentMethodId,
-                requestOptions = ApiRequest.Options(
-                    apiKey = customerConfig.ephemeralKeySecret,
-                    stripeAccount = lazyPaymentConfig.get().stripeAccountId,
-                )
-            ).onFailure {
-                logger.error("Failed to detach payment method $paymentMethodId.", it)
-            }.getOrNull()
-        }
+        stripeRepository.detachPaymentMethod(
+            publishableKey = lazyPaymentConfig.get().publishableKey,
+            productUsageTokens = productUsageTokens,
+            paymentMethodId = paymentMethodId,
+            requestOptions = ApiRequest.Options(
+                apiKey = customerConfig.ephemeralKeySecret,
+                stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            )
+        ).onFailure {
+            logger.error("Failed to detach payment method $paymentMethodId.", it)
+        }.getOrNull()
 
     override suspend fun attachPaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodId: String
     ): PaymentMethod? =
-        withContext(workContext) {
-            stripeRepository.attachPaymentMethod(
-                customerId = customerConfig.id,
-                publishableKey = lazyPaymentConfig.get().publishableKey,
-                productUsageTokens = productUsageTokens,
-                paymentMethodId = paymentMethodId,
-                requestOptions = ApiRequest.Options(
-                    apiKey = customerConfig.ephemeralKeySecret,
-                    stripeAccount = lazyPaymentConfig.get().stripeAccountId,
-                )
-            ).onFailure {
-                logger.error("Failed to attach payment method $paymentMethodId.", it)
-            }.getOrNull()
-        }
+        stripeRepository.attachPaymentMethod(
+            customerId = customerConfig.id,
+            publishableKey = lazyPaymentConfig.get().publishableKey,
+            productUsageTokens = productUsageTokens,
+            paymentMethodId = paymentMethodId,
+            requestOptions = ApiRequest.Options(
+                apiKey = customerConfig.ephemeralKeySecret,
+                stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            )
+        ).onFailure {
+            logger.error("Failed to attach payment method $paymentMethodId.", it)
+        }.getOrNull()
 }
