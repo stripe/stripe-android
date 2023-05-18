@@ -12,6 +12,7 @@ sealed class SavedPaymentMethodsSheetResult {
      * @param selection, the [PaymentOptionSelection] the customer selected from the
      * [SavedPaymentMethodsSheet]
      */
+    @ExperimentalSavedPaymentMethodsApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Selected internal constructor(
         val selection: PaymentOptionSelection
@@ -20,6 +21,7 @@ sealed class SavedPaymentMethodsSheetResult {
     /**
      * The customer canceled the sheet
      */
+    @ExperimentalSavedPaymentMethodsApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Canceled internal constructor() : SavedPaymentMethodsSheetResult() {
         override fun equals(other: Any?): Boolean = this === other
@@ -29,6 +31,7 @@ sealed class SavedPaymentMethodsSheetResult {
     /**
      * An error occurred when presenting the sheet
      */
+    @ExperimentalSavedPaymentMethodsApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Error internal constructor(
         val exception: Exception

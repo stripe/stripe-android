@@ -28,6 +28,7 @@ class SavedPaymentMethodsSheet internal constructor() {
     /**
      * Configuration for [SavedPaymentMethodsSheet]
      */
+    @ExperimentalSavedPaymentMethodsApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration(
         /**
@@ -55,6 +56,7 @@ class SavedPaymentMethodsSheet internal constructor() {
         val headerTextForSelectionScreen: String? = null,
     )
 
+    @ExperimentalSavedPaymentMethodsApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @Suppress("UNUSED_PARAMETER")
