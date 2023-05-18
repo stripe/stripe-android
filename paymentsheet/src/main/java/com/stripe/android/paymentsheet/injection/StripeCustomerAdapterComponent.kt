@@ -7,10 +7,14 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.paymentsheet.DefaultPrefsRepository
+import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
+import com.stripe.android.paymentsheet.repositories.CustomerEphemeralKey
 import com.stripe.android.paymentsheet.repositories.CustomerEphemeralKeyProvider
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.SetupIntentClientSecretProvider
@@ -23,6 +27,7 @@ import dagger.Provides
 import java.util.Calendar
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 internal const val CAN_CREATE_SETUP_INTENT = "canCreateSetupIntent"
 
@@ -64,6 +69,7 @@ internal interface StripeCustomerAdapterComponent {
 }
 
 @Module
+@OptIn(ExperimentalSavedPaymentMethodsApi::class)
 internal interface StripeCustomerAdapterModule {
     @Binds
     fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
@@ -72,6 +78,18 @@ internal interface StripeCustomerAdapterModule {
         @Provides
         fun provideTimeProvider(): () -> Long = {
             Calendar.getInstance().timeInMillis
+        }
+
+        @Provides
+        fun providePrefsRepositoryFactory(
+            appContext: Context,
+            @IOContext workContext: CoroutineContext
+        ): (CustomerEphemeralKey) -> PrefsRepository = { customer ->
+            DefaultPrefsRepository(
+                appContext,
+                customer.customerId,
+                workContext
+            )
         }
 
         @Provides

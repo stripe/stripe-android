@@ -26,9 +26,6 @@ dependencies {
     implementation libs.androidx.lifecycle
     implementation libs.androidx.savedState
     implementation libs.androidx.viewModel
-    implementation libs.androidx.datastore.preferencesCoreJvm
-    implementation libs.androidx.datastore.preferencesAndroid
-    implementation libs.androidx.datastore.coreAndroid
 
     // DI
     implementation libs.dagger
