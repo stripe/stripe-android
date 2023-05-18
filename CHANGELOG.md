@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [CHANGED] The experimental API for [finalizing payments on the server](https://stripe.com/docs/payments/finalize-payments-on-the-server?platform=android) has changed:
+  * Instead of providing only the `PaymentMethod` ID, `CreateIntentCallback` now provides the entire `PaymentMethod` object.
+  * `CreateIntentCallbackForServerSideConfirmation` has been removed. If you’re using server-side confirmation, use `CreateIntentCallback` and its new `shouldSavePaymentMethod` parameter.
+
 ## 20.25.2 - 2023-05-15
 
 ### PaymentSheet
