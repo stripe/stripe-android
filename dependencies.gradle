@@ -46,7 +46,7 @@ ext.versions = [
         kotlinSerialization         : '1.5.0',
         kotlinSerializationConverter: '1.0.0',
         ktlint                      : '0.48.2',
-        leakCanary                  : '2.10',
+        leakCanary                  : '2.11',
         mavericks                   : "3.0.2",
         material                    : '1.8.0',
         mockito                     : '5.2.0',
