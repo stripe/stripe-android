@@ -13,7 +13,7 @@ sealed class SavedPaymentMethodsSheetResult {
      * [SavedPaymentMethodsSheet]
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Selected(
+    class Selected internal constructor(
         val selection: PaymentOptionSelection
     ) : SavedPaymentMethodsSheetResult()
 
@@ -27,7 +27,7 @@ sealed class SavedPaymentMethodsSheetResult {
      * An error occurred when presenting the sheet
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Error(
+    class Error internal constructor(
         val exception: Exception
     ) : SavedPaymentMethodsSheetResult()
 }
@@ -39,7 +39,7 @@ sealed class SavedPaymentMethodsSheetResult {
  */
 @ExperimentalSavedPaymentMethodsApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class PaymentOptionSelection(
+data class PaymentOptionSelection internal constructor(
     val paymentMethodId: String,
     val paymentOption: PaymentOption,
 )

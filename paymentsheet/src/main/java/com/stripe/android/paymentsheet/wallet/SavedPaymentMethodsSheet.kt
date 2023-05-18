@@ -8,7 +8,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CustomerAdapter
 
 /**
- * 🏗 This features is under construction 🏗
+ * 🏗 This feature is under construction 🏗
  *
  * [SavedPaymentMethodsSheet] A class that presents a bottom sheet to manage a customer's
  * saved payment methods.
@@ -18,7 +18,8 @@ import com.stripe.android.paymentsheet.repositories.CustomerAdapter
 interface SavedPaymentMethodsSheet {
 
     /**
-     * Present's the saved payment methods sheet for the customer
+     * Presents the saved payment methods sheet for the customer. Results are delivered to the
+     * callback that the sheet was created with.
      */
     fun present()
 
@@ -35,7 +36,7 @@ interface SavedPaymentMethodsSheet {
         val merchantDisplayName: String,
 
         /**
-         * Describes the appearance of SavedPaymentMethodsSheet
+         * Describes the appearance of [SavedPaymentMethodsSheet].
          */
         val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
 
@@ -54,6 +55,8 @@ interface SavedPaymentMethodsSheet {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+
+        @Suppress("UNUSED_PARAMETER")
         fun create(
             activity: ComponentActivity,
             configuration: Configuration,
@@ -63,6 +66,7 @@ interface SavedPaymentMethodsSheet {
             TODO()
         }
 
+        @Suppress("UNUSED_PARAMETER")
         fun create(
             fragment: Fragment,
             configuration: Configuration,
