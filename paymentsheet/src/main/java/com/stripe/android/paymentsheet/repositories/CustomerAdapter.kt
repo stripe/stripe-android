@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.model.PaymentMethod
@@ -12,6 +13,8 @@ import com.stripe.android.model.PaymentMethod
  *
  * Implement this interface if you would prefer retrieving and updating your Stripe customer object
  * via your own backend instead of using [StripeCustomerAdapter].
+ *
+ * Use [CustomerAdapter.create] to create an instance of [StripeCustomerAdapter].
  */
 @ExperimentalSavedPaymentMethodsApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -41,7 +44,8 @@ interface CustomerAdapter {
     suspend fun setSelectedPaymentMethodOption(paymentOption: PersistablePaymentMethodOption?)
 
     /**
-     * Fetch the persisted payment method option from the [DataStore]
+     * Fetch the persisted payment method option from the [DataStore]. If null, the customer does
+     * not have a default saved payment method.
      */
     suspend fun fetchSelectedPaymentMethodOption(): Result<PersistablePaymentMethodOption?>
 
@@ -51,6 +55,29 @@ interface CustomerAdapter {
      * setupIntentClientSecretProvider in the init call.
      */
     suspend fun setupIntentClientSecretForCustomerAttach(): Result<String>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+
+        /**
+         * Creates an instance of [StripeCustomerAdapter]
+         *
+         * @param context, the Application context
+         * @param customerEphemeralKeyProvider, a callback to retrieve the customer id and
+         * ephemeral key
+         * @param setupIntentClientSecretProvider, a callback to retrieve the setup intent client
+         * secret
+         * @param canCreateSetupIntents, whether or not this adapter can create setup intents
+         */
+        fun create(
+            context: Context,
+            customerEphemeralKeyProvider: suspend () -> Result<CustomerEphemeralKey>,
+            setupIntentClientSecretProvider: (suspend () -> Result<String>)?,
+            canCreateSetupIntents: Boolean,
+        ): CustomerAdapter {
+            TODO()
+        }
+    }
 }
 
 /**
@@ -81,3 +108,9 @@ sealed class PersistablePaymentMethodOption(
         }
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CustomerEphemeralKey(
+    val customerId: String,
+    val ephemeralKey: String,
+)
