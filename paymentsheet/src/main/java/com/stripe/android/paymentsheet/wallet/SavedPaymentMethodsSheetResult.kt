@@ -13,8 +13,8 @@ sealed class SavedPaymentMethodsSheetResult {
      * [SavedPaymentMethodsSheet]
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Selected(
-        val selection: PaymentOptionSelection?
+    class Selected(
+        val selection: PaymentOptionSelection
     ) : SavedPaymentMethodsSheetResult()
 
     /**
@@ -27,7 +27,7 @@ sealed class SavedPaymentMethodsSheetResult {
      * An error occurred when presenting the sheet
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Error(
+    class Error(
         val exception: Exception
     ) : SavedPaymentMethodsSheetResult()
 }

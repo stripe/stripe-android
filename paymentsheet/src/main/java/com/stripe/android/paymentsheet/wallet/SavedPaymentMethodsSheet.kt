@@ -26,7 +26,7 @@ interface SavedPaymentMethodsSheet {
      * Configuration for [SavedPaymentMethodsSheet]
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Configuration(
+    class Configuration(
         /**
          * Your customer-facing business name.
          *
@@ -56,8 +56,8 @@ interface SavedPaymentMethodsSheet {
     companion object {
         fun create(
             activity: ComponentActivity,
-            customerAdapter: CustomerAdapter,
             configuration: Configuration,
+            customerAdapter: CustomerAdapter,
             callback: SavedPaymentMethodsSheetResultCallback,
         ): SavedPaymentMethodsSheet {
             TODO()
@@ -65,8 +65,8 @@ interface SavedPaymentMethodsSheet {
 
         fun create(
             fragment: Fragment,
-            customerAdapter: CustomerAdapter,
             configuration: Configuration,
+            customerAdapter: CustomerAdapter,
             callback: SavedPaymentMethodsSheetResultCallback,
         ): SavedPaymentMethodsSheet {
             TODO()
