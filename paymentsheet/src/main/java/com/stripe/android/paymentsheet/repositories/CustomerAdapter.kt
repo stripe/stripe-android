@@ -35,9 +35,10 @@ interface CustomerAdapter {
 
     /**
      * Set the selected payment method option.
-     * @param paymentOption, the [PersistablePaymentMethodOption] to save in the [DataStore]
+     * @param paymentOption, the [PersistablePaymentMethodOption] to save in the [DataStore]. If
+     * null, the selected payment method option will be cleared from the [DataStore].
      */
-    suspend fun setSelectedPaymentMethodOption(paymentOption: PersistablePaymentMethodOption)
+    suspend fun setSelectedPaymentMethodOption(paymentOption: PersistablePaymentMethodOption?)
 
     /**
      * Fetch the persisted payment method option from the [DataStore]
@@ -62,19 +63,10 @@ sealed class PersistablePaymentMethodOption(
     open val id: String
 ) {
 
-    /**
-     * GooglePay is the customer's default payment method.
-     */
     internal object GooglePay : PersistablePaymentMethodOption("google_pay")
 
-    /**
-     * Link is the customer's default payment method.
-     */
     internal object Link : PersistablePaymentMethodOption("link")
 
-    /**
-     * A Stripe payment method backed by a Stripe PaymentMethod ID.
-     */
     internal data class StripeId(override val id: String) : PersistablePaymentMethodOption(id)
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
