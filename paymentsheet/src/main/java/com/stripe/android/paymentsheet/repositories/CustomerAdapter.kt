@@ -20,21 +20,18 @@ import com.stripe.android.model.PaymentMethod
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CustomerAdapter {
     /**
-     * Retrieves a list of payment methods attached to the customer provided by the
-     * [CustomerEphemeralKeyProvider]
+     * Retrieves a list of payment methods attached to a customer
      */
     suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>>
 
     /**
      * Attaches a payment method to a customer
-     * @param paymentMethodId, the payment method to attach to the customer provided by the
-     * [CustomerEphemeralKeyProvider]
+     * @param paymentMethodId, the payment method to attach to a customer
      */
     suspend fun attachPaymentMethod(paymentMethodId: String)
 
     /**
-     * Detaches the given payment method from the customer provided by the
-     * [CustomerEphemeralKeyProvider]
+     * Detaches the given payment method from a customer
      * @param paymentMethodId, the payment method to detach from the customer
      */
     suspend fun detachPaymentMethod(paymentMethodId: String)
@@ -59,6 +56,7 @@ interface CustomerAdapter {
      */
     suspend fun setupIntentClientSecretForCustomerAttach(): Result<String>
 
+    @ExperimentalSavedPaymentMethodsApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
@@ -69,9 +67,11 @@ interface CustomerAdapter {
          *
          * @param context, the Application context
          * @param customerEphemeralKeyProvider, a callback to retrieve the customer id and
-         * ephemeral key
+         * ephemeral key. The customer ID is used in this adapter to manage the customer's saved
+         * payment methods.
          * @param setupIntentClientSecretProvider, a callback to retrieve the setup intent client
-         * secret
+         * secret. The client secret is used in this adapter to attach a payment method with a
+         * setup intent.
          * @param canCreateSetupIntents, whether or not this adapter can create setup intents
          */
         @Suppress("UNUSED_PARAMETER")
@@ -102,9 +102,9 @@ sealed class PersistablePaymentMethodOption(
 
     internal data class StripeId(override val id: String) : PersistablePaymentMethodOption(id)
 
+    @ExperimentalSavedPaymentMethodsApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        @ExperimentalSavedPaymentMethodsApi
         fun fromId(id: String): PersistablePaymentMethodOption {
             return when (id) {
                 "google_pay" -> GooglePay
@@ -135,6 +135,7 @@ class CustomerEphemeralKey internal constructor(
     internal val customerId: String,
     internal val ephemeralKey: String,
 ) {
+    @ExperimentalSavedPaymentMethodsApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun create(
