@@ -114,7 +114,20 @@ sealed class PersistablePaymentMethodOption(
 
 @ExperimentalSavedPaymentMethodsApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CustomerEphemeralKey(
-    val customerId: String,
-    val ephemeralKey: String,
-)
+class CustomerEphemeralKey internal constructor(
+    internal val customerId: String,
+    internal val ephemeralKey: String,
+) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        fun create(
+            customerId: String,
+            ephemeralKey: String,
+        ): CustomerEphemeralKey {
+            return CustomerEphemeralKey(
+                customerId = customerId,
+                ephemeralKey = ephemeralKey,
+            )
+        }
+    }
+}
