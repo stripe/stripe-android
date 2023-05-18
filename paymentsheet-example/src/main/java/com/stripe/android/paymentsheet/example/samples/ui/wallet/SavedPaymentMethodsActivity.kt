@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui.wallet_mode
+package com.stripe.android.paymentsheet.example.samples.ui.wallet
 
 import android.os.Bundle
 import androidx.activity.compose.setContent

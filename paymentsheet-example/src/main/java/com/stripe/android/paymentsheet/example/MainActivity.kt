@@ -41,7 +41,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlow
 import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
-import com.stripe.android.paymentsheet.example.samples.ui.wallet_mode.SavedPaymentMethodsActivity
+import com.stripe.android.paymentsheet.example.samples.ui.wallet.SavedPaymentMethodsActivity
 
 private const val SurfaceOverlayOpacity = 0.12f
 
@@ -154,13 +154,13 @@ private fun MainScreen(items: List<MenuItem>) {
         )
 
         Section(
-            title = "Internal",
-            items = groupedItems.getOrElse(MenuItem.Section.Internal) { emptyList() },
+            title = "Wallet Mode",
+            items = groupedItems.getOrElse(MenuItem.Section.WalletMode) { emptyList() }
         )
 
         Section(
-            title = "\uD83C\uDFD7 Wallet Mode (under construction)",
-            items = groupedItems.getOrElse(MenuItem.Section.WalletMode) { emptyList() }
+            title = "Internal",
+            items = groupedItems.getOrElse(MenuItem.Section.Internal) { emptyList() },
         )
 
         item {
