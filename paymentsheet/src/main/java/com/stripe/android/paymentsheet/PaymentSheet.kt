@@ -47,7 +47,7 @@ class PaymentSheet internal constructor(
 
     /**
      * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and intending
-     * to create the [PaymentIntent] or [SetupIntent] on your server.
+     * to create and optionally confirm the [PaymentIntent] or [SetupIntent] on your server.
      *
      * @param activity The Activity that is presenting [PaymentSheet].
      * @param createIntentCallback Called when the customer confirms the payment or setup.
@@ -80,7 +80,7 @@ class PaymentSheet internal constructor(
 
     /**
      * Constructor to be used when launching [PaymentSheet] from a [Fragment] and intending to
-     * create the [PaymentIntent] or [SetupIntent] on your server.
+     * create and optionally confirm the [PaymentIntent] or [SetupIntent] on your server.
      *
      * @param fragment The Fragment that is presenting [PaymentSheet].
      * @param createIntentCallback Called when the customer confirms the payment or setup.
@@ -1171,8 +1171,7 @@ class PaymentSheet internal constructor(
 
             /**
              * Create a [FlowController] that you configure with an [IntentConfiguration] by calling
-             * [configureWithIntentConfiguration]. Use this method if you confirm the
-             * [PaymentIntent] or [SetupIntent] on the client.
+             * [configureWithIntentConfiguration].
              *
              * @param activity The Activity that is presenting [PaymentSheet].
              * @param paymentOptionCallback Called when the customer's selected payment method
@@ -1220,8 +1219,7 @@ class PaymentSheet internal constructor(
 
             /**
              * Create a [FlowController] that you configure with an [IntentConfiguration] by calling
-             * [configureWithIntentConfiguration]. Use this method if you confirm the
-             * [PaymentIntent] or [SetupIntent] on the client.
+             * [configureWithIntentConfiguration].
              *
              * @param fragment The Fragment that is presenting [PaymentSheet].
              * @param paymentOptionCallback Called when the customer's selected payment method
