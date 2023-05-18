@@ -59,7 +59,7 @@ interface CustomerAdapter {
 @ExperimentalSavedPaymentMethodsApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class PersistablePaymentMethodOption(
-    internal open val id: String
+    open val id: String
 ) {
 
     /**
@@ -79,6 +79,7 @@ sealed class PersistablePaymentMethodOption(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        @ExperimentalSavedPaymentMethodsApi
         fun fromId(id: String): PersistablePaymentMethodOption {
             return when (id) {
                 "google_pay" -> GooglePay
