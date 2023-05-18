@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.CreateIntentCallback
-import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
 import com.stripe.android.CreateIntentResult
 import com.stripe.android.DelicatePaymentSheetApi
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
@@ -67,27 +66,6 @@ class PaymentSheet internal constructor(
     }
 
     /**
-     * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and intending
-     * to create and confirm the [PaymentIntent] or [SetupIntent] on your server.
-     *
-     * @param activity The Activity that is presenting [PaymentSheet].
-     * @param createIntentCallbackForServerSideConfirmation Called when the customer confirms the
-     * payment or setup.
-     * @param paymentResultCallback Called with the result of the payment or setup after
-     * [PaymentSheet] is dismissed.
-     */
-    @ExperimentalPaymentSheetDecouplingApi
-    constructor(
-        activity: ComponentActivity,
-        createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
-        paymentResultCallback: PaymentSheetResultCallback,
-    ) : this(
-        DefaultPaymentSheetLauncher(activity, paymentResultCallback)
-    ) {
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallbackForServerSideConfirmation
-    }
-
-    /**
      * Constructor to be used when launching the payment sheet from a [Fragment].
      *
      * @param fragment the Fragment that is presenting the payment sheet.
@@ -118,27 +96,6 @@ class PaymentSheet internal constructor(
         DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
-    }
-
-    /**
-     * Constructor to be used when launching [PaymentSheet] from a [Fragment] and intending to
-     * create and confirm the [PaymentIntent] or [SetupIntent] on your server.
-     *
-     * @param fragment The Fragment that is presenting [PaymentSheet].
-     * @param createIntentCallbackForServerSideConfirmation Called when the customer confirms the
-     * payment or setup.
-     * @param paymentResultCallback Called with the result of the payment or setup after
-     * [PaymentSheet] is dismissed.
-     */
-    @ExperimentalPaymentSheetDecouplingApi
-    constructor(
-        fragment: Fragment,
-        createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
-        paymentResultCallback: PaymentSheetResultCallback,
-    ) : this(
-        DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
-    ) {
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallbackForServerSideConfirmation
     }
 
     /**
@@ -1241,35 +1198,6 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Create a [FlowController] that you configure with an [IntentConfiguration] by calling
-             * [configureWithIntentConfiguration]. Use this method if you confirm the
-             * [PaymentIntent] or [SetupIntent] on the server.
-             *
-             * @param activity The Activity that is presenting [PaymentSheet].
-             * @param paymentOptionCallback Called when the customer's selected payment method
-             * changes.
-             * @param createIntentCallbackForServerSideConfirmation Called when the customer
-             * confirms the payment or setup.
-             * @param paymentResultCallback Called with the result of the payment after
-             * [PaymentSheet] is dismissed.
-             */
-            @ExperimentalPaymentSheetDecouplingApi
-            @JvmStatic
-            fun create(
-                activity: ComponentActivity,
-                paymentOptionCallback: PaymentOptionCallback,
-                createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
-                paymentResultCallback: PaymentSheetResultCallback,
-            ): FlowController {
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallbackForServerSideConfirmation
-                return FlowControllerFactory(
-                    activity,
-                    paymentOptionCallback,
-                    paymentResultCallback
-                ).create()
-            }
-
-            /**
              * Create a [FlowController] that you configure with a client secret by calling
              * [configureWithPaymentIntent] or [configureWithSetupIntent].
              *
@@ -1311,35 +1239,6 @@ class PaymentSheet internal constructor(
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
                 IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
-                return FlowControllerFactory(
-                    fragment,
-                    paymentOptionCallback,
-                    paymentResultCallback
-                ).create()
-            }
-
-            /**
-             * Create a [FlowController] that you configure with an [IntentConfiguration] by calling
-             * [configureWithIntentConfiguration]. Use this method if you confirm the
-             * [PaymentIntent] or [SetupIntent] on the server.
-             *
-             * @param fragment The Fragment that is presenting [PaymentSheet].
-             * @param paymentOptionCallback Called when the customer's selected payment method
-             * changes.
-             * @param createIntentCallbackForServerSideConfirmation Called when the customer
-             * confirms the payment or setup.
-             * @param paymentResultCallback Called with the result of the payment after
-             * [PaymentSheet] is dismissed.
-             */
-            @ExperimentalPaymentSheetDecouplingApi
-            @JvmStatic
-            fun create(
-                fragment: Fragment,
-                paymentOptionCallback: PaymentOptionCallback,
-                createIntentCallbackForServerSideConfirmation: CreateIntentCallbackForServerSideConfirmation,
-                paymentResultCallback: PaymentSheetResultCallback,
-            ): FlowController {
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallbackForServerSideConfirmation
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
