@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlow
 import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
+import com.stripe.android.paymentsheet.example.samples.ui.wallet.SavedPaymentMethodsActivity
 
 private const val SurfaceOverlayOpacity = 0.12f
 
@@ -85,6 +86,15 @@ class MainActivity : AppCompatActivity() {
                 section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(
+                titleResId = R.string.saved_payment_methods_title,
+                subtitleResId = R.string.saved_payment_methods_subtitle,
+                klass = SavedPaymentMethodsActivity::class.java,
+                section = MenuItem.Section.WalletMode,
+                badge = MenuItem.Badge(
+                    labelResId = R.string.under_construction_badge_label,
+                )
+            ),
+            MenuItem(
                 titleResId = R.string.playground_title,
                 subtitleResId = R.string.playground_subtitle,
                 klass = PaymentSheetPlaygroundActivity::class.java,
@@ -115,12 +125,13 @@ private data class MenuItem(
 ) {
     data class Badge(
         val labelResId: Int,
-        val onClick: () -> Unit,
+        val onClick: () -> Unit = { },
     )
 
     enum class Section {
         CompleteFlow,
         CustomFlow,
+        WalletMode,
         Internal,
     }
 }
@@ -140,6 +151,11 @@ private fun MainScreen(items: List<MenuItem>) {
         Section(
             title = "Custom flow",
             items = groupedItems.getOrElse(MenuItem.Section.CustomFlow) { emptyList() },
+        )
+
+        Section(
+            title = "Wallet Mode",
+            items = groupedItems.getOrElse(MenuItem.Section.WalletMode) { emptyList() }
         )
 
         Section(
