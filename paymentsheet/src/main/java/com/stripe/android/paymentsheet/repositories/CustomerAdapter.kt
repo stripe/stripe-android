@@ -20,37 +20,40 @@ import com.stripe.android.model.PaymentMethod
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CustomerAdapter {
     /**
-     * Retrieves a list of payment methods attached to a customer
+     * Retrieves a list of payment methods attached to the customer provided by the
+     * [CustomerEphemeralKeyProvider]
      */
-    suspend fun fetchPaymentMethods(): Result<List<PaymentMethod>>
+    suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>>
 
     /**
-     * Adds a payment method to a customer
-     * @param paymentMethodId, the payment method to attach to the customer
+     * Attaches a payment method to a customer
+     * @param paymentMethodId, the payment method to attach to the customer provided by the
+     * [CustomerEphemeralKeyProvider]
      */
     suspend fun attachPaymentMethod(paymentMethodId: String)
 
     /**
-     * Deletes the given payment method from the customer
+     * Detaches the given payment method from the customer provided by the
+     * [CustomerEphemeralKeyProvider]
      * @param paymentMethodId, the payment method to detach from the customer
      */
     suspend fun detachPaymentMethod(paymentMethodId: String)
 
     /**
      * Set the selected payment method option.
-     * @param paymentOption, the [PersistablePaymentMethodOption] to save in the [DataStore]. If
-     * null, the selected payment method option will be cleared from the [DataStore].
+     * @param paymentOption, the [PersistablePaymentMethodOption] to save to the data store. If
+     * null, the selected payment method option will be cleared from the data store.
      */
     suspend fun setSelectedPaymentMethodOption(paymentOption: PersistablePaymentMethodOption?)
 
     /**
-     * Fetch the persisted payment method option from the [DataStore]. If null, the customer does
+     * Fetch the persisted payment method option from the data store. If null, the customer does
      * not have a default saved payment method.
      */
     suspend fun fetchSelectedPaymentMethodOption(): Result<PersistablePaymentMethodOption?>
 
     /**
-     * Returns a client secret configured to the attach a new payment method to a customer.
+     * Returns a client secret configured to attach a new payment method to a customer.
      * This will call your backend to retrieve a client secret if you have provided a
      * setupIntentClientSecretProvider in the init call.
      */
@@ -74,8 +77,8 @@ interface CustomerAdapter {
         @Suppress("UNUSED_PARAMETER")
         fun create(
             context: Context,
-            customerEphemeralKeyProvider: suspend () -> Result<CustomerEphemeralKey>,
-            setupIntentClientSecretProvider: (suspend () -> Result<String>)?,
+            customerEphemeralKeyProvider: CustomerEphemeralKeyProvider,
+            setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
             canCreateSetupIntents: Boolean,
         ): CustomerAdapter {
             TODO()
@@ -110,6 +113,20 @@ sealed class PersistablePaymentMethodOption(
             }
         }
     }
+}
+
+@ExperimentalSavedPaymentMethodsApi
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun interface CustomerEphemeralKeyProvider {
+
+    suspend fun provide(): Result<CustomerEphemeralKey>
+}
+
+@ExperimentalSavedPaymentMethodsApi
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun interface SetupIntentClientSecretProvider {
+
+    suspend fun provide(): Result<String>
 }
 
 @ExperimentalSavedPaymentMethodsApi
