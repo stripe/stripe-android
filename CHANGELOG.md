@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [FIXED][6735](https://github.com/stripe/stripe-android/pull/6735) Fixed an issue where google places caused errors with R8.
+
 ## 20.25.2 - 2023-05-15
 
 ### PaymentSheet
