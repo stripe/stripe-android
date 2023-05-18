@@ -67,6 +67,9 @@ public abstract interface class com/stripe/android/CustomerSession$SourceRetriev
 	public abstract fun onSourceRetrieved (Lcom/stripe/android/model/Source;)V
 }
 
+public abstract interface annotation class com/stripe/android/DelicatePaymentSheetApi : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/EphemeralKey : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
