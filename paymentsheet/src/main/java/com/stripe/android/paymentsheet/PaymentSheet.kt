@@ -6,11 +6,14 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.CreateIntentCallback
 import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
+import com.stripe.android.CreateIntentResult
+import com.stripe.android.DelicatePaymentSheetApi
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.link.account.CookieStore
@@ -357,6 +360,17 @@ class PaymentSheet internal constructor(
              * **Note**: Not all payment methods support this.
              */
             Manual,
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+
+            /**
+             * Pass this as the client secret into [CreateIntentResult.Success] to force
+             * [PaymentSheet] to show success and dismiss.
+             */
+            @DelicatePaymentSheetApi
+            const val DISMISS_WITH_SUCCESS = IntentConfirmationInterceptor.DISMISS_WITH_SUCCESS
         }
     }
 

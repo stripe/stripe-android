@@ -35,10 +35,10 @@ fun interface CreateIntentCallback : AbsCreateIntentCallback {
 sealed interface CreateIntentResult {
 
     @ExperimentalPaymentSheetDecouplingApi
-    data class Success(val clientSecret: String) : CreateIntentResult
+    class Success(internal val clientSecret: String) : CreateIntentResult
 
     @ExperimentalPaymentSheetDecouplingApi
-    data class Failure @JvmOverloads constructor(
+    class Failure @JvmOverloads constructor(
         internal val cause: Exception,
         internal val displayMessage: String? = null,
     ) : CreateIntentResult

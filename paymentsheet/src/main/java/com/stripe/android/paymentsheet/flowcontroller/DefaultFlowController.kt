@@ -312,6 +312,9 @@ internal class DefaultFlowController @Inject internal constructor(
                     )
                 }
                 is IntentConfirmationInterceptor.NextStep.Complete -> {
+                    if (nextStep.isForceSuccess) {
+                        eventReporter.onForceSuccess()
+                    }
                     onPaymentResult(PaymentResult.Completed)
                 }
             }
