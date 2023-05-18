@@ -58,25 +58,24 @@ interface CustomerAdapter {
  */
 @ExperimentalSavedPaymentMethodsApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class PersistablePaymentMethodOption(open val id: String) {
+sealed class PersistablePaymentMethodOption(
+    internal open val id: String
+) {
 
     /**
      * GooglePay is the customer's default payment method.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object GooglePay : PersistablePaymentMethodOption("google_pay")
+    internal object GooglePay : PersistablePaymentMethodOption("google_pay")
 
     /**
      * Link is the customer's default payment method.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object Link : PersistablePaymentMethodOption("link")
+    internal object Link : PersistablePaymentMethodOption("link")
 
     /**
      * A Stripe payment method backed by a Stripe PaymentMethod ID.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class StripeId(override val id: String) : PersistablePaymentMethodOption(id)
+    internal data class StripeId(override val id: String) : PersistablePaymentMethodOption(id)
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
