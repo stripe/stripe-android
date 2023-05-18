@@ -57,7 +57,7 @@ interface IntentConfirmationInterceptor {
     companion object {
         var createIntentCallback: AbsCreateIntentCallback? = null
 
-        const val DISMISS_WITH_SUCCESS = "DISMISS_WITH_SUCCESS"
+        const val COMPLETE_WITHOUT_CONFIRMING_INTENT = "COMPLETE_WITHOUT_CONFIRMING_INTENT"
     }
 }
 
@@ -170,7 +170,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): NextStep {
         return when (val result = createIntentCallback.onCreateIntent(paymentMethod)) {
             is CreateIntentResult.Success -> {
-                if (result.clientSecret == IntentConfirmationInterceptor.DISMISS_WITH_SUCCESS) {
+                if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
                     NextStep.Complete(isForceSuccess = true)
                 } else {
                     createConfirmStep(result.clientSecret, shippingValues, paymentMethod)
@@ -198,7 +198,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
 
         return when (result) {
             is CreateIntentResult.Success -> {
-                if (result.clientSecret == IntentConfirmationInterceptor.DISMISS_WITH_SUCCESS) {
+                if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
                     NextStep.Complete(isForceSuccess = true)
                 } else {
                     handleServerSideConfirmationSuccess(
