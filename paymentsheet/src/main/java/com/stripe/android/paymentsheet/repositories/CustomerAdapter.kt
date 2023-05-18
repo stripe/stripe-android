@@ -14,7 +14,7 @@ import com.stripe.android.model.PaymentMethod
  * Implement this interface if you would prefer retrieving and updating your Stripe customer object
  * via your own backend instead of using [StripeCustomerAdapter].
  *
- * Use [CustomerAdapter.create] to create an instance of [StripeCustomerAdapter].
+ * Use [CustomerAdapter.create] to create an instance of a [CustomerAdapter].
  */
 @ExperimentalSavedPaymentMethodsApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -60,7 +60,9 @@ interface CustomerAdapter {
     companion object {
 
         /**
-         * Creates an instance of [StripeCustomerAdapter]
+         * Creates a default implementation of [CustomerAdapter] which uses Android
+         * SharedPreferences as the data store to manage the customer's default saved payment
+         * methods.
          *
          * @param context, the Application context
          * @param customerEphemeralKeyProvider, a callback to retrieve the customer id and
@@ -69,6 +71,7 @@ interface CustomerAdapter {
          * secret
          * @param canCreateSetupIntents, whether or not this adapter can create setup intents
          */
+        @Suppress("UNUSED_PARAMETER")
         fun create(
             context: Context,
             customerEphemeralKeyProvider: suspend () -> Result<CustomerEphemeralKey>,
@@ -109,6 +112,7 @@ sealed class PersistablePaymentMethodOption(
     }
 }
 
+@ExperimentalSavedPaymentMethodsApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CustomerEphemeralKey(
     val customerId: String,
