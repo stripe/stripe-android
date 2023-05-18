@@ -154,6 +154,22 @@ data class ExampleCreateAndConfirmErrorResponse(
     }
 }
 
+@Serializable
+data class ExampleSavedPaymentMethodRequest(
+    @SerialName("customer_type")
+    val customerType: String
+)
+
+@Serializable
+data class ExampleSavedPaymentMethodResponse(
+    @SerialName("publishableKey")
+    val publishableKey: String,
+    @SerialName("customerEphemeralKeySecret")
+    val customerEphemeralKeySecret: String,
+    @SerialName("customerId")
+    val customerId: String
+)
+
 /**
  * Awaits the [ApiResult] and deserializes it into the desired type [T].
  */

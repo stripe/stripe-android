@@ -33,6 +33,9 @@
     <ID>PackageNaming:CustomFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.custom_flow</ID>
     <ID>PackageNaming:CustomFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.custom_flow</ID>
     <ID>PackageNaming:CustomFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.custom_flow</ID>
+    <ID>PackageNaming:SavedPaymentMethodsActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.wallet_mode</ID>
+    <ID>PackageNaming:SavedPaymentMethodsViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.wallet_mode</ID>
+    <ID>PackageNaming:SavedPaymentMethodsViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.wallet_mode</ID>
     <ID>PackageNaming:ServerSideConfirmationCompleteFlowActivity.kt$package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow</ID>
     <ID>PackageNaming:ServerSideConfirmationCompleteFlowViewModel.kt$package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow</ID>
     <ID>PackageNaming:ServerSideConfirmationCompleteFlowViewState.kt$package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow</ID>
