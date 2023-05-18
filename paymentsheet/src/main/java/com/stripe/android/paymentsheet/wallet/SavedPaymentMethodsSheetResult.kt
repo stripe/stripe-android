@@ -21,7 +21,10 @@ sealed class SavedPaymentMethodsSheetResult {
      * The customer canceled the sheet
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object Canceled : SavedPaymentMethodsSheetResult()
+    class Canceled internal constructor() : SavedPaymentMethodsSheetResult() {
+        override fun equals(other: Any?): Boolean = this === other
+        override fun hashCode(): Int = System.identityHashCode(this)
+    }
 
     /**
      * An error occurred when presenting the sheet

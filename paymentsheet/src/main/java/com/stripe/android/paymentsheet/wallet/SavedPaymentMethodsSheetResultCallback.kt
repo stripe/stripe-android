@@ -10,5 +10,5 @@ import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 @ExperimentalSavedPaymentMethodsApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface SavedPaymentMethodsSheetResultCallback {
-    fun onResult(result: SavedPaymentMethodsSheetResult?)
+    fun onResult(result: SavedPaymentMethodsSheetResult)
 }

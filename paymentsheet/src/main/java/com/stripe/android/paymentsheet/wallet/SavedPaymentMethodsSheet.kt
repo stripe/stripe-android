@@ -15,24 +15,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerAdapter
  */
 @ExperimentalSavedPaymentMethodsApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class SavedPaymentMethodsSheet {
-
-    @Suppress("UNUSED_PARAMETER", "unused")
-    constructor (
-        activity: ComponentActivity,
-        configuration: Configuration,
-        customerAdapter: CustomerAdapter,
-        callback: SavedPaymentMethodsSheetResultCallback,
-    )
-
-    @Suppress("UNUSED_PARAMETER", "unused")
-    constructor(
-        fragment: Fragment,
-        configuration: Configuration,
-        customerAdapter: CustomerAdapter,
-        callback: SavedPaymentMethodsSheetResultCallback,
-    )
-
+class SavedPaymentMethodsSheet internal constructor() {
 
     /**
      * Presents the saved payment methods sheet for the customer. Results are delivered to the
@@ -71,4 +54,27 @@ class SavedPaymentMethodsSheet {
          */
         val headerTextForSelectionScreen: String? = null,
     )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        @Suppress("UNUSED_PARAMETER")
+        fun create(
+            activity: ComponentActivity,
+            configuration: Configuration,
+            customerAdapter: CustomerAdapter,
+            callback: SavedPaymentMethodsSheetResultCallback,
+        ): SavedPaymentMethodsSheet {
+            TODO()
+        }
+
+        @Suppress("UNUSED_PARAMETER")
+        fun create(
+            fragment: Fragment,
+            configuration: Configuration,
+            customerAdapter: CustomerAdapter,
+            callback: SavedPaymentMethodsSheetResultCallback,
+        ): SavedPaymentMethodsSheet {
+            TODO()
+        }
+    }
 }
