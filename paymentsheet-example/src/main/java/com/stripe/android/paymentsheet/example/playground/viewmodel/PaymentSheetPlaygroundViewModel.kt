@@ -280,7 +280,7 @@ class PaymentSheetPlaygroundViewModel(
         val initializationType = initializationType.value
 
         val clientSecret = if (initializationType == InitializationType.DeferredMultiprocessor) {
-            PaymentSheet.IntentConfiguration.DISMISS_WITH_SUCCESS
+            PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT
         } else {
             // Note: This is not how you'd do this in a real application. Instead, your app would
             // call your backend and create (and optionally confirm) a payment or setup intent.
@@ -300,7 +300,7 @@ class PaymentSheetPlaygroundViewModel(
         backendUrl: String,
     ): CreateIntentResult {
         return if (initializationType.value == InitializationType.DeferredMultiprocessor) {
-            CreateIntentResult.Success(PaymentSheet.IntentConfiguration.DISMISS_WITH_SUCCESS)
+            CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
         } else {
             createAndConfirmIntentInternal(
                 paymentMethodId = paymentMethodId,

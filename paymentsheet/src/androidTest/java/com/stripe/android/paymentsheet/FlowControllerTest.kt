@@ -518,7 +518,7 @@ internal class FlowControllerTest {
                     flowController.confirm()
                 },
                 createIntentCallback = {
-                    CreateIntentResult.Success(PaymentSheet.IntentConfiguration.DISMISS_WITH_SUCCESS)
+                    CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
                 },
                 paymentResultCallback = { result ->
                     assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)

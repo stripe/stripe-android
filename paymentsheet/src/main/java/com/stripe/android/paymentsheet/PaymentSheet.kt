@@ -359,10 +359,18 @@ class PaymentSheet internal constructor(
 
             /**
              * Pass this as the client secret into [CreateIntentResult.Success] to force
-             * [PaymentSheet] to show success and dismiss.
+             * [PaymentSheet] to show success, dismiss the sheet without confirming the intent, and
+             * return [PaymentSheetResult.Completed].
+             *
+             * **Note**: If provided, the SDK performs no action to complete the payment or setup.
+             * It doesn't confirm a [PaymentIntent] or [SetupIntent] or handle next actions. You
+             * should only use this if your integration can't create a [PaymentIntent] or
+             * [SetupIntent]. It is your responsibility to ensure that you only pass this value if
+             * the payment or setup is successful.
              */
             @DelicatePaymentSheetApi
-            const val DISMISS_WITH_SUCCESS = IntentConfirmationInterceptor.DISMISS_WITH_SUCCESS
+            const val COMPLETE_WITHOUT_CONFIRMING_INTENT =
+                IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT
         }
     }
 

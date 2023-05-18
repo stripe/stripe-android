@@ -474,7 +474,7 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
-            CreateIntentResult.Success(IntentConfirmationInterceptor.DISMISS_WITH_SUCCESS)
+            CreateIntentResult.Success(IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT)
         }
 
         val nextStep = interceptor.intercept(
@@ -505,7 +505,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         IntentConfirmationInterceptor.createIntentCallback =
             CreateIntentCallbackForServerSideConfirmation { _, _ ->
-                CreateIntentResult.Success(IntentConfirmationInterceptor.DISMISS_WITH_SUCCESS)
+                CreateIntentResult.Success(IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT)
             }
 
         val nextStep = interceptor.intercept(
