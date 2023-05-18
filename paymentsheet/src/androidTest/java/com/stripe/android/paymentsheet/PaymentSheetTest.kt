@@ -311,7 +311,7 @@ internal class PaymentSheetTest {
             paymentSheet = PaymentSheet(
                 activity = it,
                 createIntentCallback = {
-                    CreateIntentResult.Success(PaymentSheet.IntentConfiguration.DISMISS_WITH_SUCCESS)
+                    CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
                 }
             ) { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
