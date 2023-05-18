@@ -298,7 +298,7 @@ class PaymentSheet internal constructor(
             @ExperimentalPaymentSheetDecouplingApi
             @Parcelize
             class Setup @JvmOverloads constructor(
-                val currency: String?,
+                val currency: String? = null,
                 override val setupFutureUse: SetupFutureUse = SetupFutureUse.OffSession,
             ) : Mode() {
 
