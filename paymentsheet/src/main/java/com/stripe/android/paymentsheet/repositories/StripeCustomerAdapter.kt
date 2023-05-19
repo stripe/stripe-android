@@ -55,7 +55,7 @@ internal class StripeCustomerAdapter @Inject constructor(
 
     internal suspend fun getCustomer(): Result<CustomerEphemeralKey> {
         return cachedCustomer.takeUnless {
-            it == null || shouldRefreshCustomer()
+            shouldRefreshCustomer()
         } ?: run {
             val updatedCustomer = customerEphemeralKeyProvider.provide()
             cacheDate = timeProvider()

@@ -32,7 +32,26 @@ class CustomerAdapterTest {
 
     @Test
     fun `CustomerAdapter can be created`() {
-        val adapter = createAdapter()
+        val customerEphemeralKeyProvider = CustomerEphemeralKeyProvider {
+            Result.success(
+                CustomerEphemeralKey(
+                    customerId = "cus_123",
+                    ephemeralKey = "ek_123"
+                )
+            )
+        }
+
+        val setupIntentClientSecretProvider = SetupIntentClientSecretProvider {
+            Result.success("seti_123")
+        }
+
+        val adapter = CustomerAdapter.create(
+            context = context,
+            customerEphemeralKeyProvider = customerEphemeralKeyProvider,
+            setupIntentClientSecretProvider = setupIntentClientSecretProvider,
+            canCreateSetupIntents = true
+        )
+
         assertThat(adapter).isNotNull()
     }
 
@@ -78,7 +97,12 @@ class CustomerAdapterTest {
         assertThat(customer.getOrNull()?.customerId).isEqualTo("0")
         assertThat(adapter.cachedCustomer).isNotNull()
 
-        advanceTimeBy(CACHED_CUSTOMER_MAX_AGE_MILLIS + 1)
+        advanceTimeBy(CACHED_CUSTOMER_MAX_AGE_MILLIS)
+        customer = adapter.getCustomer()
+        assertThat(customer.getOrNull()?.customerId)
+            .isEqualTo("0")
+
+        advanceTimeBy(1)
         customer = adapter.getCustomer()
         assertThat(customer.getOrNull()?.customerId)
             .isEqualTo("${CACHED_CUSTOMER_MAX_AGE_MILLIS + 1}")
