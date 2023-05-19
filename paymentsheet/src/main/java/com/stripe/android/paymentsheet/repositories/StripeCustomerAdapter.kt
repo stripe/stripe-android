@@ -26,6 +26,9 @@ internal class StripeCustomerAdapter @Inject constructor(
     private val prefsRepositoryFactory: (CustomerEphemeralKey) -> PrefsRepository,
 ) : CustomerAdapter {
 
+    internal var cachedCustomer: Result<CustomerEphemeralKey>? = null
+    private var cacheDate: Long? = null
+
     override suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>> {
         TODO()
     }
@@ -48,5 +51,27 @@ internal class StripeCustomerAdapter @Inject constructor(
 
     override suspend fun setupIntentClientSecretForCustomerAttach(): Result<String> {
         TODO()
+    }
+
+    internal suspend fun getCustomer(): Result<CustomerEphemeralKey> {
+        return cachedCustomer.takeUnless {
+            it == null || shouldRefreshCustomer()
+        } ?: run {
+            val updatedCustomer = customerEphemeralKeyProvider.provide()
+            cacheDate = timeProvider()
+            cachedCustomer = updatedCustomer
+            updatedCustomer
+        }
+    }
+
+    private fun shouldRefreshCustomer(): Boolean {
+        val customerCreated = cacheDate ?: return true
+        val nowInMillis = timeProvider()
+        return customerCreated + CACHED_CUSTOMER_MAX_AGE_MILLIS < nowInMillis
+    }
+
+    internal companion object {
+        // 30 minutes, server-side timeout is 60
+        internal const val CACHED_CUSTOMER_MAX_AGE_MILLIS = 60 * 30 * 1000L
     }
 }
