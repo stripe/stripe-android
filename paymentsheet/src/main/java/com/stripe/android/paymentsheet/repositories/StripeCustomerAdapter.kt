@@ -5,7 +5,6 @@ import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PrefsRepository
 import javax.inject.Inject
-import javax.inject.Named
 
 /**
  * The default implementation of [CustomerAdapter]. This adapter uses the customer ID and ephemeral
