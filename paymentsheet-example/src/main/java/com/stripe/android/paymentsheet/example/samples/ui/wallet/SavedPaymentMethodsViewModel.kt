@@ -32,14 +32,11 @@ class SavedPaymentMethodsViewModel(
     )
     val state: StateFlow<SavedPaymentMethodsViewState> = _state
 
-    private var customerId: String = ""
-
     internal val customerAdapter: CustomerAdapter = CustomerAdapter.create(
         context = getApplication(),
         customerEphemeralKeyProvider = {
             fetchCustomerEphemeralKey().fold(
                 success = {
-                    customerId = it.customerId
                     Result.success(
                         CustomerEphemeralKey.create(
                             customerId = it.customerId,
@@ -52,8 +49,8 @@ class SavedPaymentMethodsViewModel(
                 }
             )
         },
-        setupIntentClientSecretProvider = {
-            createSetupIntent().fold(
+        setupIntentClientSecretProvider = { customerId ->
+            createSetupIntent(customerId).fold(
                 success = {
                     Result.success(
                         it.clientSecret
@@ -115,7 +112,7 @@ class SavedPaymentMethodsViewModel(
             .awaitModel(ExampleSavedPaymentMethodResponse.serializer())
     }
 
-    private suspend fun createSetupIntent():
+    private suspend fun createSetupIntent(customerId: String):
         FuelResult<ExampleCreateSetupIntentResponse, FuelError> {
         val request = ExampleCreateSetupIntentRequest(
             customerId = customerId
