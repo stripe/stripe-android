@@ -40,5 +40,5 @@ internal interface CustomerRepository {
     suspend fun attachPaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodId: String
-    ): Result<PaymentMethod?>
+    ): Result<PaymentMethod>
 }

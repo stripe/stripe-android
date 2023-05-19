@@ -28,7 +28,7 @@ internal class StripeCustomerAdapter @Inject constructor(
     private var cacheDate: Long? = null
 
     override suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>> {
-        getCustomer().fold(
+        return getCustomer().fold(
             onSuccess = { customer ->
                 val paymentMethods = customerRepository.getPaymentMethods(
                     customerConfig = PaymentSheet.CustomerConfiguration(
@@ -37,16 +37,26 @@ internal class StripeCustomerAdapter @Inject constructor(
                     ),
                     types = listOf(PaymentMethod.Type.Card)
                 )
-                return Result.success(paymentMethods)
+                Result.success(paymentMethods)
             },
             onFailure = {
-                return Result.failure(it)
+                Result.failure(it)
             }
         )
     }
 
-    override suspend fun attachPaymentMethod(paymentMethodId: String) {
-        TODO()
+    override suspend fun attachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
+        return getCustomer().mapCatching { customer ->
+            customerRepository.attachPaymentMethod(
+                customerConfig = PaymentSheet.CustomerConfiguration(
+                    id = customer.customerId,
+                    ephemeralKeySecret = customer.ephemeralKey
+                ),
+                paymentMethodId = paymentMethodId
+            ).getOrElse {
+                return Result.failure(it)
+            }
+        }
     }
 
     override suspend fun detachPaymentMethod(paymentMethodId: String) {

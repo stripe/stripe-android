@@ -22,14 +22,16 @@ import com.stripe.android.paymentsheet.injection.DaggerStripeCustomerAdapterComp
 interface CustomerAdapter {
     /**
      * Retrieves a list of payment methods attached to a customer
+     * @return a list of [PaymentMethod]s.
      */
     suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>>
 
     /**
      * Attaches a payment method to a customer
      * @param paymentMethodId, the payment method to attach to a customer
+     * @return the modified [PaymentMethod].
      */
-    suspend fun attachPaymentMethod(paymentMethodId: String)
+    suspend fun attachPaymentMethod(paymentMethodId: String): Result<PaymentMethod>
 
     /**
      * Detaches the given payment method from a customer

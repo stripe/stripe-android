@@ -130,6 +130,32 @@ class CustomerAdapterTest {
         assertThat(paymentMethods).isEqualTo(error)
     }
 
+    @Test
+    fun `attachPaymentMethod succeeds when the payment method is attached`() = runTest {
+        val adapter = createAdapter(
+            customerRepository = FakeCustomerRepository(
+                onAttachPaymentMethod = {
+                    Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                }
+            )
+        )
+        val result = adapter.attachPaymentMethod("pm_1234")
+        assertThat(result.getOrNull()).isNotNull()
+    }
+
+    @Test
+    fun `attachPaymentMethod fails when the payment method couldn't be attached`() = runTest {
+        val adapter = createAdapter(
+            customerRepository = FakeCustomerRepository(
+                onAttachPaymentMethod = {
+                    Result.failure(Exception("could not attach payment method"))
+                }
+            )
+        )
+        val result = adapter.attachPaymentMethod("pm_1234")
+        assertThat(result.isFailure).isTrue()
+    }
+
     private fun createAdapter(
         customerEphemeralKeyProvider: CustomerEphemeralKeyProvider =
             CustomerEphemeralKeyProvider {

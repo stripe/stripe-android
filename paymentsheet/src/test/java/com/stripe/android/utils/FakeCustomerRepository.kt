@@ -8,6 +8,9 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 internal class FakeCustomerRepository(
     private val paymentMethods: List<PaymentMethod> = emptyList(),
     private val customer: Customer? = null,
+    private val onAttachPaymentMethod: () -> Result<PaymentMethod> = {
+        Result.failure(NotImplementedError())
+    },
 ) : CustomerRepository {
     lateinit var savedPaymentMethod: PaymentMethod
     var error: Throwable? = null
@@ -30,7 +33,5 @@ internal class FakeCustomerRepository(
     override suspend fun attachPaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodId: String
-    ): Result<PaymentMethod?> {
-        return Result.failure(NotImplementedError())
-    }
+    ): Result<PaymentMethod> = onAttachPaymentMethod()
 }
