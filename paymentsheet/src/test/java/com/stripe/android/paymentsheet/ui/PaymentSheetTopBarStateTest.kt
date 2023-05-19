@@ -3,13 +3,11 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import com.stripe.android.R as StripeR
 
 @RunWith(AndroidJUnit4::class)
@@ -22,7 +20,7 @@ class PaymentSheetTopBarStateTest {
     fun `SelectSavedPaymentMethods shows correct navigation icon`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.SelectSavedPaymentMethods,
-            paymentMethods = emptyList(),
+            showEditMenu = false,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -35,7 +33,7 @@ class PaymentSheetTopBarStateTest {
     fun `AddFirstPaymentMethod shows correct navigation icon`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddFirstPaymentMethod,
-            paymentMethods = emptyList(),
+            showEditMenu = false,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -48,7 +46,7 @@ class PaymentSheetTopBarStateTest {
     fun `AddAnotherPaymentMethod shows correct navigation icon`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
-            paymentMethods = emptyList(),
+            showEditMenu = false,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -61,7 +59,7 @@ class PaymentSheetTopBarStateTest {
     fun `Shows test mode badge if not running in live mode`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
-            paymentMethods = emptyList(),
+            showEditMenu = false,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -74,7 +72,7 @@ class PaymentSheetTopBarStateTest {
     fun `Hide test mode badge if running in live mode`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
-            paymentMethods = emptyList(),
+            showEditMenu = false,
             isLiveMode = true,
             isProcessing = false,
             isEditing = false,
@@ -87,7 +85,7 @@ class PaymentSheetTopBarStateTest {
     fun `Shows edit menu if displaying customer payment methods`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.SelectSavedPaymentMethods,
-            paymentMethods = listOf(mock()),
+            showEditMenu = true,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -100,7 +98,7 @@ class PaymentSheetTopBarStateTest {
     fun `Hides edit menu if customer has no payment methods`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.SelectSavedPaymentMethods,
-            paymentMethods = emptyList(),
+            showEditMenu = false,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -113,7 +111,7 @@ class PaymentSheetTopBarStateTest {
     fun `Hides edit menu if not on the saved payment methods screen`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
-            paymentMethods = listOf(mock()),
+            showEditMenu = true,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -126,7 +124,7 @@ class PaymentSheetTopBarStateTest {
     fun `Shows correct edit menu label when not in editing mode`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
-            paymentMethods = emptyList(),
+            showEditMenu = false,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -139,7 +137,7 @@ class PaymentSheetTopBarStateTest {
     fun `Shows correct edit menu label when in editing mode`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
-            paymentMethods = emptyList(),
+            showEditMenu = false,
             isLiveMode = true,
             isProcessing = false,
             isEditing = true,
@@ -152,7 +150,7 @@ class PaymentSheetTopBarStateTest {
     fun `Enables menu when not processing`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
-            paymentMethods = emptyList(),
+            showEditMenu = false,
             isLiveMode = false,
             isProcessing = false,
             isEditing = false,
@@ -165,7 +163,7 @@ class PaymentSheetTopBarStateTest {
     fun `Disables menu when processing`() {
         val state = buildTopBarState(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
-            paymentMethods = emptyList(),
+            showEditMenu = false,
             isLiveMode = false,
             isProcessing = true,
             isEditing = false,
@@ -176,7 +174,7 @@ class PaymentSheetTopBarStateTest {
 
     private fun buildTopBarState(
         screen: PaymentSheetScreen,
-        paymentMethods: List<PaymentMethod>?,
+        showEditMenu: Boolean,
         isLiveMode: Boolean,
         isProcessing: Boolean,
         isEditing: Boolean,
@@ -186,7 +184,7 @@ class PaymentSheetTopBarStateTest {
         composeTestRule.setContent {
             state = rememberPaymentSheetTopBarState(
                 screen = screen,
-                paymentMethods = paymentMethods,
+                showEditMenu = showEditMenu,
                 isLiveMode = isLiveMode,
                 isProcessing = isProcessing,
                 isEditing = isEditing,

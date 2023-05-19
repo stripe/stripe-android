@@ -27,7 +27,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.uicore.StripeTheme
@@ -40,7 +39,7 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 @Composable
 internal fun PaymentSheetTopBar(
     screen: PaymentSheetScreen,
-    paymentMethods: List<PaymentMethod>?,
+    showEditMenu: Boolean,
     isLiveMode: Boolean?,
     isProcessing: Boolean,
     isEditing: Boolean,
@@ -50,7 +49,7 @@ internal fun PaymentSheetTopBar(
 ) {
     val state = rememberPaymentSheetTopBarState(
         screen = screen,
-        paymentMethods = paymentMethods,
+        showEditMenu = showEditMenu,
         isLiveMode = isLiveMode ?: true,
         isProcessing = isProcessing,
         isEditing = isEditing,

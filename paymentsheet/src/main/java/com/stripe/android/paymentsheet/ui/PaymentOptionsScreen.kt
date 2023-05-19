@@ -37,7 +37,7 @@ internal fun PaymentOptionsScreen(
         topBar = {
             PaymentSheetTopBar(
                 screen = screen,
-                paymentMethods = paymentMethods,
+                showEditMenu = !paymentMethods.isNullOrEmpty(),
                 isLiveMode = isLiveMode,
                 isProcessing = isProcessing,
                 isEditing = isEditing,

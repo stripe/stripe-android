@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.R as StripeR
@@ -22,12 +21,12 @@ internal data class PaymentSheetTopBarState(
 @Composable
 internal fun rememberPaymentSheetTopBarState(
     screen: PaymentSheetScreen,
-    paymentMethods: List<PaymentMethod>?,
+    showEditMenu: Boolean,
     isLiveMode: Boolean,
     isProcessing: Boolean,
     isEditing: Boolean,
 ): PaymentSheetTopBarState {
-    return remember(screen, paymentMethods, isLiveMode, isProcessing, isEditing) {
+    return remember(screen, showEditMenu, isLiveMode, isProcessing, isEditing) {
         val icon = if (screen == PaymentSheetScreen.AddAnotherPaymentMethod) {
             R.drawable.stripe_ic_paymentsheet_back
         } else {
@@ -52,7 +51,7 @@ internal fun rememberPaymentSheetTopBarState(
             icon = icon,
             contentDescription = contentDescription,
             showTestModeLabel = !isLiveMode,
-            showEditMenu = showOptionsMenu && !paymentMethods.isNullOrEmpty(),
+            showEditMenu = showOptionsMenu && showEditMenu,
             editMenuLabel = editMenuLabel,
             isEnabled = !isProcessing,
         )
