@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.injection.DaggerStripeCustomerAdapterComponent
 
 /**
  * [CustomerAdapter] A "bridge" from wallet mode to your backend to fetch Customer-related
@@ -74,14 +75,19 @@ interface CustomerAdapter {
          * setup intent.
          * @param canCreateSetupIntents, whether or not this adapter can create setup intents
          */
-        @Suppress("UNUSED_PARAMETER")
         fun create(
             context: Context,
             customerEphemeralKeyProvider: CustomerEphemeralKeyProvider,
             setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
             canCreateSetupIntents: Boolean,
         ): CustomerAdapter {
-            TODO()
+            val component = DaggerStripeCustomerAdapterComponent.builder()
+                .context(context)
+                .customerEphemeralKeyProvider(customerEphemeralKeyProvider)
+                .setupIntentClientSecretProvider(setupIntentClientSecretProvider)
+                .canCreateSetupIntents(canCreateSetupIntents)
+                .build()
+            return component.stripeCustomerAdapter
         }
     }
 }
