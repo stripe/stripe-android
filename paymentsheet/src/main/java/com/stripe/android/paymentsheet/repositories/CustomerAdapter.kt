@@ -73,19 +73,16 @@ interface CustomerAdapter {
          * @param setupIntentClientSecretProvider, a callback to retrieve the setup intent client
          * secret. The client secret is used in this adapter to attach a payment method with a
          * setup intent.
-         * @param canCreateSetupIntents, whether or not this adapter can create setup intents
          */
         fun create(
             context: Context,
             customerEphemeralKeyProvider: CustomerEphemeralKeyProvider,
             setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
-            canCreateSetupIntents: Boolean,
         ): CustomerAdapter {
             val component = DaggerStripeCustomerAdapterComponent.builder()
                 .context(context)
                 .customerEphemeralKeyProvider(customerEphemeralKeyProvider)
                 .setupIntentClientSecretProvider(setupIntentClientSecretProvider)
-                .canCreateSetupIntents(canCreateSetupIntents)
                 .build()
             return component.stripeCustomerAdapter
         }

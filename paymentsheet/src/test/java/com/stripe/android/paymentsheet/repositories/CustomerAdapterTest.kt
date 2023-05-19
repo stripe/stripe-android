@@ -48,8 +48,7 @@ class CustomerAdapterTest {
         val adapter = CustomerAdapter.create(
             context = context,
             customerEphemeralKeyProvider = customerEphemeralKeyProvider,
-            setupIntentClientSecretProvider = setupIntentClientSecretProvider,
-            canCreateSetupIntents = true
+            setupIntentClientSecretProvider = setupIntentClientSecretProvider
         )
 
         assertThat(adapter).isNotNull()

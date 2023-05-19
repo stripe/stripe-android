@@ -29,8 +29,6 @@ import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-internal const val CAN_CREATE_SETUP_INTENT = "canCreateSetupIntent"
-
 @Singleton
 @Component(
     modules = [
@@ -57,11 +55,6 @@ internal interface StripeCustomerAdapterComponent {
         @BindsInstance
         fun setupIntentClientSecretProvider(
             setupIntentClientSecretProvider: SetupIntentClientSecretProvider?
-        ): Builder
-
-        @BindsInstance
-        fun canCreateSetupIntents(
-            @Named(CAN_CREATE_SETUP_INTENT) canCreateSetupIntents: Boolean
         ): Builder
 
         fun build(): StripeCustomerAdapterComponent
