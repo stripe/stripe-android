@@ -24,16 +24,31 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
+import com.stripe.android.paymentsheet.wallet.SavedPaymentMethodsSheet
 
+@OptIn(ExperimentalSavedPaymentMethodsApi::class)
 internal class SavedPaymentMethodsActivity : AppCompatActivity() {
     private val viewModel by viewModels<SavedPaymentMethodsViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val savedPaymentMethodsSheet = SavedPaymentMethodsSheet.create(
+            activity = this,
+            configuration = SavedPaymentMethodsSheet.Configuration(
+                merchantDisplayName = "Test Merchant",
+            ),
+            customerAdapter = viewModel.customerAdapter,
+            callback = {
+                TODO()
+            }
+        )
+
         setContent {
             PaymentSheetExampleTheme {
+                val context = LocalContext.current
                 val viewState by viewModel.state.collectAsState()
                 Column(
                     modifier = Modifier
@@ -47,7 +62,19 @@ internal class SavedPaymentMethodsActivity : AppCompatActivity() {
 
                     when (val state = viewState) {
                         is SavedPaymentMethodsViewState.Data -> {
-                            PaymentDefaults()
+                            PaymentDefaults(
+                                onUpdateDefaultPaymentMethod = {
+                                    try {
+                                        savedPaymentMethodsSheet.present()
+                                    } catch (_: Error) {
+                                        Toast.makeText(
+                                            context,
+                                            "Wallet mode under construction",
+                                            Toast.LENGTH_LONG,
+                                        ).show()
+                                    }
+                                }
+                            )
                         }
                         is SavedPaymentMethodsViewState.FailedToLoad -> {
                             Text(
@@ -69,8 +96,9 @@ internal class SavedPaymentMethodsActivity : AppCompatActivity() {
 }
 
 @Composable
-private fun PaymentDefaults() {
-    val context = LocalContext.current
+private fun PaymentDefaults(
+    onUpdateDefaultPaymentMethod: () -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -81,13 +109,7 @@ private fun PaymentDefaults() {
             fontWeight = FontWeight.Bold,
         )
         TextButton(
-            onClick = {
-                Toast.makeText(
-                    context,
-                    "Wallet mode under construction",
-                    Toast.LENGTH_LONG,
-                ).show()
-            }
+            onClick = onUpdateDefaultPaymentMethod
         ) {
             Text(
                 text = "Visa 4242",

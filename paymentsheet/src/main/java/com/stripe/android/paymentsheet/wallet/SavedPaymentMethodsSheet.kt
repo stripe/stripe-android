@@ -66,7 +66,7 @@ class SavedPaymentMethodsSheet internal constructor() {
             customerAdapter: CustomerAdapter,
             callback: SavedPaymentMethodsSheetResultCallback,
         ): SavedPaymentMethodsSheet {
-            TODO()
+            return SavedPaymentMethodsSheet()
         }
 
         @Suppress("UNUSED_PARAMETER")
@@ -76,7 +76,7 @@ class SavedPaymentMethodsSheet internal constructor() {
             customerAdapter: CustomerAdapter,
             callback: SavedPaymentMethodsSheetResultCallback,
         ): SavedPaymentMethodsSheet {
-            TODO()
+            return SavedPaymentMethodsSheet()
         }
     }
 }
