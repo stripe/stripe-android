@@ -7,12 +7,12 @@ import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.repositories.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
+import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -20,7 +20,7 @@ import org.robolectric.RobolectricTestRunner
 class CustomerAdapterTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val customerRepository = mock<CustomerRepository>()
+    private val customerRepository = FakeCustomerRepository()
 
     @Before
     fun setup() {
@@ -57,6 +57,26 @@ class CustomerAdapterTest {
 
         customer = adapter.getCustomer()
         assertThat(customer.getOrNull()?.customerId).isEqualTo("0")
+    }
+
+    @Test
+    fun `CustomerEphemeralKey is expired and updated`() = runTest {
+        val adapter = createAdapter(
+            customerEphemeralKeyProvider = {
+                Result.success(
+                    CustomerEphemeralKey(
+                        customerId = testScheduler.currentTime.toString(),
+                        ephemeralKey = "ek_123"
+                    )
+                )
+            },
+            timeProvider = { testScheduler.currentTime }
+        )
+        assertThat(adapter.cachedCustomer).isNull()
+
+        var customer = adapter.getCustomer()
+        assertThat(customer.getOrNull()?.customerId).isEqualTo("0")
+        assertThat(adapter.cachedCustomer).isNotNull()
 
         advanceTimeBy(CACHED_CUSTOMER_MAX_AGE_MILLIS + 1)
         customer = adapter.getCustomer()
