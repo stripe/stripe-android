@@ -27,12 +27,11 @@ internal interface CustomerRepository {
 
     /**
      * Detach a payment method from the Customer and return the modified [PaymentMethod].
-     * Silently handle failures by returning null.
      */
     suspend fun detachPaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodId: String
-    ): PaymentMethod?
+    ): Result<PaymentMethod>
 
     /**
      * Attach a payment method to the Customer and return the modified [PaymentMethod].
