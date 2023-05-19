@@ -15,6 +15,7 @@ import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.model.InitializationType
@@ -32,6 +33,7 @@ import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import java.util.Locale
+import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
 import com.stripe.android.uicore.R as UiCoreR
@@ -130,12 +132,16 @@ class Selectors(
         PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> EspressoIdButton(R.id.collect_address_radio_never)
     }
 
-    val baseScreenshotFilenamePrefix = "info-" +
-        getResourceString(paymentSelection.label) +
-        "-" +
-        testParameters.intentType.name
-
-    val buyButton = BuyButton(composeTestRule)
+    val buyButton = BuyButton(
+        composeTestRule = composeTestRule,
+        processingCompleteTimeout = if (testParameters.paymentMethod.code == CashAppPay.code) {
+            // We're using a longer timeout for Cash App Pay until we fix an issue where we
+            // needlessly poll after a canceled payment attempt.
+            15.seconds
+        } else {
+            5.seconds
+        }
+    )
 
     val addPaymentMethodButton = AddPaymentMethodButton(device)
 
