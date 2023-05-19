@@ -48,8 +48,7 @@ class CustomerAdapterTest {
         val adapter = CustomerAdapter.create(
             context = context,
             customerEphemeralKeyProvider = customerEphemeralKeyProvider,
-            setupIntentClientSecretProvider = setupIntentClientSecretProvider,
-            canCreateSetupIntents = true
+            setupIntentClientSecretProvider = setupIntentClientSecretProvider
         )
 
         assertThat(adapter).isNotNull()
@@ -122,14 +121,12 @@ class CustomerAdapterTest {
             SetupIntentClientSecretProvider {
                 Result.success("seti_123")
             },
-        canCreateSetupIntents: Boolean = true,
         timeProvider: () -> Long = { 1L }
     ): StripeCustomerAdapter {
         return StripeCustomerAdapter(
             context = context,
             customerEphemeralKeyProvider = customerEphemeralKeyProvider,
             setupIntentClientSecretProvider = setupIntentClientSecretProvider,
-            canCreateSetupIntents = canCreateSetupIntents,
             timeProvider = timeProvider,
             customerRepository = customerRepository,
             prefsRepositoryFactory = { FakePrefsRepository() }
