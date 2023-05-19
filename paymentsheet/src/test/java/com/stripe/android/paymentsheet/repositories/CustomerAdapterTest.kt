@@ -131,7 +131,7 @@ class CustomerAdapterTest {
     }
 
     @Test
-    fun `attachPaymentMethod succeeds`() = runTest {
+    fun `attachPaymentMethod succeeds when the payment method is attached`() = runTest {
         val adapter = createAdapter(
             customerRepository = FakeCustomerRepository(
                 onAttachPaymentMethod = {
@@ -144,7 +144,7 @@ class CustomerAdapterTest {
     }
 
     @Test
-    fun `attachPaymentMethod throws`() = runTest {
+    fun `attachPaymentMethod fails when the payment method couldn't be attached`() = runTest {
         val adapter = createAdapter(
             customerRepository = FakeCustomerRepository(
                 onAttachPaymentMethod = {

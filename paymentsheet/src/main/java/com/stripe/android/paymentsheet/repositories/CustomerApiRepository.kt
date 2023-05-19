@@ -92,7 +92,7 @@ internal class CustomerApiRepository @Inject constructor(
     override suspend fun attachPaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodId: String
-    ): Result<PaymentMethod?> =
+    ): Result<PaymentMethod> =
         stripeRepository.attachPaymentMethod(
             customerId = customerConfig.id,
             publishableKey = lazyPaymentConfig.get().publishableKey,

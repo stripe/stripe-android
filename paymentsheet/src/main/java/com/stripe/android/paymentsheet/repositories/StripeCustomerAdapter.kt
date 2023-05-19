@@ -45,7 +45,7 @@ internal class StripeCustomerAdapter @Inject constructor(
         )
     }
 
-    override suspend fun attachPaymentMethod(paymentMethodId: String): Result<PaymentMethod?> {
+    override suspend fun attachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
         return getCustomer().mapCatching { customer ->
             customerRepository.attachPaymentMethod(
                 customerConfig = PaymentSheet.CustomerConfiguration(
@@ -53,15 +53,10 @@ internal class StripeCustomerAdapter @Inject constructor(
                     ephemeralKeySecret = customer.ephemeralKey
                 ),
                 paymentMethodId = paymentMethodId
-            ).getOrThrow()
-        }.fold(
-            onSuccess = {
-                Result.success(it)
-            },
-            onFailure = {
-                Result.failure(it)
+            ).getOrElse {
+                return Result.failure(it)
             }
-        )
+        }
     }
 
     override suspend fun detachPaymentMethod(paymentMethodId: String) {
