@@ -7,7 +7,6 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
-import com.github.kittinunf.result.Result
 import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleSavedPaymentMethodRequest
@@ -20,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import com.github.kittinunf.result.Result as FuelResult
 
 @OptIn(ExperimentalSavedPaymentMethodsApi::class)
 class SavedPaymentMethodsViewModel(
@@ -35,7 +35,7 @@ class SavedPaymentMethodsViewModel(
         customerEphemeralKeyProvider = {
             fetchCustomerEphemeralKey().fold(
                 success = {
-                    kotlin.Result.success(
+                    Result.success(
                         CustomerEphemeralKey.create(
                             customerId = it.customerId,
                             ephemeralKey = it.customerEphemeralKeySecret
@@ -43,12 +43,11 @@ class SavedPaymentMethodsViewModel(
                     )
                 },
                 failure = {
-                    kotlin.Result.failure(it.exception)
+                    Result.failure(it.exception)
                 }
             )
         },
         setupIntentClientSecretProvider = null,
-        canCreateSetupIntents = false
     )
 
     init {
@@ -59,7 +58,7 @@ class SavedPaymentMethodsViewModel(
 
     private suspend fun initialize() {
         when (val result = fetchCustomerEphemeralKey()) {
-            is Result.Success -> {
+            is FuelResult.Success -> {
                 PaymentConfiguration.init(
                     context = getApplication(),
                     publishableKey = result.value.publishableKey,
@@ -73,7 +72,7 @@ class SavedPaymentMethodsViewModel(
                     )
                 }
             }
-            is Result.Failure -> {
+            is FuelResult.Failure -> {
                 _state.update {
                     SavedPaymentMethodsViewState.FailedToLoad(
                         message = result.error.message.toString()
@@ -83,7 +82,8 @@ class SavedPaymentMethodsViewModel(
         }
     }
 
-    private suspend fun fetchCustomerEphemeralKey(): Result<ExampleSavedPaymentMethodResponse, FuelError> {
+    private suspend fun fetchCustomerEphemeralKey():
+        FuelResult<ExampleSavedPaymentMethodResponse, FuelError> {
         val request = ExampleSavedPaymentMethodRequest(
             customerType = "returning"
         )
