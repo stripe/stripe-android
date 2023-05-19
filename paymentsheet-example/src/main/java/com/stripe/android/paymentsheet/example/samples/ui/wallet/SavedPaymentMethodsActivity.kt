@@ -24,10 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
-@OptIn(ExperimentalSavedPaymentMethodsApi::class)
 internal class SavedPaymentMethodsActivity : AppCompatActivity() {
     private val viewModel by viewModels<SavedPaymentMethodsViewModel>()
 
@@ -36,7 +34,7 @@ internal class SavedPaymentMethodsActivity : AppCompatActivity() {
 
         setContent {
             PaymentSheetExampleTheme {
-                val uiState by viewModel.state.collectAsState()
+                val viewState by viewModel.state.collectAsState()
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -46,15 +44,22 @@ internal class SavedPaymentMethodsActivity : AppCompatActivity() {
                         text = "Payment Methods",
                         fontSize = 18.sp
                     )
-                    if (uiState.isProcessing) {
-                        LinearProgressIndicator(
-                            Modifier
-                                .fillMaxWidth()
-                                .height(4.dp)
-                        )
-                    } else {
-                        uiState.customerEphemeralKey?.let {
+
+                    when (val state = viewState) {
+                        is SavedPaymentMethodsViewState.Data -> {
                             PaymentDefaults()
+                        }
+                        is SavedPaymentMethodsViewState.FailedToLoad -> {
+                            Text(
+                                text = state.message
+                            )
+                        }
+                        SavedPaymentMethodsViewState.Loading -> {
+                            LinearProgressIndicator(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(4.dp)
+                            )
                         }
                     }
                 }

@@ -4,7 +4,13 @@ import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.paymentsheet.repositories.CustomerEphemeralKey
 
 @OptIn(ExperimentalSavedPaymentMethodsApi::class)
-data class SavedPaymentMethodsViewState(
-    val isProcessing: Boolean = false,
-    val customerEphemeralKey: CustomerEphemeralKey? = null
-)
+sealed class SavedPaymentMethodsViewState {
+    object Loading : SavedPaymentMethodsViewState()
+
+    class FailedToLoad(val message: String) : SavedPaymentMethodsViewState()
+
+    @Suppress("unused")
+    class Data(
+        val customerEphemeralKey: CustomerEphemeralKey
+    ) : SavedPaymentMethodsViewState()
+}

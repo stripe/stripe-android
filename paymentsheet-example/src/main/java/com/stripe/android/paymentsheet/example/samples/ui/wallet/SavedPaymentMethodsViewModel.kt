@@ -15,7 +15,7 @@ import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.repositories.CustomerEphemeralKey
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
@@ -23,8 +23,8 @@ import kotlinx.serialization.json.Json
 class SavedPaymentMethodsViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
-    private val _state = MutableStateFlow(
-        value = SavedPaymentMethodsViewState()
+    private val _state = MutableStateFlow<SavedPaymentMethodsViewState>(
+        value = SavedPaymentMethodsViewState.Loading
     )
     val state: StateFlow<SavedPaymentMethodsViewState> = _state
 
@@ -34,9 +34,6 @@ class SavedPaymentMethodsViewModel(
 
     private fun initialize() {
         viewModelScope.launch {
-            _state.updateAndGet {
-                it.copy(isProcessing = true)
-            }
             val request = ExampleSavedPaymentMethodRequest(
                 customerType = "returning"
             )
@@ -56,9 +53,8 @@ class SavedPaymentMethodsViewModel(
                         context = getApplication(),
                         publishableKey = apiResult.value.publishableKey,
                     )
-                    _state.updateAndGet {
-                        it.copy(
-                            isProcessing = false,
+                    _state.update {
+                        SavedPaymentMethodsViewState.Data(
                             customerEphemeralKey = CustomerEphemeralKey.create(
                                 customerId = apiResult.value.customerId,
                                 ephemeralKey = apiResult.value.customerEphemeralKeySecret,
@@ -67,10 +63,9 @@ class SavedPaymentMethodsViewModel(
                     }
                 }
                 is Result.Failure -> {
-                    _state.updateAndGet {
-                        it.copy(
-                            isProcessing = false,
-                            customerEphemeralKey = null
+                    _state.update {
+                        SavedPaymentMethodsViewState.FailedToLoad(
+                            message = apiResult.error.message.toString()
                         )
                     }
                 }
