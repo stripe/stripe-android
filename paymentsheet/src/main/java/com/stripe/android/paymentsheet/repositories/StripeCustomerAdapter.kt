@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import android.content.Context
 import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import javax.inject.Inject
 
@@ -27,7 +28,21 @@ internal class StripeCustomerAdapter @Inject constructor(
     private var cacheDate: Long? = null
 
     override suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>> {
-        TODO()
+        getCustomer().fold(
+            onSuccess = { customer ->
+                val paymentMethods = customerRepository.getPaymentMethods(
+                    customerConfig = PaymentSheet.CustomerConfiguration(
+                        id = customer.customerId,
+                        ephemeralKeySecret = customer.ephemeralKey
+                    ),
+                    types = listOf(PaymentMethod.Type.Card)
+                )
+                return Result.success(paymentMethods)
+            },
+            onFailure = {
+                return Result.failure(it)
+            }
+        )
     }
 
     override suspend fun attachPaymentMethod(paymentMethodId: String) {
