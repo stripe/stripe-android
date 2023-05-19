@@ -1144,7 +1144,7 @@ internal class DefaultFlowControllerTest {
         )
 
         for ((clientSecret, verificationMode) in clientSecrets) {
-            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
+            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
                 CreateIntentResult.Success(clientSecret)
             }
 

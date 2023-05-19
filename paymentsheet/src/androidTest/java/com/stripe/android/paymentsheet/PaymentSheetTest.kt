@@ -181,7 +181,7 @@ internal class PaymentSheetTest {
             PaymentConfiguration.init(it, "pk_test_123")
             paymentSheet = PaymentSheet(
                 activity = it,
-                createIntentCallback = {
+                createIntentCallback = { _, _ ->
                     CreateIntentResult.Success("pi_example_secret_example")
                 }
             ) { result ->
@@ -213,6 +213,13 @@ internal class PaymentSheetTest {
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
         }
 
         networkRule.enqueue(
@@ -251,7 +258,7 @@ internal class PaymentSheetTest {
             PaymentConfiguration.init(it, "pk_test_123")
             paymentSheet = PaymentSheet(
                 activity = it,
-                createIntentCallback = {
+                createIntentCallback = { _, _ ->
                     CreateIntentResult.Failure(
                         cause = Exception("We don't accept visa"),
                         displayMessage = "We don't accept visa"
@@ -310,9 +317,9 @@ internal class PaymentSheetTest {
             PaymentConfiguration.init(it, "pk_test_123")
             paymentSheet = PaymentSheet(
                 activity = it,
-                createIntentCallback = {
+                createIntentCallback = { _, _ ->
                     CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
-                }
+                },
             ) { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()

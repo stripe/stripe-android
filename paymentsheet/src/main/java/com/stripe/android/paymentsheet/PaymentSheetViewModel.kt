@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.IntentConfirmationInterceptor
@@ -217,13 +216,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-        val isServerSideConfirmation = isDecoupling &&
-            IntentConfirmationInterceptor.createIntentCallback is CreateIntentCallbackForServerSideConfirmation
-
         eventReporter.onInit(
             configuration = config,
             isDecoupling = isDecoupling,
-            isServerSideConfirmation = isServerSideConfirmation,
         )
 
         viewModelScope.launch {

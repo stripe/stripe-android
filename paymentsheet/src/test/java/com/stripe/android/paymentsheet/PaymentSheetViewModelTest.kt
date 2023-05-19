@@ -9,7 +9,6 @@ import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CreateIntentCallback
-import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
 import com.stripe.android.CreateIntentResult
 import com.stripe.android.DelicatePaymentSheetApi
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
@@ -147,7 +146,6 @@ internal class PaymentSheetViewModelTest {
         createViewModel()
         verify(eventReporter).onInit(
             configuration = eq(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY),
-            isServerSideConfirmation = any(),
             isDecoupling = eq(false),
         )
     }
@@ -1259,7 +1257,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
-            isServerSideConfirmation = eq(false),
             isDecoupling = eq(false),
         )
     }
@@ -1267,7 +1264,7 @@ internal class PaymentSheetViewModelTest {
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
+        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
             throw AssertionError("Not expected to be called")
         }
 
@@ -1276,7 +1273,6 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
             isDecoupling = eq(true),
-            isServerSideConfirmation = eq(false),
         )
     }
 
@@ -1284,7 +1280,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
         IntentConfirmationInterceptor.createIntentCallback =
-            CreateIntentCallbackForServerSideConfirmation { _, _ ->
+            CreateIntentCallback { _, _ ->
                 throw AssertionError("Not expected to be called")
             }
 
@@ -1293,7 +1289,6 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
             isDecoupling = eq(true),
-            isServerSideConfirmation = eq(true),
         )
     }
 
@@ -1306,7 +1301,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         for ((clientSecret, verificationMode) in clientSecrets) {
-            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
+            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
                 CreateIntentResult.Success(clientSecret)
             }
 
