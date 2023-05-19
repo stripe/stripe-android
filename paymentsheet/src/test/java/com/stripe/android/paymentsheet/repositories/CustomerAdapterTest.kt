@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.repositories.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.utils.FakeCustomerRepository
@@ -20,7 +21,6 @@ import org.robolectric.RobolectricTestRunner
 class CustomerAdapterTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val customerRepository = FakeCustomerRepository()
 
     @Before
     fun setup() {
@@ -107,6 +107,29 @@ class CustomerAdapterTest {
             .isEqualTo("${CACHED_CUSTOMER_MAX_AGE_MILLIS + 1}")
     }
 
+    @Test
+    fun `retrievePaymentMethods returns success`() = runTest {
+        val adapter = createAdapter(
+            customerRepository = FakeCustomerRepository(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
+        )
+        val paymentMethods = adapter.retrievePaymentMethods()
+        assertThat(
+            paymentMethods.getOrNull()
+        ).contains(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+    }
+
+    @Test
+    fun `retrievePaymentMethods returns failure when customer is not fetched`() = runTest {
+        val error = Result.failure<CustomerEphemeralKey>(Exception("Cannot get customer"))
+        val adapter = createAdapter(
+            customerEphemeralKeyProvider = { error }
+        )
+        val paymentMethods = adapter.retrievePaymentMethods()
+        assertThat(paymentMethods).isEqualTo(error)
+    }
+
     private fun createAdapter(
         customerEphemeralKeyProvider: CustomerEphemeralKeyProvider =
             CustomerEphemeralKeyProvider {
@@ -121,7 +144,8 @@ class CustomerAdapterTest {
             SetupIntentClientSecretProvider {
                 Result.success("seti_123")
             },
-        timeProvider: () -> Long = { 1L }
+        timeProvider: () -> Long = { 1L },
+        customerRepository: CustomerRepository = FakeCustomerRepository(),
     ): StripeCustomerAdapter {
         return StripeCustomerAdapter(
             context = context,
