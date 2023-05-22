@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.toSavedSelection
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -78,6 +79,32 @@ internal class DefaultPrefsRepositoryTest {
             SavedSelection.PaymentMethod(
                 id = "pm_123456789"
             )
+        )
+    }
+
+    @Test
+    fun `setSavedSelection should return the saved payment method`() = runTest {
+        prefsRepository.setSavedSelection(
+            PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            ).toSavedSelection()
+        )
+        assertThat(
+            prefsRepository.getSavedSelection(isGooglePayReady, isLinkAvailable)
+        ).isEqualTo(
+            SavedSelection.PaymentMethod(
+                id = "pm_123456789"
+            )
+        )
+    }
+
+    @Test
+    fun `setSavedSelection null should return none`() = runTest {
+        prefsRepository.setSavedSelection(null)
+        assertThat(
+            prefsRepository.getSavedSelection(isGooglePayReady, isLinkAvailable)
+        ).isEqualTo(
+            SavedSelection.None
         )
     }
 }

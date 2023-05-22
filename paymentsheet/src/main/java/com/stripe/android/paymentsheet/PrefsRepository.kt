@@ -9,5 +9,7 @@ internal interface PrefsRepository {
         isLinkAvailable: Boolean
     ): SavedSelection
 
+    fun setSavedSelection(savedSelection: SavedSelection?)
+
     fun savePaymentSelection(paymentSelection: PaymentSelection?)
 }
