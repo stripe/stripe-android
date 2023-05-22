@@ -29,8 +29,8 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExa
 import com.stripe.android.paymentsheet.wallet.CustomerSheet
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-internal class CustomerActivity : AppCompatActivity() {
-    private val viewModel by viewModels<CustomerViewModel>()
+internal class CustomerSheetActivity : AppCompatActivity() {
+    private val viewModel by viewModels<CustomerSheetViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +61,7 @@ internal class CustomerActivity : AppCompatActivity() {
                     )
 
                     when (val state = viewState) {
-                        is CustomerViewState.Data -> {
+                        is CustomerSheetViewState.Data -> {
                             PaymentDefaults(
                                 onUpdateDefaultPaymentMethod = {
                                     try {
@@ -76,12 +76,12 @@ internal class CustomerActivity : AppCompatActivity() {
                                 }
                             )
                         }
-                        is CustomerViewState.FailedToLoad -> {
+                        is CustomerSheetViewState.FailedToLoad -> {
                             Text(
                                 text = state.message
                             )
                         }
-                        CustomerViewState.Loading -> {
+                        CustomerSheetViewState.Loading -> {
                             LinearProgressIndicator(
                                 Modifier
                                     .fillMaxWidth()

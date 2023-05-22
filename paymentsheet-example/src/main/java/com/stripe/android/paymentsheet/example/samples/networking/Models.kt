@@ -155,13 +155,13 @@ data class ExampleCreateAndConfirmErrorResponse(
 }
 
 @Serializable
-data class ExampleCustomerRequest(
+data class ExampleCustomerSheetRequest(
     @SerialName("customer_type")
     val customerType: String
 )
 
 @Serializable
-data class ExampleCustomerResponse(
+data class ExampleCustomerSheetResponse(
     @SerialName("publishableKey")
     val publishableKey: String,
     @SerialName("customerEphemeralKeySecret")

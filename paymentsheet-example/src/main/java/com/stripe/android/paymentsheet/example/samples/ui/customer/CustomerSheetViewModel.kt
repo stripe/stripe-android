@@ -11,8 +11,8 @@ import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentResponse
-import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerRequest
-import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerResponse
+import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerSheetRequest
+import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerSheetResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.repositories.CustomerAdapter
 import com.stripe.android.paymentsheet.repositories.CustomerEphemeralKey
@@ -24,13 +24,13 @@ import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as FuelResult
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-class CustomerViewModel(
+class CustomerSheetViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
-    private val _state = MutableStateFlow<CustomerViewState>(
-        value = CustomerViewState.Loading
+    private val _state = MutableStateFlow<CustomerSheetViewState>(
+        value = CustomerSheetViewState.Loading
     )
-    val state: StateFlow<CustomerViewState> = _state
+    val state: StateFlow<CustomerSheetViewState> = _state
 
     internal val customerAdapter: CustomerAdapter = CustomerAdapter.create(
         context = getApplication(),
@@ -77,7 +77,7 @@ class CustomerViewModel(
                     publishableKey = result.value.publishableKey,
                 )
                 _state.update {
-                    CustomerViewState.Data(
+                    CustomerSheetViewState.Data(
                         customerEphemeralKey = CustomerEphemeralKey.create(
                             customerId = result.value.customerId,
                             ephemeralKey = result.value.customerEphemeralKeySecret,
@@ -87,7 +87,7 @@ class CustomerViewModel(
             }
             is FuelResult.Failure -> {
                 _state.update {
-                    CustomerViewState.FailedToLoad(
+                    CustomerSheetViewState.FailedToLoad(
                         message = result.error.message.toString()
                     )
                 }
@@ -96,12 +96,12 @@ class CustomerViewModel(
     }
 
     private suspend fun fetchCustomerEphemeralKey():
-        FuelResult<ExampleCustomerResponse, FuelError> {
-        val request = ExampleCustomerRequest(
+        FuelResult<ExampleCustomerSheetResponse, FuelError> {
+        val request = ExampleCustomerSheetRequest(
             customerType = "returning"
         )
         val requestBody = Json.encodeToString(
-            ExampleCustomerRequest.serializer(),
+            ExampleCustomerSheetRequest.serializer(),
             request
         )
 
@@ -109,7 +109,7 @@ class CustomerViewModel(
             .post("$backendUrl/customer_ephemeral_key")
             .jsonBody(requestBody)
             .suspendable()
-            .awaitModel(ExampleCustomerResponse.serializer())
+            .awaitModel(ExampleCustomerSheetResponse.serializer())
     }
 
     private suspend fun createSetupIntent(customerId: String):

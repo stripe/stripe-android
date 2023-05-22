@@ -4,13 +4,13 @@ import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.repositories.CustomerEphemeralKey
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-sealed class CustomerViewState {
-    object Loading : CustomerViewState()
+sealed class CustomerSheetViewState {
+    object Loading : CustomerSheetViewState()
 
-    class FailedToLoad(val message: String) : CustomerViewState()
+    class FailedToLoad(val message: String) : CustomerSheetViewState()
 
     @Suppress("unused")
     class Data(
         val customerEphemeralKey: CustomerEphemeralKey
-    ) : CustomerViewState()
+    ) : CustomerSheetViewState()
 }
