@@ -3,19 +3,19 @@ package com.stripe.android.paymentsheet.wallet
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
-import com.stripe.android.ExperimentalSavedPaymentMethodsApi
+import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CustomerAdapter
 
 /**
  * 🏗 This feature is under construction 🏗
  *
- * [SavedPaymentMethodsSheet] A class that presents a bottom sheet to manage a customer's
+ * [CustomerSheet] A class that presents a bottom sheet to manage a customer's
  * saved payment methods.
  */
-@ExperimentalSavedPaymentMethodsApi
+@ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class SavedPaymentMethodsSheet internal constructor() {
+class CustomerSheet internal constructor() {
 
     /**
      * Presents the saved payment methods sheet for the customer. Results are delivered to the
@@ -26,9 +26,9 @@ class SavedPaymentMethodsSheet internal constructor() {
     }
 
     /**
-     * Configuration for [SavedPaymentMethodsSheet]
+     * Configuration for [CustomerSheet]
      */
-    @ExperimentalSavedPaymentMethodsApi
+    @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration(
         /**
@@ -39,7 +39,7 @@ class SavedPaymentMethodsSheet internal constructor() {
         val merchantDisplayName: String,
 
         /**
-         * Describes the appearance of [SavedPaymentMethodsSheet].
+         * Describes the appearance of [CustomerSheet].
          */
         val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
 
@@ -56,7 +56,7 @@ class SavedPaymentMethodsSheet internal constructor() {
         val headerTextForSelectionScreen: String? = null,
     )
 
-    @ExperimentalSavedPaymentMethodsApi
+    @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @Suppress("UNUSED_PARAMETER")
@@ -64,9 +64,9 @@ class SavedPaymentMethodsSheet internal constructor() {
             activity: ComponentActivity,
             configuration: Configuration,
             customerAdapter: CustomerAdapter,
-            callback: SavedPaymentMethodsSheetResultCallback,
-        ): SavedPaymentMethodsSheet {
-            return SavedPaymentMethodsSheet()
+            callback: CustomerSheetResultCallback,
+        ): CustomerSheet {
+            return CustomerSheet()
         }
 
         @Suppress("UNUSED_PARAMETER")
@@ -74,9 +74,9 @@ class SavedPaymentMethodsSheet internal constructor() {
             fragment: Fragment,
             configuration: Configuration,
             customerAdapter: CustomerAdapter,
-            callback: SavedPaymentMethodsSheetResultCallback,
-        ): SavedPaymentMethodsSheet {
-            return SavedPaymentMethodsSheet()
+            callback: CustomerSheetResultCallback,
+        ): CustomerSheet {
+            return CustomerSheet()
         }
     }
 }

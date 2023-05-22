@@ -38,10 +38,10 @@ import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetP
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.customer.CustomerSheetActivity
 import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
-import com.stripe.android.paymentsheet.example.samples.ui.wallet.SavedPaymentMethodsActivity
 
 private const val SurfaceOverlayOpacity = 0.12f
 
@@ -86,10 +86,10 @@ class MainActivity : AppCompatActivity() {
                 section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(
-                titleResId = R.string.saved_payment_methods_title,
-                subtitleResId = R.string.saved_payment_methods_subtitle,
-                klass = SavedPaymentMethodsActivity::class.java,
-                section = MenuItem.Section.WalletMode,
+                titleResId = R.string.customer_title,
+                subtitleResId = R.string.customer_subtitle,
+                klass = CustomerSheetActivity::class.java,
+                section = MenuItem.Section.CustomerSheet,
                 badge = MenuItem.Badge(
                     labelResId = R.string.under_construction_badge_label,
                 )
@@ -131,7 +131,7 @@ private data class MenuItem(
     enum class Section {
         CompleteFlow,
         CustomFlow,
-        WalletMode,
+        CustomerSheet,
         Internal,
     }
 }
@@ -154,8 +154,8 @@ private fun MainScreen(items: List<MenuItem>) {
         )
 
         Section(
-            title = "Wallet Mode",
-            items = groupedItems.getOrElse(MenuItem.Section.WalletMode) { emptyList() }
+            title = "Customer sheet",
+            items = groupedItems.getOrElse(MenuItem.Section.CustomerSheet) { emptyList() }
         )
 
         Section(
