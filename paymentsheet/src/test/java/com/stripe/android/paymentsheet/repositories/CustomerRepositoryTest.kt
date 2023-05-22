@@ -124,11 +124,11 @@ internal class CustomerRepositoryTest {
                 "payment_method_id"
             )
 
-            assertThat(result).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            assertThat(result.getOrNull()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
     @Test
-    fun `detachPaymentMethod() should return null on failure`() =
+    fun `detachPaymentMethod() should return exception on failure`() =
         runTest {
             givenDetachPaymentMethodReturns(
                 Result.failure(InvalidParameterException("error"))
@@ -142,7 +142,7 @@ internal class CustomerRepositoryTest {
                 "payment_method_id"
             )
 
-            assertThat(result).isNull()
+            assertThat(result.isFailure).isTrue()
         }
 
     @Test

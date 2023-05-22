@@ -36,8 +36,9 @@ interface CustomerAdapter {
     /**
      * Detaches the given payment method from a customer
      * @param paymentMethodId, the payment method to detach from the customer
+     * @return the modified [PaymentMethod].
      */
-    suspend fun detachPaymentMethod(paymentMethodId: String)
+    suspend fun detachPaymentMethod(paymentMethodId: String): Result<PaymentMethod>
 
     /**
      * Set the selected payment method option.

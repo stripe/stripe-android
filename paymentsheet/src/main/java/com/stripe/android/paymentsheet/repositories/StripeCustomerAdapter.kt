@@ -59,7 +59,7 @@ internal class StripeCustomerAdapter @Inject constructor(
         }
     }
 
-    override suspend fun detachPaymentMethod(paymentMethodId: String) {
+    override suspend fun detachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
         TODO()
     }
 
