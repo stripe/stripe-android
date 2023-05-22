@@ -1,33 +1,31 @@
 appId: com.stripe.android.paymentsheet.example
 ---
 - launchApp
+- scroll
 # Android specific: Navigate to example
-- tapOn: "PaymentSheet"
 - waitForAnimationToEnd:
     timeout: 5000
-# ENTER SHIPPING DETAILS
-- tapOn: "Add Shipping Address"
-- tapOn: "Full name"
-- inputText: "Jane Doe"
-- tapOn: "Address line 1"
-- inputText: "123 Main St."
-- tapOn: "Address line 2 (optional)"
-- inputText: "Apt 101"
-- tapOn: "City"
-- inputText: "Alabama"
-- tapOn: "ZIP Code"
-- inputText: 11111
-- hideKeyboard
-- tapOn: "Billing address is same as shipping"
+- "scroll"
+- tapOn: "Playground"
+- tapOn:
+    id: "com.stripe.android.paymentsheet.example:id/default_billing_off_button"
+- "scroll"
+- tapOn:
+    id: "com.stripe.android.paymentsheet.example:id/reload_button"
+- "scroll"
+- "scroll"
+- tapOn:
+      id: "com.stripe.android.paymentsheet.example:id/shipping_address_button"
+- waitForAnimationToEnd:
+    timeout: 5000
 - tapOn: "Save address"
-- extendedWaitUntil:
-    visible: "Ship to.*"
-    timeout: 60000
-- tapOn: "Buy"
+- tapOn:
+      id: "com.stripe.android.paymentsheet.example:id/complete_checkout_button"
 # ENTER CARD DETAILS
 - extendedWaitUntil:
     visible: "Card"
     timeout: 60000
+- assertVisible: "Billing address is same as shipping"
 - runFlow:
     file: ./card/subflow-card-details.yaml
     env:
@@ -35,4 +33,3 @@ appId: com.stripe.android.paymentsheet.example
 - scroll
 - tapOn: "Pay.*"
 - assertVisible: ".*Success.*"
-- tapOn: "Finish"
