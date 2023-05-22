@@ -5,6 +5,7 @@ import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.model.SavedSelection
 import javax.inject.Inject
 
 /**
@@ -74,11 +75,40 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun setSelectedPaymentMethodOption(paymentOption: PersistablePaymentMethodOption?) {
-        TODO()
+        getCustomerEphemeralKey().getOrNull()?.let { customerEphemeralKey ->
+            val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
+            val savedSelection = when (paymentOption) {
+                is PersistablePaymentMethodOption.GooglePay ->
+                    SavedSelection.GooglePay
+                is PersistablePaymentMethodOption.Link ->
+                    SavedSelection.Link
+                is PersistablePaymentMethodOption.StripeId ->
+                    SavedSelection.PaymentMethod(paymentOption.id)
+                else -> null
+            }
+            prefsRepository.setSavedSelection(savedSelection)
+        }
     }
 
-    override suspend fun fetchSelectedPaymentMethodOption(): Result<PersistablePaymentMethodOption> {
-        TODO()
+    override suspend fun fetchSelectedPaymentMethodOption(): Result<PersistablePaymentMethodOption?> {
+        return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
+            val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
+            val savedSelection = prefsRepository.getSavedSelection(
+                isGooglePayAvailable = false,
+                isLinkAvailable = false,
+            )
+
+            when (savedSelection) {
+                is SavedSelection.GooglePay ->
+                    PersistablePaymentMethodOption.GooglePay
+                is SavedSelection.Link ->
+                    PersistablePaymentMethodOption.Link
+                is SavedSelection.None ->
+                    null
+                is SavedSelection.PaymentMethod ->
+                    PersistablePaymentMethodOption.StripeId(savedSelection.id)
+            }
+        }
     }
 
     override suspend fun setupIntentClientSecretForCustomerAttach(): Result<String> {

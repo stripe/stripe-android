@@ -6,7 +6,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.FakePrefsRepository
+import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.repositories.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.advanceTimeBy
@@ -188,6 +190,60 @@ class CustomerAdapterTest {
         assertThat(result.isFailure).isTrue()
     }
 
+    @Test
+    fun `setSelectedPaymentMethodOption saves the selected payment method`() = runTest {
+        val adapter = createAdapter(
+            customerEphemeralKeyProvider = {
+                Result.success(
+                    CustomerEphemeralKey(
+                        customerId = "cus_123",
+                        ephemeralKey = "ek_123"
+                    )
+                )
+            },
+            prefsRepositoryFactory = {
+                DefaultPrefsRepository(
+                    context = context,
+                    customerId = it.customerId,
+                    workContext = testScheduler
+                )
+            }
+        )
+        adapter.setSelectedPaymentMethodOption(
+            paymentOption = PersistablePaymentMethodOption.StripeId("pm_1234")
+        )
+        val result = adapter.fetchSelectedPaymentMethodOption()
+        assertThat(result.getOrNull()).isEqualTo(
+            PersistablePaymentMethodOption.StripeId("pm_1234")
+        )
+    }
+
+    @Test
+    fun `setSelectedPaymentMethodOption sets none when there is no selection`() = runTest {
+        val adapter = createAdapter(
+            customerEphemeralKeyProvider = {
+                Result.success(
+                    CustomerEphemeralKey(
+                        customerId = "cus_123",
+                        ephemeralKey = "ek_123"
+                    )
+                )
+            },
+            prefsRepositoryFactory = {
+                DefaultPrefsRepository(
+                    context = context,
+                    customerId = it.customerId,
+                    workContext = testScheduler
+                )
+            }
+        )
+        adapter.setSelectedPaymentMethodOption(
+            paymentOption = null
+        )
+        val result = adapter.fetchSelectedPaymentMethodOption()
+        assertThat(result.getOrNull()).isNull()
+    }
+
     private fun createAdapter(
         customerEphemeralKeyProvider: CustomerEphemeralKeyProvider =
             CustomerEphemeralKeyProvider {
@@ -204,6 +260,9 @@ class CustomerAdapterTest {
             },
         timeProvider: () -> Long = { 1L },
         customerRepository: CustomerRepository = FakeCustomerRepository(),
+        prefsRepositoryFactory: (CustomerEphemeralKey) -> PrefsRepository = {
+            FakePrefsRepository()
+        }
     ): StripeCustomerAdapter {
         return StripeCustomerAdapter(
             context = context,
@@ -211,7 +270,7 @@ class CustomerAdapterTest {
             setupIntentClientSecretProvider = setupIntentClientSecretProvider,
             timeProvider = timeProvider,
             customerRepository = customerRepository,
-            prefsRepositoryFactory = { FakePrefsRepository() }
+            prefsRepositoryFactory = prefsRepositoryFactory,
         )
     }
 }
