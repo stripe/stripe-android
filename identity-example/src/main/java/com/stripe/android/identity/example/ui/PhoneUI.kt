@@ -67,6 +67,9 @@ internal fun PhoneUI(
     }
 
     if (useDocumentFallback) {
+        if (submissionState.phoneOtpCheck == null) {
+            onSubmissionStateChanged(submissionState.copy(phoneOtpCheck = PhoneOTPCheck.Attempt))
+        }
         OtpCheckSelectUI(selectedCheckType = optCheck, onNewCheckTypeSelected = {
             optCheck = it
             onSubmissionStateChanged(
