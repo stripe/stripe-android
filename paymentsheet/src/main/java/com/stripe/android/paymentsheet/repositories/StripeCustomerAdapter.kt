@@ -5,7 +5,8 @@ import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.repositories.PersistablePaymentMethodOption.Companion.toPersistablePaymentMethodOption
+import com.stripe.android.paymentsheet.repositories.PersistablePaymentMethodOption.Companion.toSavedSelection
 import javax.inject.Inject
 
 /**
@@ -77,16 +78,7 @@ internal class StripeCustomerAdapter @Inject constructor(
     override suspend fun setSelectedPaymentMethodOption(paymentOption: PersistablePaymentMethodOption?) {
         getCustomerEphemeralKey().getOrNull()?.let { customerEphemeralKey ->
             val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
-            val savedSelection = when (paymentOption) {
-                is PersistablePaymentMethodOption.GooglePay ->
-                    SavedSelection.GooglePay
-                is PersistablePaymentMethodOption.Link ->
-                    SavedSelection.Link
-                is PersistablePaymentMethodOption.StripeId ->
-                    SavedSelection.PaymentMethod(paymentOption.id)
-                else -> null
-            }
-            prefsRepository.setSavedSelection(savedSelection)
+            prefsRepository.setSavedSelection(paymentOption?.toSavedSelection())
         }
     }
 
@@ -97,17 +89,7 @@ internal class StripeCustomerAdapter @Inject constructor(
                 isGooglePayAvailable = false,
                 isLinkAvailable = false,
             )
-
-            when (savedSelection) {
-                is SavedSelection.GooglePay ->
-                    PersistablePaymentMethodOption.GooglePay
-                is SavedSelection.Link ->
-                    PersistablePaymentMethodOption.Link
-                is SavedSelection.None ->
-                    null
-                is SavedSelection.PaymentMethod ->
-                    PersistablePaymentMethodOption.StripeId(savedSelection.id)
-            }
+            savedSelection.toPersistablePaymentMethodOption()
         }
     }
 

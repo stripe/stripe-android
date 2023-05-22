@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.injection.DaggerStripeCustomerAdapterComponent
+import com.stripe.android.paymentsheet.model.SavedSelection
 
 /**
  * [CustomerAdapter] A "bridge" from wallet mode to your backend to fetch Customer-related
@@ -116,6 +117,24 @@ sealed class PersistablePaymentMethodOption(
                 "google_pay" -> GooglePay
                 "link" -> Link
                 else -> StripeId(id)
+            }
+        }
+
+        internal fun PersistablePaymentMethodOption.toSavedSelection(): SavedSelection {
+            return when (this) {
+                is GooglePay -> SavedSelection.GooglePay
+                is Link -> SavedSelection.Link
+                is StripeId -> SavedSelection.PaymentMethod(id)
+            }
+        }
+
+        internal fun SavedSelection.toPersistablePaymentMethodOption():
+            PersistablePaymentMethodOption? {
+            return when (this) {
+                is SavedSelection.GooglePay -> GooglePay
+                is SavedSelection.Link -> Link
+                is SavedSelection.None -> null
+                is SavedSelection.PaymentMethod -> StripeId(id)
             }
         }
     }

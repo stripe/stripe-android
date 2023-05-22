@@ -9,6 +9,9 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.repositories.PersistablePaymentMethodOption.Companion.toPersistablePaymentMethodOption
+import com.stripe.android.paymentsheet.repositories.PersistablePaymentMethodOption.Companion.toSavedSelection
 import com.stripe.android.paymentsheet.repositories.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.advanceTimeBy
@@ -242,6 +245,26 @@ class CustomerAdapterTest {
         )
         val result = adapter.fetchSelectedPaymentMethodOption()
         assertThat(result.getOrNull()).isNull()
+    }
+
+    @Test
+    fun `PersistablePaymentMethodOption to SavedSelection`() {
+        assertThat(PersistablePaymentMethodOption.GooglePay.toSavedSelection())
+            .isEqualTo(SavedSelection.GooglePay)
+        assertThat(PersistablePaymentMethodOption.Link.toSavedSelection())
+            .isEqualTo(SavedSelection.Link)
+        assertThat(PersistablePaymentMethodOption.StripeId("pm_1234").toSavedSelection())
+            .isEqualTo(SavedSelection.PaymentMethod("pm_1234"))
+    }
+
+    @Test
+    fun `SavedSelection to PersistablePaymentMethodOption`() {
+        assertThat(SavedSelection.GooglePay.toPersistablePaymentMethodOption())
+            .isEqualTo(PersistablePaymentMethodOption.GooglePay)
+        assertThat(SavedSelection.Link.toPersistablePaymentMethodOption())
+            .isEqualTo(PersistablePaymentMethodOption.Link)
+        assertThat(SavedSelection.PaymentMethod("pm_1234").toPersistablePaymentMethodOption())
+            .isEqualTo(PersistablePaymentMethodOption.StripeId("pm_1234"))
     }
 
     private fun createAdapter(
