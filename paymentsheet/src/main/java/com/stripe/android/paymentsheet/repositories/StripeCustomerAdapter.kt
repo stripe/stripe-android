@@ -24,11 +24,11 @@ internal class StripeCustomerAdapter @Inject constructor(
     private val prefsRepositoryFactory: (CustomerEphemeralKey) -> PrefsRepository,
 ) : CustomerAdapter {
 
-    internal var cachedCustomer: Result<CustomerEphemeralKey>? = null
-    private var cacheDate: Long? = null
+    @Volatile
+    private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
 
     override suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>> {
-        return getCustomer().fold(
+        return getCustomerEphemeralKey().fold(
             onSuccess = { customer ->
                 val paymentMethods = customerRepository.getPaymentMethods(
                     customerConfig = PaymentSheet.CustomerConfiguration(
@@ -46,7 +46,7 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun attachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
-        return getCustomer().mapCatching { customer ->
+        return getCustomerEphemeralKey().mapCatching { customer ->
             customerRepository.attachPaymentMethod(
                 customerConfig = PaymentSheet.CustomerConfiguration(
                     id = customer.customerId,
@@ -75,21 +75,22 @@ internal class StripeCustomerAdapter @Inject constructor(
         TODO()
     }
 
-    internal suspend fun getCustomer(): Result<CustomerEphemeralKey> {
-        return cachedCustomer.takeUnless {
-            shouldRefreshCustomer()
-        } ?: run {
-            val updatedCustomer = customerEphemeralKeyProvider.provide()
-            cacheDate = timeProvider()
-            cachedCustomer = updatedCustomer
-            updatedCustomer
+    internal suspend fun getCustomerEphemeralKey(): Result<CustomerEphemeralKey> {
+        return cachedCustomerEphemeralKey.takeUnless { cachedCustomerEphemeralKey ->
+            cachedCustomerEphemeralKey == null || shouldRefreshCustomer(cachedCustomerEphemeralKey.date)
+        }?.result ?: run {
+            val newCachedCustomerEphemeralKey = CachedCustomerEphemeralKey(
+                result = customerEphemeralKeyProvider.provide(),
+                date = timeProvider(),
+            )
+            cachedCustomerEphemeralKey = newCachedCustomerEphemeralKey
+            newCachedCustomerEphemeralKey.result
         }
     }
 
-    private fun shouldRefreshCustomer(): Boolean {
-        val customerCreated = cacheDate ?: return true
+    private fun shouldRefreshCustomer(cacheDate: Long): Boolean {
         val nowInMillis = timeProvider()
-        return customerCreated + CACHED_CUSTOMER_MAX_AGE_MILLIS < nowInMillis
+        return cacheDate + CACHED_CUSTOMER_MAX_AGE_MILLIS < nowInMillis
     }
 
     internal companion object {
@@ -97,3 +98,9 @@ internal class StripeCustomerAdapter @Inject constructor(
         internal const val CACHED_CUSTOMER_MAX_AGE_MILLIS = 60 * 30 * 1000L
     }
 }
+
+@OptIn(ExperimentalSavedPaymentMethodsApi::class)
+private data class CachedCustomerEphemeralKey(
+    val result: Result<CustomerEphemeralKey>,
+    val date: Long,
+)
