@@ -3,6 +3,7 @@
 ## XX.XX.XX - 2023-XX-XX
 
 ### PaymentSheet
+* [CHANGED][6687](https://github.com/stripe/stripe-android/pull/6687) Show the US Bank Account payment method if the specified verification method is either automatic or instant. Otherwise, hide the payment method.
 * [FIXED][6736](https://github.com/stripe/stripe-android/pull/6736) Fixed an issue where Google Places caused errors with R8.
 
 ## 20.25.2 - 2023-05-15
@@ -22,9 +23,6 @@
 ### All SDKs
 * [CHANGED][6635](https://github.com/stripe/stripe-android/pull/6635) Use non transitive R classes.
 * [CHANGED][6676](https://github.com/stripe/stripe-android/pull/6676) Updated Compose BOM to 2023.05.00.
-
-### PaymentSheet
-* [CHANGED][6687](https://github.com/stripe/stripe-android/pull/6687) Show the US Bank Account payment method if the specified verification method is either automatic or instant, otherwise, hide the payment method.
 
 ### Identity
 * [ADDED][6642](https://github.com/stripe/stripe-android/pull/6642) Support Test mode M1.
