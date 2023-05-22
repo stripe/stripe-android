@@ -3,6 +3,8 @@ appId: com.stripe.android.paymentsheet.example
 - launchApp
 # Android specific: Navigate to example
 - tapOn: "PaymentSheet"
+- waitForAnimationToEnd:
+      timeout: 5000
 - tapOn: "Buy"
 # ENTER CARD DETAILS
 - extendedWaitUntil:
