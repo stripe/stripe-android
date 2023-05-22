@@ -39,10 +39,26 @@ internal fun PaymentSheetScreen(
     val contentVisible by viewModel.contentVisible.collectAsState()
     val processing by viewModel.processing.collectAsState()
 
+    val screen = viewModel.currentScreen.collectAsState().value
+    val paymentMethods = viewModel.paymentMethods.collectAsState().value
+    val isLiveMode = viewModel.stripeIntent.collectAsState().value?.isLiveMode
+    val isProcessing = viewModel.processing.collectAsState().value
+    val isEditing = viewModel.editing.collectAsState().value
+
     DismissKeyboardOnProcessing(processing)
 
     PaymentSheetScaffold(
-        topBar = { PaymentSheetTopBar(viewModel) },
+        topBar = {
+            PaymentSheetTopBar(
+                screen = screen,
+                showEditMenu = !paymentMethods.isNullOrEmpty(),
+                isLiveMode = isLiveMode,
+                isProcessing = isProcessing,
+                isEditing = isEditing,
+                handleBackPressed = viewModel::handleBackPressed,
+                toggleEditing = viewModel::toggleEditing,
+            )
+        },
         content = { scrollModifier ->
             if (contentVisible) {
                 PaymentSheetScreenContent(

@@ -27,8 +27,24 @@ internal fun PaymentOptionsScreen(
     viewModel: PaymentOptionsViewModel,
     modifier: Modifier = Modifier,
 ) {
+    val screen = viewModel.currentScreen.collectAsState().value
+    val paymentMethods = viewModel.paymentMethods.collectAsState().value
+    val isLiveMode = viewModel.stripeIntent.collectAsState().value?.isLiveMode
+    val isProcessing = viewModel.processing.collectAsState().value
+    val isEditing = viewModel.editing.collectAsState().value
+
     PaymentSheetScaffold(
-        topBar = { PaymentSheetTopBar(viewModel) },
+        topBar = {
+            PaymentSheetTopBar(
+                screen = screen,
+                showEditMenu = !paymentMethods.isNullOrEmpty(),
+                isLiveMode = isLiveMode,
+                isProcessing = isProcessing,
+                isEditing = isEditing,
+                handleBackPressed = viewModel::handleBackPressed,
+                toggleEditing = viewModel::toggleEditing,
+            )
+        },
         content = { scrollModifier ->
             PaymentOptionsScreenContent(viewModel, scrollModifier)
         },

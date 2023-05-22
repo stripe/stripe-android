@@ -11,8 +11,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -30,7 +28,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.stripeColors
@@ -40,19 +38,19 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @Composable
 internal fun PaymentSheetTopBar(
-    viewModel: BaseSheetViewModel,
+    screen: PaymentSheetScreen,
+    showEditMenu: Boolean,
+    isLiveMode: Boolean?,
+    isProcessing: Boolean,
+    isEditing: Boolean,
+    handleBackPressed: () -> Unit,
+    toggleEditing: () -> Unit,
     elevation: Dp = 0.dp,
 ) {
-    val screen by viewModel.currentScreen.collectAsState()
-    val stripeIntent by viewModel.stripeIntent.collectAsState()
-    val isProcessing by viewModel.processing.collectAsState()
-    val isEditing by viewModel.editing.collectAsState()
-    val paymentMethods by viewModel.paymentMethods.collectAsState()
-
     val state = rememberPaymentSheetTopBarState(
         screen = screen,
-        paymentMethods = paymentMethods,
-        isLiveMode = stripeIntent?.isLiveMode ?: true,
+        showEditMenu = showEditMenu,
+        isLiveMode = isLiveMode ?: true,
         isProcessing = isProcessing,
         isEditing = isEditing,
     )
@@ -60,8 +58,8 @@ internal fun PaymentSheetTopBar(
     PaymentSheetTopBar(
         state = state,
         elevation = elevation,
-        onNavigationIconPressed = viewModel::handleBackPressed,
-        onEditIconPressed = viewModel::toggleEditing,
+        onNavigationIconPressed = handleBackPressed,
+        onEditIconPressed = toggleEditing,
     )
 }
 
