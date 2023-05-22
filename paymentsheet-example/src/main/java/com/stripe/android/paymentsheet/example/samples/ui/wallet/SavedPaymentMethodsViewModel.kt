@@ -9,6 +9,8 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.stripe.android.ExperimentalSavedPaymentMethodsApi
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentRequest
+import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleSavedPaymentMethodRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleSavedPaymentMethodResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
@@ -47,7 +49,18 @@ class SavedPaymentMethodsViewModel(
                 }
             )
         },
-        setupIntentClientSecretProvider = null,
+        setupIntentClientSecretProvider = { customerId ->
+            createSetupIntent(customerId).fold(
+                success = {
+                    Result.success(
+                        it.clientSecret
+                    )
+                },
+                failure = {
+                    Result.failure(it.exception)
+                }
+            )
+        },
     )
 
     init {
@@ -97,6 +110,23 @@ class SavedPaymentMethodsViewModel(
             .jsonBody(requestBody)
             .suspendable()
             .awaitModel(ExampleSavedPaymentMethodResponse.serializer())
+    }
+
+    private suspend fun createSetupIntent(customerId: String):
+        FuelResult<ExampleCreateSetupIntentResponse, FuelError> {
+        val request = ExampleCreateSetupIntentRequest(
+            customerId = customerId
+        )
+        val requestBody = Json.encodeToString(
+            ExampleCreateSetupIntentRequest.serializer(),
+            request
+        )
+
+        return Fuel
+            .post("$backendUrl/create_setup_intent")
+            .jsonBody(requestBody)
+            .suspendable()
+            .awaitModel(ExampleCreateSetupIntentResponse.serializer())
     }
 
     private companion object {

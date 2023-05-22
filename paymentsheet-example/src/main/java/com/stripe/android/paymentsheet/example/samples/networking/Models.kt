@@ -170,6 +170,18 @@ data class ExampleSavedPaymentMethodResponse(
     val customerId: String
 )
 
+@Serializable
+data class ExampleCreateSetupIntentRequest(
+    @SerialName("customer_id")
+    val customerId: String,
+)
+
+@Serializable
+data class ExampleCreateSetupIntentResponse(
+    @SerialName("client_secret")
+    val clientSecret: String,
+)
+
 /**
  * Awaits the [ApiResult] and deserializes it into the desired type [T].
  */

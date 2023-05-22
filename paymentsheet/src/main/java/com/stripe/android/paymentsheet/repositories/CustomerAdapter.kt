@@ -121,6 +121,9 @@ sealed class PersistablePaymentMethodOption(
     }
 }
 
+/**
+ * Callback to provide the customer's ID and an ephemeral key from your server.
+ */
 @ExperimentalSavedPaymentMethodsApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface CustomerEphemeralKeyProvider {
@@ -128,11 +131,14 @@ fun interface CustomerEphemeralKeyProvider {
     suspend fun provide(): Result<CustomerEphemeralKey>
 }
 
+/**
+ * Callback to provide the [SetupIntent] client secret given a customer ID from your server.
+ */
 @ExperimentalSavedPaymentMethodsApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface SetupIntentClientSecretProvider {
 
-    suspend fun provide(): Result<String>
+    suspend fun provide(customerId: String): Result<String>
 }
 
 @ExperimentalSavedPaymentMethodsApi
