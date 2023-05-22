@@ -15,6 +15,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalSavedPaymentMethodsApi::class)
@@ -56,8 +57,10 @@ class CustomerAdapterTest {
 
     @Test
     fun `CustomerEphemeralKey is cached`() = runTest {
+        val ephemeralKeyProviderCounter = AtomicInteger(0)
         val adapter = createAdapter(
             customerEphemeralKeyProvider = {
+                ephemeralKeyProviderCounter.incrementAndGet()
                 Result.success(
                     CustomerEphemeralKey(
                         customerId = testScheduler.currentTime.toString(),
@@ -67,20 +70,23 @@ class CustomerAdapterTest {
             },
             timeProvider = { testScheduler.currentTime }
         )
-        assertThat(adapter.cachedCustomer).isNull()
 
-        var customer = adapter.getCustomer()
-        assertThat(customer.getOrNull()?.customerId).isEqualTo("0")
-        assertThat(adapter.cachedCustomer).isNotNull()
+        advanceTimeBy(1)
+        var customer = adapter.getCustomerEphemeralKey()
+        assertThat(customer.getOrNull()?.customerId).isEqualTo("1")
+        assertThat(ephemeralKeyProviderCounter.get()).isEqualTo(1)
 
-        customer = adapter.getCustomer()
-        assertThat(customer.getOrNull()?.customerId).isEqualTo("0")
+        customer = adapter.getCustomerEphemeralKey()
+        assertThat(customer.getOrNull()?.customerId).isEqualTo("1")
+        assertThat(ephemeralKeyProviderCounter.get()).isEqualTo(1)
     }
 
     @Test
     fun `CustomerEphemeralKey is expired and updated`() = runTest {
+        val ephemeralKeyProviderCounter = AtomicInteger(0)
         val adapter = createAdapter(
             customerEphemeralKeyProvider = {
+                ephemeralKeyProviderCounter.incrementAndGet()
                 Result.success(
                     CustomerEphemeralKey(
                         customerId = testScheduler.currentTime.toString(),
@@ -90,21 +96,21 @@ class CustomerAdapterTest {
             },
             timeProvider = { testScheduler.currentTime }
         )
-        assertThat(adapter.cachedCustomer).isNull()
 
-        var customer = adapter.getCustomer()
+        var customer = adapter.getCustomerEphemeralKey()
         assertThat(customer.getOrNull()?.customerId).isEqualTo("0")
-        assertThat(adapter.cachedCustomer).isNotNull()
+        assertThat(ephemeralKeyProviderCounter.get()).isEqualTo(1)
 
         advanceTimeBy(CACHED_CUSTOMER_MAX_AGE_MILLIS)
-        customer = adapter.getCustomer()
-        assertThat(customer.getOrNull()?.customerId)
-            .isEqualTo("0")
+        customer = adapter.getCustomerEphemeralKey()
+        assertThat(customer.getOrNull()?.customerId).isEqualTo("0")
+        assertThat(ephemeralKeyProviderCounter.get()).isEqualTo(1)
 
         advanceTimeBy(1)
-        customer = adapter.getCustomer()
+        customer = adapter.getCustomerEphemeralKey()
         assertThat(customer.getOrNull()?.customerId)
             .isEqualTo("${CACHED_CUSTOMER_MAX_AGE_MILLIS + 1}")
+        assertThat(ephemeralKeyProviderCounter.get()).isEqualTo(2)
     }
 
     @Test
