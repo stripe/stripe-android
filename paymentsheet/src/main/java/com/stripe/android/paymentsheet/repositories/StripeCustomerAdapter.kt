@@ -60,7 +60,17 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun detachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
-        TODO()
+        return getCustomerEphemeralKey().mapCatching { customer ->
+            customerRepository.detachPaymentMethod(
+                customerConfig = PaymentSheet.CustomerConfiguration(
+                    id = customer.customerId,
+                    ephemeralKeySecret = customer.ephemeralKey
+                ),
+                paymentMethodId = paymentMethodId
+            ).getOrElse {
+                return Result.failure(it)
+            }
+        }
     }
 
     override suspend fun setSelectedPaymentMethodOption(paymentOption: PersistablePaymentMethodOption?) {

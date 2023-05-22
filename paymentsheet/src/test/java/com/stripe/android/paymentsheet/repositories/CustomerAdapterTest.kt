@@ -162,6 +162,32 @@ class CustomerAdapterTest {
         assertThat(result.isFailure).isTrue()
     }
 
+    @Test
+    fun `detachPaymentMethod succeeds when the payment method is detached`() = runTest {
+        val adapter = createAdapter(
+            customerRepository = FakeCustomerRepository(
+                onDetachPaymentMethod = {
+                    Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                }
+            )
+        )
+        val result = adapter.detachPaymentMethod("pm_1234")
+        assertThat(result.getOrNull()).isNotNull()
+    }
+
+    @Test
+    fun `detachPaymentMethod fails when the payment method couldn't be detached`() = runTest {
+        val adapter = createAdapter(
+            customerRepository = FakeCustomerRepository(
+                onDetachPaymentMethod = {
+                    Result.failure(Exception("could not detach payment method"))
+                }
+            )
+        )
+        val result = adapter.detachPaymentMethod("pm_1234")
+        assertThat(result.isFailure).isTrue()
+    }
+
     private fun createAdapter(
         customerEphemeralKeyProvider: CustomerEphemeralKeyProvider =
             CustomerEphemeralKeyProvider {
