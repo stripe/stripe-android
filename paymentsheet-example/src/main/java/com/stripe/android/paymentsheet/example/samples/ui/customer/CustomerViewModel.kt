@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui.wallet
+package com.stripe.android.paymentsheet.example.samples.ui.customer
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -7,12 +7,12 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
-import com.stripe.android.ExperimentalSavedPaymentMethodsApi
+import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentResponse
-import com.stripe.android.paymentsheet.example.samples.networking.ExampleSavedPaymentMethodRequest
-import com.stripe.android.paymentsheet.example.samples.networking.ExampleSavedPaymentMethodResponse
+import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerRequest
+import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.repositories.CustomerAdapter
 import com.stripe.android.paymentsheet.repositories.CustomerEphemeralKey
@@ -23,14 +23,14 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as FuelResult
 
-@OptIn(ExperimentalSavedPaymentMethodsApi::class)
-class SavedPaymentMethodsViewModel(
+@OptIn(ExperimentalCustomerSheetApi::class)
+class CustomerViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
-    private val _state = MutableStateFlow<SavedPaymentMethodsViewState>(
-        value = SavedPaymentMethodsViewState.Loading
+    private val _state = MutableStateFlow<CustomerViewState>(
+        value = CustomerViewState.Loading
     )
-    val state: StateFlow<SavedPaymentMethodsViewState> = _state
+    val state: StateFlow<CustomerViewState> = _state
 
     internal val customerAdapter: CustomerAdapter = CustomerAdapter.create(
         context = getApplication(),
@@ -77,7 +77,7 @@ class SavedPaymentMethodsViewModel(
                     publishableKey = result.value.publishableKey,
                 )
                 _state.update {
-                    SavedPaymentMethodsViewState.Data(
+                    CustomerViewState.Data(
                         customerEphemeralKey = CustomerEphemeralKey.create(
                             customerId = result.value.customerId,
                             ephemeralKey = result.value.customerEphemeralKeySecret,
@@ -87,7 +87,7 @@ class SavedPaymentMethodsViewModel(
             }
             is FuelResult.Failure -> {
                 _state.update {
-                    SavedPaymentMethodsViewState.FailedToLoad(
+                    CustomerViewState.FailedToLoad(
                         message = result.error.message.toString()
                     )
                 }
@@ -96,12 +96,12 @@ class SavedPaymentMethodsViewModel(
     }
 
     private suspend fun fetchCustomerEphemeralKey():
-        FuelResult<ExampleSavedPaymentMethodResponse, FuelError> {
-        val request = ExampleSavedPaymentMethodRequest(
+        FuelResult<ExampleCustomerResponse, FuelError> {
+        val request = ExampleCustomerRequest(
             customerType = "returning"
         )
         val requestBody = Json.encodeToString(
-            ExampleSavedPaymentMethodRequest.serializer(),
+            ExampleCustomerRequest.serializer(),
             request
         )
 
@@ -109,7 +109,7 @@ class SavedPaymentMethodsViewModel(
             .post("$backendUrl/customer_ephemeral_key")
             .jsonBody(requestBody)
             .suspendable()
-            .awaitModel(ExampleSavedPaymentMethodResponse.serializer())
+            .awaitModel(ExampleCustomerResponse.serializer())
     }
 
     private suspend fun createSetupIntent(customerId: String):

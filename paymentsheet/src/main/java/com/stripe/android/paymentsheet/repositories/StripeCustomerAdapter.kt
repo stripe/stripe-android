@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
 import android.content.Context
-import com.stripe.android.ExperimentalSavedPaymentMethodsApi
+import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -12,7 +12,7 @@ import javax.inject.Inject
  * key provided by [CustomerEphemeralKeyProvider] to read, update, or delete the customer's
  * default saved payment method using Android [SharedPreferences].
  */
-@OptIn(ExperimentalSavedPaymentMethodsApi::class)
+@OptIn(ExperimentalCustomerSheetApi::class)
 @Suppress("unused")
 @JvmSuppressWildcards
 internal class StripeCustomerAdapter @Inject constructor(
@@ -109,7 +109,7 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 }
 
-@OptIn(ExperimentalSavedPaymentMethodsApi::class)
+@OptIn(ExperimentalCustomerSheetApi::class)
 private data class CachedCustomerEphemeralKey(
     val result: Result<CustomerEphemeralKey>,
     val date: Long,

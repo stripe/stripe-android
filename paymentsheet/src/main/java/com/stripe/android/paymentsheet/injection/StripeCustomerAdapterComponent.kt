@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.BuildConfig
-import com.stripe.android.ExperimentalSavedPaymentMethodsApi
+import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
@@ -38,7 +38,7 @@ import kotlin.coroutines.CoroutineContext
         CoreCommonModule::class,
     ]
 )
-@OptIn(ExperimentalSavedPaymentMethodsApi::class)
+@OptIn(ExperimentalCustomerSheetApi::class)
 internal interface StripeCustomerAdapterComponent {
     val stripeCustomerAdapter: StripeCustomerAdapter
 
@@ -62,7 +62,7 @@ internal interface StripeCustomerAdapterComponent {
 }
 
 @Module
-@OptIn(ExperimentalSavedPaymentMethodsApi::class)
+@OptIn(ExperimentalCustomerSheetApi::class)
 internal interface StripeCustomerAdapterModule {
     @Binds
     fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository

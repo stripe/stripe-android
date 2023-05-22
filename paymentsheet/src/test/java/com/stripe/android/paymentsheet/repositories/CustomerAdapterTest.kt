@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ExperimentalSavedPaymentMethodsApi
+import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.FakePrefsRepository
@@ -18,7 +18,7 @@ import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalSavedPaymentMethodsApi::class)
+@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerAdapterTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()

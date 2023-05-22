@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import android.content.Context
 import androidx.annotation.RestrictTo
-import com.stripe.android.ExperimentalSavedPaymentMethodsApi
+import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.injection.DaggerStripeCustomerAdapterComponent
 
@@ -17,7 +17,7 @@ import com.stripe.android.paymentsheet.injection.DaggerStripeCustomerAdapterComp
  *
  * Use [CustomerAdapter.create] to create an instance of a [CustomerAdapter].
  */
-@ExperimentalSavedPaymentMethodsApi
+@ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CustomerAdapter {
     /**
@@ -60,7 +60,7 @@ interface CustomerAdapter {
      */
     suspend fun setupIntentClientSecretForCustomerAttach(): Result<String>
 
-    @ExperimentalSavedPaymentMethodsApi
+    @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
@@ -96,7 +96,7 @@ interface CustomerAdapter {
  * A representation of a saved payment method, used for persisting the user's default payment
  * method.
  */
-@ExperimentalSavedPaymentMethodsApi
+@ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class PersistablePaymentMethodOption(
     open val id: String
@@ -108,7 +108,7 @@ sealed class PersistablePaymentMethodOption(
 
     internal data class StripeId(override val id: String) : PersistablePaymentMethodOption(id)
 
-    @ExperimentalSavedPaymentMethodsApi
+    @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun fromId(id: String): PersistablePaymentMethodOption {
@@ -124,7 +124,7 @@ sealed class PersistablePaymentMethodOption(
 /**
  * Callback to provide the customer's ID and an ephemeral key from your server.
  */
-@ExperimentalSavedPaymentMethodsApi
+@ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface CustomerEphemeralKeyProvider {
 
@@ -134,20 +134,20 @@ fun interface CustomerEphemeralKeyProvider {
 /**
  * Callback to provide the [SetupIntent] client secret given a customer ID from your server.
  */
-@ExperimentalSavedPaymentMethodsApi
+@ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface SetupIntentClientSecretProvider {
 
     suspend fun provide(customerId: String): Result<String>
 }
 
-@ExperimentalSavedPaymentMethodsApi
+@ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CustomerEphemeralKey internal constructor(
     internal val customerId: String,
     internal val ephemeralKey: String,
 ) {
-    @ExperimentalSavedPaymentMethodsApi
+    @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun create(

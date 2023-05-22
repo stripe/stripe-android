@@ -8,4 +8,4 @@ import androidx.annotation.RestrictTo
 )
 @Retention(AnnotationRetention.BINARY)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-annotation class ExperimentalSavedPaymentMethodsApi
+annotation class ExperimentalCustomerSheetApi

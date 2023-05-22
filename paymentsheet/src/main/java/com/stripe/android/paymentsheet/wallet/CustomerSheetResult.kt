@@ -1,29 +1,29 @@
 package com.stripe.android.paymentsheet.wallet
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ExperimentalSavedPaymentMethodsApi
+import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.model.PaymentOption
 
-@ExperimentalSavedPaymentMethodsApi
+@ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class SavedPaymentMethodsSheetResult {
+sealed class CustomerSheetResult {
     /**
      * The customer selected a payment method
      * @param selection, the [PaymentOptionSelection] the customer selected from the
-     * [SavedPaymentMethodsSheet]
+     * [CustomerSheet]
      */
-    @ExperimentalSavedPaymentMethodsApi
+    @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Selected internal constructor(
         val selection: PaymentOptionSelection
-    ) : SavedPaymentMethodsSheetResult()
+    ) : CustomerSheetResult()
 
     /**
      * The customer canceled the sheet
      */
-    @ExperimentalSavedPaymentMethodsApi
+    @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Canceled internal constructor() : SavedPaymentMethodsSheetResult() {
+    class Canceled internal constructor() : CustomerSheetResult() {
         override fun equals(other: Any?): Boolean = this === other
         override fun hashCode(): Int = System.identityHashCode(this)
     }
@@ -31,11 +31,11 @@ sealed class SavedPaymentMethodsSheetResult {
     /**
      * An error occurred when presenting the sheet
      */
-    @ExperimentalSavedPaymentMethodsApi
+    @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Error internal constructor(
         val exception: Exception
-    ) : SavedPaymentMethodsSheetResult()
+    ) : CustomerSheetResult()
 }
 
 /**
@@ -43,7 +43,7 @@ sealed class SavedPaymentMethodsSheetResult {
  * @param paymentMethodId, the Stripe payment method ID
  * @param paymentOption, contains the drawable and label to display
  */
-@ExperimentalSavedPaymentMethodsApi
+@ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentOptionSelection internal constructor(
     val paymentMethodId: String,

@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui.wallet
+package com.stripe.android.paymentsheet.example.samples.ui.customer
 
 import android.os.Bundle
 import android.widget.Toast
@@ -24,20 +24,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.ExperimentalSavedPaymentMethodsApi
+import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
-import com.stripe.android.paymentsheet.wallet.SavedPaymentMethodsSheet
+import com.stripe.android.paymentsheet.wallet.CustomerSheet
 
-@OptIn(ExperimentalSavedPaymentMethodsApi::class)
-internal class SavedPaymentMethodsActivity : AppCompatActivity() {
-    private val viewModel by viewModels<SavedPaymentMethodsViewModel>()
+@OptIn(ExperimentalCustomerSheetApi::class)
+internal class CustomerActivity : AppCompatActivity() {
+    private val viewModel by viewModels<CustomerViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val savedPaymentMethodsSheet = SavedPaymentMethodsSheet.create(
+        val customerSheet = CustomerSheet.create(
             activity = this,
-            configuration = SavedPaymentMethodsSheet.Configuration(
+            configuration = CustomerSheet.Configuration(
                 merchantDisplayName = "Test Merchant",
             ),
             customerAdapter = viewModel.customerAdapter,
@@ -61,27 +61,27 @@ internal class SavedPaymentMethodsActivity : AppCompatActivity() {
                     )
 
                     when (val state = viewState) {
-                        is SavedPaymentMethodsViewState.Data -> {
+                        is CustomerViewState.Data -> {
                             PaymentDefaults(
                                 onUpdateDefaultPaymentMethod = {
                                     try {
-                                        savedPaymentMethodsSheet.present()
+                                        customerSheet.present()
                                     } catch (_: Error) {
                                         Toast.makeText(
                                             context,
-                                            "Wallet mode under construction",
+                                            "Customer sheet under construction",
                                             Toast.LENGTH_LONG,
                                         ).show()
                                     }
                                 }
                             )
                         }
-                        is SavedPaymentMethodsViewState.FailedToLoad -> {
+                        is CustomerViewState.FailedToLoad -> {
                             Text(
                                 text = state.message
                             )
                         }
-                        SavedPaymentMethodsViewState.Loading -> {
+                        CustomerViewState.Loading -> {
                             LinearProgressIndicator(
                                 Modifier
                                     .fillMaxWidth()
