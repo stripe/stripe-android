@@ -37,59 +37,22 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
                             VerificationType.DOCUMENT -> {
                                 if (submissionState.requirePhoneVerification == true) {
                                     VerificationSessionCreationRequest.Options(
-                                        document = VerificationSessionCreationRequest.Options.Document(
-                                            requireIdNumber = submissionState.requireId,
-                                            requireMatchingSelfie = submissionState.requireSelfie,
-                                            requireLiveCapture = submissionState.requireLiveCapture,
-                                            requireAddress = submissionState.requireAddress,
-                                            allowedTypes = mutableListOf<DocumentType>().also {
-                                                if (submissionState.allowDrivingLicense) {
-                                                    it.add(
-                                                    DocumentType.DrivingLicense
-                                                )
-                                                }
-                                                if (submissionState.allowPassport) {
-                                                    it.add(
-                                                    DocumentType.Passport
-                                                )
-                                                }
-                                                if (submissionState.allowId) it.add(DocumentType.IdCard)
-                                            }
-                                        ),
+                                        document = submissionState.toDocumentOptions(),
                                         phone = VerificationSessionCreationRequest.Options.Phone(
                                             requireVerification = true
                                         )
                                     )
                                 } else {
                                     VerificationSessionCreationRequest.Options(
-                                        document = VerificationSessionCreationRequest.Options.Document(
-                                            requireIdNumber = submissionState.requireId,
-                                            requireMatchingSelfie = submissionState.requireSelfie,
-                                            requireLiveCapture = submissionState.requireLiveCapture,
-                                            requireAddress = submissionState.requireAddress,
-                                            allowedTypes = mutableListOf<DocumentType>().also {
-                                                if (submissionState.allowDrivingLicense) {
-                                                    it.add(
-                                                    DocumentType.DrivingLicense
-                                                )
-                                                }
-                                                if (submissionState.allowPassport) {
-                                                    it.add(
-                                                    DocumentType.Passport
-                                                )
-                                                }
-                                                if (submissionState.allowId) it.add(DocumentType.IdCard)
-                                            }
-                                        )
+                                        document = submissionState.toDocumentOptions()
                                     )
                                 }
                             }
+
                             VerificationType.PHONE -> {
                                 if (submissionState.useDocumentFallback == true) {
                                     VerificationSessionCreationRequest.Options(
-                                        document = VerificationSessionCreationRequest.Options.Document(
-                                            allowedTypes = listOf(DocumentType.DrivingLicense)
-                                        ),
+                                        document = submissionState.toDocumentOptions(),
                                         phoneRecords = VerificationSessionCreationRequest.Options.PhoneRecords(
                                             fallback = Fallback.Document
                                         ),
@@ -101,6 +64,7 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
                                     null
                                 }
                             }
+
                             VerificationType.ID_NUMBER -> {
                                 if (submissionState.requirePhoneVerification == true) {
                                     VerificationSessionCreationRequest.Options(
@@ -112,6 +76,7 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
                                     null
                                 }
                             }
+
                             VerificationType.ADDRESS -> {
                                 if (submissionState.requirePhoneVerification == true) {
                                     VerificationSessionCreationRequest.Options(
@@ -136,6 +101,7 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
                                     null
                                 }
                             }
+
                             VerificationType.ADDRESS -> {
                                 if (submissionState.requirePhoneVerification == true) {
                                     VerificationSessionCreationRequest.ProvidedDetails(
@@ -147,6 +113,7 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
                                     null
                                 }
                             }
+
                             VerificationType.ID_NUMBER -> {
                                 if (submissionState.requirePhoneVerification == true) {
                                     VerificationSessionCreationRequest.ProvidedDetails(
@@ -158,6 +125,7 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
                                     null
                                 }
                             }
+
                             VerificationType.PHONE -> {
                                 null
                             }
@@ -181,6 +149,27 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
             }
         }
     }
+
+    private fun IdentitySubmissionState.toDocumentOptions() =
+        VerificationSessionCreationRequest.Options.Document(
+            requireIdNumber = this.requireId,
+            requireMatchingSelfie = this.requireSelfie,
+            requireLiveCapture = this.requireLiveCapture,
+            requireAddress = this.requireAddress,
+            allowedTypes = mutableListOf<DocumentType>().also {
+                if (this.allowDrivingLicense) {
+                    it.add(
+                        DocumentType.DrivingLicense
+                    )
+                }
+                if (this.allowPassport) {
+                    it.add(
+                        DocumentType.Passport
+                    )
+                }
+                if (this.allowId) it.add(DocumentType.IdCard)
+            }
+        )
 
     private companion object {
         const val EXAMPLE_BACKEND_URL =
