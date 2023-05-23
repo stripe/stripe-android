@@ -48,7 +48,7 @@ internal fun PaymentElement(
         id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
 
-    val primaryButtonState = sheetViewModel.primaryButtonState.collectAsState().value
+    val primaryButtonState = sheetViewModel.primaryButtonState.collectAsState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
         if (supportedPaymentMethods.size > 1) {
@@ -66,8 +66,7 @@ internal fun PaymentElement(
             USBankAccountForm(
                 formArgs = formArguments,
                 sheetViewModel = sheetViewModel,
-                isProcessing = primaryButtonState is PrimaryButton.State.StartProcessing ||
-                    primaryButtonState is PrimaryButton.State.FinishProcessing,
+                isProcessing = primaryButtonState.value?.isProcessing == true,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
         } else {

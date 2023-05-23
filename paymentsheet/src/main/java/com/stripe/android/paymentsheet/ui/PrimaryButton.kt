@@ -246,13 +246,24 @@ internal class PrimaryButton @JvmOverloads constructor(
         }
     }
 
-    internal sealed class State {
+    internal sealed class State(
+        val isProcessing: Boolean
+    ) {
+
         /**
          * The label will be applied if the value is not null.
          */
-        object Ready : State()
-        object StartProcessing : State()
-        data class FinishProcessing(val onComplete: () -> Unit) : State()
+        object Ready : State(
+            isProcessing = false
+        )
+        object StartProcessing : State(
+            isProcessing = true
+        )
+        data class FinishProcessing(
+            val onComplete: () -> Unit
+        ) : State(
+            isProcessing = true
+        )
     }
 
     internal data class UIState(
