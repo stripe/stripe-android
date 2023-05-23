@@ -5,6 +5,8 @@ import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.repositories.PersistablePaymentMethodOption.Companion.toPersistablePaymentMethodOption
+import com.stripe.android.paymentsheet.repositories.PersistablePaymentMethodOption.Companion.toSavedSelection
 import javax.inject.Inject
 
 /**
@@ -74,11 +76,21 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun setSelectedPaymentMethodOption(paymentOption: PersistablePaymentMethodOption?) {
-        TODO()
+        getCustomerEphemeralKey().getOrNull()?.let { customerEphemeralKey ->
+            val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
+            prefsRepository.setSavedSelection(paymentOption?.toSavedSelection())
+        }
     }
 
-    override suspend fun fetchSelectedPaymentMethodOption(): Result<PersistablePaymentMethodOption> {
-        TODO()
+    override suspend fun fetchSelectedPaymentMethodOption(): Result<PersistablePaymentMethodOption?> {
+        return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
+            val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
+            val savedSelection = prefsRepository.getSavedSelection(
+                isGooglePayAvailable = false,
+                isLinkAvailable = false,
+            )
+            savedSelection.toPersistablePaymentMethodOption()
+        }
     }
 
     override suspend fun setupIntentClientSecretForCustomerAttach(): Result<String> {
