@@ -59,7 +59,6 @@ import com.stripe.android.identity.example.ui.IntegrationType.LINK
 import com.stripe.android.identity.example.ui.IntegrationType.NATIVE
 import com.stripe.android.identity.example.ui.IntegrationType.WEB
 import kotlinx.coroutines.launch
-import com.stripe.android.identity.R as IdentityR
 
 internal enum class VerificationType(val value: String) {
     DOCUMENT("document"), ID_NUMBER("id_number"), ADDRESS("address"), PHONE("phone")
@@ -133,7 +132,6 @@ internal fun ExampleScreen(
             Divider()
             TypeSelectUI(
                 submissionState.verificationType,
-                submissionState.integrationType
             ) { newVerificationType ->
                 onSubmissionStateChanged(
                     submissionState.copy(
@@ -154,11 +152,13 @@ internal fun ExampleScreen(
                         shouldShowPhoneNumber = true,
                         scrollState = scrollState
                     )
+
                     VerificationType.ID_NUMBER -> IdNumberUI(
                         scrollState,
                         submissionState,
                         onSubmissionStateChanged
                     )
+
                     VerificationType.ADDRESS -> AddressUI()
                     VerificationType.PHONE -> PhoneUI(
                         scrollState,
@@ -244,7 +244,6 @@ private fun IntegrationTypeUI(
 @Composable
 private fun TypeSelectUI(
     verificationType: VerificationType,
-    integrationType: IntegrationType,
     onVerificationTypeChanged: (VerificationType) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -323,6 +322,7 @@ private fun LoadVSView(
                     onPostResult = onPostResult
                 )
             }
+
             LoadingState.Loading -> {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
@@ -337,6 +337,7 @@ private fun LoadVSView(
                     onPostResult = onPostResult
                 )
             }
+
             is LoadingState.Result -> {
                 Column(
                     modifier = Modifier
@@ -390,6 +391,7 @@ private fun LoadingButton(
                             it.value.url
                         )
                     }
+
                     is Result.Failure -> {
                         onLoadingStateChanged(
                             LoadingState.Result(
@@ -432,6 +434,7 @@ private fun SubmitView(
                     )
                 )
             }
+
             IdentityVerificationSheet.VerificationFlowResult.Canceled -> {
                 onLoadingStateChanged(
                     LoadingState.Result(
@@ -440,6 +443,7 @@ private fun SubmitView(
                     )
                 )
             }
+
             IdentityVerificationSheet.VerificationFlowResult.Completed -> {
                 onLoadingStateChanged(
                     LoadingState.Result(
@@ -462,12 +466,14 @@ private fun SubmitView(
             NATIVE -> {
                 identityVerificationSheet.present(verificationSessionId, ephemeralKeySecret)
             }
+
             WEB -> {
                 onLoadingStateChanged(
                     LoadingState.Result(vsId, "web redirect")
                 )
                 CustomTabsIntent.Builder().build().launchUrl(context, Uri.parse(url))
             }
+
             LINK -> {
                 (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(
                     ClipData.newPlainText("verification link", url)
