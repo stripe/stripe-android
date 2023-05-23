@@ -2,7 +2,7 @@
 
 ## XX.XX.XX - 2023-XX-XX
 ### All SDKs
-* [FIXED][6771](https://github.com/stripe/stripe-android/pull/6771) Fixed the length of phone number.
+* [FIXED][6771](https://github.com/stripe/stripe-android/pull/6771) Fixed the length of phone number field.
 
 ## 20.25.3 - 2023-05-23
 
