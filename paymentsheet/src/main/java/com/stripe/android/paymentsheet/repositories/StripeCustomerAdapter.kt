@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.repositories.PersistablePaymentMethodOption.Companion.toPersistablePaymentMethodOption
 import com.stripe.android.paymentsheet.repositories.PersistablePaymentMethodOption.Companion.toSavedSelection
+import java.lang.IllegalArgumentException
 import javax.inject.Inject
 
 /**
@@ -94,7 +95,11 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun setupIntentClientSecretForCustomerAttach(): Result<String> {
-        TODO()
+        return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
+            setupIntentClientSecretProvider?.provide(customerEphemeralKey.customerId)
+        }.getOrElse {
+            Result.failure(it)
+        } ?: throw IllegalArgumentException("setupIntentClientSecretProvider cannot be null")
     }
 
     internal suspend fun getCustomerEphemeralKey(): Result<CustomerEphemeralKey> {

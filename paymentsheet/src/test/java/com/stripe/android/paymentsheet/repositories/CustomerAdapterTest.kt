@@ -21,6 +21,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -267,6 +268,44 @@ class CustomerAdapterTest {
             .isEqualTo(PersistablePaymentMethodOption.StripeId("pm_1234"))
     }
 
+    @Test
+    fun `setupIntentClientSecretForCustomerAttach succeeds`() = runTest {
+        val adapter = createAdapter(
+            setupIntentClientSecretProvider = {
+                Result.success("seti_123")
+            },
+        )
+        val result = adapter.setupIntentClientSecretForCustomerAttach()
+        assertThat(result.getOrNull()).isEqualTo("seti_123")
+    }
+
+    @Test
+    fun `setupIntentClientSecretForCustomerAttach fails when client secret cannot be retrieved`() = runTest {
+        val error = Exception("some exception")
+        val adapter = createAdapter(
+            setupIntentClientSecretProvider = {
+                Result.failure(error)
+            },
+        )
+        val result = adapter.setupIntentClientSecretForCustomerAttach()
+        assertThat(result.exceptionOrNull()).isEqualTo(error)
+    }
+
+    @Test
+    fun `setupIntentClientSecretForCustomerAttach fails when null and called`() = runTest {
+        val adapter = createAdapter(
+            setupIntentClientSecretProvider = null,
+        )
+
+        val error = assertFailsWith<IllegalArgumentException> {
+            adapter.setupIntentClientSecretForCustomerAttach()
+        }
+
+        assertThat(error.message).isEqualTo(
+            "setupIntentClientSecretProvider cannot be null"
+        )
+    }
+
     private fun createAdapter(
         customerEphemeralKeyProvider: CustomerEphemeralKeyProvider =
             CustomerEphemeralKeyProvider {
@@ -277,7 +316,7 @@ class CustomerAdapterTest {
                     )
                 )
             },
-        setupIntentClientSecretProvider: SetupIntentClientSecretProvider =
+        setupIntentClientSecretProvider: SetupIntentClientSecretProvider? =
             SetupIntentClientSecretProvider {
                 Result.success("seti_123")
             },
