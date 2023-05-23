@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.customersheet
+package com.stripe.android.customersheet
 
 import android.content.Intent
 import android.os.Bundle

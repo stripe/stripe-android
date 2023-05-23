@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.customersheet
+package com.stripe.android.customersheet
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCaller

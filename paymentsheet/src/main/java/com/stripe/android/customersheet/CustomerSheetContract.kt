@@ -1,11 +1,10 @@
-package com.stripe.android.paymentsheet.customersheet
+package com.stripe.android.customersheet
 
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.ExperimentalCustomerSheetApi
-import com.stripe.android.view.ActivityStarter
-import kotlinx.parcelize.Parcelize
+import java.io.Serializable
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetContract :
@@ -19,14 +18,14 @@ internal class CustomerSheetContract :
         return CustomerSheetResult.fromIntent(intent)
     }
 
-    @Parcelize
     internal data class Args(
         val data: String,
-    ) : ActivityStarter.Args {
+    ) : Serializable {
         internal companion object {
+            private const val serialVersionUID = 1L
             internal fun fromIntent(intent: Intent): Args? {
                 @Suppress("DEPRECATION")
-                return intent.getParcelableExtra(EXTRA_ARGS)
+                return intent.getSerializableExtra(EXTRA_ARGS) as? Args
             }
         }
     }
