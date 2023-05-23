@@ -9,8 +9,7 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 sealed class CustomerSheetResult {
     /**
      * The customer selected a payment method
-     * @param selection, the [PaymentOptionSelection] the customer selected from the
-     * [CustomerSheet]
+     * @param selection, the [PaymentOptionSelection] the customer selected from the [CustomerSheet]
      */
     @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -39,7 +38,7 @@ sealed class CustomerSheetResult {
 }
 
 /**
- * The customer's payment method selection
+ * The customer's payment option selection
  * @param paymentMethodId, the Stripe payment method ID
  * @param paymentOption, contains the drawable and label to display
  */

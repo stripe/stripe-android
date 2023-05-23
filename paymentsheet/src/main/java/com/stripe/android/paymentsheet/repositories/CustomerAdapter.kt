@@ -8,10 +8,11 @@ import com.stripe.android.paymentsheet.injection.DaggerStripeCustomerAdapterComp
 import com.stripe.android.paymentsheet.model.SavedSelection
 
 /**
- * [CustomerAdapter] A "bridge" from wallet mode to your backend to fetch Customer-related
- * information. Typically, you will not need to implement this interface yourself. You should
- * instead use [CustomerAdaper.create], which manages retrieving and updating a Stripe customer for
- * you.
+ * [CustomerAdapter] A bridge to your backend to fetch Customer-related information. Typically,
+ * you will not need to implement this interface yourself. You should instead use
+ * [CustomerAdaper.create], which manages retrieving and updating a Stripe customer for you.
+ *
+ * The methods in this interface should act on a Stripe [Customer] object.
  *
  * Implement this interface if you would prefer retrieving and updating your Stripe customer object
  * via your own backend instead of using the default implementation.
@@ -42,22 +43,22 @@ interface CustomerAdapter {
     suspend fun detachPaymentMethod(paymentMethodId: String): Result<PaymentMethod>
 
     /**
-     * Set the selected payment method option.
-     * @param paymentOption, the [PersistablePaymentMethodOption] to save to the data store. If
+     * Saves the payment option to a data store.
+     * @param paymentOption, the [PersistablePaymentMethodOption] to save to the . If
      * null, the selected payment method option will be cleared from the data store.
      */
     suspend fun setSelectedPaymentMethodOption(paymentOption: PersistablePaymentMethodOption?)
 
     /**
-     * Fetch the persisted payment method option from the data store. If null, the customer does
-     * not have a default saved payment method.
+     * Retrieves the saved payment option from a data store. If null, the customer does not have a
+     * default saved payment method.
      */
     suspend fun fetchSelectedPaymentMethodOption(): Result<PersistablePaymentMethodOption?>
 
     /**
-     * Returns a client secret configured to attach a new payment method to a customer.
+     * Returns a [SetupIntent] client secret to attach a new payment method to a customer.
      * This will call your backend to retrieve a client secret if you have provided a
-     * setupIntentClientSecretProvider in the init call.
+     * [setupIntentClientSecretProvider] in the [CustomerAdapter.create] call.
      */
     suspend fun setupIntentClientSecretForCustomerAttach(): Result<String>
 
@@ -67,16 +68,16 @@ interface CustomerAdapter {
 
         /**
          * Creates a default implementation of [CustomerAdapter] which uses Android
-         * SharedPreferences as the data store to manage the customer's default saved payment
-         * methods.
+         * [SharedPreferences] as the data store to manage the customer's default saved payment
+         * methods locally.
          *
          * @param context, the Application context
          * @param customerEphemeralKeyProvider, a callback to retrieve the customer id and
          * ephemeral key. The customer ID is used in this adapter to manage the customer's saved
          * payment methods.
-         * @param setupIntentClientSecretProvider, a callback to retrieve the setup intent client
+         * @param setupIntentClientSecretProvider, a callback to retrieve the [SetupIntent] client
          * secret. The client secret is used in this adapter to attach a payment method with a
-         * setup intent.
+         * [SetupIntent].
          */
         fun create(
             context: Context,
