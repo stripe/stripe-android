@@ -8,7 +8,7 @@ internal class PhoneNumberFormatterTest {
 
     @Test
     fun `Phone number is correctly formatted for US locale`() {
-        val formatter = PhoneNumberFormatter.forCountry("US")
+        val formatter = PhoneNumberFormatter.forCountry("US") // "(###) ###-####"
 
         assertThat(formatter.format("123")).isEqualTo("(123")
         assertThat(formatter.format("1234")).isEqualTo("(123) 4")
@@ -17,21 +17,21 @@ internal class PhoneNumberFormatterTest {
         assertThat(formatter.format("1234567890")).isEqualTo("(123) 456-7890")
         // prefix has 1 digit so full number must be at most 14 digits
         assertThat(formatter.format("12345asdfg678901234567890"))
-            .isEqualTo("(123) 456-7890 1234")
+            .isEqualTo("(123) 456-7890")
     }
 
     @Test
     fun `Phone number is correctly formatted for FI locale`() {
-        val formatter = PhoneNumberFormatter.forCountry("FI")
+        val formatter = PhoneNumberFormatter.forCountry("FI") // "## ### ## ##"
 
         assertThat(formatter.format("123")).isEqualTo("12 3")
         assertThat(formatter.format("1234")).isEqualTo("12 34")
         assertThat(formatter.format("123456")).isEqualTo("12 345 6")
         assertThat(formatter.format("1234567")).isEqualTo("12 345 67")
-        assertThat(formatter.format("1234567890")).isEqualTo("12 345 67 89 0")
+        assertThat(formatter.format("1234567890")).isEqualTo("12 345 67 89")
         // prefix has 3 digits so full number must be at most 12 digits
         assertThat(formatter.format("12345asdfg678901234567890"))
-            .isEqualTo("12 345 67 89 012")
+            .isEqualTo("12 345 67 89")
     }
 
     @Test
