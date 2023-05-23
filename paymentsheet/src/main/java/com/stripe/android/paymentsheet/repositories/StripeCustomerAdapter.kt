@@ -5,8 +5,8 @@ import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.repositories.PaymentOption.Companion.toPaymentOption
-import com.stripe.android.paymentsheet.repositories.PaymentOption.Companion.toSavedSelection
+import com.stripe.android.paymentsheet.repositories.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.paymentsheet.repositories.CustomerAdapter.PaymentOption.Companion.toSavedSelection
 import java.lang.IllegalArgumentException
 import javax.inject.Inject
 
@@ -76,14 +76,14 @@ internal class StripeCustomerAdapter @Inject constructor(
         }
     }
 
-    override suspend fun setSelectedPaymentOption(paymentOption: PaymentOption?) {
+    override suspend fun setSelectedPaymentOption(paymentOption: CustomerAdapter.PaymentOption?) {
         getCustomerEphemeralKey().getOrNull()?.let { customerEphemeralKey ->
             val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
             prefsRepository.setSavedSelection(paymentOption?.toSavedSelection())
         }
     }
 
-    override suspend fun retrieveSelectedPaymentOption(): Result<PaymentOption?> {
+    override suspend fun fetchSelectedPaymentOption(): Result<CustomerAdapter.PaymentOption?> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
             val savedSelection = prefsRepository.getSavedSelection(

@@ -10,8 +10,8 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.repositories.PaymentOption.Companion.toPaymentOption
-import com.stripe.android.paymentsheet.repositories.PaymentOption.Companion.toSavedSelection
+import com.stripe.android.paymentsheet.repositories.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.paymentsheet.repositories.CustomerAdapter.PaymentOption.Companion.toSavedSelection
 import com.stripe.android.paymentsheet.repositories.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.advanceTimeBy
@@ -214,11 +214,11 @@ class CustomerAdapterTest {
             }
         )
         adapter.setSelectedPaymentOption(
-            paymentOption = PaymentOption.StripeId("pm_1234")
+            paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
         )
         val result = adapter.retrieveSelectedPaymentOption()
         assertThat(result.getOrNull()).isEqualTo(
-            PaymentOption.StripeId("pm_1234")
+            CustomerAdapter.PaymentOption.StripeId("pm_1234")
         )
     }
 
@@ -250,22 +250,22 @@ class CustomerAdapterTest {
 
     @Test
     fun `PersistablePaymentMethodOption to SavedSelection`() {
-        assertThat(PaymentOption.GooglePay.toSavedSelection())
+        assertThat(CustomerAdapter.PaymentOption.GooglePay.toSavedSelection())
             .isEqualTo(SavedSelection.GooglePay)
-        assertThat(PaymentOption.Link.toSavedSelection())
+        assertThat(CustomerAdapter.PaymentOption.Link.toSavedSelection())
             .isEqualTo(SavedSelection.Link)
-        assertThat(PaymentOption.StripeId("pm_1234").toSavedSelection())
+        assertThat(CustomerAdapter.PaymentOption.StripeId("pm_1234").toSavedSelection())
             .isEqualTo(SavedSelection.PaymentMethod("pm_1234"))
     }
 
     @Test
     fun `SavedSelection to PersistablePaymentMethodOption`() {
         assertThat(SavedSelection.GooglePay.toPaymentOption())
-            .isEqualTo(PaymentOption.GooglePay)
+            .isEqualTo(CustomerAdapter.PaymentOption.GooglePay)
         assertThat(SavedSelection.Link.toPaymentOption())
-            .isEqualTo(PaymentOption.Link)
+            .isEqualTo(CustomerAdapter.PaymentOption.Link)
         assertThat(SavedSelection.PaymentMethod("pm_1234").toPaymentOption())
-            .isEqualTo(PaymentOption.StripeId("pm_1234"))
+            .isEqualTo(CustomerAdapter.PaymentOption.StripeId("pm_1234"))
     }
 
     @Test
