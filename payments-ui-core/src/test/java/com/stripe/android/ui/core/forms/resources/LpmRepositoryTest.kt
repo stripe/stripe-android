@@ -365,7 +365,7 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify LpmRepository does not filter out USBankAccount if verification method is unsupported`() = runTest {
+    fun `Verify LpmRepository filters out USBankAccount if verification method is unsupported`() = runTest {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
@@ -397,7 +397,7 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify LpmRepository filters out USBankAccount if verification method is supported`() = runTest {
+    fun `Verify LpmRepository does not filter out USBankAccount if verification method is supported`() = runTest {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(

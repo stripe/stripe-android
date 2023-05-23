@@ -100,10 +100,7 @@ internal class PaymentSheetViewModelTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
     private val lpmRepository = LpmRepository(
-        arguments = LpmRepository.LpmRepositoryArguments(
-            resources = application.resources,
-            enableACHV2InDeferredFlow = true,
-        ),
+        arguments = LpmRepository.LpmRepositoryArguments(application.resources),
     ).apply {
         this.update(
             PaymentIntentFactory.create(
