@@ -59,7 +59,6 @@ internal class PhoneNumberFormatterTest {
         assertThat(formatter.format("1234567")).isEqualTo("(123)-456+7")
         assertThat(formatter.format("123456789012")).isEqualTo("(123)-456+78901!2")
         assertThat(formatter.format("123456789012456")).isEqualTo("(123)-456+78901!2")
-
     }
 
     private fun PhoneNumberFormatter.format(input: String) =
