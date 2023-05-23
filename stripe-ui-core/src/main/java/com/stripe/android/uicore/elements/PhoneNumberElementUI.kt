@@ -28,6 +28,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -38,6 +39,9 @@ import com.stripe.android.uicore.R
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import com.stripe.android.core.R as CoreR
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val PHONE_NUMBER_TEXT_FIELD_TAG = "PhoneNumberTextField"
 
 @Preview
 @Composable
@@ -114,7 +118,8 @@ fun PhoneNumberElementUI(
                     controller.onFocusChange(it.isFocused)
                 }
                 hasFocus = it.isFocused
-            },
+            }
+            .testTag(PHONE_NUMBER_TEXT_FIELD_TAG),
         enabled = enabled,
         label = {
             FormLabel(
@@ -163,3 +168,6 @@ fun PhoneNumberElementUI(
         }
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val PHONE_NUMBER_FIELD_TAG = "phone_number"
