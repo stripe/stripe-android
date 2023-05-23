@@ -44,6 +44,24 @@ internal class PhoneNumberFormatterTest {
             .isEqualTo("+123456789012345")
     }
 
+    @Test
+    fun `WithRegion correctly formats`() {
+        val pattern = "(###)-###+#####!#"
+        val formatter = PhoneNumberFormatter.WithRegion(
+            PhoneNumberFormatter.Metadata(
+                "prefix",
+                "regionCode",
+                pattern
+            )
+        )
+
+        assertThat(formatter.format("123")).isEqualTo("(123")
+        assertThat(formatter.format("1234567")).isEqualTo("(123)-456+7")
+        assertThat(formatter.format("123456789012")).isEqualTo("(123)-456+78901!2")
+        assertThat(formatter.format("123456789012456")).isEqualTo("(123)-456+78901!2")
+
+    }
+
     private fun PhoneNumberFormatter.format(input: String) =
         visualTransformation.filter(AnnotatedString(userInputFilter(input))).text.text
 }
