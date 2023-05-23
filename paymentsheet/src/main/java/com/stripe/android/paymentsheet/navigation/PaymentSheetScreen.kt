@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.PaymentOptions
@@ -33,7 +34,22 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            PaymentOptions(viewModel, modifier)
+            val state = viewModel.paymentOptionsState.collectAsState().value
+            val isEditing = viewModel.editing.collectAsState().value
+            val isProcessing = viewModel.processing.collectAsState().value
+            val onAddCardPressed = viewModel::transitionToAddPaymentScreen
+            val onItemSelected = viewModel::handlePaymentMethodSelected
+            val onItemRemoved = viewModel::removePaymentMethod
+
+            PaymentOptions(
+                state = state,
+                isEditing = isEditing,
+                isProcessing = isProcessing,
+                onAddCardPressed = onAddCardPressed,
+                onItemSelected = onItemSelected,
+                onItemRemoved = onItemRemoved,
+                modifier = modifier
+            )
         }
     }
 
