@@ -45,7 +45,7 @@ internal class PhoneNumberFormatterTest {
     }
 
     @Test
-    fun `WithRegion correctly formats`() {
+    fun `WithRegion correctly formats with pattern`() {
         val pattern = "(###)-###+#####!#"
         val formatter = PhoneNumberFormatter.WithRegion(
             PhoneNumberFormatter.Metadata(
