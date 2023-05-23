@@ -428,7 +428,26 @@ class LpmRepository constructor(
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.USBankAccount.code -> {
-            if (stripeIntent.clientSecret != null || arguments.enableACHV2InDeferredFlow) {
+            val pmo = stripeIntent.getPaymentMethodOptions()[PaymentMethod.Type.USBankAccount.code]
+            val verificationMethod = (pmo as? Map<*, *>)?.get("verification_method") as? String
+            val supportsVerificationMethod = verificationMethod == "instant" ||
+                verificationMethod == "automatic"
+            val supported =
+                (stripeIntent.clientSecret != null || arguments.enableACHV2InDeferredFlow) &&
+                    supportsVerificationMethod
+            /**
+             * US Bank Account requires the payment method option to have either automatic or
+             * instant verification method in order to be a supported payment method. For example,
+             * the intent should include:
+             * {
+             *     "payment_method_options" : {
+             *         "us_bank_account": {
+             *             "verification_method": "automatic"
+             *         }
+             *     }
+             * }
+             */
+            if (supported) {
                 SupportedPaymentMethod(
                     code = "us_bank_account",
                     requiresMandate = true,

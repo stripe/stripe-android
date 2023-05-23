@@ -107,6 +107,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethodTypes = listOf(
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.USBankAccount.code,
+                    PaymentMethod.Type.CashAppPay.code,
                     PaymentMethod.Type.Ideal.code,
                     PaymentMethod.Type.SepaDebit.code,
                     PaymentMethod.Type.Sofort.code,
@@ -1188,7 +1189,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Shows the correct divider text if intent supports multiple payment method types`() = runTest {
-        val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card", "us_bank_account"))
+        val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card", "cashapp"))
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
