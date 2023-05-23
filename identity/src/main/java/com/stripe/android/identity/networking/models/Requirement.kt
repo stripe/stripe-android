@@ -45,7 +45,13 @@ internal enum class Requirement {
     NAME,
 
     @SerialName("address")
-    ADDRESS;
+    ADDRESS,
+
+    @SerialName("phone")
+    PHONE,
+
+    @SerialName("phone_otp")
+    PHONE_OTP;
 
     internal companion object {
         private val SCAN_UPLOAD_ROUTE_SET = setOf(
@@ -88,7 +94,7 @@ internal enum class Requirement {
                 FACE -> {
                     fromRoute == SelfieDestination.ROUTE.route
                 }
-                DOB, NAME, IDNUMBER, ADDRESS -> {
+                DOB, NAME, IDNUMBER, ADDRESS, PHONE, PHONE_OTP -> {
                     fromRoute == IndividualDestination.ROUTE.route
                 }
             }

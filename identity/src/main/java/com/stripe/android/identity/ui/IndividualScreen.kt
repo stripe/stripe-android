@@ -25,6 +25,7 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DobParam
 import com.stripe.android.identity.networking.models.IdNumberParam
 import com.stripe.android.identity.networking.models.NameParam
+import com.stripe.android.identity.networking.models.PhoneParam
 import com.stripe.android.identity.networking.models.RequiredInternationalAddress
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentIndividualPage
@@ -61,7 +62,8 @@ internal fun IndividualScreen(
                     name = requirementResource(missing, Requirement.NAME),
                     dob = requirementResource(missing, Requirement.DOB),
                     idNumber = requirementResource(missing, Requirement.IDNUMBER),
-                    address = requirementResource(missing, Requirement.ADDRESS)
+                    address = requirementResource(missing, Requirement.ADDRESS),
+                    phone = requirementResource(missing, Requirement.PHONE)
                 )
             )
         }
@@ -131,6 +133,19 @@ private fun IndividualScreenBodyContent(
         fontWeight = FontWeight.Bold,
         modifier = Modifier.testTag(INDIVIDUAL_TITLE_TAG)
     )
+    if (missing.contains(Requirement.PHONE)) {
+        PhoneNumberSection(
+            enabled,
+            individualPage.phoneNumberCountries,
+        ) {
+            collectedStates.phone = it
+            onUpdateLoadingButtonState(
+                updateSubmitButtonState(
+                    collectedStates
+                )
+            )
+        }
+    }
     if (missing.contains(Requirement.NAME)) {
         NameSection(enabled) {
             collectedStates.name = it
@@ -188,9 +203,10 @@ internal data class IndividualCollectedStates(
     var name: Resource<NameParam>,
     var dob: Resource<DobParam>,
     var idNumber: Resource<IdNumberParam>,
-    var address: Resource<RequiredInternationalAddress>
+    var address: Resource<RequiredInternationalAddress>,
+    var phone: Resource<PhoneParam>
 ) {
-    fun allStates() = listOf(name, dob, idNumber, address)
+    fun allStates() = listOf(name, dob, idNumber, address, phone)
     fun toCollectedDataParam() = CollectedDataParam(
         name = if (name.status == Status.SUCCESS) name.data else null,
         dob = if (dob.status == Status.SUCCESS) dob.data else null,

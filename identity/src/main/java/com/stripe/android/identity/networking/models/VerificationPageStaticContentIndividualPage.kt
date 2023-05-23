@@ -23,5 +23,8 @@ internal data class VerificationPageStaticContentIndividualPage(
     @SerialName("id_number_country_not_listed_text_button_text")
     val idNumberCountryNotListedTextButtonText: String,
     @SerialName("address_country_not_listed_text_button_text")
-    val addressCountryNotListedTextButtonText: String
+    val addressCountryNotListedTextButtonText: String,
+    @SerialName("phone_number_countries")
+    @Serializable(with = CountryListSerializer::class)
+    val phoneNumberCountries: List<Country> = listOf(Country("US", "United States")), // TODO(ccen) read from server
 ) : Parcelable

@@ -37,7 +37,9 @@ internal data class CollectedDataParam(
     @SerialName("name")
     val name: NameParam? = null,
     @SerialName("address")
-    val address: RequiredInternationalAddress? = null
+    val address: RequiredInternationalAddress? = null,
+    @SerialName("phone")
+    val phone: PhoneParam? = null,
 ) : Parcelable {
     @Serializable
     internal enum class Type {
@@ -178,6 +180,7 @@ internal data class CollectedDataParam(
                 Requirement.DOB -> this.copy(dob = null)
                 Requirement.NAME -> this.copy(name = null)
                 Requirement.ADDRESS -> this.copy(address = null)
+                else -> { this }
             }
         }
 
