@@ -1,6 +1,7 @@
-package com.stripe.android.paymentsheet.wallet
+package com.stripe.android.paymentsheet.customersheet
 
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalCustomerSheetApi
@@ -15,14 +16,25 @@ import com.stripe.android.paymentsheet.repositories.CustomerAdapter
  */
 @ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CustomerSheet internal constructor() {
+class CustomerSheet internal constructor(
+    activityResultCaller: ActivityResultCaller,
+    callback: CustomerSheetResultCallback,
+) {
+
+    private val customerSheetActivityLauncher = activityResultCaller.registerForActivityResult(
+        CustomerSheetContract(),
+    ) {
+        callback.onResult(it)
+    }
 
     /**
      * Presents a sheet to manage the customer through a [CustomerAdapter]. Results of the sheet
      * are delivered through the callback passed in [CustomerSheet.create].
      */
     fun present() {
-        TODO()
+        customerSheetActivityLauncher.launch(
+            CustomerSheetContract.Args("Hello world!")
+        )
     }
 
     /**
@@ -75,7 +87,10 @@ class CustomerSheet internal constructor() {
             customerAdapter: CustomerAdapter,
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
-            return CustomerSheet()
+            return CustomerSheet(
+                activityResultCaller = activity,
+                callback = callback,
+            )
         }
 
         /**
@@ -93,7 +108,10 @@ class CustomerSheet internal constructor() {
             customerAdapter: CustomerAdapter,
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
-            return CustomerSheet()
+            return CustomerSheet(
+                activityResultCaller = fragment,
+                callback = callback,
+            )
         }
     }
 }

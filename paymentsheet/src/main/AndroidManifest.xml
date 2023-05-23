@@ -13,6 +13,11 @@
             android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
+            android:name=".customersheet.CustomerSheetActivity"
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
+        <activity
             android:name=".addresselement.AddressElementActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />

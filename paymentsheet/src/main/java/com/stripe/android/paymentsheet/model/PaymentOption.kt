@@ -13,6 +13,7 @@ import android.graphics.Region
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
 import android.os.Build
+import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -20,10 +21,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 
 /**
  * The customer's selected payment option.
  */
+@Parcelize
 data class PaymentOption
 @Deprecated("Not intended for public use.")
 constructor(
@@ -40,7 +43,7 @@ constructor(
      * For example, "····4242" for a Visa ending in 4242.
      */
     val label: String
-) {
+) : Parcelable {
     // These aren't part of the primary constructor in order to maintain binary compatibility.
     internal var lightThemeIconUrl: String? = null
         private set

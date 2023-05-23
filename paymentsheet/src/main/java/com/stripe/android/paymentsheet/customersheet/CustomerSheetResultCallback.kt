@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.wallet
+package com.stripe.android.paymentsheet.customersheet
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.ExperimentalCustomerSheetApi
@@ -10,5 +10,5 @@ import com.stripe.android.ExperimentalCustomerSheetApi
 @ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface CustomerSheetResultCallback {
-    fun onResult(result: CustomerSheetResult)
+    fun onResult(result: CustomerSheetResult?)
 }
