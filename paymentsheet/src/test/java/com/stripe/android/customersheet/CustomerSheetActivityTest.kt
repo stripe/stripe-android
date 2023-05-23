@@ -3,9 +3,9 @@ package com.stripe.android.customersheet
 import android.content.Context
 import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalCustomerSheetApi
@@ -20,9 +20,6 @@ import org.robolectric.annotation.Config
 internal class CustomerSheetActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
-
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<CustomerSheetActivity>()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val contract = CustomerSheetContract()
@@ -39,7 +36,7 @@ internal class CustomerSheetActivityTest {
         val scenario = ActivityScenario.launchActivityForResult<CustomerSheetActivity>(intent)
 
         scenario.onActivity {
-            it.onBackPressedDispatcher.onBackPressed()
+            pressBack()
         }
 
         assertThat(
