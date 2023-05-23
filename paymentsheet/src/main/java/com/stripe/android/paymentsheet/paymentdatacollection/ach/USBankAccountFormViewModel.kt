@@ -242,10 +242,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         initialValue = false
     )
 
-    private val _processing = MutableStateFlow(false)
-    val processing: StateFlow<Boolean>
-        get() = _processing
-
     @VisibleForTesting
     var collectBankAccountLauncher: CollectBankAccountLauncher? = null
 
@@ -420,10 +416,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun formattedMerchantName(): String {
         return args.formArgs.merchantName.trimEnd { it == '.' }
-    }
-
-    fun setProcessing(enabled: Boolean) {
-        _processing.update { enabled }
     }
 
     private fun collectBankAccount(clientSecret: String?) {
