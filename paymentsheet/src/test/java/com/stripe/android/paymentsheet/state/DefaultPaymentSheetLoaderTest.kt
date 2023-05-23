@@ -58,8 +58,9 @@ internal class DefaultPaymentSheetLoaderTest {
             PaymentIntentFactory.create(
                 paymentMethodTypes = listOf(
                     PaymentMethod.Type.Card.code,
-                    PaymentMethod.Type.USBankAccount.code
-                )
+                    PaymentMethod.Type.USBankAccount.code,
+                    PaymentMethod.Type.CashAppPay.code,
+                ),
             ),
             null
         )
@@ -533,7 +534,7 @@ internal class DefaultPaymentSheetLoaderTest {
         ) as? PaymentSheetLoader.Result.Failure
 
         val expectedMessage = "None of the requested payment methods (gold, silver, bronze) " +
-            "match the supported payment types (card, us_bank_account)."
+            "match the supported payment types (card, cashapp)."
         assertThat(result?.throwable?.message).isEqualTo(expectedMessage)
     }
 

@@ -435,6 +435,18 @@ class LpmRepository constructor(
             val supported =
                 (stripeIntent.clientSecret != null || arguments.enableACHV2InDeferredFlow) &&
                     supportsVerificationMethod
+            /**
+             * US Bank Account requires the payment method option to have either automatic or
+             * instant verification method in order to be a supported payment method. For example,
+             * the intent should include:
+             * {
+             *     "payment_method_options" : {
+             *         "us_bank_account": {
+             *             "verification_method": "automatic"
+             *         }
+             *     }
+             * }
+             */
             if (supported) {
                 SupportedPaymentMethod(
                     code = "us_bank_account",

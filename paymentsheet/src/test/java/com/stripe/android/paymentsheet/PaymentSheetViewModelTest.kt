@@ -100,13 +100,17 @@ internal class PaymentSheetViewModelTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
     private val lpmRepository = LpmRepository(
-        arguments = LpmRepository.LpmRepositoryArguments(application.resources),
+        arguments = LpmRepository.LpmRepositoryArguments(
+            resources = application.resources,
+            enableACHV2InDeferredFlow = true,
+        ),
     ).apply {
         this.update(
             PaymentIntentFactory.create(
                 paymentMethodTypes = listOf(
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.USBankAccount.code,
+                    PaymentMethod.Type.CashAppPay.code,
                     PaymentMethod.Type.Ideal.code,
                     PaymentMethod.Type.SepaDebit.code,
                     PaymentMethod.Type.Sofort.code,
@@ -1188,7 +1192,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Shows the correct divider text if intent supports multiple payment method types`() = runTest {
-        val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card", "us_bank_account"))
+        val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card", "cashapp"))
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
