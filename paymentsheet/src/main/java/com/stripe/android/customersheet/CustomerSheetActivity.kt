@@ -6,9 +6,7 @@ import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Text
-import com.stripe.android.ExperimentalCustomerSheetApi
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetActivity : AppCompatActivity() {
 
     private val starterArgs: CustomerSheetContract.Args? by lazy {
@@ -23,11 +21,11 @@ internal class CustomerSheetActivity : AppCompatActivity() {
         }
 
         onBackPressedDispatcher.addCallback {
-            finishWithResult(CustomerSheetResult.Canceled)
+            finishWithResult(InternalCustomerSheetResult.Canceled)
         }
     }
 
-    private fun finishWithResult(result: CustomerSheetResult) {
+    private fun finishWithResult(result: InternalCustomerSheetResult) {
         setResult(RESULT_OK, Intent().putExtras(result.toBundle()))
         finish()
     }

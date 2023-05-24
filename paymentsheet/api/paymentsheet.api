@@ -6,35 +6,27 @@ public final class com/stripe/android/customersheet/CustomerSheetContract$Args$C
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/customersheet/CustomerSheetResult$Canceled$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/customersheet/InternalCustomerSheetResult$Canceled$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/CustomerSheetResult$Canceled;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Canceled;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/customersheet/CustomerSheetResult$Canceled;
+	public final fun newArray (I)[Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Canceled;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/customersheet/CustomerSheetResult$Error$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/customersheet/InternalCustomerSheetResult$Error$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/CustomerSheetResult$Error;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Error;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/customersheet/CustomerSheetResult$Error;
+	public final fun newArray (I)[Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Error;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/customersheet/CustomerSheetResult$Selected$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/customersheet/InternalCustomerSheetResult$Selected$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/CustomerSheetResult$Selected;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Selected;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/customersheet/CustomerSheetResult$Selected;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/customersheet/PaymentOptionSelection$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/PaymentOptionSelection;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/customersheet/PaymentOptionSelection;
+	public final fun newArray (I)[Lcom/stripe/android/customersheet/InternalCustomerSheetResult$Selected;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -1236,30 +1228,19 @@ public final class com/stripe/android/paymentsheet/model/PaymentIntentClientSecr
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/model/PaymentOption : android/os/Parcelable {
+public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (ILjava/lang/String;)V
 	public final fun component1 ()I
 	public final fun component2 ()Ljava/lang/String;
 	public final fun copy (ILjava/lang/String;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
 	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentOption;ILjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
-	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDrawableResourceId ()I
 	public final fun getLabel ()Ljava/lang/String;
 	public fun hashCode ()I
 	public final fun icon ()Landroid/graphics/drawable/Drawable;
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/paymentsheet/model/PaymentOption$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/PaymentOption;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/paymentsheet/model/PaymentSelection$GooglePay$Creator : android/os/Parcelable$Creator {

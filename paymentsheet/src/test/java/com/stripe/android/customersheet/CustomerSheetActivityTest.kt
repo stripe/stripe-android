@@ -8,7 +8,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ExperimentalCustomerSheetApi
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,7 +15,6 @@ import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
@@ -45,7 +43,7 @@ internal class CustomerSheetActivityTest {
                 scenario.result.resultData
             )
         ).isInstanceOf(
-            CustomerSheetResult.Canceled::class.java
+            InternalCustomerSheetResult.Canceled::class.java
         )
     }
 }

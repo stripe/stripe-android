@@ -6,6 +6,7 @@ import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.repositories.CustomerAdapter
 
 /**
@@ -18,15 +19,13 @@ import com.stripe.android.paymentsheet.repositories.CustomerAdapter
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CustomerSheet internal constructor(
     activityResultCaller: ActivityResultCaller,
-    callback: CustomerSheetResultCallback,
+    private val callback: CustomerSheetResultCallback,
 ) {
 
     private val customerSheetActivityLauncher = activityResultCaller.registerForActivityResult(
         CustomerSheetContract(),
-    ) {
-        requireNotNull(it)
-        callback.onResult(it)
-    }
+        ::onCustomerSheetResult
+    )
 
     /**
      * Presents a sheet to manage the customer through a [CustomerAdapter]. Results of the sheet
@@ -36,6 +35,25 @@ class CustomerSheet internal constructor(
         customerSheetActivityLauncher.launch(
             CustomerSheetContract.Args("Hello world!")
         )
+    }
+
+    private fun onCustomerSheetResult(result: InternalCustomerSheetResult?) {
+        requireNotNull(result)
+        val customerSheetResult = when (result) {
+            is InternalCustomerSheetResult.Canceled -> CustomerSheetResult.Canceled
+            is InternalCustomerSheetResult.Error -> CustomerSheetResult.Error(result.exception)
+            is InternalCustomerSheetResult.Selected -> CustomerSheetResult.Selected(
+                selection = PaymentOptionSelection(
+                    paymentMethodId = result.paymentMethodId,
+                    // Use [PaymentOptionFactory], which requires DI
+                    paymentOption = PaymentOption(
+                        drawableResourceId = result.drawableResourceId,
+                        label = result.label,
+                    )
+                )
+            )
+        }
+        callback.onResult(customerSheetResult)
     }
 
     /**

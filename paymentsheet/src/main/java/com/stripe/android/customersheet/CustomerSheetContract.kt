@@ -3,20 +3,18 @@ package com.stripe.android.customersheet
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
-import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetContract :
-    ActivityResultContract<CustomerSheetContract.Args, CustomerSheetResult?>() {
+    ActivityResultContract<CustomerSheetContract.Args, InternalCustomerSheetResult?>() {
     override fun createIntent(context: Context, input: Args): Intent {
         return Intent(context, CustomerSheetActivity::class.java)
             .putExtra(EXTRA_ARGS, input)
     }
 
-    override fun parseResult(resultCode: Int, intent: Intent?): CustomerSheetResult? {
-        return CustomerSheetResult.fromIntent(intent)
+    override fun parseResult(resultCode: Int, intent: Intent?): InternalCustomerSheetResult? {
+        return InternalCustomerSheetResult.fromIntent(intent)
     }
 
     @Parcelize
