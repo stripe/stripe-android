@@ -9,7 +9,6 @@ import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
-import java.io.Serializable
 
 @ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -24,6 +24,7 @@ class CustomerSheet internal constructor(
     private val customerSheetActivityLauncher = activityResultCaller.registerForActivityResult(
         CustomerSheetContract(),
     ) {
+        requireNotNull(it)
         callback.onResult(it)
     }
 

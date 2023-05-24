@@ -2,12 +2,10 @@ package com.stripe.android.customersheet
 
 import android.content.Context
 import android.content.Intent
-import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
-import java.io.Serializable
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetContract :

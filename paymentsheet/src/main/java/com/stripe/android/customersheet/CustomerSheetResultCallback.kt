@@ -10,5 +10,5 @@ import com.stripe.android.ExperimentalCustomerSheetApi
 @ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface CustomerSheetResultCallback {
-    fun onResult(result: CustomerSheetResult?)
+    fun onResult(result: CustomerSheetResult)
 }
