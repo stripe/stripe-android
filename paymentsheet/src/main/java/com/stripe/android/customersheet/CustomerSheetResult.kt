@@ -12,7 +12,7 @@ import com.stripe.android.view.ActivityStarter
 sealed class CustomerSheetResult {
     /**
      * The customer selected a payment method
-     * @param selection, the [PaymentOptionSelection] the customer selected from the [CustomerSheet]
+     * @param selection the [PaymentOptionSelection] the customer selected from the [CustomerSheet]
      */
     @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -25,7 +25,10 @@ sealed class CustomerSheetResult {
      */
     @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object Canceled : CustomerSheetResult()
+    class Canceled internal constructor() : CustomerSheetResult() {
+        override fun equals(other: Any?): Boolean = this === other
+        override fun hashCode(): Int = System.identityHashCode(this)
+    }
 
     /**
      * An error occurred when presenting the sheet

@@ -12,6 +12,7 @@ import kotlinx.parcelize.Parcelize
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal sealed class InternalCustomerSheetResult : Parcelable {
     abstract fun toPublicResult(): CustomerSheetResult
+
     /**
      * The customer selected a payment method
      */
@@ -42,7 +43,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     @Parcelize
     object Canceled : InternalCustomerSheetResult() {
         override fun toPublicResult(): CustomerSheetResult {
-            return CustomerSheetResult.Canceled
+            return CustomerSheetResult.Canceled()
         }
     }
 
