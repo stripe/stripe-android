@@ -6,7 +6,6 @@ import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.repositories.CustomerAdapter
 
 /**
@@ -39,21 +38,7 @@ class CustomerSheet internal constructor(
 
     private fun onCustomerSheetResult(result: InternalCustomerSheetResult?) {
         requireNotNull(result)
-        val customerSheetResult = when (result) {
-            is InternalCustomerSheetResult.Canceled -> CustomerSheetResult.Canceled
-            is InternalCustomerSheetResult.Error -> CustomerSheetResult.Error(result.exception)
-            is InternalCustomerSheetResult.Selected -> CustomerSheetResult.Selected(
-                selection = PaymentOptionSelection(
-                    paymentMethodId = result.paymentMethodId,
-                    // Use [PaymentOptionFactory], which requires DI
-                    paymentOption = PaymentOption(
-                        drawableResourceId = result.drawableResourceId,
-                        label = result.label,
-                    )
-                )
-            )
-        }
-        callback.onResult(customerSheetResult)
+        callback.onResult(result.toPublicResult())
     }
 
     /**

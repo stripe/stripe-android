@@ -4,10 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
+import com.stripe.android.ExperimentalCustomerSheetApi
+import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
+@OptIn(ExperimentalCustomerSheetApi::class)
 internal sealed class InternalCustomerSheetResult : Parcelable {
+    abstract fun toPublicResult(): CustomerSheetResult
     /**
      * The customer selected a payment method
      */
@@ -16,13 +20,31 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
         val paymentMethodId: String,
         val drawableResourceId: Int,
         val label: String,
-    ) : InternalCustomerSheetResult()
+    ) : InternalCustomerSheetResult() {
+        @Suppress("DEPRECATION")
+        override fun toPublicResult(): CustomerSheetResult {
+            return CustomerSheetResult.Selected(
+                selection = PaymentOptionSelection(
+                    paymentMethodId = paymentMethodId,
+                    // Use [PaymentOptionFactory]
+                    paymentOption = PaymentOption(
+                        drawableResourceId = drawableResourceId,
+                        label = label,
+                    )
+                )
+            )
+        }
+    }
 
     /**
      * The customer canceled the sheet
      */
     @Parcelize
-    object Canceled : InternalCustomerSheetResult()
+    object Canceled : InternalCustomerSheetResult() {
+        override fun toPublicResult(): CustomerSheetResult {
+            return CustomerSheetResult.Canceled
+        }
+    }
 
     /**
      * An error occurred when presenting the sheet
@@ -30,7 +52,11 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     @Parcelize
     class Error internal constructor(
         val exception: Exception
-    ) : InternalCustomerSheetResult()
+    ) : InternalCustomerSheetResult() {
+        override fun toPublicResult(): CustomerSheetResult {
+            return CustomerSheetResult.Error(exception)
+        }
+    }
 
     internal companion object {
         private const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
