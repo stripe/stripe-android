@@ -23,7 +23,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
         }
 
         onBackPressedDispatcher.addCallback {
-            finishWithResult(CustomerSheetResult.Canceled())
+            finishWithResult(CustomerSheetResult.Canceled)
         }
     }
 
