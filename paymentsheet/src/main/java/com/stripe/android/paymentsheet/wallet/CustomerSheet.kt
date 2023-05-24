@@ -10,16 +10,16 @@ import com.stripe.android.paymentsheet.repositories.CustomerAdapter
 /**
  * 🏗 This feature is under construction 🏗
  *
- * [CustomerSheet] A class that presents a bottom sheet to manage a customer's
- * saved payment methods.
+ * [CustomerSheet] A class that presents a bottom sheet to manage a customer through the
+ * [CustomerAdapter].
  */
 @ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CustomerSheet internal constructor() {
 
     /**
-     * Presents the saved payment methods sheet for the customer. Results are delivered to the
-     * callback that the sheet was created with.
+     * Presents a sheet to manage the customer through a [CustomerAdapter]. Results of the sheet
+     * are delivered through the callback passed in [CustomerSheet.create].
      */
     fun present() {
         TODO()
@@ -46,7 +46,7 @@ class CustomerSheet internal constructor() {
         /**
          * Configuration for GooglePay.
          *
-         * If set, PaymentSheet displays Google Pay as a payment option.
+         * If set, CustomerSheet displays Google Pay as a payment option.
          */
         val googlePayConfiguration: PaymentSheet.GooglePayConfiguration? = null,
 
@@ -59,6 +59,15 @@ class CustomerSheet internal constructor() {
     @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+
+        /**
+         * Create a [CustomerSheet]
+         *
+         * @param activity The [Activity] that is presenting [CustomerSheet].
+         * @param configuration The [Configuration] options used to render the [CustomerSheet].
+         * @param customerAdapter The bridge to communicate with your server to manage a customer.
+         * @param callback called when a [CustomerSheetResult] is available.
+         */
         @Suppress("UNUSED_PARAMETER")
         fun create(
             activity: ComponentActivity,
@@ -69,6 +78,14 @@ class CustomerSheet internal constructor() {
             return CustomerSheet()
         }
 
+        /**
+         * Create a [CustomerSheet]
+         *
+         * @param fragment The [Fragment] that is presenting [CustomerSheet].
+         * @param configuration The [Configuration] options used to render the [CustomerSheet].
+         * @param customerAdapter The bridge to communicate with your server to manage a customer.
+         * @param callback called when a [CustomerSheetResult] is available.
+         */
         @Suppress("UNUSED_PARAMETER")
         fun create(
             fragment: Fragment,
