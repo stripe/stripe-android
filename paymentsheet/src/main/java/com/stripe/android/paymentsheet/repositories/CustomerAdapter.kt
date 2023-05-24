@@ -44,20 +44,20 @@ interface CustomerAdapter {
 
     /**
      * Saves the payment option to a data store.
-     * @param paymentOption, the [PersistablePaymentMethodOption] to save to the . If
-     * null, the selected payment method option will be cleared from the data store.
+     * @param paymentOption, the [PaymentOption] to save to the data store. If null, the selected
+     * payment method option will be cleared from the data store.
      */
-    suspend fun setSelectedPaymentMethodOption(paymentOption: PersistablePaymentMethodOption?)
+    suspend fun setSelectedPaymentOption(paymentOption: PaymentOption?)
 
     /**
-     * Retrieves the saved payment option from a data store. If null, the customer does not have a
-     * default saved payment method.
+     * Fetch the saved payment method option from a data store. If null, the customer does not have
+     * a default saved payment method.
      */
-    suspend fun fetchSelectedPaymentMethodOption(): Result<PersistablePaymentMethodOption?>
+    suspend fun fetchSelectedPaymentOption(): Result<PaymentOption?>
 
     /**
-     * Returns a [SetupIntent] client secret to attach a new payment method to a customer.
-     * This will call your backend to retrieve a client secret if you have provided a
+     * Returns a [SetupIntent] client secret to attach a new payment method to a customer. This will
+     * call your backend to retrieve a client secret if you have provided a
      * [setupIntentClientSecretProvider] in the [CustomerAdapter.create] call.
      */
     suspend fun setupIntentClientSecretForCustomerAttach(): Result<String>
@@ -92,50 +92,50 @@ interface CustomerAdapter {
             return component.stripeCustomerAdapter
         }
     }
-}
 
-/**
- * A representation of a saved payment method, used for persisting the user's default payment
- * method.
- */
-@ExperimentalCustomerSheetApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class PersistablePaymentMethodOption(
-    open val id: String
-) {
-
-    internal object GooglePay : PersistablePaymentMethodOption("google_pay")
-
-    internal object Link : PersistablePaymentMethodOption("link")
-
-    internal data class StripeId(override val id: String) : PersistablePaymentMethodOption(id)
-
+    /**
+     * A representation of a saved payment method, used for persisting the user's default payment
+     * method.
+     */
     @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    companion object {
-        fun fromId(id: String): PersistablePaymentMethodOption {
-            return when (id) {
-                "google_pay" -> GooglePay
-                "link" -> Link
-                else -> StripeId(id)
-            }
-        }
+    sealed class PaymentOption(
+        open val id: String
+    ) {
 
-        internal fun PersistablePaymentMethodOption.toSavedSelection(): SavedSelection {
-            return when (this) {
-                is GooglePay -> SavedSelection.GooglePay
-                is Link -> SavedSelection.Link
-                is StripeId -> SavedSelection.PaymentMethod(id)
-            }
-        }
+        internal object GooglePay : PaymentOption("google_pay")
 
-        internal fun SavedSelection.toPersistablePaymentMethodOption():
-            PersistablePaymentMethodOption? {
-            return when (this) {
-                is SavedSelection.GooglePay -> GooglePay
-                is SavedSelection.Link -> Link
-                is SavedSelection.None -> null
-                is SavedSelection.PaymentMethod -> StripeId(id)
+        internal object Link : PaymentOption("link")
+
+        internal data class StripeId(override val id: String) : PaymentOption(id)
+
+        @ExperimentalCustomerSheetApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            fun fromId(id: String): PaymentOption {
+                return when (id) {
+                    "google_pay" -> GooglePay
+                    "link" -> Link
+                    else -> StripeId(id)
+                }
+            }
+
+            internal fun PaymentOption.toSavedSelection(): SavedSelection {
+                return when (this) {
+                    is GooglePay -> SavedSelection.GooglePay
+                    is Link -> SavedSelection.Link
+                    is StripeId -> SavedSelection.PaymentMethod(id)
+                }
+            }
+
+            internal fun SavedSelection.toPaymentOption():
+                PaymentOption? {
+                return when (this) {
+                    is SavedSelection.GooglePay -> GooglePay
+                    is SavedSelection.Link -> Link
+                    is SavedSelection.None -> null
+                    is SavedSelection.PaymentMethod -> StripeId(id)
+                }
             }
         }
     }
