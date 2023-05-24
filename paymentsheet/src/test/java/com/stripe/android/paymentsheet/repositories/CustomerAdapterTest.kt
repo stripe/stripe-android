@@ -216,7 +216,7 @@ class CustomerAdapterTest {
         adapter.setSelectedPaymentOption(
             paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
         )
-        val result = adapter.fetchSelectedPaymentOption()
+        val result = adapter.retrieveSelectedPaymentOption()
         assertThat(result.getOrNull()).isEqualTo(
             CustomerAdapter.PaymentOption.StripeId("pm_1234")
         )
@@ -244,7 +244,7 @@ class CustomerAdapterTest {
         adapter.setSelectedPaymentOption(
             paymentOption = null
         )
-        val result = adapter.fetchSelectedPaymentOption()
+        val result = adapter.retrieveSelectedPaymentOption()
         assertThat(result.getOrNull()).isNull()
     }
 

@@ -50,10 +50,10 @@ interface CustomerAdapter {
     suspend fun setSelectedPaymentOption(paymentOption: PaymentOption?)
 
     /**
-     * Fetch the saved payment method option from a data store. If null, the customer does not have
-     * a default saved payment method.
+     * Retrieve the saved payment method option from a data store. If null, the customer does not
+     * have a default saved payment method.
      */
-    suspend fun fetchSelectedPaymentOption(): Result<PaymentOption?>
+    suspend fun retrieveSelectedPaymentOption(): Result<PaymentOption?>
 
     /**
      * Returns a [SetupIntent] client secret to attach a new payment method to a customer. This will
