@@ -13,7 +13,9 @@ import javax.inject.Inject
 /**
  * The default implementation of [CustomerAdapter]. This adapter uses the customer ID and ephemeral
  * key provided by [CustomerEphemeralKeyProvider] to read, update, or delete the customer's
- * default saved payment method using Android [SharedPreferences].
+ * default saved payment method using Android [SharedPreferences]. By default, this adapter saves
+ * the customer's selected payment method to [SharedPreferences], which is used by [PaymentSheet]
+ * to load the customer's default saved payment method.
  */
 @OptIn(ExperimentalCustomerSheetApi::class)
 @Suppress("unused")
