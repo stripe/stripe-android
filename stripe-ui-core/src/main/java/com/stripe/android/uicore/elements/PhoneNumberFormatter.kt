@@ -55,9 +55,7 @@ internal sealed class PhoneNumberFormatter {
         override val placeholder = metadata.pattern.replace('#', '5')
         override val countryCode = metadata.regionCode
 
-        // Maximum number of digits for the subscriber number for this region.
-        private val maxSubscriberDigits = E164_MAX_DIGITS -
-            (prefix.length - 1) // prefix minus the '+'
+        private val maxSubscriberDigits = metadata.pattern.count { it == '#' }
 
         override fun userInputFilter(input: String) =
             input.filter { VALID_INPUT_RANGE.contains(it) }.run {
