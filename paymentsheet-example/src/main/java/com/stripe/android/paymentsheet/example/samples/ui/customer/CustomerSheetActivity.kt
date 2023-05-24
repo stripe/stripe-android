@@ -20,13 +20,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
-import com.stripe.android.paymentsheet.wallet.CustomerSheet
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetActivity : AppCompatActivity() {
@@ -42,13 +41,12 @@ internal class CustomerSheetActivity : AppCompatActivity() {
             ),
             customerAdapter = viewModel.customerAdapter,
             callback = {
-                TODO()
+                Toast.makeText(this, "Got result $it", Toast.LENGTH_LONG).show()
             }
         )
 
         setContent {
             PaymentSheetExampleTheme {
-                val context = LocalContext.current
                 val viewState by viewModel.state.collectAsState()
                 Column(
                     modifier = Modifier
@@ -64,15 +62,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                         is CustomerSheetViewState.Data -> {
                             PaymentDefaults(
                                 onUpdateDefaultPaymentMethod = {
-                                    try {
-                                        customerSheet.present()
-                                    } catch (_: Error) {
-                                        Toast.makeText(
-                                            context,
-                                            "Customer sheet under construction",
-                                            Toast.LENGTH_LONG,
-                                        ).show()
-                                    }
+                                    customerSheet.present()
                                 }
                             )
                         }

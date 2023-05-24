@@ -1,15 +1,18 @@
-package com.stripe.android.paymentsheet.wallet
+package com.stripe.android.customersheet
 
+import android.os.Bundle
 import androidx.annotation.RestrictTo
+import androidx.core.os.bundleOf
 import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.view.ActivityStarter
 
 @ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class CustomerSheetResult {
     /**
      * The customer selected a payment method
-     * @param selection, the [PaymentOptionSelection] the customer selected from the [CustomerSheet]
+     * @param selection the [PaymentOptionSelection] the customer selected from the [CustomerSheet]
      */
     @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -35,6 +38,14 @@ sealed class CustomerSheetResult {
     class Error internal constructor(
         val exception: Exception
     ) : CustomerSheetResult()
+
+    internal companion object {
+        private const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
+    }
+
+    internal fun toBundle(): Bundle {
+        return bundleOf(EXTRA_RESULT to this)
+    }
 }
 
 /**

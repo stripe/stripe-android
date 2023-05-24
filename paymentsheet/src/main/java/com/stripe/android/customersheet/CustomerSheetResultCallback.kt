@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.wallet
+package com.stripe.android.customersheet
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.ExperimentalCustomerSheetApi
