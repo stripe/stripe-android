@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
@@ -36,6 +37,7 @@ import com.stripe.android.financialconnections.utils.parcelable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.lang.Error
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import javax.inject.Inject
@@ -163,6 +165,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 val state = awaitState()
                 if (state.activityRecreated.not()) {
                     when (state.webAuthFlowStatus) {
+                        // THIS IS BEING CALLED, we probably should even attempt to start the activity
                         AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> finishWithResult(
                             state = state,
                             result = Canceled
@@ -206,6 +209,18 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    internal fun onBrowserNotAvailable() {
+        withState { state ->
+            viewModelScope.launch {
+                finishWithResult(
+                    state = state,
+                    result = Failed(Exception("No application is installed that can handle url requests"))
+                )
+            }
+        }
+
     }
 
     internal fun onNativeAuthFlowResult(activityResult: ActivityResult) {

@@ -12,13 +12,14 @@ import androidx.browser.customtabs.CustomTabsIntent
  */
 internal object CreateBrowserIntentForUrl {
 
-    operator fun invoke(context: Context, uri: Uri): Intent {
+    operator fun invoke(context: Context, uri: Uri): Intent? {
         val browserIntent = Intent(Intent.ACTION_VIEW, uri)
         val resolveInfo: String? = context.packageManager
             .resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
             ?.activityInfo
             ?.packageName
         return when {
+            resolveInfo == null -> null
             /**
              * Firefox browser has a redirect issue when launching as a custom tab.
              * @see [BANKCON-3846]

@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.ui
 
 import android.content.Context
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.ui.platform.UriHandler
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 
@@ -11,11 +12,14 @@ import com.stripe.android.financialconnections.presentation.CreateBrowserIntentF
  */
 internal class CustomTabUriHandler(private val context: Context) : UriHandler {
     override fun openUri(uri: String) {
-        context.startActivity(
-            CreateBrowserIntentForUrl(
-                context = context,
-                uri = Uri.parse(uri)
-            )
+        val browserIntent = CreateBrowserIntentForUrl(
+            context = context,
+            uri = Uri.parse(uri)
         )
+        browserIntent?.let {
+            context.startActivity(it)
+        } ?: kotlin.run {
+            Toast.makeText(context, "No application can handle this request. Please install a web browser.", Toast.LENGTH_LONG).show()
+        }
     }
 }

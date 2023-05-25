@@ -1,9 +1,11 @@
 package com.stripe.android.financialconnections.ui
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -115,12 +117,22 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         withState(viewModel) { state ->
             state.viewEffect?.let { viewEffect ->
                 when (viewEffect) {
-                    is OpenUrl -> startActivity(
-                        CreateBrowserIntentForUrl(
-                            context = this,
-                            uri = Uri.parse(viewEffect.url)
-                        )
-                    )
+                    is OpenUrl -> {
+                        try {
+                            startActivity(
+                                CreateBrowserIntentForUrl(
+                                    context = this,
+                                    uri = Uri.parse(viewEffect.url)
+                                )
+                            )
+                        } catch (e: ActivityNotFoundException) {
+                            // Display an error message or something else to handle this situation
+                            Toast.makeText(this, "No application can handle this request. Please install a web browser or check your URL.", Toast.LENGTH_LONG).show()
+                            setResult(
+                                Activity.RESULT_CANCELED)
+                            finish()
+                        }
+                    }
 
                     is Finish -> {
                         setResult(

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -77,15 +78,30 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity(), Maverick
      * handle state changes here.
      */
     override fun invalidate() {
+
         withState(viewModel) { state ->
+
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.google.com"))
+            if (intent.resolveActivity(packageManager) == null) {
+                // No application can handle this intent, handle this situation here, maybe ask the user to install a browser
+                viewModel.onBrowserNotAvailable()
+            }
+
             state.viewEffect?.let { viewEffect ->
+
                 when (viewEffect) {
-                    is OpenAuthFlowWithUrl -> startBrowserForResult.launch(
-                        CreateBrowserIntentForUrl(
+
+                    is OpenAuthFlowWithUrl -> {
+                        val browserIntent = CreateBrowserIntentForUrl(
                             context = this,
                             uri = Uri.parse(viewEffect.url)
                         )
-                    )
+                        browserIntent?.let {
+                            startBrowserForResult.launch(it)
+                        } ?: kotlin.run {
+                            viewModel.onBrowserNotAvailable()
+                        }
+                    }
 
                     is FinishWithResult -> finishWithResult(
                         viewEffect.result

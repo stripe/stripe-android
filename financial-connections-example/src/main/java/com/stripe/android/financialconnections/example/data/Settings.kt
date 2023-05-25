@@ -32,7 +32,7 @@ class Settings(context: Context) {
          * [example-mobile-backend](https://github.com/stripe/example-mobile-backend),
          * the URL will be something like `https://stripe-example-mobile-backend.glitch.me/`.
          */
-        private const val BASE_URL = "https://stripe-mobile-connections-example.glitch.me/"
+        private const val BASE_URL = "https://night-discreet-femur.glitch.me/"
 
         private const val METADATA_BACKEND_URL_KEY =
             "com.stripe.financialconnections.example.metadata.backend_url"
