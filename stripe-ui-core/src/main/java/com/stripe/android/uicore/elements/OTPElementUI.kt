@@ -199,11 +199,7 @@ private fun OTPInputBox(
             // If the OTPInputBox already has a value, it would be the first character of it.text
             // remove it before passing it to the controller.
             val newValue =
-                if (value.isNotBlank() && it.text.isNotBlank()) {
-                    it.text.substring(1)
-                } else {
-                    it.text
-                }
+                if (value.isNotBlank() && it.text.isNotBlank()) { it.text.substring(1) } else { it.text }
             val inputLength = element.controller.onValueChanged(index, newValue)
             (0 until inputLength).forEach { _ -> focusManager.moveFocus(FocusDirection.Next) }
         },
