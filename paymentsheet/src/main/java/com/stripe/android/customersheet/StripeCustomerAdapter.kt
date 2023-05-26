@@ -1,9 +1,8 @@
-package com.stripe.android.customersheet.repositories
+package com.stripe.android.customersheet
 
 import android.content.Context
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
-import com.stripe.android.customersheet.repositories.CustomerAdapter.PaymentOption.Companion.toPaymentOption
-import com.stripe.android.customersheet.repositories.CustomerAdapter.PaymentOption.Companion.toSavedSelection
+import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toSavedSelection
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository

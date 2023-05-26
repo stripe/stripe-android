@@ -8,11 +8,11 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.customersheet.CustomerEphemeralKey
+import com.stripe.android.customersheet.CustomerEphemeralKeyProvider
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
-import com.stripe.android.customersheet.repositories.CustomerEphemeralKey
-import com.stripe.android.customersheet.repositories.CustomerEphemeralKeyProvider
-import com.stripe.android.customersheet.repositories.SetupIntentClientSecretProvider
-import com.stripe.android.customersheet.repositories.StripeCustomerAdapter
+import com.stripe.android.customersheet.SetupIntentClientSecretProvider
+import com.stripe.android.customersheet.StripeCustomerAdapter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository

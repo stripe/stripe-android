@@ -4,7 +4,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
-import com.stripe.android.customersheet.repositories.CustomerAdapter
 import com.stripe.android.paymentsheet.PaymentSheet
 
 /**

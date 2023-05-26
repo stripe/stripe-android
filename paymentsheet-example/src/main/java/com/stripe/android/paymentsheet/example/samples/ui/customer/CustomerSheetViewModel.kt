@@ -8,9 +8,9 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.customersheet.CustomerAdapter
+import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
-import com.stripe.android.customersheet.repositories.CustomerAdapter
-import com.stripe.android.customersheet.repositories.CustomerEphemeralKey
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerSheetRequest

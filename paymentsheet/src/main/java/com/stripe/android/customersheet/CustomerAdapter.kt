@@ -1,8 +1,7 @@
-package com.stripe.android.customersheet.repositories
+package com.stripe.android.customersheet
 
 import android.content.Context
 import androidx.annotation.RestrictTo
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.injection.DaggerStripeCustomerAdapterComponent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.SavedSelection

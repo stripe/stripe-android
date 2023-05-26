@@ -1,13 +1,12 @@
-package com.stripe.android.customersheet.repositories
+package com.stripe.android.customersheet
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
-import com.stripe.android.customersheet.repositories.CustomerAdapter.PaymentOption.Companion.toPaymentOption
-import com.stripe.android.customersheet.repositories.CustomerAdapter.PaymentOption.Companion.toSavedSelection
-import com.stripe.android.customersheet.repositories.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
+import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toSavedSelection
+import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.FakePrefsRepository
