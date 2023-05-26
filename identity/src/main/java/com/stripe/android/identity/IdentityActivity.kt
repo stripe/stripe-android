@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -174,6 +175,8 @@ internal class IdentityActivity :
             startedAt = starterArgs.presentTime.asEpochMillisecondsClockMark()
         )
         supportActionBar?.hide()
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             var topBarState by remember {

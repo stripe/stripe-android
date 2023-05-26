@@ -1,5 +1,7 @@
 package com.stripe.android.identity.ui
 
+import android.graphics.PointF
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,7 +30,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
@@ -39,6 +46,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -58,6 +67,7 @@ import com.stripe.android.identity.utils.startScanning
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 internal const val CONTINUE_BUTTON_TAG = "Continue"
 internal const val SCAN_TITLE_TAG = "Title"
@@ -156,15 +166,19 @@ internal fun DocumentScanScreen(
                 null -> {
                     cameraManager.toggleInitial()
                 }
+
                 is IdentityScanState.Initial -> {
                     cameraManager.toggleInitial()
                 }
+
                 is IdentityScanState.Found -> {
                     cameraManager.toggleFound()
                 }
+
                 is IdentityScanState.Finished -> {
                     cameraManager.toggleFinished()
                 }
+
                 else -> {} // no-op
             }
         }
@@ -292,6 +306,18 @@ private fun CameraViewFinder(
     newScanState: IdentityScanState?,
     cameraManager: IdentityCameraManager
 ) {
+
+    val configuration = LocalConfiguration.current
+//    val globalPosition = remember { mutableStateOf(IntOffset.Zero) }
+    val position = remember { mutableStateOf(IntOffset.Zero) }
+    val localDensity = LocalDensity.current.density
+    val screenSize = remember(configuration) {
+        IntSize(
+            width = (configuration.screenWidthDp * localDensity).roundToInt(),
+            height = (configuration.screenHeightDp * localDensity).roundToInt()
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -299,7 +325,24 @@ private fun CameraViewFinder(
             .clip(RoundedCornerShape(dimensionResource(id = R.dimen.stripe_view_finder_corner_radius)))
     ) {
         AndroidView(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer()
+                .onGloballyPositioned { layoutCoordinates ->
+                    val positionInRoot = layoutCoordinates.parentLayoutCoordinates?.positionInRoot()
+                    positionInRoot?.let {
+                        position.value = IntOffset(it.x.roundToInt(), it.y.roundToInt())
+                    }
+                    Log.d("BGLM", "positionInRoot: $positionInRoot")
+//                    val maxX = screenSize.width.toFloat() / localDensity
+//                    val maxY = screenSize.height.toFloat() / localDensity
+//                    val maxWidth = position?.x?.dp?.value?.coerceIn(0f, maxX)
+//                    val maxHeight = position?.y?.dp?.value?.coerceIn(0f, maxY)
+//                    if (maxWidth != null && maxHeight != null) {
+//                        globalPosition.value =
+//                            IntOffset(maxWidth.roundToInt(), maxHeight.roundToInt())
+//                    }
+                },
             factory = {
                 CameraView(
                     it,
@@ -309,7 +352,12 @@ private fun CameraViewFinder(
             },
             update =
             {
-                cameraManager.onCameraViewUpdate(it)
+                cameraManager.onCameraViewUpdate(
+                    it, PointF(
+                        position.value.x.toFloat(),
+                        position.value.y.toFloat()
+                    )
+                )
             }
         )
         if (newScanState is IdentityScanState.Finished) {

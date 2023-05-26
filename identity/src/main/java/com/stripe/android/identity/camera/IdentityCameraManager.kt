@@ -1,6 +1,8 @@
 package com.stripe.android.identity.camera
 
 import android.graphics.Bitmap
+import android.graphics.PointF
+import android.util.Log
 import android.util.Size
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
@@ -19,11 +21,37 @@ internal abstract class IdentityCameraManager {
      * with the same [CameraView] instance. Save it at the first occurrence of the call and
      * initialize [cameraAdapter] with the [CameraView].
      */
-    fun onCameraViewUpdate(view: CameraView) {
+    fun onCameraViewUpdate(view: CameraView, pointF: PointF) {
+        if(pointF.x > 0f && cameraView != null) {
+            cameraView!!.setOnTouchListener { _, e ->
+
+                val centerPoint = PointF(
+                    pointF.x + e.x,
+                    pointF.y + e.y
+                )
+                Log.d("BGLM", "pointF.x ${pointF.x}")
+                Log.d("BGLM", "pointF.y ${pointF.y}")
+
+
+                Log.d("BGLM", "centerPoint.x ${centerPoint.x}")
+                Log.d("BGLM", "centerPoint.y ${centerPoint.y}")
+
+
+                Log.d("BGLM", "e.x ${e.x}")
+                Log.d("BGLM", "e.y ${e.y}")
+
+
+                cameraAdapter?.setFocus(
+                    centerPoint
+                )
+                true
+            }
+        }
         if (cameraView == null) {
             cameraView = view
             cameraAdapter = createCameraAdapter(view)
             onInitialized()
+
         }
     }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.identity.ui
 
+import android.graphics.PointF
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -399,7 +400,7 @@ private fun SelfieCameraViewFinder(
                 )
             },
             update = {
-                cameraManager.onCameraViewUpdate(it)
+                cameraManager.onCameraViewUpdate(it, PointF())
             }
         )
         Box(
