@@ -1,18 +1,19 @@
-package com.stripe.android.paymentsheet.repositories
+package com.stripe.android.customersheet.repositories
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.repositories.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.customersheet.repositories.CustomerAdapter.PaymentOption.Companion.toSavedSelection
+import com.stripe.android.customersheet.repositories.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.repositories.CustomerAdapter.PaymentOption.Companion.toPaymentOption
-import com.stripe.android.paymentsheet.repositories.CustomerAdapter.PaymentOption.Companion.toSavedSelection
-import com.stripe.android.paymentsheet.repositories.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest

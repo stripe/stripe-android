@@ -3,7 +3,6 @@ package com.stripe.android.customersheet
 import android.os.Bundle
 import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
-import com.stripe.android.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.view.ActivityStarter
 

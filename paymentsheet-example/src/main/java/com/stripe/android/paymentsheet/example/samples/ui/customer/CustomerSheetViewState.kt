@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.example.samples.ui.customer
 
-import com.stripe.android.ExperimentalCustomerSheetApi
-import com.stripe.android.paymentsheet.repositories.CustomerEphemeralKey
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.repositories.CustomerEphemeralKey
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 sealed class CustomerSheetViewState {
