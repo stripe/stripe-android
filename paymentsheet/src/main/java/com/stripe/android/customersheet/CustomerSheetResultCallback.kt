@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ExperimentalCustomerSheetApi
 
 /**
  * Callback to be used when you use [CustomerSheet], called when a customer makes a payment method
