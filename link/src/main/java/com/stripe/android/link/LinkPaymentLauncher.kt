@@ -19,13 +19,10 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkPaymentLauncherComponent
-import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
-import com.stripe.android.link.ui.wallet.WalletViewModel
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -198,12 +195,8 @@ class LinkPaymentLauncher @Inject internal constructor(
         val injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 when (injectable) {
-                    is LinkActivityViewModel.Factory -> linkComponent.inject(injectable)
                     is SignUpViewModel.Factory -> linkComponent.inject(injectable)
                     is VerificationViewModel.Factory -> linkComponent.inject(injectable)
-                    is WalletViewModel.Factory -> linkComponent.inject(injectable)
-                    is PaymentMethodViewModel.Factory -> linkComponent.inject(injectable)
-                    is CardEditViewModel.Factory -> linkComponent.inject(injectable)
                     else -> {
                         throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
                     }
@@ -237,7 +230,6 @@ class LinkPaymentLauncher @Inject internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        const val LINK_ENABLED = true
         val supportedFundingSources = SupportedPaymentMethod.allTypes
     }
 }
