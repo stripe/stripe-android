@@ -8,7 +8,7 @@ internal class AccountLoadError(
     val canRetry: Boolean,
     val institution: FinancialConnectionsInstitution,
     stripeException: StripeException
-) : FinancialConnectionsError(
+) : FinancialConnectionsStripeError(
     name = "AccountLoadError",
     stripeException = stripeException
 )

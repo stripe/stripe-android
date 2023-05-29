@@ -7,7 +7,7 @@ internal class InstitutionUnplannedDowntimeError(
     val institution: FinancialConnectionsInstitution,
     val allowManualEntry: Boolean,
     stripeException: StripeException
-) : FinancialConnectionsError(
+) : FinancialConnectionsStripeError(
     name = "InstitutionUnplannedDowntimeError",
     stripeException = stripeException
 )

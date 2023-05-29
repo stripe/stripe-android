@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import javax.inject.Inject
 
-
 /**
  * Check if a browser is available on the device.
  */

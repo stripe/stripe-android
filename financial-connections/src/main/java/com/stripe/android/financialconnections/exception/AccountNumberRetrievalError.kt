@@ -7,7 +7,7 @@ internal class AccountNumberRetrievalError(
     val allowManualEntry: Boolean,
     val institution: FinancialConnectionsInstitution,
     stripeException: StripeException
-) : FinancialConnectionsError(
+) : FinancialConnectionsStripeError(
     name = "AccountNumberRetrievalError",
     stripeException = stripeException
 )

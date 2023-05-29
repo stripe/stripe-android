@@ -8,18 +8,7 @@ internal class AccountNoneEligibleForPaymentMethodError(
     val institution: FinancialConnectionsInstitution,
     val merchantName: String,
     stripeException: StripeException,
-) : FinancialConnectionsError(
+) : FinancialConnectionsStripeError(
     name = "AccountNoneEligibleForPaymentMethodError",
     stripeException = stripeException
-)
-
-internal abstract class FinancialConnectionsError(
-    val name: String,
-    stripeException: StripeException,
-) : StripeException(
-    stripeException.stripeError,
-    stripeException.requestId,
-    stripeException.statusCode,
-    stripeException.cause,
-    stripeException.message
 )

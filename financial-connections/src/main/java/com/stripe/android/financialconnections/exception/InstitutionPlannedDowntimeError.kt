@@ -9,7 +9,7 @@ internal class InstitutionPlannedDowntimeError(
     val isToday: Boolean,
     val backUpAt: Long,
     stripeException: StripeException
-) : FinancialConnectionsError(
+) : FinancialConnectionsStripeError(
     name = "InstitutionPlannedDowntimeError",
     stripeException = stripeException,
 )

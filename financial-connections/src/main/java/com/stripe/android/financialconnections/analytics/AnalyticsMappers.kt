@@ -1,7 +1,8 @@
 package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.financialconnections.exception.FinancialConnectionsError
+import com.stripe.android.financialconnections.exception.FinancialConnectionsClientError
+import com.stripe.android.financialconnections.exception.FinancialConnectionsStripeError
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 
 /**
@@ -15,7 +16,12 @@ internal fun Throwable.toEventParams(): Map<String, String?> = when (this) {
         "error_message" to message,
         "code" to null
     )
-    is FinancialConnectionsError -> mapOf(
+    is FinancialConnectionsClientError -> mapOf(
+        "error" to name,
+        "error_type" to name,
+        "error_message" to message,
+    )
+    is FinancialConnectionsStripeError -> mapOf(
         "error" to name,
         "error_type" to name,
         "error_message" to (stripeError?.message ?: message),
