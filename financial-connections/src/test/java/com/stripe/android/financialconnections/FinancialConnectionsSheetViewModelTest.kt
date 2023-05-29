@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections
 import android.content.Intent
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.test.MavericksTestRule
 import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
@@ -123,7 +122,6 @@ class FinancialConnectionsSheetViewModelTest {
             )
         }
     }
-
 
     @Test
     fun `handleOnNewIntent - wrong intent should fire analytics event and set fail result`() {
