@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.customersheet
 
 import androidx.annotation.RestrictTo
 

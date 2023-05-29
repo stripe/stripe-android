@@ -17,9 +17,7 @@ import kotlinx.parcelize.Parcelize
 class LinkActivityContract :
     ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
-    override fun createIntent(context: Context, input: Args) =
-        Intent(context, LinkActivity::class.java)
-            .putExtra(EXTRA_ARGS, input)
+    override fun createIntent(context: Context, input: Args) = Intent()
 
     override fun parseResult(resultCode: Int, intent: Intent?): LinkActivityResult {
         val linkResult = intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.linkResult

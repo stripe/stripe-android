@@ -1,12 +1,12 @@
-package com.stripe.android.paymentsheet.repositories
+package com.stripe.android.customersheet
 
 import android.content.Context
-import com.stripe.android.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toSavedSelection
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.repositories.CustomerAdapter.PaymentOption.Companion.toPaymentOption
-import com.stripe.android.paymentsheet.repositories.CustomerAdapter.PaymentOption.Companion.toSavedSelection
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import java.lang.IllegalArgumentException
 import javax.inject.Inject
 

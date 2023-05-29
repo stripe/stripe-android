@@ -12,7 +12,6 @@ import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
@@ -196,12 +195,7 @@ class VerificationViewModelTest {
 
     @Test
     fun `Factory gets initialized by Injector`() {
-        val mockBuilder = mock<SignedInViewModelSubcomponent.Builder>()
-        val mockSubComponent = mock<SignedInViewModelSubcomponent>()
         val vmToBeReturned = mock<VerificationViewModel>()
-
-        whenever(mockBuilder.linkAccount(any())).thenReturn(mockBuilder)
-        whenever(mockBuilder.build()).thenReturn(mockSubComponent)
 
         val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
         val mockSavedStateRegistry = mock<SavedStateRegistry>()
