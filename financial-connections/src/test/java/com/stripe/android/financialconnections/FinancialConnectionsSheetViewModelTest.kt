@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
+import com.stripe.android.financialconnections.domain.IsBrowserAvailable
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
@@ -56,6 +57,8 @@ class FinancialConnectionsSheetViewModelTest {
     private val syncResponse = syncResponse()
 
     private val fetchFinancialConnectionsSession = mock<FetchFinancialConnectionsSession>()
+    private val isBrowserAvailable = mock<IsBrowserAvailable>()
+    private val analyticsTracker = TestFinancialConnectionsAnalyticsTracker()
     private val fetchFinancialConnectionsSessionForToken =
         mock<FetchFinancialConnectionsSessionForToken>()
     private val synchronizeFinancialConnectionsSession =
@@ -468,6 +471,8 @@ class FinancialConnectionsSheetViewModelTest {
             fetchFinancialConnectionsSessionForToken = fetchFinancialConnectionsSessionForToken,
             eventReporter = eventReporter,
             nativeRouter = mock(),
+            analyticsTracker = analyticsTracker,
+            isBrowserAvailable = isBrowserAvailable,
             logger = Logger.noop()
         )
     }

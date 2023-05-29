@@ -101,10 +101,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *
      */
     private fun openAuthFlow(sync: SynchronizeSessionResponse) {
-        if (isBrowserAvailable().not()) {
-            logNoBrowserAvailableAndFinish()
-            return
-        }
+//        if (isBrowserAvailable().not()) {
+//            logNoBrowserAvailableAndFinish()
+//            return
+//        }
         val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(sync.manifest)
         viewModelScope.launch { nativeRouter.logExposure(sync.manifest) }
         if (sync.manifest.hostedAuthUrl == null) {
