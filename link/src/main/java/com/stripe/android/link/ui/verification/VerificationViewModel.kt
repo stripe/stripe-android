@@ -142,12 +142,6 @@ internal class VerificationViewModel @Inject constructor(
         linkAccountManager.logout()
     }
 
-    fun onChangeEmailClicked() {
-        clearError()
-        navigator.navigateTo(LinkScreen.SignUp, clearBackStack = true)
-        linkAccountManager.logout()
-    }
-
     fun onFocusRequested() {
         updateViewState {
             it.copy(requestFocus = false)

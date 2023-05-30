@@ -58,12 +58,9 @@ internal fun LinkAppBar(
             )
         }
 
-        val contentAlpha by animateFloatAsState(targetValue = if (state.showHeader) 1f else 0f)
-
         Column(
             modifier = Modifier
                 .weight(1f)
-                .alpha(contentAlpha)
                 .padding(top = 18.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -131,7 +128,6 @@ private fun LinkAppBarPreview() {
             LinkAppBar(
                 state = LinkAppBarState(
                     navigationIcon = R.drawable.stripe_link_close,
-                    showHeader = true,
                     showOverflowMenu = true,
                     email = "email@example.com",
                     accountStatus = AccountStatus.Verified
@@ -152,7 +148,6 @@ private fun LinkAppBar_NoEmail() {
             LinkAppBar(
                 state = LinkAppBarState(
                     navigationIcon = R.drawable.stripe_link_close,
-                    showHeader = true,
                     showOverflowMenu = true,
                     email = null,
                     accountStatus = AccountStatus.SignedOut
@@ -173,7 +168,6 @@ private fun LinkAppBar_ChildScreen() {
             LinkAppBar(
                 state = LinkAppBarState(
                     navigationIcon = R.drawable.stripe_link_back,
-                    showHeader = false,
                     showOverflowMenu = false,
                     email = "email@example.com",
                     accountStatus = AccountStatus.Verified
@@ -194,7 +188,6 @@ private fun LinkAppBar_ChildScreen_NoEmail() {
             LinkAppBar(
                 state = LinkAppBarState(
                     navigationIcon = R.drawable.stripe_link_back,
-                    showHeader = false,
                     showOverflowMenu = false,
                     email = null,
                     accountStatus = AccountStatus.SignedOut

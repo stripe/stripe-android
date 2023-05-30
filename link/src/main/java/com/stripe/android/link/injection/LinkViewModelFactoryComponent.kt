@@ -9,7 +9,6 @@ import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
@@ -36,12 +35,10 @@ import javax.inject.Singleton
     ]
 )
 internal abstract class LinkViewModelFactoryComponent : NonFallbackInjector {
-    abstract fun inject(factory: SignUpViewModel.Factory)
     abstract fun inject(factory: VerificationViewModel.Factory)
 
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
-            is SignUpViewModel.Factory -> inject(injectable)
             is VerificationViewModel.Factory -> inject(injectable)
             else -> {
                 throw IllegalArgumentException("invalid Injectable $injectable requested in $this")

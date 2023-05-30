@@ -1,40 +1,11 @@
 package com.stripe.android.link
 
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-
 /**
  * All Link screens.
  */
 internal sealed class LinkScreen(
     open val route: String
 ) {
-    object Loading : LinkScreen("Loading")
-    object Verification : LinkScreen("Verification")
     object VerificationDialog : LinkScreen("VerificationDialog")
     object Wallet : LinkScreen("Wallet")
-
-    class PaymentMethod(loadFromArgs: Boolean = false) :
-        LinkScreen("PaymentMethod?$loadArg=$loadFromArgs") {
-        override val route = super.route
-
-        companion object {
-            const val loadArg = "loadFromArgs"
-            const val route = "PaymentMethod?$loadArg={$loadArg}"
-        }
-    }
-
-    class CardEdit(paymentDetailsId: String) :
-        LinkScreen("CardEdit?$idArg=${paymentDetailsId.urlEncode()}") {
-        override val route = super.route
-
-        companion object {
-            const val idArg = "id"
-            const val route = "CardEdit?$idArg={$idArg}"
-        }
-    }
-
-    object SignUp : LinkScreen("SignUp")
 }
-
-private fun String.urlEncode(): String = URLEncoder.encode(this, StandardCharsets.UTF_8.name())

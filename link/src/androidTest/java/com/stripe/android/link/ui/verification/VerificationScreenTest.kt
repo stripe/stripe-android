@@ -49,20 +49,6 @@ internal class VerificationScreenTest {
     }
 
     @Test
-    fun change_email_button_triggers_action() {
-        var count = 0
-        setContent(
-            onChangeEmailClick = {
-                count++
-            }
-        )
-
-        onChangeEmailButton().performClick()
-
-        assertThat(count).isEqualTo(1)
-    }
-
-    @Test
     fun resend_code_button_triggers_action() {
         var count = 0
         setContent(
@@ -82,16 +68,12 @@ internal class VerificationScreenTest {
         var count = 0
         setContent(
             isProcessing = true,
-            onChangeEmailClick = {
-                count++
-            },
             onResendCodeClick = {
                 count++
             }
         )
 
         onResendCodeButton().performClick()
-        onChangeEmailButton().performClick()
 
         assertThat(count).isEqualTo(0)
     }
@@ -176,35 +158,29 @@ internal class VerificationScreenTest {
 
     private fun setContent(
         redactedPhoneNumber: String = "+1********23",
-        email: String = "test@stripe.com",
         otpElement: OTPElement = OTPSpec.transform(),
         isProcessing: Boolean = false,
         isSendingNewCode: Boolean = true,
         errorMessage: ErrorMessage? = null,
         onBack: () -> Unit = { },
-        onChangeEmailClick: () -> Unit = { },
         onResendCodeClick: () -> Unit = { }
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             VerificationBody(
                 headerStringResId = R.string.stripe_verification_header,
                 messageStringResId = R.string.stripe_verification_message,
-                showChangeEmailMessage = true,
                 redactedPhoneNumber = redactedPhoneNumber,
                 isSendingNewCode = isSendingNewCode,
-                email = email,
                 otpElement = otpElement,
                 isProcessing = isProcessing,
                 errorMessage = errorMessage,
                 focusRequester = remember { FocusRequester() },
                 onBack = onBack,
-                onChangeEmailClick = onChangeEmailClick,
                 onResendCodeClick = onResendCodeClick
             )
         }
     }
 
     private fun onResendCodeButton() = composeTestRule.onNodeWithText("Resend code")
-    private fun onChangeEmailButton() = composeTestRule.onNodeWithText("Change email")
     private fun onOtpField(index: Int) = composeTestRule.onNodeWithTag("OTP-$index")
 }

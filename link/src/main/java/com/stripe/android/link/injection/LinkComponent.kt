@@ -1,7 +1,6 @@
 package com.stripe.android.link.injection
 
 import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
@@ -15,7 +14,6 @@ import dagger.Subcomponent
     ]
 )
 internal abstract class LinkComponent {
-    abstract fun inject(factory: SignUpViewModel.Factory)
     abstract fun inject(factory: VerificationViewModel.Factory)
 
     @Subcomponent.Builder

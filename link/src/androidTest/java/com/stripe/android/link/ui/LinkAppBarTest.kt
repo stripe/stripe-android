@@ -58,7 +58,6 @@ internal class LinkAppBarTest {
             LinkAppBar(
                 state = LinkAppBarState(
                     navigationIcon = R.drawable.stripe_link_close,
-                    showHeader = true,
                     showOverflowMenu = true,
                     email = email,
                     accountStatus = accountStatus
