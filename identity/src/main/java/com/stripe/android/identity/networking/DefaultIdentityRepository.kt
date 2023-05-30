@@ -128,6 +128,32 @@ internal class DefaultIdentityRepository @Inject constructor(
         VerificationPageData.serializer()
     )
 
+    override suspend fun generateOtp(
+        id: String,
+        ephemeralKey: String
+    ) = executeRequestWithKSerializer(
+        apiRequestFactory.createPost(
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$OTP/$GENERATE",
+            options = ApiRequest.Options(
+                apiKey = ephemeralKey
+            )
+        ),
+        VerificationPageData.serializer()
+    )
+
+    override suspend fun cannotVerifyOtp(
+        id: String,
+        ephemeralKey: String
+    ) = executeRequestWithKSerializer(
+        apiRequestFactory.createPost(
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$OTP/$CANNOT_VERIFY",
+            options = ApiRequest.Options(
+                apiKey = ephemeralKey
+            )
+        ),
+        VerificationPageData.serializer()
+    )
+
     override suspend fun uploadImage(
         verificationId: String,
         ephemeralKey: String,
