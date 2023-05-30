@@ -35,7 +35,7 @@
   <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
   <string name="stripe_verification_not_email">不是 %s？</string>
   <!-- Label for a button that re-sends the a login code when tapped -->
-  <string name="stripe_verification_resend">重新發送驗證碼</string>
+  <string name="stripe_verification_resend">重新傳送驗證碼</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[點擊「繼續」，即表示您同意按照這些<terms>條款</terms>授權付款。]]></string>
   <!-- Label for a section displaying payment details. -->
