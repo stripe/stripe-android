@@ -2,15 +2,14 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>CyclomaticComplexMethod:IdentityExampleViewModel.kt$IdentityExampleViewModel$fun postForResult( submissionState: IdentitySubmissionState )</ID>
     <ID>LongMethod:ComposeExampleUI.kt$@Composable internal fun ExampleScreen( configuration: IdentityVerificationSheet.Configuration, viewModel: IdentityExampleViewModel )</ID>
-    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun AllowedDocumentTypes( identitySubmissionState: IdentitySubmissionState, onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit )</ID>
-    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun IntegrationTypeUI( identitySubmissionState: IdentitySubmissionState, onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit )</ID>
     <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun LoadVSView( viewModel: IdentityExampleViewModel, loadingState: LoadingState, identitySubmissionState: IdentitySubmissionState, onLoadingStateChanged: (LoadingState) -> Unit, onPostResult: (String, String, String) -> Unit )</ID>
-    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun RequireDocTypes( identitySubmissionState: IdentitySubmissionState, onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit )</ID>
-    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun SubmitView( submissionState: IdentitySubmissionState, scaffoldState: ScaffoldState, configuration: IdentityVerificationSheet.Configuration, viewModel: IdentityExampleViewModel, )</ID>
-    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun TypeSelectUI( verificationType: VerificationType, integrationType: IntegrationType, onVerificationTypeChanged: (VerificationType) -> Unit )</ID>
-    <ID>MaxLineLength:ComposeExampleUI.kt$resultString = "Error generating verificationSessionId and ephemeralKeySecret: ${it.getException().message}"</ID>
-    <ID>MaximumLineLength:com.stripe.android.identity.example.ui.ComposeExampleUI.kt:632</ID>
+    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun SubmitView( submissionState: IdentitySubmissionState, scaffoldState: ScaffoldState, configuration: IdentityVerificationSheet.Configuration, viewModel: IdentityExampleViewModel, loadingState: LoadingState, onLoadingStateChanged: (LoadingState) -> Unit )</ID>
+    <ID>LongMethod:DocumentUI.kt$@Composable private fun AllowedDocumentTypes( identitySubmissionState: IdentitySubmissionState, onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit )</ID>
+    <ID>LongMethod:DocumentUI.kt$@Composable private fun RequireDocTypes( identitySubmissionState: IdentitySubmissionState, onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit )</ID>
+    <ID>LongMethod:IdentityExampleViewModel.kt$IdentityExampleViewModel$fun postForResult( submissionState: IdentitySubmissionState )</ID>
+    <ID>LongMethod:RequirePhoneVerificationUI.kt$@Composable internal fun RequirePhoneVerificationUI( scrollState: ScrollState, submissionState: IdentitySubmissionState, onSubmissionStateChanged: (IdentitySubmissionState) -> Unit )</ID>
     <ID>TooGenericExceptionCaught:IdentityExampleViewModel.kt$IdentityExampleViewModel$t: Throwable</ID>
   </CurrentIssues>
 </SmellBaseline>
