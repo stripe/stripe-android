@@ -9,7 +9,6 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.signup.SignUpState
-import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -91,7 +90,7 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.failure(APIConnectionException()))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.useLink).isEqualTo(false)
 
@@ -101,7 +100,7 @@ class InlineSignupViewModelTest {
             viewModel.emailController.onRawValueChange("valid2@email.com")
 
             // Advance past lookup debounce delay
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.useLink).isEqualTo(true)
         }
@@ -124,7 +123,7 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(linkAccount))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.userInput).isEqualTo(UserInput.SignIn(email))
         }
@@ -140,7 +139,7 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(null))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.userInput).isNull()
             assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingPhoneOrName)
@@ -160,7 +159,7 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(null))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.userInput).isNull()
 
@@ -195,7 +194,7 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(null))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingPhoneOrName)
             verify(linkEventsReporter).onSignupStarted(true)

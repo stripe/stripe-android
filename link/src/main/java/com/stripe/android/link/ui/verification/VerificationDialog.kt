@@ -104,7 +104,6 @@ fun LinkVerificationDialog(
                                     VerificationBody(
                                         headerStringResId = R.string.stripe_verification_header_prefilled,
                                         messageStringResId = R.string.stripe_verification_message,
-                                        showChangeEmailMessage = false,
                                         linkAccount = account,
                                         injector = component.injector,
                                         onVerificationCompleted = {

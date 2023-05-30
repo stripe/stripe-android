@@ -131,12 +131,6 @@ class VerificationViewModelTest {
         }
 
     @Test
-    fun `onChangeEmailClicked triggers logout`() = runTest {
-        createViewModel().onChangeEmailClicked()
-        verify(linkAccountManager).logout()
-    }
-
-    @Test
     fun `onBack triggers logout and sends analytics event`() = runTest {
         createViewModel().onBack()
         verify(linkEventsReporter).on2FACancel()

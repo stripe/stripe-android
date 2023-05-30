@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -23,10 +25,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -48,7 +52,7 @@ import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
-import com.stripe.android.link.ui.signup.EmailCollectionSection
+import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.EmailConfig
@@ -293,6 +297,50 @@ internal fun LinkInlineSignup(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+internal fun EmailCollectionSection(
+    enabled: Boolean,
+    emailController: TextFieldController,
+    signUpState: SignUpState,
+    focusRequester: FocusRequester = remember { FocusRequester() }
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(0.dp),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        TextFieldSection(
+            textFieldController = emailController,
+            imeAction = if (signUpState == SignUpState.InputtingPhoneOrName) {
+                ImeAction.Next
+            } else {
+                ImeAction.Done
+            },
+            enabled = enabled && signUpState != SignUpState.VerifyingEmail,
+            modifier = Modifier
+                .focusRequester(focusRequester)
+        )
+        if (signUpState == SignUpState.VerifyingEmail) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(32.dp)
+                    .padding(
+                        start = 0.dp,
+                        top = 8.dp,
+                        end = 16.dp,
+                        bottom = 8.dp
+                    )
+                    .semantics {
+                        testTag = progressIndicatorTestTag
+                    },
+                color = MaterialTheme.linkColors.progressIndicator,
+                strokeWidth = 2.dp
+            )
         }
     }
 }
