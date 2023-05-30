@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
+
+## 20.25.4 - 2023-05-30
 ### All SDKs
 * [FIXED][6771](https://github.com/stripe/stripe-android/pull/6771) Fixed the length of phone number field.
 * [CHANGED][6789](https://github.com/stripe/stripe-android/pull/6789) Updated Mavericks to 3.0.3.
