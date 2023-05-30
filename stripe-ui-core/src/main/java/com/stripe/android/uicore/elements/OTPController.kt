@@ -29,7 +29,7 @@ class OTPController(val otpLength: Int = 6) : Controller {
      */
     fun onValueChanged(index: Int, text: String): Int {
         if (text == fieldValues[index].value) {
-            return 0
+            return 1
         }
 
         if (text.isEmpty()) {
@@ -49,6 +49,10 @@ class OTPController(val otpLength: Int = 6) : Controller {
         }
 
         return inputLength
+    }
+
+    fun reset() {
+        fieldValues.forEach { it.value = "" }
     }
 
     private fun filter(userTyped: String) = userTyped.filter { VALID_INPUT_RANGES.contains(it) }
