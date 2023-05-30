@@ -211,7 +211,8 @@ internal data class IndividualCollectedStates(
         name = if (name.status == Status.SUCCESS) name.data else null,
         dob = if (dob.status == Status.SUCCESS) dob.data else null,
         idNumber = if (idNumber.status == Status.SUCCESS) idNumber.data else null,
-        address = if (address.status == Status.SUCCESS) address.data else null
+        address = if (address.status == Status.SUCCESS) address.data else null,
+        phone = if (phone.status == Status.SUCCESS) phone.data else null,
     )
 }
 
