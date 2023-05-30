@@ -63,7 +63,7 @@ internal fun IndividualScreen(
                     dob = requirementResource(missing, Requirement.DOB),
                     idNumber = requirementResource(missing, Requirement.IDNUMBER),
                     address = requirementResource(missing, Requirement.ADDRESS),
-                    phone = requirementResource(missing, Requirement.PHONE)
+                    phone = requirementResource(missing, Requirement.PHONE_NUMBER)
                 )
             )
         }
@@ -133,7 +133,7 @@ private fun IndividualScreenBodyContent(
         fontWeight = FontWeight.Bold,
         modifier = Modifier.testTag(INDIVIDUAL_TITLE_TAG)
     )
-    if (missing.contains(Requirement.PHONE)) {
+    if (missing.contains(Requirement.PHONE_NUMBER)) {
         PhoneNumberSection(
             enabled,
             individualPage.phoneNumberCountries,

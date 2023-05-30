@@ -47,8 +47,8 @@ internal enum class Requirement {
     @SerialName("address")
     ADDRESS,
 
-    @SerialName("phone")
-    PHONE,
+    @SerialName("phone_number")
+    PHONE_NUMBER,
 
     @SerialName("phone_otp")
     PHONE_OTP;
@@ -94,7 +94,7 @@ internal enum class Requirement {
                 FACE -> {
                     fromRoute == SelfieDestination.ROUTE.route
                 }
-                DOB, NAME, IDNUMBER, ADDRESS, PHONE, PHONE_OTP -> {
+                DOB, NAME, IDNUMBER, ADDRESS, PHONE_NUMBER, PHONE_OTP -> {
                     fromRoute == IndividualDestination.ROUTE.route
                 }
             }
