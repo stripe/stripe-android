@@ -147,10 +147,10 @@ workflows:
             - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug
       - script@1:
           inputs:
-            - content: pip install requests_toolbelt requests
+            - content: pip3 install requests_toolbelt requests
       - script@1:
           inputs:
-            - content: python scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk
+            - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk
   start_emulator:
     steps:
       - avd-manager@1:
