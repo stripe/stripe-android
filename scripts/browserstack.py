@@ -127,7 +127,7 @@ def uploadEspressoApk(espressoApkFile):
         print("DONE\nRESULT: " + str(response.status_code) + "\n" + str(response.json()))
         return None
 
-def testShards():
+def testShards(isNightly):
     testClassNames = [
         # Hard coded tests.
         "com.stripe.android.TestAuthorization",
@@ -145,7 +145,8 @@ def testShards():
         testClassNames.append(f"com.stripe.android.lpm.{className}")
 
     # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
-    testClassesPerShard = math.ceil(len(testClassNames) / 10.0)
+    numberOfShards = 8.0 if isNightly else 10.0
+    testClassesPerShard = math.ceil(len(testClassNames) / numberOfShards)
 
     shards = []
     shardValues = []
@@ -181,7 +182,7 @@ def executeTests(appUrl, testUrl, isNightly):
     )
     url="https://api-cloud.browserstack.com/app-automate/espresso/v2/build"
     # firefox doesn't work on this samsung: Samsung Galaxy S9 Plus-9.0"]
-    shards = testShards()
+    shards = testShards(isNightly)
     devices = []
     if isNightly:
         devices = [
@@ -255,10 +256,6 @@ def confirm(message):
     return answer == "y"
 
 if __name__ == "__main__":
-#     shards = json.dumps(testShards())
-#     print(f"{shards}")
-#     raise SystemExit('error in code want to exit')
-
     # Parse arguments
     parser = argparse.ArgumentParser(description='Interact with browserstack.')
     parser.add_argument("-t", "--test", help="Runs the espresso test.  Requires -a and -e", action="store_true")

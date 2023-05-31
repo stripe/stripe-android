@@ -4,6 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BaseLpmTest
 import com.stripe.android.test.core.Currency
 import org.junit.Ignore
+import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
@@ -26,5 +27,10 @@ internal class TestKlarna : BaseLpmTest() {
         testDriver.confirmCustom(
             testParameters = klarna,
         )
+    }
+
+    @Test
+    fun ignoredKlarnaTests() {
+        // Adding a test to make it so this doesn't fail to initialize because of no tests.
     }
 }
