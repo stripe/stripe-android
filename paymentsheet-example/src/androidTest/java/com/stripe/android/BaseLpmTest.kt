@@ -1,12 +1,10 @@
 package com.stripe.android
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
-import com.stripe.android.test.core.Browser
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
@@ -19,19 +17,32 @@ import com.stripe.android.test.core.TestParameters
 import com.stripe.android.utils.TestRules
 import com.stripe.android.utils.initializedLpmRepository
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
-class TestLink {
-
+internal open class BaseLpmTest {
     @get:Rule
     val rules = TestRules.create()
 
-    private lateinit var device: UiDevice
-    private lateinit var testDriver: PlaygroundTestDriver
+    lateinit var device: UiDevice
+    lateinit var testDriver: PlaygroundTestDriver
+
+    val newUser = TestParameters(
+        paymentMethod = lpmRepository.fromCode("bancontact")!!,
+        customer = Customer.New,
+        linkState = LinkState.Off,
+        googlePayState = GooglePayState.On,
+        currency = Currency.EUR,
+        intentType = IntentType.Pay,
+        billing = Billing.On,
+        shipping = Shipping.Off,
+        delayed = DelayedPMs.Off,
+        automatic = Automatic.Off,
+        saveCheckboxValue = false,
+        saveForFutureUseCheckboxVisible = false,
+        useBrowser = null,
+        authorizationAction = AuthorizeAction.Authorize,
+        merchantCountryCode = "GB",
+    )
 
     @Before
     fun before() {
@@ -39,32 +50,8 @@ class TestLink {
         testDriver = PlaygroundTestDriver(device, rules.compose)
     }
 
-    private val linkNewUser = TestParameters(
-        paymentMethod = lpmRepository.fromCode("card")!!,
-        customer = Customer.Guest,
-        linkState = LinkState.On,
-        googlePayState = GooglePayState.On,
-        currency = Currency.USD,
-        intentType = IntentType.Pay,
-        billing = Billing.Off,
-        shipping = Shipping.Off,
-        delayed = DelayedPMs.Off,
-        automatic = Automatic.Off,
-        saveCheckboxValue = false,
-        saveForFutureUseCheckboxVisible = false,
-        useBrowser = Browser.Chrome,
-        authorizationAction = AuthorizeAction.Authorize,
-        merchantCountryCode = "US",
-    )
-
-    @Test
-    @Ignore("neutral-culminate")
-    fun testLinkInlineCustom() {
-        testDriver.testLinkCustom(linkNewUser)
-    }
-
     companion object {
-        private val lpmRepository = initializedLpmRepository(
+        val lpmRepository = initializedLpmRepository(
             context = InstrumentationRegistry.getInstrumentation().targetContext,
         )
     }

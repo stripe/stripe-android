@@ -22,6 +22,7 @@ stages:
       - check: { }
       - test: { }
       - run-instrumentation-tests: { }
+      - run-paymentsheet-end-to-end-tests: { }
 
 workflows:
   check:
@@ -39,10 +40,6 @@ workflows:
     after_run:
       - conclude_all
     steps:
-      - script@1:
-          title: Restore gradle.properties
-          inputs:
-            - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
       - script@1:
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
@@ -139,6 +136,21 @@ workflows:
           title: Execute instrumentation tests
           inputs:
             - file_path: ./scripts/execute_instrumentation_tests.sh
+  run-paymentsheet-end-to-end-tests:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          inputs:
+            - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug
+      - script@1:
+          inputs:
+            - content: pip3 install requests_toolbelt requests
+      - script@1:
+          inputs:
+            - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk
   start_emulator:
     steps:
       - avd-manager@1:
