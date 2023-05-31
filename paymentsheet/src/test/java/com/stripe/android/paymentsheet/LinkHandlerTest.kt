@@ -27,7 +27,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -35,112 +34,27 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class LinkHandlerTest {
     @Test
-    fun `Sets up state correctly for logged in user`() = runLinkTest {
-        accountStatusFlow.emit(AccountStatus.Verified)
-        handler.setupLinkLaunchingEagerly(
-            testScope,
-            LinkState(configuration, LinkState.LoginState.LoggedIn),
-        )
-
-        assertThat(handler.isLinkEnabled.first()).isTrue()
-        assertThat(handler.activeLinkSession.first()).isTrue()
-        assertThat(handler.showLinkVerificationDialog.first()).isFalse()
-        assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
-        assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
-
-        verify(linkLauncher).present(configuration, null)
-    }
-
-    @Test
-    fun `Sets up state correctly for logged out user`() = runLinkTest {
-        accountStatusFlow.emit(AccountStatus.SignedOut)
-        handler.setupLinkLaunchingEagerly(
-            testScope,
-            LinkState(configuration, LinkState.LoginState.LoggedOut),
-        )
-
-        assertThat(handler.isLinkEnabled.first()).isTrue()
-        assertThat(handler.activeLinkSession.first()).isFalse()
-        assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.SignedOut)
-        assertThat(handler.showLinkVerificationDialog.first()).isFalse()
-    }
-
-    @Test
-    fun `Sets up state correctly for a user that needs verification`() = runLinkTest {
-        accountStatusFlow.emit(AccountStatus.NeedsVerification)
-        handler.setupLinkLaunchingEagerly(
-            testScope,
-            LinkState(configuration, LinkState.LoginState.NeedsVerification),
-        )
-
-        assertThat(handler.isLinkEnabled.first()).isTrue()
-        assertThat(handler.activeLinkSession.first()).isFalse()
-        assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.NeedsVerification)
-        processingStateTurbine.ensureAllEventsConsumed()
-        assertThat(handler.showLinkVerificationDialog.first()).isFalse()
-
-        handler.handleLinkVerificationResult(true)
-
-        assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
-        assertThat(handler.showLinkVerificationDialog.first()).isTrue()
-        assertThat(handler.activeLinkSession.first()).isTrue()
-
-        verify(linkLauncher).present(configuration, null)
-    }
-
-    @Test
-    fun `Sets up state correctly for user that fails verification`() = runLinkTest {
-        accountStatusFlow.emit(AccountStatus.Error)
-        handler.setupLinkLaunchingEagerly(
-            testScope,
-            LinkState(configuration, LinkState.LoginState.NeedsVerification),
-        )
-
-        assertThat(handler.isLinkEnabled.first()).isTrue()
-        assertThat(handler.activeLinkSession.first()).isFalse()
-        assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Error)
-        processingStateTurbine.ensureAllEventsConsumed()
-        assertThat(handler.showLinkVerificationDialog.first()).isFalse()
-
-        handler.handleLinkVerificationResult(false)
-
-        assertThat(handler.activeLinkSession.first()).isFalse()
-        assertThat(handler.showLinkVerificationDialog.first()).isFalse()
-    }
-
-    @Test
-    fun `Sets up state correctly for null LinkState`() = runLinkTest {
-        handler.setupLinkLaunchingEagerly(testScope, null)
-        assertThat(handler.isLinkEnabled.first()).isFalse()
-        assertThat(handler.activeLinkSession.first()).isFalse()
-        assertThat(handler.showLinkVerificationDialog.first()).isFalse()
-        verifyNoInteractions(linkLauncher)
-    }
-
-    @Test
     fun `Prepares state correctly for logged in user`() = runLinkTest {
         accountStatusFlow.emit(AccountStatus.Verified)
-        handler.prepareLink(LinkState(configuration, LinkState.LoginState.LoggedIn))
+        handler.setupLink(LinkState(configuration, LinkState.LoginState.LoggedIn))
         assertThat(handler.isLinkEnabled.first()).isTrue()
         assertThat(handler.activeLinkSession.first()).isTrue()
         assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
-        assertThat(handler.showLinkVerificationDialog.first()).isFalse()
     }
 
     @Test
     fun `Prepares state correctly for logged out user`() = runLinkTest {
         accountStatusFlow.emit(AccountStatus.SignedOut)
-        handler.prepareLink(LinkState(configuration, LinkState.LoginState.LoggedOut))
+        handler.setupLink(LinkState(configuration, LinkState.LoginState.LoggedOut))
         assertThat(handler.isLinkEnabled.first()).isTrue()
         assertThat(handler.activeLinkSession.first()).isFalse()
         assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.SignedOut)
-        assertThat(handler.showLinkVerificationDialog.first()).isFalse()
         assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION)).isNull()
     }
 
     @Test
     fun `launchLink presents with configuration`() = runLinkTest {
-        handler.launchLink(configuration, launchedDirectly = false)
+        handler.launchLink(configuration)
 
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
         processingStateTurbine.ensureAllEventsConsumed()
@@ -151,10 +65,10 @@ class LinkHandlerTest {
 
     @Test
     fun `Completed result sets processing state to Completed`() = runLinkTest {
-        handler.setupLinkLaunchingEagerly(
-            testScope,
+        handler.setupLink(
             LinkState(configuration, LinkState.LoginState.LoggedIn),
         )
+        handler.launchLink()
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
         handler.onLinkActivityResult(LinkActivityResult.Completed)
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Completed)
@@ -162,10 +76,10 @@ class LinkHandlerTest {
 
     @Test
     fun `Back pressed result sets processing state to Cancelled`() = runLinkTest {
-        handler.setupLinkLaunchingEagerly(
-            testScope,
+        handler.setupLink(
             LinkState(configuration, LinkState.LoginState.LoggedIn),
         )
+        handler.launchLink()
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
         handler.onLinkActivityResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.BackPressed))
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Cancelled)
@@ -173,10 +87,10 @@ class LinkHandlerTest {
 
     @Test
     fun `Cancelled result sets processing state to Cancelled`() = runLinkTest {
-        handler.setupLinkLaunchingEagerly(
-            testScope,
+        handler.setupLink(
             LinkState(configuration, LinkState.LoginState.LoggedIn),
         )
+        handler.launchLink()
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
         handler.onLinkActivityResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.LoggedOut))
         val resultState =
@@ -186,10 +100,10 @@ class LinkHandlerTest {
 
     @Test
     fun `exception causes processing state to be CompletedWithPaymentResult`() = runLinkTest {
-        handler.setupLinkLaunchingEagerly(
-            testScope,
+        handler.setupLink(
             LinkState(configuration, LinkState.LoginState.LoggedIn),
         )
+        handler.launchLink()
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
         handler.onLinkActivityResult(LinkActivityResult.Failed(AssertionError("Expected payment result error.")))
         val result =
@@ -205,7 +119,7 @@ class LinkHandlerTest {
     ) {
         val userInput = UserInput.SignIn("example@example.com")
 
-        handler.prepareLink(
+        handler.setupLink(
             state = LinkState(
                 loginState = LinkState.LoginState.LoggedIn,
                 configuration = configuration,
@@ -238,7 +152,7 @@ class LinkHandlerTest {
     ) {
         val userInput = UserInput.SignIn("example@example.com")
 
-        handler.prepareLink(
+        handler.setupLink(
             state = LinkState(
                 loginState = LinkState.LoginState.NeedsVerification,
                 configuration = configuration,
@@ -266,95 +180,6 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `payWithLinkInline completes successfully for new user`() = runLinkInlineTest {
-        val userInput = UserInput.SignUp(
-            email = "example@example.com",
-            phone = "5555555555",
-            country = "US",
-            name = null,
-        )
-
-        handler.prepareLink(
-            state = LinkState(
-                loginState = LinkState.LoginState.NeedsVerification,
-                configuration = configuration,
-            )
-        )
-
-        handler.processingState.test {
-            accountStatusFlow.emit(AccountStatus.NeedsVerification)
-            ensureAllEventsConsumed() // Begin with no events.
-            whenever(linkLauncher.attachNewCardToAccount(any(), any()))
-                .thenReturn(Result.success(mock()))
-            handler.showLinkVerificationDialog.test {
-                assertThat(awaitItem()).isFalse()
-                testScope.launch {
-                    handler.payWithLinkInline(userInput, cardSelection(), shouldCompleteLinkFlow)
-                }
-                assertThat(awaitItem()).isTrue()
-                handler.handleLinkVerificationResult(true)
-                assertThat(awaitItem()).isFalse()
-                assertThat(handler.activeLinkSession.value).isTrue()
-            }
-            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
-            assertThat(awaitItem())
-                .isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
-            verify(linkLauncher, never()).present(eq(configuration), any())
-        }
-
-        handler.accountStatus.test {
-            assertThat(awaitItem()).isEqualTo(AccountStatus.NeedsVerification)
-        }
-
-        processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
-        accountStatusTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
-    }
-
-    @Test
-    fun `payWithLinkInline fails when verification fails`() = runLinkInlineTest {
-        val userInput = UserInput.SignUp(
-            email = "example@example.com",
-            phone = "5555555555",
-            country = "US",
-            name = null,
-        )
-
-        handler.prepareLink(
-            state = LinkState(
-                loginState = LinkState.LoginState.NeedsVerification,
-                configuration = configuration,
-            )
-        )
-
-        handler.processingState.test {
-            accountStatusFlow.emit(AccountStatus.NeedsVerification)
-            ensureAllEventsConsumed() // Begin with no events.
-            whenever(linkLauncher.attachNewCardToAccount(any(), any()))
-                .thenReturn(Result.failure(IllegalStateException("Whoops")))
-            handler.showLinkVerificationDialog.test {
-                assertThat(awaitItem()).isFalse()
-                testScope.launch {
-                    handler.payWithLinkInline(userInput, cardSelection(), shouldCompleteLinkFlow)
-                }
-                assertThat(awaitItem()).isTrue()
-                handler.handleLinkVerificationResult(false)
-                assertThat(awaitItem()).isFalse()
-                assertThat(handler.activeLinkSession.value).isFalse()
-            }
-            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
-            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Ready)
-            verify(linkLauncher, never()).present(eq(configuration), any())
-        }
-
-        handler.accountStatus.test {
-            assertThat(awaitItem()).isEqualTo(AccountStatus.NeedsVerification)
-        }
-
-        processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
-        accountStatusTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
-    }
-
-    @Test
     fun `payWithLinkInline completes successfully for signedOut user in complete flow`() = runLinkInlineTest(
         MutableSharedFlow(replay = 0),
         shouldCompleteLinkFlowValues = listOf(true),
@@ -362,7 +187,7 @@ class LinkHandlerTest {
         val userInput = UserInput.SignIn(email = "example@example.com")
 
         accountStatusTurbine.ensureAllEventsConsumed()
-        handler.prepareLink(
+        handler.setupLink(
             state = LinkState(
                 loginState = LinkState.LoginState.LoggedOut,
                 configuration = configuration,
@@ -398,7 +223,7 @@ class LinkHandlerTest {
         val userInput = UserInput.SignIn(email = "example@example.com")
 
         accountStatusTurbine.ensureAllEventsConsumed()
-        handler.prepareLink(
+        handler.setupLink(
             state = LinkState(
                 loginState = LinkState.LoginState.LoggedOut,
                 configuration = configuration,
@@ -430,7 +255,7 @@ class LinkHandlerTest {
     fun `payWithLinkInline fails for signedOut user`() = runLinkInlineTest {
         val userInput = UserInput.SignIn(email = "example@example.com")
 
-        handler.prepareLink(
+        handler.setupLink(
             state = LinkState(
                 loginState = LinkState.LoginState.LoggedOut,
                 configuration = configuration,
@@ -462,7 +287,7 @@ class LinkHandlerTest {
 
     @Test
     fun `payWithLinkInline fails for signedOut user without userInput`() = runLinkInlineTest {
-        handler.prepareLink(
+        handler.setupLink(
             state = LinkState(
                 loginState = LinkState.LoginState.LoggedOut,
                 configuration = configuration,

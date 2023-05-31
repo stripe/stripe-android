@@ -22,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.LinkButton
-import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
@@ -88,8 +87,6 @@ internal fun PaymentSheetScreenContent(
     viewModel: PaymentSheetViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val showLinkDialog by viewModel.linkHandler.showLinkVerificationDialog.collectAsState()
-
     val headerText by viewModel.headerText.collectAsState(null)
     val buyButtonState by viewModel.buyButtonState.collectAsState(initial = null)
 
@@ -101,13 +98,6 @@ internal fun PaymentSheetScreenContent(
     )
 
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-
-    if (showLinkDialog) {
-        LinkVerificationDialog(
-            linkLauncher = viewModel.linkHandler.linkLauncher,
-            onResult = viewModel.linkHandler::handleLinkVerificationResult,
-        )
-    }
 
     Column(
         modifier = modifier.padding(bottom = bottomPadding),
