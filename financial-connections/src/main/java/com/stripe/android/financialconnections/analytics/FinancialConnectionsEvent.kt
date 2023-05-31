@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
-import com.stripe.android.financialconnections.exception.FinancialConnectionsStripeError
+import com.stripe.android.financialconnections.exception.FinancialConnectionsError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 
@@ -247,7 +247,7 @@ internal sealed class FinancialConnectionsEvent(
         exception: Throwable
     ) : FinancialConnectionsEvent(
         name = when (exception) {
-            is FinancialConnectionsStripeError,
+            is FinancialConnectionsError,
             is OTPError -> "error.expected"
             else -> "error.unexpected"
         },

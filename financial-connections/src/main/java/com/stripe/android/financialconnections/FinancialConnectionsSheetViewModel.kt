@@ -22,8 +22,8 @@ import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsS
 import com.stripe.android.financialconnections.domain.IsBrowserAvailable
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
+import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
-import com.stripe.android.financialconnections.exception.FinancialConnectionsClientError
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
@@ -43,7 +43,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
-import java.lang.UnsupportedOperationException
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -136,16 +135,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     private fun logNoBrowserAvailableAndFinish() {
         viewModelScope.launch {
-            val errorMessage = "[Android] No Web browser available to launch AuthFlow"
-            analyticsTracker.track(
-                Error(
-                    Pane.UNEXPECTED_ERROR,
-                    FinancialConnectionsClientError("AppInitializationError", errorMessage)
-                )
-            )
+            val error = AppInitializationError("[Android] No Web browser available to launch AuthFlow")
+            analyticsTracker.track(Error(Pane.UNEXPECTED_ERROR, error))
             finishWithResult(
                 state = awaitState(),
-                result = Failed(UnsupportedOperationException(errorMessage))
+                result = Failed(error)
             )
         }
     }

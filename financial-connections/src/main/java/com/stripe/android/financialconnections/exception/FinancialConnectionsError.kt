@@ -5,7 +5,7 @@ import com.stripe.android.core.exception.StripeException
 /**
  * Base class for errors that occur during the financial connections flow.
  */
-internal abstract class FinancialConnectionsStripeError(
+internal abstract class FinancialConnectionsError(
     val name: String,
     stripeException: StripeException,
 ) : StripeException(
