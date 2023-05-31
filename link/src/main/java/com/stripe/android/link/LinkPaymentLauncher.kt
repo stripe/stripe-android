@@ -7,21 +7,17 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjectable
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
-import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkPaymentLauncherComponent
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
-import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -140,7 +136,6 @@ class LinkPaymentLauncher @Inject internal constructor(
                 stripeAccountIdProvider()
             )
         )
-        buildLinkComponent(getLinkPaymentLauncherComponent(configuration), args)
         linkActivityResultLauncher?.launch(args)
     }
 
@@ -182,27 +177,6 @@ class LinkPaymentLauncher @Inject internal constructor(
                 .also {
                     componentFlow.value = it
                 }
-
-    /**
-     * Set up [LinkComponent], responsible for injecting all dependencies into the Link app.
-     */
-    private fun buildLinkComponent(
-        component: LinkPaymentLauncherComponent,
-        args: LinkActivityContract.Args
-    ) {
-        val linkComponent = component.linkComponentBuilder.starterArgs(args).build()
-        val injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*>) {
-                when (injectable) {
-                    is VerificationViewModel.Factory -> linkComponent.inject(injectable)
-                    else -> {
-                        throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-                    }
-                }
-            }
-        }
-        WeakMapInjectorRegistry.register(injector, injectorKey)
-    }
 
     /**
      * Arguments for launching [LinkActivity] to confirm a payment with Link.

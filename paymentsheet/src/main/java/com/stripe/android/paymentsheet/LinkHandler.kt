@@ -12,8 +12,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class LinkHandler @Inject constructor(
@@ -50,12 +47,7 @@ internal class LinkHandler @Inject constructor(
         MutableSharedFlow<ProcessingState>(replay = 1, extraBufferCapacity = 5)
     val processingState: Flow<ProcessingState> = _processingState
 
-    var linkInlineSelection = MutableStateFlow<PaymentSelection.New.LinkInline?>(null)
-
-    private var launchedLinkDirectly: Boolean = false
-
-    private val _showLinkVerificationDialog = MutableStateFlow(false)
-    val showLinkVerificationDialog: StateFlow<Boolean> = _showLinkVerificationDialog
+    val linkInlineSelection = MutableStateFlow<PaymentSelection.New.LinkInline?>(null)
 
     private val _isLinkEnabled = MutableStateFlow<Boolean?>(null)
     val isLinkEnabled: StateFlow<Boolean?> = _isLinkEnabled
@@ -69,8 +61,6 @@ internal class LinkHandler @Inject constructor(
         .filterNotNull()
         .flatMapLatest(linkLauncher::getAccountStatusFlow)
 
-    private val linkVerificationChannel = Channel<Boolean>(capacity = 1)
-
     fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
         linkLauncher.register(
             activityResultCaller,
@@ -82,49 +72,13 @@ internal class LinkHandler @Inject constructor(
         linkLauncher.unregister()
     }
 
-    private fun setupLink(state: LinkState?) {
+    fun setupLink(state: LinkState?) {
         _isLinkEnabled.value = state != null
         _activeLinkSession.value = state?.loginState == LinkState.LoginState.LoggedIn
 
         if (state == null) return
 
         linkConfiguration.value = state.configuration
-    }
-
-    fun setupLinkLaunchingEagerly(scope: CoroutineScope, state: LinkState?) {
-        setupLink(state)
-
-        when (state?.loginState) {
-            LinkState.LoginState.LoggedIn -> {
-                launchLink(state.configuration, launchedDirectly = true)
-            }
-            LinkState.LoginState.NeedsVerification -> {
-                scope.launch {
-                    setupLinkWithVerification(state.configuration)
-                }
-            }
-            LinkState.LoginState.LoggedOut -> {
-                // Nothing to do here
-            }
-            null -> {
-                // Nothing to do here
-            }
-        }
-    }
-
-    fun prepareLink(state: LinkState?) {
-        setupLink(state)
-    }
-
-    private suspend fun requestLinkVerification(): Boolean {
-        _showLinkVerificationDialog.value = true
-        return linkVerificationChannel.receive()
-    }
-
-    fun handleLinkVerificationResult(success: Boolean) {
-        _showLinkVerificationDialog.value = false
-        _activeLinkSession.value = success
-        linkVerificationChannel.trySend(success)
     }
 
     suspend fun payWithLinkInline(
@@ -149,18 +103,7 @@ internal class LinkHandler @Inject constructor(
                 }
                 AccountStatus.VerificationStarted,
                 AccountStatus.NeedsVerification -> {
-                    val success = requestLinkVerification()
-
-                    if (success) {
-                        completeLinkInlinePayment(
-                            configuration,
-                            params,
-                            userInput is UserInput.SignIn && shouldCompleteLinkInlineFlow
-                        )
-                    } else {
-                        savedStateHandle[SAVE_PROCESSING] = false
-                        _processingState.emit(ProcessingState.Ready)
-                    }
+                    TODO()
                 }
                 AccountStatus.SignedOut,
                 AccountStatus.Error -> {
@@ -190,22 +133,13 @@ internal class LinkHandler @Inject constructor(
         }
     }
 
-    private suspend fun setupLinkWithVerification(
-        configuration: LinkPaymentLauncher.Configuration,
-    ) {
-        val success = requestLinkVerification()
-        if (success) {
-            launchLink(configuration, launchedDirectly = true)
-        }
-    }
-
     private suspend fun completeLinkInlinePayment(
         configuration: LinkPaymentLauncher.Configuration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shouldCompleteLinkInlineFlow: Boolean
     ) {
         if (shouldCompleteLinkInlineFlow) {
-            launchLink(configuration, launchedDirectly = false, paymentMethodCreateParams)
+            launchLink(configuration, paymentMethodCreateParams)
         } else {
             _processingState.emit(
                 ProcessingState.PaymentDetailsCollected(
@@ -220,16 +154,13 @@ internal class LinkHandler @Inject constructor(
 
     fun launchLink() {
         val config = linkConfiguration.value ?: return
-        launchLink(config, launchedDirectly = false)
+        launchLink(config)
     }
 
     fun launchLink(
         configuration: LinkPaymentLauncher.Configuration,
-        launchedDirectly: Boolean,
         paymentMethodCreateParams: PaymentMethodCreateParams? = null
     ) {
-        launchedLinkDirectly = launchedDirectly
-
         linkLauncher.present(
             configuration,
             paymentMethodCreateParams,
@@ -243,8 +174,8 @@ internal class LinkHandler @Inject constructor(
      */
     fun onLinkActivityResult(result: LinkActivityResult) {
         val completePaymentFlow = result is LinkActivityResult.Completed
-        val cancelPaymentFlow = launchedLinkDirectly &&
-            result is LinkActivityResult.Canceled && result.reason == LinkActivityResult.Canceled.Reason.BackPressed
+        val cancelPaymentFlow = result is LinkActivityResult.Canceled &&
+            result.reason == LinkActivityResult.Canceled.Reason.BackPressed
 
         if (completePaymentFlow) {
             // If payment was completed inside the Link UI, dismiss immediately.
