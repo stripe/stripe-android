@@ -6,6 +6,8 @@ from requests.auth import HTTPBasicAuth
 from requests_toolbelt.multipart import encoder
 import argparse
 import sys
+import json
+import math
 
 # These need to be set in environment variables.
 user=os.getenv('BROWSERSTACK_USERNAME')
@@ -125,6 +127,52 @@ def uploadEspressoApk(espressoApkFile):
         print("DONE\nRESULT: " + str(response.status_code) + "\n" + str(response.json()))
         return None
 
+def testShards():
+    testClassNames = [
+        # Hard coded tests.
+        "com.stripe.android.TestAuthorization",
+        "com.stripe.android.TestBrowsers",
+        "com.stripe.android.TestCustomers",
+        "com.stripe.android.TestFieldPopulation",
+    ]
+
+    # Add LPM tests to testClassNames.
+    lpmFileNames = os.listdir('paymentsheet-example/src/androidTest/java/com/stripe/android/lpm')
+    for fileName in lpmFileNames:
+        if not fileName.endswith(".kt"):
+            continue
+        className = fileName[:-3]
+        testClassNames.append(f"com.stripe.android.lpm.{className}")
+
+    # We only have 25 parallel runs, but we run it on 3 devices, and we want multiple PRs to run at the same time.
+    testClassesPerShard = math.ceil(len(testClassNames) / 5.0)
+
+    shards = []
+    shardValues = []
+
+    for testClass in testClassNames:
+        shardValues.append(testClass)
+        if len(shardValues) == testClassesPerShard:
+            shards.append(
+                {
+                   "name": f"Shard {len(shards) + 1}",
+                   "strategy": "class",
+                   "values": shardValues
+                },
+            )
+            shardValues = []
+
+    if len(shardValues) > 0:
+        shards.append(
+            {
+               "name": f"Shard {len(shards) + 1}",
+               "strategy": "class",
+               "values": shardValues
+            },
+        )
+
+    return shards
+
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#execute-a-build
 def executeTests(appUrl, testUrl):
     print("RUNNING the tests (appUrl: {app}, testUrl: {test})..."
@@ -133,6 +181,7 @@ def executeTests(appUrl, testUrl):
     )
     url="https://api-cloud.browserstack.com/app-automate/espresso/v2/build"
     # firefox doesn't work on this samsung: Samsung Galaxy S9 Plus-9.0"]
+    shards = testShards()
     response = requests.post(url, json={
          "app": appUrl,
          "devices": [
@@ -149,34 +198,8 @@ def executeTests(appUrl, testUrl):
          "enableSpoonFramework": False,
          "project": "Mobile Payments",
          "shards": {
-            "numberOfShards": 5,
-            "mapping": [
-                {
-                   "name": "Shard 1",
-                   "strategy": "class",
-                   "values": ["com.stripe.android.TestAuthorization", "com.stripe.android.TestBrowsers"]
-                },
-                {
-                   "name": "Shard 2",
-                   "strategy": "class",
-                   "values": ["com.stripe.android.TestCustomers", "com.stripe.android.TestFieldPopulation"]
-                },
-                {
-                   "name": "Shard 3",
-                   "strategy": "class",
-                   "values": ["com.stripe.android.TestHardCodedLpms"]
-                },
-                {
-                   "name": "Shard 4",
-                   "strategy": "class",
-                   "values": ["com.stripe.android.TestMultiStepFieldsReloaded"]
-                },
-                {
-                   "name": "Shard 5",
-                   "strategy": "class",
-                   "values": ["com.stripe.android.TestLink"]
-                },
-            ]
+            "numberOfShards": len(shards),
+            "mapping": shards,
          }
       }, auth=(user, authKey))
     jsonResponse = response.json()
@@ -225,6 +248,10 @@ def confirm(message):
     return answer == "y"
 
 if __name__ == "__main__":
+#     shards = json.dumps(testShards())
+#     print(f"{shards}")
+#     raise SystemExit('error in code want to exit')
+
     # Parse arguments
     parser = argparse.ArgumentParser(description='Interact with browserstack.')
     parser.add_argument("-t", "--test", help="Runs the espresso test.  Requires -a and -e", action="store_true")
