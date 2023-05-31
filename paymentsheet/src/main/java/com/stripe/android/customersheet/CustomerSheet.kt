@@ -4,7 +4,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.customersheet.injection.CustomerSheetComponent
 import com.stripe.android.paymentsheet.PaymentSheet
+import javax.inject.Inject
 
 /**
  * 🏗 This feature is under construction 🏗
@@ -14,7 +18,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
  */
 @ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CustomerSheet internal constructor(
+class CustomerSheet @Inject internal constructor(
     activityResultCaller: ActivityResultCaller,
     private val callback: CustomerSheetResultCallback,
 ) {
@@ -30,7 +34,7 @@ class CustomerSheet internal constructor(
      */
     fun present() {
         customerSheetActivityLauncher.launch(
-            CustomerSheetContract.Args("Hello world!")
+            CustomerSheetContract.Args
         )
     }
 
@@ -82,15 +86,17 @@ class CustomerSheet internal constructor(
          * @param customerAdapter The bridge to communicate with your server to manage a customer.
          * @param callback called when a [CustomerSheetResult] is available.
          */
-        @Suppress("UNUSED_PARAMETER")
         fun create(
             activity: ComponentActivity,
             configuration: Configuration,
             customerAdapter: CustomerAdapter,
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
-            return CustomerSheet(
+            return getInstance(
+                viewModelStoreOwner = activity,
                 activityResultCaller = activity,
+                configuration = configuration,
+                customerAdapter = customerAdapter,
                 callback = callback,
             )
         }
@@ -103,17 +109,43 @@ class CustomerSheet internal constructor(
          * @param customerAdapter The bridge to communicate with your server to manage a customer.
          * @param callback called when a [CustomerSheetResult] is available.
          */
-        @Suppress("UNUSED_PARAMETER")
         fun create(
             fragment: Fragment,
             configuration: Configuration,
             customerAdapter: CustomerAdapter,
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
-            return CustomerSheet(
+            return getInstance(
+                viewModelStoreOwner = fragment,
                 activityResultCaller = fragment,
+                configuration = configuration,
+                customerAdapter = customerAdapter,
                 callback = callback,
             )
+        }
+
+        private fun getInstance(
+            viewModelStoreOwner: ViewModelStoreOwner,
+            activityResultCaller: ActivityResultCaller,
+            configuration: Configuration,
+            customerAdapter: CustomerAdapter,
+            callback: CustomerSheetResultCallback,
+        ): CustomerSheet {
+            val customerSessionViewModel =
+                ViewModelProvider(viewModelStoreOwner)[CustomerSessionViewModel::class.java]
+
+            val customerSessionComponent = customerSessionViewModel.createCustomerSessionComponent(
+                configuration = configuration,
+                customerAdapter = customerAdapter,
+                callback = callback,
+            )
+
+            val customerSheetComponent: CustomerSheetComponent =
+                customerSessionComponent.customerSheetComponentBuilder
+                    .activityResultCaller(activityResultCaller)
+                    .build()
+
+            return customerSheetComponent.customerSheet
         }
     }
 }
