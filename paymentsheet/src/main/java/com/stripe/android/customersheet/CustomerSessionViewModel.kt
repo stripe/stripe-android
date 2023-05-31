@@ -38,9 +38,13 @@ internal class CustomerSessionViewModel(
         return component
     }
 
+    internal fun clear() {
+        backingComponent = null
+    }
+
     override fun onCleared() {
         super.onCleared()
-        backingComponent = null
+        clear()
     }
 
     internal companion object {

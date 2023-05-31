@@ -10,7 +10,7 @@ import dagger.Subcomponent
 @Subcomponent
 internal interface CustomerSheetComponent {
     val customerSheet: CustomerSheet
-    val stateComponent: CustomerSessionComponent
+    val sessionComponent: CustomerSessionComponent
 
     @Subcomponent.Builder
     interface Builder {

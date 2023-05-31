@@ -134,14 +134,14 @@ class CustomerSheet @Inject internal constructor(
             val customerSessionViewModel =
                 ViewModelProvider(viewModelStoreOwner)[CustomerSessionViewModel::class.java]
 
-            val customerSessionStateComponent = customerSessionViewModel.createCustomerSessionComponent(
+            val customerSessionComponent = customerSessionViewModel.createCustomerSessionComponent(
                 configuration = configuration,
                 customerAdapter = customerAdapter,
                 callback = callback,
             )
 
             val customerSheetComponent: CustomerSheetComponent =
-                customerSessionStateComponent.customerSheetComponentBuilder
+                customerSessionComponent.customerSheetComponentBuilder
                     .activityResultCaller(activityResultCaller)
                     .build()
 
