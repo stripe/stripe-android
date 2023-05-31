@@ -117,7 +117,7 @@ class FinancialConnectionsSheetViewModelTest {
                     "pane" to "unexpected_error",
                     "error" to "AppInitializationError",
                     "error_type" to "AppInitializationError",
-                    "error_message" to "[Android] No Web browser available to launch AuthFlow",
+                    "error_message" to "No Web browser available to launch AuthFlow",
                 )
             )
         }
