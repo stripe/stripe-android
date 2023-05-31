@@ -314,7 +314,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         val linkState = state.linkState
 
-        linkHandler.setupLinkLaunchingEagerly(viewModelScope, linkState)
+        linkHandler.setupLink(linkState)
 
         resetViewState()
         transitionToFirstScreen()

@@ -16,6 +16,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -23,9 +25,6 @@ class PaymentSessionActivityTest {
 
     @get:Rule
     val activityScenarioRule: ActivityScenarioRule<LauncherActivity> = activityScenarioRule()
-
-    @get:Rule
-    val idlingResourceRule: IdlingResourceRule = IdlingResourceRule("PaymentSessionActivityTest")
 
     @Before
     fun setup() {
@@ -35,10 +34,17 @@ class PaymentSessionActivityTest {
     @After
     fun cleanup() {
         Intents.release()
+        BackgroundTaskTracker.reset()
     }
 
     @Test
     fun testSelectPaymentMethod() {
+        val counter = CountDownLatch(1)
+
+        BackgroundTaskTracker.onStop = {
+            counter.countDown()
+        }
+
         // launch PaymentSessionActivity
         Espresso.onView(ViewMatchers.withId(R.id.examples)).perform(
             RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(5, click())
@@ -49,5 +55,6 @@ class PaymentSessionActivityTest {
             .perform(click())
 
         // navigate to PaymentMethodsActivity
+        counter.await(5000L, TimeUnit.MILLISECONDS)
     }
 }

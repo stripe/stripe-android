@@ -14,7 +14,6 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
-import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -39,17 +38,13 @@ import kotlin.coroutines.CoroutineContext
 internal abstract class LinkPaymentLauncherComponent {
     abstract val linkAccountManager: LinkAccountManager
     abstract val linkEventsReporter: LinkEventsReporter
-    abstract val linkComponentBuilder: LinkComponent.Builder
     abstract val configuration: LinkPaymentLauncher.Configuration
 
-    abstract fun inject(factory: VerificationViewModel.Factory)
     abstract fun inject(factory: InlineSignupViewModel.Factory)
 
     val injector: NonFallbackInjector = object : NonFallbackInjector {
         override fun inject(injectable: Injectable<*>) {
             when (injectable) {
-                is VerificationViewModel.Factory ->
-                    this@LinkPaymentLauncherComponent.inject(injectable)
                 is InlineSignupViewModel.Factory ->
                     this@LinkPaymentLauncherComponent.inject(injectable)
                 else -> {

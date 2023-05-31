@@ -75,7 +75,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
@@ -305,41 +304,6 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkout()
 
         verify(viewModel).confirmStripeIntent(eq(expectedParams))
-    }
-
-    @Test
-    fun `Launches Link when user is logged in to their Link account`() = runTest {
-        val configuration: LinkPaymentLauncher.Configuration = mock()
-
-        val viewModel = createViewModel(
-            linkState = LinkState(
-                configuration = configuration,
-                loginState = LinkState.LoginState.LoggedIn,
-            ),
-        )
-
-        assertThat(viewModel.linkHandler.showLinkVerificationDialog.value).isFalse()
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isTrue()
-        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
-
-        verify(linkLauncher).present(
-            configuration = eq(configuration),
-            prefilledNewCardParams = isNull(),
-        )
-    }
-
-    @Test
-    fun `Launches Link verification when user needs to verify their Link account`() = runTest {
-        val viewModel = createViewModel(
-            linkState = LinkState(
-                configuration = mock(),
-                loginState = LinkState.LoginState.NeedsVerification,
-            ),
-        )
-
-        assertThat(viewModel.linkHandler.showLinkVerificationDialog.value).isTrue()
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
-        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
     @Test

@@ -17,6 +17,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import com.stripe.android.R as StripeR
 
 @RunWith(AndroidJUnit4::class)
@@ -26,9 +28,6 @@ class CreateCardTokenActivityTest {
     @get:Rule
     val activityScenarioRule: ActivityScenarioRule<LauncherActivity> = activityScenarioRule()
 
-    @get:Rule
-    val idlingResourceRule: IdlingResourceRule = IdlingResourceRule("CreateCardTokenActivityTest")
-
     @Before
     fun setup() {
         Intents.init()
@@ -37,10 +36,17 @@ class CreateCardTokenActivityTest {
     @After
     fun cleanup() {
         Intents.release()
+        BackgroundTaskTracker.reset()
     }
 
     @Test
     fun createCardToken() {
+        val counter = CountDownLatch(1)
+
+        BackgroundTaskTracker.onStop = {
+            counter.countDown()
+        }
+
         // launch create a card token activity
         onView(withId(R.id.examples)).perform(
             RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(1, click())
@@ -57,6 +63,8 @@ class CreateCardTokenActivityTest {
         // click create card button
         onView(withId(R.id.create_token_button))
             .perform(click())
+
+        counter.await(5000L, TimeUnit.MILLISECONDS)
 
         // check that card token info has been added to the tokens list
         onView(withId(R.id.tokens_list))
