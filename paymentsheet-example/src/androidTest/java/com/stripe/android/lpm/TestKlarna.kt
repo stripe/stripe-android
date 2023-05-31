@@ -16,6 +16,7 @@ internal class TestKlarna : BaseLpmTest() {
     )
 
     @Ignore("Complex authorization handling required")
+    @Test
     fun testKlarna() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = klarna,
@@ -23,14 +24,10 @@ internal class TestKlarna : BaseLpmTest() {
     }
 
     @Ignore("Complex authorization handling required")
+    @Test
     fun testKlarnaInCustomFlow() {
         testDriver.confirmCustom(
             testParameters = klarna,
         )
-    }
-
-    @Test
-    fun ignoredKlarnaTests() {
-        // Adding a test to make it so this doesn't fail to initialize because of no tests.
     }
 }
