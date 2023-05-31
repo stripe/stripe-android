@@ -1,33 +1,22 @@
 package com.stripe.android.customersheet
 
 import android.content.Context
-import android.os.Build
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso.pressBack
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.utils.InjectableActivityScenario
-import com.stripe.android.utils.TestUtils.viewModelFactoryFor
-import com.stripe.android.utils.injectableActivityScenario
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.annotation.Config
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(AndroidJUnit4::class)
-@Config(sdk = [Build.VERSION_CODES.Q])
+@RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCustomerSheetApi::class)
-internal class CustomerSheetActivityTest {
-    @get:Rule
-    val rule = InstantTaskExecutorRule()
-
+class CustomerSheetViewModelTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val contract = CustomerSheetContract()
     private val lpmRepository = LpmRepository(
         LpmRepository.LpmRepositoryArguments(
             resources = context.resources,
@@ -35,12 +24,6 @@ internal class CustomerSheetActivityTest {
             enableACHV2InDeferredFlow = true
         )
     )
-    val intent = contract.createIntent(
-        context = context,
-        input = CustomerSheetContract.Args
-    )
-
-    private lateinit var viewModel: CustomerSheetViewModel
 
     @Before
     fun setup() {
@@ -48,34 +31,13 @@ internal class CustomerSheetActivityTest {
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
-        viewModel = createViewModel()
     }
 
     @Test
-    fun `Finish with cancel on back press`() {
-        val scenario = activityScenario().launchForResult(intent)
-
-        scenario.onActivity {
-            pressBack()
-        }
-
-        assertThat(
-            contract.parseResult(
-                scenario.getResult().resultCode,
-                scenario.getResult().resultData
-            )
-        ).isEqualTo(
-            InternalCustomerSheetResult.Canceled
-        )
-    }
-
-    private fun activityScenario(
-        viewModel: CustomerSheetViewModel = this.viewModel,
-    ): InjectableActivityScenario<CustomerSheetActivity> {
-        return injectableActivityScenario {
-            injectActivity {
-                viewModelFactory = viewModelFactoryFor(viewModel)
-            }
+    fun `ViewModel initializes with loading`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isEqualTo(CustomerSheetViewState.Loading)
         }
     }
 
