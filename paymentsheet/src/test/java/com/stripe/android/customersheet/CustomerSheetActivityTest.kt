@@ -26,9 +26,7 @@ internal class CustomerSheetActivityTest {
     fun `Finish with cancel on back press`() {
         val intent = contract.createIntent(
             context = context,
-            input = CustomerSheetContract.Args(
-                data = "Hello world!"
-            )
+            input = CustomerSheetContract.Args
         )
 
         val scenario = ActivityScenario.launchActivityForResult<CustomerSheetActivity>(intent)

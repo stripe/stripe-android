@@ -9,15 +9,11 @@ import androidx.compose.material.Text
 
 internal class CustomerSheetActivity : AppCompatActivity() {
 
-    private val starterArgs: CustomerSheetContract.Args? by lazy {
-        CustomerSheetContract.Args.fromIntent(intent)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            Text(starterArgs?.data.orEmpty())
+            Text("Hello world!")
         }
 
         onBackPressedDispatcher.addCallback {
