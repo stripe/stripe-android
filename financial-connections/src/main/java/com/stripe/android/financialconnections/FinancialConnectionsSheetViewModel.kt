@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.ActivityResult
+import androidx.annotation.StringRes
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
@@ -139,7 +140,8 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             analyticsTracker.track(Error(Pane.UNEXPECTED_ERROR, error))
             finishWithResult(
                 state = awaitState(),
-                result = Failed(error)
+                result = Failed(error),
+                finishMessage = R.string.stripe_no_browser_installed
             )
         }
     }
@@ -437,10 +439,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     private fun finishWithResult(
         state: FinancialConnectionsSheetState,
-        result: FinancialConnectionsSheetActivityResult
+        result: FinancialConnectionsSheetActivityResult,
+        @StringRes finishMessage: Int? = null,
     ) {
         eventReporter.onResult(state.initialArgs.configuration, result)
-        setState { copy(viewEffect = FinishWithResult(result)) }
+        setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
     }
 
     companion object :
