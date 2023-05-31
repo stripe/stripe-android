@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsS
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.IsBrowserAvailable
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
+import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
@@ -110,7 +111,7 @@ class FinancialConnectionsSheetViewModelTest {
             require(it.viewEffect is FinishWithResult)
             require(it.viewEffect.result is Failed)
             assertThat(it.viewEffect.result.error)
-                .isInstanceOf(UnsupportedOperationException::class.java)
+                .isInstanceOf(AppInitializationError::class.java)
             analyticsTracker.assertContainsEvent(
                 expectedEventName = "linked_accounts.error.unexpected",
                 expectedParams = mapOf(
