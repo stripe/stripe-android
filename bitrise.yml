@@ -22,7 +22,7 @@ stages:
 #      - check: { }
 #      - test: { }
 #      - run-instrumentation-tests: { }
-      - run-end-to-end-tests: { }
+      - run-paymentsheet-end-to-end-tests: { }
 
 workflows:
   check:
@@ -136,7 +136,7 @@ workflows:
           title: Execute instrumentation tests
           inputs:
             - file_path: ./scripts/execute_instrumentation_tests.sh
-  run-end-to-end-tests:
+  run-paymentsheet-end-to-end-tests:
     before_run:
       - prepare_all
     after_run:

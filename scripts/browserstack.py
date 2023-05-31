@@ -144,8 +144,8 @@ def testShards():
         className = fileName[:-3]
         testClassNames.append(f"com.stripe.android.lpm.{className}")
 
-    # We only have 25 parallel runs, but we run it on 3 devices, and we want multiple PRs to run at the same time.
-    testClassesPerShard = math.ceil(len(testClassNames) / 5.0)
+    # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
+    testClassesPerShard = math.ceil(len(testClassNames) / 10.0)
 
     shards = []
     shardValues = []
@@ -174,7 +174,7 @@ def testShards():
     return shards
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#execute-a-build
-def executeTests(appUrl, testUrl):
+def executeTests(appUrl, testUrl, isNightly):
     print("RUNNING the tests (appUrl: {app}, testUrl: {test})..."
         .format(app=appUrl, test=testUrl),
          end=''
@@ -182,13 +182,20 @@ def executeTests(appUrl, testUrl):
     url="https://api-cloud.browserstack.com/app-automate/espresso/v2/build"
     # firefox doesn't work on this samsung: Samsung Galaxy S9 Plus-9.0"]
     shards = testShards()
-    response = requests.post(url, json={
-         "app": appUrl,
-         "devices": [
+    devices = []
+    if isNightly:
+        devices = [
             "Google Pixel 7-13.0",
             "Samsung Galaxy S22-12.0",
             "Google Pixel 2-8.0",
-         ],
+        ]
+    else:
+        devices = [
+            "Samsung Galaxy S22-12.0",
+        ]
+    response = requests.post(url, json={
+         "app": appUrl,
+         "devices": devices,
          "testSuite": testUrl,
          "networkLogs": True,
          "deviceLogs": True,
@@ -257,6 +264,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--test", help="Runs the espresso test.  Requires -a and -e", action="store_true")
     parser.add_argument("-a", "--apk", help="The app under test resulting from ./gradlew assemble")
     parser.add_argument("-e", "--espresso", help="The espresso test suite resulting from ./gradlew assembleDebugAndroidTest")
+    parser.add_argument("--is-nightly", action="store_true")
 
     parser.add_argument("-u", "--upload", help="Upload a file to browserstack for app live testing")
 
@@ -305,7 +313,7 @@ if __name__ == "__main__":
            print("-----------------")
            testUrl = uploadEspressoApk(args.espresso)
            print("-----------------")
-           buildId = executeTests(appUrl, testUrl)
+           buildId = executeTests(appUrl, testUrl, args.is_nightly)
            exitStatus = 1
            if(buildId != None):
                exitStatus = waitForBuildComplete(buildId)
