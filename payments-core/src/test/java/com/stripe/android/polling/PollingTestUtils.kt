@@ -4,7 +4,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.testing.AbsFakeStripeRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock

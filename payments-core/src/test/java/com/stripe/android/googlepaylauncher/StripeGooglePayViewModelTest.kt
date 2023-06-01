@@ -10,7 +10,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.testing.AbsFakeStripeRepository
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.json.JSONObject
 import org.junit.runner.RunWith

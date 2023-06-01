@@ -4,8 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.testharness.TestEphemeralKeyProvider
+import com.stripe.android.testing.AbsFakeStripeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
