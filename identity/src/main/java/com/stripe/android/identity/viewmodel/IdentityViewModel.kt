@@ -67,7 +67,6 @@ import com.stripe.android.identity.networking.models.CollectedDataParam.Companio
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.mergeWith
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
-import com.stripe.android.identity.networking.models.PhoneParam
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.Requirement.Companion.INDIVIDUAL_REQUIREMENT_SET
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -219,13 +218,6 @@ internal class IdentityViewModel constructor(
         }
     )
     val missingRequirements: StateFlow<Set<Requirement>> = _missingRequirements
-
-    private val _phoneParam = MutableStateFlow<PhoneParam?>(
-        savedStateHandle[PHONE_PARAM] ?: run {
-            null
-        }
-    )
-    val phoneParam: StateFlow<PhoneParam?> = _phoneParam
 
     val frontCollectedInfo =
         _documentFrontUploadedState.combine(_collectedData) { upload, collected ->
@@ -1367,13 +1359,6 @@ internal class IdentityViewModel constructor(
         individualCollectedStates: IndividualCollectedStates,
         navController: NavController
     ) {
-        _phoneParam.updateStateAndSave {
-            if (individualCollectedStates.phone.status == Status.SUCCESS) {
-                individualCollectedStates.phone.data
-            } else {
-                null
-            }
-        }
         postVerificationPageDataAndMaybeNavigate(
             navController,
             individualCollectedStates.toCollectedDataParam(),
@@ -1665,7 +1650,6 @@ internal class IdentityViewModel constructor(
                 _documentBackUploadedState -> DOCUMENT_BACK_UPLOAD_STATE
                 _collectedData -> COLLECTED_DATA
                 _missingRequirements -> MISSING_REQUIREMENTS
-                _phoneParam -> PHONE_PARAM
                 verificationPageData -> VERIFICATION_PAGE_DATA
                 verificationPageSubmit -> VERIFICATION_PAGE_SUBMIT
                 else -> {
@@ -1720,6 +1704,5 @@ internal class IdentityViewModel constructor(
         private const val VERIFICATION_PAGE = "verification_page"
         private const val VERIFICATION_PAGE_DATA = "verification_page_data"
         private const val VERIFICATION_PAGE_SUBMIT = "verification_page_submit"
-        private const val PHONE_PARAM = "phone_param"
     }
 }
