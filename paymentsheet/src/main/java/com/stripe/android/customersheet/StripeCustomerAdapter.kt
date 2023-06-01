@@ -1,14 +1,17 @@
 package com.stripe.android.customersheet
 
 import android.content.Context
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toSavedSelection
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import kotlinx.coroutines.withContext
 import java.lang.IllegalArgumentException
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 /**
  * The default implementation of [CustomerAdapter]. This adapter uses the customer ID and ephemeral
@@ -27,31 +30,27 @@ internal class StripeCustomerAdapter @Inject constructor(
     private val timeProvider: () -> Long,
     private val customerRepository: CustomerRepository,
     private val prefsRepositoryFactory: (CustomerEphemeralKey) -> PrefsRepository,
+    @IOContext private val workContext: CoroutineContext,
 ) : CustomerAdapter {
 
     @Volatile
     private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
 
     override suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>> {
-        return getCustomerEphemeralKey().fold(
-            onSuccess = { customer ->
-                val paymentMethods = customerRepository.getPaymentMethods(
-                    customerConfig = PaymentSheet.CustomerConfiguration(
-                        id = customer.customerId,
-                        ephemeralKeySecret = customer.ephemeralKey
-                    ),
-                    types = listOf(PaymentMethod.Type.Card)
-                )
-                Result.success(paymentMethods)
-            },
-            onFailure = {
-                Result.failure(it)
-            }
-        )
+        return getCustomerEphemeralKey().map { customer ->
+            val paymentMethods = customerRepository.getPaymentMethods(
+                customerConfig = PaymentSheet.CustomerConfiguration(
+                    id = customer.customerId,
+                    ephemeralKeySecret = customer.ephemeralKey
+                ),
+                types = listOf(PaymentMethod.Type.Card)
+            )
+            paymentMethods
+        }
     }
 
     override suspend fun attachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
-        return getCustomerEphemeralKey().mapCatching { customer ->
+        return getCustomerEphemeralKey().map { customer ->
             customerRepository.attachPaymentMethod(
                 customerConfig = PaymentSheet.CustomerConfiguration(
                     id = customer.customerId,
@@ -105,15 +104,19 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     internal suspend fun getCustomerEphemeralKey(): Result<CustomerEphemeralKey> {
-        return cachedCustomerEphemeralKey.takeUnless { cachedCustomerEphemeralKey ->
-            cachedCustomerEphemeralKey == null || shouldRefreshCustomer(cachedCustomerEphemeralKey.date)
-        }?.result ?: run {
-            val newCachedCustomerEphemeralKey = CachedCustomerEphemeralKey(
-                result = customerEphemeralKeyProvider.provide(),
-                date = timeProvider(),
-            )
-            cachedCustomerEphemeralKey = newCachedCustomerEphemeralKey
-            newCachedCustomerEphemeralKey.result
+        return withContext(workContext) {
+            cachedCustomerEphemeralKey.takeUnless { cachedCustomerEphemeralKey ->
+                cachedCustomerEphemeralKey == null || shouldRefreshCustomer(
+                    cachedCustomerEphemeralKey.date
+                )
+            }?.result ?: run {
+                val newCachedCustomerEphemeralKey = CachedCustomerEphemeralKey(
+                    result = customerEphemeralKeyProvider.provide(),
+                    date = timeProvider(),
+                )
+                cachedCustomerEphemeralKey = newCachedCustomerEphemeralKey
+                newCachedCustomerEphemeralKey.result
+            }
         }
     }
 

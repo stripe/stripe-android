@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -28,6 +29,7 @@ import kotlin.test.assertFailsWith
 class CustomerAdapterTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Before
     fun setup() {
@@ -333,6 +335,7 @@ class CustomerAdapterTest {
             timeProvider = timeProvider,
             customerRepository = customerRepository,
             prefsRepositoryFactory = prefsRepositoryFactory,
+            workContext = testDispatcher
         )
     }
 }
