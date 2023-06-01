@@ -1,6 +1,9 @@
 package com.stripe.android.model
 
-internal data class CreateFinancialConnectionsSessionParams(
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class CreateFinancialConnectionsSessionParams(
     val clientSecret: String,
     val customerName: String,
     val customerEmailAddress: String?
@@ -18,8 +21,8 @@ internal data class CreateFinancialConnectionsSessionParams(
         )
     }
 
-    companion object {
-        private const val PARAM_CLIENT_SECRET = "client_secret"
-        private const val PARAM_PAYMENT_METHOD_DATA = "payment_method_data"
+    private companion object {
+        const val PARAM_CLIENT_SECRET = "client_secret"
+        const val PARAM_PAYMENT_METHOD_DATA = "payment_method_data"
     }
 }

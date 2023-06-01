@@ -1139,12 +1139,12 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `Sends correct analytics event based on force-success usage`() = runTest {
         val clientSecrets = listOf(
-            PaymentSheet.IntentConfiguration.DISMISS_WITH_SUCCESS to times(1),
+            PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT to times(1),
             "real_client_secret" to never(),
         )
 
         for ((clientSecret, verificationMode) in clientSecrets) {
-            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
+            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
                 CreateIntentResult.Success(clientSecret)
             }
 
@@ -1157,7 +1157,7 @@ internal class DefaultFlowControllerTest {
             )
             flowController.confirm()
 
-            val isForceSuccess = clientSecret == PaymentSheet.IntentConfiguration.DISMISS_WITH_SUCCESS
+            val isForceSuccess = clientSecret == PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT
             fakeIntentConfirmationInterceptor.enqueueCompleteStep(isForceSuccess)
 
             verify(eventReporter, verificationMode).onForceSuccess()

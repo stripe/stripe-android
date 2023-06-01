@@ -2,7 +2,12 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
-# Financial Connections
+### PaymentSheet
+* [CHANGED] The experimental API for [finalizing payments on the server](https://stripe.com/docs/payments/finalize-payments-on-the-server?platform=android) has changed:
+  * Instead of providing only the `PaymentMethod` ID, `CreateIntentCallback` now provides the entire `PaymentMethod` object.
+  * `CreateIntentCallbackForServerSideConfirmation` has been removed. If you’re using server-side confirmation, use `CreateIntentCallback` and its new `shouldSavePaymentMethod` parameter.
+
+### Financial Connections
 * [FIXED][6794](https://github.com/stripe/stripe-android/pull/6794) Gracefully fails when no web browser available.
 
 ## 20.25.4 - 2023-05-30
@@ -10,7 +15,7 @@
 ### All SDKs
 * [FIXED][6771](https://github.com/stripe/stripe-android/pull/6771) Fixed the length of phone number field.
 
-# Financial Connections
+### Financial Connections
 * [CHANGED][6789](https://github.com/stripe/stripe-android/pull/6789) Updated Mavericks to 3.0.3.
 
 ## 20.25.3 - 2023-05-23

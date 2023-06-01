@@ -134,7 +134,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
     sdkVersion: String = StripeSdkVersion.VERSION
-) : StripeRepository() {
+) : StripeRepository {
 
     @Inject
     constructor(

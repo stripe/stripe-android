@@ -18,12 +18,12 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.Stripe3ds2Fixtures
-import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.AlipayRepository
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.utils.ParcelUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking

@@ -9,6 +9,7 @@ import com.github.kittinunf.fuel.core.requests.suspendable
 import com.stripe.android.CreateIntentResult
 import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
@@ -91,11 +92,11 @@ internal class ServerSideConfirmationCustomFlowViewModel(
 
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     suspend fun createAndConfirmIntent(
-        paymentMethodId: String,
+        paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
     ): CreateIntentResult = withContext(Dispatchers.IO) {
         val request = state.value.cartState.toCreateIntentRequest(
-            paymentMethodId = paymentMethodId,
+            paymentMethodId = paymentMethod.id!!,
             shouldSavePaymentMethod = shouldSavePaymentMethod,
             returnUrl = "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
         )

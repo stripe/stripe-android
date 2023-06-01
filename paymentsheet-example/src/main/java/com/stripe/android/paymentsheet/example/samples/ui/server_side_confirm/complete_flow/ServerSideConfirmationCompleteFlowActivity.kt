@@ -37,7 +37,7 @@ internal class ServerSideConfirmationCompleteFlowActivity : AppCompatActivity() 
 
         paymentSheet = PaymentSheet(
             activity = this,
-            createIntentCallbackForServerSideConfirmation = viewModel::createAndConfirmIntent,
+            createIntentCallback = viewModel::createAndConfirmIntent,
             paymentResultCallback = viewModel::handlePaymentSheetResult,
         )
 

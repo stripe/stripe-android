@@ -16,10 +16,12 @@ import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateS
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerSheetRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerSheetResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as FuelResult
 
@@ -97,36 +99,40 @@ class CustomerSheetViewModel(
 
     private suspend fun fetchCustomerEphemeralKey():
         FuelResult<ExampleCustomerSheetResponse, FuelError> {
-        val request = ExampleCustomerSheetRequest(
-            customerType = "returning"
-        )
-        val requestBody = Json.encodeToString(
-            ExampleCustomerSheetRequest.serializer(),
-            request
-        )
+        return withContext(Dispatchers.IO) {
+            val request = ExampleCustomerSheetRequest(
+                customerType = "returning"
+            )
+            val requestBody = Json.encodeToString(
+                ExampleCustomerSheetRequest.serializer(),
+                request
+            )
 
-        return Fuel
-            .post("$backendUrl/customer_ephemeral_key")
-            .jsonBody(requestBody)
-            .suspendable()
-            .awaitModel(ExampleCustomerSheetResponse.serializer())
+            Fuel
+                .post("$backendUrl/customer_ephemeral_key")
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitModel(ExampleCustomerSheetResponse.serializer())
+        }
     }
 
     private suspend fun createSetupIntent(customerId: String):
         FuelResult<ExampleCreateSetupIntentResponse, FuelError> {
-        val request = ExampleCreateSetupIntentRequest(
-            customerId = customerId
-        )
-        val requestBody = Json.encodeToString(
-            ExampleCreateSetupIntentRequest.serializer(),
-            request
-        )
+        return withContext(Dispatchers.IO) {
+            val request = ExampleCreateSetupIntentRequest(
+                customerId = customerId
+            )
+            val requestBody = Json.encodeToString(
+                ExampleCreateSetupIntentRequest.serializer(),
+                request
+            )
 
-        return Fuel
-            .post("$backendUrl/create_setup_intent")
-            .jsonBody(requestBody)
-            .suspendable()
-            .awaitModel(ExampleCreateSetupIntentResponse.serializer())
+            Fuel
+                .post("$backendUrl/create_setup_intent")
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitModel(ExampleCreateSetupIntentResponse.serializer())
+        }
     }
 
     private companion object {

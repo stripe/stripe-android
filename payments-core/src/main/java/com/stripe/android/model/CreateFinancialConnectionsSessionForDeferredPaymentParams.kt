@@ -1,6 +1,9 @@
 package com.stripe.android.model
 
-internal data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
     val uniqueId: String,
     val initialInstitution: String? = null,
     val manualEntryOnly: Boolean? = null,
@@ -27,20 +30,21 @@ internal data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
         )
     }
 
-    companion object {
-        private const val PARAM_UNIQUE_ID = "unique_id"
-        private const val PARAM_INITIAL_INSTITUTION = "initial_institution"
-        private const val PARAM_MANUAL_ENTRY_ONLY = "manual_entry_only"
-        private const val PARAM_SEARCH_SESSION = "search_session"
-        private const val PARAM_VERIFICATION_METHOD = "verification_method"
-        private const val PARAM_CUSTOMER = "customer"
-        private const val PARAM_ON_BEHALF_OF = "on_behalf_of"
-        private const val PARAM_AMOUNT = "amount"
-        private const val PARAM_CURRENCY = "currency"
+    private companion object {
+        const val PARAM_UNIQUE_ID = "unique_id"
+        const val PARAM_INITIAL_INSTITUTION = "initial_institution"
+        const val PARAM_MANUAL_ENTRY_ONLY = "manual_entry_only"
+        const val PARAM_SEARCH_SESSION = "search_session"
+        const val PARAM_VERIFICATION_METHOD = "verification_method"
+        const val PARAM_CUSTOMER = "customer"
+        const val PARAM_ON_BEHALF_OF = "on_behalf_of"
+        const val PARAM_AMOUNT = "amount"
+        const val PARAM_CURRENCY = "currency"
     }
 }
 
-internal enum class VerificationMethodParam(val value: String) {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class VerificationMethodParam(val value: String) {
     Automatic("automatic"),
     Skip("skip"),
     Microdeposits("microdeposits"),
