@@ -9,7 +9,6 @@ internal interface EventReporter {
     fun onInit(
         configuration: PaymentSheet.Configuration?,
         isDecoupling: Boolean,
-        isServerSideConfirmation: Boolean,
     )
 
     fun onDismiss(

@@ -357,7 +357,7 @@ internal class FlowControllerTest {
                     assertThat(paymentOption?.label).endsWith("4242")
                     flowController.confirm()
                 },
-                createIntentCallback = {
+                createIntentCallback = { _, _ ->
                     CreateIntentResult.Success(
                         clientSecret = "pi_example_secret_example"
                     )
@@ -398,6 +398,13 @@ internal class FlowControllerTest {
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
         }
 
         networkRule.enqueue(
@@ -442,7 +449,7 @@ internal class FlowControllerTest {
                     assertThat(paymentOption?.label).endsWith("4242")
                     flowController.confirm()
                 },
-                createIntentCallback = {
+                createIntentCallback = { _, _ ->
                     CreateIntentResult.Failure(
                         cause = Exception("We don't accept visa"),
                         displayMessage = "We don't accept visa"
@@ -517,8 +524,8 @@ internal class FlowControllerTest {
                     assertThat(paymentOption?.label).endsWith("4242")
                     flowController.confirm()
                 },
-                createIntentCallback = {
-                    CreateIntentResult.Success(PaymentSheet.IntentConfiguration.DISMISS_WITH_SUCCESS)
+                createIntentCallback = { _, _ ->
+                    CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
                 },
                 paymentResultCallback = { result ->
                     assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)

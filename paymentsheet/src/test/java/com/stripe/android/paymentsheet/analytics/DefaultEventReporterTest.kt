@@ -48,7 +48,6 @@ class DefaultEventReporterTest {
         completeEventReporter.onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
-            isServerSideConfirmation = false,
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
