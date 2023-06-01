@@ -48,5 +48,3 @@ example/bin
 example/target
 example/gen
 
-# Stripe-internal `pay` commands
-.pay/*
