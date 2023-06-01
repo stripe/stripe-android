@@ -67,9 +67,6 @@ public abstract interface class com/stripe/android/CustomerSession$SourceRetriev
 	public abstract fun onSourceRetrieved (Lcom/stripe/android/model/Source;)V
 }
 
-public abstract interface annotation class com/stripe/android/DelicatePaymentSheetApi : java/lang/annotation/Annotation {
-}
-
 public final class com/stripe/android/EphemeralKey : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -179,9 +176,6 @@ public final class com/stripe/android/EphemeralOperation$RetrieveKey$Creator : a
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/EphemeralOperation$RetrieveKey;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public abstract interface annotation class com/stripe/android/ExperimentalPaymentSheetDecouplingApi : java/lang/annotation/Annotation {
 }
 
 public final class com/stripe/android/GooglePayConfig {
