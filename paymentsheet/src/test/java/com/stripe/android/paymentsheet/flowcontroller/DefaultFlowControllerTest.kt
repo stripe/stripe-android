@@ -13,11 +13,6 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.plusAssign
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.CreateIntentCallback
-import com.stripe.android.CreateIntentResult
-import com.stripe.android.DelicatePaymentSheetApi
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
@@ -42,6 +37,11 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
+import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -58,10 +58,10 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.testing.FakeIntentConfirmationInterceptor
-import com.stripe.android.testing.IntentConfirmationInterceptorTestRule
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.RelayingPaymentSheetLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

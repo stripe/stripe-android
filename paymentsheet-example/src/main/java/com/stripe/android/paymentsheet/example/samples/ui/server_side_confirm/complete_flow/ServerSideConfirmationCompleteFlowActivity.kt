@@ -9,7 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.google.android.material.snackbar.Snackbar
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.toIntentConfiguration
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton

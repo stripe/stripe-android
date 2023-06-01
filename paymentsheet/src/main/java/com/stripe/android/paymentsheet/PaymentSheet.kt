@@ -9,11 +9,6 @@ import androidx.annotation.FontRes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
-import com.stripe.android.CreateIntentCallback
-import com.stripe.android.CreateIntentResult
-import com.stripe.android.DelicatePaymentSheetApi
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent

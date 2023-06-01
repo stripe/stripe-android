@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.paymentsheet
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentIntent

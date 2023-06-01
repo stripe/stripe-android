@@ -94,7 +94,8 @@ data class PaymentMethodCreateParams internal constructor(
     val typeCode: String
         get() = code
 
-    internal val attribution: Set<String>
+    val attribution: Set<String>
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @JvmSynthetic
         get() {
             return when (code) {

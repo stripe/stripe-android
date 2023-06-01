@@ -7,7 +7,6 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
