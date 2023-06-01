@@ -21,8 +21,8 @@ data class CreateFinancialConnectionsSessionParams(
         )
     }
 
-    companion object {
-        private const val PARAM_CLIENT_SECRET = "client_secret"
-        private const val PARAM_PAYMENT_METHOD_DATA = "payment_method_data"
+    private companion object {
+        const val PARAM_CLIENT_SECRET = "client_secret"
+        const val PARAM_PAYMENT_METHOD_DATA = "payment_method_data"
     }
 }

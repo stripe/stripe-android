@@ -61,6 +61,7 @@ data class Stripe3ds2AuthResult internal constructor(
     ) : StripeModel
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class ThreeDS2Error internal constructor(
         val threeDSServerTransId: String?,
         val acsTransId: String?,
