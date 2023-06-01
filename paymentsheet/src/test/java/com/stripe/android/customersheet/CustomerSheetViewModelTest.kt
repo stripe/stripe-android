@@ -42,8 +42,9 @@ class CustomerSheetViewModelTest {
     }
 
     private fun createViewModel(
-        customerEphemeralKeyProvider: CustomerEphemeralKeyProvider =
-            CustomerEphemeralKeyProvider {
+        customerAdapter: CustomerAdapter = CustomerAdapter.create(
+            context = context,
+            customerEphemeralKeyProvider = {
                 Result.success(
                     CustomerEphemeralKey(
                         customerId = "cus_123",
@@ -51,14 +52,9 @@ class CustomerSheetViewModelTest {
                     )
                 )
             },
-        setupIntentClientSecretProvider: SetupIntentClientSecretProvider =
-            SetupIntentClientSecretProvider {
+            setupIntentClientSecretProvider = {
                 Result.success("seti_123")
             },
-        customerAdapter: CustomerAdapter = CustomerAdapter.create(
-            context = context,
-            customerEphemeralKeyProvider = customerEphemeralKeyProvider,
-            setupIntentClientSecretProvider = setupIntentClientSecretProvider,
         ),
         lpmRepository: LpmRepository = this.lpmRepository
     ): CustomerSheetViewModel {

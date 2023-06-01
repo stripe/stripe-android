@@ -5,13 +5,13 @@ import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.gms.common.util.VisibleForTesting
 
 internal class CustomerSheetActivity : AppCompatActivity() {
 
@@ -19,9 +19,11 @@ internal class CustomerSheetActivity : AppCompatActivity() {
     internal var viewModelFactory: ViewModelProvider.Factory = CustomerSheetViewModel.Factory
 
     /**
+     * TODO verify that the [viewModels] delegate caches the right dependencies
+     *
      * The ViewModel lifecycle is cached by this implementation, and the merchant might pass in
      * different dependencies, adapter, result callback, etc. This may require us to recreate our
-     * `CustomerSessionScope`, which would make it out of sync with what the `viewModels`
+     * [CustomerSessionScope], which would make it out of sync with what the [viewModels]
      * implementation caches.
      */
     private val viewModel by viewModels<CustomerSheetViewModel> {
