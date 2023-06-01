@@ -114,7 +114,6 @@ internal class CustomerSheetViewModel @Inject constructor(
                     title = configuration.headerTextForSelectionScreen,
                     savedPaymentMethods = savedPaymentMethods,
                     paymentSelection = paymentSelection,
-                    showEditMenu = savedPaymentMethods.isNotEmpty(),
                     isLiveMode = isLiveMode,
                     isProcessing = false,
                     isEditing = false,

@@ -88,7 +88,6 @@ class CustomerSheetViewModelTest {
                         paymentSelection = PaymentSelection.Saved(
                             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                         ),
-                        showEditMenu = true,
                         isLiveMode = false,
                         isProcessing = false,
                         isEditing = false,

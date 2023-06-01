@@ -33,9 +33,8 @@ class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.SelectPaymentMethod(
                     title = "Screenshot testing",
-                    savedPaymentMethods = listOf(),
+                    savedPaymentMethods = emptyList(),
                     paymentSelection = null,
-                    showEditMenu = false,
                     isLiveMode = false,
                     isProcessing = false,
                     isEditing = false,
@@ -72,7 +71,6 @@ class CustomerSheetScreenshotTest {
                     paymentSelection = PaymentSelection.Saved(
                         savedPaymentMethods.first()
                     ),
-                    showEditMenu = true,
                     isLiveMode = false,
                     isProcessing = false,
                     isEditing = false,
@@ -95,9 +93,8 @@ class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.SelectPaymentMethod(
                     title = "Screenshot testing",
-                    savedPaymentMethods = listOf(),
+                    savedPaymentMethods = emptyList(),
                     paymentSelection = PaymentSelection.GooglePay,
-                    showEditMenu = true,
                     isLiveMode = false,
                     isProcessing = false,
                     isEditing = false,

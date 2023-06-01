@@ -44,11 +44,7 @@ internal fun CustomerSheetScreen(
     PaymentSheetScaffold(
         topBar = {
             PaymentSheetTopBar(
-                screen = viewState.screen,
-                showEditMenu = viewState.showEditMenu,
-                isLiveMode = viewState.isLiveMode,
-                isProcessing = viewState.isProcessing,
-                isEditing = viewState.isEditing,
+                state = viewState.topBarState,
                 handleBackPressed = {
                     viewActionHandler(
                         CustomerSheetViewAction.OnBackPressed
