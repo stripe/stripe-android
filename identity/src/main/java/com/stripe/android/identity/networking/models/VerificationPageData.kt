@@ -60,8 +60,12 @@ internal data class VerificationPageData(
         fun VerificationPageData.isMissingSelfie() =
             requirements.missings?.contains(Requirement.FACE) == true
 
-        fun VerificationPageData.isMissingIndividualRequirements() = requirements.missings?.intersect(
-            listOf(Requirement.IDNUMBER, Requirement.DOB, Requirement.NAME, Requirement.ADDRESS)
-        )?.isNotEmpty() == true
+        fun VerificationPageData.isMissingOtp() =
+            requirements.missings?.contains(Requirement.PHONE_OTP) == true
+
+        fun VerificationPageData.isMissingIndividualRequirements() =
+            requirements.missings?.intersect(
+                listOf(Requirement.IDNUMBER, Requirement.DOB, Requirement.NAME, Requirement.ADDRESS)
+            )?.isNotEmpty() == true
     }
 }

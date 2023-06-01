@@ -121,6 +121,8 @@ internal fun String.routeToScreenName(): String = when (this) {
         IdentityAnalyticsRequestFactory.SCREEN_NAME_INDIVIDUAL_WELCOME
     DebugDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_DEBUG
+    OTPDestination.ROUTE.route ->
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_OTP
     else ->
         throw IllegalArgumentException("Invalid route: $this")
 }

@@ -1,0 +1,149 @@
+package com.stripe.android.identity.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.stripe.android.identity.IdentityVerificationSheetContract
+import com.stripe.android.identity.networking.IdentityRepository
+import com.stripe.android.identity.networking.models.VerificationPageData
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.OTPController
+import com.stripe.android.uicore.elements.OTPElement
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+internal sealed class OTPViewState {
+    object InputtingOTP : OTPViewState() // When user is inputting OTP
+    data class SubmittingOTP(
+        val otp: String
+    ) : OTPViewState() // When OTP is being submitted through Post VerificationPageData
+
+    object ErrorOTP : OTPViewState() // When wrong OTP is submitted
+    object RequestingOTP : OTPViewState() // When GenerateOTP is outstanding
+    object RequestingCannotVerify : OTPViewState() // When CannotVerify is outstanding
+    data class RequestingCannotVerifySuccess(val verificationPageData: VerificationPageData) :
+        OTPViewState() // When CannotVerify is successful
+
+    data class RequestingError(val cause: Throwable) :
+        OTPViewState() // When there's an error requesting OTP or requesting cannotVerify
+}
+
+internal class OTPViewModel(
+    private val identityRepository: IdentityRepository,
+    private val verificationArgs: IdentityVerificationSheetContract.Args
+) : ViewModel() {
+    private val _viewState = MutableStateFlow<OTPViewState>(OTPViewState.InputtingOTP)
+    val viewState: StateFlow<OTPViewState> = _viewState
+
+    val otpElement =
+        OTPElement(
+            identifier = IdentifierSpec.Generic(OTP),
+            controller = OTPController()
+        )
+
+    init {
+        // transition to submittingOTP when otp is fully input
+        viewModelScope.launch {
+            otpElement.otpCompleteFlow.collectLatest {
+                onValidOTPInput(otp = it)
+            }
+        }
+    }
+
+    private fun onValidOTPInput(otp: String) {
+        _viewState.update {
+            OTPViewState.SubmittingOTP(otp)
+        }
+        otpElement.controller.reset()
+    }
+
+    // When the user has input error OTP
+    fun onInputErrorOtp() {
+        _viewState.update {
+            OTPViewState.ErrorOTP
+        }
+    }
+
+    private fun onRequestingError(cause: Throwable) {
+        _viewState.update {
+            OTPViewState.RequestingError(cause)
+        }
+    }
+
+    fun generateOtp() {
+        _viewState.update {
+            OTPViewState.RequestingOTP
+        }
+        otpElement.controller.reset()
+
+        viewModelScope.launch {
+            runCatching {
+                identityRepository.generateOtp(
+                    id = verificationArgs.verificationSessionId,
+                    ephemeralKey = verificationArgs.ephemeralKeySecret
+                )
+            }.fold(
+                onSuccess = {
+                    onGenerateOtpSuccess()
+                },
+                onFailure = {
+                    onRequestingError(it)
+                }
+            )
+        }
+    }
+
+    private fun onGenerateOtpSuccess() {
+        _viewState.update {
+            OTPViewState.InputtingOTP
+        }
+    }
+
+    fun onCannotVerifyClicked() {
+        _viewState.update {
+            OTPViewState.RequestingCannotVerify
+        }
+        viewModelScope.launch {
+            runCatching {
+                identityRepository.cannotVerifyOtp(
+                    id = verificationArgs.verificationSessionId,
+                    ephemeralKey = verificationArgs.ephemeralKeySecret
+                )
+            }.fold(
+                onSuccess = {
+                    onRequestingCannotVerifySuccess(it)
+                },
+                onFailure = {
+                    onRequestingError(it)
+                }
+            )
+        }
+    }
+
+    private fun onRequestingCannotVerifySuccess(verificationPageData: VerificationPageData) {
+        _viewState.update {
+            OTPViewState.RequestingCannotVerifySuccess(verificationPageData)
+        }
+    }
+
+    internal class Factory(
+        val identityRepository: IdentityRepository,
+        val verificationArgs: IdentityVerificationSheetContract.Args
+    ) : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return OTPViewModel(
+                identityRepository = identityRepository,
+                verificationArgs = verificationArgs
+            ) as T
+        }
+    }
+
+    internal companion object {
+        const val OTP = "OTP"
+    }
+}

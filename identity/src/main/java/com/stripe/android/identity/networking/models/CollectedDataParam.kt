@@ -40,6 +40,8 @@ internal data class CollectedDataParam(
     val address: RequiredInternationalAddress? = null,
     @SerialName("phone")
     val phone: PhoneParam? = null,
+    @SerialName("phone_otp")
+    val phoneOtp: String? = null
 ) : Parcelable {
     @Serializable
     internal enum class Type {
