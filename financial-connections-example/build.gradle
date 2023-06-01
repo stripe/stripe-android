@@ -27,10 +27,6 @@ android {
                 groups = "financial-connections"
             }
         }
-        release {
-            minifyEnabled true
-            shrinkResources true
-        }
     }
 
     buildFeatures {
