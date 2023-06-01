@@ -1,6 +1,9 @@
 package com.stripe.android.model
 
-internal data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
     val uniqueId: String,
     val initialInstitution: String? = null,
     val manualEntryOnly: Boolean? = null,
@@ -40,7 +43,8 @@ internal data class CreateFinancialConnectionsSessionForDeferredPaymentParams(
     }
 }
 
-internal enum class VerificationMethodParam(val value: String) {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class VerificationMethodParam(val value: String) {
     Automatic("automatic"),
     Skip("skip"),
     Microdeposits("microdeposits"),

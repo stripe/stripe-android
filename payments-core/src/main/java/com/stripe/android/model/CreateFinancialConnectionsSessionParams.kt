@@ -1,6 +1,9 @@
 package com.stripe.android.model
 
-internal data class CreateFinancialConnectionsSessionParams(
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class CreateFinancialConnectionsSessionParams(
     val clientSecret: String,
     val customerName: String,
     val customerEmailAddress: String?

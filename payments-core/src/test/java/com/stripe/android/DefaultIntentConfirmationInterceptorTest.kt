@@ -12,8 +12,8 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.IntentConfirmationInterceptorTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule

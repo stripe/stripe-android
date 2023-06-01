@@ -1,10 +1,12 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class Stripe3ds2AuthResult internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class Stripe3ds2AuthResult internal constructor(
     val id: String?,
     val ares: Ares? = null,
     val created: Long?,
@@ -15,8 +17,10 @@ internal data class Stripe3ds2AuthResult internal constructor(
     val fallbackRedirectUrl: String? = null,
     val creq: String? = null
 ) : StripeModel {
+
     @Parcelize
-    internal data class Ares internal constructor(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Ares internal constructor(
         internal val threeDSServerTransId: String?,
         private val acsChallengeMandated: String?,
         internal val acsSignedContent: String? = null,
