@@ -46,6 +46,7 @@ private val LightColorPalette = FinancialConnectionsColors(
     iconAttention = Attention400
 )
 
+@Deprecated("Use AuthFlowV3Typography instead")
 private val Typography = FinancialConnectionsTypography(
     subtitle = TextStyle(
         fontSize = 24.sp,
@@ -134,6 +135,67 @@ private val Typography = FinancialConnectionsTypography(
     ),
 )
 
+private val AuthFlowV3Typography = FinancialConnectionsAuthFlowV3Typography(
+    headingXLarge = TextStyle(
+        fontSize = 28.sp,
+        lineHeight = 32.sp,
+        letterSpacing = 0.38.sp,
+        fontWeight = FontWeight.W700
+    ),
+    headingLarge = TextStyle(
+        fontSize = 24.sp,
+        lineHeight = 32.sp,
+        letterSpacing = 0.30.sp,
+        fontWeight = FontWeight.W700
+    ),
+    headingMedium = TextStyle(
+        fontSize = 20.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.30.sp,
+        fontWeight = FontWeight.W700
+    ),
+    bodyMediumEmphasized = TextStyle(
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        fontWeight = FontWeight.W600
+    ),
+    bodyMedium = TextStyle(
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        fontWeight = FontWeight.W400
+    ),
+    bodySmall = TextStyle(
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        fontWeight = FontWeight.W400
+    ),
+    labelLargeEmphasized = TextStyle(
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        fontWeight = FontWeight.W600
+    ),
+    labelLarge = TextStyle(
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        fontWeight = FontWeight.W400
+    ),
+    labelMediumEmphasized = TextStyle(
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        fontWeight = FontWeight.W600
+    ),
+    labelMedium = TextStyle(
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        fontWeight = FontWeight.W400
+    ),
+    labelSmall = TextStyle(
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        fontWeight = FontWeight.W400
+    ),
+)
+
 private val TextSelectionColors = TextSelectionColors(
     handleColor = LightColorPalette.textBrand,
     backgroundColor = LightColorPalette.textBrand.copy(alpha = 0.4f)
@@ -158,6 +220,7 @@ private object FinancialConnectionsRippleTheme : RippleTheme {
 internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalFinancialConnectionsTypography provides Typography,
+        LocalAuthFlowV3Typography provides AuthFlowV3Typography,
         LocalFinancialConnectionsColors provides LightColorPalette
     ) {
         val view = LocalView.current
@@ -205,6 +268,12 @@ private val LocalFinancialConnectionsTypography =
         error("no FinancialConnectionsTypography provided")
     }
 
+
+private val LocalAuthFlowV3Typography =
+    staticCompositionLocalOf<FinancialConnectionsAuthFlowV3Typography> {
+        error("no AuthFlowV3Typography provided")
+    }
+
 private val LocalFinancialConnectionsColors = staticCompositionLocalOf<FinancialConnectionsColors> {
     error("No FinancialConnectionsColors provided")
 }
@@ -216,6 +285,9 @@ internal object FinancialConnectionsTheme {
     val typography: FinancialConnectionsTypography
         @Composable
         get() = LocalFinancialConnectionsTypography.current
+    val authFlowV3Typography
+        @Composable
+        get() = LocalAuthFlowV3Typography.current
 }
 
 /**
