@@ -12,7 +12,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
-import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
@@ -298,13 +297,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun createLinkFinancialConnectionsSession(
-        consumerSessionClientSecret: String,
-        requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession? {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         financialConnectionsAccountId: String,
@@ -316,30 +308,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
-        requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun listPaymentDetails(
-        consumerSessionClientSecret: String,
-        paymentMethodTypes: Set<String>,
-        requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deletePaymentDetails(
-        consumerSessionClientSecret: String,
-        paymentDetailsId: String,
-        requestOptions: ApiRequest.Options
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun updatePaymentDetails(
-        consumerSessionClientSecret: String,
-        paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
         requestOptions: ApiRequest.Options
     ): ConsumerPaymentDetails? {
         TODO("Not yet implemented")

@@ -17,7 +17,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
-import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
@@ -353,12 +352,6 @@ interface StripeRepository {
     ): ConsumerSession?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun createLinkFinancialConnectionsSession(
-        consumerSessionClientSecret: String,
-        requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession?
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         financialConnectionsAccountId: String,
@@ -369,27 +362,6 @@ interface StripeRepository {
     suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
-        requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails?
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun listPaymentDetails(
-        consumerSessionClientSecret: String,
-        paymentMethodTypes: Set<String>,
-        requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails?
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun deletePaymentDetails(
-        consumerSessionClientSecret: String,
-        paymentDetailsId: String,
-        requestOptions: ApiRequest.Options
-    )
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun updatePaymentDetails(
-        consumerSessionClientSecret: String,
-        paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
         requestOptions: ApiRequest.Options
     ): ConsumerPaymentDetails?
 

@@ -9,7 +9,6 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -115,20 +114,6 @@ internal class LinkAccountManager @Inject constructor(
                         LinkAccount(consumerSession)
                     }
                 }
-            }.mapCatching {
-                it?.let { account ->
-                    if (startSession && !account.isVerified) {
-                        setAccount(
-                            linkRepository.startVerification(
-                                account.clientSecret,
-                                consumerPublishableKey,
-                                cookie()
-                            ).getOrThrow()
-                        )
-                    } else {
-                        account
-                    }
-                }
             }
 
     /**
@@ -169,51 +154,7 @@ internal class LinkAccountManager @Inject constructor(
             .map { consumerSession ->
                 cookieStore.storeNewUserEmail(email)
                 setAccount(consumerSession)
-            }.mapCatching { account ->
-                if (account.isVerified) {
-                    account
-                } else {
-                    setAccount(
-                        linkRepository.startVerification(
-                            account.clientSecret,
-                            consumerPublishableKey,
-                            cookie()
-                        ).getOrThrow()
-                    )
-                }
             }
-
-    /**
-     * Triggers sending a verification code to the user.
-     */
-    suspend fun startVerification(): Result<LinkAccount> = retryingOnAuthError { clientSecret ->
-        linkRepository.startVerification(clientSecret, consumerPublishableKey, cookie())
-            .also {
-                if (it.isFailure) {
-                    linkEventsReporter.on2FAStartFailure()
-                }
-            }.map { consumerSession ->
-                setAccount(consumerSession)
-            }
-    }
-
-    /**
-     * Confirms a verification code sent to the user.
-     */
-    suspend fun confirmVerification(code: String): Result<LinkAccount> =
-        retryingOnAuthError { clientSecret ->
-            linkRepository.confirmVerification(code, clientSecret, consumerPublishableKey, cookie())
-                .map { consumerSession ->
-                    setAccount(consumerSession)
-                }
-        }
-
-    /**
-     * Fetch all saved payment methods for the signed in consumer.
-     */
-    suspend fun listPaymentDetails() = retryingOnAuthError { clientSecret ->
-        linkRepository.listPaymentDetails(clientSecret, consumerPublishableKey)
-    }
 
     /**
      * Creates a new PaymentDetails.Card attached to the current account.
@@ -235,29 +176,6 @@ internal class LinkAccountManager @Inject constructor(
         )
 
     /**
-     * Create a session used to connect a bank account through Financial Connections.
-     */
-    suspend fun createFinancialConnectionsSession() = retryingOnAuthError { clientSecret ->
-        linkRepository.createFinancialConnectionsSession(
-            clientSecret,
-            consumerPublishableKey
-        )
-    }
-
-    /**
-     * Create a new Bank Account payment method attached to the consumer account.
-     */
-    suspend fun createBankAccountPaymentDetails(
-        financialConnectionsAccountId: String
-    ) = retryingOnAuthError { clientSecret ->
-        linkRepository.createBankAccountPaymentDetails(
-            financialConnectionsAccountId,
-            clientSecret,
-            consumerPublishableKey
-        )
-    }
-
-    /**
      * Create a new Card payment method attached to the consumer account.
      */
     suspend fun createCardPaymentDetails(
@@ -273,26 +191,6 @@ internal class LinkAccountManager @Inject constructor(
             consumerPublishableKey
         )
     }
-
-    /**
-     * Update an existing payment method in the signed in consumer account.
-     */
-    suspend fun updatePaymentDetails(updateParams: ConsumerPaymentDetailsUpdateParams) =
-        retryingOnAuthError { clientSecret ->
-            linkRepository.updatePaymentDetails(updateParams, clientSecret, consumerPublishableKey)
-        }
-
-    /**
-     * Delete the payment method from the signed in consumer account.
-     */
-    suspend fun deletePaymentDetails(paymentDetailsId: String) =
-        retryingOnAuthError { clientSecret ->
-            linkRepository.deletePaymentDetails(
-                paymentDetailsId,
-                clientSecret,
-                consumerPublishableKey
-            )
-        }
 
     /**
      * Make an API call with the client_secret for the currently signed in account, retrying once
