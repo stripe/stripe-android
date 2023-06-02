@@ -77,8 +77,8 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                                 )
                                 Loading(
                                     modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(padding)
+                                        .fillMaxWidth()
+                                        .padding(padding)
                                 )
                             }
                         }

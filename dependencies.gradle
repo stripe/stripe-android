@@ -1,5 +1,5 @@
 ext.versions = [
-        accompanist                 : '0.28.0',
+        accompanist                 : '0.31.3-beta',
         alipay                      : '15.8.12',
         androidGradlePlugin         : '8.0.2',
         androidTest                 : '1.5.0',
@@ -93,6 +93,7 @@ ext.libs = [
         accompanist                         : [
                 flowLayout         : "com.google.accompanist:accompanist-flowlayout:${versions.accompanist}",
                 navigationAnimation: "com.google.accompanist:accompanist-navigation-animation:${versions.accompanist}",
+                navigationMaterial : "com.google.accompanist:accompanist-navigation-material:${versions.accompanist}",
                 themeAdapter       : "com.google.accompanist:accompanist-themeadapter-material:${versions.accompanist}",
                 webView            : "com.google.accompanist:accompanist-webview:${versions.accompanist}",
         ],

@@ -2,49 +2,43 @@ package com.stripe.android.customersheet.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
-import kotlinx.coroutines.launch
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.google.accompanist.navigation.material.ModalBottomSheetLayout
+import com.google.accompanist.navigation.material.bottomSheet
+import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
 internal fun CustomerBottomSheet(
-    modifier: Modifier = Modifier,
     onClose: () -> Unit = {},
     sheetContent: @Composable ColumnScope.() -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val modalSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        confirmValueChange = {
-            if (it ==  ModalBottomSheetValue.Hidden) {
-                onClose()
-            }
-            it != ModalBottomSheetValue.Expanded
-        },
-        skipHalfExpanded = true
-    )
+    val bottomSheetNavigator = rememberBottomSheetNavigator()
+    val navController = rememberNavController(bottomSheetNavigator)
 
-    LaunchedEffect(Unit) {
-        modalSheetState.show()
+    BackHandler(bottomSheetNavigator.navigatorSheetState.isVisible) {
+        navController.popBackStack()
+        onClose()
     }
 
-    BackHandler(modalSheetState.isVisible) {
-        coroutineScope.launch {
-            modalSheetState.hide()
+    LaunchedEffect(navController.currentDestination) {
+        if (navController.currentDestination == null) {
+            navController.popBackStack()
             onClose()
         }
     }
 
     ModalBottomSheetLayout(
-        sheetState = modalSheetState,
-        sheetContent = sheetContent,
-        modifier = modifier
-    ) { }
+        bottomSheetNavigator = bottomSheetNavigator,
+    ) {
+        NavHost(navController, "sheet") {
+            bottomSheet(route = "sheet") {
+                sheetContent()
+            }
+        }
+    }
 }
