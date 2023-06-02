@@ -72,7 +72,42 @@ class CustomerSheet @Inject internal constructor(
          * The text to display at the top of the presented bottom sheet.
          */
         val headerTextForSelectionScreen: String? = null,
-    )
+    ) {
+        @ExperimentalCustomerSheetApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Builder(
+            private var merchantDisplayName: String
+        ) {
+            private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
+            private var googlePayConfiguration: PaymentSheet.GooglePayConfiguration? = null
+            private var headerTextForSelectionScreen: String? = null
+
+            fun merchantDisplayName(merchantDisplayName: String) = apply {
+                this.merchantDisplayName = merchantDisplayName
+            }
+
+            fun appearance(appearance: PaymentSheet.Appearance) = apply {
+                this.appearance = appearance
+            }
+
+            fun googlePayConfiguration(
+                googlePayConfiguration: PaymentSheet.GooglePayConfiguration?
+            ) = apply {
+                this.googlePayConfiguration = googlePayConfiguration
+            }
+
+            fun headerTextForSelectionScreen(headerTextForSelectionScreen: String?) = apply {
+                this.headerTextForSelectionScreen = headerTextForSelectionScreen
+            }
+
+            fun build() = Configuration(
+                merchantDisplayName = merchantDisplayName,
+                appearance = appearance,
+                googlePayConfiguration = googlePayConfiguration,
+                headerTextForSelectionScreen = headerTextForSelectionScreen,
+            )
+        }
+    }
 
     @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
