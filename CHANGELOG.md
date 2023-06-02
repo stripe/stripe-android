@@ -6,7 +6,7 @@
 * [CHANGED] The experimental API for [finalizing payments on the server](https://stripe.com/docs/payments/finalize-payments-on-the-server?platform=android) has changed:
   * Instead of providing only the `PaymentMethod` ID, `CreateIntentCallback` now provides the entire `PaymentMethod` object.
   * `CreateIntentCallbackForServerSideConfirmation` has been removed. If you’re using server-side confirmation, use `CreateIntentCallback` and its new `shouldSavePaymentMethod` parameter.
-  * `CreateIntentCallback`, `CreateIntentResult`, and `ExperimentalPaymentSheetDecouplingApi` have been moved to the `com.stripe.android.paymentsheet` module.
+  * `CreateIntentCallback`, `CreateIntentResult`, and `ExperimentalPaymentSheetDecouplingApi` have been moved to the `paymentsheet` module. Update your imports from `com.stripe.android.*` to `com.stripe.android.paymentsheet.*`.
 
 ## 20.25.4 - 2023-05-30
 
