@@ -8,11 +8,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 
@@ -27,15 +23,16 @@ internal fun CustomerBottomSheet(
     val modalSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
         confirmValueChange = {
-            it != ModalBottomSheetValue.HalfExpanded
+            if (it ==  ModalBottomSheetValue.Hidden) {
+                onClose()
+            }
+            it != ModalBottomSheetValue.Expanded
         },
-        skipHalfExpanded = false
+        skipHalfExpanded = true
     )
-    var sheetLaunched by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         modalSheetState.show()
-        sheetLaunched = true
     }
 
     BackHandler(modalSheetState.isVisible) {
@@ -43,10 +40,6 @@ internal fun CustomerBottomSheet(
             modalSheetState.hide()
             onClose()
         }
-    }
-
-    if (sheetLaunched && !modalSheetState.isVisible) {
-        onClose()
     }
 
     ModalBottomSheetLayout(
