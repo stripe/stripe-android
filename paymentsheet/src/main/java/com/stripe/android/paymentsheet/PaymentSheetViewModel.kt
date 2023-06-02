@@ -11,9 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY

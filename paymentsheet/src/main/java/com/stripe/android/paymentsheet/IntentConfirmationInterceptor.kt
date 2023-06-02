@@ -1,8 +1,9 @@
-package com.stripe.android
+package com.stripe.android.paymentsheet
 
 import android.content.Context
 import androidx.annotation.RestrictTo
-import com.stripe.android.IntentConfirmationInterceptor.NextStep
+import com.stripe.android.ConfirmStripeIntentParamsFactory
+import com.stripe.android.R
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -14,6 +15,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.IntentConfirmationInterceptor.NextStep
 import javax.inject.Inject
 import javax.inject.Named
 

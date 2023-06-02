@@ -3,13 +3,13 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.core.os.LocaleListCompat
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest

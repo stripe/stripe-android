@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.paymentsheet
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
@@ -14,7 +14,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testing.AbsFakeStripeRepository
-import com.stripe.android.testing.IntentConfirmationInterceptorTestRule
+import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test

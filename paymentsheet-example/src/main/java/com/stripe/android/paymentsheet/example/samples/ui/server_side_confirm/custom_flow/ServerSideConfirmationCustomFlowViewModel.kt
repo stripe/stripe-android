@@ -6,10 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
-import com.stripe.android.CreateIntentResult
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState

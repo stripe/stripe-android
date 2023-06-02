@@ -38,6 +38,12 @@ public final class com/stripe/android/paymentsheet/ComposableSingletons$PaymentO
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public abstract interface annotation class com/stripe/android/paymentsheet/DelicatePaymentSheetApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalPaymentSheetDecouplingApi : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/paymentsheet/PaymentMethodsUIKt {
 	public static final field TEST_TAG_LIST Ljava/lang/String;
 }

@@ -10,9 +10,6 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.CreateIntentCallback
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock

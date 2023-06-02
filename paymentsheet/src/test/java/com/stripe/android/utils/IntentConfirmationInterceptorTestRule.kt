@@ -1,6 +1,6 @@
-package com.stripe.android.testing
+package com.stripe.android.utils
 
-import com.stripe.android.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 

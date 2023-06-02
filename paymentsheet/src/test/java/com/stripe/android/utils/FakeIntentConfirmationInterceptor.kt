@@ -1,10 +1,10 @@
-package com.stripe.android.testing
+package com.stripe.android.utils
 
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import kotlinx.coroutines.channels.Channel
 
 class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {

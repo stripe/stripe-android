@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.repositories
 
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
@@ -12,6 +11,7 @@ import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Usage
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

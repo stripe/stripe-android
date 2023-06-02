@@ -4,9 +4,6 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.CreateIntentResult
-import com.stripe.android.DelicatePaymentSheetApi
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart

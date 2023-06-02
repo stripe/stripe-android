@@ -9,11 +9,11 @@ import androidx.lifecycle.asFlow
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
-import com.stripe.android.CreateIntentResult
-import com.stripe.android.DelicatePaymentSheetApi
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer

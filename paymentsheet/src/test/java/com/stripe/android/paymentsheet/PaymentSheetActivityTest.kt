@@ -66,7 +66,6 @@ import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.testing.FakeIntentConfirmationInterceptor
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
@@ -74,6 +73,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
