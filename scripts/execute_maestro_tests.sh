@@ -2,6 +2,18 @@
 set -o pipefail
 set -x
 
+# Get the first command line argument as the parameter
+buildType=$1
+
+if [ "$buildType" == "debug" ]; then
+  task="installDebug"
+elif [ "$buildType" == "release" ]; then
+  task="installRelease"
+else
+  echo "Invalid parameter. Please use 'debug' or 'release'."
+  exit 1
+fi
+
 now=$(date +%F_%H-%M-%S)
 echo $now
 
@@ -11,7 +23,7 @@ export PATH="$PATH":"$HOME/.maestro/bin"
 maestro -v
 
 # Compile and install APK.
-./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:installDebug
+./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:$task
 
 # Start screen record (adb screenrecord has a 3 min limit).
 adb shell "screenrecord /sdcard/$now-1.mp4" &
