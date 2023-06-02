@@ -64,8 +64,6 @@ internal class CustomerSheetActivityTest {
             scenario.onActivity {
                 page.clickNavigationIcon()
 
-                composeTestRule.waitForIdle()
-
                 assertThat(
                     contract.parseResult(
                         scenario.getResult().resultCode,

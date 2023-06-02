@@ -19,6 +19,8 @@ internal class CustomerSheetPage(
 
         composeTestRule.onNodeWithTag(SHEET_NAVIGATION_BUTTON_TAG)
             .performClick()
+
+        composeTestRule.waitForIdle()
     }
 
     fun waitForText(text: String) {
