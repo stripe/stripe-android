@@ -151,15 +151,6 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
-    class ClickLinkAnotherAccount(
-        pane: Pane,
-    ) : FinancialConnectionsEvent(
-        name = "click.link_another_account",
-        mapOf(
-            "pane" to pane.value,
-        ).filterNotNullValues()
-    )
-
     class NetworkingNewConsumer(
         pane: Pane,
     ) : FinancialConnectionsEvent(

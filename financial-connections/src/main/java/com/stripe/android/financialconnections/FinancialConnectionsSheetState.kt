@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections
 
+import androidx.annotation.StringRes
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.PersistState
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
@@ -80,6 +81,7 @@ internal sealed class FinancialConnectionsSheetViewEffect {
      * Finish [FinancialConnectionsSheetActivity] with a given [FinancialConnectionsSheetActivityResult]
      */
     data class FinishWithResult(
-        val result: FinancialConnectionsSheetActivityResult
+        val result: FinancialConnectionsSheetActivityResult,
+        @StringRes val finishToast: Int? = null
     ) : FinancialConnectionsSheetViewEffect()
 }

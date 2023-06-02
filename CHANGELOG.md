@@ -8,10 +8,15 @@
   * `CreateIntentCallbackForServerSideConfirmation` has been removed. If you’re using server-side confirmation, use `CreateIntentCallback` and its new `shouldSavePaymentMethod` parameter.
   * `CreateIntentCallback`, `CreateIntentResult`, and `ExperimentalPaymentSheetDecouplingApi` have been moved to the `paymentsheet` module. Update your imports from `com.stripe.android.*` to `com.stripe.android.paymentsheet.*`.
 
+### Financial Connections
+* [FIXED][6794](https://github.com/stripe/stripe-android/pull/6794) Gracefully fails when no web browser available.
+
 ## 20.25.4 - 2023-05-30
 
 ### All SDKs
 * [FIXED][6771](https://github.com/stripe/stripe-android/pull/6771) Fixed the length of phone number field.
+
+### Financial Connections
 * [CHANGED][6789](https://github.com/stripe/stripe-android/pull/6789) Updated Mavericks to 3.0.3.
 
 ## 20.25.3 - 2023-05-23
