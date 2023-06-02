@@ -48,7 +48,7 @@ class CustomerSheet @Inject internal constructor(
      */
     @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Configuration(
+    class Configuration internal constructor(
         /**
          * Your customer-facing business name.
          *
