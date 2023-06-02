@@ -3,22 +3,15 @@ package com.stripe.android.customersheet
 import android.content.Context
 import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.utils.InjectableActivityScenario
-import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,6 +34,7 @@ internal class CustomerSheetActivityTest {
         context = context,
         input = CustomerSheetContract.Args
     )
+    private val page = CustomerSheetPage(composeTestRule)
 
     @Test
     fun `Finish with cancel on back press`() {
@@ -68,30 +62,18 @@ internal class CustomerSheetActivityTest {
             )
         ) { scenario ->
             scenario.onActivity {
-                runTest {
-                    composeTestRule.waitUntil {
-                        runCatching {
-                            composeTestRule
-                                .onNodeWithTag(SHEET_NAVIGATION_BUTTON_TAG)
-                                .assertIsDisplayed()
-                        }.isSuccess
-                    }
+                page.clickNavigationIcon()
 
-                    composeTestRule.onNodeWithTag(SHEET_NAVIGATION_BUTTON_TAG)
-                        .performClick()
+                composeTestRule.waitForIdle()
 
-                    composeTestRule.waitForIdle()
-                    idleLooper()
-
-                    assertThat(
-                        contract.parseResult(
-                            scenario.getResult().resultCode,
-                            scenario.getResult().resultData
-                        )
-                    ).isEqualTo(
-                        InternalCustomerSheetResult.Canceled
+                assertThat(
+                    contract.parseResult(
+                        scenario.getResult().resultCode,
+                        scenario.getResult().resultData
                     )
-                }
+                ).isEqualTo(
+                    InternalCustomerSheetResult.Canceled
+                )
             }
         }
     }
@@ -104,15 +86,7 @@ internal class CustomerSheetActivityTest {
             )
         ) { scenario ->
             scenario.onActivity {
-                runTest {
-                    composeTestRule.waitUntil {
-                        runCatching {
-                            composeTestRule
-                                .onNodeWithText("Select your payment method")
-                                .assertIsDisplayed()
-                        }.isSuccess
-                    }
-                }
+                page.waitForText("Select your payment method")
             }
         }
     }
