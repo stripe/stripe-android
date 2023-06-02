@@ -8,10 +8,19 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.customersheet.ui.CustomerBottomSheet
+import com.stripe.android.customersheet.ui.CustomerSheetScreen
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.AnimationConstants
 
 internal class CustomerSheetActivity : AppCompatActivity() {
@@ -35,12 +44,35 @@ internal class CustomerSheetActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            when (val viewState = viewModel.viewState.collectAsState().value) {
-                is CustomerSheetViewState.Data -> {
-                    Data(viewState.data)
-                }
-                CustomerSheetViewState.Loading -> {
-                    Loading()
+            StripeTheme {
+                CustomerBottomSheet(
+                    onClose = {
+                        finishWithResult(InternalCustomerSheetResult.Canceled)
+                    }
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        when (val viewState = viewModel.viewState.collectAsState().value) {
+                            is CustomerSheetViewState.SelectPaymentMethod -> {
+                                CustomerSheetScreen(
+                                    header = viewState.title,
+                                    isLiveMode = false,
+                                    isProcessing = false,
+                                    isEditing = false,
+                                    onBackPressed = {
+                                        onBackPressedDispatcher.onBackPressed()
+                                    },
+                                    onEdit = {
+                                        TODO()
+                                    }
+                                )
+                            }
+                            is CustomerSheetViewState.Loading -> {
+                                Loading()
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -63,14 +95,13 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
 @Composable
 private fun Loading() {
-    Column {
-        Text("loading...")
-    }
-}
-
-@Composable
-private fun Data(data: String) {
-    Column {
-        Text(data)
+    val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(padding),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        CircularProgressIndicator()
     }
 }

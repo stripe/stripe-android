@@ -60,7 +60,10 @@ class CustomerSheetViewModelTest {
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
             customerAdapter = customerAdapter,
-            lpmRepository = lpmRepository
+            lpmRepository = lpmRepository,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Testing"
+            )
         )
     }
 }
