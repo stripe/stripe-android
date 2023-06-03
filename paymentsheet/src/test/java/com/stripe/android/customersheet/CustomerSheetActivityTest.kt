@@ -8,10 +8,13 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,7 +40,7 @@ internal class CustomerSheetActivityTest {
     private val page = CustomerSheetPage(composeTestRule)
 
     @Test
-    fun `Finish with cancel on back press`() {
+    fun `Finish with cancel on back press`() = runTest {
         runActivityScenario { scenario ->
             scenario.onActivity {
                 pressBack()
@@ -55,31 +58,26 @@ internal class CustomerSheetActivityTest {
     }
 
     @Test
-    fun `Finish with cancel on navigation icon press`() {
+    fun `Finish with cancel on navigate up action`() = runTest {
         runActivityScenario(
-            viewState = CustomerSheetViewState.SelectPaymentMethod(
-                title = null
-            )
+            viewState = createSelectPaymentMethodViewState(),
+            action = CustomerSheetAction.NavigateUp
         ) { scenario ->
-            scenario.onActivity {
-                page.clickNavigationIcon()
-
-                assertThat(
-                    contract.parseResult(
-                        scenario.getResult().resultCode,
-                        scenario.getResult().resultData
-                    )
-                ).isEqualTo(
-                    InternalCustomerSheetResult.Canceled
+            assertThat(
+                contract.parseResult(
+                    scenario.getResult().resultCode,
+                    scenario.getResult().resultData
                 )
-            }
+            ).isEqualTo(
+                InternalCustomerSheetResult.Canceled
+            )
         }
     }
 
     @Test
-    fun `Verify bottom sheet expands on start with default title`() {
+    fun `Verify bottom sheet expands on start with default title`() = runTest {
         runActivityScenario(
-            viewState = CustomerSheetViewState.SelectPaymentMethod(
+            viewState = createSelectPaymentMethodViewState(
                 title = null
             )
         ) { scenario ->
@@ -90,13 +88,30 @@ internal class CustomerSheetActivityTest {
     }
 
     private fun activityScenario(
-        viewState: CustomerSheetViewState
+        viewState: CustomerSheetViewState,
+        action: CustomerSheetAction?,
     ): InjectableActivityScenario<CustomerSheetActivity> {
         val viewModel = mock<CustomerSheetViewModel>()
 
         whenever(viewModel.viewState).thenReturn(
             MutableStateFlow(viewState)
         )
+
+        action?.let {
+            whenever(viewModel.action).thenReturn(
+                MutableStateFlow(action)
+            )
+        }
+
+        if (action != null) {
+            whenever(viewModel.action).thenReturn(
+                MutableStateFlow(action)
+            )
+        } else {
+            whenever(viewModel.action).thenReturn(
+                MutableSharedFlow()
+            )
+        }
 
         return injectableActivityScenario {
             injectActivity {
@@ -107,9 +122,31 @@ internal class CustomerSheetActivityTest {
 
     private fun runActivityScenario(
         viewState: CustomerSheetViewState = CustomerSheetViewState.Loading,
+        action: CustomerSheetAction? = null,
         block: (InjectableActivityScenario<CustomerSheetActivity>) -> Unit
     ) {
-        val scenario = activityScenario(viewState).launchForResult(intent)
+        val scenario = activityScenario(
+            viewState = viewState,
+            action = action,
+        ).launchForResult(intent)
         scenario.use(block)
+    }
+
+    private fun createSelectPaymentMethodViewState(
+        title: String? = null,
+        paymentMethods: List<PaymentOptionsItem.SavedPaymentMethod> = listOf(),
+        selectedPaymentMethodId: String? = null,
+        isLiveMode: Boolean = false,
+        isProcessing: Boolean = false,
+        isEditing: Boolean = false,
+    ): CustomerSheetViewState.SelectPaymentMethod {
+        return CustomerSheetViewState.SelectPaymentMethod(
+            title = title,
+            paymentMethods = paymentMethods,
+            selectedPaymentMethodId = selectedPaymentMethodId,
+            isLiveMode = isLiveMode,
+            isProcessing = isProcessing,
+            isEditing = isEditing,
+        )
     }
 }

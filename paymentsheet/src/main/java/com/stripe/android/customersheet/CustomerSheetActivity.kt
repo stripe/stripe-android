@@ -7,23 +7,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.customersheet.ui.CustomerBottomSheet
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.AnimationConstants
+import kotlinx.coroutines.launch
 
 internal class CustomerSheetActivity : AppCompatActivity() {
 
@@ -56,39 +51,36 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         val viewState by viewModel.viewState.collectAsState()
-                        when (val currentViewState = viewState) {
-                            is CustomerSheetViewState.SelectPaymentMethod -> {
-                                CustomerSheetScreen(
-                                    header = currentViewState.title,
-                                    isLiveMode = false,
-                                    isProcessing = false,
-                                    isEditing = false,
-                                    onBackPressed = {
-                                        onBackPressedDispatcher.onBackPressed()
-                                    },
-                                    onEdit = {
-                                        TODO()
-                                    }
-                                )
-                            }
-                            is CustomerSheetViewState.Loading -> {
-                                val padding = dimensionResource(
-                                    R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-                                )
-                                Loading(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(padding)
-                                )
-                            }
-                        }
+                        val errorMessage by viewModel.errorState.collectAsState()
+                        CustomerSheetScreen(
+                            viewState = viewState,
+                            errorMessage = errorMessage,
+                            viewActionHandler = viewModel::handleViewAction,
+                        )
                     }
                 }
             }
         }
 
+        lifecycleScope.launch {
+            viewModel.action.collect {
+                handleAction(it)
+            }
+        }
+
         onBackPressedDispatcher.addCallback {
             finishWithResult(InternalCustomerSheetResult.Canceled)
+        }
+    }
+
+    private fun handleAction(action: CustomerSheetAction?) {
+        when (action) {
+            is CustomerSheetAction.NavigateUp -> {
+                finishWithResult(InternalCustomerSheetResult.Canceled)
+            }
+            null -> {
+                // nothing to do
+            }
         }
     }
 
@@ -100,15 +92,5 @@ internal class CustomerSheetActivity : AppCompatActivity() {
     override fun finish() {
         super.finish()
         overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
-    }
-}
-
-@Composable
-private fun Loading(modifier: Modifier) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center,
-    ) {
-        CircularProgressIndicator()
     }
 }
