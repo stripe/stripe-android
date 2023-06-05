@@ -6,7 +6,7 @@ trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
   - pull_request_source_branch: 'carlosmuvi/maestro-compile-release'
-    workflow: main-trigger-pipeline
+    workflow: maestro-financial-connections
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
