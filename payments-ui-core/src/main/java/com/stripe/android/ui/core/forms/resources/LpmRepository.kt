@@ -348,7 +348,7 @@ class LpmRepository constructor(
         )
         PaymentMethod.Type.PayPal.code -> {
             val localLayoutSpecs: List<FormItemSpec> = if (stripeIntent.payPalRequiresMandate()) {
-                listOf(MandateTextSpec(stringResId = R.string.paypal_mandate))
+                listOf(MandateTextSpec(stringResId = R.string.stripe_paypal_mandate))
             } else {
                 emptyList()
             }
@@ -427,7 +427,26 @@ class LpmRepository constructor(
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.USBankAccount.code -> {
-            if (stripeIntent.clientSecret != null) {
+            val pmo = stripeIntent.getPaymentMethodOptions()[PaymentMethod.Type.USBankAccount.code]
+            val verificationMethod = (pmo as? Map<*, *>)?.get("verification_method") as? String
+            val supportsVerificationMethod = verificationMethod == "instant" ||
+                verificationMethod == "automatic"
+            val supported =
+                (stripeIntent.clientSecret != null || arguments.enableACHV2InDeferredFlow) &&
+                    supportsVerificationMethod
+            /**
+             * US Bank Account requires the payment method option to have either automatic or
+             * instant verification method in order to be a supported payment method. For example,
+             * the intent should include:
+             * {
+             *     "payment_method_options" : {
+             *         "us_bank_account": {
+             *             "verification_method": "automatic"
+             *         }
+             *     }
+             * }
+             */
+            if (supported) {
                 SupportedPaymentMethod(
                     code = "us_bank_account",
                     requiresMandate = true,
@@ -441,7 +460,6 @@ class LpmRepository constructor(
                     formSpec = LayoutSpec(sharedDataSpec.fields)
                 )
             } else {
-                // A deferred intent without a client secret doesn't support this
                 null
             }
         }
@@ -611,6 +629,9 @@ class LpmRepository constructor(
         val resources: Resources?,
         val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
             DefaultIsFinancialConnectionsAvailable(),
+        // Whether to enable ACHv2 in the deferred flow.
+        // To be deleted when https://jira.corp.stripe.com/browse/BANKCON-6731 is completed.
+        val enableACHV2InDeferredFlow: Boolean = false,
     )
 }
 

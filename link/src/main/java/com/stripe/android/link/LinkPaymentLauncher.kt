@@ -7,25 +7,17 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjectable
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
-import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkPaymentLauncherComponent
-import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
-import com.stripe.android.link.ui.signup.SignUpViewModel
-import com.stripe.android.link.ui.verification.VerificationViewModel
-import com.stripe.android.link.ui.wallet.WalletViewModel
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -144,7 +136,6 @@ class LinkPaymentLauncher @Inject internal constructor(
                 stripeAccountIdProvider()
             )
         )
-        buildLinkComponent(getLinkPaymentLauncherComponent(configuration), args)
         linkActivityResultLauncher?.launch(args)
     }
 
@@ -188,32 +179,6 @@ class LinkPaymentLauncher @Inject internal constructor(
                 }
 
     /**
-     * Set up [LinkComponent], responsible for injecting all dependencies into the Link app.
-     */
-    private fun buildLinkComponent(
-        component: LinkPaymentLauncherComponent,
-        args: LinkActivityContract.Args
-    ) {
-        val linkComponent = component.linkComponentBuilder.starterArgs(args).build()
-        val injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*>) {
-                when (injectable) {
-                    is LinkActivityViewModel.Factory -> linkComponent.inject(injectable)
-                    is SignUpViewModel.Factory -> linkComponent.inject(injectable)
-                    is VerificationViewModel.Factory -> linkComponent.inject(injectable)
-                    is WalletViewModel.Factory -> linkComponent.inject(injectable)
-                    is PaymentMethodViewModel.Factory -> linkComponent.inject(injectable)
-                    is CardEditViewModel.Factory -> linkComponent.inject(injectable)
-                    else -> {
-                        throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-                    }
-                }
-            }
-        }
-        WeakMapInjectorRegistry.register(injector, injectorKey)
-    }
-
-    /**
      * Arguments for launching [LinkActivity] to confirm a payment with Link.
      *
      * @param stripeIntent The Stripe Intent that is being processed
@@ -237,7 +202,6 @@ class LinkPaymentLauncher @Inject internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        const val LINK_ENABLED = true
         val supportedFundingSources = SupportedPaymentMethod.allTypes
     }
 }

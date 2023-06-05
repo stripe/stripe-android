@@ -7,7 +7,7 @@ import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.doOnNextLayout
-import com.stripe.android.databinding.CardBrandViewBinding
+import com.stripe.android.databinding.StripeCardBrandViewBinding
 import com.stripe.android.model.CardBrand
 import kotlin.properties.Delegates
 
@@ -16,7 +16,7 @@ internal class CardBrandView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
-    private val viewBinding: CardBrandViewBinding = CardBrandViewBinding.inflate(
+    private val viewBinding: StripeCardBrandViewBinding = StripeCardBrandViewBinding.inflate(
         LayoutInflater.from(context),
         this
     )

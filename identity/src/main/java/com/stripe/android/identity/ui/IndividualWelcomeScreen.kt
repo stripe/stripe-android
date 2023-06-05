@@ -70,10 +70,10 @@ internal fun IndividualWelcomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    start = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    end = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    top = dimensionResource(id = R.dimen.page_vertical_margin),
-                    bottom = dimensionResource(id = R.dimen.page_vertical_margin)
+                    start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                    end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                    top = dimensionResource(id = R.dimen.stripe_page_vertical_margin),
+                    bottom = dimensionResource(id = R.dimen.stripe_page_vertical_margin)
                 )
         ) {
             Column(
@@ -115,7 +115,7 @@ private fun WelcomeHeader(
             StripeImage(
                 url = merchantLogoUri.urlWithoutQuery(),
                 imageLoader = imageLoader,
-                contentDescription = stringResource(id = R.string.description_merchant_logo),
+                contentDescription = stringResource(id = R.string.stripe_description_merchant_logo),
                 modifier = Modifier
                     .width(32.dp)
                     .height(32.dp)
@@ -128,23 +128,23 @@ private fun WelcomeHeader(
                 modifier = Modifier
                     .width(32.dp)
                     .height(32.dp),
-                contentDescription = stringResource(id = R.string.description_merchant_logo)
+                contentDescription = stringResource(id = R.string.stripe_description_merchant_logo)
             )
         }
         Image(
-            painter = painterResource(id = R.drawable.plus_icon),
+            painter = painterResource(id = R.drawable.stripe_plus_icon),
             modifier = Modifier
                 .width(16.dp)
                 .height(16.dp),
-            contentDescription = stringResource(id = R.string.description_plus)
+            contentDescription = stringResource(id = R.string.stripe_description_plus)
         )
 
         Image(
-            painter = painterResource(id = R.drawable.ic_stripe_square_32),
+            painter = painterResource(id = R.drawable.stripe_square),
             modifier = Modifier
                 .width(32.dp)
                 .height(32.dp),
-            contentDescription = stringResource(id = R.string.description_stripe_logo)
+            contentDescription = stringResource(id = R.string.stripe_description_stripe_logo)
         )
     }
     Text(
@@ -152,7 +152,7 @@ private fun WelcomeHeader(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+                vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
             )
             .semantics {
                 testTag = INDIVIDUAL_WELCOME_TITLE_TAG
@@ -169,8 +169,8 @@ private fun WelcomeBody(individualWelcomePage: VerificationPageStaticContentIndi
         modifier = Modifier.padding(bottom = 12.dp)
     ) {
         Image(
-            painter = painterResource(id = R.drawable.time_estimate_icon),
-            contentDescription = stringResource(id = R.string.description_time_estimate)
+            painter = painterResource(id = R.drawable.stripe_time_estimate_icon),
+            contentDescription = stringResource(id = R.string.stripe_description_time_estimate)
         )
         Html(
             html = individualWelcomePage.timeEstimate,
@@ -191,7 +191,7 @@ private fun WelcomeBody(individualWelcomePage: VerificationPageStaticContentIndi
         html = individualWelcomePage.privacyPolicy,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
+            .padding(bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
             .semantics {
                 testTag = INDIVIDUAL_WELCOME_PRIVACY_POLICY_TAG
             },
@@ -204,13 +204,13 @@ private fun WelcomeBody(individualWelcomePage: VerificationPageStaticContentIndi
     Divider(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
+            .padding(bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
     )
 
     Html(
         html = individualWelcomePage.body,
         modifier = Modifier
-            .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
+            .padding(bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
             .semantics {
                 testTag = INDIVIDUAL_WELCOME_BODY_TAG
             },

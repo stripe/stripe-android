@@ -41,13 +41,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.core.R as CoreR
+import com.stripe.android.stripecardscan.R as CardScanR
 
 @RunWith(RobolectricTestRunner::class)
 internal class TransformSpecToElementTest {
 
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(),
-        R.style.StripeDefaultTheme
+        CardScanR.style.StripeCardScanDefaultTheme
     )
 
     private val nameSection = NameSpec()
@@ -104,7 +106,7 @@ internal class TransformSpecToElementTest {
             val idealElement = idealSectionElement.fields[0] as SimpleDropdownElement
 
             // Verify the correct config is setup for the controller
-            assertThat(idealElement.controller.label.first()).isEqualTo(R.string.ideal_bank)
+            assertThat(idealElement.controller.label.first()).isEqualTo(R.string.stripe_ideal_bank)
 
             assertThat(idealSectionElement.identifier.v1).isEqualTo("ideal[bank]_section")
 
@@ -150,7 +152,7 @@ internal class TransformSpecToElementTest {
             as SimpleTextElement
 
         // Verify the correct config is setup for the controller
-        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_full_name)
+        assertThat(nameElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_full_name)
         assertThat(nameElement.identifier.v1).isEqualTo("simple")
         assertThat(nameElement.controller.showOptionalLabel).isTrue()
     }
@@ -173,7 +175,7 @@ internal class TransformSpecToElementTest {
     fun `Add a static text section spec setup of the static element correctly`() {
         val staticText = StaticTextSpec(
             IdentifierSpec.Generic("mandate"),
-            stringResId = R.string.sepa_mandate
+            stringResId = R.string.stripe_sepa_mandate
         )
         val formElement = transformSpecToElements.transform(
             listOf(staticText)

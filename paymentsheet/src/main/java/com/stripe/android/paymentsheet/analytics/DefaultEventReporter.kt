@@ -24,14 +24,12 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onInit(
         configuration: PaymentSheet.Configuration?,
         isDecoupling: Boolean,
-        isServerSideConfirmation: Boolean,
     ) {
         fireEvent(
             PaymentSheetEvent.Init(
                 mode = mode,
                 configuration = configuration,
                 isDecoupled = isDecoupling,
-                isServerSideConfirmation = isServerSideConfirmation,
             )
         )
     }
@@ -160,6 +158,10 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDecoupled = isDecoupling,
             )
         )
+    }
+
+    override fun onForceSuccess() {
+        fireEvent(PaymentSheetEvent.ForceSuccess)
     }
 
     private fun fireEvent(event: PaymentSheetEvent) {

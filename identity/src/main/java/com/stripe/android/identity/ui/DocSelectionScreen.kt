@@ -84,8 +84,8 @@ internal fun DocSelectionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    horizontal = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    vertical = dimensionResource(id = R.dimen.page_vertical_margin)
+                    horizontal = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                    vertical = dimensionResource(id = R.dimen.stripe_page_vertical_margin)
                 )
         ) {
             Text(

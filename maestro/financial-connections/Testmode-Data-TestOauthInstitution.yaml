@@ -13,9 +13,11 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
-    visible: "Agree"
+    visible:
+      id: "consent_cta"
     timeout: 30000
-- tapOn: "Agree"
+- tapOn:
+    id: "consent_cta"
 - assertVisible: "Test OAuth Institution"
 # ERRORS
 - tapOn: ".*unknown error.*"
@@ -35,9 +37,11 @@ appId: com.stripe.android.financialconnections.example
     visible: "Select all accounts"
     timeout: 60000
 - tapOn: "Select all accounts" # select all accounts
-- tapOn: "Link accounts"
+- tapOn:
+    text: "Link accounts"
+    retryTapIfNoChange: false
 # CONFIRM AND COMPLETE
-- assertVisible: "Link another account"
+- assertVisible: ".*Success.*"
 - tapOn: "Done"
 - assertVisible: ".*Completed!.*"
 - assertVisible: ".*StripeBank.*"

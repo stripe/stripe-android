@@ -1,0 +1,4 @@
+# Google Places SDK is compile only in the build.gradle.
+-dontwarn com.google.android.libraries.places.**
+# Stripe Card Scan SDK is compile only in the build.gradle.
+-dontwarn com.stripe.android.stripecardscan.**

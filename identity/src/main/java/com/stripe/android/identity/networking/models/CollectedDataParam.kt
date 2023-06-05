@@ -223,13 +223,13 @@ internal data class CollectedDataParam(
         fun Type.getDisplayName(context: Context) =
             when (this) {
                 Type.IDCARD -> {
-                    context.getString(R.string.id_card)
+                    context.getString(R.string.stripe_id_card)
                 }
                 Type.DRIVINGLICENSE -> {
-                    context.getString(R.string.driver_license)
+                    context.getString(R.string.stripe_driver_license)
                 }
                 Type.PASSPORT -> {
-                    context.getString(R.string.passport)
+                    context.getString(R.string.stripe_passport)
                 }
                 else -> throw java.lang.IllegalStateException("Invalid CollectedDataParam.Type")
             }

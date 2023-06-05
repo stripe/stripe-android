@@ -78,7 +78,7 @@
 
         <activity
             android:name=".payments.paymentlauncher.PaymentLauncherConfirmationActivity"
-            android:theme="@style/PayLauncherDefaultTheme"
+            android:theme="@style/StripePayLauncherDefaultTheme"
             android:exported="false" />
         <activity
             android:name=".payments.bankaccount.ui.CollectBankAccountActivity"

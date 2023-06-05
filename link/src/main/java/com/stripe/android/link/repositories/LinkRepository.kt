@@ -1,12 +1,9 @@
 package com.stripe.android.link.repositories
 
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
-import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 
@@ -36,25 +33,6 @@ internal interface LinkRepository {
     ): Result<ConsumerSession>
 
     /**
-     * Start an SMS verification.
-     */
-    suspend fun startVerification(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
-        authSessionCookie: String?
-    ): Result<ConsumerSession>
-
-    /**
-     * Confirm an SMS verification code.
-     */
-    suspend fun confirmVerification(
-        verificationCode: String,
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
-        authSessionCookie: String?
-    ): Result<ConsumerSession>
-
-    /**
      * Logs out the current consumer.
      */
     suspend fun logout(
@@ -62,32 +40,6 @@ internal interface LinkRepository {
         consumerPublishableKey: String?,
         authSessionCookie: String?
     ): Result<ConsumerSession>
-
-    /**
-     * Fetch all saved payment methods for the consumer.
-     */
-    suspend fun listPaymentDetails(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<ConsumerPaymentDetails>
-
-    /**
-     * Create a new [FinancialConnectionsSession], used to link a bank account using the Financial
-     * Connections SDK.
-     */
-    suspend fun createFinancialConnectionsSession(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<FinancialConnectionsSession>
-
-    /**
-     * Create a new linked bank account payment method in the consumer account.
-     */
-    suspend fun createBankAccountPaymentDetails(
-        financialConnectionsAccountId: String,
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<ConsumerPaymentDetails.BankAccount>
 
     /**
      * Create a new card payment method in the consumer account.
@@ -99,22 +51,4 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<LinkPaymentDetails.New>
-
-    /**
-     * Update an existing payment method in the consumer account.
-     */
-    suspend fun updatePaymentDetails(
-        updateParams: ConsumerPaymentDetailsUpdateParams,
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<ConsumerPaymentDetails>
-
-    /**
-     * Delete the payment method from the consumer account.
-     */
-    suspend fun deletePaymentDetails(
-        paymentDetailsId: String,
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<Unit>
 }

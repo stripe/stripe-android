@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.toSavedSelection
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
@@ -32,12 +33,14 @@ internal class DefaultPrefsRepository(
     }
 
     override fun savePaymentSelection(paymentSelection: PaymentSelection?) {
-        when (paymentSelection) {
-            PaymentSelection.GooglePay -> "google_pay"
-            PaymentSelection.Link -> "link"
-            is PaymentSelection.Saved -> {
-                "payment_method:${paymentSelection.paymentMethod.id.orEmpty()}"
-            }
+        setSavedSelection(paymentSelection?.toSavedSelection())
+    }
+
+    override fun setSavedSelection(savedSelection: SavedSelection?) {
+        when (savedSelection) {
+            SavedSelection.GooglePay -> "google_pay"
+            SavedSelection.Link -> "link"
+            is SavedSelection.PaymentMethod -> "payment_method:${savedSelection.id}"
             else -> null
         }?.let { value ->
             write(value)

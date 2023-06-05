@@ -53,6 +53,36 @@ internal object NavigationDirections {
         override val destination = "attach_linked_payment_account"
     }
 
+    val networkingLinkSignup = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "networking_link_signup_pane"
+    }
+
+    val networkingLinkLoginWarmup = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "networking_link_login_warmup"
+    }
+
+    val networkingLinkVerification = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "networking_link_verification_pane"
+    }
+
+    val networkingSaveToLinkVerification = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "networking_save_to_link_verification_pane"
+    }
+
+    val linkAccountPicker = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "linkaccount_picker"
+    }
+
+    val linkStepUpVerification = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "link_step_up_verification"
+    }
+
     val reset = object : NavigationCommand {
         override val arguments = emptyList<NamedNavArgument>()
         override val destination = "reset"

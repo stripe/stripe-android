@@ -9,8 +9,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -20,8 +18,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionUi
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -29,29 +29,10 @@ import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.toPaymentSelection
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
-
-@Composable
-internal fun PaymentOptions(
-    viewModel: BaseSheetViewModel,
-    modifier: Modifier = Modifier,
-) {
-    val state by viewModel.paymentOptionsState.collectAsState()
-    val isEditing by viewModel.editing.collectAsState()
-    val isProcessing by viewModel.processing.collectAsState()
-
-    PaymentOptions(
-        state = state,
-        isEditing = isEditing,
-        isProcessing = isProcessing,
-        onAddCardPressed = viewModel::transitionToAddPaymentScreen,
-        onItemSelected = viewModel::handlePaymentMethodSelected,
-        onItemRemoved = viewModel::removePaymentMethod,
-        modifier = modifier,
-    )
-}
+import com.stripe.android.R as StripeR
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -92,6 +73,42 @@ internal fun PaymentOptions(
                 )
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PaymentOptionsPreview() {
+    DefaultStripeTheme {
+        PaymentOptions(
+            state = PaymentOptionsState(
+                items = listOf(
+                    PaymentOptionsItem.AddCard,
+                    PaymentOptionsItem.Link,
+                    PaymentOptionsItem.GooglePay,
+                    PaymentOptionsItem.SavedPaymentMethod(
+                        displayName = "4242",
+                        paymentMethod = PaymentMethod(
+                            id = "id",
+                            created = null,
+                            liveMode = false,
+                            code = PaymentMethod.Type.Card.code,
+                            type = PaymentMethod.Type.Card,
+                            card = PaymentMethod.Card(
+                                brand = CardBrand.Visa,
+                                last4 = "4242",
+                            )
+                        )
+                    ),
+                ),
+                selectedIndex = 1
+            ),
+            isEditing = false,
+            isProcessing = false,
+            onAddCardPressed = { },
+            onItemSelected = { },
+            onItemRemoved = { },
+        )
     }
 }
 
@@ -179,7 +196,7 @@ private fun AddCard(
         labelText = stringResource(R.string.stripe_paymentsheet_add_payment_method_button_label),
         iconRes = iconRes,
         onItemSelectedListener = onAddCardPressed,
-        description = stringResource(R.string.add_new_payment_method),
+        description = stringResource(R.string.stripe_add_new_payment_method),
         modifier = modifier,
     )
 }
@@ -198,8 +215,8 @@ private fun GooglePay(
         isSelected = isSelected,
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_google_pay_mark,
-        labelText = stringResource(R.string.google_pay),
-        description = stringResource(R.string.google_pay),
+        labelText = stringResource(StripeR.string.stripe_google_pay),
+        description = stringResource(StripeR.string.stripe_google_pay),
         onItemSelectedListener = { onItemSelected(PaymentSelection.GooglePay) },
         modifier = modifier,
     )
@@ -229,8 +246,8 @@ private fun Link(
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_link_mark,
         iconTint = linkLogoColor,
-        labelText = stringResource(R.string.link),
-        description = stringResource(R.string.link),
+        labelText = stringResource(StripeR.string.stripe_link),
+        description = stringResource(StripeR.string.stripe_link),
         onItemSelectedListener = { onItemSelected(PaymentSelection.Link) },
         modifier = modifier,
     )

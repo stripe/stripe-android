@@ -20,6 +20,8 @@ internal class PollAttachPaymentAccount @Inject constructor(
         allowManualEntry: Boolean,
         // null, when attaching via manual entry.
         activeInstitution: FinancialConnectionsInstitution?,
+        // null, if account should not be saved to Link user.
+        consumerSessionClientSecret: String?,
         params: PaymentAccountParams
     ): LinkAccountSessionPaymentAccount {
         return retryOnException(
@@ -30,7 +32,8 @@ internal class PollAttachPaymentAccount @Inject constructor(
             try {
                 repository.postLinkAccountSessionPaymentAccount(
                     clientSecret = configuration.financialConnectionsSessionClientSecret,
-                    paymentAccount = params
+                    paymentAccount = params,
+                    consumerSessionClientSecret = consumerSessionClientSecret
                 )
             } catch (
                 @Suppress("SwallowedException") e: StripeException

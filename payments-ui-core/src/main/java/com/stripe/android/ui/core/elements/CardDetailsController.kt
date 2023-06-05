@@ -30,7 +30,7 @@ internal class CardDetailsController constructor(
         SimpleTextElement(
             controller = SimpleTextFieldController(
                 textFieldConfig = SimpleTextFieldConfig(
-                    label = R.string.name_on_card,
+                    label = R.string.stripe_name_on_card,
                     capitalization = KeyboardCapitalization.Words,
                     keyboard = androidx.compose.ui.text.input.KeyboardType.Text
                 ),

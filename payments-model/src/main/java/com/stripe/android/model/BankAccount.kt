@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import com.stripe.android.core.model.StripeModel
@@ -105,6 +106,7 @@ constructor(
         Company("company"),
         Individual("individual");
 
+        @Keep
         override fun toString(): String = code
 
         internal companion object {
@@ -119,6 +121,7 @@ constructor(
         VerificationFailed("verification_failed"),
         Errored("errored");
 
+        @Keep
         override fun toString(): String = code
 
         internal companion object {

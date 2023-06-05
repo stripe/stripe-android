@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 open class AddressElement constructor(
@@ -39,7 +40,7 @@ open class AddressElement constructor(
         IdentifierSpec.Name,
         SimpleTextFieldController(
             textFieldConfig = SimpleTextFieldConfig(
-                label = R.string.address_label_full_name
+                label = CoreR.string.stripe_address_label_full_name
             ),
             initialValue = rawValuesMap[IdentifierSpec.Name]
         )
@@ -47,7 +48,7 @@ open class AddressElement constructor(
 
     private val addressAutoCompleteElement = AddressTextFieldElement(
         identifier = IdentifierSpec.OneLineAddress,
-        config = SimpleTextFieldConfig(label = R.string.address_label_address),
+        config = SimpleTextFieldConfig(label = R.string.stripe_address_label_address),
         onNavigation = (addressType as? AddressType.ShippingCondensed)?.onNavigation
     )
 
@@ -261,7 +262,7 @@ private suspend fun updateLine1ConfigForAutocompleteAffordance(
         TextFieldIcon.Trailing(
             idRes = R.drawable.stripe_ic_search,
             isTintable = true,
-            contentDescription = R.string.address_search_content_description,
+            contentDescription = R.string.stripe_address_search_content_description,
             onClick = {
                 addressType.onNavigation()
             }

@@ -1,8 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.content.Context
-import android.content.ContextWrapper
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkInlineSignedIn
@@ -21,9 +17,9 @@ import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.FragmentAchBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -52,6 +48,8 @@ internal fun PaymentElement(
         id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
 
+    val primaryButtonState = sheetViewModel.primaryButtonState.collectAsState()
+
     Column(modifier = Modifier.fillMaxWidth()) {
         if (supportedPaymentMethods.size > 1) {
             PaymentMethodsUI(
@@ -65,13 +63,12 @@ internal fun PaymentElement(
         }
 
         if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
-            // A temporary workaround until the USBankAccountFragment is migrated to Compose
-            val activity = context.requireActivity()
-            (activity as BaseSheetActivity<*>).formArgs = formArguments
-
-            Column(modifier = Modifier.padding(horizontal = horizontalPadding)) {
-                AndroidViewBinding(FragmentAchBinding::inflate)
-            }
+            USBankAccountForm(
+                formArgs = formArguments,
+                sheetViewModel = sheetViewModel,
+                isProcessing = primaryButtonState.value?.isProcessing == true,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
         } else {
             PaymentMethodForm(
                 args = formArguments,
@@ -108,15 +105,4 @@ internal fun PaymentElement(
             }
         }
     }
-}
-
-private fun Context.requireActivity(): ComponentActivity {
-    var currentContext = this
-    while (currentContext is ContextWrapper) {
-        if (currentContext is ComponentActivity) {
-            return currentContext
-        }
-        currentContext = currentContext.baseContext
-    }
-    error("Failed to find an Activity from the current Context")
 }

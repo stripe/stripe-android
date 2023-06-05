@@ -11,6 +11,8 @@ import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
+import com.stripe.android.R as StripeR
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 class PaymentSheetTopBarScreenshotTest {
 
@@ -26,10 +28,10 @@ class PaymentSheetTopBarScreenshotTest {
     fun testLoading() {
         val state = PaymentSheetTopBarState(
             icon = R.drawable.stripe_ic_paymentsheet_close,
-            contentDescription = R.string.close,
+            contentDescription = StripeR.string.stripe_close,
             showTestModeLabel = false,
             showEditMenu = false,
-            editMenuLabel = R.string.edit,
+            editMenuLabel = StripeR.string.stripe_edit,
             isEnabled = true,
         )
 
@@ -47,10 +49,10 @@ class PaymentSheetTopBarScreenshotTest {
     fun testPaymentMethodsScreen() {
         val state = PaymentSheetTopBarState(
             icon = R.drawable.stripe_ic_paymentsheet_close,
-            contentDescription = R.string.close,
+            contentDescription = StripeR.string.stripe_close,
             showTestModeLabel = true,
             showEditMenu = true,
-            editMenuLabel = R.string.edit,
+            editMenuLabel = StripeR.string.stripe_edit,
             isEnabled = true,
         )
 
@@ -68,10 +70,10 @@ class PaymentSheetTopBarScreenshotTest {
     fun testPaymentMethodsScreenEditing() {
         val state = PaymentSheetTopBarState(
             icon = R.drawable.stripe_ic_paymentsheet_close,
-            contentDescription = R.string.close,
+            contentDescription = StripeR.string.stripe_close,
             showTestModeLabel = true,
             showEditMenu = true,
-            editMenuLabel = R.string.done,
+            editMenuLabel = StripeR.string.stripe_done,
             isEnabled = true,
         )
 
@@ -89,10 +91,10 @@ class PaymentSheetTopBarScreenshotTest {
     fun testAddPaymentMethodScreen() {
         val state = PaymentSheetTopBarState(
             icon = R.drawable.stripe_ic_paymentsheet_back,
-            contentDescription = R.string.back,
+            contentDescription = StripeUiCoreR.string.stripe_back,
             showTestModeLabel = true,
             showEditMenu = false,
-            editMenuLabel = R.string.edit,
+            editMenuLabel = StripeR.string.stripe_edit,
             isEnabled = true,
         )
 

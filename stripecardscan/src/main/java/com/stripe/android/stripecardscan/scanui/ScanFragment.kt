@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.coroutines.CoroutineContext
+import com.stripe.android.camera.R as CameraR
 
 private const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
 
@@ -136,7 +137,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
      */
     protected open fun showCameraNotSupported() {
         instructionsText.visibility = View.VISIBLE
-        instructionsText.setText(R.string.stripe_error_camera_unsupported)
+        instructionsText.setText(CameraR.string.stripe_error_camera_unsupported)
         scanFailure()
     }
 

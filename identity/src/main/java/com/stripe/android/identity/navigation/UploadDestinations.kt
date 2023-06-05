@@ -138,10 +138,10 @@ internal class PassportUploadDestination(
     shouldPopUpToDocSelection = shouldPopUpToDocSelection,
     frontScanType = IdentityScanState.ScanType.PASSPORT,
     backScanType = IdentityScanState.ScanType.PASSPORT,
-    titleRes = R.string.file_upload,
-    contextRes = R.string.file_upload_content_passport,
-    frontDescriptionRes = R.string.passport,
-    frontCheckMarkDescriptionRes = R.string.passport_selected,
+    titleRes = R.string.stripe_upload_your_photo_id,
+    contextRes = R.string.stripe_file_upload_content_passport,
+    frontDescriptionRes = R.string.stripe_passport,
+    frontCheckMarkDescriptionRes = R.string.stripe_passport_selected,
     collectedDataParamType = CollectedDataParam.Type.PASSPORT
 ) {
     override val destinationRoute = ROUTE
@@ -162,12 +162,12 @@ internal class IDUploadDestination(
     shouldPopUpToDocSelection = shouldPopUpToDocSelection,
     frontScanType = IdentityScanState.ScanType.ID_FRONT,
     backScanType = IdentityScanState.ScanType.ID_BACK,
-    titleRes = R.string.file_upload,
-    contextRes = R.string.file_upload_content_id,
-    frontDescriptionRes = R.string.front_of_id,
-    frontCheckMarkDescriptionRes = R.string.front_of_id_selected,
-    backDescriptionRes = R.string.back_of_id,
-    backCheckMarkDescriptionRes = R.string.back_of_id_selected,
+    titleRes = R.string.stripe_upload_your_photo_id,
+    contextRes = R.string.stripe_file_upload_content_id,
+    frontDescriptionRes = R.string.stripe_front_of_id,
+    frontCheckMarkDescriptionRes = R.string.stripe_front_of_id_selected,
+    backDescriptionRes = R.string.stripe_back_of_id,
+    backCheckMarkDescriptionRes = R.string.stripe_back_of_id_selected,
     collectedDataParamType = CollectedDataParam.Type.IDCARD
 ) {
     override val destinationRoute = ROUTE
@@ -188,12 +188,12 @@ internal class DriverLicenseUploadDestination(
     shouldPopUpToDocSelection = shouldPopUpToDocSelection,
     frontScanType = IdentityScanState.ScanType.DL_FRONT,
     backScanType = IdentityScanState.ScanType.DL_BACK,
-    titleRes = R.string.file_upload,
-    contextRes = R.string.file_upload_content_dl,
-    frontDescriptionRes = R.string.front_of_dl,
-    frontCheckMarkDescriptionRes = R.string.front_of_dl_selected,
-    backDescriptionRes = R.string.back_of_dl,
-    backCheckMarkDescriptionRes = R.string.back_of_dl_selected,
+    titleRes = R.string.stripe_upload_your_photo_id,
+    contextRes = R.string.stripe_file_upload_content_dl,
+    frontDescriptionRes = R.string.stripe_front_of_dl,
+    frontCheckMarkDescriptionRes = R.string.stripe_front_of_dl_selected,
+    backDescriptionRes = R.string.stripe_back_of_dl,
+    backCheckMarkDescriptionRes = R.string.stripe_back_of_dl_selected,
     collectedDataParamType = CollectedDataParam.Type.DRIVINGLICENSE
 ) {
     override val destinationRoute = ROUTE

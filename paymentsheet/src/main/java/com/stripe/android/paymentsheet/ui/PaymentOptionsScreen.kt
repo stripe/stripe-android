@@ -13,10 +13,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
-import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentOptionsPrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentOptionsPrimaryButtonBinding
 import com.stripe.android.paymentsheet.navigation.Content
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.stripeColors
@@ -27,8 +26,24 @@ internal fun PaymentOptionsScreen(
     viewModel: PaymentOptionsViewModel,
     modifier: Modifier = Modifier,
 ) {
+    val screen = viewModel.currentScreen.collectAsState().value
+    val paymentMethods = viewModel.paymentMethods.collectAsState().value
+    val isLiveMode = viewModel.stripeIntent.collectAsState().value?.isLiveMode
+    val isProcessing = viewModel.processing.collectAsState().value
+    val isEditing = viewModel.editing.collectAsState().value
+
     PaymentSheetScaffold(
-        topBar = { PaymentSheetTopBar(viewModel) },
+        topBar = {
+            PaymentSheetTopBar(
+                screen = screen,
+                showEditMenu = !paymentMethods.isNullOrEmpty(),
+                isLiveMode = isLiveMode,
+                isProcessing = isProcessing,
+                isEditing = isEditing,
+                handleBackPressed = viewModel::handleBackPressed,
+                toggleEditing = viewModel::toggleEditing,
+            )
+        },
         content = { scrollModifier ->
             PaymentOptionsScreenContent(viewModel, scrollModifier)
         },
@@ -47,21 +62,12 @@ internal fun PaymentOptionsScreenContent(
     val errorMessage by viewModel.error.collectAsState(initial = null)
     val notesText by viewModel.notesText.collectAsState()
 
-    val showLinkDialog by viewModel.linkHandler.showLinkVerificationDialog.collectAsState()
-
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
     val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
 
     Column(
         modifier = modifier.padding(bottom = bottomPadding),
     ) {
-        if (showLinkDialog) {
-            LinkVerificationDialog(
-                linkLauncher = viewModel.linkHandler.linkLauncher,
-                onResult = viewModel.linkHandler::handleLinkVerificationResult,
-            )
-        }
-
         headerText?.let { text ->
             H4Text(
                 text = stringResource(text),
@@ -83,7 +89,7 @@ internal fun PaymentOptionsScreenContent(
         }
 
         AndroidViewBinding(
-            factory = FragmentPaymentOptionsPrimaryButtonBinding::inflate,
+            factory = StripeFragmentPaymentOptionsPrimaryButtonBinding::inflate,
             modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
         )
 

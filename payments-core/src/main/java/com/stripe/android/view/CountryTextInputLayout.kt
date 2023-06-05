@@ -23,6 +23,8 @@ import com.stripe.android.core.model.CountryUtils
 import kotlinx.parcelize.Parcelize
 import java.util.Locale
 import kotlin.properties.Delegates
+import androidx.appcompat.R as AppCompatR
+import com.google.android.material.R as MaterialR
 
 /**
  * A subclass of [TextInputLayout] that programmatically wraps a styleable [AutoCompleteTextView],
@@ -38,7 +40,7 @@ import kotlin.properties.Delegates
 class CountryTextInputLayout @JvmOverloads internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = com.google.android.material.R.attr.textInputStyle
+    defStyleAttr: Int = MaterialR.attr.textInputStyle
 ) : TextInputLayout(context, attrs, defStyleAttr) {
 
     @StyleRes
@@ -146,7 +148,7 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
         selectedCountryCode = countryAdapter.firstItem.code
         updateInitialCountry()
 
-        val errorMessage = resources.getString(R.string.address_country_invalid)
+        val errorMessage = resources.getString(R.string.stripe_address_country_invalid)
 
         countryAutocomplete.validator = CountryAutoCompleteTextViewValidator(
             countryAdapter
@@ -209,7 +211,7 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
             INVALID_COUNTRY_AUTO_COMPLETE_STYLE -> AutoCompleteTextView(
                 context,
                 null,
-                R.attr.autoCompleteTextViewStyle
+                AppCompatR.attr.autoCompleteTextViewStyle
             )
             else -> AutoCompleteTextView(context, null, 0, countryAutoCompleteStyleRes)
         }
@@ -286,7 +288,7 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
 
     private companion object {
         const val INVALID_COUNTRY_AUTO_COMPLETE_STYLE = 0
-        val DEFAULT_ITEM_LAYOUT = R.layout.country_text_view
+        val DEFAULT_ITEM_LAYOUT = R.layout.stripe_country_text_view
     }
 
     @Parcelize

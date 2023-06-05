@@ -2,8 +2,64 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [CHANGED] The experimental API for [finalizing payments on the server](https://stripe.com/docs/payments/finalize-payments-on-the-server?platform=android) has changed:
+  * Instead of providing only the `PaymentMethod` ID, `CreateIntentCallback` now provides the entire `PaymentMethod` object.
+  * `CreateIntentCallbackForServerSideConfirmation` has been removed. If you’re using server-side confirmation, use `CreateIntentCallback` and its new `shouldSavePaymentMethod` parameter.
+  * `CreateIntentCallback`, `CreateIntentResult`, and `ExperimentalPaymentSheetDecouplingApi` have been moved to the `paymentsheet` module. Update your imports from `com.stripe.android.*` to `com.stripe.android.paymentsheet.*`.
+
+### Financial Connections
+* [FIXED][6794](https://github.com/stripe/stripe-android/pull/6794) Gracefully fails when no web browser available.
+
+## 20.25.4 - 2023-05-30
+
 ### All SDKs
+* [FIXED][6771](https://github.com/stripe/stripe-android/pull/6771) Fixed the length of phone number field.
+
+### Financial Connections
+* [CHANGED][6789](https://github.com/stripe/stripe-android/pull/6789) Updated Mavericks to 3.0.3.
+
+## 20.25.3 - 2023-05-23
+
+### PaymentSheet
+* [CHANGED][6687](https://github.com/stripe/stripe-android/pull/6687) Show the US Bank Account payment method if the specified verification method is either automatic or instant. Otherwise, hide the payment method.
+* [FIXED][6736](https://github.com/stripe/stripe-android/pull/6736) Fixed an issue where Google Places caused errors with R8.
+
+## 20.25.2 - 2023-05-15
+
+### PaymentSheet
+* [FIXED][6680](https://github.com/stripe/stripe-android/pull/6680) Made payments with Cash App Pay more reliable.
+
+### Payments
+* [FIXED][6680](https://github.com/stripe/stripe-android/pull/6680) Made payments with Cash App Pay more reliable.
+
+## 20.25.1 - 2023-05-10
+* [CHANGED][6697](https://github.com/stripe/stripe-android/pull/6697) Revert BOM change and use compose 1.4.3. 
+* [FIXED][6698](https://github.com/stripe/stripe-android/pull/6698) ImageDecoder: Exception in invokeOnCancellation handler.
+
+## 20.25.0 - 2023-05-08
+
+### All SDKs
+* [CHANGED][6635](https://github.com/stripe/stripe-android/pull/6635) Use non transitive R classes.
+* [CHANGED][6676](https://github.com/stripe/stripe-android/pull/6676) Updated Compose BOM to 2023.05.00.
+
+### Identity
+* [ADDED][6642](https://github.com/stripe/stripe-android/pull/6642) Support Test mode M1.
+ 
+## 20.24.2 - 2023-05-03
+
+### Payments
+* [FIXED][6664](https://github.com/stripe/stripe-android/pull/6664) Fixed an issue where 3DS2 would crash when using payments SDKs with the card scan SDK.
+
+## 20.24.1 - 2023-05-01
+
+### Payments
+* [FIXED][6612](https://github.com/stripe/stripe-android/pull/6612) Fixed an issue where the Android Gradle Plugin 8.0 and later would cause issues with R8 in full mode related to missing classes.
+
+### All SDKs
+* [CHANGED][6603](https://github.com/stripe/stripe-android/pull/6603) Added a `stripe` prefix to our resources to avoid name conflicts.
 * [FIXED][6602](https://github.com/stripe/stripe-android/pull/6602) Fixed an issue which caused a compiler error (duplicate class) when including payments *and* identity SDKs.
+* [FIXED][6611](https://github.com/stripe/stripe-android/pull/6611) Fixed an issue where countries might be filtered out on old Android versions (notably Kosovo).
 
 ## 20.24.0 - 2023-04-24
 

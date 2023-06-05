@@ -21,7 +21,9 @@ internal data class SynchronizeSessionResponse(
 @Parcelize
 internal data class TextUpdate(
     @SerialName("consent_pane")
-    val consent: ConsentPane? = null
+    val consent: ConsentPane? = null,
+    @SerialName("networking_link_signup_pane")
+    val networkingLinkSignupPane: NetworkingLinkSignupPane? = null
 ) : Parcelable
 
 @Serializable
@@ -55,6 +57,32 @@ internal data class ConsentPane(
     @SerialName("title")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val title: String
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class NetworkingLinkSignupPane(
+    @SerialName("title")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val title: String,
+    @SerialName("body")
+    val body: NetworkingLinkSignupBody,
+    @SerialName("above_cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val aboveCta: String,
+    @SerialName("cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val cta: String,
+    @SerialName("skip_cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val skipCta: String
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class NetworkingLinkSignupBody(
+    @SerialName("bullets")
+    val bullets: List<Bullet>
 ) : Parcelable
 
 @Serializable

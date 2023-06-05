@@ -29,7 +29,7 @@ import com.stripe.android.model.GooglePayFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.fakeCreationExtras
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith

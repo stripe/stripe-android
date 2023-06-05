@@ -33,8 +33,14 @@ import com.stripe.android.financialconnections.features.attachpayment.AttachPaym
 import com.stripe.android.financialconnections.features.common.CloseDialog
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
+import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerScreen
+import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationScreen
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
 import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessScreen
+import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupScreen
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupScreen
+import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationScreen
+import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationScreen
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
@@ -79,15 +85,16 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 FinancialConnectionsTheme {
                     Column {
                         Box(modifier = Modifier.weight(1f)) {
-                            val showCloseDialog = viewModel.collectAsState { it.showCloseDialog }
+                            val closeDialog = viewModel.collectAsState { it.closeDialog }
                             val firstPane =
                                 viewModel.collectAsState { it.initialPane }
                             val reducedBranding =
                                 viewModel.collectAsState { it.reducedBranding }
-                            if (showCloseDialog.value) {
+                            closeDialog.value?.let {
                                 CloseDialog(
-                                    viewModel::onCloseConfirm,
-                                    viewModel::onCloseDismiss
+                                    description = it.description,
+                                    onConfirmClick = viewModel::onCloseConfirm,
+                                    onDismissClick = viewModel::onCloseDismiss
                                 )
                             }
                             NavHost(
@@ -141,7 +148,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         val initialDestination =
             remember(initialPane) {
                 initialPane.toNavigationCommand(
-                    logger,
                     emptyMap()
                 ).destination
             }
@@ -200,6 +206,36 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     LaunchedPane(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT)
                     BackHandler(navController, Pane.ATTACH_LINKED_PAYMENT_ACCOUNT)
                     AttachPaymentScreen()
+                }
+                composable(NavigationDirections.networkingLinkSignup.destination) {
+                    LaunchedPane(Pane.NETWORKING_LINK_SIGNUP_PANE)
+                    BackHandler(navController, Pane.NETWORKING_LINK_SIGNUP_PANE)
+                    NetworkingLinkSignupScreen()
+                }
+                composable(NavigationDirections.networkingLinkLoginWarmup.destination) {
+                    LaunchedPane(Pane.NETWORKING_LINK_LOGIN_WARMUP)
+                    BackHandler(navController, Pane.NETWORKING_LINK_LOGIN_WARMUP)
+                    NetworkingLinkLoginWarmupScreen()
+                }
+                composable(NavigationDirections.networkingLinkVerification.destination) {
+                    LaunchedPane(Pane.NETWORKING_LINK_VERIFICATION)
+                    BackHandler(navController, Pane.NETWORKING_LINK_VERIFICATION)
+                    NetworkingLinkVerificationScreen()
+                }
+                composable(NavigationDirections.networkingSaveToLinkVerification.destination) {
+                    LaunchedPane(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION)
+                    BackHandler(navController, Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION)
+                    NetworkingSaveToLinkVerificationScreen()
+                }
+                composable(NavigationDirections.linkAccountPicker.destination) {
+                    LaunchedPane(Pane.LINK_ACCOUNT_PICKER)
+                    BackHandler(navController, Pane.LINK_ACCOUNT_PICKER)
+                    LinkAccountPickerScreen()
+                }
+                composable(NavigationDirections.linkStepUpVerification.destination) {
+                    LaunchedPane(Pane.LINK_STEP_UP_VERIFICATION)
+                    BackHandler(navController, Pane.LINK_STEP_UP_VERIFICATION)
+                    LinkStepUpVerificationScreen()
                 }
             }
         }

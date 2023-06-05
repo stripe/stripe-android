@@ -45,6 +45,7 @@ import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
+import com.stripe.android.R as StripeR
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 const val PAYMENT_OPTION_CARD_TEST_TAG = "PAYMENT_OPTION_CARD_TEST_TAG"
@@ -122,8 +123,8 @@ internal fun PaymentOptionUi(
             openDialog = openRemoveDialog,
             titleText = removePmDialogTitle,
             messageText = description,
-            confirmText = stringResource(R.string.remove),
-            dismissText = stringResource(R.string.cancel),
+            confirmText = stringResource(StripeR.string.stripe_remove),
+            dismissText = stringResource(StripeR.string.stripe_cancel),
             onConfirmListener = onRemoveListener
         )
     }

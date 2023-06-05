@@ -224,6 +224,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "networking_link_verification")
         NETWORKING_LINK_VERIFICATION("networking_link_verification"),
 
+        @SerialName(value = "networking_link_step_up_verification")
+        LINK_STEP_UP_VERIFICATION("networking_link_step_up_verification"),
+
         @SerialName(value = "partner_auth")
         PARTNER_AUTH("partner_auth"),
 
@@ -234,6 +237,12 @@ internal data class FinancialConnectionsSessionManifest(
         UNEXPECTED_ERROR("unexpected_error"),
 
         // CLIENT SIDE PANES
+        @SerialName(value = "link_account_picker")
+        LINK_ACCOUNT_PICKER("link_account_picker"),
+
+        @SerialName(value = "networking_save_to_link_verification")
+        NETWORKING_SAVE_TO_LINK_VERIFICATION("networking_save_to_link_verification"),
+
         @SerialName(value = "reset")
         RESET("reset");
 

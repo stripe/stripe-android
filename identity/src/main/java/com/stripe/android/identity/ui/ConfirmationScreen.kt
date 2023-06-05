@@ -68,8 +68,8 @@ internal fun ConfirmationScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    vertical = dimensionResource(id = R.dimen.page_vertical_margin),
-                    horizontal = dimensionResource(id = R.dimen.page_horizontal_margin)
+                    vertical = dimensionResource(id = R.dimen.stripe_page_vertical_margin),
+                    horizontal = dimensionResource(id = R.dimen.stripe_page_horizontal_margin)
                 )
         ) {
             Column(
@@ -87,11 +87,11 @@ internal fun ConfirmationScreen(
 
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.clock_icon),
+                        painter = painterResource(id = R.drawable.stripe_clock_icon),
                         modifier = Modifier
                             .width(26.dp)
                             .height(26.dp),
-                        contentDescription = stringResource(id = R.string.description_plus)
+                        contentDescription = stringResource(id = R.string.stripe_description_plus)
                     )
                 }
                 Text(
@@ -99,7 +99,7 @@ internal fun ConfirmationScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+                            vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
                         )
                         .semantics {
                             testTag = confirmationTitleTag
@@ -111,7 +111,7 @@ internal fun ConfirmationScreen(
                 Html(
                     html = successPage.body,
                     modifier = Modifier
-                        .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
+                        .padding(bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
                         .semantics {
                             testTag = BODY_TAG
                         },

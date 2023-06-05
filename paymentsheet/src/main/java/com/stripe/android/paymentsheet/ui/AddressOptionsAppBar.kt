@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @Composable
 internal fun AddressOptionsAppBar(
@@ -38,7 +39,7 @@ internal fun AddressOptionsAppBar(
                     if (isRootScreen) {
                         R.string.stripe_paymentsheet_close
                     } else {
-                        R.string.back
+                        StripeUiCoreR.string.stripe_back
                     }
                 ),
                 tint = MaterialTheme.stripeColors.appBarIcon

@@ -1,9 +1,10 @@
 package com.stripe.android.uicore.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.uicore.R
+import com.stripe.android.core.model.CountryUtils
 import org.junit.Test
 import java.util.Locale
+import com.stripe.android.core.R as CoreR
 
 class CountryConfigTest {
 
@@ -16,7 +17,7 @@ class CountryConfigTest {
     @Test
     fun `Verify the label`() {
         assertThat(CountryConfig(locale = Locale.US).label)
-            .isEqualTo(R.string.address_label_country_or_region)
+            .isEqualTo(CoreR.string.stripe_address_label_country_or_region)
     }
 
     @Test
@@ -62,7 +63,7 @@ class CountryConfigTest {
             locale = Locale.US
         ).displayItems
         val supportedCountries = CountryConfig(
-            onlyShowCountryCodes = supportedBillingCountries,
+            onlyShowCountryCodes = CountryUtils.supportedBillingCountries,
             locale = Locale.US
         ).displayItems
 
@@ -79,10 +80,10 @@ class CountryConfigTest {
 
         assertThat(
             defaultCountries.size
-        ).isEqualTo(249)
+        ).isEqualTo(235)
 
         assertThat(
             supportedCountries.size
-        ).isEqualTo(233)
+        ).isEqualTo(235)
     }
 }

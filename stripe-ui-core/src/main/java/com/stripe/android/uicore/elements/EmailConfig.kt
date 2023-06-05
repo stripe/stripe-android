@@ -18,7 +18,7 @@ class EmailConfig : TextFieldConfig {
     override val debugLabel = "email"
 
     @StringRes
-    override val label = R.string.email
+    override val label = R.string.stripe_email
     override val keyboard = KeyboardType.Email
     override val visualTransformation: VisualTransformation? = null
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null)
@@ -39,8 +39,8 @@ class EmailConfig : TextFieldConfig {
             input.isEmpty() -> Error.Blank
             PATTERN.matcher(input).matches() -> Valid.Limitless
             containsNameAndDomain(input) || cannotBecomeValid(input) ->
-                Error.Invalid(R.string.email_is_invalid)
-            else -> Error.Incomplete(R.string.email_is_invalid)
+                Error.Invalid(R.string.stripe_email_is_invalid)
+            else -> Error.Incomplete(R.string.stripe_email_is_invalid)
         }
     }
 

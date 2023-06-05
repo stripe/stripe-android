@@ -39,11 +39,7 @@ internal fun AddPaymentMethod(
     val showCheckboxFlow = remember { MutableStateFlow(false) }
 
     val processing by sheetViewModel.processing.collectAsState(false)
-
-    val linkConfig by linkHandler.linkConfiguration.collectAsState()
-    val linkAccountStatus by linkConfig?.let {
-        linkHandler.linkLauncher.getAccountStatusFlow(it).collectAsState(null)
-    } ?: mutableStateOf(null)
+    val linkAccountStatus by linkHandler.accountStatus.collectAsState(initial = null)
 
     var selectedPaymentMethodCode: String by rememberSaveable {
         mutableStateOf(sheetViewModel.initiallySelectedPaymentMethodType)

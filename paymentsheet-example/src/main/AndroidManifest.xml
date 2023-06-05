@@ -41,6 +41,7 @@
         <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlowActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity" />
+        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.customer.CustomerSheetActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity" />
     </application>
 

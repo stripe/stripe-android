@@ -49,8 +49,8 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
-import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentSheetBinding
+import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.forms.MandateRequirement
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
@@ -66,7 +66,6 @@ import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.testing.FakeIntentConfirmationInterceptor
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
@@ -74,6 +73,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -102,6 +102,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
@@ -194,7 +195,7 @@ internal class PaymentSheetActivityTest {
         )
     }
 
-    private val ActivityPaymentSheetBinding.buyButton: PrimaryButton
+    private val StripeActivityPaymentSheetBinding.buyButton: PrimaryButton
         get() = root.findViewById(R.id.primary_button)
 
     @Test
@@ -537,7 +538,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             viewModel.viewState.value = PaymentSheetViewState.Reset(null)
 
-            val buyBinding = PrimaryButtonBinding.bind(activity.viewBinding.buyButton)
+            val buyBinding = StripePrimaryButtonBinding.bind(activity.viewBinding.buyButton)
 
             assertThat(buyBinding.confirmedIcon.isVisible)
                 .isFalse()
@@ -774,7 +775,7 @@ internal class PaymentSheetActivityTest {
     fun `notes visibility is visible`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity {
-            val text = context.getString(R.string.stripe_paymentsheet_payment_method_us_bank_account)
+            val text = context.getString(StripeUiCoreR.string.stripe_paymentsheet_payment_method_us_bank_account)
             viewModel.updateBelowButtonText(text)
 
             composeTestRule
@@ -1032,8 +1033,8 @@ internal class PaymentSheetActivityTest {
                     code = PaymentMethod.Type.Card.code,
                     requiresMandate = false,
                     mandateRequirement = MandateRequirement.Never,
-                    displayNameResource = com.stripe.android.ui.core.R.string.stripe_paymentsheet_payment_method_card,
-                    iconResource = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
+                    displayNameResource = StripeUiCoreR.string.stripe_paymentsheet_payment_method_card,
+                    iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_card,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                     tintIconOnSelection = true,

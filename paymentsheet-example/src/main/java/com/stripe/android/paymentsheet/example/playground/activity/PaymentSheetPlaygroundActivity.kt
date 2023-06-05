@@ -20,10 +20,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.snackbar.Snackbar
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.launch
 import java.util.Locale
+import com.stripe.android.uicore.R as UiCoreR
 
 class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
@@ -202,9 +203,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         paymentSheet = PaymentSheet(
             activity = this,
-            createIntentCallback = { paymentMethodId ->
+            createIntentCallback = { paymentMethod, _ ->
                 viewModel.createIntent(
-                    paymentMethodId = paymentMethodId,
+                    paymentMethodId = paymentMethod.id!!,
                     merchantCountryCode = merchantCountryCode.value,
                     mode = mode.value,
                     returnUrl = returnUrl,
@@ -217,9 +218,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         flowController = PaymentSheet.FlowController.create(
             activity = this,
             paymentOptionCallback = ::onPaymentOption,
-            createIntentCallbackForServerSideConfirmation = { paymentMethodId, shouldSavePaymentMethod ->
+            createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
                 viewModel.createAndConfirmIntent(
-                    paymentMethodId = paymentMethodId,
+                    paymentMethodId = paymentMethod.id!!,
                     shouldSavePaymentMethod = shouldSavePaymentMethod,
                     merchantCountryCode = merchantCountryCode.value,
                     mode = mode.value,
@@ -232,13 +233,27 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         addressLauncher = AddressLauncher(this, ::onAddressLauncherResult)
 
-        viewBinding.initializationRadioGroup.setOnCheckedChangeListener { _, checkedId ->
-            val type = when (checkedId) {
-                R.id.normal_initialization_button -> InitializationType.Normal
-                R.id.deferred_initialization_button -> InitializationType.Deferred
-                else -> error("🤔")
+        val initializationTypes = InitializationType.values().map { it.value }
+        viewBinding.initializationTypeSpinner.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            initializationTypes,
+        )
+
+        viewBinding.initializationTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                val type = InitializationType.values()[position]
+                viewModel.initializationType.value = type
             }
-            viewModel.initializationType.value = type
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Nothing to do here
+            }
         }
 
         viewBinding.modeRadioGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -291,11 +306,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         viewBinding.reloadButton.setOnClickListener {
-            val initializationType = viewModel.initializationType.value
-
             lifecycleScope.launch {
                 viewModel.storeToggleState(
-                    initializationType = initializationType.value,
                     customer = customer.value,
                     link = linkEnabled,
                     googlePay = googlePayConfig != null,
@@ -314,7 +326,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 )
 
                 viewModel.prepareCheckout(
-                    initializationType = initializationType,
                     customer = customer,
                     currency = currency,
                     merchantCountry = merchantCountryCode,
@@ -440,14 +451,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         collectPhone: String,
         collectAddress: String,
     ) {
-        when (initialization) {
-            InitializationType.Normal.value -> {
-                viewBinding.initializationRadioGroup.check(R.id.normal_initialization_button)
-            }
-            InitializationType.Deferred.value -> {
-                viewBinding.initializationRadioGroup.check(R.id.deferred_initialization_button)
-            }
-        }
+        val initializationTypes = InitializationType.values().map { it.value }
+        viewBinding.initializationTypeSpinner.setSelection(
+            initializationTypes.indexOf(initialization)
+        )
 
         when (customer) {
             CheckoutCustomer.Guest.value -> viewBinding.customerRadioGroup.check(R.id.guest_customer_button)
@@ -662,7 +669,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         val checkboxLabel = if (viewBinding.shippingAddressCheckboxLabel.text.isNotBlank()) {
             viewBinding.shippingAddressCheckboxLabel.text.toString()
         } else {
-            getString(R.string.billing_same_as_shipping)
+            getString(UiCoreR.string.stripe_billing_same_as_shipping)
         }
         builder.additionalFields(
             AddressLauncher.AdditionalFieldsConfiguration(

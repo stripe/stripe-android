@@ -7,7 +7,7 @@ import org.junit.Test
 
 class SimpleDropdownConfigTest {
     private val config: DropdownConfig = SimpleDropdownConfig(
-        R.string.ideal_bank,
+        R.string.stripe_ideal_bank,
         listOf(
             DropdownItemSpec(displayText = "ABN AMRO", apiValue = "abn_amro"),
             DropdownItemSpec(displayText = "ASN Bank", apiValue = "asn_bank"),

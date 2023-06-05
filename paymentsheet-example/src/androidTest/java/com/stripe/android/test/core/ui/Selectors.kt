@@ -15,8 +15,10 @@ import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.playground.model.InitializationType
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
@@ -25,13 +27,16 @@ import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
-import com.stripe.android.test.core.InitializationType
 import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import java.util.Locale
+import kotlin.time.Duration.Companion.seconds
+import com.stripe.android.R as StripeR
+import com.stripe.android.core.R as CoreR
+import com.stripe.android.uicore.R as UiCoreR
 
 /**
  * This contains the Android specific code such as for accessing UI elements, detecting
@@ -92,11 +97,6 @@ class Selectors(
         Automatic.On -> EspressoIdButton(R.id.automatic_pm_on_button)
     }
 
-    val initializationType = when (testParameters.initializationType) {
-        InitializationType.Normal -> EspressoIdButton(R.id.normal_initialization_button)
-        InitializationType.Deferred -> EspressoIdButton(R.id.deferred_initialization_button)
-    }
-
     val paymentSelection = PaymentSelection(
         composeTestRule,
         testParameters.paymentMethod.displayNameResource
@@ -132,12 +132,16 @@ class Selectors(
         PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> EspressoIdButton(R.id.collect_address_radio_never)
     }
 
-    val baseScreenshotFilenamePrefix = "info-" +
-        getResourceString(paymentSelection.label) +
-        "-" +
-        testParameters.intentType.name
-
-    val buyButton = BuyButton(composeTestRule)
+    val buyButton = BuyButton(
+        composeTestRule = composeTestRule,
+        processingCompleteTimeout = if (testParameters.paymentMethod.code == CashAppPay.code) {
+            // We're using a longer timeout for Cash App Pay until we fix an issue where we
+            // needlessly poll after a canceled payment attempt.
+            15.seconds
+        } else {
+            5.seconds
+        }
+    )
 
     val addPaymentMethodButton = AddPaymentMethodButton(device)
 
@@ -221,7 +225,7 @@ class Selectors(
 
     // Note: Compose will take care of scrolling to the field if not in view.
     fun getEmail() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.email)
+        getResourceString(UiCoreR.string.stripe_email)
     )
 
     fun getName(@StringRes resourceId: Int) = composeTestRule.onNodeWithText(
@@ -229,34 +233,34 @@ class Selectors(
     )
 
     fun getLine1() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_address_line1)
+        getResourceString(CoreR.string.stripe_address_label_address_line1)
     )
 
     fun getCity() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_city)
+        getResourceString(CoreR.string.stripe_address_label_city)
     )
 
     fun getState() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_state)
+        getResourceString(CoreR.string.stripe_address_label_state)
     )
 
     fun selectState(value: String) {
-        composeTestRule.onNodeWithText(getResourceString(R.string.address_label_state))
+        composeTestRule.onNodeWithText(getResourceString(CoreR.string.stripe_address_label_state))
             .performClick()
         composeTestRule.onNodeWithText(value)
             .performClick()
     }
 
     fun getZip() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.address_label_zip_code)
+        getResourceString(CoreR.string.stripe_address_label_zip_code)
     )
 
     fun getAuBsb() = composeTestRule.onNodeWithText(
-        getResourceString(com.stripe.android.ui.core.R.string.becs_widget_bsb)
+        getResourceString(StripeR.string.stripe_becs_widget_bsb)
     )
 
     fun getAuAccountNumber() = composeTestRule.onNodeWithText(
-        getResourceString(R.string.becs_widget_account_number)
+        getResourceString(StripeR.string.stripe_becs_widget_account_number)
     )
 
     fun getGoogleDividerText() = composeTestRule.onNodeWithText(
@@ -267,21 +271,26 @@ class Selectors(
 
     fun getCardNumber() = composeTestRule.onNodeWithText(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            com.stripe.android.R.string.acc_label_card_number
+            StripeR.string.stripe_acc_label_card_number
         )
     )
 
     fun getCardExpiration() = composeTestRule.onNodeWithText(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            R.string.expiration_date_hint
+            UiCoreR.string.stripe_expiration_date_hint
         )
     )
 
     fun getCardCvc() = composeTestRule.onNodeWithText(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            com.stripe.android.ui.core.R.string.cvc_number_hint
+            StripeR.string.stripe_cvc_number_hint
         )
     )
+
+    fun setInitializationType(initializationType: InitializationType) {
+        EspressoIdButton(R.id.initialization_type_spinner).click()
+        EspressoText(initializationType.value).click()
+    }
 
     fun setCurrency(currency: Currency) {
         EspressoIdButton(R.id.currency_spinner).click()

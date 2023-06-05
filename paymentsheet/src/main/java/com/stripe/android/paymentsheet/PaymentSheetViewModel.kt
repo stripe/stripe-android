@@ -11,10 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
@@ -76,6 +73,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+import com.stripe.android.R as StripeR
 
 @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal class PaymentSheetViewModel @Inject internal constructor(
@@ -216,13 +214,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-        val isServerSideConfirmation = isDecoupling &&
-            IntentConfirmationInterceptor.createIntentCallback is CreateIntentCallbackForServerSideConfirmation
-
         eventReporter.onInit(
             configuration = config,
             isDecoupling = isDecoupling,
-            isServerSideConfirmation = isServerSideConfirmation,
         )
 
         viewModelScope.launch {
@@ -313,7 +307,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         val linkState = state.linkState
 
-        linkHandler.setupLinkLaunchingEagerly(viewModelScope, linkState)
+        linkHandler.setupLink(linkState)
 
         resetViewState()
         transitionToFirstScreen()
@@ -426,8 +420,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override fun handleUSBankAccountConfirmed(paymentSelection: PaymentSelection.New.USBankAccount) {
-        confirmPaymentSelection(paymentSelection)
+    override fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount) {
+        updateSelection(paymentSelection)
+        checkout()
     }
 
     override fun clearErrorMessages() {
@@ -489,6 +484,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     onError(nextStep.message)
                 }
                 is IntentConfirmationInterceptor.NextStep.Complete -> {
+                    if (nextStep.isForceSuccess) {
+                        eventReporter.onForceSuccess()
+                    }
                     processPayment(stripeIntent, PaymentResult.Completed)
                 }
             }
@@ -578,8 +576,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 onError(
                     when (result.errorCode) {
                         GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
-                            R.string.stripe_failure_connection_error
-                        else -> R.string.stripe_internal_error
+                            StripeR.string.stripe_failure_connection_error
+                        else -> StripeR.string.stripe_internal_error
                     }
                 )
             }

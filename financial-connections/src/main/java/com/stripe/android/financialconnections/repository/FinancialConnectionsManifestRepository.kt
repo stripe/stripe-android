@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
+import com.stripe.android.financialconnections.utils.filterNotNullValues
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.Date
@@ -22,6 +23,7 @@ import java.util.Locale
  * Repository to centralize reads and writes to the [FinancialConnectionsSessionManifest]
  * of the current flow.
  */
+@Suppress("TooManyFunctions")
 internal interface FinancialConnectionsManifestRepository {
 
     /**
@@ -113,6 +115,60 @@ internal interface FinancialConnectionsManifestRepository {
         clientSecret: String,
         sessionId: String
     ): FinancialConnectionsAuthorizationSession
+
+    /**
+     * Save the authorized bank accounts to Link.
+     *
+     * This method could be called on behalf of a Link consumer or non-Link consumer.
+     *
+     * @return [FinancialConnectionsSessionManifest]
+     */
+    suspend fun postSaveAccountsToLink(
+        clientSecret: String,
+        email: String?,
+        country: String?,
+        locale: String?,
+        phoneNumber: String?,
+        consumerSessionClientSecret: String?,
+        selectedAccounts: List<String>
+    ): FinancialConnectionsSessionManifest
+
+    /**
+     * Disable networking in Connections Auth Flow
+     *
+     * Disable networking in Connections Auth Flow when the user chooses to continue in guest mode.
+     *
+     * @return [FinancialConnectionsSessionManifest]
+     */
+    suspend fun disableNetworking(
+        clientSecret: String,
+        disabledReason: String?
+    ): FinancialConnectionsSessionManifest
+
+    /**
+     * Mark when the user has verified (logged in) via SMS OTP to their Link account in the networking auth flow
+     *
+     * When the user verifies via SMS OTP and logs in to their Link account in
+     * the networking auth flow, mark it on the link account session so we don't ask them to log in again.
+     *
+     * @return [FinancialConnectionsSessionManifest]
+     */
+    suspend fun postMarkLinkVerified(
+        clientSecret: String,
+    ): FinancialConnectionsSessionManifest
+
+    /**
+     * Mark when the user has verified (logged in) via email OTP as a step up authentication
+     * of SMS OTP to their Link account in the networking auth flow
+     *
+     * When the user verifies via email OTP in the networking auth flow,
+     * mark it on the link account session.
+     *
+     * @return [FinancialConnectionsSessionManifest]
+     */
+    suspend fun postMarkLinkStepUpVerified(
+        clientSecret: String,
+    ): FinancialConnectionsSessionManifest
 
     fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
@@ -323,6 +379,97 @@ private class FinancialConnectionsManifestRepositoryImpl(
         }
     }
 
+    override suspend fun postSaveAccountsToLink(
+        clientSecret: String,
+        email: String?,
+        country: String?,
+        locale: String?,
+        phoneNumber: String?,
+        consumerSessionClientSecret: String?,
+        selectedAccounts: List<String>,
+    ): FinancialConnectionsSessionManifest {
+        val request = apiRequestFactory.createPost(
+            url = saveAccountToLinkUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                NetworkConstants.PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
+                "expand" to listOf("active_auth_session"),
+                "country" to country,
+                "locale" to locale,
+                "email_address" to email,
+                "phone_number" to phoneNumber
+            ).filterNotNullValues() + selectedAccounts.mapIndexed { index, account ->
+                "${NetworkConstants.PARAM_SELECTED_ACCOUNTS}[$index]" to account
+            }
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsSessionManifest.serializer()
+        ).also {
+            updateCachedManifest("postSaveAccountsToLink", it)
+        }
+    }
+
+    override suspend fun disableNetworking(
+        clientSecret: String,
+        disabledReason: String?
+    ): FinancialConnectionsSessionManifest {
+        val request = apiRequestFactory.createPost(
+            url = disableNetworking,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "expand" to listOf("active_auth_session"),
+                "disabled_reason" to disabledReason,
+            ).filterNotNullValues()
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsSessionManifest.serializer()
+        ).also {
+            updateCachedManifest("postSaveAccountsToLink", it)
+        }
+    }
+
+    override suspend fun postMarkLinkVerified(
+        clientSecret: String
+    ): FinancialConnectionsSessionManifest {
+        val request = apiRequestFactory.createPost(
+            url = linkVerifiedUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "expand" to listOf("active_auth_session"),
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsSessionManifest.serializer()
+        ).also {
+            updateCachedManifest("postMarkLinkVerified", it)
+        }
+    }
+
+    override suspend fun postMarkLinkStepUpVerified(
+        clientSecret: String
+    ): FinancialConnectionsSessionManifest {
+        val request = apiRequestFactory.createPost(
+            url = linkStepUpVerifiedUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "expand" to listOf("active_auth_session"),
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsSessionManifest.serializer()
+        ).also {
+            updateCachedManifest("postMarkLinkStepUpVerified", it)
+        }
+    }
+
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     ) {
@@ -385,5 +532,17 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal val linkMoreAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_more_accounts"
+
+        internal val saveAccountToLinkUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/save_accounts_to_link"
+
+        internal val linkVerifiedUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/link_verified"
+
+        internal val linkStepUpVerifiedUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/link_step_up_authentication_verified"
+
+        internal val disableNetworking: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"
     }
 }

@@ -18,10 +18,10 @@ internal fun NavController.navigateToErrorScreenWithRequirementError(
 ) {
     navigateTo(
         ErrorDestination(
-            errorTitle = requirementError.title ?: context.getString(R.string.error),
+            errorTitle = requirementError.title ?: context.getString(R.string.stripe_error),
             errorContent = requirementError.body
-                ?: context.getString(R.string.unexpected_error_try_again),
-            backButtonText = requirementError.backButtonText ?: context.getString(R.string.go_back),
+                ?: context.getString(R.string.stripe_unexpected_error_try_again),
+            backButtonText = requirementError.backButtonText ?: context.getString(R.string.stripe_go_back),
             backButtonDestination =
             if (requirementError.requirement.matchesFromRoute(route)) {
                 route
@@ -40,10 +40,10 @@ internal fun NavController.navigateToErrorScreenWithRequirementError(
 internal fun NavController.navigateToErrorScreenWithDefaultValues(context: Context) {
     navigateTo(
         ErrorDestination(
-            errorTitle = context.getString(R.string.error),
-            errorContent = context.getString(R.string.unexpected_error_try_again),
+            errorTitle = context.getString(R.string.stripe_error),
+            errorContent = context.getString(R.string.stripe_unexpected_error_try_again),
             backButtonDestination = ConsentDestination.ROUTE.route,
-            backButtonText = context.getString(R.string.go_back),
+            backButtonText = context.getString(R.string.stripe_go_back),
             shouldFail = false
         )
     )

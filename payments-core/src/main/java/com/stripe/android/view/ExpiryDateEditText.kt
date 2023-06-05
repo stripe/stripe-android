@@ -13,6 +13,8 @@ import com.stripe.android.R
 import com.stripe.android.model.ExpirationDate
 import kotlin.math.min
 import kotlin.properties.Delegates
+import androidx.appcompat.R as AppCompatR
+import com.stripe.android.uicore.R as UiCoreR
 
 /**
  * An [EditText] that handles putting numbers around a central divider character.
@@ -20,7 +22,7 @@ import kotlin.properties.Delegates
 class ExpiryDateEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
+    defStyleAttr: Int = AppCompatR.attr.editTextStyle
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     // invoked when a valid date has been entered
@@ -49,7 +51,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
 
     override val accessibilityText: String
         get() {
-            return resources.getString(R.string.acc_label_expiry_date_node, text)
+            return resources.getString(R.string.stripe_acc_label_expiry_date_node, text)
         }
 
     internal var includeSeparatorGaps: Boolean by Delegates.observable(
@@ -213,11 +215,11 @@ class ExpiryDateEditText @JvmOverloads constructor(
                     setErrorMessage(
                         resources.getString(
                             if (expirationDate.isPartialEntry) {
-                                R.string.incomplete_expiry_date
+                                UiCoreR.string.stripe_incomplete_expiry_date
                             } else if (!expirationDate.isMonthValid) {
-                                R.string.invalid_expiry_month
+                                UiCoreR.string.stripe_invalid_expiry_month
                             } else {
-                                R.string.invalid_expiry_year
+                                UiCoreR.string.stripe_invalid_expiry_year
                             }
                         )
                     )

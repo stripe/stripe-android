@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.net.Uri
 import android.os.Parcelable
+import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.utils.StripeUrlUtils
@@ -73,6 +74,9 @@ sealed interface StripeIntent : StripeModel {
 
     fun requiresConfirmation(): Boolean
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun getPaymentMethodOptions(): Map<String, Any?>
+
     /**
      * Type of the next action to perform.
      */
@@ -87,6 +91,7 @@ sealed interface StripeIntent : StripeModel {
         UpiAwaitNotification("upi_await_notification"),
         CashAppRedirect("cashapp_handle_redirect_or_display_qr_code");
 
+        @Keep
         override fun toString(): String {
             return code
         }
@@ -114,6 +119,7 @@ sealed interface StripeIntent : StripeModel {
         // only applies to Payment Intents
         RequiresCapture("requires_capture");
 
+        @Keep
         override fun toString(): String {
             return code
         }
@@ -143,6 +149,7 @@ sealed interface StripeIntent : StripeModel {
 
         OneTime("one_time");
 
+        @Keep
         override fun toString(): String {
             return code
         }

@@ -20,7 +20,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.R
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.databinding.PaymentMethodsActivityBinding
+import com.stripe.android.databinding.StripePaymentMethodsActivityBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.utils.argsAreInvalid
 import com.stripe.android.view.i18n.TranslatorManager
@@ -36,8 +36,8 @@ import com.stripe.android.view.i18n.TranslatorManager
  * to retrieve the result of this activity from an intent in onActivityResult().
  */
 class PaymentMethodsActivity : AppCompatActivity() {
-    internal val viewBinding: PaymentMethodsActivityBinding by lazy {
-        PaymentMethodsActivityBinding.inflate(layoutInflater)
+    internal val viewBinding: StripePaymentMethodsActivityBinding by lazy {
+        StripePaymentMethodsActivityBinding.inflate(layoutInflater)
     }
 
     private val startedFromPaymentSession: Boolean by lazy {

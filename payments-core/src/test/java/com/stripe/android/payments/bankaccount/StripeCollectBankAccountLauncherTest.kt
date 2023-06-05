@@ -56,6 +56,56 @@ class StripeCollectBankAccountLauncherTest {
         )
     }
 
+    @Test
+    fun `presentWithDeferredPayment - launches CollectBankAccountActivity with correct arguments`() {
+        launcher.presentWithDeferredPayment(
+            publishableKey = PUBLISHABLE_KEY,
+            stripeAccountId = STRIPE_ACCOUNT_ID,
+            configuration = CONFIGURATION,
+            elementsSessionId = "elements_session_id",
+            customerId = "customer_id",
+            onBehalfOf = "on_behalf_of_id",
+            amount = 1000,
+            currency = "usd"
+        )
+
+        verify(mockHostActivityLauncher).launch(
+            CollectBankAccountContract.Args.ForDeferredPaymentIntent(
+                publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
+                configuration = CONFIGURATION,
+                elementsSessionId = "elements_session_id",
+                customerId = "customer_id",
+                onBehalfOf = "on_behalf_of_id",
+                amount = 1000,
+                currency = "usd"
+            )
+        )
+    }
+
+    @Test
+    fun `presentWithDeferredSetup - launches CollectBankAccountActivity with correct arguments`() {
+        launcher.presentWithDeferredSetup(
+            publishableKey = PUBLISHABLE_KEY,
+            stripeAccountId = STRIPE_ACCOUNT_ID,
+            configuration = CONFIGURATION,
+            elementsSessionId = "elements_session_id",
+            customerId = "customer_id",
+            onBehalfOf = "on_behalf_of_id",
+        )
+
+        verify(mockHostActivityLauncher).launch(
+            CollectBankAccountContract.Args.ForDeferredSetupIntent(
+                publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
+                configuration = CONFIGURATION,
+                elementsSessionId = "elements_session_id",
+                customerId = "customer_id",
+                onBehalfOf = "on_behalf_of_id",
+            )
+        )
+    }
+
     companion object {
         private const val CLIENT_SECRET = "client_secret"
         private const val PUBLISHABLE_KEY = "publishableKey"

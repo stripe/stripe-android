@@ -11,6 +11,12 @@ internal class FakePrefsRepository : PrefsRepository {
     override suspend fun getSavedSelection(isGooglePayAvailable: Boolean, isLinkAvailable: Boolean): SavedSelection =
         savedSelection
 
+    override fun setSavedSelection(savedSelection: SavedSelection?) {
+        savedSelection?.let {
+            this.savedSelection = it
+        }
+    }
+
     override fun savePaymentSelection(paymentSelection: PaymentSelection?) {
         paymentSelectionArgs.add(paymentSelection)
 

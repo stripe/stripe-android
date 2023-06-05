@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.repositories
 
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
@@ -12,6 +11,7 @@ import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Usage
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -136,9 +136,8 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): Elements
             ElementsSessionParams.DeferredIntentType(
                 deferredIntentParams = DeferredIntentParams(
                     mode = intentConfiguration.mode.toElementsSessionParam(),
-                    setupFutureUsage = intentConfiguration.setupFutureUse?.toElementsSessionParam(),
-                    captureMethod = intentConfiguration.captureMethod?.toElementsSessionParam(),
-                    paymentMethodTypes = intentConfiguration.paymentMethodTypes.toSet(),
+                    paymentMethodTypes = intentConfiguration.paymentMethodTypes,
+                    onBehalfOf = intentConfiguration.onBehalfOf,
                 ),
             )
         }
@@ -148,8 +147,20 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): Elements
 @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 private fun PaymentSheet.IntentConfiguration.Mode.toElementsSessionParam(): Mode {
     return when (this) {
-        is PaymentSheet.IntentConfiguration.Mode.Payment -> Mode.Payment(amount, currency)
-        is PaymentSheet.IntentConfiguration.Mode.Setup -> Mode.Setup(currency)
+        is PaymentSheet.IntentConfiguration.Mode.Payment -> {
+            Mode.Payment(
+                amount = amount,
+                currency = currency,
+                setupFutureUsage = setupFutureUse?.toElementsSessionParam(),
+                captureMethod = captureMethod.toElementsSessionParam(),
+            )
+        }
+        is PaymentSheet.IntentConfiguration.Mode.Setup -> {
+            Mode.Setup(
+                currency = currency,
+                setupFutureUsage = setupFutureUse.toElementsSessionParam(),
+            )
+        }
     }
 }
 
@@ -165,6 +176,7 @@ private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toElementsSessionPar
 private fun PaymentSheet.IntentConfiguration.CaptureMethod.toElementsSessionParam(): CaptureMethod {
     return when (this) {
         PaymentSheet.IntentConfiguration.CaptureMethod.Automatic -> CaptureMethod.Automatic
+        PaymentSheet.IntentConfiguration.CaptureMethod.AutomaticAsync -> CaptureMethod.AutomaticAsync
         PaymentSheet.IntentConfiguration.CaptureMethod.Manual -> CaptureMethod.Manual
     }
 }

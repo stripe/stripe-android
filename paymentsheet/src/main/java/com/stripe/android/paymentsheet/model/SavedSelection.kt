@@ -18,3 +18,12 @@ internal sealed class SavedSelection : Parcelable {
     @Parcelize
     object None : SavedSelection()
 }
+
+internal fun PaymentSelection.toSavedSelection(): SavedSelection? {
+    return when (this) {
+        is PaymentSelection.GooglePay -> SavedSelection.GooglePay
+        is PaymentSelection.Link -> SavedSelection.Link
+        is PaymentSelection.Saved -> SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
+        else -> null
+    }
+}

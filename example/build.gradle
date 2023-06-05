@@ -56,8 +56,6 @@ dependencies {
     androidTestImplementation(testLibs.espresso.contrib) {
         exclude group: 'org.checkerframework', module: 'checker'
     }
-    androidTestImplementation testLibs.espresso.idling
-    androidTestImplementation testLibs.espresso.idlingResource
     androidTestImplementation testLibs.espresso.intents
     androidTestImplementation testLibs.truth
 
@@ -86,7 +84,7 @@ android {
         execution 'ANDROIDX_TEST_ORCHESTRATOR'
     }
 
-    lintOptions {
+    lint {
         disable 'MissingTranslation'
     }
 

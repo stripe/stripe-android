@@ -7,21 +7,20 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.CreateIntentCallback
-import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
+import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
-import com.stripe.android.testing.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.DelayingPaymentSheetLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -99,7 +98,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
-            isServerSideConfirmation = false,
         )
     }
 
@@ -135,7 +133,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter, never()).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
-            isServerSideConfirmation = false,
         )
     }
 
@@ -173,7 +170,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
-            isServerSideConfirmation = false,
         )
     }
 
@@ -212,7 +208,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
-            isServerSideConfirmation = false,
         )
     }
 
@@ -430,7 +425,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = isNull(),
             isDecoupling = eq(false),
-            isServerSideConfirmation = eq(false),
         )
     }
 
@@ -440,7 +434,7 @@ class FlowControllerConfigurationHandlerTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
+        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
             throw AssertionError("Not expected to be called")
         }
 
@@ -464,7 +458,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = isNull(),
             isDecoupling = eq(true),
-            isServerSideConfirmation = eq(false),
         )
     }
 
@@ -475,7 +468,7 @@ class FlowControllerConfigurationHandlerTest {
         val configurationHandler = createConfigurationHandler()
 
         IntentConfirmationInterceptor.createIntentCallback =
-            CreateIntentCallbackForServerSideConfirmation { _, _ ->
+            CreateIntentCallback { _, _ ->
                 throw AssertionError("Not expected to be called")
             }
 
@@ -499,7 +492,6 @@ class FlowControllerConfigurationHandlerTest {
         verify(eventReporter).onInit(
             configuration = isNull(),
             isDecoupling = eq(true),
-            isServerSideConfirmation = eq(true),
         )
     }
 

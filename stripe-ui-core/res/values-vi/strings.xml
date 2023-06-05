@@ -1,73 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Caption for Address field on address form -->
-  <string name="address_label_address">Địa chỉ</string>
+  <string name="stripe_address_label_address">Địa chỉ</string>
   <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">Dòng địa chỉ 2</string>
+  <string name="stripe_address_label_address_line2">Dòng địa chỉ 2</string>
   <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">Tiểu vương quốc</string>
+  <string name="stripe_address_label_ae_emirate">Tiểu vương quốc</string>
   <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Ngoại ô hoặc thành phố</string>
+  <string name="stripe_address_label_au_suburb_or_city">Ngoại ô hoặc thành phố</string>
   <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Giáo xứ</string>
+  <string name="stripe_address_label_bb_jm_parish">Giáo xứ</string>
   <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">Mã Cedex</string>
+  <string name="stripe_address_label_cedex">Mã Cedex</string>
   <!-- Label of an address field -->
-  <string name="address_label_department">Sở ngành</string>
+  <string name="stripe_address_label_department">Sở ngành</string>
   <!-- Label for the district field on an address form -->
-  <string name="address_label_district">Quận/Huyện</string>
+  <string name="stripe_address_label_district">Quận/Huyện</string>
   <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">Khu vực</string>
+  <string name="stripe_address_label_hk_area">Khu vực</string>
   <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">Mã Eircode</string>
+  <string name="stripe_address_label_ie_eircode">Mã Eircode</string>
   <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">Thị trấn</string>
+  <string name="stripe_address_label_ie_townland">Thị trấn</string>
   <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">Mã Pin</string>
+  <string name="stripe_address_label_in_pin">Mã Pin</string>
   <!-- Used to describe part of an address -->
-  <string name="address_label_island">Đảo</string>
+  <string name="stripe_address_label_island">Đảo</string>
   <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">Tỉnh</string>
+  <string name="stripe_address_label_jp_prefecture">Tỉnh</string>
   <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">Tỉnh/Thành phố</string>
+  <string name="stripe_address_label_kr_do_si">Tỉnh/Thành phố</string>
   <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">Khu dân cư</string>
+  <string name="stripe_address_label_neighborhood">Khu dân cư</string>
   <!-- Label of an address field -->
-  <string name="address_label_oblast">Vùng</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="address_label_phone_number">Số điện thoại</string>
+  <string name="stripe_address_label_oblast">Vùng</string>
   <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">Bưu điện hoặc Thị trấn</string>
+  <string name="stripe_address_label_post_town">Bưu điện hoặc Thị trấn</string>
   <!-- Label of an address field -->
-  <string name="address_label_suburb">Ngoại ô</string>
+  <string name="stripe_address_label_suburb">Ngoại ô</string>
   <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">Làng hoặc thị trấn</string>
+  <string name="stripe_address_label_village_township">Làng hoặc thị trấn</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
-  <string name="address_search_content_description">Tìm kiếm</string>
+  <string name="stripe_address_search_content_description">Tìm kiếm</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
-  <string name="address_zip_invalid">Mã ZIP không hợp lệ</string>
+  <string name="stripe_address_zip_invalid">Mã ZIP không hợp lệ</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
-  <string name="address_zip_postal_invalid">Mã bưu điện/ZIP không hợp lệ</string>
+  <string name="stripe_address_zip_postal_invalid">Mã bưu điện/ZIP không hợp lệ</string>
   <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
-  <string name="billing_same_as_shipping">Địa chỉ xuất hóa đơn giống địa chỉ chuyển hàng</string>
+  <string name="stripe_billing_same_as_shipping">Địa chỉ xuất hóa đơn giống địa chỉ chuyển hàng</string>
   <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">Trường này không được bỏ trống.</string>
+  <string name="stripe_blank_and_required">Trường này không được bỏ trống.</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Thay đổi</string>
+  <string name="stripe_change">Thay đổi</string>
   <!-- Caption for Email field on address form -->
-  <string name="email">Email</string>
+  <string name="stripe_email">Email</string>
   <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Email của quý vị không hợp lệ.</string>
+  <string name="stripe_email_is_invalid">Email của quý vị không hợp lệ.</string>
   <!-- label for text field to enter card expiry -->
-  <string name="expiration_date_hint">Tháng /Năm</string>
+  <string name="stripe_expiration_date_hint">Tháng /Năm</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="form_label_optional">%s (tùy chọn)</string>
+  <string name="stripe_form_label_optional">%s (tùy chọn)</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">Ngày hết hạn trên thẻ không hợp lệ.</string>
+  <string name="stripe_incomplete_expiry_date">Ngày hết hạn trên thẻ không hợp lệ.</string>
   <!-- Error description for incomplete phone number -->
-  <string name="incomplete_phone_number">Số điện thoại chưa đầy đủ</string>
+  <string name="stripe_incomplete_phone_number">Số điện thoại chưa đầy đủ</string>
   <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Tháng hết hạn trên thẻ của bạn không hợp lệ.</string>
+  <string name="stripe_invalid_expiry_month">Tháng hết hạn trên thẻ của bạn không hợp lệ.</string>
   <!-- String to describe an invalid year in expiry date. -->
-  <string name="invalid_expiry_year">Năm hết hạn trên thẻ của bạn không hợp lệ.</string>
+  <string name="stripe_invalid_expiry_year">Năm hết hạn trên thẻ của bạn không hợp lệ.</string>
 </resources>

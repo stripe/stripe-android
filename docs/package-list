@@ -23,7 +23,6 @@ module:link
 com.stripe.android.link
 com.stripe.android.link.account
 com.stripe.android.link.confirmation
-com.stripe.android.link.injection
 com.stripe.android.link.model
 com.stripe.android.link.ui
 com.stripe.android.link.ui.inline
@@ -72,6 +71,7 @@ com.stripe.android.ui.core.forms.resources
 com.stripe.android.ui.core.forms.resources.injection
 com.stripe.android.ui.core.injection
 module:paymentsheet
+com.stripe.android.customersheet
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.addresselement
 com.stripe.android.paymentsheet.model

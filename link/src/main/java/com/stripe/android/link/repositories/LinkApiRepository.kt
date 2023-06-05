@@ -5,14 +5,10 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
-import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
-import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
-import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -83,53 +79,6 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
-    override suspend fun startVerification(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
-        authSessionCookie: String?
-    ): Result<ConsumerSession> = withContext(workContext) {
-        runCatching {
-            requireNotNull(
-                consumersApiService.startConsumerVerification(
-                    consumerSessionClientSecret = consumerSessionClientSecret,
-                    locale = locale ?: Locale.US,
-                    authSessionCookie = authSessionCookie,
-                    requestSurface = REQUEST_SURFACE,
-                    requestOptions = consumerPublishableKey?.let {
-                        ApiRequest.Options(it)
-                    } ?: ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
-                    )
-                )
-            )
-        }
-    }
-
-    override suspend fun confirmVerification(
-        verificationCode: String,
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
-        authSessionCookie: String?
-    ): Result<ConsumerSession> = withContext(workContext) {
-        runCatching {
-            requireNotNull(
-                consumersApiService.confirmConsumerVerification(
-                    consumerSessionClientSecret = consumerSessionClientSecret,
-                    verificationCode = verificationCode,
-                    authSessionCookie = authSessionCookie,
-                    requestSurface = REQUEST_SURFACE,
-                    requestOptions = consumerPublishableKey?.let {
-                        ApiRequest.Options(it)
-                    } ?: ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
-                    )
-                )
-            )
-        }
-    }
-
     override suspend fun logout(
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
@@ -147,68 +96,6 @@ internal class LinkApiRepository @Inject constructor(
                         stripeAccountIdProvider()
                     )
                 )
-            )
-        }
-    }
-
-    override suspend fun listPaymentDetails(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<ConsumerPaymentDetails> = withContext(workContext) {
-        runCatching {
-            requireNotNull(
-                stripeRepository.listPaymentDetails(
-                    consumerSessionClientSecret,
-                    SupportedPaymentMethod.allTypes,
-                    consumerPublishableKey?.let {
-                        ApiRequest.Options(it)
-                    } ?: ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
-                    )
-                )
-            )
-        }
-    }
-
-    override suspend fun createFinancialConnectionsSession(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<FinancialConnectionsSession> = withContext(workContext) {
-        runCatching {
-            requireNotNull(
-                stripeRepository.createLinkFinancialConnectionsSession(
-                    consumerSessionClientSecret,
-                    consumerPublishableKey?.let {
-                        ApiRequest.Options(it)
-                    } ?: ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
-                    )
-                )
-            )
-        }
-    }
-
-    override suspend fun createBankAccountPaymentDetails(
-        financialConnectionsAccountId: String,
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<ConsumerPaymentDetails.BankAccount> = withContext(workContext) {
-        runCatching {
-            requireNotNull(
-                stripeRepository.createPaymentDetails(
-                    consumerSessionClientSecret,
-                    financialConnectionsAccountId,
-                    consumerPublishableKey?.let {
-                        ApiRequest.Options(it)
-                    } ?: ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
-                    )
-                )?.paymentDetails?.first()?.let {
-                    it as? ConsumerPaymentDetails.BankAccount
-                }
             )
         }
     }
@@ -250,46 +137,6 @@ internal class LinkApiRepository @Inject constructor(
                         originalParams = paymentMethodCreateParams,
                     )
                 }
-            )
-        }
-    }
-
-    override suspend fun updatePaymentDetails(
-        updateParams: ConsumerPaymentDetailsUpdateParams,
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<ConsumerPaymentDetails> = withContext(workContext) {
-        runCatching {
-            requireNotNull(
-                stripeRepository.updatePaymentDetails(
-                    consumerSessionClientSecret,
-                    updateParams,
-                    consumerPublishableKey?.let {
-                        ApiRequest.Options(it)
-                    } ?: ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
-                    )
-                )
-            )
-        }
-    }
-
-    override suspend fun deletePaymentDetails(
-        paymentDetailsId: String,
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
-    ): Result<Unit> = withContext(workContext) {
-        runCatching {
-            stripeRepository.deletePaymentDetails(
-                consumerSessionClientSecret,
-                paymentDetailsId,
-                consumerPublishableKey?.let {
-                    ApiRequest.Options(it)
-                } ?: ApiRequest.Options(
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
-                )
             )
         }
     }

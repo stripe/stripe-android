@@ -6,7 +6,6 @@ import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.model.CardBrand
-import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.TextFieldController
@@ -17,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import com.stripe.android.R as StripeR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CvcController constructor(
@@ -31,9 +31,9 @@ class CvcController constructor(
 
     private val _label = cardBrandFlow.map { cardBrand ->
         if (cardBrand == CardBrand.AmericanExpress) {
-            R.string.cvc_amex_hint
+            StripeR.string.stripe_cvc_amex_hint
         } else {
-            R.string.cvc_number_hint
+            StripeR.string.stripe_cvc_number_hint
         }
     }
     override val label: Flow<Int> = _label

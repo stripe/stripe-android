@@ -149,9 +149,9 @@ internal class CardMultilineWidgetTest {
             .findViewById<TextInputLayout>(R.id.tl_expiry)
 
         val shortExpiryHint = cardMultilineWidget
-            .resources.getString(R.string.expiry_label_short)
+            .resources.getString(R.string.stripe_expiry_label_short)
         val longExpiryHint = cardMultilineWidget
-            .resources.getString(R.string.acc_label_expiry_date)
+            .resources.getString(R.string.stripe_acc_label_expiry_date)
 
         assertThat(shortExpiryContainer.hint)
             .isEqualTo(shortExpiryHint)

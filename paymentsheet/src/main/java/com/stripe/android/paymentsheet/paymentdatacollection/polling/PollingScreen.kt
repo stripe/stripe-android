@@ -39,6 +39,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.stripeColors
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 private object Spacing {
     val extended = 12.dp
@@ -116,7 +117,7 @@ private fun ActivePolling(
         )
 
         Text(
-            text = stringResource(R.string.upi_polling_header),
+            text = stringResource(R.string.stripe_upi_polling_header),
             style = MaterialTheme.typography.h4,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = Spacing.normal),
@@ -130,7 +131,7 @@ private fun ActivePolling(
         )
 
         TextButton(onClick = onCancel) {
-            Text(stringResource(R.string.upi_polling_cancel))
+            Text(stringResource(R.string.stripe_upi_polling_cancel))
         }
     }
 }
@@ -150,7 +151,7 @@ private fun FailedPolling(
                     IconButton(onClick = onCancel) {
                         Icon(
                             painter = painterResource(R.drawable.stripe_ic_paymentsheet_back),
-                            contentDescription = stringResource(R.string.back),
+                            contentDescription = stringResource(StripeUiCoreR.string.stripe_back),
                         )
                     }
                 },
@@ -180,14 +181,14 @@ private fun FailedPolling(
                 )
 
                 Text(
-                    text = stringResource(R.string.upi_polling_payment_failed_title),
+                    text = stringResource(R.string.stripe_upi_polling_payment_failed_title),
                     style = MaterialTheme.typography.h4,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(bottom = Spacing.normal),
                 )
 
                 Text(
-                    text = stringResource(R.string.upi_polling_payment_failed_message),
+                    text = stringResource(R.string.stripe_upi_polling_payment_failed_message),
                     textAlign = TextAlign.Center,
                     lineHeight = MaterialTheme.typography.body1.fontSize * Spacing.lineHeightMultiplier,
                 )
@@ -209,7 +210,7 @@ private fun rememberActivePollingMessage(
             val paddedSeconds = seconds.toString().padStart(length = 2, padChar = '0')
             "$minutes:$paddedSeconds"
         }
-        context.getString(R.string.upi_polling_message, remainingTime)
+        context.getString(R.string.stripe_upi_polling_message, remainingTime)
     }
 }
 

@@ -7,7 +7,6 @@ import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -21,6 +20,7 @@ import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.R as StripeR
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardNumberControllerTest {
@@ -51,7 +51,7 @@ internal class CardNumberControllerTest {
         idleLooper()
 
         assertThat(errorFlowValues[errorFlowValues.size - 1]?.errorMessage)
-            .isEqualTo(R.string.invalid_card_number)
+            .isEqualTo(StripeR.string.stripe_invalid_card_number)
     }
 
     @Test

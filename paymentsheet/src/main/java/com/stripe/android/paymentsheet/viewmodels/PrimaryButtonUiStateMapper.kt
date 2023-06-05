@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class PrimaryButtonUiStateMapper(
     private val context: Context,
@@ -64,12 +65,12 @@ internal class PrimaryButtonUiStateMapper(
             val fallback = context.getString(R.string.stripe_paymentsheet_pay_button_label)
             amount?.buildPayButtonLabel(context.resources) ?: fallback
         } else {
-            context.getString(R.string.stripe_setup_button_label)
+            context.getString(StripeUiCoreR.string.stripe_setup_button_label)
         }
     }
 
     private fun continueButtonLabel(): String {
         val customLabel = config?.primaryButtonLabel
-        return customLabel ?: context.getString(R.string.stripe_continue_button_label)
+        return customLabel ?: context.getString(StripeUiCoreR.string.stripe_continue_button_label)
     }
 }

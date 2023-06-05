@@ -76,18 +76,33 @@ internal class CustomerApiRepository @Inject constructor(
     override suspend fun detachPaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodId: String
-    ): PaymentMethod? =
-        withContext(workContext) {
-            stripeRepository.detachPaymentMethod(
-                publishableKey = lazyPaymentConfig.get().publishableKey,
-                productUsageTokens = productUsageTokens,
-                paymentMethodId = paymentMethodId,
-                requestOptions = ApiRequest.Options(
-                    apiKey = customerConfig.ephemeralKeySecret,
-                    stripeAccount = lazyPaymentConfig.get().stripeAccountId,
-                )
-            ).onFailure {
-                logger.error("Failed to detach payment method $paymentMethodId.", it)
-            }.getOrNull()
+    ): Result<PaymentMethod> =
+        stripeRepository.detachPaymentMethod(
+            publishableKey = lazyPaymentConfig.get().publishableKey,
+            productUsageTokens = productUsageTokens,
+            paymentMethodId = paymentMethodId,
+            requestOptions = ApiRequest.Options(
+                apiKey = customerConfig.ephemeralKeySecret,
+                stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            )
+        ).onFailure {
+            logger.error("Failed to detach payment method $paymentMethodId.", it)
+        }
+
+    override suspend fun attachPaymentMethod(
+        customerConfig: PaymentSheet.CustomerConfiguration,
+        paymentMethodId: String
+    ): Result<PaymentMethod> =
+        stripeRepository.attachPaymentMethod(
+            customerId = customerConfig.id,
+            publishableKey = lazyPaymentConfig.get().publishableKey,
+            productUsageTokens = productUsageTokens,
+            paymentMethodId = paymentMethodId,
+            requestOptions = ApiRequest.Options(
+                apiKey = customerConfig.ephemeralKeySecret,
+                stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            )
+        ).onFailure {
+            logger.error("Failed to attach payment method $paymentMethodId.", it)
         }
 }

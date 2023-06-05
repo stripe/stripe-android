@@ -5,7 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
-import com.stripe.android.ui.core.R
+import com.stripe.android.stripecardscan.R
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.runTest
@@ -17,7 +17,7 @@ import org.robolectric.RobolectricTestRunner
 class CardDetailsElementTest {
 
     private val context =
-        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme)
+        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeCardScanDefaultTheme)
 
     @Test
     fun `test form field values returned and expiration date parsing`() = runTest {

@@ -25,13 +25,14 @@ import org.robolectric.RobolectricTestRunner
 import java.lang.reflect.Method
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import androidx.appcompat.R as AppCompatR
 
 @RunWith(RobolectricTestRunner::class)
 class WeChatPayAuthActivityTest {
     private val mockWeChatApi = mock<Any>()
     private val mockReflectionHelper: WeChatPayReflectionHelper = mock()
     private val context = ApplicationProvider.getApplicationContext<Context>().also {
-        it.setTheme(R.style.Theme_AppCompat)
+        it.setTheme(AppCompatR.style.Theme_AppCompat)
     }
     private val mockOnRespMethod = mock<Method>()
     private val responseArg = Object()

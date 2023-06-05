@@ -19,7 +19,6 @@ import org.junit.Test
 import org.mockito.Mockito.times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
@@ -155,28 +154,6 @@ class LinkAccountManagerTest {
     }
 
     @Test
-    fun `lookupConsumer starts session when startSession is true`() = runSuspendTest {
-        mockUnverifiedAccountLookup()
-
-        val accountManager = accountManager()
-
-        accountManager.lookupConsumer(EMAIL, true)
-
-        verify(linkRepository).startVerification(anyOrNull(), anyOrNull(), anyOrNull())
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
-
-    @Test
-    fun `lookupConsumer does not start session when startSession is false`() = runSuspendTest {
-        val accountManager = accountManager()
-
-        accountManager.lookupConsumer(EMAIL, false)
-
-        verify(linkRepository, times(0)).startVerification(anyOrNull(), anyOrNull(), anyOrNull())
-        assertThat(accountManager.linkAccount.value).isNull()
-    }
-
-    @Test
     fun `lookupConsumer sends analytics event when call fails`() = runSuspendTest {
         whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
             .thenReturn(Result.failure(Exception()))
@@ -279,257 +256,6 @@ class LinkAccountManagerTest {
     }
 
     @Test
-    fun `startVerification updates account`() = runSuspendTest {
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        accountManager.startVerification()
-
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
-
-    @Test
-    fun `startVerification retries on auth error`() = runSuspendTest {
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        whenever(linkRepository.startVerification(anyOrNull(), anyOrNull(), anyOrNull()))
-            .thenReturn(
-                Result.failure(AuthenticationException(StripeError())),
-                Result.success(mockConsumerSession)
-            )
-
-        accountManager.startVerification()
-
-        verify(linkRepository, times(2)).startVerification(anyOrNull(), anyOrNull(), anyOrNull())
-        verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
-
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
-
-    @Test
-    fun `startVerification does not retry on auth error if no cookie exists`() = runSuspendTest {
-        whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        whenever(linkRepository.startVerification(anyOrNull(), anyOrNull(), anyOrNull()))
-            .thenReturn(
-                Result.failure(AuthenticationException(StripeError())),
-                Result.success(mockConsumerSession)
-            )
-
-        accountManager.startVerification()
-
-        verify(linkRepository).startVerification(anyOrNull(), anyOrNull(), anyOrNull())
-        verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
-    }
-
-    @Test
-    fun `startVerification uses consumerPublishableKey`() = runSuspendTest {
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        accountManager.startVerification()
-
-        val keyCaptor = argumentCaptor<String>()
-        verify(linkRepository).startVerification(anyOrNull(), keyCaptor.capture(), anyOrNull())
-        assertThat(keyCaptor.firstValue).isEqualTo(PUBLISHABLE_KEY)
-    }
-
-    @Test
-    fun `startVerification sends analytics event when call fails`() = runSuspendTest {
-        whenever(linkRepository.startVerification(anyOrNull(), anyOrNull(), anyOrNull()))
-            .thenReturn(Result.failure(Exception()))
-
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-        accountManager.startVerification()
-
-        verify(linkEventsReporter).on2FAStartFailure()
-    }
-
-    @Test
-    fun `confirmVerification retries on auth error`() = runSuspendTest {
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        whenever(
-            linkRepository.confirmVerification(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
-        ).thenReturn(
-            Result.failure(AuthenticationException(StripeError())),
-            Result.success(mockConsumerSession)
-        )
-
-        accountManager.confirmVerification("123")
-
-        verify(linkRepository, times(2))
-            .confirmVerification(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
-        verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
-
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
-
-    @Test
-    fun `confirmVerification does not retry on auth error if no cookie exists`() = runSuspendTest {
-        whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        whenever(
-            linkRepository.confirmVerification(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
-        ).thenReturn(
-            Result.failure(AuthenticationException(StripeError())),
-            Result.success(mockConsumerSession)
-        )
-
-        accountManager.confirmVerification("123")
-
-        verify(linkRepository)
-            .confirmVerification(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
-        verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
-    }
-
-    @Test
-    fun `listPaymentDetails retries on auth error`() = runSuspendTest {
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        whenever(linkRepository.listPaymentDetails(anyOrNull(), anyOrNull()))
-            .thenReturn(
-                Result.failure(AuthenticationException(StripeError())),
-                Result.success(mock())
-            )
-
-        accountManager.listPaymentDetails()
-
-        verify(linkRepository, times(2)).listPaymentDetails(anyOrNull(), anyOrNull())
-        verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
-
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
-
-    @Test
-    fun `listPaymentDetails does not retry on auth error if no cookie exists`() = runSuspendTest {
-        whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        whenever(linkRepository.listPaymentDetails(anyOrNull(), anyOrNull()))
-            .thenReturn(
-                Result.failure(AuthenticationException(StripeError())),
-                Result.success(mock())
-            )
-
-        accountManager.listPaymentDetails()
-
-        verify(linkRepository).listPaymentDetails(anyOrNull(), anyOrNull())
-        verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
-    }
-
-    @Test
-    fun `createFinancialConnectionsSession retries on auth error`() = runSuspendTest {
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        whenever(linkRepository.createFinancialConnectionsSession(anyOrNull(), anyOrNull()))
-            .thenReturn(
-                Result.failure(AuthenticationException(StripeError())),
-                Result.success(mock())
-            )
-
-        accountManager.createFinancialConnectionsSession()
-
-        verify(linkRepository, times(2))
-            .createFinancialConnectionsSession(anyOrNull(), anyOrNull())
-        verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
-
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
-
-    @Test
-    fun `createFinancialConnectionsSession does not retry on auth error if no cookie exists`() =
-        runSuspendTest {
-            whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
-            val accountManager = accountManager()
-            accountManager.setAccountNullable(mockConsumerSession)
-
-            whenever(linkRepository.createFinancialConnectionsSession(anyOrNull(), anyOrNull()))
-                .thenReturn(
-                    Result.failure(AuthenticationException(StripeError())),
-                    Result.success(mock())
-                )
-
-            accountManager.createFinancialConnectionsSession()
-
-            verify(linkRepository)
-                .createFinancialConnectionsSession(anyOrNull(), anyOrNull())
-            verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
-        }
-
-    @Test
-    fun `createPaymentDetails for bank account retries on auth error`() = runSuspendTest {
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        whenever(
-            linkRepository.createBankAccountPaymentDetails(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
-        )
-            .thenReturn(
-                Result.failure(AuthenticationException(StripeError())),
-                Result.success(mock())
-            )
-
-        accountManager.createBankAccountPaymentDetails("")
-
-        verify(linkRepository, times(2))
-            .createBankAccountPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
-        verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
-
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
-
-    @Test
-    fun `createPaymentDetails for bank account does not retry on auth error if no cookie exists`() =
-        runSuspendTest {
-            whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
-            val accountManager = accountManager()
-            accountManager.setAccountNullable(mockConsumerSession)
-
-            whenever(
-                linkRepository.createBankAccountPaymentDetails(
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull()
-                )
-            )
-                .thenReturn(
-                    Result.failure(AuthenticationException(StripeError())),
-                    Result.success(mock())
-                )
-
-            accountManager.createBankAccountPaymentDetails("")
-
-            verify(linkRepository)
-                .createBankAccountPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
-            verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
-        }
-
-    @Test
     fun `createPaymentDetails for card retries on auth error`() = runSuspendTest {
         val accountManager = accountManager()
         accountManager.setAccountNullable(mockConsumerSession)
@@ -595,84 +321,6 @@ class LinkAccountManagerTest {
             verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
         }
 
-    @Test
-    fun `updatePaymentDetails retries on auth error`() = runSuspendTest {
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        whenever(linkRepository.updatePaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
-            .thenReturn(
-                Result.failure(AuthenticationException(StripeError())),
-                Result.success(mock())
-            )
-
-        accountManager.updatePaymentDetails(mock())
-
-        verify(linkRepository, times(2)).updatePaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
-        verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
-
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
-
-    @Test
-    fun `updatePaymentDetails does not retry on auth error if no cookie exists`() = runSuspendTest {
-        whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        whenever(linkRepository.updatePaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
-            .thenReturn(
-                Result.failure(AuthenticationException(StripeError())),
-                Result.success(mock())
-            )
-
-        accountManager.updatePaymentDetails(mock())
-
-        verify(linkRepository).updatePaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
-        verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
-
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
-
-    @Test
-    fun `deletePaymentDetails retries on auth error`() = runSuspendTest {
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        whenever(linkRepository.deletePaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
-            .thenReturn(
-                Result.failure(AuthenticationException(StripeError())),
-                Result.success(mock())
-            )
-
-        accountManager.deletePaymentDetails("id")
-
-        verify(linkRepository, times(2)).deletePaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
-        verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
-
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
-
-    @Test
-    fun `deletePaymentDetails does not retry on auth error if no cookie exists`() = runSuspendTest {
-        whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        whenever(linkRepository.deletePaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
-            .thenReturn(
-                Result.failure(AuthenticationException(StripeError())),
-                Result.success(mock())
-            )
-
-        accountManager.deletePaymentDetails("id")
-
-        verify(linkRepository).deletePaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
-        verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
-
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
-
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest {
         setupRepository()
         testBody()
@@ -684,8 +332,6 @@ class LinkAccountManagerTest {
         }
         whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
             .thenReturn(Result.success(consumerSessionLookup))
-        whenever(linkRepository.startVerification(anyOrNull(), anyOrNull(), anyOrNull()))
-            .thenReturn(Result.success(mockConsumerSession))
         whenever(
             linkRepository.consumerSignUp(
                 email = anyOrNull(),
@@ -696,17 +342,6 @@ class LinkAccountManagerTest {
                 consentAction = any()
             )
         ).thenReturn(Result.success(mockConsumerSession))
-    }
-
-    private suspend fun mockUnverifiedAccountLookup() {
-        val mockConsumerSession = mock<ConsumerSession>().apply {
-            whenever(clientSecret).thenReturn(CLIENT_SECRET)
-        }
-        val consumerSessionLookup = mock<ConsumerSessionLookup>().apply {
-            whenever(consumerSession).thenReturn(mockConsumerSession)
-        }
-        whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
-            .thenReturn(Result.success(consumerSessionLookup))
     }
 
     private suspend fun mockNonexistentAccountLookup() {

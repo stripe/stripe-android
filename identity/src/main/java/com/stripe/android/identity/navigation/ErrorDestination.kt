@@ -40,6 +40,8 @@ internal class ErrorDestination(
         // If this happens, set the back button destination to [DEFAULT_BACK_BUTTON_DESTINATION]
         const val UNEXPECTED_ROUTE = "UnexpectedRoute"
 
+        const val TAG = "ErrorDestination"
+
         fun errorTitle(backStackEntry: NavBackStackEntry) =
             backStackEntry.getStringArgument(ARG_ERROR_TITLE)
 
@@ -80,8 +82,8 @@ internal class ErrorDestination(
 
 internal fun Context.finalErrorDestination(): ErrorDestination =
     ErrorDestination(
-        errorTitle = getString(R.string.error),
-        errorContent = getString(R.string.unexpected_error_try_again),
-        backButtonText = getString(R.string.go_back),
+        errorTitle = getString(R.string.stripe_error),
+        errorContent = getString(R.string.stripe_unexpected_error_try_again),
+        backButtonText = getString(R.string.stripe_go_back),
         shouldFail = true
     )

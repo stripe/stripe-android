@@ -17,6 +17,7 @@ private def readProperty(name) {
 android {
     defaultConfig {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        versionCode 1
 
         // From https://developer.android.com/training/testing/junit-runner:
         // > To remove all shared state from your device's CPU and memory after each test,

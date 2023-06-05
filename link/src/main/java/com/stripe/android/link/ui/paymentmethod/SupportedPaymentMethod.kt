@@ -9,6 +9,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.forms.LinkCardForm
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 /**
  * Represents the Payment Methods that are supported by Link.
@@ -33,9 +34,9 @@ internal enum class SupportedPaymentMethod(
     Card(
         ConsumerPaymentDetails.Card.type,
         LinkCardForm.items,
-        R.string.stripe_paymentsheet_payment_method_card,
-        R.drawable.ic_link_card,
-        primaryButtonEndIconResourceId = R.drawable.stripe_ic_lock
+        StripeUiCoreR.string.stripe_paymentsheet_payment_method_card,
+        R.drawable.stripe_link_card,
+        primaryButtonEndIconResourceId = StripeUiCoreR.drawable.stripe_ic_lock
     ) {
         override fun primaryButtonLabel(
             stripeIntent: StripeIntent,
@@ -45,14 +46,14 @@ internal enum class SupportedPaymentMethod(
     BankAccount(
         ConsumerPaymentDetails.BankAccount.type,
         emptyList(),
-        R.string.stripe_payment_method_bank,
-        R.drawable.ic_link_bank,
-        primaryButtonStartIconResourceId = R.drawable.ic_link_add
+        StripeUiCoreR.string.stripe_payment_method_bank,
+        R.drawable.stripe_link_bank,
+        primaryButtonStartIconResourceId = R.drawable.stripe_link_add
     ) {
         override fun primaryButtonLabel(
             stripeIntent: StripeIntent,
             resources: Resources
-        ) = resources.getString(R.string.add_bank_account)
+        ) = resources.getString(R.string.stripe_add_bank_account)
     };
 
     val showsForm = formSpec.isNotEmpty()

@@ -14,9 +14,7 @@ maestro -v
 ./gradlew :paymentsheet-example:installDebug
 
 # Start screen record (adb screenrecord has a 3 min limit). Can append more recordings as needed.
-# adb shell "screenrecord /sdcard/$now-1.mp4" &
-# adb shell "screenrecord /sdcard/$now-2.mp4" & ...
-adb shell "screenrecord /sdcard/$now-1.mp4" &
+adb shell "screenrecord /sdcard/$now-1.mp4; screenrecord /sdcard/$now-2.mp4" &
 
 # Store the process ID
 childpid=$!
@@ -35,6 +33,8 @@ sleep 3
 # Pull the video file from the device
 mkdir -p /tmp/test_results
 cd /tmp/test_results
+adb logcat -d > /tmp/test_results/log.txt
 adb pull "/sdcard/$now-1.mp4" || true
+adb pull "/sdcard/$now-2.mp4" || true
 
 exit "$result"

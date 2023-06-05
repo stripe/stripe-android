@@ -119,7 +119,7 @@ internal sealed class PaymentSelection : Parcelable {
             val bankName: String,
             val last4: String,
             val financialConnectionsSessionId: String,
-            val intentId: String,
+            val intentId: String?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val customerRequestedSave: CustomerRequestedSave
         ) : New()

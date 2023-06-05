@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
+import androidx.annotation.Keep
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
@@ -8,7 +9,6 @@ internal interface EventReporter {
     fun onInit(
         configuration: PaymentSheet.Configuration?,
         isDecoupling: Boolean,
-        isServerSideConfirmation: Boolean,
     )
 
     fun onDismiss(
@@ -56,10 +56,13 @@ internal interface EventReporter {
         isDecoupling: Boolean,
     )
 
+    fun onForceSuccess()
+
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom");
 
+        @Keep
         override fun toString(): String = code
     }
 }

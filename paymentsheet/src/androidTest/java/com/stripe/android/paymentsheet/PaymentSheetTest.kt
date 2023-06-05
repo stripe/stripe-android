@@ -4,8 +4,6 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.CreateIntentResult
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -180,7 +178,7 @@ internal class PaymentSheetTest {
             PaymentConfiguration.init(it, "pk_test_123")
             paymentSheet = PaymentSheet(
                 activity = it,
-                createIntentCallback = {
+                createIntentCallback = { _, _ ->
                     CreateIntentResult.Success("pi_example_secret_example")
                 }
             ) { result ->
@@ -212,6 +210,13 @@ internal class PaymentSheetTest {
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
         }
 
         networkRule.enqueue(
@@ -250,7 +255,7 @@ internal class PaymentSheetTest {
             PaymentConfiguration.init(it, "pk_test_123")
             paymentSheet = PaymentSheet(
                 activity = it,
-                createIntentCallback = {
+                createIntentCallback = { _, _ ->
                     CreateIntentResult.Failure(
                         cause = Exception("We don't accept visa"),
                         displayMessage = "We don't accept visa"
@@ -288,5 +293,63 @@ internal class PaymentSheetTest {
 
         page.clickPrimaryButton()
         page.waitForText("We don't accept visa")
+    }
+
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
+    @Test
+    fun testDeferredIntentCardPaymentWithForcedSuccess() {
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
+        }
+
+        val countDownLatch = CountDownLatch(1)
+        val activityScenarioRule = composeTestRule.activityRule
+        val scenario = activityScenarioRule.scenario
+        scenario.moveToState(Lifecycle.State.CREATED)
+        lateinit var paymentSheet: PaymentSheet
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            paymentSheet = PaymentSheet(
+                activity = it,
+                createIntentCallback = { _, _ ->
+                    CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+                },
+            ) { result ->
+                assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
+                countDownLatch.countDown()
+            }
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        scenario.onActivity {
+            paymentSheet.presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd"
+                    )
+                ),
+                configuration = null,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_methods"),
+            bodyPart(
+                "payment_user_agent",
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent")
+            ),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        page.clickPrimaryButton()
+
+        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
 }

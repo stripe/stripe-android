@@ -154,6 +154,34 @@ data class ExampleCreateAndConfirmErrorResponse(
     }
 }
 
+@Serializable
+data class ExampleCustomerSheetRequest(
+    @SerialName("customer_type")
+    val customerType: String
+)
+
+@Serializable
+data class ExampleCustomerSheetResponse(
+    @SerialName("publishableKey")
+    val publishableKey: String,
+    @SerialName("customerEphemeralKeySecret")
+    val customerEphemeralKeySecret: String,
+    @SerialName("customerId")
+    val customerId: String
+)
+
+@Serializable
+data class ExampleCreateSetupIntentRequest(
+    @SerialName("customer_id")
+    val customerId: String,
+)
+
+@Serializable
+data class ExampleCreateSetupIntentResponse(
+    @SerialName("client_secret")
+    val clientSecret: String,
+)
+
 /**
  * Awaits the [ApiResult] and deserializes it into the desired type [T].
  */

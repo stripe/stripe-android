@@ -150,7 +150,13 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
             stripeIntent.nextActionType == StripeIntent.NextActionType.UseStripeSdk
 
-        return succeededMaybeRefresh || cancelledMaybeRefresh || actionNotProcessedMaybeRefresh
+        // For Cash App Pay, the intent status can still be `requires_action` by the time the user
+        // gets back to the merchant app. We poll until it's succeeded.
+        val shouldRefreshForCashApp = stripeIntent.requiresAction() &&
+            stripeIntent.paymentMethod?.type == PaymentMethod.Type.CashAppPay
+
+        return succeededMaybeRefresh || cancelledMaybeRefresh ||
+            actionNotProcessedMaybeRefresh || shouldRefreshForCashApp
     }
 
     private fun determineFlowOutcome(intent: StripeIntent, originalFlowOutcome: Int): Int {

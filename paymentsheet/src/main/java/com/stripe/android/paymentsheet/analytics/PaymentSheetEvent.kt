@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
+import androidx.annotation.Keep
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -13,7 +14,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         private val mode: EventReporter.Mode,
         private val configuration: PaymentSheet.Configuration?,
         private val isDecoupled: Boolean,
-        private val isServerSideConfirmation: Boolean,
     ) : PaymentSheetEvent() {
 
         override val eventName: String
@@ -105,7 +105,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_APPEARANCE to appearanceConfigMap,
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
                         billingDetailsCollectionConfigMap,
-                    FIELD_IS_SERVER_SIDE_CONFIRMATION to isServerSideConfirmation,
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -196,6 +195,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             Success("success"),
             Failure("failure");
 
+            @Keep
             override fun toString(): String = code
         }
     }
@@ -221,6 +221,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val eventName: String = "autofill_${type.toSnakeCase()}"
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_IS_DECOUPLED to isDecoupled,
+        )
+    }
+
+    object ForceSuccess : PaymentSheetEvent() {
+        override val eventName: String = "mc_force_success"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_IS_DECOUPLED to true,
         )
     }
 
@@ -258,7 +265,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION =
             "billing_details_collection_configuration"
         const val FIELD_IS_DECOUPLED = "is_decoupled"
-        const val FIELD_IS_SERVER_SIDE_CONFIRMATION = "is_server_side_confirmation"
         const val FIELD_ATTACH_DEFAULTS = "attach_defaults"
         const val FIELD_COLLECT_NAME = "name"
         const val FIELD_COLLECT_EMAIL = "email"

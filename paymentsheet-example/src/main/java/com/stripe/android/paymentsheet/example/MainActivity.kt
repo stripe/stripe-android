@@ -38,6 +38,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetP
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.customer.CustomerSheetActivity
 import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
@@ -85,6 +86,15 @@ class MainActivity : AppCompatActivity() {
                 section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(
+                titleResId = R.string.customer_title,
+                subtitleResId = R.string.customer_subtitle,
+                klass = CustomerSheetActivity::class.java,
+                section = MenuItem.Section.CustomerSheet,
+                badge = MenuItem.Badge(
+                    labelResId = R.string.under_construction_badge_label,
+                )
+            ),
+            MenuItem(
                 titleResId = R.string.playground_title,
                 subtitleResId = R.string.playground_subtitle,
                 klass = PaymentSheetPlaygroundActivity::class.java,
@@ -115,12 +125,13 @@ private data class MenuItem(
 ) {
     data class Badge(
         val labelResId: Int,
-        val onClick: () -> Unit,
+        val onClick: () -> Unit = { },
     )
 
     enum class Section {
         CompleteFlow,
         CustomFlow,
+        CustomerSheet,
         Internal,
     }
 }
@@ -140,6 +151,11 @@ private fun MainScreen(items: List<MenuItem>) {
         Section(
             title = "Custom flow",
             items = groupedItems.getOrElse(MenuItem.Section.CustomFlow) { emptyList() },
+        )
+
+        Section(
+            title = "Customer sheet",
+            items = groupedItems.getOrElse(MenuItem.Section.CustomerSheet) { emptyList() }
         )
 
         Section(

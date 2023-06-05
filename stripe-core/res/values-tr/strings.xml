@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">Adres satırı 1</string>
+  <string name="stripe_address_label_address_line1">Adres satırı 1</string>
   <!-- Caption for City field on address form -->
-  <string name="address_label_city">Şehir</string>
+  <string name="stripe_address_label_city">Şehir</string>
   <!-- Caption for Country field on address form -->
-  <string name="address_label_country">Ülke</string>
+  <string name="stripe_address_label_country">Ülke</string>
   <!-- Country selector and postal code entry form header title -->
-  <string name="address_label_country_or_region">Ülke veya bölge</string>
+  <string name="stripe_address_label_country_or_region">Ülke veya bölge</string>
   <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
-  <string name="address_label_county">Ülke</string>
+  <string name="stripe_address_label_county">Ülke</string>
   <!-- Placeholder string for name entry field. -->
-  <string name="address_label_full_name">Ad ve soyadınız</string>
+  <string name="stripe_address_label_full_name">Ad ve soyadınız</string>
   <!-- Caption for Name field on address form -->
-  <string name="address_label_name">Ad</string>
+  <string name="stripe_address_label_name">Ad</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="stripe_address_label_phone_number">Telefon numarası</string>
   <!-- Short string for postal code (text used in non-US countries) -->
-  <string name="address_label_postal_code">Posta kodu</string>
+  <string name="stripe_address_label_postal_code">Posta kodu</string>
   <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
-  <string name="address_label_province">İlçe</string>
+  <string name="stripe_address_label_province">İlçe</string>
   <!-- Caption for State field on address form (only countries that use state , like United States) -->
-  <string name="address_label_state">Eyalet</string>
+  <string name="stripe_address_label_state">Eyalet</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
-  <string name="address_label_zip_code">Posta kodu</string>
+  <string name="stripe_address_label_zip_code">Posta kodu</string>
 </resources>

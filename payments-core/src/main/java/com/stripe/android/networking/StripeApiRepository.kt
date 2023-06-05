@@ -51,7 +51,6 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
-import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
@@ -134,7 +133,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
     sdkVersion: String = StripeSdkVersion.VERSION
-) : StripeRepository() {
+) : StripeRepository {
 
     @Inject
     constructor(
@@ -1139,27 +1138,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    override suspend fun createLinkFinancialConnectionsSession(
-        consumerSessionClientSecret: String,
-        requestOptions: ApiRequest.Options
-    ): FinancialConnectionsSession? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                linkFinancialConnectionsSessionUrl,
-                requestOptions,
-                mapOf(
-                    "request_surface" to "android_payment_element",
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to consumerSessionClientSecret
-                    )
-                )
-            ),
-            FinancialConnectionsSessionJsonParser()
-        ) {
-            // no-op
-        }
-    }
-
     override suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         financialConnectionsAccountId: String,
@@ -1202,83 +1180,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "active" to false
                 ).plus(
                     paymentDetailsCreateParams.toParamMap()
-                )
-            ),
-            ConsumerPaymentDetailsJsonParser()
-        ) {
-            // no-op
-        }
-    }
-
-    /**
-     * Fetches the saved payment methods for the given customer.
-     */
-    override suspend fun listPaymentDetails(
-        consumerSessionClientSecret: String,
-        paymentMethodTypes: Set<String>,
-        requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                listConsumerPaymentDetailsUrl,
-                requestOptions,
-                mapOf(
-                    "request_surface" to "android_payment_element",
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to consumerSessionClientSecret
-                    ),
-                    "types" to paymentMethodTypes.toList()
-                )
-            ),
-            ConsumerPaymentDetailsJsonParser()
-        ) {
-            // no-op
-        }
-    }
-
-    /**
-     * Deletes the consumer payment details with the given id.
-     */
-    override suspend fun deletePaymentDetails(
-        consumerSessionClientSecret: String,
-        paymentDetailsId: String,
-        requestOptions: ApiRequest.Options
-    ) {
-        makeApiRequest(
-            apiRequestFactory.createDelete(
-                getConsumerPaymentDetailsUrl(paymentDetailsId),
-                requestOptions,
-                mapOf(
-                    "request_surface" to "android_payment_element",
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to consumerSessionClientSecret
-                    )
-                )
-            )
-        ) {
-            // no-op
-        }
-    }
-
-    /**
-     * Updates the consumer payment details with the given id.
-     */
-    override suspend fun updatePaymentDetails(
-        consumerSessionClientSecret: String,
-        paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
-        requestOptions: ApiRequest.Options
-    ): ConsumerPaymentDetails? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getConsumerPaymentDetailsUrl(paymentDetailsUpdateParams.id),
-                requestOptions,
-                mapOf(
-                    "request_surface" to "android_payment_element",
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to consumerSessionClientSecret
-                    )
-                ).plus(
-                    paymentDetailsUpdateParams.toParamMap()
                 )
             ),
             ConsumerPaymentDetailsJsonParser()

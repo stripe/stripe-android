@@ -8,10 +8,6 @@ import app.cash.turbine.testIn
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.CreateIntentCallback
-import com.stripe.android.CreateIntentCallbackForServerSideConfirmation
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
-import com.stripe.android.IntentConfirmationInterceptor
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -51,14 +47,14 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
-import com.stripe.android.testing.FakeIntentConfirmationInterceptor
-import com.stripe.android.testing.IntentConfirmationInterceptorTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -66,13 +62,15 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
@@ -102,6 +100,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethodTypes = listOf(
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.USBankAccount.code,
+                    PaymentMethod.Type.CashAppPay.code,
                     PaymentMethod.Type.Ideal.code,
                     PaymentMethod.Type.SepaDebit.code,
                     PaymentMethod.Type.Sofort.code,
@@ -142,7 +141,6 @@ internal class PaymentSheetViewModelTest {
         createViewModel()
         verify(eventReporter).onInit(
             configuration = eq(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY),
-            isServerSideConfirmation = any(),
             isDecoupling = eq(false),
         )
     }
@@ -299,41 +297,6 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkout()
 
         verify(viewModel).confirmStripeIntent(eq(expectedParams))
-    }
-
-    @Test
-    fun `Launches Link when user is logged in to their Link account`() = runTest {
-        val configuration: LinkPaymentLauncher.Configuration = mock()
-
-        val viewModel = createViewModel(
-            linkState = LinkState(
-                configuration = configuration,
-                loginState = LinkState.LoginState.LoggedIn,
-            ),
-        )
-
-        assertThat(viewModel.linkHandler.showLinkVerificationDialog.value).isFalse()
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isTrue()
-        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
-
-        verify(linkLauncher).present(
-            configuration = eq(configuration),
-            prefilledNewCardParams = isNull(),
-        )
-    }
-
-    @Test
-    fun `Launches Link verification when user needs to verify their Link account`() = runTest {
-        val viewModel = createViewModel(
-            linkState = LinkState(
-                configuration = mock(),
-                loginState = LinkState.LoginState.NeedsVerification,
-            ),
-        )
-
-        assertThat(viewModel.linkHandler.showLinkVerificationDialog.value).isTrue()
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
-        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
     @Test
@@ -1183,7 +1146,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Shows the correct divider text if intent supports multiple payment method types`() = runTest {
-        val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card", "us_bank_account"))
+        val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card", "cashapp"))
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
@@ -1251,7 +1214,7 @@ internal class PaymentSheetViewModelTest {
             viewModel.updateSelection(savedSelection)
             viewModel.checkout()
 
-            fakeIntentConfirmationInterceptor.enqueueCompleteStep(PaymentIntentFixtures.PI_SUCCEEDED)
+            fakeIntentConfirmationInterceptor.enqueueCompleteStep()
 
             val finishingState = viewModel.viewState.value as PaymentSheetViewState.FinishProcessing
             finishingState.onComplete()
@@ -1289,7 +1252,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
-            isServerSideConfirmation = eq(false),
             isDecoupling = eq(false),
         )
     }
@@ -1297,7 +1259,7 @@ internal class PaymentSheetViewModelTest {
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _ ->
+        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
             throw AssertionError("Not expected to be called")
         }
 
@@ -1306,7 +1268,6 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
             isDecoupling = eq(true),
-            isServerSideConfirmation = eq(false),
         )
     }
 
@@ -1314,7 +1275,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
         IntentConfirmationInterceptor.createIntentCallback =
-            CreateIntentCallbackForServerSideConfirmation { _, _ ->
+            CreateIntentCallback { _, _ ->
                 throw AssertionError("Not expected to be called")
             }
 
@@ -1323,8 +1284,34 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onInit(
             configuration = anyOrNull(),
             isDecoupling = eq(true),
-            isServerSideConfirmation = eq(true),
         )
+    }
+
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
+    @Test
+    fun `Sends correct analytics event based on force-success usage`() = runTest {
+        val clientSecrets = listOf(
+            PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT to times(1),
+            "real_client_secret" to never(),
+        )
+
+        for ((clientSecret, verificationMode) in clientSecrets) {
+            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
+                CreateIntentResult.Success(clientSecret)
+            }
+
+            val viewModel = createViewModelForDeferredIntent()
+
+            val savedSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            viewModel.updateSelection(savedSelection)
+            viewModel.checkout()
+
+            val isForceSuccess = clientSecret == PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT
+            fakeIntentConfirmationInterceptor.enqueueCompleteStep(isForceSuccess)
+
+            verify(eventReporter, verificationMode).onForceSuccess()
+            reset(eventReporter)
+        }
     }
 
     private fun createViewModel(

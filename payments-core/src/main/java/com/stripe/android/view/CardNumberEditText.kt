@@ -27,6 +27,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
+import androidx.appcompat.R as AppCompatR
 
 /**
  * A [StripeEditText] that handles spacing out the digits of a credit card.
@@ -35,7 +36,7 @@ import kotlin.coroutines.CoroutineContext
 class CardNumberEditText internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
+    defStyleAttr: Int = AppCompatR.attr.editTextStyle,
 
     // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses
     @get:VisibleForTesting
@@ -51,7 +52,7 @@ class CardNumberEditText internal constructor(
     constructor(
         context: Context,
         attrs: AttributeSet? = null,
-        defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
+        defStyleAttr: Int = AppCompatR.attr.editTextStyle
     ) : this(
         context,
         attrs,
@@ -149,7 +150,7 @@ class CardNumberEditText internal constructor(
     init {
         setNumberOnlyInputType()
 
-        setErrorMessage(resources.getString(R.string.invalid_card_number))
+        setErrorMessage(resources.getString(R.string.stripe_invalid_card_number))
         addTextChangedListener(CardNumberTextWatcher())
 
         internalFocusChangeListeners.add { _, hasFocus ->
@@ -180,7 +181,7 @@ class CardNumberEditText internal constructor(
 
     override val accessibilityText: String
         get() {
-            return resources.getString(R.string.acc_label_card_number_node, text)
+            return resources.getString(R.string.stripe_acc_label_card_number_node, text)
         }
 
     override fun onDetachedFromWindow() {

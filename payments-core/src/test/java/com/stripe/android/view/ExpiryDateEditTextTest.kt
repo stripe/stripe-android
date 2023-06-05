@@ -18,6 +18,7 @@ import org.mockito.kotlin.verifyNoMoreInteractions
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.test.Test
+import com.stripe.android.uicore.R as UiCoreR
 
 /**
  * Test class for [ExpiryDateEditText].
@@ -195,7 +196,7 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
         assertThat(expiryDateEditText.errorMessage)
-            .isEqualTo(context.getString(R.string.incomplete_expiry_date))
+            .isEqualTo(context.getString(UiCoreR.string.stripe_incomplete_expiry_date))
         assertThat(expiryDateEditText.text.toString())
             .isEqualTo("14")
     }
@@ -207,7 +208,7 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
         assertThat(expiryDateEditText.errorMessage)
-            .isEqualTo(context.getString(R.string.incomplete_expiry_date))
+            .isEqualTo(context.getString(UiCoreR.string.stripe_incomplete_expiry_date))
         assertThat(expiryDateEditText.text.toString())
             .isEqualTo("14/3")
     }
@@ -240,7 +241,7 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
         assertThat(expiryDateEditText.errorMessage)
-            .isEqualTo(context.getString(R.string.invalid_expiry_year))
+            .isEqualTo(context.getString(UiCoreR.string.stripe_invalid_expiry_year))
         assertThat(invocations)
             .isEqualTo(0)
     }
@@ -261,7 +262,7 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
         assertThat(expiryDateEditText.errorMessage)
-            .isEqualTo(context.getString(R.string.invalid_expiry_year))
+            .isEqualTo(context.getString(UiCoreR.string.stripe_invalid_expiry_year))
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
         assertThat(expiryDateEditText.text.toString())
@@ -291,7 +292,7 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
         assertThat(expiryDateEditText.errorMessage)
-            .isEqualTo(context.getString(R.string.invalid_expiry_month))
+            .isEqualTo(context.getString(UiCoreR.string.stripe_invalid_expiry_month))
     }
 
     @Test
@@ -414,7 +415,7 @@ class ExpiryDateEditTextTest {
 
         idleLooper()
 
-        verify(errorMessageListener).displayErrorMessage(context.getString(R.string.incomplete_expiry_date))
+        verify(errorMessageListener).displayErrorMessage(context.getString(UiCoreR.string.stripe_incomplete_expiry_date))
     }
 
     @Test

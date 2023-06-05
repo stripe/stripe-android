@@ -35,8 +35,8 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
-import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentOptionsBinding
+import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -84,7 +84,7 @@ internal class PaymentOptionsActivityTest {
     private val eventReporter = mock<EventReporter>()
     private lateinit var injector: NonFallbackInjector
 
-    private val ActivityPaymentOptionsBinding.continueButton: PrimaryButton
+    private val StripeActivityPaymentOptionsBinding.continueButton: PrimaryButton
         get() = root.findViewById(R.id.primary_button)
 
     @BeforeTest
@@ -206,7 +206,7 @@ internal class PaymentOptionsActivityTest {
     fun `Verify Ready state updates the add button label`() {
         runActivityScenario {
             it.onActivity { activity ->
-                val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.continueButton)
+                val addBinding = StripePrimaryButtonBinding.bind(activity.viewBinding.continueButton)
 
                 assertThat(addBinding.confirmedIcon.isVisible)
                     .isFalse()

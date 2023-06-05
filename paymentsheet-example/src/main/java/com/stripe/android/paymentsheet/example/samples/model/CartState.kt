@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.example.samples.model
 
-import com.stripe.android.ExperimentalPaymentSheetDecouplingApi
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleUpdateResponse
