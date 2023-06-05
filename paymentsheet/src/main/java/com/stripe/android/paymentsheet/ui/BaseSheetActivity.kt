@@ -18,10 +18,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat.Type
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updateMargins
+import androidx.core.view.updatePadding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.utils.doOnApplyWindowInsets
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.isSystemDarkTheme
@@ -62,6 +68,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
 
         bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        applyInsetsToBottomSheet()
 
         bottomSheetController.setup(bottomSheet)
 
@@ -104,6 +111,26 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // TODO(mlb): Consider if this needs to be an abstract function
         setActivityResult(result)
         bottomSheetController.hide()
+    }
+
+    private fun applyInsetsToBottomSheet() {
+        if (Build.VERSION.SDK_INT < 30) {
+            return
+        }
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        bottomSheet.doOnApplyWindowInsets { view, insets, initialState ->
+            // Status bar inset
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                updateMargins(
+                    top = initialState.top + insets.getInsets(Type.systemBars()).top,
+                )
+            }
+
+            // Keyboard inset
+            view.updatePadding(bottom = initialState.bottom + insets.getInsets(Type.ime()).bottom)
+        }
     }
 
     private fun updateRootViewClickHandling(isProcessing: Boolean) {

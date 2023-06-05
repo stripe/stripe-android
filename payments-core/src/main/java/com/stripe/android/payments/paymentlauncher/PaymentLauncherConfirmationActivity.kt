@@ -9,6 +9,7 @@ import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
@@ -45,6 +46,8 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             finishWithResult(PaymentResult.Failed(it))
             return
         }
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         onBackPressedDispatcher.addCallback {
             // Prevent back presses while confirming payment

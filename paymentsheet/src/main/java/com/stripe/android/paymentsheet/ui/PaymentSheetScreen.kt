@@ -4,6 +4,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -26,6 +27,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
 import com.stripe.android.paymentsheet.state.WalletsContainerState
+import com.stripe.android.paymentsheet.utils.ContentInsets
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
@@ -33,6 +35,7 @@ import com.stripe.android.uicore.text.Html
 @Composable
 internal fun PaymentSheetScreen(
     viewModel: PaymentSheetViewModel,
+    insets: ContentInsets,
     modifier: Modifier = Modifier,
 ) {
     val contentVisible by viewModel.contentVisible.collectAsState()
@@ -62,6 +65,7 @@ internal fun PaymentSheetScreen(
             if (contentVisible) {
                 PaymentSheetScreenContent(
                     viewModel = viewModel,
+                    insets = insets,
                     modifier = scrollModifier,
                 )
             }
@@ -85,6 +89,7 @@ private fun DismissKeyboardOnProcessing(processing: Boolean) {
 @Composable
 internal fun PaymentSheetScreenContent(
     viewModel: PaymentSheetViewModel,
+    insets: ContentInsets,
     modifier: Modifier = Modifier,
 ) {
     val headerText by viewModel.headerText.collectAsState(null)
@@ -93,14 +98,11 @@ internal fun PaymentSheetScreenContent(
     val currentScreen by viewModel.currentScreen.collectAsState()
     val notes by viewModel.notesText.collectAsState()
 
-    val bottomPadding = dimensionResource(
-        R.dimen.stripe_paymentsheet_button_container_spacing_bottom
-    )
-
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
 
     Column(
-        modifier = modifier.padding(bottom = bottomPadding),
+        modifier = modifier,
     ) {
         headerText?.let { text ->
             H4Text(
@@ -140,6 +142,10 @@ internal fun PaymentSheetScreenContent(
                     .padding(horizontal = horizontalPadding),
             )
         }
+
+        Spacer(
+            modifier = Modifier.requiredHeight(insets.navigationBar + bottomPadding),
+        )
     }
 }
 

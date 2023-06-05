@@ -13,6 +13,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
+import com.stripe.android.paymentsheet.utils.EdgeToEdge
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.flow.filterNotNull
@@ -67,7 +68,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewBinding.content.setContent {
             StripeTheme {
-                PaymentSheetScreen(viewModel)
+                EdgeToEdge { insets ->
+                    PaymentSheetScreen(
+                        viewModel = viewModel,
+                        insets = insets,
+                    )
+                }
             }
         }
 

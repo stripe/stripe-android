@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -17,6 +19,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentOptionsPrimaryButtonBinding
 import com.stripe.android.paymentsheet.navigation.Content
+import com.stripe.android.paymentsheet.utils.ContentInsets
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
@@ -24,6 +27,7 @@ import com.stripe.android.uicore.text.Html
 @Composable
 internal fun PaymentOptionsScreen(
     viewModel: PaymentOptionsViewModel,
+    insets: ContentInsets,
     modifier: Modifier = Modifier,
 ) {
     val screen = viewModel.currentScreen.collectAsState().value
@@ -45,7 +49,11 @@ internal fun PaymentOptionsScreen(
             )
         },
         content = { scrollModifier ->
-            PaymentOptionsScreenContent(viewModel, scrollModifier)
+            PaymentOptionsScreenContent(
+                viewModel = viewModel,
+                insets = insets,
+                modifier = scrollModifier,
+            )
         },
         modifier = modifier,
     )
@@ -54,6 +62,7 @@ internal fun PaymentOptionsScreen(
 @Composable
 internal fun PaymentOptionsScreenContent(
     viewModel: PaymentOptionsViewModel,
+    insets: ContentInsets,
     modifier: Modifier = Modifier,
 ) {
     val headerText by viewModel.headerText.collectAsState(initial = null)
@@ -66,7 +75,7 @@ internal fun PaymentOptionsScreenContent(
     val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
 
     Column(
-        modifier = modifier.padding(bottom = bottomPadding),
+        modifier = modifier,
     ) {
         headerText?.let { text ->
             H4Text(
@@ -103,5 +112,9 @@ internal fun PaymentOptionsScreenContent(
                     .padding(horizontal = horizontalPadding),
             )
         }
+
+        Spacer(
+            modifier = Modifier.requiredHeight(insets.navigationBar + bottomPadding),
+        )
     }
 }

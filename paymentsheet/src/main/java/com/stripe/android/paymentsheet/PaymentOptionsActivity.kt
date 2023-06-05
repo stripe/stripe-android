@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentOptionsScreen
+import com.stripe.android.paymentsheet.utils.EdgeToEdge
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.uicore.StripeTheme
 
@@ -54,7 +55,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         viewBinding.content.setContent {
             StripeTheme {
-                PaymentOptionsScreen(viewModel)
+                EdgeToEdge { insets ->
+                    PaymentOptionsScreen(
+                        viewModel = viewModel,
+                        insets = insets,
+                    )
+                }
             }
         }
     }
