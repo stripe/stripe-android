@@ -5,8 +5,8 @@ project_type: android
 trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
-  - pull_request_source_branch: '*'
-    pipeline: main-trigger-pipeline
+  - pull_request_source_branch: 'carlosmuvi/maestro-compile-release'
+    workflow: main-trigger-pipeline
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -53,21 +53,23 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
-      - script-runner@0:
-          title: Execute Maestro tests
+      - script@1:
+          title: Execute Maestro tests (release)
           inputs:
-            - file_path: ./scripts/execute_maestro_tests.sh
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_tests.sh release
       - slack@3:
           is_always_run: true
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-      - pagerduty@0:
-          inputs:
-            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
-            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
-          is_always_run: true
-          run_if: .IsBuildFailed
+#      - pagerduty@0:
+#          inputs:
+#            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
+#            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
+#          is_always_run: true
+#          run_if: .IsBuildFailed
       - custom-test-results-export@0:
           inputs:
             - search_pattern: '*/maestroReport.xml'
@@ -109,12 +111,10 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
-      - script@1:
-          title: Execute Maestro tests (release)
+      - script-runner@0:
+          title: Execute Maestro tests
           inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh release
+            - file_path: ./scripts/execute_maestro_paymentsheet_tests.sh
       - slack@3:
           is_always_run: true
           run_if: .IsBuildFailed
