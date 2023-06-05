@@ -12,6 +12,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.utils.AnimationConstants
 
 internal class CustomerSheetActivity : AppCompatActivity() {
 
@@ -52,6 +53,11 @@ internal class CustomerSheetActivity : AppCompatActivity() {
     private fun finishWithResult(result: InternalCustomerSheetResult) {
         setResult(RESULT_OK, Intent().putExtras(result.toBundle()))
         finish()
+    }
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 }
 
