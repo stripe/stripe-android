@@ -27,7 +27,6 @@ internal fun CustomerBottomSheet(
 
     LaunchedEffect(navController.currentDestination) {
         if (navController.currentDestination == null) {
-            navController.popBackStack()
             onClose()
         }
     }
