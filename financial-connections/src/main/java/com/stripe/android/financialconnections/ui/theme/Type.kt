@@ -29,9 +29,8 @@ internal data class FinancialConnectionsTypography(
     val bodyCode: TextStyle,
     val bodyCodeEmphasized: TextStyle,
     val captionCode: TextStyle,
-    val captionCodeEmphasized: TextStyle,
-
-    )
+    val captionCodeEmphasized: TextStyle
+)
 
 @Immutable
 internal data class FinancialConnectionsAuthFlowV3Typography(
@@ -45,7 +44,7 @@ internal data class FinancialConnectionsAuthFlowV3Typography(
     val labelLarge: TextStyle,
     val labelMediumEmphasized: TextStyle,
     val labelMedium: TextStyle,
-    val labelSmall: TextStyle,
+    val labelSmall: TextStyle
 )
 
 @Preview(group = "Components", name = "Type")

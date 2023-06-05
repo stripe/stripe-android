@@ -268,7 +268,6 @@ private val LocalFinancialConnectionsTypography =
         error("no FinancialConnectionsTypography provided")
     }
 
-
 private val LocalAuthFlowV3Typography =
     staticCompositionLocalOf<FinancialConnectionsAuthFlowV3Typography> {
         error("no AuthFlowV3Typography provided")
