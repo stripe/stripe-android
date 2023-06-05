@@ -335,7 +335,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             text = "Flow",
             style = MaterialTheme.typography.h6.merge(),
         )
-        FlowRow(
+        Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Flow.values().forEach { text ->
