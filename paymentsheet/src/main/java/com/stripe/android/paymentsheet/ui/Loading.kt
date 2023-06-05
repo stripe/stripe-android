@@ -2,8 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -18,11 +17,7 @@ import com.stripe.android.uicore.shouldUseDarkDynamicColor
 @Composable
 internal fun Loading() {
     Row(
-        modifier = Modifier
-            .height(
-                dimensionResource(R.dimen.stripe_paymentsheet_loading_container_height)
-            )
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {

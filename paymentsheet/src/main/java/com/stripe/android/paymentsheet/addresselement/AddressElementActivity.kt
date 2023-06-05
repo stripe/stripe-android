@@ -10,9 +10,11 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -31,6 +33,7 @@ import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.ui.Loading
+import com.stripe.android.paymentsheet.utils.EdgeToEdge
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.AnimationConstants
 import kotlinx.coroutines.launch
@@ -99,48 +102,53 @@ internal class AddressElementActivity : ComponentActivity() {
             }
 
             StripeTheme {
-                ModalBottomSheetLayout(
-                    sheetState = modalBottomSheetState,
-                    sheetContent = {
-                        Surface(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            AnimatedNavHost(
-                                navController = navController,
-                                startDestination = AddressElementScreen.Loading.route,
+                EdgeToEdge { insets ->
+                    ModalBottomSheetLayout(
+                        sheetState = modalBottomSheetState,
+                        sheetContent = {
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .statusBarsPadding()
                             ) {
-                                composable(AddressElementScreen.Loading.route) {
-                                    Loading()
-                                }
-                                composable(AddressElementScreen.InputAddress.route) {
-                                    InputAddressScreen(viewModel.injector)
-                                }
-                                composable(
-                                    AddressElementScreen.Autocomplete.route,
-                                    arguments = listOf(
-                                        navArgument(AddressElementScreen.Autocomplete.countryArg) {
-                                            type = NavType.StringType
+                                Column {
+                                    AnimatedNavHost(
+                                        navController = navController,
+                                        startDestination = AddressElementScreen.Loading.route,
+                                    ) {
+                                        composable(AddressElementScreen.Loading.route) {
+                                            Loading()
                                         }
-                                    )
-                                ) { backStackEntry ->
-                                    val country = backStackEntry
-                                        .arguments
-                                        ?.getString(
-                                            AddressElementScreen.Autocomplete.countryArg
-                                        )
-                                    AutocompleteScreen(
-                                        viewModel.injector,
-                                        country
-                                    )
+                                        composable(AddressElementScreen.InputAddress.route) {
+                                            InputAddressScreen(viewModel.injector)
+                                        }
+                                        composable(
+                                            AddressElementScreen.Autocomplete.route,
+                                            arguments = listOf(
+                                                navArgument(AddressElementScreen.Autocomplete.countryArg) {
+                                                    type = NavType.StringType
+                                                }
+                                            )
+                                        ) { backStackEntry ->
+                                            val country = backStackEntry
+                                                .arguments
+                                                ?.getString(
+                                                    AddressElementScreen.Autocomplete.countryArg
+                                                )
+                                            AutocompleteScreen(
+                                                viewModel.injector,
+                                                country
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.requiredHeight(insets.navigationBar))
                                 }
                             }
-                        }
-                    },
-                    content = {},
-                    modifier = Modifier
-                        .navigationBarsPadding()
-                        .systemBarsPadding()
-                )
+                        },
+                        content = {},
+                    )
+                }
             }
         }
     }
