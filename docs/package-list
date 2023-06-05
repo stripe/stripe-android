@@ -1,6 +1,6 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
-$dokka.location:com.stripe.android.link.confirmation////PointingToDeclaration/link/com.stripe.android.link.confirmation.html
+
 module:camera-core
 com.stripe.android.camera
 com.stripe.android.camera.framework
@@ -22,11 +22,9 @@ com.stripe.android.identity.utils
 module:link
 com.stripe.android.link
 com.stripe.android.link.account
-com.stripe.android.link.confirmation
 com.stripe.android.link.model
 com.stripe.android.link.ui
 com.stripe.android.link.ui.inline
-com.stripe.android.link.ui.verification
 module:network-testing
 com.stripe.android.networktesting
 module:payments-core
