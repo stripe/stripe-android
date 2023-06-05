@@ -12,6 +12,7 @@
 
 ### Financial Connections
 * [FIXED][6794](https://github.com/stripe/stripe-android/pull/6794) Gracefully fails when no web browser available.
+* [FIXED][6813](https://github.com/stripe/stripe-android/pull/6813) Added Mavericks related proguard rules to the consumer-rules file.
 
 ## 20.25.4 - 2023-05-30
 
