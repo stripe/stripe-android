@@ -27,7 +27,7 @@ internal class CustomerSessionViewModel(
         if (shouldCreateNewComponent) {
             backingComponent = DaggerCustomerSessionComponent
                 .builder()
-                .appContext(getApplication())
+                .application(getApplication())
                 .configuration(configuration)
                 .customerAdapter(customerAdapter)
                 .callback(callback)

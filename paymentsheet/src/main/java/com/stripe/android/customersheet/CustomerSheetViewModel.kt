@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -17,6 +18,7 @@ import javax.inject.Inject
 @CustomerSessionScope
 @Suppress("unused")
 internal class CustomerSheetViewModel @Inject constructor(
+    private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
     private val customerAdapter: CustomerAdapter,
     private val lpmRepository: LpmRepository,
