@@ -152,6 +152,9 @@ def create_key(key_object)
     body = {
         "keys": [
             {
+                "key_name": {
+                    "android": key_object['key_name'],
+                },
                 "platforms": ["android"],
                 "filenames": {
                     "android": key_object['filename'],
@@ -173,7 +176,13 @@ def create_key(key_object)
     request.body = body.to_s
 
     response = http.request(request)
-    puts response.read_body
+    success = response.kind_of? Net::HTTPSuccess
+
+    if !success
+        puts "Failed to create key: #{key_object[:key_name]}"
+    else
+        puts "Created key: #{key_object[:key_name]}"
+    end
 end
 
 def find_existing_key(all_keys, key_object)
@@ -193,7 +202,40 @@ def find_existing_key(all_keys, key_object)
 end
 
 def update_key(existing_key, key_object)
-    puts "WIP"
+    url = URI("https://api.lokalise.com/api2/projects/project_id/keys")
+
+    http = Net::HTTP.new(url.host, url.port)
+    http.use_ssl = true
+
+    request = Net::HTTP::Put.new(url)
+    request["accept"] = 'application/json'
+    request["content-type"] = 'application/json'
+
+    api_token = ENV['LOKALISE_API_TOKEN']
+    if api_token.nil?
+        abort("Missing LOKALISE_API_TOKEN environment variable.")
+    else
+        request["X-Api-Token"] = api_token
+    end
+
+    key['key_name']['android'] = key_object['key_name']
+    key['filenames']['android'] = key_object['filename']
+    key['platforms'] << 'android'
+
+    body = {
+        "keys": [key]
+    }
+
+    request.body = body.to_s
+
+    response = http.request(request)
+    success = response.kind_of? Net::HTTPSuccess
+
+    if !success
+        puts "Failed to update key: #{key_object[:key_name]}"
+    else
+        puts "Updated key: #{key_object[:key_name]}"
+    end
 end
 
 def determine_unsynced_keys(key_objects, remote_android_keys)
