@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -35,6 +36,8 @@ import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
+
+internal const val SHEET_NAVIGATION_BUTTON_TAG = "SHEET_NAVIGATION_BUTTON_TAG"
 
 @Composable
 internal fun PaymentSheetTopBar(
@@ -87,6 +90,7 @@ internal fun PaymentSheetTopBar(
                     keyboardController?.hide()
                     onNavigationIconPressed()
                 },
+                modifier = Modifier.testTag(SHEET_NAVIGATION_BUTTON_TAG)
             ) {
                 Icon(
                     painter = painterResource(state.icon),
