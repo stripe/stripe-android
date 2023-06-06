@@ -59,6 +59,7 @@ class CustomerSheetViewModelTest {
         lpmRepository: LpmRepository = this.lpmRepository
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
+            resources = context.resources,
             customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
             configuration = CustomerSheet.Configuration(

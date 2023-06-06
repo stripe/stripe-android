@@ -1,6 +1,6 @@
 package com.stripe.android.customersheet.injection
 
-import android.content.Context
+import android.app.Application
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSessionViewModel
 import com.stripe.android.customersheet.CustomerSheet
@@ -25,7 +25,7 @@ internal interface CustomerSessionComponent {
     @Component.Builder
     interface Builder {
         @BindsInstance
-        fun appContext(appContext: Context): Builder
+        fun application(application: Application): Builder
 
         @BindsInstance
         fun customerSessionViewModel(viewModel: CustomerSessionViewModel): Builder
