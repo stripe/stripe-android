@@ -39,9 +39,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
         val customerSheet = CustomerSheet.create(
             activity = this,
-            configuration = CustomerSheet.Configuration.Builder(
-                merchantDisplayName = "Test Merchant"
-            ).build(),
+            configuration = CustomerSheet.Configuration.Builder().build(),
             customerAdapter = viewModel.customerAdapter,
             callback = {
                 Toast.makeText(this, "Got result $it", Toast.LENGTH_LONG).show()

@@ -38,9 +38,7 @@ class CustomerSheetViewModelTest {
             resources = context.resources,
             customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
-            configuration = CustomerSheet.Configuration(
-                merchantDisplayName = "Testing"
-            )
+            configuration = CustomerSheet.Configuration()
         )
     }
 }
