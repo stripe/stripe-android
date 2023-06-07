@@ -50,7 +50,9 @@ jobs:
           disable-animations: true
           sdcard-path-or-size: 512M
           profile: Nexus 6
-          script: ./gradlew paymentsheet-example:executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot
+          # We need to append these weird flags because of a Java 17 bug in Shot
+          # See: https://github.com/pedrovgs/Shot/issues/268
+          script: ./gradlew paymentsheet-example:executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot -Dorg.gradle.jvmargs="--add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.nio.channels=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED"
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
