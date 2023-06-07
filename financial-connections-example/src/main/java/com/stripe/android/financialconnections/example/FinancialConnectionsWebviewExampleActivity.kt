@@ -4,9 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Message
 import android.util.Log
 import android.view.ViewGroup
 import android.webkit.ConsoleMessage
+import android.webkit.JsResult
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -46,7 +48,8 @@ class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
             this,
             WebviewContainerActivity::class.java
         )
-        intent.putExtra("url", "https://rich-familiar-angle.glitch.me/")
+//        intent.putExtra("url", "https://rich-familiar-angle.glitch.me/")
+        intent.putExtra("url", "https://respected-aeolian-heather.glitch.me/")
         startActivity(intent)
     }
 }
