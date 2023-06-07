@@ -1,6 +1,6 @@
 package com.stripe.android.customersheet
 
-import android.content.Context
+import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -13,20 +13,31 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetViewModelTest {
-    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val application = ApplicationProvider.getApplicationContext<Application>()
     private val lpmRepository = LpmRepository(
         LpmRepository.LpmRepositoryArguments(
-            resources = context.resources,
+            resources = application.resources,
             isFinancialConnectionsAvailable = { true },
             enableACHV2InDeferredFlow = true
         )
     )
 
     @Test
-    fun `ViewModel initializes with loading`() = runTest {
+    fun `init emits CustomerSheetViewState#SelectPaymentMethod`() = runTest {
         val viewModel = createViewModel()
         viewModel.viewState.test {
-            assertThat(awaitItem()).isEqualTo(CustomerSheetViewState.Loading)
+            assertThat(awaitItem()).isInstanceOf(
+                CustomerSheetViewState.SelectPaymentMethod::class.java
+            )
+        }
+    }
+
+    @Test
+    fun `CustomerSheetViewAction#OnBackPress emits CustomerSheetAction#NavigateUp`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.viewEffect.test {
+            viewModel.handleViewAction(CustomerSheetViewAction.OnBackPress)
+            assertThat(awaitItem()).isEqualTo(CustomerSheetViewEffect.NavigateUp)
         }
     }
 
@@ -35,7 +46,7 @@ class CustomerSheetViewModelTest {
         lpmRepository: LpmRepository = this.lpmRepository
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
-            resources = context.resources,
+            resources = application.resources,
             customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
             configuration = CustomerSheet.Configuration(

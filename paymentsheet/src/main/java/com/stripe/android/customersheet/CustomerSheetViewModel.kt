@@ -6,9 +6,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.customersheet.injection.CustomerSessionScope
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,15 +31,57 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val _viewState = MutableStateFlow<CustomerSheetViewState>(CustomerSheetViewState.Loading)
     val viewState: StateFlow<CustomerSheetViewState> = _viewState
 
+    private val _viewEffect = MutableSharedFlow<CustomerSheetViewEffect>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val viewEffect: SharedFlow<CustomerSheetViewEffect> = _viewEffect
+
     init {
         viewModelScope.launch {
-            delay(DELAY)
             _viewState.update {
                 CustomerSheetViewState.SelectPaymentMethod(
-                    configuration.headerTextForSelectionScreen
+                    title = configuration.headerTextForSelectionScreen,
+                    paymentMethods = listOf(),
+                    selectedPaymentMethodId = null,
+                    isLiveMode = false,
+                    isProcessing = false,
+                    isEditing = false
                 )
             }
         }
+    }
+
+    fun handleViewAction(viewAction: CustomerSheetViewAction) {
+        when (viewAction) {
+            is CustomerSheetViewAction.OnAddCardPressed -> onAddCardPressed()
+            is CustomerSheetViewAction.OnBackPress -> onBackPressed()
+            is CustomerSheetViewAction.OnEdit -> onEdit()
+            is CustomerSheetViewAction.OnItemRemoved -> onItemRemoved(viewAction.paymentMethod)
+            is CustomerSheetViewAction.OnItemSelected -> onItemSelected(viewAction.selection)
+        }
+    }
+
+    private fun onAddCardPressed() {
+        TODO()
+    }
+
+    private fun onBackPressed() {
+        _viewEffect.tryEmit(CustomerSheetViewEffect.NavigateUp)
+    }
+
+    private fun onEdit() {
+        TODO()
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onItemRemoved(paymentMethod: PaymentMethod) {
+        TODO()
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onItemSelected(paymentSelection: PaymentSelection?) {
+        TODO()
     }
 
     object Factory : ViewModelProvider.Factory {
@@ -43,9 +89,5 @@ internal class CustomerSheetViewModel @Inject constructor(
             @Suppress("UNCHECKED_CAST")
             return CustomerSessionViewModel.component.customerSheetViewModel as T
         }
-    }
-
-    private companion object {
-        const val DELAY = 2000L
     }
 }
