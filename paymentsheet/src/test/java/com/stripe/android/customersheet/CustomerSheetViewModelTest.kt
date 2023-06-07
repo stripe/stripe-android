@@ -29,7 +29,6 @@ class CustomerSheetViewModelTest {
             assertThat(awaitItem()).isInstanceOf(
                 CustomerSheetViewState.SelectPaymentMethod::class.java
             )
-            ensureAllEventsConsumed()
         }
     }
 
@@ -37,12 +36,13 @@ class CustomerSheetViewModelTest {
     fun `CustomerSheetViewAction#OnBackPressed emits canceled result`() = runTest {
         val viewModel = createViewModel()
         viewModel.viewState.test {
-            skipItems(1)
+            assertThat(
+                (awaitItem() as CustomerSheetViewState.SelectPaymentMethod).result
+            ).isEqualTo(null)
             viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
             assertThat(
                 (awaitItem() as CustomerSheetViewState.SelectPaymentMethod).result
             ).isEqualTo(InternalCustomerSheetResult.Canceled)
-            ensureAllEventsConsumed()
         }
     }
 
