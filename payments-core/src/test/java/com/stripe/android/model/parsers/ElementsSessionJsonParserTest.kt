@@ -248,7 +248,7 @@ class ElementsSessionJsonParserTest {
                     mode = DeferredIntentParams.Mode.Payment(
                         amount = 2000,
                         currency = "usd",
-                        captureMethod = DeferredIntentParams.CaptureMethod.Automatic,
+                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
                         setupFutureUsage = null,
                     ),
                     paymentMethodTypes = emptyList(),
