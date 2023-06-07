@@ -2,7 +2,11 @@
 
 package com.stripe.android.financialconnections.ui.components
 
+import androidx.compose.foundation.Indication
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,8 +30,18 @@ import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.debugInspectorInfo
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -38,6 +52,10 @@ import com.stripe.android.financialconnections.ui.theme.Brand400
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.Neutral50
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Composable
 internal fun FinancialConnectionsButton(
@@ -47,11 +65,25 @@ internal fun FinancialConnectionsButton(
     size: FinancialConnectionsButton.Size = FinancialConnectionsButton.Size.Regular,
     enabled: Boolean = true,
     loading: Boolean = false,
+    debounceTime: Long = 500,
     content: @Composable (RowScope.() -> Unit)
 ) {
+
+    // Remember a mutable state to store a debounce flag
+    var debounceJob by remember { mutableStateOf<Job?>(null) }
+    val coroutineScope = rememberCoroutineScope()
     CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
         Button(
-            onClick = { if (loading.not()) onClick() },
+            onClick = {
+                if (loading.not()) {
+                    if (debounceJob == null || debounceJob?.isCompleted == true) {
+                        debounceJob = coroutineScope.launch {
+                            delay(debounceTime)
+                            onClick()
+                        }
+                    }
+                }
+            },
             modifier = modifier,
             elevation = ButtonDefaults.elevation(
                 defaultElevation = 0.dp,
@@ -238,3 +270,84 @@ internal fun FinancialConnectionsButtonPreview() {
         }
     }
 }
+
+internal interface MultipleEventsCutter {
+    fun processEvent(event: () -> Unit)
+
+    companion object
+}
+
+internal fun MultipleEventsCutter.Companion.get(): MultipleEventsCutter =
+    MultipleEventsCutterImpl()
+
+private class MultipleEventsCutterImpl : MultipleEventsCutter {
+    private val now: Long
+        get() = System.currentTimeMillis()
+
+    private var lastEventTimeMs: Long = 0
+
+    override fun processEvent(event: () -> Unit) {
+        if (now - lastEventTimeMs >= 500L) {
+            event.invoke()
+        }
+        lastEventTimeMs = now
+    }
+}
+
+fun Modifier.clickableSingle(
+    enabled: Boolean = true,
+    onClickLabel: String? = null,
+    role: Role? = null,
+    onClick: () -> Unit
+
+) = composed(
+    inspectorInfo = debugInspectorInfo {
+        name = "clickable"
+        properties["enabled"] = enabled
+        properties["onClickLabel"] = onClickLabel
+        properties["role"] = role
+        properties["onClick"] = onClick
+    },
+
+    factory = {
+        val multipleEventsCutter = remember { MultipleEventsCutter.get() }
+        Modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = LocalIndication.current,
+            enabled = enabled,
+            onClickLabel = onClickLabel,
+            onClick = { multipleEventsCutter.processEvent { onClick() } },
+            role = role,
+        )
+    }
+)
+
+fun Modifier.clickableSingle(
+    interactionSource: MutableInteractionSource,
+    indication: Indication?,
+    enabled: Boolean = true,
+    onClickLabel: String? = null,
+    role: Role? = null,
+    onClick: () -> Unit
+
+) = composed(
+    inspectorInfo = debugInspectorInfo {
+        name = "clickable"
+        properties["enabled"] = enabled
+        properties["onClickLabel"] = onClickLabel
+        properties["role"] = role
+        properties["onClick"] = onClick
+    },
+
+    factory = {
+        val multipleEventsCutter = remember { MultipleEventsCutter.get() }
+        Modifier.clickable(
+            interactionSource = interactionSource,
+            indication = indication,
+            enabled = enabled,
+            onClickLabel = onClickLabel,
+            onClick = { multipleEventsCutter.processEvent { onClick() } },
+            role = role,
+        )
+    }
+)

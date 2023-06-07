@@ -77,6 +77,7 @@ import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
+import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.theme.Brand100
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.image.StripeImage
@@ -397,7 +398,7 @@ private fun InstitutionResultTile(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxSize()
-            .clickable { onInstitutionSelected(institution) }
+            .clickableSingle { onInstitutionSelected(institution) }
             .padding(
                 vertical = 8.dp,
                 horizontal = 24.dp
@@ -472,7 +473,7 @@ private fun FeaturedInstitutionsGrid(
                                 color = FinancialConnectionsTheme.colors.borderDefault,
                                 shape = RoundedCornerShape(6.dp)
                             )
-                            .clickable(
+                            .clickableSingle(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = rememberRipple(
                                     color = FinancialConnectionsTheme.colors.textSecondary
