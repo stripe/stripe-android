@@ -50,13 +50,6 @@ class CustomerSheet @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration internal constructor(
         /**
-         * Your customer-facing business name.
-         *
-         * The default value is the name of your app.
-         */
-        val merchantDisplayName: String,
-
-        /**
          * Describes the appearance of [CustomerSheet].
          */
         val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
@@ -75,16 +68,10 @@ class CustomerSheet @Inject internal constructor(
     ) {
         @ExperimentalCustomerSheetApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Builder(
-            private var merchantDisplayName: String
-        ) {
+        class Builder {
             private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
             private var googlePayConfiguration: PaymentSheet.GooglePayConfiguration? = null
             private var headerTextForSelectionScreen: String? = null
-
-            fun merchantDisplayName(merchantDisplayName: String) = apply {
-                this.merchantDisplayName = merchantDisplayName
-            }
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
                 this.appearance = appearance
@@ -101,7 +88,6 @@ class CustomerSheet @Inject internal constructor(
             }
 
             fun build() = Configuration(
-                merchantDisplayName = merchantDisplayName,
                 appearance = appearance,
                 googlePayConfiguration = googlePayConfiguration,
                 headerTextForSelectionScreen = headerTextForSelectionScreen,
