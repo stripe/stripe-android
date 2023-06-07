@@ -30,11 +30,7 @@ import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
@@ -50,9 +46,6 @@ import com.stripe.android.financialconnections.ui.theme.Brand400
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.Neutral50
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun FinancialConnectionsButton(
@@ -62,24 +55,13 @@ internal fun FinancialConnectionsButton(
     size: FinancialConnectionsButton.Size = FinancialConnectionsButton.Size.Regular,
     enabled: Boolean = true,
     loading: Boolean = false,
-    debounceTime: Long = 500,
-    content: @Composable (RowScope.() -> Unit)
+    content: @Composable() (RowScope.() -> Unit)
 ) {
-
-    // Remember a mutable state to store a debounce flag
-    var debounceJob by remember { mutableStateOf<Job?>(null) }
-    val coroutineScope = rememberCoroutineScope()
+    val multipleEventsCutter = remember { MultipleEventsCutter.get() }
     CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
         Button(
             onClick = {
-                if (loading.not()) {
-                    if (debounceJob == null || debounceJob?.isCompleted == true) {
-                        debounceJob = coroutineScope.launch {
-                            delay(debounceTime)
-                            onClick()
-                        }
-                    }
-                }
+                multipleEventsCutter.processEvent { if (loading.not()) onClick() }
             },
             modifier = modifier,
             elevation = ButtonDefaults.elevation(
@@ -227,40 +209,40 @@ internal fun FinancialConnectionsButtonPreview() {
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             FinancialConnectionsButton(
+                onClick = { },
                 modifier = Modifier.fillMaxWidth(),
-                loading = false,
-                onClick = { }
+                loading = false
             ) {
                 Text(text = "Primary")
             }
             FinancialConnectionsButton(
+                onClick = { },
                 modifier = Modifier.fillMaxWidth(),
-                loading = true,
-                onClick = { }
+                loading = true
             ) {
                 Text(text = "Primary - loading")
             }
             FinancialConnectionsButton(
+                onClick = { },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = false,
-                onClick = { }
+                enabled = false
             ) {
                 Text(text = "Primary - disabled")
             }
             FinancialConnectionsButton(
+                onClick = { },
                 modifier = Modifier.fillMaxWidth(),
                 type = Type.Secondary,
-                loading = false,
-                onClick = { }
+                loading = false
             ) {
                 Text(text = "Secondary")
             }
             FinancialConnectionsButton(
+                onClick = { },
                 modifier = Modifier.fillMaxWidth(),
                 type = Type.Secondary,
-                loading = false,
                 enabled = false,
-                onClick = { }
+                loading = false
             ) {
                 Text(text = "Secondary disabled")
             }
@@ -284,10 +266,14 @@ private class MultipleEventsCutterImpl : MultipleEventsCutter {
     private var lastEventTimeMs: Long = 0
 
     override fun processEvent(event: () -> Unit) {
-        if (now - lastEventTimeMs >= 500L) {
+        if (now - lastEventTimeMs >= DEBOUNCE_MS) {
             event.invoke()
         }
         lastEventTimeMs = now
+    }
+
+    companion object {
+        private const val DEBOUNCE_MS = 500L
     }
 }
 
