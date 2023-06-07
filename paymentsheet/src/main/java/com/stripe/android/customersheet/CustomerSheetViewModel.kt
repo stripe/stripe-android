@@ -9,10 +9,7 @@ import com.stripe.android.customersheet.injection.CustomerSessionScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -30,12 +27,6 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private val _viewState = MutableStateFlow<CustomerSheetViewState>(CustomerSheetViewState.Loading)
     val viewState: StateFlow<CustomerSheetViewState> = _viewState
-
-    private val _viewEffect = MutableSharedFlow<CustomerSheetViewEffect>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val viewEffect: SharedFlow<CustomerSheetViewEffect> = _viewEffect
 
     init {
         viewModelScope.launch {
@@ -55,8 +46,8 @@ internal class CustomerSheetViewModel @Inject constructor(
     fun handleViewAction(viewAction: CustomerSheetViewAction) {
         when (viewAction) {
             is CustomerSheetViewAction.OnAddCardPressed -> onAddCardPressed()
-            is CustomerSheetViewAction.OnBackPress -> onBackPressed()
-            is CustomerSheetViewAction.OnEdit -> onEdit()
+            is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
+            is CustomerSheetViewAction.OnEditPressed -> onEdit()
             is CustomerSheetViewAction.OnItemRemoved -> onItemRemoved(viewAction.paymentMethod)
             is CustomerSheetViewAction.OnItemSelected -> onItemSelected(viewAction.selection)
         }
@@ -67,7 +58,9 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onBackPressed() {
-        _viewEffect.tryEmit(CustomerSheetViewEffect.NavigateUp)
+        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+            it.copy(result = InternalCustomerSheetResult.Canceled)
+        }
     }
 
     private fun onEdit() {
@@ -82,6 +75,21 @@ internal class CustomerSheetViewModel @Inject constructor(
     @Suppress("UNUSED_PARAMETER")
     private fun onItemSelected(paymentSelection: PaymentSelection?) {
         TODO()
+    }
+
+    override fun onCleared() {
+        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+            it.copy(result = null)
+        }
+        super.onCleared()
+    }
+
+    private inline fun <reified T : CustomerSheetViewState> updateViewState(block: (T) -> T) {
+        (_viewState.value as? T)?.let {
+            _viewState.update {
+                block(it as T)
+            }
+        }
     }
 
     object Factory : ViewModelProvider.Factory {

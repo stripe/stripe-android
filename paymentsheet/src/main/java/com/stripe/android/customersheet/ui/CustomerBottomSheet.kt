@@ -10,8 +10,9 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.navigation.material.BottomSheetNavigator
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.google.accompanist.navigation.material.ModalBottomSheetLayout
@@ -20,19 +21,19 @@ import com.google.accompanist.navigation.material.bottomSheet
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @Composable
 internal fun CustomerBottomSheet(
+    navController: NavHostController,
     onClose: () -> Unit = {},
     sheetContent: @Composable ColumnScope.() -> Unit,
 ) {
     val bottomSheetNavigator = rememberBottomSheetNavigator()
-    val navController = rememberNavController(bottomSheetNavigator)
+    navController.navigatorProvider.addNavigator(bottomSheetNavigator)
 
     BackHandler(bottomSheetNavigator.navigatorSheetState.isVisible) {
         navController.popBackStack()
-        onClose()
     }
 
     LaunchedEffect(navController.currentDestination) {
-        if (navController.currentDestination == null) {
+        if (navController.isInitialized && navController.currentDestination == null) {
             onClose()
         }
     }
@@ -47,6 +48,9 @@ internal fun CustomerBottomSheet(
         }
     }
 }
+
+private val NavController.isInitialized: Boolean
+    get() = runCatching { graph }.isSuccess
 
 @ExperimentalMaterialNavigationApi
 @OptIn(ExperimentalMaterialApi::class)

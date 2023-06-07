@@ -66,10 +66,10 @@ internal fun SelectPaymentMethod(
                 isProcessing = viewState.isProcessing,
                 isEditing = viewState.isEditing,
                 handleBackPressed = {
-                    viewActionHandler(CustomerSheetViewAction.OnBackPress)
+                    viewActionHandler(CustomerSheetViewAction.OnBackPressed)
                 },
                 toggleEditing = {
-                    viewActionHandler(CustomerSheetViewAction.OnEdit)
+                    viewActionHandler(CustomerSheetViewAction.OnEditPressed)
                 },
             )
         },

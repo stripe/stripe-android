@@ -2,7 +2,6 @@ package com.stripe.android.customersheet
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
@@ -14,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.compose.rememberNavController
 import com.stripe.android.customersheet.ui.CustomerBottomSheet
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.uicore.StripeTheme
@@ -41,7 +41,9 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
+                val navController = rememberNavController()
                 CustomerBottomSheet(
+                    navController = navController,
                     onClose = {
                         finishWithResult(InternalCustomerSheetResult.Canceled)
                     }
@@ -50,11 +52,13 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         val viewState by viewModel.viewState.collectAsState()
-                        val viewEffect by viewModel.viewEffect.collectAsState(initial = null)
 
-                        LaunchedEffect(viewEffect) {
-                            viewEffect?.let {
-                                handleAction(it)
+                        LaunchedEffect(viewState) {
+                            (viewState as? CustomerSheetViewState.SelectPaymentMethod)?.let {
+                                it.result?.let { result ->
+                                    setResult(result)
+                                    navController.popBackStack()
+                                }
                             }
                         }
 
@@ -66,18 +70,10 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                 }
             }
         }
-
-        onBackPressedDispatcher.addCallback {
-            finishWithResult(InternalCustomerSheetResult.Canceled)
-        }
     }
 
-    private fun handleAction(action: CustomerSheetViewEffect) {
-        when (action) {
-            is CustomerSheetViewEffect.NavigateUp -> {
-                finishWithResult(InternalCustomerSheetResult.Canceled)
-            }
-        }
+    private fun setResult(result: InternalCustomerSheetResult) {
+        setResult(RESULT_OK, Intent().putExtras(result.toBundle()))
     }
 
     private fun finishWithResult(result: InternalCustomerSheetResult) {

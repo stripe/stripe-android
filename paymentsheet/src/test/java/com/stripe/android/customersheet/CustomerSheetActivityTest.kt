@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -40,37 +39,79 @@ internal class CustomerSheetActivityTest {
     private val page = CustomerSheetPage(composeTestRule)
 
     @Test
-    fun `Finish with cancel on back press`() = runTest {
+    fun `Finish with cancel on back press`() {
         runActivityScenario { scenario ->
             scenario.onActivity {
+                composeTestRule.waitForIdle()
                 pressBack()
-            }
-
-            assertThat(
-                contract.parseResult(
-                    scenario.getResult().resultCode,
-                    scenario.getResult().resultData
+                composeTestRule.waitForIdle()
+                assertThat(
+                    InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
+                ).isEqualTo(
+                    InternalCustomerSheetResult.Canceled
                 )
-            ).isEqualTo(
-                InternalCustomerSheetResult.Canceled
-            )
+            }
         }
     }
 
     @Test
-    fun `Finish with cancel on navigate up action`() = runTest {
+    fun `Finish with cancel on canceled result`() = runTest {
         runActivityScenario(
-            viewState = createSelectPaymentMethodViewState(),
-            viewEffect = CustomerSheetViewEffect.NavigateUp,
+            viewState = createSelectPaymentMethodViewState(
+                result = InternalCustomerSheetResult.Canceled
+            ),
         ) { scenario ->
             scenario.onActivity {
+                composeTestRule.waitForIdle()
+                it.finish()
                 assertThat(
-                    contract.parseResult(
-                        scenario.getResult().resultCode,
-                        scenario.getResult().resultData
-                    )
+                    InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
                 ).isEqualTo(
                     InternalCustomerSheetResult.Canceled
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `Finish with selected on selected result`() = runTest {
+        runActivityScenario(
+            viewState = createSelectPaymentMethodViewState(
+                result = InternalCustomerSheetResult.Selected(
+                    paymentMethodId = "pm_123",
+                    drawableResourceId = 123,
+                    label = "test",
+                )
+            ),
+        ) { scenario ->
+            scenario.onActivity {
+                composeTestRule.waitForIdle()
+                it.finish()
+                assertThat(
+                    InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
+                ).isInstanceOf(
+                    InternalCustomerSheetResult.Selected::class.java
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `Finish with error on error result`() = runTest {
+        runActivityScenario(
+            viewState = createSelectPaymentMethodViewState(
+                result = InternalCustomerSheetResult.Error(
+                    exception = Exception("test")
+                )
+            ),
+        ) { scenario ->
+            scenario.onActivity {
+                composeTestRule.waitForIdle()
+                it.finish()
+                assertThat(
+                    InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
+                ).isInstanceOf(
+                    InternalCustomerSheetResult.Error::class.java
                 )
             }
         }
@@ -91,23 +132,12 @@ internal class CustomerSheetActivityTest {
 
     private fun activityScenario(
         viewState: CustomerSheetViewState,
-        viewEffect: CustomerSheetViewEffect?,
     ): InjectableActivityScenario<CustomerSheetActivity> {
         val viewModel = mock<CustomerSheetViewModel>()
 
         whenever(viewModel.viewState).thenReturn(
             MutableStateFlow(viewState)
         )
-
-        if (viewEffect != null) {
-            whenever(viewModel.viewEffect).thenReturn(
-                MutableStateFlow(viewEffect)
-            )
-        } else {
-            whenever(viewModel.viewEffect).thenReturn(
-                MutableSharedFlow()
-            )
-        }
 
         return injectableActivityScenario {
             injectActivity {
@@ -118,14 +148,11 @@ internal class CustomerSheetActivityTest {
 
     private fun runActivityScenario(
         viewState: CustomerSheetViewState = CustomerSheetViewState.Loading,
-        viewEffect: CustomerSheetViewEffect? = null,
         block: (InjectableActivityScenario<CustomerSheetActivity>) -> Unit
     ) {
-        val scenario = activityScenario(
-            viewState = viewState,
-            viewEffect = viewEffect,
-        ).launchForResult(intent)
-        scenario.use(block)
+        activityScenario(viewState = viewState)
+            .launchForResult(intent)
+            .use(block)
     }
 
     private fun createSelectPaymentMethodViewState(
@@ -135,6 +162,7 @@ internal class CustomerSheetActivityTest {
         isLiveMode: Boolean = false,
         isProcessing: Boolean = false,
         isEditing: Boolean = false,
+        result: InternalCustomerSheetResult? = null
     ): CustomerSheetViewState.SelectPaymentMethod {
         return CustomerSheetViewState.SelectPaymentMethod(
             title = title,
@@ -143,6 +171,7 @@ internal class CustomerSheetActivityTest {
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isEditing = isEditing,
+            result = result,
         )
     }
 }
