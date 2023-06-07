@@ -2,20 +2,24 @@ package com.stripe.android.financialconnections.example
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
+import android.webkit.ConsoleMessage
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -24,50 +28,89 @@ class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WebView.setWebContentsDebuggingEnabled(true)
         setContent {
-            FinancialConnectionsWebViewScreen {
-                val intent = Intent(
-                    this,
-                    FinancialConnectionsWebviewExampleRedirectActivity::class.java
-                )
-                intent.putExtra("url", "https://night-discreet-femur.glitch.me/")
-                startActivity(intent)
+            Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+                Button(
+                    onClick = { onButtonClick() },
+                ) {
+                    Text("Connect Accounts!")
+                }
+                Divider(modifier = Modifier.padding(vertical = 5.dp))
             }
         }
     }
 
-    @Composable
-    private fun FinancialConnectionsWebViewScreen(onButtonClick: () -> Unit) {
-        Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-            Button(
-                onClick = { onButtonClick() },
-            ) {
-                Text("Connect Accounts!")
-            }
-            Divider(modifier = Modifier.padding(vertical = 5.dp))
-        }
+    fun onButtonClick() {
+        val intent = Intent(
+            this,
+            WebviewContainerActivity::class.java
+        )
+        intent.putExtra("url", "https://rich-familiar-angle.glitch.me/")
+        startActivity(intent)
     }
-
 }
 
+class WebviewContainerActivity : Activity() {
 
-class FinancialConnectionsWebviewExampleRedirectActivity : Activity() {
     private lateinit var webView: WebView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        webView = WebView(this)
-        webView.webViewClient = buildWebviewClient()
-        webView.layoutParams = FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
-        )
+        webView = WebView(this).also {
+            it.settings.javaScriptEnabled = true
+            it.settings.loadWithOverviewMode = true
+            it.webViewClient = buildWebviewClient()
+            it.webChromeClient = buildWebChromeClient()
+            it.layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
         val frameLayout = FrameLayout(this)
         frameLayout.addView(webView)
-        webView.loadUrl(intent.getStringExtra("url")!!)
+        webView.loadUrl(requireNotNull(intent.getStringExtra("url")))
         setContentView(frameLayout)
     }
 
+    private fun buildWebChromeClient(): WebChromeClient {
+        return object : WebChromeClient() {
+            override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
+                Log.d(
+                    "Webview", consoleMessage.message() + " -- From line "
+                        + consoleMessage.lineNumber() + " of "
+                        + consoleMessage.sourceId()
+                )
+                return super.onConsoleMessage(consoleMessage)
+
+            }
+        }
+    }
+
     private fun buildWebviewClient() = object : WebViewClient() {
+        override fun shouldOverrideUrlLoading(
+            view: WebView,
+            webResourceRequest: WebResourceRequest
+        ): Boolean {
+            val forMainFrame = webResourceRequest.isForMainFrame
+            Log.d(
+                "URL",
+                "${webResourceRequest.url} " +
+                    "isForMainFrame? $forMainFrame "
+            )
+            // TODO just open browser for desired links.
+            return if (true) {
+                val builder: CustomTabsIntent.Builder = CustomTabsIntent.Builder()
+                val customTabsIntent: CustomTabsIntent = builder.build()
+                customTabsIntent.launchUrl(
+                    this@WebviewContainerActivity,
+                    Uri.parse(webResourceRequest.url.toString())
+                )
+                true
+            } else {
+                false
+            }
+        }
     }
 
     override fun onDestroy() {
