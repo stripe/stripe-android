@@ -62,11 +62,9 @@ class CustomerSheet @Inject internal constructor(
         val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
 
         /**
-         * Configuration for GooglePay.
-         *
-         * If set, CustomerSheet displays Google Pay as a payment option.
+         * Whether [CustomerSheet] displays Google Pay as a payment option.
          */
-        val googlePayConfiguration: PaymentSheet.GooglePayConfiguration? = null,
+        val googlePayEnabled: Boolean = false,
 
         /**
          * The text to display at the top of the presented bottom sheet.
@@ -79,7 +77,7 @@ class CustomerSheet @Inject internal constructor(
             private var merchantDisplayName: String
         ) {
             private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
-            private var googlePayConfiguration: PaymentSheet.GooglePayConfiguration? = null
+            private var googlePayEnabled: Boolean = false
             private var headerTextForSelectionScreen: String? = null
 
             fun merchantDisplayName(merchantDisplayName: String) = apply {
@@ -90,10 +88,8 @@ class CustomerSheet @Inject internal constructor(
                 this.appearance = appearance
             }
 
-            fun googlePayConfiguration(
-                googlePayConfiguration: PaymentSheet.GooglePayConfiguration?
-            ) = apply {
-                this.googlePayConfiguration = googlePayConfiguration
+            fun googlePayEnabled(googlePayConfiguration: Boolean) = apply {
+                this.googlePayEnabled = googlePayConfiguration
             }
 
             fun headerTextForSelectionScreen(headerTextForSelectionScreen: String?) = apply {
@@ -103,7 +99,7 @@ class CustomerSheet @Inject internal constructor(
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 appearance = appearance,
-                googlePayConfiguration = googlePayConfiguration,
+                googlePayEnabled = googlePayEnabled,
                 headerTextForSelectionScreen = headerTextForSelectionScreen,
             )
         }
