@@ -38,6 +38,16 @@ class CustomerSheet @Inject internal constructor(
         )
     }
 
+    /**
+     * Clears the customer session state. This is only needed in a single activity workflow. You
+     * should call this when leaving the customer management workflow in your single activity app.
+     * Otherwise, if your app is using a multi-activity workflow, then [CustomerSheet] will work out
+     * of the box and clearing manually is not required.
+     */
+    fun resetCustomer() {
+        CustomerSessionViewModel.clear()
+    }
+
     private fun onCustomerSheetResult(result: InternalCustomerSheetResult?) {
         requireNotNull(result)
         callback.onResult(result.toPublicResult())

@@ -19,7 +19,7 @@ class CustomerSessionViewModelTest {
 
     @Before
     fun setup() {
-        viewModel.clear()
+        CustomerSessionViewModel.clear()
     }
 
     @Test
@@ -76,5 +76,22 @@ class CustomerSessionViewModelTest {
         )
 
         assertThat(component).isEqualTo(CustomerSessionViewModel.component)
+    }
+
+    @Test
+    fun `CustomerSessionViewModel clear clears the session`() {
+        val component = viewModel.createCustomerSessionComponent(
+            configuration = mock(),
+            customerAdapter = mock(),
+            callback = mock(),
+        )
+
+        assertThat(component).isEqualTo(CustomerSessionViewModel.component)
+
+        CustomerSessionViewModel.clear()
+
+        assertFailsWith<IllegalStateException> {
+            CustomerSessionViewModel.component
+        }
     }
 }
