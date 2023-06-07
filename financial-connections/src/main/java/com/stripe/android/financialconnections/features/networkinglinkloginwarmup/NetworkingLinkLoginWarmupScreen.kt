@@ -5,7 +5,6 @@ package com.stripe.android.financialconnections.features.networkinglinkloginwarm
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
