@@ -21,7 +21,7 @@ internal class FakeCustomerAdapter(
 
     override suspend fun setSelectedPaymentOption(
         paymentOption: CustomerAdapter.PaymentOption?
-    ): Result<CustomerAdapter.PaymentOption?> {
+    ): Result<Unit> {
         TODO("Not yet implemented")
     }
 

@@ -279,7 +279,7 @@ class CustomerAdapterTest {
             paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
         )
         assertThat(result.getOrNull())
-            .isEqualTo(CustomerAdapter.PaymentOption.StripeId("pm_1234"))
+            .isEqualTo(Unit)
     }
 
     @Test

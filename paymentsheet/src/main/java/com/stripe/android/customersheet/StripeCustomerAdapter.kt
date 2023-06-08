@@ -81,13 +81,13 @@ internal class StripeCustomerAdapter @Inject constructor(
 
     override suspend fun setSelectedPaymentOption(
         paymentOption: CustomerAdapter.PaymentOption?
-    ): Result<CustomerAdapter.PaymentOption?> {
+    ): Result<Unit> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
             withContext(workContext) {
                 val result = prefsRepository.setSavedSelection(paymentOption?.toSavedSelection())
                 if (result) {
-                    Result.success(paymentOption)
+                    Result.success(Unit)
                 } else {
                     Result.failure(
                         IOException("Unable to set the payment option: $paymentOption")

@@ -45,14 +45,14 @@ interface CustomerAdapter {
      * Saves the payment option to a data store.
      * @param paymentOption, the [PaymentOption] to save to the data store. If null, the selected
      * payment method option will be cleared from the data store.
-     * @return the saved [PaymentOption]
+     * @return success if the [PaymentOption] was persisted failure otherwise.
      */
-    suspend fun setSelectedPaymentOption(paymentOption: PaymentOption?): Result<PaymentOption?>
+    suspend fun setSelectedPaymentOption(paymentOption: PaymentOption?): Result<Unit>
 
     /**
      * Retrieve the saved payment method option from a data store. If null, the customer does not
      * have a default saved payment method.
-     * @return the saved [PaymentOption]
+     * @return the saved [PaymentOption].
      */
     suspend fun retrieveSelectedPaymentOption(): Result<PaymentOption?>
 
@@ -60,7 +60,7 @@ interface CustomerAdapter {
      * Returns a [SetupIntent] client secret to attach a new payment method to a customer. This will
      * call your backend to retrieve a client secret if you have provided a
      * [setupIntentClientSecretProvider] in the [CustomerAdapter.create] call.
-     * @return the client secret for the [SetupIntent]
+     * @return the client secret for the [SetupIntent].
      */
     suspend fun setupIntentClientSecretForCustomerAttach(): Result<String>
 
