@@ -9,8 +9,8 @@ public final class com/stripe/android/link/LinkActivityContract$Args : com/strip
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/link/LinkActivityContract$Args$Companion;
-	public final fun copy (Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;Lcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/link/LinkActivityContract$Args$InjectionParams;)Lcom/stripe/android/link/LinkActivityContract$Args;
-	public static synthetic fun copy$default (Lcom/stripe/android/link/LinkActivityContract$Args;Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;Lcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/link/LinkActivityContract$Args$InjectionParams;ILjava/lang/Object;)Lcom/stripe/android/link/LinkActivityContract$Args;
+	public final fun copy (Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;Lcom/stripe/android/model/PaymentMethodCreateParams;)Lcom/stripe/android/link/LinkActivityContract$Args;
+	public static synthetic fun copy$default (Lcom/stripe/android/link/LinkActivityContract$Args;Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;Lcom/stripe/android/model/PaymentMethodCreateParams;ILjava/lang/Object;)Lcom/stripe/android/link/LinkActivityContract$Args;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -26,14 +26,6 @@ public final class com/stripe/android/link/LinkActivityContract$Args$Creator : a
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkActivityContract$Args;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/link/LinkActivityContract$Args;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/link/LinkActivityContract$Args$InjectionParams$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkActivityContract$Args$InjectionParams;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/link/LinkActivityContract$Args$InjectionParams;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -96,7 +88,6 @@ public final class com/stripe/android/link/LinkActivityResult$Canceled$Creator :
 public final class com/stripe/android/link/LinkActivityResult$Canceled$Reason : java/lang/Enum {
 	public static final field BackPressed Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
 	public static final field LoggedOut Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
-	public static final field PayAnotherWay Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
 	public static fun values ()[Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
 }
