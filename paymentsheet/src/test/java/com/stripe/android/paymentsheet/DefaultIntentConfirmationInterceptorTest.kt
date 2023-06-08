@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import kotlinx.coroutines.test.runTest
@@ -48,7 +49,7 @@ class DefaultIntentConfirmationInterceptorTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
         val nextStep = interceptor.intercept(
-            clientSecret = "pi_1234_secret_4321",
+            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
@@ -73,7 +74,7 @@ class DefaultIntentConfirmationInterceptorTest {
         val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 
         val nextStep = interceptor.intercept(
-            clientSecret = "pi_1234_secret_4321",
+            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
             paymentMethodCreateParams = createParams,
             shippingValues = null,
             setupForFutureUsage = null,
@@ -97,7 +98,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val error = assertFailsWith<IllegalStateException> {
             interceptor.intercept(
-                clientSecret = null,
+                initializationMode = InitializationMode.DeferredIntent(mock()),
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 shippingValues = null,
                 setupForFutureUsage = null,
@@ -127,7 +128,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val error = assertFailsWith<IllegalStateException> {
             interceptor.intercept(
-                clientSecret = null,
+                initializationMode = InitializationMode.DeferredIntent(mock()),
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 shippingValues = null,
                 setupForFutureUsage = null,
@@ -162,7 +163,7 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         val nextStep = interceptor.intercept(
-            clientSecret = null,
+            initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             shippingValues = null,
             setupForFutureUsage = null,
@@ -204,7 +205,7 @@ class DefaultIntentConfirmationInterceptorTest {
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
 
         val nextStep = interceptor.intercept(
-            clientSecret = null,
+            initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
             setupForFutureUsage = null,
@@ -232,7 +233,7 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         val nextStep = interceptor.intercept(
-            clientSecret = null,
+            initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
             setupForFutureUsage = null,
@@ -258,7 +259,7 @@ class DefaultIntentConfirmationInterceptorTest {
         IntentConfirmationInterceptor.createIntentCallback = failingCreateIntentCallback()
 
         val nextStep = interceptor.intercept(
-            clientSecret = null,
+            initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
             setupForFutureUsage = null,
@@ -296,7 +297,7 @@ class DefaultIntentConfirmationInterceptorTest {
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
 
         val nextStep = interceptor.intercept(
-            clientSecret = null,
+            initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
@@ -327,7 +328,7 @@ class DefaultIntentConfirmationInterceptorTest {
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
 
         val nextStep = interceptor.intercept(
-            clientSecret = null,
+            initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
@@ -362,7 +363,7 @@ class DefaultIntentConfirmationInterceptorTest {
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
 
         val nextStep = interceptor.intercept(
-            clientSecret = null,
+            initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
@@ -408,7 +409,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 }
 
             interceptor.intercept(
-                clientSecret = null,
+                initializationMode = InitializationMode.DeferredIntent(mock()),
                 paymentMethod = paymentMethod,
                 shippingValues = null,
                 setupForFutureUsage = input,
@@ -435,7 +436,7 @@ class DefaultIntentConfirmationInterceptorTest {
         }
 
         val nextStep = interceptor.intercept(
-            clientSecret = null,
+            initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,

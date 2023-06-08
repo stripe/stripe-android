@@ -25,7 +25,7 @@ internal object DeferredIntentValidator {
 
                 require(paymentMode.currency == stripeIntent.currency) {
                     "Your PaymentIntent currency (${stripeIntent.currency}) does not match " +
-                        "the PaymentSheet.IntentConfiguration currency (${paymentMode.currency}))."
+                        "the PaymentSheet.IntentConfiguration currency (${paymentMode.currency})."
                 }
 
                 require(paymentMode.setupFutureUsage == stripeIntent.setupFutureUsage) {

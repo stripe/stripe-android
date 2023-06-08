@@ -5,9 +5,10 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.channels.Channel
 
-class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {
+internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {
 
     private val channel = Channel<IntentConfirmationInterceptor.NextStep>(capacity = 1)
 
@@ -36,7 +37,7 @@ class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {
     }
 
     override suspend fun intercept(
-        clientSecret: String?,
+        initializationMode: PaymentSheet.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
@@ -45,7 +46,7 @@ class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor {
     }
 
     override suspend fun intercept(
-        clientSecret: String?,
+        initializationMode: PaymentSheet.InitializationMode,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
