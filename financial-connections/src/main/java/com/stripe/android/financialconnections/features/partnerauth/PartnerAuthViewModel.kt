@@ -70,7 +70,6 @@ internal class PartnerAuthViewModel @Inject constructor(
                 institution = requireNotNull(manifest.activeInstitution),
                 allowManualEntry = manifest.allowManualEntry
             )
-            logger.debug("HOLA")
             Payload(
                 authSession = authSession,
                 institution = requireNotNull(manifest.activeInstitution),
@@ -83,12 +82,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                     listOfNotNull(launchedEvent, loadedEvent)
                 )
             }
-        }.execute {
-            if (payload is Fail) {
-                logger.debug(it.toString())
-            }
-            copy(payload = it)
-        }
+        }.execute { copy(payload = it) }
     }
 
     private fun observePayload() {
