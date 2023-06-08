@@ -22,7 +22,7 @@ internal class NativeAuthFlowRouterTest {
     )
 
     init {
-        whenever(debugConfiguration.overridenNative).thenReturn(null)
+        whenever(debugConfiguration.overriddenNative).thenReturn(null)
     }
 
     @Test

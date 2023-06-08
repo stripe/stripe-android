@@ -240,8 +240,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             connectionsDebugSharedPrefs.edit {
                 when (selectedOption) {
                     NativeOverride.None -> clear()
-                    NativeOverride.Native -> putBoolean("override_native", true)
-                    NativeOverride.Web -> putBoolean("override_native", false)
+                    NativeOverride.Native -> putBoolean("financial_connections_override_native", true)
+                    NativeOverride.Web -> putBoolean("financial_connections_override_native", false)
                 }
             }
         }
