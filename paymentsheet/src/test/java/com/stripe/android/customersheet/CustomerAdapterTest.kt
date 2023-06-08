@@ -225,6 +225,93 @@ class CustomerAdapterTest {
     }
 
     @Test
+    fun `setSelectedPaymentMethodOption clears the saved payment method`() = runTest {
+        val adapter = createAdapter(
+            customerEphemeralKeyProvider = {
+                Result.success(
+                    CustomerEphemeralKey(
+                        customerId = "cus_123",
+                        ephemeralKey = "ek_123"
+                    )
+                )
+            },
+            prefsRepositoryFactory = {
+                DefaultPrefsRepository(
+                    context = context,
+                    customerId = it.customerId,
+                    workContext = testScheduler
+                )
+            }
+        )
+        adapter.setSelectedPaymentOption(
+            paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
+        )
+        var result = adapter.retrieveSelectedPaymentOption()
+        assertThat(result.getOrNull()).isEqualTo(
+            CustomerAdapter.PaymentOption.StripeId("pm_1234")
+        )
+
+        adapter.setSelectedPaymentOption(
+            paymentOption = null
+        )
+        result = adapter.retrieveSelectedPaymentOption()
+        assertThat(result.getOrNull()).isEqualTo(null)
+    }
+
+    @Test
+    fun `setSelectedPaymentMethodOption succeeds when payment selection was saved`() = runTest {
+        val prefsRepository = FakePrefsRepository(
+            setSavedSelectionResult = true
+        )
+        val adapter = createAdapter(
+            customerEphemeralKeyProvider = {
+                Result.success(
+                    CustomerEphemeralKey(
+                        customerId = "cus_123",
+                        ephemeralKey = "ek_123"
+                    )
+                )
+            },
+            prefsRepositoryFactory = {
+                prefsRepository
+            },
+        )
+        val result = adapter.setSelectedPaymentOption(
+            paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
+        )
+        assertThat(result.getOrNull())
+            .isEqualTo(Unit)
+
+        val paymentOptionResult = adapter.retrieveSelectedPaymentOption()
+        assertThat(paymentOptionResult.getOrNull())
+            .isEqualTo(CustomerAdapter.PaymentOption.StripeId("pm_1234"))
+    }
+
+    @Test
+    fun `setSelectedPaymentMethodOption fails when payment selection was unable to be saved`() = runTest {
+        val adapter = createAdapter(
+            customerEphemeralKeyProvider = {
+                Result.success(
+                    CustomerEphemeralKey(
+                        customerId = "cus_123",
+                        ephemeralKey = "ek_123"
+                    )
+                )
+            },
+            prefsRepositoryFactory = {
+                FakePrefsRepository(
+                    setSavedSelectionResult = false
+                )
+            },
+        )
+        val result = adapter.setSelectedPaymentOption(
+            paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
+        )
+        assertThat(result.exceptionOrNull()?.message)
+            .isEqualTo("Unable to set the payment option: StripeId(id=pm_1234)")
+    }
+
+    @Test
     fun `setSelectedPaymentMethodOption sets none when there is no selection`() = runTest {
         val adapter = createAdapter(
             customerEphemeralKeyProvider = {

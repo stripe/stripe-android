@@ -7,8 +7,10 @@ import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -37,11 +39,11 @@ internal class StripeCustomerAdapter @Inject constructor(
     private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
 
     override suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>> {
-        return getCustomerEphemeralKey().map { customer ->
+        return getCustomerEphemeralKey().map { customerEphemeralKey ->
             val paymentMethods = customerRepository.getPaymentMethods(
                 customerConfig = PaymentSheet.CustomerConfiguration(
-                    id = customer.customerId,
-                    ephemeralKeySecret = customer.ephemeralKey
+                    id = customerEphemeralKey.customerId,
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
                 ),
                 types = listOf(PaymentMethod.Type.Card)
             )
@@ -50,11 +52,11 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun attachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
-        return getCustomerEphemeralKey().map { customer ->
+        return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.attachPaymentMethod(
                 customerConfig = PaymentSheet.CustomerConfiguration(
-                    id = customer.customerId,
-                    ephemeralKeySecret = customer.ephemeralKey
+                    id = customerEphemeralKey.customerId,
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
                 ),
                 paymentMethodId = paymentMethodId
             ).getOrElse {
@@ -64,11 +66,11 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun detachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
-        return getCustomerEphemeralKey().mapCatching { customer ->
+        return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             customerRepository.detachPaymentMethod(
                 customerConfig = PaymentSheet.CustomerConfiguration(
-                    id = customer.customerId,
-                    ephemeralKeySecret = customer.ephemeralKey
+                    id = customerEphemeralKey.customerId,
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
                 ),
                 paymentMethodId = paymentMethodId
             ).getOrElse {
@@ -77,10 +79,23 @@ internal class StripeCustomerAdapter @Inject constructor(
         }
     }
 
-    override suspend fun setSelectedPaymentOption(paymentOption: CustomerAdapter.PaymentOption?) {
-        getCustomerEphemeralKey().getOrNull()?.let { customerEphemeralKey ->
+    override suspend fun setSelectedPaymentOption(
+        paymentOption: CustomerAdapter.PaymentOption?
+    ): Result<Unit> {
+        return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
-            prefsRepository.setSavedSelection(paymentOption?.toSavedSelection())
+            withContext(workContext) {
+                val result = prefsRepository.setSavedSelection(paymentOption?.toSavedSelection())
+                if (result) {
+                    Result.success(Unit)
+                } else {
+                    Result.failure(
+                        IOException("Unable to set the payment option: $paymentOption")
+                    )
+                }
+            }
+        }.getOrElse {
+            Result.failure(it)
         }
     }
 
