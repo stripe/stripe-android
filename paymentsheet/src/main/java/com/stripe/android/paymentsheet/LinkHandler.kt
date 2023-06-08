@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import javax.inject.Inject
 
 internal class LinkHandler @Inject constructor(
-    val linkLauncher: LinkPaymentLauncher,
+    private val linkLauncher: LinkPaymentLauncher,
     private val linkInteractor: LinkInteractor,
     private val savedStateHandle: SavedStateHandle,
 ) {
