@@ -7,12 +7,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
 import com.stripe.android.link.injection.LinkPaymentLauncherComponent
@@ -67,11 +65,6 @@ class LinkPaymentLauncher @Inject internal constructor(
         .publishableKeyProvider(publishableKeyProvider)
         .stripeAccountIdProvider(stripeAccountIdProvider)
         .productUsage(productUsage)
-
-    @InjectorKey
-    private val injectorKey: String = WeakMapInjectorRegistry.nextKey(
-        requireNotNull(LinkPaymentLauncher::class.simpleName)
-    )
 
     private val componentFlow = MutableStateFlow<LinkPaymentLauncherComponent?>(null)
 
@@ -128,13 +121,6 @@ class LinkPaymentLauncher @Inject internal constructor(
         val args = LinkActivityContract.Args(
             configuration,
             prefilledNewCardParams,
-            LinkActivityContract.Args.InjectionParams(
-                injectorKey,
-                productUsage,
-                enableLogging,
-                publishableKeyProvider(),
-                stripeAccountIdProvider()
-            )
         )
         linkActivityResultLauncher?.launch(args)
     }
