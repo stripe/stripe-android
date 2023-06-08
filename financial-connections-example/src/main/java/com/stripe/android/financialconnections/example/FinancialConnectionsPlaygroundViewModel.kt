@@ -49,7 +49,8 @@ class FinancialConnectionsPlaygroundViewModel(
             Flow.PaymentIntent -> startWithPaymentIntent(
                 merchant,
                 keys,
-                email.takeIf { it.isNotEmpty() })
+                email.takeIf { it.isNotEmpty() }
+            )
         }
     }
 

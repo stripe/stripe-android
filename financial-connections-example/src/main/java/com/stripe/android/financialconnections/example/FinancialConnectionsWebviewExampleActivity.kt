@@ -4,11 +4,9 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.Message
 import android.util.Log
 import android.view.ViewGroup
 import android.webkit.ConsoleMessage
-import android.webkit.JsResult
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -24,7 +22,6 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-
 
 class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
 
@@ -43,13 +40,12 @@ class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
         }
     }
 
-    fun onButtonClick() {
+    private fun onButtonClick() {
         val intent = Intent(
             this,
             WebviewContainerActivity::class.java
         )
-//        intent.putExtra("url", "https://rich-familiar-angle.glitch.me/")
-        intent.putExtra("url", "https://respected-aeolian-heather.glitch.me/")
+        intent.putExtra("url", "https://rich-familiar-angle.glitch.me/")
         startActivity(intent)
     }
 }
@@ -64,6 +60,7 @@ class WebviewContainerActivity : Activity() {
             it.settings.javaScriptEnabled = true
             it.settings.loadWithOverviewMode = true
             it.webViewClient = buildWebviewClient()
+            it.settings.domStorageEnabled = true
             it.webChromeClient = buildWebChromeClient()
             it.layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -76,43 +73,31 @@ class WebviewContainerActivity : Activity() {
         setContentView(frameLayout)
     }
 
-    private fun buildWebChromeClient(): WebChromeClient {
-        return object : WebChromeClient() {
-            override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
-                Log.d(
-                    "Webview", consoleMessage.message() + " -- From line "
-                        + consoleMessage.lineNumber() + " of "
-                        + consoleMessage.sourceId()
-                )
-                return super.onConsoleMessage(consoleMessage)
-
-            }
-        }
-    }
-
     private fun buildWebviewClient() = object : WebViewClient() {
         override fun shouldOverrideUrlLoading(
             view: WebView,
             webResourceRequest: WebResourceRequest
         ): Boolean {
-            val forMainFrame = webResourceRequest.isForMainFrame
-            Log.d(
-                "URL",
-                "${webResourceRequest.url} " +
-                    "isForMainFrame? $forMainFrame "
+            Log.d("URL", "${webResourceRequest.url} ")
+            val builder: CustomTabsIntent.Builder = CustomTabsIntent.Builder()
+            val customTabsIntent: CustomTabsIntent = builder.build()
+            customTabsIntent.launchUrl(
+                this@WebviewContainerActivity,
+                Uri.parse(webResourceRequest.url.toString())
             )
-            // TODO just open browser for desired links.
-            return if (true) {
-                val builder: CustomTabsIntent.Builder = CustomTabsIntent.Builder()
-                val customTabsIntent: CustomTabsIntent = builder.build()
-                customTabsIntent.launchUrl(
-                    this@WebviewContainerActivity,
-                    Uri.parse(webResourceRequest.url.toString())
-                )
-                true
-            } else {
-                false
-            }
+            return true
+        }
+    }
+
+    private fun buildWebChromeClient() = object : WebChromeClient() {
+        override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
+            Log.d(
+                "Webview",
+                consoleMessage.message() + " -- From line " +
+                    consoleMessage.lineNumber() + " of " +
+                    consoleMessage.sourceId()
+            )
+            return super.onConsoleMessage(consoleMessage)
         }
     }
 
