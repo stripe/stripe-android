@@ -264,24 +264,20 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         isFlowController: Boolean,
     ): NextStep {
         return retrieveStripeIntent(clientSecret).mapCatching { intent ->
-            DeferredIntentValidator.validate(intent, intentConfiguration, isFlowController)
-        }.fold(
-            onSuccess = { intent ->
-                if (intent.isConfirmed) {
-                    NextStep.Complete(isForceSuccess = false)
-                } else if (intent.requiresAction()) {
-                    NextStep.HandleNextAction(clientSecret)
-                } else {
-                    createConfirmStep(clientSecret, shippingValues, paymentMethod)
-                }
-            },
-            onFailure = { error ->
-                NextStep.Fail(
-                    cause = error,
-                    message = genericErrorMessage,
-                )
+            if (intent.isConfirmed) {
+                NextStep.Complete(isForceSuccess = false)
+            } else if (intent.requiresAction()) {
+                NextStep.HandleNextAction(clientSecret)
+            } else {
+                DeferredIntentValidator.validate(intent, intentConfiguration, isFlowController)
+                createConfirmStep(clientSecret, shippingValues, paymentMethod)
             }
-        )
+        }.getOrElse { error ->
+            NextStep.Fail(
+                cause = error,
+                message = genericErrorMessage,
+            )
+        }
     }
 
     private suspend fun retrieveStripeIntent(clientSecret: String): Result<StripeIntent> {

@@ -11,6 +11,10 @@ import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
 @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal object DeferredIntentValidator {
 
+    /**
+     * Validates that the created [StripeIntent] matches the [PaymentSheet.IntentConfiguration] that
+     * was provided to [PaymentSheet].
+     */
     fun validate(
         stripeIntent: StripeIntent,
         intentConfiguration: PaymentSheet.IntentConfiguration,
