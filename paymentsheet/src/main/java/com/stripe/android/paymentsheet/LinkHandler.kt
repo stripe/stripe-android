@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkInteractor
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -23,6 +24,7 @@ import javax.inject.Inject
 
 internal class LinkHandler @Inject constructor(
     val linkLauncher: LinkPaymentLauncher,
+    private val linkInteractor: LinkInteractor,
     private val savedStateHandle: SavedStateHandle,
 ) {
     sealed class ProcessingState {
@@ -59,7 +61,7 @@ internal class LinkHandler @Inject constructor(
 
     val accountStatus: Flow<AccountStatus> = linkConfiguration
         .filterNotNull()
-        .flatMapLatest(linkLauncher::getAccountStatusFlow)
+        .flatMapLatest(linkInteractor::getAccountStatusFlow)
 
     fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
         linkLauncher.register(
@@ -92,7 +94,7 @@ internal class LinkHandler @Inject constructor(
 
             val configuration = requireNotNull(linkConfiguration.value)
 
-            when (linkLauncher.getAccountStatusFlow(configuration).first()) {
+            when (linkInteractor.getAccountStatusFlow(configuration).first()) {
                 AccountStatus.Verified -> {
                     _activeLinkSession.value = true
                     completeLinkInlinePayment(
@@ -109,7 +111,7 @@ internal class LinkHandler @Inject constructor(
                 AccountStatus.Error -> {
                     _activeLinkSession.value = false
                     userInput?.let {
-                        linkLauncher.signInWithUserInput(configuration, userInput).fold(
+                        linkInteractor.signInWithUserInput(configuration, userInput).fold(
                             onSuccess = {
                                 // If successful, the account was fetched or created, so try again
                                 payWithLinkInline(
@@ -143,7 +145,7 @@ internal class LinkHandler @Inject constructor(
         } else {
             _processingState.emit(
                 ProcessingState.PaymentDetailsCollected(
-                    linkLauncher.attachNewCardToAccount(
+                    linkInteractor.attachNewCardToAccount(
                         configuration,
                         paymentMethodCreateParams
                     ).getOrNull()

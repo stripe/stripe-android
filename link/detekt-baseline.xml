@@ -2,39 +2,17 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>ForbiddenComment:LinkActivityTest.kt$LinkActivityTest$// TODO:(brnunes-stripe) Enable these tests</ID>
-    <ID>FunctionNaming:LinkAppBar.kt$@Preview @Composable private fun LinkAppBar_ChildScreen()</ID>
-    <ID>FunctionNaming:LinkAppBar.kt$@Preview @Composable private fun LinkAppBar_ChildScreen_NoEmail()</ID>
-    <ID>FunctionNaming:LinkAppBar.kt$@Preview @Composable private fun LinkAppBar_NoEmail()</ID>
-    <ID>LongMethod:LinkActivity.kt$LinkActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
-    <ID>LongMethod:LinkAppBar.kt$@Composable internal fun LinkAppBar( state: LinkAppBarState, onBackPressed: () -> Unit, onLogout: () -> Unit, showBottomSheetContent: (BottomSheetContent?) -> Unit )</ID>
     <ID>LongMethod:LinkButtonView.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) @Composable fun LinkButton( email: String?, enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:LinkInlineSignup.kt$@Composable internal fun LinkInlineSignup( merchantName: String, emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, signUpState: SignUpState, enabled: Boolean, expanded: Boolean, requiresNameCollection: Boolean, errorMessage: ErrorMessage?, toggleExpanded: () -> Unit, modifier: Modifier = Modifier )</ID>
-    <ID>LongMethod:PaymentDetails.kt$@Composable internal fun PaymentDetailsListItem( paymentDetails: ConsumerPaymentDetails.PaymentDetails, enabled: Boolean, isSupported: Boolean, isSelected: Boolean, isUpdating: Boolean, onClick: () -> Unit, onMenuButtonClick: () -> Unit )</ID>
-    <ID>LongMethod:PaymentMethodBody.kt$@Composable internal fun PaymentMethodBody( linkAccount: LinkAccount, injector: NonFallbackInjector, loadFromArgs: Boolean )</ID>
-    <ID>LongMethod:SignUpScreen.kt$@OptIn(ExperimentalComposeUiApi::class) @Composable internal fun SignUpBody( merchantName: String, emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, signUpState: SignUpState, isReadyToSignUp: Boolean, requiresNameCollection: Boolean, errorMessage: ErrorMessage?, onSignUpClick: () -> Unit )</ID>
-    <ID>LongMethod:WalletScreen.kt$@Composable internal fun WalletBody( uiState: WalletUiState, primaryButtonLabel: String, expiryDateController: TextFieldController, cvcController: CvcController, setExpanded: (Boolean) -> Unit, onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onAddNewPaymentMethodClick: () -> Unit, onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onSetDefault: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onPrimaryButtonClick: () -> Unit, onPayAnotherWayClick: () -> Unit, showBottomSheetContent: (BottomSheetContent?) -> Unit )</ID>
-    <ID>LongMethod:WalletScreen.kt$@Composable private fun ExpandedPaymentDetails( uiState: WalletUiState, onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onMenuButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onAddNewPaymentMethodClick: () -> Unit, onCollapse: () -> Unit )</ID>
     <ID>MagicNumber:DefaultLinkEventsReporter.kt$DefaultLinkEventsReporter$1000f</ID>
-    <ID>MagicNumber:PaymentDetails.kt$0.6f</ID>
-    <ID>MagicNumber:PaymentMethodBody.kt$0.6f</ID>
-    <ID>MagicNumber:VerificationScreen.kt$200</ID>
-    <ID>MagicNumber:WalletScreen.kt$180f</ID>
     <ID>MatchingDeclarationName:ErrorText.kt$ErrorTextStyle</ID>
-    <ID>MatchingDeclarationName:LinkLogoutSheet.kt$LinkLogoutMenuItem : LinkMenuItem</ID>
-    <ID>MatchingDeclarationName:LinkMenu.kt$LinkMenuItem</ID>
     <ID>MatchingDeclarationName:PrimaryButton.kt$PrimaryButtonState</ID>
-    <ID>MatchingDeclarationName:WalletPaymentMethodMenu.kt$WalletPaymentMethodMenuItem : LinkMenuItem</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$val d = delegate ?: throw IllegalStateException("Cannot run onActivity since the activity hasn't been launched.")</ID>
     <ID>TooManyFunctions:DefaultLinkEventsReporter.kt$DefaultLinkEventsReporter : LinkEventsReporter</ID>
-    <ID>TooManyFunctions:LinkAccountManager.kt$LinkAccountManager</ID>
-    <ID>TooManyFunctions:LinkApiRepository.kt$LinkApiRepository : LinkRepository</ID>
     <ID>TooManyFunctions:LinkEventsReporter.kt$LinkEventsReporter</ID>
     <ID>TooManyFunctions:LinkPaymentLauncherComponent.kt$LinkPaymentLauncherComponent$Builder</ID>
-    <ID>TooManyFunctions:LinkRepository.kt$LinkRepository</ID>
     <ID>TopLevelPropertyNaming:PrimaryButton.kt$internal const val completedIconTestTag = "CompletedIcon"</ID>
     <ID>TopLevelPropertyNaming:PrimaryButton.kt$internal const val progressIndicatorTestTag = "CircularProgressIndicator"</ID>
-    <ID>UnnecessaryAbstractClass:LinkComponent.kt$LinkComponent$LinkComponent</ID>
   </CurrentIssues>
 </SmellBaseline>

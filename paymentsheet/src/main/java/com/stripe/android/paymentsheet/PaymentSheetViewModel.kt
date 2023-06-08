@@ -24,6 +24,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.link.LinkInteractor
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -94,6 +95,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
+    linkInteractor: LinkInteractor,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
 ) : BaseSheetViewModel(
     application = application,
@@ -106,6 +108,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     lpmRepository = lpmRepository,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
+    linkInteractor = linkInteractor,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = true),
 ) {
 

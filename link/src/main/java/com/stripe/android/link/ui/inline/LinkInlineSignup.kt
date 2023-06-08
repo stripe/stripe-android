@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.link.LinkInteractor
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -90,12 +91,12 @@ private fun Preview() {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LinkInlineSignup(
-    linkPaymentLauncher: LinkPaymentLauncher,
+    linkInteractor: LinkInteractor,
     enabled: Boolean,
     onStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    linkPaymentLauncher.component?.let { component ->
+    linkInteractor.component?.let { component ->
         val viewModel: InlineSignupViewModel = viewModel(
             factory = InlineSignupViewModel.Factory(component.injector)
         )

@@ -11,7 +11,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkInteractor
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -122,7 +122,7 @@ internal class PaymentSheetViewModelTest {
     }
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
-    private val linkLauncher = mock<LinkPaymentLauncher> {
+    private val linkInteractor = mock<LinkInteractor> {
         on { getAccountStatusFlow(any()) } doReturn flowOf(AccountStatus.SignedOut)
     }
 
@@ -1327,8 +1327,8 @@ internal class PaymentSheetViewModelTest {
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return TestViewModelFactory.create(
-            linkLauncher = linkLauncher,
-        ) { linkHandler, savedStateHandle ->
+            linkInteractor = linkInteractor,
+        ) { linkHandler, linkInteractor, savedStateHandle ->
             PaymentSheetViewModel(
                 application,
                 args,
@@ -1352,6 +1352,7 @@ internal class PaymentSheetViewModelTest {
                 testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
+                linkInteractor = linkInteractor,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
             )
         }

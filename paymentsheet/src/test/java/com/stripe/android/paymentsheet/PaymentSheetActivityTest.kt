@@ -34,7 +34,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkInteractor
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.model.CardBrand
@@ -968,16 +968,14 @@ internal class PaymentSheetActivityTest {
         whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
         whenever(lpmRepository.serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
 
-        val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
-            onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
-            on { emailFlow } doReturn flowOf("email@email.com")
-        }
-
         registerFormViewModelInjector()
 
         TestViewModelFactory.create(
-            linkLauncher = linkPaymentLauncher,
-        ) { linkHandler, savedStateHandle ->
+            linkInteractor = mock<LinkInteractor>().stub {
+                onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
+                on { emailFlow } doReturn flowOf("email@email.com")
+            },
+        ) { linkHandler, linkInteractor, savedStateHandle ->
             PaymentSheetViewModel(
                 ApplicationProvider.getApplicationContext(),
                 PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
@@ -1004,6 +1002,7 @@ internal class PaymentSheetActivityTest {
                 testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
+                linkInteractor = linkInteractor,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
             ).also {
                 it.injector = injector

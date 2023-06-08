@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.LinkInteractor
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkInlineSignedIn
@@ -32,7 +33,7 @@ internal fun PaymentElement(
     supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
     selectedItem: LpmRepository.SupportedPaymentMethod,
     showLinkInlineSignup: Boolean,
-    linkPaymentLauncher: LinkPaymentLauncher,
+    linkInteractor: LinkInteractor,
     showCheckboxFlow: Flow<Boolean>,
     onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
     onLinkSignupStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit,
@@ -85,7 +86,7 @@ internal fun PaymentElement(
         if (showLinkInlineSignup) {
             if (linkInlineSelection.value != null) {
                 LinkInlineSignedIn(
-                    linkPaymentLauncher = linkPaymentLauncher,
+                    linkInteractor = linkInteractor,
                     onLogout = {
                         sheetViewModel.linkHandler.linkInlineSelection.value = null
                     },
@@ -95,7 +96,7 @@ internal fun PaymentElement(
                 )
             } else {
                 LinkInlineSignup(
-                    linkPaymentLauncher = linkPaymentLauncher,
+                    linkInteractor = linkInteractor,
                     enabled = enabled,
                     onStateChanged = onLinkSignupStateChanged,
                     modifier = Modifier

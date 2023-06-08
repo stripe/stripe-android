@@ -27,7 +27,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkInteractor
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -331,10 +331,6 @@ internal class PaymentOptionsActivityTest {
             bundleOf(ActivityStarter.Args.EXTRA to args)
         )
 
-        val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
-            onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
-        }
-
         val lpmRepository = LpmRepository(
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Context>().resources,
@@ -348,8 +344,10 @@ internal class PaymentOptionsActivityTest {
         }
 
         val viewModel = TestViewModelFactory.create(
-            linkLauncher = linkPaymentLauncher,
-        ) { linkHandler, savedStateHandle ->
+            linkInteractor = mock<LinkInteractor>().stub {
+                onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
+            },
+        ) { linkHandler, linkInteractor, savedStateHandle ->
             registerFormViewModelInjector(lpmRepository)
             PaymentOptionsViewModel(
                 args = args,
@@ -362,6 +360,7 @@ internal class PaymentOptionsActivityTest {
                 lpmRepository = lpmRepository,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
+                linkInteractor = linkInteractor,
             ).also {
                 it.injector = injector
             }

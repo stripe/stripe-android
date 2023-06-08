@@ -92,7 +92,7 @@ internal fun AddPaymentMethod(
                 supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
                 selectedItem = selectedItem,
                 showLinkInlineSignup = showLinkInlineSignup,
-                linkPaymentLauncher = linkHandler.linkLauncher,
+                linkInteractor = sheetViewModel.linkInteractor,
                 showCheckboxFlow = showCheckboxFlow,
                 onItemSelectedListener = { selectedLpm ->
                     if (selectedItem != selectedLpm) {
