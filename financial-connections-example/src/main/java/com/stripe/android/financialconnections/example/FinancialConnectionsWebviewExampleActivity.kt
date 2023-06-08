@@ -45,7 +45,7 @@ class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
             this,
             WebviewContainerActivity::class.java
         )
-        intent.putExtra("url", "https://rich-familiar-angle.glitch.me/")
+        intent.putExtra("url", GLITCH_EXAMPLE_URL)
         startActivity(intent)
     }
 }
@@ -78,14 +78,19 @@ class WebviewContainerActivity : Activity() {
             view: WebView,
             webResourceRequest: WebResourceRequest
         ): Boolean {
-            Log.d("URL", "${webResourceRequest.url} ")
-            val builder: CustomTabsIntent.Builder = CustomTabsIntent.Builder()
-            val customTabsIntent: CustomTabsIntent = builder.build()
-            customTabsIntent.launchUrl(
-                this@WebviewContainerActivity,
-                Uri.parse(webResourceRequest.url.toString())
-            )
-            return true
+            Log.d("Webview", "url loading: ${webResourceRequest.url}")
+            val url = webResourceRequest.url.toString()
+            return when {
+                // Glitch-only: instance is idle it'll wake up and redirect when ready. This prevents
+                // the redirect from opening in an external browser.
+                url.startsWith(GLITCH_EXAMPLE_URL) -> false
+                else -> {
+                    CustomTabsIntent.Builder()
+                        .build()
+                        .launchUrl(this@WebviewContainerActivity, Uri.parse(url))
+                    true
+                }
+            }
         }
     }
 
@@ -106,3 +111,6 @@ class WebviewContainerActivity : Activity() {
         super.onDestroy()
     }
 }
+
+private const val GLITCH_EXAMPLE_URL = "https://rich-familiar-angle.glitch.me/"
+
