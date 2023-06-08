@@ -395,7 +395,7 @@ private class LinkTestDataImpl(
     override val testScope: TestScope,
     override val handler: LinkHandler,
     override val linkLauncher: LinkPaymentLauncher,
-    val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    override val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     override val savedStateHandle: SavedStateHandle,
     override val configuration: LinkPaymentLauncher.Configuration,
     override val accountStatusFlow: MutableSharedFlow<AccountStatus>,
