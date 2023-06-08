@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Financial Connections
+* [FIXED][6836](https://github.com/stripe/stripe-android/pull/6836) Prevents double navigation when tapping too quickly.
+* 
 ## 20.25.5 - 2023-06-05
 
 ### PaymentSheet
