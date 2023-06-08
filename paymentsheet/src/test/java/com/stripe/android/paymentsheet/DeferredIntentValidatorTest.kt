@@ -20,6 +20,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
+                isFlowController = false,
             )
         }
 
@@ -40,6 +41,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
+                isFlowController = false,
             )
         }
 
@@ -60,6 +62,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
+                isFlowController = false,
             )
         }
 
@@ -84,6 +87,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
+                isFlowController = false,
             )
         }
 
@@ -106,6 +110,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
+                isFlowController = false,
             )
         }
 
@@ -118,6 +123,43 @@ internal class DeferredIntentValidatorTest {
     }
 
     @Test
+    fun `Fails if PaymentIntent has manual capture method outside of FlowController`() {
+        val paymentIntent = PaymentIntentFactory.create()
+        val intentConfiguration = makeIntentConfigurationForPayment(
+            captureMethod = IntentConfiguration.CaptureMethod.Manual,
+        )
+
+        val failure = assertThrows(IllegalArgumentException::class.java) {
+            DeferredIntentValidator.validate(
+                stripeIntent = paymentIntent,
+                intentConfiguration = intentConfiguration,
+                isFlowController = true,
+            )
+        }
+
+        assertThat(failure).isInstanceOf(IllegalArgumentException::class.java)
+
+        assertThat(failure).hasMessageThat().isEqualTo(
+            "Your PaymentIntent captureMethod (Automatic) does not match " +
+                "the PaymentSheet.IntentConfiguration captureMethod (Manual)."
+        )
+    }
+
+    @Test
+    fun `Succeeds if PaymentIntent and IntentConfiguration match`() {
+        val paymentIntent = PaymentIntentFactory.create()
+        val intentConfiguration = makeIntentConfigurationForPayment()
+
+        val result = DeferredIntentValidator.validate(
+            stripeIntent = paymentIntent,
+            intentConfiguration = intentConfiguration,
+            isFlowController = true,
+        )
+
+        assertThat(result).isEqualTo(paymentIntent)
+    }
+
+    @Test
     fun `Fails if SetupIntent is validated against IntentConfiguration in payment mode`() {
         val paymentIntent = SetupIntentFixtures.SI_SUCCEEDED
         val intentConfiguration = makeIntentConfigurationForPayment()
@@ -126,6 +168,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
+                isFlowController = false,
             )
         }
 
@@ -148,6 +191,7 @@ internal class DeferredIntentValidatorTest {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
+                isFlowController = false,
             )
         }
 
@@ -157,6 +201,20 @@ internal class DeferredIntentValidatorTest {
             "Your SetupIntent usage (off_session) does not match " +
                 "the PaymentSheet.IntentConfiguration usage (off_session)."
         )
+    }
+
+    @Test
+    fun `Succeeds if SetupIntent and IntentConfiguration match`() {
+        val paymentIntent = SetupIntentFixtures.SI_SUCCEEDED
+        val intentConfiguration = makeIntentConfigurationForSetup()
+
+        val result = DeferredIntentValidator.validate(
+            stripeIntent = paymentIntent,
+            intentConfiguration = intentConfiguration,
+            isFlowController = true,
+        )
+
+        assertThat(result).isEqualTo(paymentIntent)
     }
 
     private fun makeIntentConfigurationForPayment(

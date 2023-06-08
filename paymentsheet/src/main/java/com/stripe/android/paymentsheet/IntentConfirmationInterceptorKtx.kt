@@ -9,6 +9,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
     initializationMode: PaymentSheet.InitializationMode,
     paymentSelection: PaymentSelection?,
     shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    isFlowController: Boolean,
 ): IntentConfirmationInterceptor.NextStep {
     return when (paymentSelection) {
         is PaymentSelection.New -> {
@@ -23,6 +24,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
                 shippingValues = shippingValues,
                 setupForFutureUsage = setupFutureUsage,
+                isFlowController = isFlowController,
             )
         }
         is PaymentSelection.Saved -> {
@@ -31,6 +33,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 paymentMethod = paymentSelection.paymentMethod,
                 shippingValues = shippingValues,
                 setupForFutureUsage = null,
+                isFlowController = isFlowController,
             )
         }
         else -> {

@@ -53,6 +53,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
+            isFlowController = false,
         )
 
         val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
@@ -78,6 +79,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodCreateParams = createParams,
             shippingValues = null,
             setupForFutureUsage = null,
+            isFlowController = false,
         )
 
         val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
@@ -102,6 +104,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 shippingValues = null,
                 setupForFutureUsage = null,
+                isFlowController = false,
             )
         }
 
@@ -132,6 +135,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 shippingValues = null,
                 setupForFutureUsage = null,
+                isFlowController = false,
             )
         }
 
@@ -167,6 +171,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             shippingValues = null,
             setupForFutureUsage = null,
+            isFlowController = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -209,6 +214,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
             setupForFutureUsage = null,
+            isFlowController = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -237,6 +243,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
             setupForFutureUsage = null,
+            isFlowController = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -263,6 +270,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
             setupForFutureUsage = null,
+            isFlowController = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -301,6 +309,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
+            isFlowController = false,
         )
 
         assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Confirm::class.java)
@@ -332,6 +341,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
+            isFlowController = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -367,6 +377,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
+            isFlowController = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -413,6 +424,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethod = paymentMethod,
                 shippingValues = null,
                 setupForFutureUsage = input,
+                isFlowController = false,
             )
         }
 
@@ -440,6 +452,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
+            isFlowController = false,
         )
 
         verify(stripeRepository, never()).retrieveStripeIntent(any(), any(), any())

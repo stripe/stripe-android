@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntent.CaptureMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
@@ -13,6 +14,7 @@ internal object DeferredIntentValidator {
     fun validate(
         stripeIntent: StripeIntent,
         intentConfiguration: PaymentSheet.IntentConfiguration,
+        isFlowController: Boolean,
     ): StripeIntent {
         val params = mapToDeferredIntentParams(intentConfiguration)
 
@@ -43,6 +45,15 @@ internal object DeferredIntentValidator {
                     "Your PaymentIntent captureMethod (${stripeIntent.captureMethod}) does not " +
                         "match the PaymentSheet.IntentConfiguration " +
                         "captureMethod (${paymentMode.captureMethod})."
+                }
+
+                // Manual confirmation is only available using FlowController because merchants own
+                // the final step of confirmation. Showing a successful payment in the complete flow
+                // may be misleading when merchants still need to do a final confirmation which
+                // could fail.
+                require(stripeIntent.captureMethod != CaptureMethod.Manual || isFlowController) {
+                    "Your PaymentIntent confirmationMethod (${stripeIntent.confirmationMethod}) " +
+                        "can only be used with PaymentSheet.FlowController."
                 }
             }
             is SetupIntent -> {

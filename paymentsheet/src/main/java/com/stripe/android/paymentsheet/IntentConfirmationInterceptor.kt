@@ -45,6 +45,7 @@ internal interface IntentConfirmationInterceptor {
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        isFlowController: Boolean,
     ): NextStep
 
     suspend fun intercept(
@@ -52,6 +53,7 @@ internal interface IntentConfirmationInterceptor {
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        isFlowController: Boolean,
     ): NextStep
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -83,7 +85,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         initializationMode: PaymentSheet.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
+        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        isFlowController: Boolean,
     ): NextStep {
         return when (initializationMode) {
             is PaymentSheet.InitializationMode.DeferredIntent -> {
@@ -92,6 +95,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
                     setupForFutureUsage = setupForFutureUsage,
+                    isFlowController = isFlowController,
                 )
             }
             is PaymentSheet.InitializationMode.PaymentIntent -> {
@@ -118,7 +122,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         initializationMode: PaymentSheet.InitializationMode,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
+        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        isFlowController: Boolean,
     ): NextStep {
         return when (initializationMode) {
             is PaymentSheet.InitializationMode.DeferredIntent -> {
@@ -127,6 +132,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethod = paymentMethod,
                     shippingValues = shippingValues,
                     setupForFutureUsage = setupForFutureUsage,
+                    isFlowController = isFlowController,
                 )
             }
             is PaymentSheet.InitializationMode.PaymentIntent -> {
@@ -151,6 +157,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        isFlowController: Boolean,
     ): NextStep {
         val params = paymentMethodCreateParams.copy(
             productUsage = paymentMethodCreateParams.attribution + "deferred-intent",
@@ -163,6 +170,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethod = paymentMethod,
                     shippingValues = shippingValues,
                     setupForFutureUsage = setupForFutureUsage,
+                    isFlowController = isFlowController,
                 )
             },
             onFailure = { error ->
@@ -179,6 +187,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        isFlowController: Boolean,
     ): NextStep {
         return when (val callback = IntentConfirmationInterceptor.createIntentCallback) {
             is CreateIntentCallback -> {
@@ -188,6 +197,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethod = paymentMethod,
                     shouldSavePaymentMethod = setupForFutureUsage == OffSession,
                     shippingValues = shippingValues,
+                    isFlowController = isFlowController,
                 )
             }
             else -> {
@@ -216,6 +226,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        isFlowController: Boolean,
     ): NextStep {
         val result = createIntentCallback.onCreateIntent(
             paymentMethod = paymentMethod,
@@ -232,6 +243,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         intentConfiguration = intentConfiguration,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues,
+                        isFlowController = isFlowController,
                     )
                 }
             }
@@ -249,9 +261,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        isFlowController: Boolean,
     ): NextStep {
         return retrieveStripeIntent(clientSecret).mapCatching { intent ->
-            DeferredIntentValidator.validate(intent, intentConfiguration)
+            DeferredIntentValidator.validate(intent, intentConfiguration, isFlowController)
         }.fold(
             onSuccess = { intent ->
                 if (intent.isConfirmed) {
