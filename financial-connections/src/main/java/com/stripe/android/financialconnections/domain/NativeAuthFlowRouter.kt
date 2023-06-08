@@ -18,7 +18,7 @@ internal class NativeAuthFlowRouter @Inject constructor(
 ) {
 
     fun nativeAuthFlowEnabled(manifest: FinancialConnectionsSessionManifest): Boolean {
-        debugConfiguration.overridenNative?.let { return it }
+        debugConfiguration.overriddenNative?.let { return it }
         val killSwitchEnabled = nativeKillSwitchActive(manifest)
         val nativeExperimentEnabled = manifest
             .experimentAssignment(Experiment.CONNECTIONS_MOBILE_NATIVE) == EXPERIMENT_VALUE_NATIVE_TREATMENT
@@ -27,7 +27,7 @@ internal class NativeAuthFlowRouter @Inject constructor(
 
     @Suppress("ComplexCondition")
     suspend fun logExposure(manifest: FinancialConnectionsSessionManifest) {
-        debugConfiguration.overridenNative?.let { return }
+        debugConfiguration.overriddenNative?.let { return }
         if (nativeKillSwitchActive(manifest).not()) {
             eventTracker.trackExposure(
                 experiment = Experiment.CONNECTIONS_MOBILE_NATIVE,

@@ -60,7 +60,7 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
      * [Uri], if no override set.
      */
     private fun Uri.overrideWithDebugConfiguration(): Uri =
-        when (DebugConfiguration(application).overridenNative) {
+        when (DebugConfiguration(application).overriddenNative) {
             true -> Uri.parse(toString().replace(HOST_LINK_ACCOUNTS, HOST_NATIVE_LINK_ACCOUNTS))
             false -> Uri.parse(toString().replace(HOST_NATIVE_LINK_ACCOUNTS, HOST_LINK_ACCOUNTS))
             null -> this

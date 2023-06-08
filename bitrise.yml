@@ -53,10 +53,12 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
-      - script-runner@0:
-          title: Execute Maestro tests
+      - script@1:
+          title: Execute Maestro tests (release)
           inputs:
-            - file_path: ./scripts/execute_maestro_tests.sh
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_tests.sh release
       - slack@3:
           is_always_run: true
           inputs:
@@ -83,10 +85,12 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
-      - script-runner@0:
-          title: Execute Maestro tests
+      - script@1:
+          title: Execute Maestro tests (debug)
           inputs:
-            - file_path: ./scripts/execute_maestro_tests.sh
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_tests.sh debug
       - slack@3:
           is_always_run: true
           inputs:

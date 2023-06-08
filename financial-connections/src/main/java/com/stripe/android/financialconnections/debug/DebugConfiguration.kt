@@ -11,7 +11,7 @@ internal class DebugConfiguration @Inject constructor(
     private val sharedPreferences = context
         .getSharedPreferences("FINANCIAL_CONNECTIONS_DEBUG", Context.MODE_PRIVATE)
 
-    internal val overridenNative: Boolean?
+    internal val overriddenNative: Boolean?
         get() = if (sharedPreferences.contains(KEY_OVERRIDE_NATIVE)) {
             sharedPreferences.getBoolean(KEY_OVERRIDE_NATIVE, false)
         } else {
@@ -19,4 +19,4 @@ internal class DebugConfiguration @Inject constructor(
         }
 }
 
-private const val KEY_OVERRIDE_NATIVE = "override_native"
+private const val KEY_OVERRIDE_NATIVE = "financial_connections_override_native"
