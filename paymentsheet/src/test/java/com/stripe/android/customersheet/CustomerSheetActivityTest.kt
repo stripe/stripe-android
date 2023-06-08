@@ -8,10 +8,12 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,35 +42,11 @@ internal class CustomerSheetActivityTest {
     fun `Finish with cancel on back press`() {
         runActivityScenario { scenario ->
             scenario.onActivity {
+                composeTestRule.waitForIdle()
                 pressBack()
-            }
-
-            assertThat(
-                contract.parseResult(
-                    scenario.getResult().resultCode,
-                    scenario.getResult().resultData
-                )
-            ).isEqualTo(
-                InternalCustomerSheetResult.Canceled
-            )
-        }
-    }
-
-    @Test
-    fun `Finish with cancel on navigation icon press`() {
-        runActivityScenario(
-            viewState = CustomerSheetViewState.SelectPaymentMethod(
-                title = null
-            )
-        ) { scenario ->
-            scenario.onActivity {
-                page.clickNavigationIcon()
-
+                composeTestRule.waitForIdle()
                 assertThat(
-                    contract.parseResult(
-                        scenario.getResult().resultCode,
-                        scenario.getResult().resultData
-                    )
+                    InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
                 ).isEqualTo(
                     InternalCustomerSheetResult.Canceled
                 )
@@ -77,11 +55,74 @@ internal class CustomerSheetActivityTest {
     }
 
     @Test
+    fun `Finish with cancel on canceled result`() = runTest {
+        runActivityScenario(
+            viewState = createSelectPaymentMethodViewState(
+                result = InternalCustomerSheetResult.Canceled
+            ),
+        ) { scenario ->
+            scenario.onActivity {
+                composeTestRule.waitForIdle()
+                it.finish()
+                assertThat(
+                    InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
+                ).isEqualTo(
+                    InternalCustomerSheetResult.Canceled
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `Finish with selected on selected result`() = runTest {
+        runActivityScenario(
+            viewState = createSelectPaymentMethodViewState(
+                result = InternalCustomerSheetResult.Selected(
+                    paymentMethodId = "pm_123",
+                    drawableResourceId = 123,
+                    label = "test",
+                )
+            ),
+        ) { scenario ->
+            scenario.onActivity {
+                composeTestRule.waitForIdle()
+                it.finish()
+                assertThat(
+                    InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
+                ).isInstanceOf(
+                    InternalCustomerSheetResult.Selected::class.java
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `Finish with error on error result`() = runTest {
+        runActivityScenario(
+            viewState = createSelectPaymentMethodViewState(
+                result = InternalCustomerSheetResult.Error(
+                    exception = Exception("test")
+                )
+            ),
+        ) { scenario ->
+            scenario.onActivity {
+                composeTestRule.waitForIdle()
+                it.finish()
+                assertThat(
+                    InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
+                ).isInstanceOf(
+                    InternalCustomerSheetResult.Error::class.java
+                )
+            }
+        }
+    }
+
+    @Test
     fun `Verify bottom sheet expands on start with default title`() {
         runActivityScenario(
-            viewState = CustomerSheetViewState.SelectPaymentMethod(
+            viewState = createSelectPaymentMethodViewState(
                 title = null
-            )
+            ),
         ) { scenario ->
             scenario.onActivity {
                 page.waitForText("Select your payment method")
@@ -90,7 +131,7 @@ internal class CustomerSheetActivityTest {
     }
 
     private fun activityScenario(
-        viewState: CustomerSheetViewState
+        viewState: CustomerSheetViewState,
     ): InjectableActivityScenario<CustomerSheetActivity> {
         val viewModel = mock<CustomerSheetViewModel>()
 
@@ -109,7 +150,28 @@ internal class CustomerSheetActivityTest {
         viewState: CustomerSheetViewState = CustomerSheetViewState.Loading,
         block: (InjectableActivityScenario<CustomerSheetActivity>) -> Unit
     ) {
-        val scenario = activityScenario(viewState).launchForResult(intent)
-        scenario.use(block)
+        activityScenario(viewState = viewState)
+            .launchForResult(intent)
+            .use(block)
+    }
+
+    private fun createSelectPaymentMethodViewState(
+        title: String? = null,
+        paymentMethods: List<PaymentOptionsItem.SavedPaymentMethod> = listOf(),
+        selectedPaymentMethodId: String? = null,
+        isLiveMode: Boolean = false,
+        isProcessing: Boolean = false,
+        isEditing: Boolean = false,
+        result: InternalCustomerSheetResult? = null
+    ): CustomerSheetViewState.SelectPaymentMethod {
+        return CustomerSheetViewState.SelectPaymentMethod(
+            title = title,
+            paymentMethods = paymentMethods,
+            selectedPaymentMethodId = selectedPaymentMethodId,
+            isLiveMode = isLiveMode,
+            isProcessing = isProcessing,
+            isEditing = isEditing,
+            result = result,
+        )
     }
 }

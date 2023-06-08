@@ -27,10 +27,14 @@ class CustomerSheetScreenshotTest {
     fun testDefault() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                header = "Screenshot testing",
-                isLiveMode = false,
-                isProcessing = false,
-                isEditing = false,
+                viewState = CustomerSheetViewState.SelectPaymentMethod(
+                    title = "Screenshot testing",
+                    paymentMethods = listOf(),
+                    selectedPaymentMethodId = null,
+                    isLiveMode = false,
+                    isProcessing = false,
+                    isEditing = false,
+                ),
             )
         }
     }
