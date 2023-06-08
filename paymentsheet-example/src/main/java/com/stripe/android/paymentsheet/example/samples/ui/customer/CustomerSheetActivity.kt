@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -34,11 +35,11 @@ internal class CustomerSheetActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        supportActionBar?.title = getString(R.string.customer_toolbar_title)
+
         val customerSheet = CustomerSheet.create(
             activity = this,
-            configuration = CustomerSheet.Configuration.Builder(
-                merchantDisplayName = "Test Merchant"
-            ).build(),
+            configuration = CustomerSheet.Configuration.Builder().build(),
             customerAdapter = viewModel.customerAdapter,
             callback = {
                 Toast.makeText(this, "Got result $it", Toast.LENGTH_LONG).show()

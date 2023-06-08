@@ -13,14 +13,6 @@ class LinkActivityContractTest {
 
     @Test
     fun `LinkActivityContract Args parcelizes correctly`() {
-        val injectionParams = LinkActivityContract.Args.InjectionParams(
-            "injectorKey",
-            setOf("Product Usage"),
-            true,
-            "publishableKey",
-            "stripeAccountId"
-        )
-
         val config = LinkPaymentLauncher.Configuration(
             stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
             merchantName = "Merchant, Inc",
@@ -34,7 +26,6 @@ class LinkActivityContractTest {
         val args = LinkActivityContract.Args(
             config,
             null,
-            injectionParams
         )
 
         val bundle = Bundle()

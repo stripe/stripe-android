@@ -27,7 +27,7 @@ internal class CustomerSessionViewModel(
         if (shouldCreateNewComponent) {
             backingComponent = DaggerCustomerSessionComponent
                 .builder()
-                .appContext(getApplication())
+                .application(getApplication())
                 .configuration(configuration)
                 .customerAdapter(customerAdapter)
                 .callback(callback)
@@ -38,16 +38,16 @@ internal class CustomerSessionViewModel(
         return component
     }
 
-    internal fun clear() {
-        backingComponent = null
-    }
-
     override fun onCleared() {
         super.onCleared()
         clear()
     }
 
     internal companion object {
+        internal fun clear() {
+            backingComponent = null
+        }
+
         private var backingComponent: CustomerSessionComponent? = null
         val component: CustomerSessionComponent
             get() = backingComponent ?: error("Component could not be retrieved")
