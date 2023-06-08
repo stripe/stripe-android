@@ -100,7 +100,14 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val error = assertFailsWith<IllegalStateException> {
             interceptor.intercept(
-                initializationMode = InitializationMode.DeferredIntent(mock()),
+                initializationMode = InitializationMode.DeferredIntent(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 1099L,
+                            currency = "usd",
+                        ),
+                    ),
+                ),
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 shippingValues = null,
                 setupForFutureUsage = null,
@@ -305,7 +312,14 @@ class DefaultIntentConfirmationInterceptorTest {
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
 
         val nextStep = interceptor.intercept(
-            initializationMode = InitializationMode.DeferredIntent(mock()),
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
@@ -337,7 +351,14 @@ class DefaultIntentConfirmationInterceptorTest {
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
 
         val nextStep = interceptor.intercept(
-            initializationMode = InitializationMode.DeferredIntent(mock()),
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
@@ -373,7 +394,14 @@ class DefaultIntentConfirmationInterceptorTest {
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
 
         val nextStep = interceptor.intercept(
-            initializationMode = InitializationMode.DeferredIntent(mock()),
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
@@ -420,7 +448,14 @@ class DefaultIntentConfirmationInterceptorTest {
                 }
 
             interceptor.intercept(
-                initializationMode = InitializationMode.DeferredIntent(mock()),
+                initializationMode = InitializationMode.DeferredIntent(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 1099L,
+                            currency = "usd",
+                        ),
+                    ),
+                ),
                 paymentMethod = paymentMethod,
                 shippingValues = null,
                 setupForFutureUsage = input,
@@ -448,7 +483,14 @@ class DefaultIntentConfirmationInterceptorTest {
         }
 
         val nextStep = interceptor.intercept(
-            initializationMode = InitializationMode.DeferredIntent(mock()),
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,

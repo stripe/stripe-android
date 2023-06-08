@@ -370,7 +370,7 @@ internal class FlowControllerTest {
             flowController.configureWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 2000,
+                        amount = 5099,
                         currency = "usd"
                     )
                 ),
@@ -464,7 +464,7 @@ internal class FlowControllerTest {
             flowController.configureWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 2000,
+                        amount = 5099,
                         currency = "usd"
                     )
                 ),
