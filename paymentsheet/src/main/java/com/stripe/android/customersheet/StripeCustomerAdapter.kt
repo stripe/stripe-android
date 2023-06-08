@@ -37,11 +37,11 @@ internal class StripeCustomerAdapter @Inject constructor(
     private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
 
     override suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>> {
-        return getCustomerEphemeralKey().map { customer ->
+        return getCustomerEphemeralKey().map { customerEphemeralKey ->
             val paymentMethods = customerRepository.getPaymentMethods(
                 customerConfig = PaymentSheet.CustomerConfiguration(
-                    id = customer.customerId,
-                    ephemeralKeySecret = customer.ephemeralKey
+                    id = customerEphemeralKey.customerId,
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
                 ),
                 types = listOf(PaymentMethod.Type.Card)
             )
@@ -50,11 +50,11 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun attachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
-        return getCustomerEphemeralKey().map { customer ->
+        return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.attachPaymentMethod(
                 customerConfig = PaymentSheet.CustomerConfiguration(
-                    id = customer.customerId,
-                    ephemeralKeySecret = customer.ephemeralKey
+                    id = customerEphemeralKey.customerId,
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
                 ),
                 paymentMethodId = paymentMethodId
             ).getOrElse {
@@ -64,11 +64,11 @@ internal class StripeCustomerAdapter @Inject constructor(
     }
 
     override suspend fun detachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
-        return getCustomerEphemeralKey().mapCatching { customer ->
+        return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             customerRepository.detachPaymentMethod(
                 customerConfig = PaymentSheet.CustomerConfiguration(
-                    id = customer.customerId,
-                    ephemeralKeySecret = customer.ephemeralKey
+                    id = customerEphemeralKey.customerId,
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
                 ),
                 paymentMethodId = paymentMethodId
             ).getOrElse {
@@ -77,10 +77,16 @@ internal class StripeCustomerAdapter @Inject constructor(
         }
     }
 
-    override suspend fun setSelectedPaymentOption(paymentOption: CustomerAdapter.PaymentOption?) {
-        getCustomerEphemeralKey().getOrNull()?.let { customerEphemeralKey ->
+    override suspend fun setSelectedPaymentOption(
+        paymentOption: CustomerAdapter.PaymentOption?
+    ): Result<Boolean> {
+        return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
-            prefsRepository.setSavedSelection(paymentOption?.toSavedSelection())
+            withContext(workContext) {
+                prefsRepository.setSavedSelection(paymentOption?.toSavedSelection())
+            }
+        }.getOrElse {
+            Result.failure(it)
         }
     }
 

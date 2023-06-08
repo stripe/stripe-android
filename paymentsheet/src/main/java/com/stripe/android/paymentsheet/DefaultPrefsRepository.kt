@@ -6,6 +6,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import kotlin.coroutines.CoroutineContext
 
 internal class DefaultPrefsRepository(
@@ -33,24 +34,50 @@ internal class DefaultPrefsRepository(
     }
 
     override fun savePaymentSelection(paymentSelection: PaymentSelection?) {
-        setSavedSelection(paymentSelection?.toSavedSelection())
-    }
-
-    override fun setSavedSelection(savedSelection: SavedSelection?) {
+        val savedSelection = paymentSelection?.toSavedSelection()
         when (savedSelection) {
             SavedSelection.GooglePay -> "google_pay"
             SavedSelection.Link -> "link"
             is SavedSelection.PaymentMethod -> "payment_method:${savedSelection.id}"
             else -> null
         }?.let { value ->
-            write(value)
+            apply(value)
         }
     }
 
-    private fun write(value: String) {
+    override fun setSavedSelection(savedSelection: SavedSelection?): Result<Boolean> {
+        return when (savedSelection) {
+            SavedSelection.GooglePay -> "google_pay"
+            SavedSelection.Link -> "link"
+            is SavedSelection.PaymentMethod -> "payment_method:${savedSelection.id}"
+            else -> ""
+        }.let { value ->
+            if (commit(value)) {
+                Result.success(true)
+            } else {
+                Result.failure(
+                    IOException("Unable to write the selection to disk: $savedSelection")
+                )
+            }
+        }
+    }
+
+    /**
+     * Asynchronous and does not notify of any failures
+     */
+    private fun apply(value: String) {
         prefs.edit()
             .putString(getKey(), value)
             .apply()
+    }
+
+    /**
+     * Synchronous and returns true if the new value was successfully written to persistent storage
+     */
+    private fun commit(value: String): Boolean {
+        return prefs.edit()
+            .putString(getKey(), value)
+            .commit()
     }
 
     private fun getKey(): String {
