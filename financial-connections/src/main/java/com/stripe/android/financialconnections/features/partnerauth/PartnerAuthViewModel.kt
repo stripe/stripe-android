@@ -39,7 +39,6 @@ import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Named
-
 @Suppress("LongParameterList")
 internal class PartnerAuthViewModel @Inject constructor(
     private val completeAuthorizationSession: CompleteAuthorizationSession,
@@ -56,6 +55,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val logger: Logger,
     initialState: PartnerAuthState
 ) : MavericksViewModel<PartnerAuthState>(initialState) {
+
     init {
         logErrors()
         observePayload()
@@ -70,6 +70,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 institution = requireNotNull(manifest.activeInstitution),
                 allowManualEntry = manifest.allowManualEntry
             )
+            logger.debug("HOLA")
             Payload(
                 authSession = authSession,
                 institution = requireNotNull(manifest.activeInstitution),
@@ -83,6 +84,9 @@ internal class PartnerAuthViewModel @Inject constructor(
                 )
             }
         }.execute {
+            if (payload is Fail) {
+                logger.debug(it.toString())
+            }
             copy(payload = it)
         }
     }
