@@ -1,25 +1,25 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.link.LinkInteractor
+import com.stripe.android.link.LinkConfigurationInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import org.mockito.kotlin.mock
 
 internal object TestViewModelFactory {
     fun <T : BaseSheetViewModel> create(
-        linkInteractor: LinkInteractor = mock(),
+        linkConfigurationInteractor: LinkConfigurationInteractor = mock(),
         viewModelFactory: (
             linkHandler: LinkHandler,
-            linkInteractor: LinkInteractor,
+            linkConfigurationInteractor: LinkConfigurationInteractor,
             savedStateHandle: SavedStateHandle,
         ) -> T
     ): T {
         val savedStateHandle = SavedStateHandle()
         val linkHandler = LinkHandler(
             linkLauncher = mock(),
-            linkInteractor = linkInteractor,
+            linkConfigurationInteractor = linkConfigurationInteractor,
             savedStateHandle = savedStateHandle,
         )
-        return viewModelFactory(linkHandler, linkInteractor, savedStateHandle)
+        return viewModelFactory(linkHandler, linkConfigurationInteractor, savedStateHandle)
     }
 }

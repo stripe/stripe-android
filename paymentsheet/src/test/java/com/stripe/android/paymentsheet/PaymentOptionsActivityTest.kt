@@ -27,7 +27,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.link.LinkInteractor
+import com.stripe.android.link.LinkConfigurationInteractor
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -344,7 +344,7 @@ internal class PaymentOptionsActivityTest {
         }
 
         val viewModel = TestViewModelFactory.create(
-            linkInteractor = mock<LinkInteractor>().stub {
+            linkConfigurationInteractor = mock<LinkConfigurationInteractor>().stub {
                 onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
             },
         ) { linkHandler, linkInteractor, savedStateHandle ->
@@ -360,7 +360,7 @@ internal class PaymentOptionsActivityTest {
                 lpmRepository = lpmRepository,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                linkInteractor = linkInteractor,
+                linkConfigurationInteractor = linkInteractor,
             ).also {
                 it.injector = injector
             }

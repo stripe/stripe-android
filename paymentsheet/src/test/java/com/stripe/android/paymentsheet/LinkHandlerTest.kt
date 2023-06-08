@@ -6,7 +6,7 @@ import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkInteractor
+import com.stripe.android.link.LinkConfigurationInteractor
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
@@ -197,7 +197,7 @@ class LinkHandlerTest {
 
         handler.processingState.test {
             ensureAllEventsConsumed() // Begin with no events.
-            whenever(linkInteractor.signInWithUserInput(any(), any()))
+            whenever(linkConfigurationInteractor.signInWithUserInput(any(), any()))
                 .thenReturn(Result.success(true))
             testScope.launch {
                 handler.payWithLinkInline(userInput, cardSelection(), shouldCompleteLinkFlow)
@@ -233,7 +233,7 @@ class LinkHandlerTest {
 
         handler.processingState.test {
             ensureAllEventsConsumed() // Begin with no events.
-            whenever(linkInteractor.signInWithUserInput(any(), any()))
+            whenever(linkConfigurationInteractor.signInWithUserInput(any(), any()))
                 .thenReturn(Result.success(true))
             testScope.launch {
                 handler.payWithLinkInline(userInput, cardSelection(), shouldCompleteLinkFlow)
@@ -266,7 +266,7 @@ class LinkHandlerTest {
         handler.processingState.test {
             accountStatusFlow.emit(AccountStatus.SignedOut)
             ensureAllEventsConsumed() // Begin with no events.
-            whenever(linkInteractor.signInWithUserInput(any(), any()))
+            whenever(linkConfigurationInteractor.signInWithUserInput(any(), any()))
                 .thenReturn(Result.failure(IllegalStateException("Whoops")))
             testScope.launch {
                 handler.payWithLinkInline(userInput, cardSelection(), shouldCompleteLinkFlow)
@@ -336,11 +336,11 @@ private fun runLinkTest(
     testBlock: suspend LinkTestData.() -> Unit
 ): Unit = runTest {
     val linkLauncher = mock<LinkPaymentLauncher>()
-    val linkInteractor = mock<LinkInteractor>()
+    val linkConfigurationInteractor = mock<LinkConfigurationInteractor>()
     val savedStateHandle = SavedStateHandle()
     val handler = LinkHandler(
         linkLauncher = linkLauncher,
-        linkInteractor = linkInteractor,
+        linkConfigurationInteractor = linkConfigurationInteractor,
         savedStateHandle = savedStateHandle,
     )
     val processingStateTurbine = handler.processingState.testIn(backgroundScope)
@@ -355,14 +355,14 @@ private fun runLinkTest(
         shippingValues = null,
     )
 
-    whenever(linkInteractor.getAccountStatusFlow(eq(configuration))).thenReturn(accountStatusFlow)
+    whenever(linkConfigurationInteractor.getAccountStatusFlow(eq(configuration))).thenReturn(accountStatusFlow)
 
     with(
         LinkTestDataImpl(
             testScope = this,
             handler = handler,
             linkLauncher = linkLauncher,
-            linkInteractor = linkInteractor,
+            linkConfigurationInteractor = linkConfigurationInteractor,
             savedStateHandle = savedStateHandle,
             configuration = configuration,
             accountStatusFlow = accountStatusFlow,
@@ -395,7 +395,7 @@ private class LinkTestDataImpl(
     override val testScope: TestScope,
     override val handler: LinkHandler,
     override val linkLauncher: LinkPaymentLauncher,
-    override val linkInteractor: LinkInteractor,
+    override val linkConfigurationInteractor: LinkConfigurationInteractor,
     override val savedStateHandle: SavedStateHandle,
     override val configuration: LinkPaymentLauncher.Configuration,
     override val accountStatusFlow: MutableSharedFlow<AccountStatus>,
@@ -407,7 +407,7 @@ private interface LinkTestData {
     val testScope: TestScope
     val handler: LinkHandler
     val linkLauncher: LinkPaymentLauncher
-    val linkInteractor: LinkInteractor
+    val linkConfigurationInteractor: LinkConfigurationInteractor
     val savedStateHandle: SavedStateHandle
     val configuration: LinkPaymentLauncher.Configuration
     val accountStatusFlow: MutableSharedFlow<AccountStatus>

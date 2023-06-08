@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
-import com.stripe.android.link.LinkInteractor
+import com.stripe.android.link.LinkConfigurationInteractor
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import kotlinx.coroutines.flow.first
@@ -11,10 +11,10 @@ internal fun interface LinkAccountStatusProvider {
 }
 
 internal class DefaultLinkAccountStatusProvider @Inject constructor(
-    private val linkInteractor: LinkInteractor,
+    private val linkConfigurationInteractor: LinkConfigurationInteractor,
 ) : LinkAccountStatusProvider {
 
     override suspend fun invoke(configuration: LinkPaymentLauncher.Configuration): AccountStatus {
-        return linkInteractor.getAccountStatusFlow(configuration).first()
+        return linkConfigurationInteractor.getAccountStatusFlow(configuration).first()
     }
 }

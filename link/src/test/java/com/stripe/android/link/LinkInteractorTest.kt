@@ -26,7 +26,7 @@ class LinkInteractorTest {
         shippingValues = null,
     )
 
-    private var linkInteractor = LinkInteractor(
+    private var linkConfigurationInteractor = LinkConfigurationInteractor(
         context,
         setOf(PRODUCT_USAGE),
         { PUBLISHABLE_KEY },
@@ -46,17 +46,17 @@ class LinkInteractorTest {
 
     @Test
     fun `verify component is reused for same configuration`() = runTest {
-        linkInteractor.getAccountStatusFlow(config)
-        val component = linkInteractor.component
-        linkInteractor.signInWithUserInput(config, mock<UserInput.SignIn>())
-        assertThat(linkInteractor.component).isEqualTo(component)
+        linkConfigurationInteractor.getAccountStatusFlow(config)
+        val component = linkConfigurationInteractor.component
+        linkConfigurationInteractor.signInWithUserInput(config, mock<UserInput.SignIn>())
+        assertThat(linkConfigurationInteractor.component).isEqualTo(component)
     }
 
     @Test
     fun `verify component is recreated for different configuration`() {
-        val component = linkInteractor.component
-        linkInteractor.getAccountStatusFlow(config.copy(merchantName = "anotherName"))
-        assertThat(linkInteractor.component).isNotEqualTo(component)
+        val component = linkConfigurationInteractor.component
+        linkConfigurationInteractor.getAccountStatusFlow(config.copy(merchantName = "anotherName"))
+        assertThat(linkConfigurationInteractor.component).isNotEqualTo(component)
     }
 
     companion object {

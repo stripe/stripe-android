@@ -30,7 +30,7 @@ import kotlin.coroutines.CoroutineContext
 
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkInteractor @Inject internal constructor(
+class LinkConfigurationInteractor @Inject internal constructor(
     context: Context,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,

@@ -515,7 +515,7 @@ internal class PaymentOptionsViewModelTest {
             lpmRepository = lpmRepository,
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
-            linkInteractor = linkInteractor,
+            linkConfigurationInteractor = linkInteractor,
         )
     }
 
