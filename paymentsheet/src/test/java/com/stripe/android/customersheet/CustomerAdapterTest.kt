@@ -260,6 +260,9 @@ class CustomerAdapterTest {
 
     @Test
     fun `setSelectedPaymentMethodOption succeeds when payment selection was saved`() = runTest {
+        val prefsRepository = FakePrefsRepository(
+            setSavedSelectionResult = true
+        )
         val adapter = createAdapter(
             customerEphemeralKeyProvider = {
                 Result.success(
@@ -270,9 +273,7 @@ class CustomerAdapterTest {
                 )
             },
             prefsRepositoryFactory = {
-                FakePrefsRepository(
-                    setSavedSelectionResult = true
-                )
+                prefsRepository
             },
         )
         val result = adapter.setSelectedPaymentOption(
@@ -280,6 +281,10 @@ class CustomerAdapterTest {
         )
         assertThat(result.getOrNull())
             .isEqualTo(Unit)
+
+        val paymentOptionResult = adapter.retrieveSelectedPaymentOption()
+        assertThat(paymentOptionResult.getOrNull())
+            .isEqualTo(CustomerAdapter.PaymentOption.StripeId("pm_1234"))
     }
 
     @Test
