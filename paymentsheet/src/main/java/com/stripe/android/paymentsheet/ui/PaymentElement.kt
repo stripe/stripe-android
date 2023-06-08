@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.LinkConfigurationInteractor
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkInlineSignedIn
@@ -33,7 +33,7 @@ internal fun PaymentElement(
     supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
     selectedItem: LpmRepository.SupportedPaymentMethod,
     showLinkInlineSignup: Boolean,
-    linkConfigurationInteractor: LinkConfigurationInteractor,
+    linkConfigurationCoordinator: LinkConfigurationCoordinator,
     showCheckboxFlow: Flow<Boolean>,
     onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
     onLinkSignupStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit,
@@ -86,7 +86,7 @@ internal fun PaymentElement(
         if (showLinkInlineSignup) {
             if (linkInlineSelection.value != null) {
                 LinkInlineSignedIn(
-                    linkConfigurationInteractor = linkConfigurationInteractor,
+                    linkConfigurationCoordinator = linkConfigurationCoordinator,
                     onLogout = {
                         sheetViewModel.linkHandler.linkInlineSelection.value = null
                     },
@@ -96,7 +96,7 @@ internal fun PaymentElement(
                 )
             } else {
                 LinkInlineSignup(
-                    linkConfigurationInteractor = linkConfigurationInteractor,
+                    linkConfigurationCoordinator = linkConfigurationCoordinator,
                     enabled = enabled,
                     onStateChanged = onLinkSignupStateChanged,
                     modifier = Modifier

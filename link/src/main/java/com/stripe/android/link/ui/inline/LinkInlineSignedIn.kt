@@ -23,7 +23,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.link.LinkConfigurationInteractor
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.uicore.StripeTheme
@@ -33,11 +33,11 @@ import com.stripe.android.uicore.stripeColors
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 fun LinkInlineSignedIn(
-    linkConfigurationInteractor: LinkConfigurationInteractor,
+    linkConfigurationCoordinator: LinkConfigurationCoordinator,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    linkConfigurationInteractor.component?.let { component ->
+    linkConfigurationCoordinator.component?.let { component ->
         val viewModel: InlineSignupViewModel = viewModel(
             factory = InlineSignupViewModel.Factory(component.injector)
         )

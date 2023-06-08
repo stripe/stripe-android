@@ -14,7 +14,7 @@ import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class LinkInteractorTest {
+class LinkConfigurationCoordinatorTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val config = LinkPaymentLauncher.Configuration(
         stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
@@ -26,7 +26,7 @@ class LinkInteractorTest {
         shippingValues = null,
     )
 
-    private var linkConfigurationInteractor = LinkConfigurationInteractor(
+    private var linkConfigurationCoordinator = LinkConfigurationCoordinator(
         context,
         setOf(PRODUCT_USAGE),
         { PUBLISHABLE_KEY },
@@ -46,17 +46,17 @@ class LinkInteractorTest {
 
     @Test
     fun `verify component is reused for same configuration`() = runTest {
-        linkConfigurationInteractor.getAccountStatusFlow(config)
-        val component = linkConfigurationInteractor.component
-        linkConfigurationInteractor.signInWithUserInput(config, mock<UserInput.SignIn>())
-        assertThat(linkConfigurationInteractor.component).isEqualTo(component)
+        linkConfigurationCoordinator.getAccountStatusFlow(config)
+        val component = linkConfigurationCoordinator.component
+        linkConfigurationCoordinator.signInWithUserInput(config, mock<UserInput.SignIn>())
+        assertThat(linkConfigurationCoordinator.component).isEqualTo(component)
     }
 
     @Test
     fun `verify component is recreated for different configuration`() {
-        val component = linkConfigurationInteractor.component
-        linkConfigurationInteractor.getAccountStatusFlow(config.copy(merchantName = "anotherName"))
-        assertThat(linkConfigurationInteractor.component).isNotEqualTo(component)
+        val component = linkConfigurationCoordinator.component
+        linkConfigurationCoordinator.getAccountStatusFlow(config.copy(merchantName = "anotherName"))
+        assertThat(linkConfigurationCoordinator.component).isNotEqualTo(component)
     }
 
     companion object {

@@ -18,7 +18,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.LinkConfigurationInteractor
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -125,7 +125,7 @@ internal class DefaultFlowControllerTest {
         mock<ActivityResultLauncher<LinkActivityContract.Args>>()
 
     private val linkPaymentLauncher = mock<LinkPaymentLauncher>()
-    private val linkConfigurationInteractor = mock<LinkConfigurationInteractor>()
+    private val linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>()
 
     private val lifeCycleOwner = mock<LifecycleOwner>()
 
@@ -590,7 +590,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with link payment method should launch LinkPaymentLauncher`() = runTest {
-        whenever(linkConfigurationInteractor.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
+        whenever(linkConfigurationCoordinator.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
         val flowController = createFlowController(
             paymentSelection = PaymentSelection.Link,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -609,7 +609,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with LinkInline and user signed in should launch LinkPaymentLauncher`() = runTest {
-        whenever(linkConfigurationInteractor.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
+        whenever(linkConfigurationCoordinator.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
 
         val flowController = createFlowController(
             paymentSelection = PaymentSelection.Link,
@@ -641,7 +641,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with LinkInline and user not signed in should confirm with PaymentLauncher`() = runTest {
-        whenever(linkConfigurationInteractor.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
+        whenever(linkConfigurationCoordinator.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
 
         val flowController = createFlowController(
             paymentSelection = PaymentSelection.Link,
@@ -682,7 +682,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with Link and shipping should have shipping details in confirm params`() = runTest {
-        whenever(linkConfigurationInteractor.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
+        whenever(linkConfigurationCoordinator.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
 
         val flowController = createFlowController(
             paymentSelection = PaymentSelection.Link,
@@ -734,7 +734,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with Link and no shipping should not have shipping details in confirm params`() = runTest {
-        whenever(linkConfigurationInteractor.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
+        whenever(linkConfigurationCoordinator.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
 
         val flowController = createFlowController(
             paymentSelection = PaymentSelection.Link,
@@ -1236,7 +1236,7 @@ internal class DefaultFlowControllerTest {
         productUsage = PRODUCT_USAGE,
         googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory(),
         linkLauncher = linkPaymentLauncher,
-        linkConfigurationInteractor = linkConfigurationInteractor,
+        linkConfigurationCoordinator = linkConfigurationCoordinator,
         configurationHandler = FlowControllerConfigurationHandler(
             paymentSheetLoader = paymentSheetLoader,
             uiContext = testDispatcher,

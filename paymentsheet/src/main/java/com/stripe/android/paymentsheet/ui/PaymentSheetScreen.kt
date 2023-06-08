@@ -152,7 +152,7 @@ internal fun Wallet(
         initial = WalletsContainerState(),
     )
 
-    val email by viewModel.linkConfigurationInteractor.emailFlow.collectAsState(initial = null)
+    val email by viewModel.linkConfigurationCoordinator.emailFlow.collectAsState(initial = null)
     val googlePayButtonState by viewModel.googlePayButtonState.collectAsState(initial = null)
     val buttonsEnabled by viewModel.buttonsEnabled.collectAsState(initial = false)
 

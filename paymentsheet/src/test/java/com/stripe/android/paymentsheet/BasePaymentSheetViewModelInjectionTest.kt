@@ -116,7 +116,7 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                 testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                linkConfigurationInteractor = linkInteractor,
+                linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
             )
         }
