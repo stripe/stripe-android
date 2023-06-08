@@ -22,7 +22,6 @@ sealed class LinkActivityResult(
     ) : LinkActivityResult(Activity.RESULT_CANCELED) {
         enum class Reason {
             BackPressed,
-            PayAnotherWay,
             LoggedOut
         }
     }
