@@ -4,7 +4,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 
 internal class FakePrefsRepository(
-    private val onSetSavedSelection: () -> Result<Boolean> = { Result.success(true) },
+    private val setSavedSelectionResult: Boolean = true,
 ) : PrefsRepository {
     internal val paymentSelectionArgs = mutableListOf<PaymentSelection?>()
 
@@ -13,11 +13,11 @@ internal class FakePrefsRepository(
     override suspend fun getSavedSelection(isGooglePayAvailable: Boolean, isLinkAvailable: Boolean): SavedSelection =
         savedSelection
 
-    override fun setSavedSelection(savedSelection: SavedSelection?): Result<Boolean> {
+    override fun setSavedSelection(savedSelection: SavedSelection?): Boolean {
         savedSelection?.let {
             this.savedSelection = it
         }
-        return onSetSavedSelection()
+        return setSavedSelectionResult
     }
 
     override fun savePaymentSelection(paymentSelection: PaymentSelection?) {

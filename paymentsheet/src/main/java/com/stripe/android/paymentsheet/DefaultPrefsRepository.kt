@@ -6,7 +6,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import kotlinx.coroutines.withContext
-import java.io.IOException
 import kotlin.coroutines.CoroutineContext
 
 internal class DefaultPrefsRepository(
@@ -45,20 +44,14 @@ internal class DefaultPrefsRepository(
         }
     }
 
-    override fun setSavedSelection(savedSelection: SavedSelection?): Result<Boolean> {
+    override fun setSavedSelection(savedSelection: SavedSelection?): Boolean {
         return when (savedSelection) {
             SavedSelection.GooglePay -> "google_pay"
             SavedSelection.Link -> "link"
             is SavedSelection.PaymentMethod -> "payment_method:${savedSelection.id}"
             else -> ""
         }.let { value ->
-            if (commit(value)) {
-                Result.success(true)
-            } else {
-                Result.failure(
-                    IOException("Unable to write the selection to disk: $savedSelection")
-                )
-            }
+            commit(value)
         }
     }
 

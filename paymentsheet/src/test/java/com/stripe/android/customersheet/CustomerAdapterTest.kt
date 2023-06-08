@@ -271,16 +271,15 @@ class CustomerAdapterTest {
             },
             prefsRepositoryFactory = {
                 FakePrefsRepository(
-                    onSetSavedSelection = {
-                        Result.success(true)
-                    }
+                    setSavedSelectionResult = true
                 )
             },
         )
         val result = adapter.setSelectedPaymentOption(
             paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
         )
-        assertThat(result.getOrNull()).isEqualTo(true)
+        assertThat(result.getOrNull())
+            .isEqualTo(CustomerAdapter.PaymentOption.StripeId("pm_1234"))
     }
 
     @Test
@@ -296,16 +295,15 @@ class CustomerAdapterTest {
             },
             prefsRepositoryFactory = {
                 FakePrefsRepository(
-                    onSetSavedSelection = {
-                        Result.failure(Exception("test error"))
-                    }
+                    setSavedSelectionResult = false
                 )
             },
         )
         val result = adapter.setSelectedPaymentOption(
             paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
         )
-        assertThat(result.exceptionOrNull()?.message).isEqualTo("test error")
+        assertThat(result.exceptionOrNull()?.message)
+            .isEqualTo("Unable to set the payment option: StripeId(id=pm_1234)")
     }
 
     @Test

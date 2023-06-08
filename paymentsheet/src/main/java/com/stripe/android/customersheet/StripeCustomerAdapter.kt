@@ -7,8 +7,10 @@ import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -79,11 +81,18 @@ internal class StripeCustomerAdapter @Inject constructor(
 
     override suspend fun setSelectedPaymentOption(
         paymentOption: CustomerAdapter.PaymentOption?
-    ): Result<Boolean> {
+    ): Result<CustomerAdapter.PaymentOption?> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
             withContext(workContext) {
-                prefsRepository.setSavedSelection(paymentOption?.toSavedSelection())
+                val result = prefsRepository.setSavedSelection(paymentOption?.toSavedSelection())
+                if (result) {
+                    Result.success(paymentOption)
+                } else {
+                    Result.failure(
+                        IOException("Unable to set the payment option: $paymentOption")
+                    )
+                }
             }
         }.getOrElse {
             Result.failure(it)

@@ -45,9 +45,9 @@ interface CustomerAdapter {
      * Saves the payment option to a data store.
      * @param paymentOption, the [PaymentOption] to save to the data store. If null, the selected
      * payment method option will be cleared from the data store.
-     * @return whether the payment option was saved
+     * @return the saved [PaymentOption]
      */
-    suspend fun setSelectedPaymentOption(paymentOption: PaymentOption?): Result<Boolean>
+    suspend fun setSelectedPaymentOption(paymentOption: PaymentOption?): Result<PaymentOption?>
 
     /**
      * Retrieve the saved payment method option from a data store. If null, the customer does not
