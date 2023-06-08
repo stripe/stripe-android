@@ -13,6 +13,7 @@ internal sealed class CustomerSheetViewState {
         val isLiveMode: Boolean,
         val isProcessing: Boolean,
         val isEditing: Boolean,
+        val errorMessage: String? = null,
         val result: InternalCustomerSheetResult? = null
     ) : CustomerSheetViewState()
 }
