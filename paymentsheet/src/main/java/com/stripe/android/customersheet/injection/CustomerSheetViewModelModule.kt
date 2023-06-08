@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.injection
 
-import android.content.Context
+import android.app.Application
+import android.content.res.Resources
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import dagger.Module
 import dagger.Provides
@@ -9,7 +10,14 @@ import dagger.Provides
 internal class CustomerSheetViewModelModule {
 
     @Provides
-    fun provideLpmRepository(context: Context): LpmRepository {
-        return LpmRepository.getInstance(LpmRepository.LpmRepositoryArguments(context.resources))
+    fun resources(application: Application): Resources {
+        return application.resources
+    }
+
+    @Provides
+    fun provideLpmRepository(resources: Resources): LpmRepository {
+        return LpmRepository.getInstance(
+            LpmRepository.LpmRepositoryArguments(resources)
+        )
     }
 }

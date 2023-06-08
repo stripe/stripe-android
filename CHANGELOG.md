@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.25.5 - 2023-06-05
+
 ### PaymentSheet
 * [CHANGED] The experimental API for [finalizing payments on the server](https://stripe.com/docs/payments/finalize-payments-on-the-server?platform=android) has changed:
   * Instead of providing only the `PaymentMethod` ID, `CreateIntentCallback` now provides the entire `PaymentMethod` object.
@@ -10,6 +12,7 @@
 
 ### Financial Connections
 * [FIXED][6794](https://github.com/stripe/stripe-android/pull/6794) Gracefully fails when no web browser available.
+* [FIXED][6813](https://github.com/stripe/stripe-android/pull/6813) Added Mavericks related proguard rules to the consumer-rules file.
 
 ## 20.25.4 - 2023-05-30
 

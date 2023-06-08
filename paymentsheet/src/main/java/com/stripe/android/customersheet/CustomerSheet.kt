@@ -38,6 +38,16 @@ class CustomerSheet @Inject internal constructor(
         )
     }
 
+    /**
+     * Clears the customer session state. This is only needed in a single activity workflow. You
+     * should call this when leaving the customer management workflow in your single activity app.
+     * Otherwise, if your app is using a multi-activity workflow, then [CustomerSheet] will work out
+     * of the box and clearing manually is not required.
+     */
+    fun resetCustomer() {
+        CustomerSessionViewModel.clear()
+    }
+
     private fun onCustomerSheetResult(result: InternalCustomerSheetResult?) {
         requireNotNull(result)
         callback.onResult(result.toPublicResult())
@@ -48,31 +58,48 @@ class CustomerSheet @Inject internal constructor(
      */
     @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Configuration(
-        /**
-         * Your customer-facing business name.
-         *
-         * The default value is the name of your app.
-         */
-        val merchantDisplayName: String,
-
+    class Configuration internal constructor(
         /**
          * Describes the appearance of [CustomerSheet].
          */
         val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
 
         /**
-         * Configuration for GooglePay.
-         *
-         * If set, CustomerSheet displays Google Pay as a payment option.
+         * Whether [CustomerSheet] displays Google Pay as a payment option.
          */
-        val googlePayConfiguration: PaymentSheet.GooglePayConfiguration? = null,
+        val googlePayEnabled: Boolean = false,
 
         /**
          * The text to display at the top of the presented bottom sheet.
          */
         val headerTextForSelectionScreen: String? = null,
-    )
+    ) {
+        @ExperimentalCustomerSheetApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Builder {
+            private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
+            private var googlePayEnabled: Boolean = false
+            private var headerTextForSelectionScreen: String? = null
+
+            fun appearance(appearance: PaymentSheet.Appearance) = apply {
+                this.appearance = appearance
+            }
+
+            fun googlePayEnabled(googlePayConfiguration: Boolean) = apply {
+                this.googlePayEnabled = googlePayConfiguration
+            }
+
+            fun headerTextForSelectionScreen(headerTextForSelectionScreen: String?) = apply {
+                this.headerTextForSelectionScreen = headerTextForSelectionScreen
+            }
+
+            fun build() = Configuration(
+                appearance = appearance,
+                googlePayEnabled = googlePayEnabled,
+                headerTextForSelectionScreen = headerTextForSelectionScreen,
+            )
+        }
+    }
 
     @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -40,6 +40,7 @@ dependencies {
     implementation libs.compose.activity
     implementation libs.compose.navigation
     implementation libs.accompanist.navigationAnimation
+    implementation libs.accompanist.navigationMaterial
 
     // Other
     implementation libs.playServicesWallet
