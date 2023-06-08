@@ -2,8 +2,10 @@ package com.stripe.android.link
 
 import android.app.Activity
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class LinkActivityResult(
     val resultCode: Int
 ) : Parcelable {
