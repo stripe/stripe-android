@@ -273,7 +273,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     private fun NavigationEffect(navController: NavHostController) {
         LaunchedEffect(navigationManager.commands) {
             navigationManager.commands.collect { command ->
-                if (command.destination.isNotEmpty()) {
+                val from = navController.currentDestination?.route
+                if (command.destination.isNotEmpty() && command.destination != from) {
+                    logger.debug("Navigating from $from to ${command.destination}")
                     navController.navigate(command.destination) {
                         launchSingleTop = true
                         popUpIfNotBackwardsNavigable(navController)

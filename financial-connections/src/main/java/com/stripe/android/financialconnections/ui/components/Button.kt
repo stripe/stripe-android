@@ -48,7 +48,7 @@ internal fun FinancialConnectionsButton(
     size: FinancialConnectionsButton.Size = FinancialConnectionsButton.Size.Regular,
     enabled: Boolean = true,
     loading: Boolean = false,
-    content: @Composable() (RowScope.() -> Unit)
+    content: @Composable (RowScope.() -> Unit)
 ) {
     val multipleEventsCutter = remember { MultipleEventsCutter.get() }
     CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
