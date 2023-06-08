@@ -59,6 +59,10 @@ internal class PartnerAuthViewModel @Inject constructor(
     init {
         logErrors()
         observePayload()
+        createAuthSession()
+    }
+
+    private fun createAuthSession() {
         suspend {
             val launchedEvent = Launched(Date())
             val manifest: FinancialConnectionsSessionManifest = getManifest()
@@ -182,12 +186,10 @@ internal class PartnerAuthViewModel @Inject constructor(
                 logger.debug("Creating a new session for this OAuth institution")
                 // Send retry event as we're presenting the prepane again.
                 postAuthSessionEvent(authSession.id, AuthSessionEvent.Retry(Date()))
-                val manifest = getManifest()
-                val newSession = createAuthorizationSession(
-                    institution = requireNotNull(manifest.activeInstitution),
-                    allowManualEntry = manifest.allowManualEntry
-                )
-                goNext(newSession.nextPane)
+                // for OAuth institutions, we remain on the pre-pane,
+                // but create a brand new auth session
+                setState { copy(authenticationStatus = Uninitialized) }
+                createAuthSession()
             } else {
                 // For OAuth institutions, navigate to Session cancellation's next pane.
                 postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
