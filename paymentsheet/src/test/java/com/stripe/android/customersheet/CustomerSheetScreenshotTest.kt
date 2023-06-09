@@ -15,6 +15,7 @@ import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetScreenshotTest {
     @get:Rule
     val paparazzi = PaparazziRule(
@@ -31,12 +32,15 @@ class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.SelectPaymentMethod(
+                    config = CustomerSheet.Configuration(),
                     title = "Screenshot testing",
                     paymentMethods = listOf(),
                     selectedPaymentMethodId = null,
                     isLiveMode = false,
                     isProcessing = false,
                     isEditing = false,
+                    primaryButtonLabel = null,
+                    primaryButtonEnabled = false,
                 ),
             )
         }
@@ -47,6 +51,7 @@ class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.SelectPaymentMethod(
+                    config = CustomerSheet.Configuration(),
                     title = "Screenshot testing",
                     paymentMethods = List(5) {
                         PaymentOptionsItem.SavedPaymentMethod(
@@ -68,6 +73,8 @@ class CustomerSheetScreenshotTest {
                     isLiveMode = false,
                     isProcessing = false,
                     isEditing = false,
+                    primaryButtonLabel = "Continue",
+                    primaryButtonEnabled = true,
                     errorMessage = "This is an error message."
                 ),
             )

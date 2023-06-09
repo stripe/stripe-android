@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
@@ -65,13 +66,15 @@ internal fun InputAddressScreen(
                 )
                 formContent()
                 checkboxContent()
-                AddressElementPrimaryButton(
+                PrimaryButton(
                     isEnabled = primaryButtonEnabled,
-                    text = primaryButtonText
-                ) {
-                    focusManager.clearFocus()
-                    onPrimaryButtonClick()
-                }
+                    label = primaryButtonText,
+                    onButtonClick = {
+                        focusManager.clearFocus()
+                        onPrimaryButtonClick()
+                    },
+                    modifier = Modifier.padding(vertical = 16.dp),
+                )
             }
         }
     }

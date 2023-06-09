@@ -38,9 +38,10 @@ internal class CustomerSheetViewModel @Inject constructor(
         when (viewAction) {
             is CustomerSheetViewAction.OnAddCardPressed -> onAddCardPressed()
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
-            is CustomerSheetViewAction.OnEditPressed -> onEdit()
+            is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
             is CustomerSheetViewAction.OnItemRemoved -> onItemRemoved(viewAction.paymentMethod)
             is CustomerSheetViewAction.OnItemSelected -> onItemSelected(viewAction.selection)
+            is CustomerSheetViewAction.OnPrimaryButtonPressed -> onPrimaryButtonPressed()
         }
     }
 
@@ -69,12 +70,19 @@ internal class CustomerSheetViewModel @Inject constructor(
             )
             _viewState.update {
                 CustomerSheetViewState.SelectPaymentMethod(
+                    config = configuration,
                     title = configuration.headerTextForSelectionScreen,
                     paymentMethods = savedPaymentMethods,
                     selectedPaymentMethodId = selectedPaymentMethodId,
                     isLiveMode = false,
                     isProcessing = false,
                     isEditing = false,
+                    primaryButtonLabel = selectedPaymentMethodId?.let {
+                        resources.getString(
+                            com.stripe.android.ui.core.R.string.stripe_continue_button_label
+                        )
+                    },
+                    primaryButtonEnabled = selectedPaymentMethodId != null,
                     errorMessage = errorMessage,
                 )
             }
@@ -91,7 +99,7 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    private fun onEdit() {
+    private fun onEditPressed() {
         TODO()
     }
 
@@ -100,8 +108,21 @@ internal class CustomerSheetViewModel @Inject constructor(
         TODO()
     }
 
-    @Suppress("UNUSED_PARAMETER")
     private fun onItemSelected(paymentSelection: PaymentSelection?) {
+        (paymentSelection as? PaymentSelection.Saved)?.let { selection ->
+            updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                it.copy(
+                    selectedPaymentMethodId = selection.paymentMethod.id,
+                    primaryButtonLabel = resources.getString(
+                        com.stripe.android.ui.core.R.string.stripe_continue_button_label
+                    ),
+                    primaryButtonEnabled = selection.paymentMethod.id != null
+                )
+            }
+        }
+    }
+
+    private fun onPrimaryButtonPressed() {
         TODO()
     }
 

@@ -6,6 +6,8 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -23,6 +25,8 @@ class CustomerSheetViewModelTest {
             enableACHV2InDeferredFlow = true
         )
     )
+
+    private var customerSheetConfiguration = createCustomerSheetConfiguration()
 
     @Test
     fun `init emits CustomerSheetViewState#SelectPaymentMethod`() = runTest {
@@ -68,6 +72,7 @@ class CustomerSheetViewModelTest {
             assertThat(awaitItem())
                 .isEqualTo(
                     CustomerSheetViewState.SelectPaymentMethod(
+                        config = customerSheetConfiguration,
                         title = null,
                         paymentMethods = listOf(
                             PaymentOptionsItem.SavedPaymentMethod(
@@ -80,6 +85,8 @@ class CustomerSheetViewModelTest {
                         isProcessing = false,
                         isEditing = false,
                         errorMessage = null,
+                        primaryButtonLabel = "Continue",
+                        primaryButtonEnabled = true,
                     )
                 )
         }
@@ -103,6 +110,11 @@ class CustomerSheetViewModelTest {
     fun `When the selected payment method cannot be loaded, selectedPaymentMethod is null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
+                paymentMethods = Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                ),
                 selectedPaymentOption = Result.failure(Exception("Failed to retrieve selected payment option."))
             )
         )
@@ -112,18 +124,97 @@ class CustomerSheetViewModelTest {
                 .isEqualTo(null)
             assertThat(viewState.errorMessage)
                 .isEqualTo(null)
+            assertThat(viewState.paymentMethods)
+                .isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `When a payment option is selected, the view state is updated`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                ),
+            )
+        )
+        viewModel.viewState.test {
+            assertThat(awaitItem())
+                .isEqualTo(
+                    CustomerSheetViewState.SelectPaymentMethod(
+                        config = customerSheetConfiguration,
+                        title = null,
+                        paymentMethods = listOf(
+                            PaymentOptionsItem.SavedPaymentMethod(
+                                displayName = "····4242",
+                                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                            )
+                        ),
+                        selectedPaymentMethodId = null,
+                        isLiveMode = false,
+                        isProcessing = false,
+                        isEditing = false,
+                        errorMessage = null,
+                        primaryButtonLabel = null,
+                        primaryButtonEnabled = false,
+                    )
+                )
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    selection = PaymentSelection.Saved(
+                        paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                )
+            )
+
+            assertThat(awaitItem())
+                .isEqualTo(
+                    CustomerSheetViewState.SelectPaymentMethod(
+                        config = customerSheetConfiguration,
+                        title = null,
+                        paymentMethods = listOf(
+                            PaymentOptionsItem.SavedPaymentMethod(
+                                displayName = "····4242",
+                                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                            )
+                        ),
+                        selectedPaymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
+                        isLiveMode = false,
+                        isProcessing = false,
+                        isEditing = false,
+                        errorMessage = null,
+                        primaryButtonLabel = "Continue",
+                        primaryButtonEnabled = true,
+                    )
+                )
         }
     }
 
     private fun createViewModel(
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
-        lpmRepository: LpmRepository = this.lpmRepository
+        lpmRepository: LpmRepository = this.lpmRepository,
+        configuration: CustomerSheet.Configuration = customerSheetConfiguration,
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
             resources = application.resources,
             customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
-            configuration = CustomerSheet.Configuration()
+            configuration = configuration
+        )
+    }
+
+    private fun createCustomerSheetConfiguration(
+        appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+        googlePayEnabled: Boolean = false,
+        headerTextForSelectionScreen: String? = null,
+    ): CustomerSheet.Configuration {
+        return CustomerSheet.Configuration(
+            appearance = appearance,
+            googlePayEnabled = googlePayEnabled,
+            headerTextForSelectionScreen = headerTextForSelectionScreen,
         )
     }
 }

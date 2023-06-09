@@ -7,6 +7,8 @@ internal sealed class CustomerSheetViewAction {
     object OnBackPressed : CustomerSheetViewAction()
     object OnEditPressed : CustomerSheetViewAction()
     object OnAddCardPressed : CustomerSheetViewAction()
+
+    object OnPrimaryButtonPressed : CustomerSheetViewAction()
     class OnItemSelected(val selection: PaymentSelection?) : CustomerSheetViewAction()
     class OnItemRemoved(val paymentMethod: PaymentMethod) : CustomerSheetViewAction()
 }

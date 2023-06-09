@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.paymentsheet.PaymentOptionsState
@@ -114,15 +116,31 @@ internal fun SelectPaymentMethodContent(
             onAddCardPressed = { viewActionHandler(CustomerSheetViewAction.OnAddCardPressed) },
             onItemSelected = { viewActionHandler(CustomerSheetViewAction.OnItemSelected(it)) },
             onItemRemoved = { viewActionHandler(CustomerSheetViewAction.OnItemRemoved(it)) },
+            modifier = Modifier.padding(bottom = 8.dp),
         )
 
-        viewState.errorMessage?.let { error ->
-            ErrorMessage(
-                error = error,
-                modifier = Modifier
-                    .padding(vertical = 2.dp)
-                    .padding(horizontal = horizontalPadding),
-            )
+        AnimatedVisibility(visible = viewState.errorMessage != null) {
+            viewState.errorMessage?.let { error ->
+                ErrorMessage(
+                    error = error,
+                    modifier = Modifier
+                        .padding(vertical = 2.dp)
+                        .padding(horizontal = horizontalPadding),
+                )
+            }
+        }
+
+        AnimatedVisibility(visible = viewState.primaryButtonLabel != null) {
+            viewState.primaryButtonLabel?.let {
+                PrimaryButton(
+                    label = it,
+                    isEnabled = viewState.primaryButtonEnabled,
+                    onButtonClick = {
+                        viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
+                    },
+                    modifier = Modifier.padding(horizontal = horizontalPadding),
+                )
+            }
         }
     }
 }

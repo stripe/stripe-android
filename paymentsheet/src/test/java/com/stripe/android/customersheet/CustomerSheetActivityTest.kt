@@ -21,6 +21,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.annotation.Config
 
+@OptIn(ExperimentalCustomerSheetApi::class)
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class CustomerSheetActivityTest {
@@ -165,12 +166,15 @@ internal class CustomerSheetActivityTest {
         result: InternalCustomerSheetResult? = null
     ): CustomerSheetViewState.SelectPaymentMethod {
         return CustomerSheetViewState.SelectPaymentMethod(
+            config = CustomerSheet.Configuration(),
             title = title,
             paymentMethods = paymentMethods,
             selectedPaymentMethodId = selectedPaymentMethodId,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isEditing = isEditing,
+            primaryButtonLabel = null,
+            primaryButtonEnabled = false,
             result = result,
         )
     }
