@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentIntent.CaptureMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
@@ -50,7 +49,7 @@ internal object DeferredIntentValidator {
                 // the final step of confirmation. Showing a successful payment in the complete flow
                 // may be misleading when merchants still need to do a final confirmation which
                 // could fail.
-                require(stripeIntent.captureMethod != CaptureMethod.Manual || isFlowController) {
+                require(stripeIntent.confirmationMethod != PaymentIntent.ConfirmationMethod.Manual || isFlowController) {
                     "Your PaymentIntent confirmationMethod (${stripeIntent.confirmationMethod}) " +
                         "can only be used with PaymentSheet.FlowController."
                 }
