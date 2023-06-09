@@ -1,12 +1,10 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
 import android.webkit.URLUtil
-import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
@@ -24,7 +22,7 @@ import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
-import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
+import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
@@ -33,12 +31,14 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Named
+
 @Suppress("LongParameterList")
 internal class PartnerAuthViewModel @Inject constructor(
     private val completeAuthorizationSession: CompleteAuthorizationSession,
@@ -58,8 +58,34 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     init {
         logErrors()
-        observePayload()
-        createAuthSession()
+        withState {
+            if (it.firstInit) {
+                setState { copy(firstInit = false) }
+                launchBrowserIfNonOauth()
+                createAuthSession()
+            } else {
+                restoreAuthSession()
+            }
+        }
+    }
+
+    private fun restoreAuthSession() {
+        suspend {
+            // if coming from a process kill, there should be a session
+            // re-fetch the manifest and use its active auth session instead of creating a new one
+            val manifest: FinancialConnectionsSessionManifest = getManifest()
+            val authSession = manifest.activeAuthSession?.also {
+                logger.debug("Restoring auth session ${it.id}")
+            } ?: createAuthorizationSession(
+                institution = requireNotNull(manifest.activeInstitution),
+                allowManualEntry = manifest.allowManualEntry
+            )
+            Payload(
+                authSession = authSession,
+                institution = requireNotNull(manifest.activeInstitution),
+                isStripeDirect = manifest.isStripeDirect ?: false
+            )
+        }.execute { copy(payload = it) }
     }
 
     private fun createAuthSession() {
@@ -70,6 +96,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 institution = requireNotNull(manifest.activeInstitution),
                 allowManualEntry = manifest.allowManualEntry
             )
+            logger.debug("Created auth session ${authSession.id}")
             Payload(
                 authSession = authSession,
                 institution = requireNotNull(manifest.activeInstitution),
@@ -85,7 +112,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    private fun observePayload() {
+    private fun launchBrowserIfNonOauth() {
         onAsync(
             asyncProp = PartnerAuthState::payload,
             onSuccess = {
@@ -134,27 +161,25 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 
     fun onWebAuthFlowFinished(
-        webStatus: Async<String>
+        webStatus: WebAuthFlowState
     ) {
         logger.debug("Web AuthFlow status received $webStatus")
         viewModelScope.launch {
             when (webStatus) {
-                is Uninitialized -> {}
-                is Loading -> setState { copy(authenticationStatus = Loading()) }
-                is Success -> completeAuthorizationSession()
-                is Fail -> {
-                    when (val error = webStatus.error) {
-                        is WebAuthFlowCancelledException -> onAuthCancelled()
-                        else -> onAuthFailed(error)
-                    }
-                }
+                WebAuthFlowState.Canceled -> onAuthCancelled()
+                is WebAuthFlowState.Failed -> onAuthFailed(webStatus.message, webStatus.reason)
+                WebAuthFlowState.InProgress -> setState { copy(authenticationStatus = Loading()) }
+                is WebAuthFlowState.Success -> completeAuthorizationSession()
+                WebAuthFlowState.Uninitialized -> {}
             }
         }
     }
 
     private suspend fun onAuthFailed(
-        error: Throwable
+        message: String,
+        reason: String?
     ) {
+        val error = WebAuthFlowFailedException(message, reason)
         kotlin.runCatching {
             logger.debug("Auth failed, cancelling AuthSession")
             val authSession = getManifest().activeAuthSession
