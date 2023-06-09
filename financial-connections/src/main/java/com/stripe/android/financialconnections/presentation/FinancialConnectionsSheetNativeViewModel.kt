@@ -48,6 +48,8 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -68,7 +70,14 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
+    private val mutex = Mutex()
+
     init {
+        viewModelScope.launch {
+            stateFlow.collect {
+                logger.debug("CONV State: $it")
+            }
+        }
         setState { copy(firstInit = false) }
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
@@ -98,62 +107,65 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      */
     fun handleOnNewIntent(intent: Intent?) {
         viewModelScope.launch {
-            val receivedUrl: String = intent?.data?.toString() ?: ""
-            when {
-                receivedUrl.contains("authentication_return", true) -> {
-                    setState {
-                        copy(webAuthFlow = Success(receivedUrl))
-                    }
-                }
-
-                uriUtils.compareSchemeAuthorityAndPath(
-                    receivedUrl,
-                    baseUrl(applicationId)
-                ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)) {
-                    STATUS_SUCCESS -> setState {
-                        copy(webAuthFlow = Success(receivedUrl))
+            mutex.withLock {
+                val receivedUrl: String = intent?.data?.toString() ?: ""
+                logger.debug("CONV onNewIntent $receivedUrl")
+                when {
+                    receivedUrl.contains("authentication_return", true) -> {
+                        setState {
+                            copy(webAuthFlow = Success(receivedUrl))
+                        }
                     }
 
-                    STATUS_CANCEL -> setState {
-                        copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
-                    }
+                    uriUtils.compareSchemeAuthorityAndPath(
+                        receivedUrl,
+                        baseUrl(applicationId)
+                    ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)) {
+                        STATUS_SUCCESS -> setState {
+                            copy(webAuthFlow = Success(receivedUrl))
+                        }
 
-                    STATUS_FAILURE -> setState {
-                        copy(
-                            webAuthFlow = Fail(
-                                WebAuthFlowFailedException(
-                                    message = "Received return_url with failed status: $receivedUrl",
-                                    reason = uriUtils.getQueryParameter(
-                                        receivedUrl,
-                                        PARAM_ERROR_REASON
+                        STATUS_CANCEL -> setState {
+                            copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
+                        }
+
+                        STATUS_FAILURE -> setState {
+                            copy(
+                                webAuthFlow = Fail(
+                                    WebAuthFlowFailedException(
+                                        message = "Received return_url with failed status: $receivedUrl",
+                                        reason = uriUtils.getQueryParameter(
+                                            receivedUrl,
+                                            PARAM_ERROR_REASON
+                                        )
                                     )
                                 )
                             )
-                        )
-                    }
+                        }
 
-                    // received unknown / non-handleable [PARAM_STATUS]
+                        // received unknown / non-handleable [PARAM_STATUS]
+                        else -> setState {
+                            copy(
+                                webAuthFlow = Fail(
+                                    WebAuthFlowFailedException(
+                                        message = "Received return_url with unknown status: $receivedUrl",
+                                        reason = null
+                                    )
+                                )
+                            )
+                        }
+                    }
+                    // received unknown / non-handleable return url.
                     else -> setState {
                         copy(
                             webAuthFlow = Fail(
                                 WebAuthFlowFailedException(
-                                    message = "Received return_url with unknown status: $receivedUrl",
+                                    message = "Received unknown return_url: $receivedUrl",
                                     reason = null
                                 )
                             )
                         )
                     }
-                }
-                // received unknown / non-handleable return url.
-                else -> setState {
-                    copy(
-                        webAuthFlow = Fail(
-                            WebAuthFlowFailedException(
-                                message = "Received unknown return_url: $receivedUrl",
-                                reason = null
-                            )
-                        )
-                    )
                 }
             }
         }
@@ -165,11 +177,13 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      *  canceled.
      */
     fun onResume() {
-        setState {
-            if (webAuthFlow is Loading) {
-                copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
-            } else {
-                this
+        viewModelScope.launch {
+            mutex.withLock {
+                logger.debug("CONV onResume")
+                val state = awaitState()
+                if (state.webAuthFlow is Loading) {
+                    setState { copy(webAuthFlow = Fail(WebAuthFlowCancelledException())) }
+                }
             }
         }
     }

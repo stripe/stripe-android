@@ -43,7 +43,7 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
             stripeNetworkClient.executeRequest(
                 request
             )
-            logger.debug("EVENT: ${request.eventName}: ${request.params}")
+            logger.debug("CONV EVENT: ${request.eventName}: ${request.params}")
         }.onFailure {
             logger.error("Exception while making analytics request", it)
         }

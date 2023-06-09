@@ -28,6 +28,7 @@ internal class PostAuthSessionEvent @Inject constructor(
         sessionId: String,
         events: List<AuthSessionEvent>
     ) = kotlin.runCatching {
+        logger.debug("CONV AUTH EVENT $events")
         repository.postAuthorizationSessionEvent(
             clientTimestamp = Date(),
             clientSecret = configuration.financialConnectionsSessionClientSecret,
