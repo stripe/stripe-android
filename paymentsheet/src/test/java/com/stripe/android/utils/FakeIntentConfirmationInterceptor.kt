@@ -41,7 +41,6 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        isFlowController: Boolean,
     ): IntentConfirmationInterceptor.NextStep {
         return channel.receive()
     }
@@ -51,7 +50,6 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        isFlowController: Boolean,
     ): IntentConfirmationInterceptor.NextStep {
         return channel.receive()
     }

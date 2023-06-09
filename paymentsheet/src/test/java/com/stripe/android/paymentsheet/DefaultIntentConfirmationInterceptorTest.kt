@@ -44,6 +44,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            isFlowController = false,
         )
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -53,7 +54,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
-            isFlowController = false,
         )
 
         val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
@@ -70,6 +70,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            isFlowController = false,
         )
 
         val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
@@ -79,7 +80,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodCreateParams = createParams,
             shippingValues = null,
             setupForFutureUsage = null,
-            isFlowController = false,
         )
 
         val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
@@ -96,6 +96,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            isFlowController = false,
         )
 
         val error = assertFailsWith<IllegalStateException> {
@@ -111,7 +112,6 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 shippingValues = null,
                 setupForFutureUsage = null,
-                isFlowController = false,
             )
         }
 
@@ -134,6 +134,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            isFlowController = false,
         )
 
         val error = assertFailsWith<IllegalStateException> {
@@ -142,7 +143,6 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 shippingValues = null,
                 setupForFutureUsage = null,
-                isFlowController = false,
             )
         }
 
@@ -171,6 +171,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            isFlowController = false,
         )
 
         val nextStep = interceptor.intercept(
@@ -178,7 +179,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             shippingValues = null,
             setupForFutureUsage = null,
-            isFlowController = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -212,6 +212,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            isFlowController = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
@@ -221,7 +222,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
             setupForFutureUsage = null,
-            isFlowController = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -239,6 +239,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            isFlowController = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = failingCreateIntentCallback(
@@ -250,7 +251,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
             setupForFutureUsage = null,
-            isFlowController = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -268,6 +268,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            isFlowController = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = failingCreateIntentCallback()
@@ -277,7 +278,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
             setupForFutureUsage = null,
-            isFlowController = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -307,6 +307,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            isFlowController = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
@@ -323,7 +324,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
-            isFlowController = false,
         )
 
         assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Confirm::class.java)
@@ -346,6 +346,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            isFlowController = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
@@ -362,7 +363,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
-            isFlowController = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -389,6 +389,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            isFlowController = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
@@ -405,7 +406,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
-            isFlowController = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -431,6 +431,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            isFlowController = false,
         )
 
         val inputs = listOf(
@@ -459,7 +460,6 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethod = paymentMethod,
                 shippingValues = null,
                 setupForFutureUsage = input,
-                isFlowController = false,
             )
         }
 
@@ -476,6 +476,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = stripeRepository,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            isFlowController = false,
         )
 
         IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
@@ -494,7 +495,6 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             shippingValues = null,
             setupForFutureUsage = null,
-            isFlowController = false,
         )
 
         verify(stripeRepository, never()).retrieveStripeIntent(any(), any(), any())
