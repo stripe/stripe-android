@@ -566,4 +566,86 @@ internal class FlowControllerTest {
 
         assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
     }
+
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
+    @Test
+    fun testDeferredIntentCardPaymentWithInvalidStripeIntent() {
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
+        }
+
+        val resultCountDownLatch = CountDownLatch(1)
+        val activityScenarioRule = composeTestRule.activityRule
+        val scenario = activityScenarioRule.scenario
+        scenario.moveToState(Lifecycle.State.CREATED)
+        lateinit var flowController: PaymentSheet.FlowController
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            flowController = PaymentSheet.FlowController.create(
+                activity = it,
+                paymentOptionCallback = { paymentOption ->
+                    assertThat(paymentOption?.label).endsWith("4242")
+                    flowController.confirm()
+                },
+                createIntentCallback = { _, _ ->
+                    CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
+                },
+                paymentResultCallback = { result ->
+                    val failureResult = result as? PaymentSheetResult.Failed
+                    assertThat(failureResult?.error?.message).isEqualTo(
+                        "Your PaymentIntent amount (5099) does not match " +
+                            "the PaymentSheet.IntentConfiguration amount (2000)."
+                    )
+                    resultCountDownLatch.countDown()
+                },
+            )
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        scenario.onActivity {
+            flowController.configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        // This amount is different from the $50.99 in the created intent, which
+                        // will cause the validator to fail this transaction.
+                        amount = 2000,
+                        currency = "usd"
+                    )
+                ),
+                configuration = null,
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    flowController.presentPaymentOptions()
+                }
+            )
+        }
+
+        page.addPaymentMethod()
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_methods"),
+            bodyPart(
+                "payment_user_agent",
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent")
+            ),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+        }
+
+        page.clickPrimaryButton()
+
+        assertThat(resultCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    }
 }
