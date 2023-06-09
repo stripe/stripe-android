@@ -10,6 +10,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -38,7 +39,7 @@ import kotlin.coroutines.CoroutineContext
 internal abstract class LinkPaymentLauncherComponent {
     abstract val linkAccountManager: LinkAccountManager
     abstract val linkEventsReporter: LinkEventsReporter
-    abstract val configuration: LinkPaymentLauncher.Configuration
+    abstract val configuration: LinkConfiguration
 
     abstract fun inject(factory: InlineSignupViewModel.Factory)
 
@@ -59,7 +60,7 @@ internal abstract class LinkPaymentLauncherComponent {
     @Component.Builder
     interface Builder {
         @BindsInstance
-        fun configuration(configuration: LinkPaymentLauncher.Configuration): Builder
+        fun configuration(configuration: LinkConfiguration): Builder
 
         @BindsInstance
         fun context(context: Context): Builder

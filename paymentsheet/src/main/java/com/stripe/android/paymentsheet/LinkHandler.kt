@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
@@ -57,7 +58,7 @@ internal class LinkHandler @Inject constructor(
     private val _activeLinkSession = MutableStateFlow(false)
     val activeLinkSession: StateFlow<Boolean> = _activeLinkSession
 
-    private val linkConfiguration = MutableStateFlow<LinkPaymentLauncher.Configuration?>(null)
+    private val linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
 
     val accountStatus: Flow<AccountStatus> = linkConfiguration
         .filterNotNull()
@@ -136,7 +137,7 @@ internal class LinkHandler @Inject constructor(
     }
 
     private suspend fun completeLinkInlinePayment(
-        configuration: LinkPaymentLauncher.Configuration,
+        configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shouldCompleteLinkInlineFlow: Boolean
     ) {
@@ -160,7 +161,7 @@ internal class LinkHandler @Inject constructor(
     }
 
     fun launchLink(
-        configuration: LinkPaymentLauncher.Configuration,
+        configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams? = null
     ) {
         linkLauncher.present(

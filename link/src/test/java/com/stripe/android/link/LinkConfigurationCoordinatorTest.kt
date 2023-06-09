@@ -16,7 +16,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class LinkConfigurationCoordinatorTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val config = LinkPaymentLauncher.Configuration(
+    private val config = LinkConfiguration(
         stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
         customerName = CUSTOMER_NAME,

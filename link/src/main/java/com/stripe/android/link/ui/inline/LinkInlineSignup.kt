@@ -44,8 +44,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
@@ -93,7 +93,7 @@ private fun Preview() {
 fun LinkInlineSignup(
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     enabled: Boolean,
-    onStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit,
+    onStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
     modifier: Modifier = Modifier
 ) {
     linkConfigurationCoordinator.component?.let { component ->

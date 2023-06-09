@@ -6,7 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.googlepaylauncher.GooglePayRepository
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -414,7 +414,7 @@ internal class DefaultPaymentSheetLoaderTest {
             ),
         ) as PaymentSheetLoader.Result.Success
 
-        val expectedLinkConfig = LinkPaymentLauncher.Configuration(
+        val expectedLinkConfig = LinkConfiguration(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             merchantName = "Merchant",
             customerName = "Till",

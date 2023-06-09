@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -345,7 +346,7 @@ private fun runLinkTest(
     )
     val processingStateTurbine = handler.processingState.testIn(backgroundScope)
     val accountStatusTurbine = handler.accountStatus.testIn(backgroundScope)
-    val configuration = LinkPaymentLauncher.Configuration(
+    val configuration = LinkConfiguration(
         stripeIntent = mock(),
         merchantName = "Merchant, Inc",
         customerName = "Name",
@@ -397,7 +398,7 @@ private class LinkTestDataImpl(
     override val linkLauncher: LinkPaymentLauncher,
     override val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     override val savedStateHandle: SavedStateHandle,
-    override val configuration: LinkPaymentLauncher.Configuration,
+    override val configuration: LinkConfiguration,
     override val accountStatusFlow: MutableSharedFlow<AccountStatus>,
     override val processingStateTurbine: ReceiveTurbine<LinkHandler.ProcessingState>,
     override val accountStatusTurbine: ReceiveTurbine<AccountStatus>,
@@ -409,7 +410,7 @@ private interface LinkTestData {
     val linkLauncher: LinkPaymentLauncher
     val linkConfigurationCoordinator: LinkConfigurationCoordinator
     val savedStateHandle: SavedStateHandle
-    val configuration: LinkPaymentLauncher.Configuration
+    val configuration: LinkConfiguration
     val accountStatusFlow: MutableSharedFlow<AccountStatus>
     val processingStateTurbine: ReceiveTurbine<LinkHandler.ProcessingState>
     val accountStatusTurbine: ReceiveTurbine<AccountStatus>

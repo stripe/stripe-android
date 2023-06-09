@@ -76,7 +76,7 @@ class LinkConfigurationCoordinator @Inject internal constructor(
      * Fetch the customer's account status, initializing the dependencies if they haven't been
      * initialized yet.
      */
-    fun getAccountStatusFlow(configuration: LinkPaymentLauncher.Configuration) =
+    fun getAccountStatusFlow(configuration: LinkConfiguration) =
         getLinkPaymentLauncherComponent(configuration).linkAccountManager.accountStatus
 
     /**
@@ -84,7 +84,7 @@ class LinkConfigurationCoordinator @Inject internal constructor(
      * it's a new or existing account.
      */
     suspend fun signInWithUserInput(
-        configuration: LinkPaymentLauncher.Configuration,
+        configuration: LinkConfiguration,
         userInput: UserInput
     ) = getLinkPaymentLauncherComponent(configuration)
         .linkAccountManager
@@ -98,7 +98,7 @@ class LinkConfigurationCoordinator @Inject internal constructor(
      *          PaymentDetails.
      */
     suspend fun attachNewCardToAccount(
-        configuration: LinkPaymentLauncher.Configuration,
+        configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.New> =
         getLinkPaymentLauncherComponent(configuration)
@@ -109,7 +109,7 @@ class LinkConfigurationCoordinator @Inject internal constructor(
      * Create or get the existing [LinkPaymentLauncherComponent], responsible for injecting all
      * injectable classes in Link while in an embedded environment.
      */
-    private fun getLinkPaymentLauncherComponent(configuration: LinkPaymentLauncher.Configuration) =
+    private fun getLinkPaymentLauncherComponent(configuration: LinkConfiguration) =
         component?.takeIf { it.configuration == configuration }
             ?: launcherComponentBuilder
                 .configuration(configuration)

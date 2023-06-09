@@ -4,7 +4,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher.Companion.supportedFundingSources
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
@@ -271,7 +271,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun createLinkConfiguration(
         config: PaymentSheet.Configuration?,
         stripeIntent: StripeIntent,
-    ): LinkPaymentLauncher.Configuration {
+    ): LinkConfiguration {
         val shippingDetails: AddressDetails? = config?.shippingDetails
 
         val customerPhone = if (shippingDetails?.isCheckboxSelected == true) {
@@ -295,7 +295,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val merchantName = config?.merchantDisplayName ?: appName
 
-        return LinkPaymentLauncher.Configuration(
+        return LinkConfiguration(
             stripeIntent = stripeIntent,
             merchantName = merchantName,
             customerEmail = customerEmail,
