@@ -22,7 +22,7 @@ stages:
       - check: { }
       - test: { }
       - run-instrumentation-tests: { }
-#      - run-paymentsheet-end-to-end-tests: { }
+      - run-paymentsheet-end-to-end-tests: { }
 
 workflows:
   check:
