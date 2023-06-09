@@ -10,6 +10,7 @@ sealed class UserInput {
     /**
      * Represents an input that is valid for signing in to a link account.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class SignIn(
         val email: String
     ) : UserInput()
@@ -17,6 +18,7 @@ sealed class UserInput {
     /**
      * Represents an input that is valid for signing up to a link account.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class SignUp(
         val email: String,
         val phone: String,

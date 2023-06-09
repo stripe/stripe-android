@@ -5,22 +5,6 @@ public final class com/stripe/android/link/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/link/LinkActivityContract$Args : com/stripe/android/view/ActivityStarter$Args {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/link/LinkActivityContract$Args$Companion;
-	public final fun copy (Lcom/stripe/android/link/LinkConfiguration;Lcom/stripe/android/model/PaymentMethodCreateParams;)Lcom/stripe/android/link/LinkActivityContract$Args;
-	public static synthetic fun copy$default (Lcom/stripe/android/link/LinkActivityContract$Args;Lcom/stripe/android/link/LinkConfiguration;Lcom/stripe/android/model/PaymentMethodCreateParams;ILjava/lang/Object;)Lcom/stripe/android/link/LinkActivityContract$Args;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/link/LinkActivityContract$Args$Companion {
-}
-
 public final class com/stripe/android/link/LinkActivityContract$Args$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkActivityContract$Args;
@@ -32,22 +16,6 @@ public final class com/stripe/android/link/LinkActivityContract$Args$Creator : a
 public final class com/stripe/android/link/LinkActivityContract$Companion {
 }
 
-public final class com/stripe/android/link/LinkActivityContract$Result : com/stripe/android/view/ActivityStarter$Result {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/link/LinkActivityResult;)V
-	public final fun component1 ()Lcom/stripe/android/link/LinkActivityResult;
-	public final fun copy (Lcom/stripe/android/link/LinkActivityResult;)Lcom/stripe/android/link/LinkActivityContract$Result;
-	public static synthetic fun copy$default (Lcom/stripe/android/link/LinkActivityContract$Result;Lcom/stripe/android/link/LinkActivityResult;ILjava/lang/Object;)Lcom/stripe/android/link/LinkActivityContract$Result;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getLinkResult ()Lcom/stripe/android/link/LinkActivityResult;
-	public fun hashCode ()I
-	public fun toBundle ()Landroid/os/Bundle;
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class com/stripe/android/link/LinkActivityContract$Result$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkActivityContract$Result;
@@ -56,34 +24,12 @@ public final class com/stripe/android/link/LinkActivityContract$Result$Creator :
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/link/LinkActivityResult$Canceled : com/stripe/android/link/LinkActivityResult {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;)V
-	public final fun component1 ()Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
-	public final fun copy (Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;)Lcom/stripe/android/link/LinkActivityResult$Canceled;
-	public static synthetic fun copy$default (Lcom/stripe/android/link/LinkActivityResult$Canceled;Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;ILjava/lang/Object;)Lcom/stripe/android/link/LinkActivityResult$Canceled;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getReason ()Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class com/stripe/android/link/LinkActivityResult$Canceled$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkActivityResult$Canceled;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/link/LinkActivityResult$Canceled;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/link/LinkActivityResult$Canceled$Reason : java/lang/Enum {
-	public static final field BackPressed Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
-	public static final field LoggedOut Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
-	public static fun values ()[Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
 }
 
 public final class com/stripe/android/link/LinkActivityResult$Completed : com/stripe/android/link/LinkActivityResult {
@@ -102,21 +48,6 @@ public final class com/stripe/android/link/LinkActivityResult$Completed$Creator 
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/link/LinkActivityResult$Failed : com/stripe/android/link/LinkActivityResult {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/Throwable;)V
-	public final fun component1 ()Ljava/lang/Throwable;
-	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/link/LinkActivityResult$Failed;
-	public static synthetic fun copy$default (Lcom/stripe/android/link/LinkActivityResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/link/LinkActivityResult$Failed;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getError ()Ljava/lang/Throwable;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class com/stripe/android/link/LinkActivityResult$Failed$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkActivityResult$Failed;
@@ -133,18 +64,6 @@ public final class com/stripe/android/link/LinkConfiguration$Creator : android/o
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/link/LinkPaymentDetails$New : com/stripe/android/link/LinkPaymentDetails {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/model/ConsumerPaymentDetails$PaymentDetails;Lcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/model/PaymentMethodCreateParams;)V
-	public final fun buildFormValues ()Ljava/util/Map;
-	public fun describeContents ()I
-	public final fun getOriginalParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public fun getPaymentDetails ()Lcom/stripe/android/model/ConsumerPaymentDetails$PaymentDetails;
-	public fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class com/stripe/android/link/LinkPaymentDetails$New$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkPaymentDetails$New;
@@ -159,16 +78,6 @@ public final class com/stripe/android/link/LinkPaymentDetails$Saved$Creator : an
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/link/LinkPaymentDetails$Saved;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/link/model/AccountStatus : java/lang/Enum {
-	public static final field Error Lcom/stripe/android/link/model/AccountStatus;
-	public static final field NeedsVerification Lcom/stripe/android/link/model/AccountStatus;
-	public static final field SignedOut Lcom/stripe/android/link/model/AccountStatus;
-	public static final field VerificationStarted Lcom/stripe/android/link/model/AccountStatus;
-	public static final field Verified Lcom/stripe/android/link/model/AccountStatus;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/link/model/AccountStatus;
-	public static fun values ()[Lcom/stripe/android/link/model/AccountStatus;
 }
 
 public final class com/stripe/android/link/ui/ComposableSingletons$PrimaryButtonKt {
@@ -201,41 +110,5 @@ public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkIn
 	public fun <init> ()V
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-2$link_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class com/stripe/android/link/ui/inline/LinkInlineSignedInKt {
-}
-
-public final class com/stripe/android/link/ui/inline/LinkInlineSignupKt {
-}
-
-public final class com/stripe/android/link/ui/inline/UserInput$SignIn : com/stripe/android/link/ui/inline/UserInput {
-	public static final field $stable I
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/link/ui/inline/UserInput$SignIn;
-	public static synthetic fun copy$default (Lcom/stripe/android/link/ui/inline/UserInput$SignIn;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/link/ui/inline/UserInput$SignIn;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEmail ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/link/ui/inline/UserInput$SignUp : com/stripe/android/link/ui/inline/UserInput {
-	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/link/ui/inline/UserInput$SignUp;
-	public static synthetic fun copy$default (Lcom/stripe/android/link/ui/inline/UserInput$SignUp;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/link/ui/inline/UserInput$SignUp;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCountry ()Ljava/lang/String;
-	public final fun getEmail ()Ljava/lang/String;
-	public final fun getName ()Ljava/lang/String;
-	public final fun getPhone ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 

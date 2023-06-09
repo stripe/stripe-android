@@ -1,3 +1,5 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.link.ui.inline
 
 import androidx.annotation.RestrictTo
@@ -30,7 +32,6 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 fun LinkInlineSignedIn(
     linkConfigurationCoordinator: LinkConfigurationCoordinator,

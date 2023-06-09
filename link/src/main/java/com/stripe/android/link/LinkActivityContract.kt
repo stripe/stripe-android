@@ -22,11 +22,12 @@ class LinkActivityContract :
     }
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Args internal constructor(
         internal val configuration: LinkConfiguration,
         internal val prefilledCardParams: PaymentMethodCreateParams? = null,
     ) : ActivityStarter.Args {
-        companion object {
+        internal companion object {
             internal fun fromIntent(intent: Intent): Args? {
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
@@ -34,13 +35,14 @@ class LinkActivityContract :
     }
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Result(
         val linkResult: LinkActivityResult
     ) : ActivityStarter.Result {
         override fun toBundle() = bundleOf(EXTRA_RESULT to this)
     }
 
-    companion object {
+    internal companion object {
         const val EXTRA_ARGS =
             "com.stripe.android.link.LinkActivityContract.extra_args"
         const val EXTRA_RESULT =
