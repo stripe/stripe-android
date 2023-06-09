@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.features.common
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat.getLocales
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
 import com.stripe.android.uicore.text.MiddleEllipsisText
@@ -52,7 +52,7 @@ internal fun AccountItem(
                 },
                 shape = shape
             )
-            .clickable(enabled = account.allowSelection) { onAccountClicked(account) }
+            .clickableSingle(enabled = account.allowSelection) { onAccountClicked(account) }
             .padding(vertical = verticalPadding, horizontal = 16.dp)
     ) {
         Row(

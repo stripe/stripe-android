@@ -26,6 +26,7 @@ import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,9 +50,14 @@ internal fun FinancialConnectionsButton(
     loading: Boolean = false,
     content: @Composable (RowScope.() -> Unit)
 ) {
+    val multipleEventsCutter = remember { MultipleEventsCutter.get() }
     CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
         Button(
-            onClick = { if (loading.not()) onClick() },
+            onClick = {
+                multipleEventsCutter.processEvent {
+                    if (loading.not()) onClick()
+                }
+            },
             modifier = modifier,
             elevation = ButtonDefaults.elevation(
                 defaultElevation = 0.dp,
@@ -198,40 +204,40 @@ internal fun FinancialConnectionsButtonPreview() {
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             FinancialConnectionsButton(
+                onClick = { },
                 modifier = Modifier.fillMaxWidth(),
-                loading = false,
-                onClick = { }
+                loading = false
             ) {
                 Text(text = "Primary")
             }
             FinancialConnectionsButton(
+                onClick = { },
                 modifier = Modifier.fillMaxWidth(),
-                loading = true,
-                onClick = { }
+                loading = true
             ) {
                 Text(text = "Primary - loading")
             }
             FinancialConnectionsButton(
+                onClick = { },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = false,
-                onClick = { }
+                enabled = false
             ) {
                 Text(text = "Primary - disabled")
             }
             FinancialConnectionsButton(
+                onClick = { },
                 modifier = Modifier.fillMaxWidth(),
                 type = Type.Secondary,
-                loading = false,
-                onClick = { }
+                loading = false
             ) {
                 Text(text = "Secondary")
             }
             FinancialConnectionsButton(
+                onClick = { },
                 modifier = Modifier.fillMaxWidth(),
                 type = Type.Secondary,
-                loading = false,
                 enabled = false,
-                onClick = { }
+                loading = false
             ) {
                 Text(text = "Secondary disabled")
             }
