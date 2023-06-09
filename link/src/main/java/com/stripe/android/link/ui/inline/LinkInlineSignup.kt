@@ -1,3 +1,5 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.link.ui.inline
 
 import androidx.annotation.RestrictTo
@@ -87,7 +89,6 @@ private fun Preview() {
     }
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LinkInlineSignup(
