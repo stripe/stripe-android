@@ -100,16 +100,18 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When the selected payment method cannot be loaded, errorMessage is emitted`() = runTest {
+    fun `When the selected payment method cannot be loaded, selectedPaymentMethod is null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
                 selectedPaymentOption = Result.failure(Exception("Failed to retrieve selected payment option."))
             )
         )
         viewModel.viewState.test {
-            assertThat(
-                (awaitItem() as CustomerSheetViewState.SelectPaymentMethod).errorMessage
-            ).isEqualTo("Failed to retrieve selected payment option.")
+            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.selectedPaymentMethodId)
+                .isEqualTo(null)
+            assertThat(viewState.errorMessage)
+                .isEqualTo(null)
         }
     }
 

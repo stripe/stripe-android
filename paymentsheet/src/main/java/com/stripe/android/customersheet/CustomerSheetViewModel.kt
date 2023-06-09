@@ -59,14 +59,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                             paymentMethod = paymentMethod
                         )
                     }
-                    customerAdapter.retrieveSelectedPaymentOption().fold(
-                        onSuccess = { selectedPaymentMethod ->
-                            selectedPaymentMethodId = selectedPaymentMethod?.id
-                        },
-                        onFailure = { throwable ->
-                            errorMessage = throwable.message
-                        }
-                    )
+                    customerAdapter.retrieveSelectedPaymentOption().onSuccess { paymentMethod ->
+                        selectedPaymentMethodId = paymentMethod?.id
+                    }
                 },
                 onFailure = { throwable ->
                     errorMessage = throwable.message
