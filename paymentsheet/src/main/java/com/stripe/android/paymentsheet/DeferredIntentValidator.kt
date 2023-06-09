@@ -40,11 +40,6 @@ internal object DeferredIntentValidator {
                         "setupFutureUsage (${paymentMode.setupFutureUsage})."
                 }
 
-                require(paymentMode.amount == stripeIntent.amount) {
-                    "Your PaymentIntent amount (${stripeIntent.amount}) does not match " +
-                        "the PaymentSheet.IntentConfiguration amount (${paymentMode.amount})."
-                }
-
                 require(paymentMode.captureMethod == stripeIntent.captureMethod) {
                     "Your PaymentIntent captureMethod (${stripeIntent.captureMethod}) does not " +
                         "match the PaymentSheet.IntentConfiguration " +

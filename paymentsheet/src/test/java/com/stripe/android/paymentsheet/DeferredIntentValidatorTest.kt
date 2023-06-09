@@ -33,27 +33,6 @@ internal class DeferredIntentValidatorTest {
     }
 
     @Test
-    fun `Fails if PaymentIntent has different amount than IntentConfiguration`() {
-        val paymentIntent = PaymentIntentFactory.create()
-        val intentConfiguration = makeIntentConfigurationForPayment(amount = 4321L)
-
-        val failure = assertThrows(IllegalArgumentException::class.java) {
-            DeferredIntentValidator.validate(
-                stripeIntent = paymentIntent,
-                intentConfiguration = intentConfiguration,
-                isFlowController = false,
-            )
-        }
-
-        assertThat(failure).isInstanceOf(IllegalArgumentException::class.java)
-
-        assertThat(failure).hasMessageThat().isEqualTo(
-            "Your PaymentIntent amount (1000) does not match " +
-                "the PaymentSheet.IntentConfiguration amount (4321)."
-        )
-    }
-
-    @Test
     fun `Fails if PaymentIntent has different currency than IntentConfiguration`() {
         val paymentIntent = PaymentIntentFactory.create()
         val intentConfiguration = makeIntentConfigurationForPayment(currency = "eur")
@@ -218,14 +197,13 @@ internal class DeferredIntentValidatorTest {
     }
 
     private fun makeIntentConfigurationForPayment(
-        amount: Long = 1000L,
         currency: String = "usd",
         setupFutureUse: IntentConfiguration.SetupFutureUse? = null,
         captureMethod: IntentConfiguration.CaptureMethod = IntentConfiguration.CaptureMethod.Automatic,
     ): IntentConfiguration {
         return IntentConfiguration(
             mode = IntentConfiguration.Mode.Payment(
-                amount = amount,
+                amount = 1_000,
                 currency = currency,
                 setupFutureUse = setupFutureUse,
                 captureMethod = captureMethod,

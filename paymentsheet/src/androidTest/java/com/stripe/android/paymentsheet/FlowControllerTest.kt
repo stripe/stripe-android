@@ -596,8 +596,8 @@ internal class FlowControllerTest {
                 paymentResultCallback = { result ->
                     val failureResult = result as? PaymentSheetResult.Failed
                     assertThat(failureResult?.error?.message).isEqualTo(
-                        "Your PaymentIntent amount (5099) does not match " +
-                            "the PaymentSheet.IntentConfiguration amount (2000)."
+                        "Your PaymentIntent currency (usd) does not match " +
+                            "the PaymentSheet.IntentConfiguration currency (cad)."
                     )
                     resultCountDownLatch.countDown()
                 },
@@ -608,10 +608,10 @@ internal class FlowControllerTest {
             flowController.configureWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        // This amount is different from the $50.99 in the created intent, which
+                        // This currency is different from USD in the created intent, which
                         // will cause the validator to fail this transaction.
-                        amount = 2000,
-                        currency = "usd"
+                        amount = 5099,
+                        currency = "cad",
                     )
                 ),
                 configuration = null,
