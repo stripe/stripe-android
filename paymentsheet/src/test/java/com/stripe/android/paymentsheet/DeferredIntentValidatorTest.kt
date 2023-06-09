@@ -17,7 +17,7 @@ internal class DeferredIntentValidatorTest {
         val paymentIntent = PaymentIntentFactory.create()
         val intentConfiguration = makeIntentConfigurationForSetup()
 
-        val failure = assertFailsWith(IllegalArgumentException::class) {
+        val failure = assertFailsWith<IllegalArgumentException> {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
@@ -36,7 +36,7 @@ internal class DeferredIntentValidatorTest {
         val paymentIntent = PaymentIntentFactory.create()
         val intentConfiguration = makeIntentConfigurationForPayment(currency = "eur")
 
-        val failure = assertFailsWith(IllegalArgumentException::class) {
+        val failure = assertFailsWith<IllegalArgumentException> {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
@@ -59,7 +59,7 @@ internal class DeferredIntentValidatorTest {
             setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession,
         )
 
-        val failure = assertFailsWith(IllegalArgumentException::class) {
+        val failure = assertFailsWith<IllegalArgumentException> {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
@@ -80,7 +80,7 @@ internal class DeferredIntentValidatorTest {
             captureMethod = IntentConfiguration.CaptureMethod.Manual,
         )
 
-        val failure = assertFailsWith(IllegalArgumentException::class) {
+        val failure = assertFailsWith<IllegalArgumentException> {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
@@ -102,7 +102,7 @@ internal class DeferredIntentValidatorTest {
 
         val intentConfiguration = makeIntentConfigurationForPayment()
 
-        val failure = assertFailsWith(IllegalArgumentException::class) {
+        val failure = assertFailsWith<IllegalArgumentException> {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
@@ -152,7 +152,7 @@ internal class DeferredIntentValidatorTest {
         val setupIntent = SetupIntentFixtures.SI_SUCCEEDED
         val intentConfiguration = makeIntentConfigurationForPayment()
 
-        val failure = assertFailsWith(IllegalArgumentException::class) {
+        val failure = assertFailsWith<IllegalArgumentException> {
             DeferredIntentValidator.validate(
                 stripeIntent = setupIntent,
                 intentConfiguration = intentConfiguration,
@@ -173,7 +173,7 @@ internal class DeferredIntentValidatorTest {
             usage = IntentConfiguration.SetupFutureUse.OnSession,
         )
 
-        val failure = assertFailsWith(IllegalArgumentException::class) {
+        val failure = assertFailsWith<IllegalArgumentException> {
             DeferredIntentValidator.validate(
                 stripeIntent = setupIntent,
                 intentConfiguration = intentConfiguration,
