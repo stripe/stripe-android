@@ -7,7 +7,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.customersheet.injection.CustomerSessionScope
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,18 +31,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     val viewState: StateFlow<CustomerSheetViewState> = _viewState
 
     init {
-        viewModelScope.launch {
-            _viewState.update {
-                CustomerSheetViewState.SelectPaymentMethod(
-                    title = configuration.headerTextForSelectionScreen,
-                    paymentMethods = listOf(),
-                    selectedPaymentMethodId = null,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isEditing = false
-                )
-            }
-        }
+        loadPaymentMethods()
     }
 
     fun handleViewAction(viewAction: CustomerSheetViewAction) {
@@ -50,6 +41,43 @@ internal class CustomerSheetViewModel @Inject constructor(
             is CustomerSheetViewAction.OnEditPressed -> onEdit()
             is CustomerSheetViewAction.OnItemRemoved -> onItemRemoved(viewAction.paymentMethod)
             is CustomerSheetViewAction.OnItemSelected -> onItemSelected(viewAction.selection)
+        }
+    }
+
+    private fun loadPaymentMethods() {
+        viewModelScope.launch {
+            var savedPaymentMethods: List<PaymentOptionsItem.SavedPaymentMethod> = emptyList()
+            var selectedPaymentMethodId: String? = null
+            var errorMessage: String? = null
+            customerAdapter.retrievePaymentMethods().fold(
+                onSuccess = { paymentMethods ->
+                    savedPaymentMethods = paymentMethods.map { paymentMethod ->
+                        PaymentOptionsItem.SavedPaymentMethod(
+                            displayName = paymentMethod
+                                .getLabel(resources)
+                                .toString(),
+                            paymentMethod = paymentMethod
+                        )
+                    }
+                    customerAdapter.retrieveSelectedPaymentOption().onSuccess { paymentMethod ->
+                        selectedPaymentMethodId = paymentMethod?.id
+                    }
+                },
+                onFailure = { throwable ->
+                    errorMessage = throwable.message
+                }
+            )
+            _viewState.update {
+                CustomerSheetViewState.SelectPaymentMethod(
+                    title = configuration.headerTextForSelectionScreen,
+                    paymentMethods = savedPaymentMethods,
+                    selectedPaymentMethodId = selectedPaymentMethodId,
+                    isLiveMode = false,
+                    isProcessing = false,
+                    isEditing = false,
+                    errorMessage = errorMessage,
+                )
+            }
         }
     }
 

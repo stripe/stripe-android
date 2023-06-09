@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,8 +13,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewState
+import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.ui.core.elements.H4Text
@@ -75,7 +77,8 @@ internal fun SelectPaymentMethod(
         },
         content = {
             SelectPaymentMethodContent(
-                header = viewState.title,
+                viewState = viewState,
+                viewActionHandler = viewActionHandler,
             )
         },
         modifier = Modifier.padding(bottom = bottomPadding)
@@ -84,13 +87,14 @@ internal fun SelectPaymentMethod(
 
 @Composable
 internal fun SelectPaymentMethodContent(
-    header: String?,
+    viewState: CustomerSheetViewState.SelectPaymentMethod,
+    viewActionHandler: (CustomerSheetViewAction) -> Unit,
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     Column {
         H4Text(
-            text = header ?: stringResource(
+            text = viewState.title ?: stringResource(
                 R.string.stripe_paymentsheet_select_payment_method
             ),
             modifier = Modifier
@@ -98,9 +102,27 @@ internal fun SelectPaymentMethodContent(
                 .padding(horizontal = horizontalPadding)
         )
 
-        Text(
-            text = "Hello world!",
-            modifier = Modifier.padding(horizontal = horizontalPadding)
+        PaymentOptions(
+            state = PaymentOptionsState(
+                items = viewState.paymentMethods,
+                selectedIndex = viewState.paymentMethods.indexOfFirst {
+                    it.paymentMethod.id == viewState.selectedPaymentMethodId
+                },
+            ),
+            isEditing = viewState.isEditing,
+            isProcessing = viewState.isProcessing,
+            onAddCardPressed = { viewActionHandler(CustomerSheetViewAction.OnAddCardPressed) },
+            onItemSelected = { viewActionHandler(CustomerSheetViewAction.OnItemSelected(it)) },
+            onItemRemoved = { viewActionHandler(CustomerSheetViewAction.OnItemRemoved(it)) },
         )
+
+        viewState.errorMessage?.let { error ->
+            ErrorMessage(
+                error = error,
+                modifier = Modifier
+                    .padding(vertical = 2.dp)
+                    .padding(horizontal = horizontalPadding),
+            )
+        }
     }
 }
