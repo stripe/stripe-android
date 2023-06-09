@@ -4,7 +4,8 @@
 
 ### Financial Connections
 * [FIXED][6836](https://github.com/stripe/stripe-android/pull/6836) Prevents double navigation when tapping too quickly.
-* 
+* [CHANGED][6850](https://github.com/stripe/stripe-android/pull/6850) Removes Toast shown after gracefully failing if no browser installed.
+
 ## 20.25.5 - 2023-06-05
 
 ### PaymentSheet
