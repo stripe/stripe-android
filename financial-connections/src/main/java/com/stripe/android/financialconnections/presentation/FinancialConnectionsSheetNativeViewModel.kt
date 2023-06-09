@@ -163,7 +163,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-
     /**
      *  If activity resumes and we did not receive a callback from the AuthFlow,
      *  then the user hit the back button or closed the custom tabs UI, so return result as
@@ -171,14 +170,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      */
     fun onResume() = viewModelScope.launch {
         mutex.withLock {
-            logger.debug("CONV onResume")
             val state = awaitState()
             if (state.webAuthFlow is Loading) {
                 setState { copy(webAuthFlow = Fail(WebAuthFlowCancelledException())) }
             }
         }
     }
-
 
     fun openPartnerAuthFlowInBrowser(url: String) {
         setState {
