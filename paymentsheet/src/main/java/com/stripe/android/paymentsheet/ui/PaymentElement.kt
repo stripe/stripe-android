@@ -10,8 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkInlineSignedIn
 import com.stripe.android.link.ui.inline.LinkInlineSignup
@@ -36,7 +36,7 @@ internal fun PaymentElement(
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     showCheckboxFlow: Flow<Boolean>,
     onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
-    onLinkSignupStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit,
+    onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
     formArguments: FormArguments,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
 ) {

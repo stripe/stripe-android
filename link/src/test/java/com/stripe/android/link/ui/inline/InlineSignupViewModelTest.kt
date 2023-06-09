@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
@@ -59,7 +59,7 @@ class InlineSignupViewModelTest {
     fun `When email and phone are provided it should prefill all values`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = InlineSignupViewModel(
-                config = LinkPaymentLauncher.Configuration(
+                config = LinkConfiguration(
                     stripeIntent = mockStripeIntent(),
                     merchantName = MERCHANT_NAME,
                     customerEmail = CUSTOMER_EMAIL,
@@ -284,7 +284,7 @@ class InlineSignupViewModelTest {
         prefilledName: String? = null,
         prefilledPhone: String? = null
     ) = InlineSignupViewModel(
-        config = LinkPaymentLauncher.Configuration(
+        config = LinkConfiguration(
             stripeIntent = mockStripeIntent(countryCode),
             merchantName = MERCHANT_NAME,
             customerEmail = prefilledEmail,

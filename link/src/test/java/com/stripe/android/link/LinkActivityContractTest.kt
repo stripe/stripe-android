@@ -13,7 +13,7 @@ class LinkActivityContractTest {
 
     @Test
     fun `LinkActivityContract Args parcelizes correctly`() {
-        val config = LinkPaymentLauncher.Configuration(
+        val config = LinkConfiguration(
             stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
             merchantName = "Merchant, Inc",
             customerName = "Name",

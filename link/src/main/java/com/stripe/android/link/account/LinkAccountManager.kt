@@ -2,8 +2,8 @@ package com.stripe.android.link.account
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.exception.AuthenticationException
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
@@ -26,7 +26,7 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class LinkAccountManager @Inject constructor(
-    private val config: LinkPaymentLauncher.Configuration,
+    private val config: LinkConfiguration,
     private val linkRepository: LinkRepository,
     private val cookieStore: CookieStore,
     private val linkEventsReporter: LinkEventsReporter

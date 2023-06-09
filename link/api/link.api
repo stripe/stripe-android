@@ -9,8 +9,8 @@ public final class com/stripe/android/link/LinkActivityContract$Args : com/strip
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/link/LinkActivityContract$Args$Companion;
-	public final fun copy (Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;Lcom/stripe/android/model/PaymentMethodCreateParams;)Lcom/stripe/android/link/LinkActivityContract$Args;
-	public static synthetic fun copy$default (Lcom/stripe/android/link/LinkActivityContract$Args;Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;Lcom/stripe/android/model/PaymentMethodCreateParams;ILjava/lang/Object;)Lcom/stripe/android/link/LinkActivityContract$Args;
+	public final fun copy (Lcom/stripe/android/link/LinkConfiguration;Lcom/stripe/android/model/PaymentMethodCreateParams;)Lcom/stripe/android/link/LinkActivityContract$Args;
+	public static synthetic fun copy$default (Lcom/stripe/android/link/LinkActivityContract$Args;Lcom/stripe/android/link/LinkConfiguration;Lcom/stripe/android/model/PaymentMethodCreateParams;ILjava/lang/Object;)Lcom/stripe/android/link/LinkActivityContract$Args;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -125,6 +125,14 @@ public final class com/stripe/android/link/LinkActivityResult$Failed$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/link/LinkConfiguration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkConfiguration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/link/LinkConfiguration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/link/LinkPaymentDetails$New : com/stripe/android/link/LinkPaymentDetails {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -150,14 +158,6 @@ public final class com/stripe/android/link/LinkPaymentDetails$Saved$Creator : an
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkPaymentDetails$Saved;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/link/LinkPaymentDetails$Saved;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/link/LinkPaymentLauncher$Configuration$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

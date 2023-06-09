@@ -23,7 +23,7 @@ class LinkActivityContract :
 
     @Parcelize
     data class Args internal constructor(
-        internal val configuration: LinkPaymentLauncher.Configuration,
+        internal val configuration: LinkConfiguration,
         internal val prefilledCardParams: PaymentMethodCreateParams? = null,
     ) : ActivityStarter.Args {
         companion object {

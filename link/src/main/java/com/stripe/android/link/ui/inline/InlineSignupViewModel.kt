@@ -8,7 +8,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.injection.NonFallbackInjectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.ui.ErrorMessage
@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class InlineSignupViewModel @Inject constructor(
-    private val config: LinkPaymentLauncher.Configuration,
+    private val config: LinkConfiguration,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger
