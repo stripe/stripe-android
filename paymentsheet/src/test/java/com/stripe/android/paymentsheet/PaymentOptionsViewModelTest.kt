@@ -503,7 +503,7 @@ internal class PaymentOptionsViewModelTest {
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
         lpmRepository: LpmRepository = createLpmRepository()
-    ) = TestViewModelFactory.create { linkHandler, savedStateHandle ->
+    ) = TestViewModelFactory.create { linkHandler, linkInteractor, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(state = args.state.copy(linkState = linkState)),
             prefsRepositoryFactory = { prefsRepository },
@@ -514,7 +514,8 @@ internal class PaymentOptionsViewModelTest {
             logger = Logger.noop(),
             lpmRepository = lpmRepository,
             savedStateHandle = savedStateHandle,
-            linkHandler = linkHandler
+            linkHandler = linkHandler,
+            linkConfigurationCoordinator = linkInteractor,
         )
     }
 

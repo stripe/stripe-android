@@ -204,14 +204,9 @@ public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkIn
 }
 
 public final class com/stripe/android/link/ui/inline/LinkInlineSignedInKt {
-	public static final fun LinkInlineSignedIn (Lcom/stripe/android/link/LinkPaymentLauncher;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/stripe/android/link/ui/inline/LinkInlineSignupKt {
-}
-
-public abstract class com/stripe/android/link/ui/inline/UserInput {
-	public static final field $stable I
 }
 
 public final class com/stripe/android/link/ui/inline/UserInput$SignIn : com/stripe/android/link/ui/inline/UserInput {

@@ -2,8 +2,6 @@
 
 package com.stripe.android.link.ui
 
-import android.content.Context
-import android.util.AttributeSet
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -21,14 +19,9 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -36,7 +29,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
@@ -131,43 +123,6 @@ fun LinkButton(
                     }
                 }
             }
-        }
-    }
-}
-
-/**
- * Wrapper view around a button for paying with Link, for use in xml layout.
- *
- * Set the `onClick` function to launch LinkPaymentLauncher.
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkButtonView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyle: Int = 0
-) : AbstractComposeView(context, attrs, defStyle) {
-
-    override var shouldCreateCompositionOnAttachedToWindow: Boolean = false
-        private set
-
-    var linkPaymentLauncher: LinkPaymentLauncher? = null
-    var onClick by mutableStateOf({})
-    private var isEnabledState by mutableStateOf(isEnabled)
-
-    override fun setEnabled(enabled: Boolean) {
-        super.setEnabled(enabled)
-        isEnabledState = enabled
-    }
-
-    @Composable
-    override fun Content() {
-        linkPaymentLauncher?.let { launcher ->
-            val email by launcher.emailFlow.collectAsState(initial = null)
-            LinkButton(
-                email = email,
-                enabled = isEnabledState,
-                onClick = onClick,
-            )
         }
     }
 }

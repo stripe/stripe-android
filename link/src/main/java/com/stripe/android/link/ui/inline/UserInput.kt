@@ -1,8 +1,11 @@
 package com.stripe.android.link.ui.inline
 
+import androidx.annotation.RestrictTo
+
 /**
  * Valid user input into the inline sign up view.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class UserInput {
     /**
      * Represents an input that is valid for signing in to a link account.

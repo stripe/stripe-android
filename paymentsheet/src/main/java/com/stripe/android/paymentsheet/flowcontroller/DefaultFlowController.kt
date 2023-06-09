@@ -20,6 +20,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -87,6 +88,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     private val linkLauncher: LinkPaymentLauncher,
+    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
 ) : PaymentSheet.FlowController, NonFallbackInjector {
@@ -491,7 +493,7 @@ internal class DefaultFlowController @Inject internal constructor(
         val linkConfig = requireNotNull(state.linkState).configuration
 
         viewModelScope.launch {
-            val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
+            val accountStatus = linkConfigurationCoordinator.getAccountStatusFlow(linkConfig).first()
 
             val linkInline = (paymentSelection as? PaymentSelection.New.LinkInline)?.takeIf {
                 accountStatus == AccountStatus.Verified

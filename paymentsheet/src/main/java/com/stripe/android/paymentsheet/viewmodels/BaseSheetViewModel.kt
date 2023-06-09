@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.NonFallbackInjector
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentIntent
@@ -70,6 +71,7 @@ internal abstract class BaseSheetViewModel(
     val lpmRepository: LpmRepository,
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
+    val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val headerTextFactory: HeaderTextFactory,
 ) : AndroidViewModel(application) {
     /**

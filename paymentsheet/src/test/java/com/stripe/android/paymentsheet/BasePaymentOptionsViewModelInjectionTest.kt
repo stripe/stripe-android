@@ -10,7 +10,7 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -70,10 +70,10 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
             null
         )
         TestViewModelFactory.create(
-            linkLauncher = mock<LinkPaymentLauncher>().apply {
+            linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>().apply {
                 whenever(getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
             },
-        ) { linkHandler, savedStateHandle ->
+        ) { linkHandler, linkInteractor, savedStateHandle ->
             PaymentOptionsViewModel(
                 args,
                 prefsRepositoryFactory = {
@@ -87,6 +87,7 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
                 lpmRepository = lpmRepository,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
+                linkConfigurationCoordinator = linkInteractor,
             )
         }
     }

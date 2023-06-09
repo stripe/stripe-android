@@ -52,8 +52,6 @@
     <ID>MagicNumber:RoundToMaxDecimals.kt$10</ID>
     <ID>MatchingDeclarationName:ComposeLoadingButton.kt$LoadingButtonState</ID>
     <ID>MaxLineLength:DefaultIdentityRepositoryTest.kt$DefaultIdentityRepositoryTest$fun</ID>
-    <ID>MaxLineLength:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$return</ID>
-    <ID>MaxLineLength:IDDetectorTransitioner.kt$IDDetectorTransitioner$"Scan for ${unsatisfiedState.type} Unsatisfied with reason ${unsatisfiedState.reason}, transition to Initial."</ID>
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$fun</ID>
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION + 1).milliseconds)</ID>
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION - 1).milliseconds)</ID>
@@ -64,8 +62,6 @@
     <ID>MaxLineLength:VerificationPage.kt$VerificationPage$* A VerificationPage contains the static content and initial state that is required for Stripe Identity's native mobile SDKs to render the verification flow.</ID>
     <ID>MaxLineLength:VerificationPageData.kt$VerificationPageData$* VerificationPageData contains the state of a verification, including what information needs to be collected to complete the verification flow.</ID>
     <ID>MaximumLineLength:com.stripe.android.identity.camera.IdentityScanFlow.kt:34</ID>
-    <ID>MaximumLineLength:com.stripe.android.identity.states.FaceDetectorTransitioner.kt:221</ID>
-    <ID>MaximumLineLength:com.stripe.android.identity.states.IDDetectorTransitioner.kt:127</ID>
     <ID>ReturnCount:AddressSection.kt$private fun isValidAddress(addressMap: Map&lt;IdentifierSpec, FormFieldEntry>): Boolean</ID>
     <ID>ReturnCount:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>
     <ID>ReturnCount:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>

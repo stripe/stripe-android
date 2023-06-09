@@ -14,7 +14,7 @@ import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class LinkPaymentLauncherTest {
+class LinkConfigurationCoordinatorTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val config = LinkPaymentLauncher.Configuration(
         stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
@@ -26,7 +26,7 @@ class LinkPaymentLauncherTest {
         shippingValues = null,
     )
 
-    private var linkPaymentLauncher = LinkPaymentLauncher(
+    private var linkConfigurationCoordinator = LinkConfigurationCoordinator(
         context,
         setOf(PRODUCT_USAGE),
         { PUBLISHABLE_KEY },
@@ -46,17 +46,17 @@ class LinkPaymentLauncherTest {
 
     @Test
     fun `verify component is reused for same configuration`() = runTest {
-        linkPaymentLauncher.getAccountStatusFlow(config)
-        val component = linkPaymentLauncher.component
-        linkPaymentLauncher.signInWithUserInput(config, mock<UserInput.SignIn>())
-        assertThat(linkPaymentLauncher.component).isEqualTo(component)
+        linkConfigurationCoordinator.getAccountStatusFlow(config)
+        val component = linkConfigurationCoordinator.component
+        linkConfigurationCoordinator.signInWithUserInput(config, mock<UserInput.SignIn>())
+        assertThat(linkConfigurationCoordinator.component).isEqualTo(component)
     }
 
     @Test
     fun `verify component is recreated for different configuration`() {
-        val component = linkPaymentLauncher.component
-        linkPaymentLauncher.getAccountStatusFlow(config.copy(merchantName = "anotherName"))
-        assertThat(linkPaymentLauncher.component).isNotEqualTo(component)
+        val component = linkConfigurationCoordinator.component
+        linkConfigurationCoordinator.getAccountStatusFlow(config.copy(merchantName = "anotherName"))
+        assertThat(linkConfigurationCoordinator.component).isNotEqualTo(component)
     }
 
     companion object {
