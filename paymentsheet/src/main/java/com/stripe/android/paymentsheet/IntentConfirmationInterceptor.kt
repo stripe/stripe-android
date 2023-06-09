@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor.NextStep
+import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -45,7 +46,6 @@ internal interface IntentConfirmationInterceptor {
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        isFlowController: Boolean,
     ): NextStep
 
     suspend fun intercept(
@@ -53,7 +53,6 @@ internal interface IntentConfirmationInterceptor {
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        isFlowController: Boolean,
     ): NextStep
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -68,6 +67,7 @@ internal interface IntentConfirmationInterceptor {
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val context: Context,
     private val stripeRepository: StripeRepository,
+    @Named(IS_FLOW_CONTROLLER) private val isFlowController: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) : IntentConfirmationInterceptor {
@@ -86,7 +86,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        isFlowController: Boolean,
     ): NextStep {
         return when (initializationMode) {
             is PaymentSheet.InitializationMode.DeferredIntent -> {
@@ -95,7 +94,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
                     setupForFutureUsage = setupForFutureUsage,
-                    isFlowController = isFlowController,
                 )
             }
             is PaymentSheet.InitializationMode.PaymentIntent -> {
@@ -123,7 +121,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        isFlowController: Boolean,
     ): NextStep {
         return when (initializationMode) {
             is PaymentSheet.InitializationMode.DeferredIntent -> {
@@ -132,7 +129,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethod = paymentMethod,
                     shippingValues = shippingValues,
                     setupForFutureUsage = setupForFutureUsage,
-                    isFlowController = isFlowController,
                 )
             }
             is PaymentSheet.InitializationMode.PaymentIntent -> {
@@ -157,7 +153,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        isFlowController: Boolean,
     ): NextStep {
         val params = paymentMethodCreateParams.copy(
             productUsage = paymentMethodCreateParams.attribution + "deferred-intent",
@@ -170,7 +165,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethod = paymentMethod,
                     shippingValues = shippingValues,
                     setupForFutureUsage = setupForFutureUsage,
-                    isFlowController = isFlowController,
                 )
             },
             onFailure = { error ->
@@ -187,7 +181,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        isFlowController: Boolean,
     ): NextStep {
         return when (val callback = IntentConfirmationInterceptor.createIntentCallback) {
             is CreateIntentCallback -> {
@@ -197,7 +190,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethod = paymentMethod,
                     shouldSavePaymentMethod = setupForFutureUsage == OffSession,
                     shippingValues = shippingValues,
-                    isFlowController = isFlowController,
                 )
             }
             else -> {
@@ -226,7 +218,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        isFlowController: Boolean,
     ): NextStep {
         val result = createIntentCallback.onCreateIntent(
             paymentMethod = paymentMethod,
@@ -243,7 +234,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         intentConfiguration = intentConfiguration,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues,
-                        isFlowController = isFlowController,
                     )
                 }
             }
@@ -261,7 +251,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        isFlowController: Boolean,
     ): NextStep {
         return retrieveStripeIntent(clientSecret).mapCatching { intent ->
             if (intent.isConfirmed) {
