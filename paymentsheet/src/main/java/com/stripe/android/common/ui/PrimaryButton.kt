@@ -1,10 +1,9 @@
-package com.stripe.android.paymentsheet.addresselement
+package com.stripe.android.common.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
@@ -27,10 +26,11 @@ import com.stripe.android.uicore.getBorderStrokeColor
 import com.stripe.android.uicore.getOnBackgroundColor
 
 @Composable
-internal fun AddressElementPrimaryButton(
+internal fun PrimaryButton(
+    label: String,
     isEnabled: Boolean,
-    text: String,
-    onButtonClick: () -> Unit
+    onButtonClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     // We need to use PaymentsTheme.primaryButtonStyle instead of MaterialTheme
     // because of the rules API for primary button.
@@ -54,9 +54,7 @@ internal fun AddressElementPrimaryButton(
         LocalContentAlpha provides if (isEnabled) ContentAlpha.high else ContentAlpha.disabled
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
+            modifier = modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             TextButton(
@@ -73,7 +71,7 @@ internal fun AddressElementPrimaryButton(
                 )
             ) {
                 Text(
-                    text = text,
+                    text = label,
                     color = onBackground.copy(alpha = LocalContentAlpha.current),
                     style = textStyle
                 )
