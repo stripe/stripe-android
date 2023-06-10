@@ -42,7 +42,6 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -64,8 +63,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
-
-    private val mutex = Mutex()
 
     init {
         setState { copy(firstInit = false) }
@@ -96,59 +93,57 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      * @param intent the new intent with the redirect URL in the intent data
      */
     fun handleOnNewIntent(intent: Intent?) = viewModelScope.launch {
-        mutex.withLock {
-            val receivedUrl: String = intent?.data?.toString() ?: ""
-            when {
-                receivedUrl.contains("authentication_return", true) -> {
-                    setState {
-                        copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
-                    }
+        val receivedUrl: String = intent?.data?.toString() ?: ""
+        when {
+            receivedUrl.contains("authentication_return", true) -> {
+                setState {
+                    copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
+                }
+            }
+
+            uriUtils.compareSchemeAuthorityAndPath(
+                receivedUrl,
+                baseUrl(applicationId)
+            ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)) {
+                STATUS_SUCCESS -> setState {
+                    copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
                 }
 
-                uriUtils.compareSchemeAuthorityAndPath(
-                    receivedUrl,
-                    baseUrl(applicationId)
-                ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)) {
-                    STATUS_SUCCESS -> setState {
-                        copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
-                    }
-
-                    STATUS_CANCEL -> setState {
-                        copy(webAuthFlow = WebAuthFlowState.Canceled)
-                    }
-
-                    STATUS_FAILURE -> setState {
-                        copy(
-                            webAuthFlow = WebAuthFlowState.Failed(
-                                message = "Received return_url with failed status: $receivedUrl",
-                                reason = uriUtils.getQueryParameter(
-                                    receivedUrl,
-                                    PARAM_ERROR_REASON
-                                )
-                            )
-                        )
-                    }
-
-                    // received unknown / non-handleable [PARAM_STATUS]
-                    else -> setState {
-                        copy(
-                            webAuthFlow = WebAuthFlowState.Failed(
-                                message = "Received return_url with unknown status: $receivedUrl",
-                                reason = null
-                            )
-
-                        )
-                    }
+                STATUS_CANCEL -> setState {
+                    copy(webAuthFlow = WebAuthFlowState.Canceled)
                 }
-                // received unknown / non-handleable return url.
-                else -> setState {
+
+                STATUS_FAILURE -> setState {
                     copy(
                         webAuthFlow = WebAuthFlowState.Failed(
-                            message = "Received unknown return_url: $receivedUrl",
-                            reason = null
+                            message = "Received return_url with failed status: $receivedUrl",
+                            reason = uriUtils.getQueryParameter(
+                                receivedUrl,
+                                PARAM_ERROR_REASON
+                            )
                         )
                     )
                 }
+
+                // received unknown / non-handleable [PARAM_STATUS]
+                else -> setState {
+                    copy(
+                        webAuthFlow = WebAuthFlowState.Failed(
+                            message = "Received return_url with unknown status: $receivedUrl",
+                            reason = null
+                        )
+
+                    )
+                }
+            }
+            // received unknown / non-handleable return url.
+            else -> setState {
+                copy(
+                    webAuthFlow = WebAuthFlowState.Failed(
+                        message = "Received unknown return_url: $receivedUrl",
+                        reason = null
+                    )
+                )
             }
         }
     }
@@ -159,11 +154,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      *  canceled.
      */
     fun onResume() = viewModelScope.launch {
-        mutex.withLock {
-            val state = awaitState()
-            if (state.webAuthFlow is WebAuthFlowState.InProgress) {
-                setState { copy(webAuthFlow = WebAuthFlowState.Canceled) }
-            }
+        val state = awaitState()
+        if (state.webAuthFlow is WebAuthFlowState.InProgress) {
+            setState { copy(webAuthFlow = WebAuthFlowState.Canceled) }
         }
     }
 
