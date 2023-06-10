@@ -15,7 +15,8 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewState
-import com.stripe.android.paymentsheet.PaymentOptionsState
+import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.ErrorMessage
@@ -27,14 +28,15 @@ import com.stripe.android.ui.core.elements.H4Text
 @Composable
 internal fun CustomerSheetScreen(
     viewState: CustomerSheetViewState,
-    viewActionHandler: (CustomerSheetViewAction) -> Unit = {}
+    viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
+    paymentMethodNameProvider: (PaymentMethodCode?) -> String,
 ) {
     when (viewState) {
         is CustomerSheetViewState.Loading -> {
             Loading()
         }
         is CustomerSheetViewState.SelectPaymentMethod -> {
-            SelectPaymentMethod(viewState, viewActionHandler)
+            SelectPaymentMethod(viewState, viewActionHandler, paymentMethodNameProvider)
         }
     }
 }
@@ -58,6 +60,7 @@ internal fun Loading() {
 internal fun SelectPaymentMethod(
     viewState: CustomerSheetViewState.SelectPaymentMethod,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
+    paymentMethodNameProvider: (PaymentMethodCode?) -> String,
 ) {
     val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
 
@@ -81,6 +84,7 @@ internal fun SelectPaymentMethod(
             SelectPaymentMethodContent(
                 viewState = viewState,
                 viewActionHandler = viewActionHandler,
+                paymentMethodNameProvider = paymentMethodNameProvider,
             )
         },
         modifier = Modifier.padding(bottom = bottomPadding)
@@ -91,6 +95,7 @@ internal fun SelectPaymentMethod(
 internal fun SelectPaymentMethodContent(
     viewState: CustomerSheetViewState.SelectPaymentMethod,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
+    paymentMethodNameProvider: (PaymentMethodCode?) -> String,
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
@@ -105,11 +110,12 @@ internal fun SelectPaymentMethodContent(
         )
 
         PaymentOptions(
-            state = PaymentOptionsState(
-                items = viewState.paymentMethods,
-                selectedIndex = viewState.paymentMethods.indexOfFirst {
-                    it.paymentMethod.id == viewState.selectedPaymentMethodId
-                },
+            state = PaymentOptionsStateFactory.create(
+                paymentMethods = viewState.savedPaymentMethods,
+                showGooglePay = viewState.isGooglePayEnabled,
+                showLink = false,
+                currentSelection = viewState.paymentSelection,
+                nameProvider = paymentMethodNameProvider,
             ),
             isEditing = viewState.isEditing,
             isProcessing = viewState.isProcessing,

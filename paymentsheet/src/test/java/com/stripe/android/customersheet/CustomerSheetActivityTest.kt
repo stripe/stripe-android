@@ -8,7 +8,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
@@ -21,7 +22,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.annotation.Config
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class CustomerSheetActivityTest {
@@ -158,21 +158,22 @@ internal class CustomerSheetActivityTest {
 
     private fun createSelectPaymentMethodViewState(
         title: String? = null,
-        paymentMethods: List<PaymentOptionsItem.SavedPaymentMethod> = listOf(),
-        selectedPaymentMethodId: String? = null,
+        paymentMethods: List<PaymentMethod> = listOf(),
+        paymentSelection: PaymentSelection? = null,
         isLiveMode: Boolean = false,
         isProcessing: Boolean = false,
         isEditing: Boolean = false,
+        isGooglePayEnabled: Boolean = false,
         result: InternalCustomerSheetResult? = null
     ): CustomerSheetViewState.SelectPaymentMethod {
         return CustomerSheetViewState.SelectPaymentMethod(
-            config = CustomerSheet.Configuration(),
             title = title,
-            paymentMethods = paymentMethods,
-            selectedPaymentMethodId = selectedPaymentMethodId,
+            savedPaymentMethods = paymentMethods,
+            paymentSelection = paymentSelection,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isEditing = isEditing,
+            isGooglePayEnabled = isGooglePayEnabled,
             primaryButtonLabel = null,
             primaryButtonEnabled = false,
             result = result,

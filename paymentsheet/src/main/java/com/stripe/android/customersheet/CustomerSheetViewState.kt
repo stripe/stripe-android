@@ -1,20 +1,20 @@
 package com.stripe.android.customersheet
 
-import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.model.PaymentSelection
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal sealed class CustomerSheetViewState {
     object Loading : CustomerSheetViewState()
 
-    @Suppress("unused")
     data class SelectPaymentMethod(
-        val config: CustomerSheet.Configuration,
         val title: String?,
-        val paymentMethods: List<PaymentOptionsItem.SavedPaymentMethod>,
-        val selectedPaymentMethodId: String?,
+        val savedPaymentMethods: List<PaymentMethod>,
+        val paymentSelection: PaymentSelection?,
         val isLiveMode: Boolean,
         val isProcessing: Boolean,
         val isEditing: Boolean,
+        val isGooglePayEnabled: Boolean,
         val primaryButtonLabel: String?,
         val primaryButtonEnabled: Boolean,
         val errorMessage: String? = null,

@@ -4,10 +4,11 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -24,9 +25,17 @@ class CustomerSheetViewModelTest {
             isFinancialConnectionsAvailable = { true },
             enableACHV2InDeferredFlow = true
         )
-    )
-
-    private var customerSheetConfiguration = createCustomerSheetConfiguration()
+    ).apply {
+        update(
+            PaymentIntentFactory.create(
+                paymentMethodTypes = listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.USBankAccount.code
+                )
+            ),
+            null
+        )
+    }
 
     @Test
     fun `init emits CustomerSheetViewState#SelectPaymentMethod`() = runTest {
@@ -72,18 +81,15 @@ class CustomerSheetViewModelTest {
             assertThat(awaitItem())
                 .isEqualTo(
                     CustomerSheetViewState.SelectPaymentMethod(
-                        config = customerSheetConfiguration,
                         title = null,
-                        paymentMethods = listOf(
-                            PaymentOptionsItem.SavedPaymentMethod(
-                                displayName = "····4242",
-                                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                            )
+                        savedPaymentMethods = listOf(
+                            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                         ),
-                        selectedPaymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
+                        paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                         isLiveMode = false,
                         isProcessing = false,
                         isEditing = false,
+                        isGooglePayEnabled = false,
                         errorMessage = null,
                         primaryButtonLabel = "Continue",
                         primaryButtonEnabled = true,
@@ -120,11 +126,11 @@ class CustomerSheetViewModelTest {
         )
         viewModel.viewState.test {
             val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.selectedPaymentMethodId)
+            assertThat(viewState.paymentSelection)
                 .isEqualTo(null)
             assertThat(viewState.errorMessage)
                 .isEqualTo(null)
-            assertThat(viewState.paymentMethods)
+            assertThat(viewState.savedPaymentMethods)
                 .isNotEmpty()
         }
     }
@@ -135,7 +141,7 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = Result.success(
                     listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     )
                 ),
             )
@@ -144,18 +150,15 @@ class CustomerSheetViewModelTest {
             assertThat(awaitItem())
                 .isEqualTo(
                     CustomerSheetViewState.SelectPaymentMethod(
-                        config = customerSheetConfiguration,
                         title = null,
-                        paymentMethods = listOf(
-                            PaymentOptionsItem.SavedPaymentMethod(
-                                displayName = "····4242",
-                                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                            )
+                        savedPaymentMethods = listOf(
+                            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                         ),
-                        selectedPaymentMethodId = null,
+                        paymentSelection = null,
                         isLiveMode = false,
                         isProcessing = false,
                         isEditing = false,
+                        isGooglePayEnabled = false,
                         errorMessage = null,
                         primaryButtonLabel = null,
                         primaryButtonEnabled = false,
@@ -173,18 +176,15 @@ class CustomerSheetViewModelTest {
             assertThat(awaitItem())
                 .isEqualTo(
                     CustomerSheetViewState.SelectPaymentMethod(
-                        config = customerSheetConfiguration,
                         title = null,
-                        paymentMethods = listOf(
-                            PaymentOptionsItem.SavedPaymentMethod(
-                                displayName = "····4242",
-                                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                            )
+                        savedPaymentMethods = listOf(
+                            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                         ),
-                        selectedPaymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
+                        paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                         isLiveMode = false,
                         isProcessing = false,
                         isEditing = false,
+                        isGooglePayEnabled = false,
                         errorMessage = null,
                         primaryButtonLabel = "Continue",
                         primaryButtonEnabled = true,
@@ -193,10 +193,18 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `providePaymentMethodName provides the name for a payment method`() {
+        val viewModel = createViewModel()
+        val name = viewModel.providePaymentMethodName("card")
+        assertThat(name)
+            .isEqualTo("Card")
+    }
+
     private fun createViewModel(
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         lpmRepository: LpmRepository = this.lpmRepository,
-        configuration: CustomerSheet.Configuration = customerSheetConfiguration,
+        configuration: CustomerSheet.Configuration = createCustomerSheetConfiguration(),
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
             resources = application.resources,

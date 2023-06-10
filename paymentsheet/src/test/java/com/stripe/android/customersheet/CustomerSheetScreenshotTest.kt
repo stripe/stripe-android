@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
@@ -15,7 +15,6 @@ import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerSheetScreenshotTest {
     @get:Rule
     val paparazzi = PaparazziRule(
@@ -32,16 +31,17 @@ class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.SelectPaymentMethod(
-                    config = CustomerSheet.Configuration(),
                     title = "Screenshot testing",
-                    paymentMethods = listOf(),
-                    selectedPaymentMethodId = null,
+                    savedPaymentMethods = listOf(),
+                    paymentSelection = null,
                     isLiveMode = false,
                     isProcessing = false,
                     isEditing = false,
+                    isGooglePayEnabled = false,
                     primaryButtonLabel = null,
                     primaryButtonEnabled = false,
                 ),
+                paymentMethodNameProvider = { it!! }
             )
         }
     }
@@ -49,34 +49,39 @@ class CustomerSheetScreenshotTest {
     @Test
     fun testWithPaymentMethods() {
         paparazzi.snapshot {
+            val savedPaymentMethods = List(5) {
+                PaymentMethod(
+                    id = "pm_123$it",
+                    created = null,
+                    code = "card",
+                    liveMode = false,
+                    type = PaymentMethod.Type.Card,
+                    card = PaymentMethod.Card(
+                        brand = CardBrand.orderedBrands[it],
+                        last4 = "424$it",
+                    )
+                )
+            }
+            var counter = 0
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.SelectPaymentMethod(
-                    config = CustomerSheet.Configuration(),
                     title = "Screenshot testing",
-                    paymentMethods = List(5) {
-                        PaymentOptionsItem.SavedPaymentMethod(
-                            displayName = "424$it",
-                            paymentMethod = PaymentMethod(
-                                id = "pm_123$it",
-                                created = null,
-                                code = "card",
-                                liveMode = false,
-                                type = PaymentMethod.Type.Card,
-                                card = PaymentMethod.Card(
-                                    brand = CardBrand.orderedBrands[it],
-                                    last4 = "424$it",
-                                )
-                            )
-                        )
-                    },
-                    selectedPaymentMethodId = "pm_1230",
+                    savedPaymentMethods = savedPaymentMethods,
+                    paymentSelection = PaymentSelection.Saved(
+                        savedPaymentMethods.first()
+                    ),
                     isLiveMode = false,
                     isProcessing = false,
                     isEditing = false,
+                    isGooglePayEnabled = false,
                     primaryButtonLabel = "Continue",
                     primaryButtonEnabled = true,
                     errorMessage = "This is an error message."
                 ),
+                paymentMethodNameProvider = {
+                    counter++
+                    "424$counter"
+                }
             )
         }
     }
