@@ -5,13 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.injection.CustomerSessionScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,14 +22,26 @@ import javax.inject.Inject
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
 internal class CustomerSheetViewModel @Inject constructor(
+    paymentConfiguration: PaymentConfiguration,
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
     private val customerAdapter: CustomerAdapter,
     private val lpmRepository: LpmRepository,
 ) : ViewModel() {
 
-    private val _viewState = MutableStateFlow<CustomerSheetViewState>(CustomerSheetViewState.Loading)
+    private val _backstack = MutableStateFlow<List<CustomerSheetViewState>>(
+        value = emptyList()
+    )
+
+    private val _viewState = MutableStateFlow<CustomerSheetViewState>(
+        CustomerSheetViewState.Loading(
+            isLiveMode = paymentConfiguration.publishableKey.contains("live")
+        )
+    )
     val viewState: StateFlow<CustomerSheetViewState> = _viewState
+
+    private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
+    val result: StateFlow<InternalCustomerSheetResult?> = _result
 
     init {
         loadPaymentMethods()
@@ -84,8 +99,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     title = configuration.headerTextForSelectionScreen,
                     savedPaymentMethods = savedPaymentMethods,
                     paymentSelection = paymentSelection,
-                    showEditMenu = true,
-                    isLiveMode = false,
+                    showEditMenu = savedPaymentMethods.isNotEmpty(),
                     isProcessing = false,
                     isEditing = false,
                     isGooglePayEnabled = configuration.googlePayEnabled,
@@ -102,13 +116,16 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onAddCardPressed() {
-        TODO()
+        transition(
+            from = viewState.value,
+            to = CustomerSheetViewState.AddCard(
+                cardNumber = ""
+            )
+        )
     }
 
     private fun onBackPressed() {
-        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-            it.copy(result = InternalCustomerSheetResult.Canceled)
-        }
+        popBackStack()
     }
 
     private fun onEditPressed() {
@@ -150,8 +167,8 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-            it.copy(result = null)
+        _result.update {
+            null
         }
         super.onCleared()
     }
@@ -160,6 +177,31 @@ internal class CustomerSheetViewModel @Inject constructor(
         (_viewState.value as? T)?.let {
             _viewState.update {
                 block(it as T)
+            }
+        }
+    }
+
+    private fun transition(from: CustomerSheetViewState, to: CustomerSheetViewState) {
+        _backstack.update {
+            it + from
+        }
+        _viewState.update {
+            to
+        }
+    }
+
+    private fun popBackStack() {
+        if (_backstack.value.isEmpty()) {
+            _result.tryEmit(
+                InternalCustomerSheetResult.Canceled
+            )
+        } else {
+            val previous = _backstack.value.last()
+            _backstack.update {
+                it - previous
+            }
+            _viewState.update {
+                previous
             }
         }
     }

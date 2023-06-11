@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.injection
 
 import android.app.Application
 import android.content.res.Resources
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import dagger.Module
 import dagger.Provides
@@ -19,5 +20,10 @@ internal class CustomerSheetViewModelModule {
         return LpmRepository.getInstance(
             LpmRepository.LpmRepositoryArguments(resources)
         )
+    }
+
+    @Provides
+    fun paymentConfiguration(application: Application): PaymentConfiguration {
+        return PaymentConfiguration.getInstance(application)
     }
 }

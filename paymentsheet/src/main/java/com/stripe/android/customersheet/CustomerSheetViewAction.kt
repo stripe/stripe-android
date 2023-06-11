@@ -4,7 +4,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal sealed class CustomerSheetViewAction {
-    object OnBackPressed : CustomerSheetViewAction()
+    class OnBackPressed(val from: CustomerSheetViewState) : CustomerSheetViewAction()
     object OnEditPressed : CustomerSheetViewAction()
     object OnAddCardPressed : CustomerSheetViewAction()
 
