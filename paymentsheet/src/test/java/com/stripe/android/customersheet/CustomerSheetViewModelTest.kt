@@ -6,7 +6,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -204,28 +203,77 @@ class CustomerSheetViewModelTest {
             .isEqualTo("Card")
     }
 
+    @Test
+    fun `GooglePay is selectable`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    )
+                ),
+            ),
+            configuration = CustomerSheet.Configuration(
+                googlePayEnabled = true
+            )
+        )
+        viewModel.viewState.test {
+            assertThat(awaitItem())
+                .isEqualTo(
+                    CustomerSheetViewState.SelectPaymentMethod(
+                        title = null,
+                        savedPaymentMethods = listOf(
+                            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        ),
+                        paymentSelection = null,
+                        showEditMenu = true,
+                        isLiveMode = false,
+                        isProcessing = false,
+                        isEditing = false,
+                        isGooglePayEnabled = true,
+                        errorMessage = null,
+                        primaryButtonLabel = null,
+                        primaryButtonEnabled = false,
+                    )
+                )
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    selection = PaymentSelection.GooglePay,
+                )
+            )
+
+            assertThat(awaitItem())
+                .isEqualTo(
+                    CustomerSheetViewState.SelectPaymentMethod(
+                        title = null,
+                        savedPaymentMethods = listOf(
+                            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        ),
+                        paymentSelection = PaymentSelection.GooglePay,
+                        showEditMenu = true,
+                        isLiveMode = false,
+                        isProcessing = false,
+                        isEditing = false,
+                        isGooglePayEnabled = true,
+                        errorMessage = null,
+                        primaryButtonLabel = "Continue",
+                        primaryButtonEnabled = true,
+                    )
+                )
+        }
+    }
+
     private fun createViewModel(
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         lpmRepository: LpmRepository = this.lpmRepository,
-        configuration: CustomerSheet.Configuration = createCustomerSheetConfiguration(),
+        configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(),
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
             resources = application.resources,
             customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
             configuration = configuration
-        )
-    }
-
-    private fun createCustomerSheetConfiguration(
-        appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
-        googlePayEnabled: Boolean = false,
-        headerTextForSelectionScreen: String? = null,
-    ): CustomerSheet.Configuration {
-        return CustomerSheet.Configuration(
-            appearance = appearance,
-            googlePayEnabled = googlePayEnabled,
-            headerTextForSelectionScreen = headerTextForSelectionScreen,
         )
     }
 }

@@ -75,7 +75,7 @@ class CustomerSheetScreenshotTest {
                     isLiveMode = false,
                     isProcessing = false,
                     isEditing = false,
-                    isGooglePayEnabled = false,
+                    isGooglePayEnabled = true,
                     primaryButtonLabel = "Continue",
                     primaryButtonEnabled = true,
                     errorMessage = "This is an error message."
@@ -84,6 +84,28 @@ class CustomerSheetScreenshotTest {
                     counter++
                     "424$counter"
                 }
+            )
+        }
+    }
+
+    @Test
+    fun testGooglePay() {
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = CustomerSheetViewState.SelectPaymentMethod(
+                    title = "Screenshot testing",
+                    savedPaymentMethods = listOf(),
+                    paymentSelection = PaymentSelection.GooglePay,
+                    showEditMenu = true,
+                    isLiveMode = false,
+                    isProcessing = false,
+                    isEditing = false,
+                    isGooglePayEnabled = true,
+                    primaryButtonLabel = "Continue",
+                    primaryButtonEnabled = true,
+                    errorMessage = "This is an error message."
+                ),
+                paymentMethodNameProvider = { it!! }
             )
         }
     }

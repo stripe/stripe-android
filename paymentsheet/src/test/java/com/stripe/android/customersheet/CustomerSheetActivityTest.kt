@@ -144,6 +144,19 @@ internal class CustomerSheetActivityTest {
         }
     }
 
+    @Test
+    fun `When isGooglePayEnabled is true, Google Pay card is visible`() {
+        runActivityScenario(
+            viewState = createSelectPaymentMethodViewState(
+                isGooglePayEnabled = true
+            ),
+        ) { scenario ->
+            scenario.onActivity {
+                page.waitForText("google pay")
+            }
+        }
+    }
+
     private fun activityScenario(
         viewState: CustomerSheetViewState,
     ): InjectableActivityScenario<CustomerSheetActivity> {

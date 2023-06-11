@@ -121,15 +121,26 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onItemSelected(paymentSelection: PaymentSelection?) {
-        (paymentSelection as? PaymentSelection.Saved)?.let { selection ->
-            updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                it.copy(
-                    paymentSelection = selection,
-                    primaryButtonLabel = resources.getString(
-                        com.stripe.android.ui.core.R.string.stripe_continue_button_label
-                    ),
-                    primaryButtonEnabled = selection.paymentMethod.id != null
-                )
+        when (paymentSelection) {
+            is PaymentSelection.GooglePay, is PaymentSelection.Saved -> {
+                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                    it.copy(
+                        paymentSelection = paymentSelection,
+                        primaryButtonLabel = resources.getString(
+                            com.stripe.android.ui.core.R.string.stripe_continue_button_label
+                        ),
+                        primaryButtonEnabled = true
+                    )
+                }
+            }
+            else -> {
+                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                    it.copy(
+                        paymentSelection = null,
+                        primaryButtonLabel = null,
+                        primaryButtonEnabled = false
+                    )
+                }
             }
         }
     }
