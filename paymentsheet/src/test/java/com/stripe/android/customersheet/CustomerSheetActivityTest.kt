@@ -131,6 +131,19 @@ internal class CustomerSheetActivityTest {
         }
     }
 
+    @Test
+    fun `When showEditMenu is true, edit button is visible`() {
+        runActivityScenario(
+            viewState = createSelectPaymentMethodViewState(
+                showEditMenu = true
+            ),
+        ) { scenario ->
+            scenario.onActivity {
+                page.waitForText("edit")
+            }
+        }
+    }
+
     private fun activityScenario(
         viewState: CustomerSheetViewState,
     ): InjectableActivityScenario<CustomerSheetActivity> {
@@ -160,6 +173,7 @@ internal class CustomerSheetActivityTest {
         title: String? = null,
         paymentMethods: List<PaymentMethod> = listOf(),
         paymentSelection: PaymentSelection? = null,
+        showEditMenu: Boolean = true,
         isLiveMode: Boolean = false,
         isProcessing: Boolean = false,
         isEditing: Boolean = false,
@@ -170,6 +184,7 @@ internal class CustomerSheetActivityTest {
             title = title,
             savedPaymentMethods = paymentMethods,
             paymentSelection = paymentSelection,
+            showEditMenu = showEditMenu,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isEditing = isEditing,

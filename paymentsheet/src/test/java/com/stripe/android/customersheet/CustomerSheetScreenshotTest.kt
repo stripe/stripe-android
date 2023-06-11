@@ -34,6 +34,7 @@ class CustomerSheetScreenshotTest {
                     title = "Screenshot testing",
                     savedPaymentMethods = listOf(),
                     paymentSelection = null,
+                    showEditMenu = true,
                     isLiveMode = false,
                     isProcessing = false,
                     isEditing = false,
@@ -70,6 +71,7 @@ class CustomerSheetScreenshotTest {
                     paymentSelection = PaymentSelection.Saved(
                         savedPaymentMethods.first()
                     ),
+                    showEditMenu = true,
                     isLiveMode = false,
                     isProcessing = false,
                     isEditing = false,

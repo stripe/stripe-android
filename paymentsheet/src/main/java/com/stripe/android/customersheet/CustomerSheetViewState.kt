@@ -11,6 +11,7 @@ internal sealed class CustomerSheetViewState {
         val title: String?,
         val savedPaymentMethods: List<PaymentMethod>,
         val paymentSelection: PaymentSelection?,
+        val showEditMenu: Boolean,
         val isLiveMode: Boolean,
         val isProcessing: Boolean,
         val isEditing: Boolean,

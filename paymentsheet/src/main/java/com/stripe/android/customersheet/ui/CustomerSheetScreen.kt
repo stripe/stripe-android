@@ -68,7 +68,7 @@ internal fun SelectPaymentMethod(
         topBar = {
             PaymentSheetTopBar(
                 screen = PaymentSheetScreen.SelectSavedPaymentMethods,
-                showEditMenu = viewState.isEditing,
+                showEditMenu = true,
                 isLiveMode = viewState.isLiveMode,
                 isProcessing = viewState.isProcessing,
                 isEditing = viewState.isEditing,
