@@ -366,21 +366,43 @@ internal data class FinancialConnectionsSheetNativeState(
     )
 }
 
-sealed class WebAuthFlowState : Parcelable {
+/**
+ * Authentication with an institution opens on an external browser.
+ *
+ * This state tracks the status of the authentication flow in the browser.
+ */
+internal sealed class WebAuthFlowState : Parcelable {
+    /**
+     * The web browser has not been opened yet.
+     */
     @Parcelize
     object Uninitialized : WebAuthFlowState()
 
+    /**
+     * The web browser has been opened and the authentication flow is in progress.
+     */
     @Parcelize
     object InProgress : WebAuthFlowState()
 
+    /**
+     * The web browser has been closed and triggered a deeplink with a success result.
+     */
     @Parcelize
     data class Success(
         val url: String
     ) : WebAuthFlowState()
 
+    /**
+     * The web browser has been closed with no deeplink,
+     * and the authentication flow is considered as canceled.
+     */
     @Parcelize
     object Canceled : WebAuthFlowState()
 
+    /**
+     * The web browser has been closed and triggered a deeplink with a failure result,
+     * or something else went wrong (unreadable / unknown structure of the received deeplink)
+     */
     @Parcelize
     data class Failed(
         val message: String,
