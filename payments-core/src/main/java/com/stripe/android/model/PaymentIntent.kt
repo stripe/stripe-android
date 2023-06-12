@@ -389,7 +389,10 @@ constructor(
     /**
      * Controls when the funds will be captured from the customer’s account.
      */
-    enum class CaptureMethod(private val code: String) {
+    enum class CaptureMethod(
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val code: String,
+    ) {
         /**
          * (Default) Stripe automatically captures funds when the customer authorizes the payment.
          */

@@ -468,7 +468,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val stripeIntent = requireNotNull(stripeIntent.value)
 
             val nextStep = intentConfirmationInterceptor.intercept(
-                clientSecret = stripeIntent.clientSecret,
+                initializationMode = args.initializationMode,
                 paymentSelection = paymentSelection,
                 shippingValues = args.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
             )
