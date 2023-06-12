@@ -7,9 +7,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.customersheet.injection.CustomerSessionScope
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +18,6 @@ import javax.inject.Inject
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
-@Suppress("unused")
 internal class CustomerSheetViewModel @Inject constructor(
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
@@ -44,23 +42,36 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
+    fun providePaymentMethodName(code: PaymentMethodCode?): String {
+        val paymentMethod = lpmRepository.fromCode(code)
+        return paymentMethod?.displayNameResource?.let {
+            resources.getString(it)
+        }.orEmpty()
+    }
+
     private fun loadPaymentMethods() {
         viewModelScope.launch {
-            var savedPaymentMethods: List<PaymentOptionsItem.SavedPaymentMethod> = emptyList()
-            var selectedPaymentMethodId: String? = null
+            var savedPaymentMethods: List<PaymentMethod> = emptyList()
+            var paymentSelection: PaymentSelection? = null
             var errorMessage: String? = null
             customerAdapter.retrievePaymentMethods().fold(
                 onSuccess = { paymentMethods ->
-                    savedPaymentMethods = paymentMethods.map { paymentMethod ->
-                        PaymentOptionsItem.SavedPaymentMethod(
-                            displayName = paymentMethod
-                                .getLabel(resources)
-                                .toString(),
-                            paymentMethod = paymentMethod
-                        )
-                    }
-                    customerAdapter.retrieveSelectedPaymentOption().onSuccess { paymentMethod ->
-                        selectedPaymentMethodId = paymentMethod?.id
+                    savedPaymentMethods = paymentMethods
+                    customerAdapter.retrieveSelectedPaymentOption().onSuccess { paymentOption ->
+                        paymentSelection = when (paymentOption) {
+                            is CustomerAdapter.PaymentOption.GooglePay -> {
+                                PaymentSelection.GooglePay
+                            }
+                            is CustomerAdapter.PaymentOption.Link -> {
+                                PaymentSelection.Link
+                            }
+                            is CustomerAdapter.PaymentOption.StripeId -> {
+                                paymentMethods.find { it.id == paymentOption.id }?.let {
+                                    PaymentSelection.Saved(it)
+                                }
+                            }
+                            else -> null
+                        }
                     }
                 },
                 onFailure = { throwable ->
@@ -70,11 +81,13 @@ internal class CustomerSheetViewModel @Inject constructor(
             _viewState.update {
                 CustomerSheetViewState.SelectPaymentMethod(
                     title = configuration.headerTextForSelectionScreen,
-                    paymentMethods = savedPaymentMethods,
-                    selectedPaymentMethodId = selectedPaymentMethodId,
+                    savedPaymentMethods = savedPaymentMethods,
+                    paymentSelection = paymentSelection,
+                    showEditMenu = savedPaymentMethods.isNotEmpty(),
                     isLiveMode = false,
                     isProcessing = false,
                     isEditing = false,
+                    isGooglePayEnabled = configuration.googlePayEnabled,
                     errorMessage = errorMessage,
                 )
             }

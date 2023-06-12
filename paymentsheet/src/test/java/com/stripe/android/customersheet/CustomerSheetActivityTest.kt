@@ -8,7 +8,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
@@ -17,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.annotation.Config
@@ -130,14 +134,60 @@ internal class CustomerSheetActivityTest {
         }
     }
 
+    @Test
+    fun `When savedPaymentMethods is not empty, payment method is visible`() {
+        runActivityScenario(
+            viewState = createSelectPaymentMethodViewState(
+                savedPaymentMethods = listOf(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                )
+            ),
+        ) { scenario ->
+            scenario.onActivity {
+                page.waitForText("····4242")
+            }
+        }
+    }
+
+    @Test
+    fun `When showEditMenu is true, edit menu is visible`() {
+        runActivityScenario(
+            viewState = createSelectPaymentMethodViewState(
+                showEditMenu = true
+            ),
+        ) { scenario ->
+            scenario.onActivity {
+                page.waitForText("edit")
+            }
+        }
+    }
+
+    @Test
+    fun `When isGooglePayEnabled is true, google pay is visible`() {
+        runActivityScenario(
+            viewState = createSelectPaymentMethodViewState(
+                isGooglePayEnabled = true
+            ),
+        ) { scenario ->
+            scenario.onActivity {
+                page.waitForText("google pay")
+            }
+        }
+    }
+
     private fun activityScenario(
         viewState: CustomerSheetViewState,
+        providePaymentMethodName: (PaymentMethodCode) -> String,
     ): InjectableActivityScenario<CustomerSheetActivity> {
         val viewModel = mock<CustomerSheetViewModel>()
 
         whenever(viewModel.viewState).thenReturn(
             MutableStateFlow(viewState)
         )
+        whenever(viewModel.providePaymentMethodName(any())).then {
+            val code = it.arguments.first() as PaymentMethodCode
+            providePaymentMethodName(code)
+        }
 
         return injectableActivityScenario {
             injectActivity {
@@ -148,29 +198,37 @@ internal class CustomerSheetActivityTest {
 
     private fun runActivityScenario(
         viewState: CustomerSheetViewState = CustomerSheetViewState.Loading,
+        providePaymentMethodName: (PaymentMethodCode) -> String = { it },
         block: (InjectableActivityScenario<CustomerSheetActivity>) -> Unit
     ) {
-        activityScenario(viewState = viewState)
+        activityScenario(
+            viewState = viewState,
+            providePaymentMethodName = providePaymentMethodName,
+        )
             .launchForResult(intent)
             .use(block)
     }
 
     private fun createSelectPaymentMethodViewState(
         title: String? = null,
-        paymentMethods: List<PaymentOptionsItem.SavedPaymentMethod> = listOf(),
-        selectedPaymentMethodId: String? = null,
+        savedPaymentMethods: List<PaymentMethod> = listOf(),
+        paymentSelection: PaymentSelection? = null,
+        showEditMenu: Boolean = false,
         isLiveMode: Boolean = false,
         isProcessing: Boolean = false,
         isEditing: Boolean = false,
+        isGooglePayEnabled: Boolean = false,
         result: InternalCustomerSheetResult? = null
     ): CustomerSheetViewState.SelectPaymentMethod {
         return CustomerSheetViewState.SelectPaymentMethod(
             title = title,
-            paymentMethods = paymentMethods,
-            selectedPaymentMethodId = selectedPaymentMethodId,
+            savedPaymentMethods = savedPaymentMethods,
+            paymentSelection = paymentSelection,
+            showEditMenu = showEditMenu,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isEditing = isEditing,
+            isGooglePayEnabled = isGooglePayEnabled,
             result = result,
         )
     }
