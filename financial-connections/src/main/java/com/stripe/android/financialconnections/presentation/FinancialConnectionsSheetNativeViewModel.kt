@@ -48,6 +48,8 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -67,6 +69,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
+
+    private val mutex = Mutex()
 
     init {
         setState { copy(firstInit = false) }
@@ -96,8 +100,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      *
      * @param intent the new intent with the redirect URL in the intent data
      */
-    fun handleOnNewIntent(intent: Intent?) {
-        viewModelScope.launch {
+    fun handleOnNewIntent(intent: Intent?) = viewModelScope.launch {
+        mutex.withLock {
             val receivedUrl: String = intent?.data?.toString() ?: ""
             when {
                 receivedUrl.contains("authentication_return", true) -> {
@@ -164,12 +168,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      *  then the user hit the back button or closed the custom tabs UI, so return result as
      *  canceled.
      */
-    fun onResume() {
-        setState {
-            if (webAuthFlow is Loading) {
-                copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
-            } else {
-                this
+    fun onResume() = viewModelScope.launch {
+        mutex.withLock {
+            val state = awaitState()
+            if (state.webAuthFlow is Loading) {
+                setState { copy(webAuthFlow = Fail(WebAuthFlowCancelledException())) }
             }
         }
     }
@@ -197,6 +200,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 value = R.string.stripe_close_dialog_networking_desc,
                 args = listOf(businessName)
             )
+
             else -> TextResource.StringId(
                 value = R.string.stripe_close_dialog_desc
             )
