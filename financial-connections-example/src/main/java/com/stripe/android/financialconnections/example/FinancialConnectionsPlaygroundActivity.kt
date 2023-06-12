@@ -77,12 +77,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        // prevent playground configuration from leaking to example apps.
-        connectionsDebugSharedPrefs.edit { clear() }
-    }
-
     @Composable
     private fun FinancialConnectionsScreen() {
         val state: FinancialConnectionsPlaygroundState by viewModel.state.collectAsState()

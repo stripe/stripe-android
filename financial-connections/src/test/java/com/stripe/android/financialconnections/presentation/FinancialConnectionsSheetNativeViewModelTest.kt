@@ -3,8 +3,6 @@ package com.stripe.android.financialconnections.presentation
 import android.content.Intent
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.test.MavericksTestRule
 import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
@@ -17,8 +15,6 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate.EarlyTerminationCause
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
-import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
-import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
@@ -85,7 +81,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         viewModel.handleOnNewIntent(intent)
 
         withState(viewModel) {
-            assertThat(it.webAuthFlow).isEqualTo(Success(intent.data!!.toString()))
+            assertThat(it.webAuthFlow).isEqualTo(WebAuthFlowState.Success(intent.data!!.toString()))
         }
     }
 
@@ -101,9 +97,8 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
         withState(viewModel) {
             val webAuthFlow = it.webAuthFlow
-            assertIs<Fail<*>>(webAuthFlow)
-            val error = webAuthFlow.error as WebAuthFlowFailedException
-            assertThat(error.reason).isEqualTo(errorReason)
+            assertIs<WebAuthFlowState.Failed>(webAuthFlow)
+            assertThat(webAuthFlow.reason).isEqualTo(errorReason)
         }
     }
 
@@ -116,8 +111,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
         withState(viewModel) {
             val webAuthFlow = it.webAuthFlow
-            assertIs<Fail<*>>(webAuthFlow)
-            assertThat(webAuthFlow.error).isInstanceOf(WebAuthFlowFailedException::class.java)
+            assertIs<WebAuthFlowState.Failed>(webAuthFlow)
         }
     }
 
@@ -130,8 +124,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
         withState(viewModel) {
             val webAuthFlow = it.webAuthFlow
-            assertIs<Fail<*>>(webAuthFlow)
-            assertThat(webAuthFlow.error).isInstanceOf(WebAuthFlowCancelledException::class.java)
+            assertIs<WebAuthFlowState.Canceled>(webAuthFlow)
         }
     }
 
@@ -144,8 +137,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
         withState(viewModel) {
             val webAuthFlow = it.webAuthFlow
-            assertIs<Fail<*>>(webAuthFlow)
-            assertThat(webAuthFlow.error).isInstanceOf(WebAuthFlowFailedException::class.java)
+            assertIs<WebAuthFlowState.Failed>(webAuthFlow)
         }
     }
 
