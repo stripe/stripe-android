@@ -140,8 +140,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             analyticsTracker.track(Error(Pane.UNEXPECTED_ERROR, error))
             finishWithResult(
                 state = awaitState(),
-                result = Failed(error),
-                finishMessage = R.string.stripe_no_browser_installed
+                result = Failed(error)
             )
         }
     }
