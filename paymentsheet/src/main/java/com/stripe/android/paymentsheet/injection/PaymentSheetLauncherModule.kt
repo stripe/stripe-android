@@ -29,5 +29,10 @@ internal abstract class PaymentSheetLauncherModule {
         @Singleton
         @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens() = setOf("PaymentSheet")
+
+        @Provides
+        @Singleton
+        @Named(IS_FLOW_CONTROLLER)
+        fun provideIsFlowController() = false
     }
 }

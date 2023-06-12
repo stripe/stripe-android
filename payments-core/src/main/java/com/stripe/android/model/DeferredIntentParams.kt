@@ -26,7 +26,7 @@ data class DeferredIntentParams(
             val amount: Long,
             override val currency: String,
             override val setupFutureUsage: StripeIntent.Usage?,
-            val captureMethod: CaptureMethod,
+            val captureMethod: PaymentIntent.CaptureMethod,
         ) : Mode {
             override val code: String get() = "payment"
         }
@@ -39,13 +39,6 @@ data class DeferredIntentParams(
         ) : Mode {
             override val code: String get() = "setup"
         }
-    }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    enum class CaptureMethod(val code: String) {
-        Automatic("automatic"),
-        AutomaticAsync("automatic_async"),
-        Manual("manual"),
     }
 
     fun toQueryParams(): Map<String, Any?> {

@@ -9,6 +9,8 @@
     <ID>FunctionNaming:PaymentOptionUi.kt$@Preview(name = "Selected payment option") @Composable private fun PaymentOptionUi_Selected()</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun PaymentSheetTopBar_Preview()</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun TestModeBadge_Preview()</ID>
+    <ID>FunctionOnlyReturningConstant:FlowControllerModule.kt$FlowControllerModule$@Provides @Singleton @Named(IS_FLOW_CONTROLLER) fun provideIsFlowController()</ID>
+    <ID>FunctionOnlyReturningConstant:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule.Companion$@Provides @Singleton @Named(IS_FLOW_CONTROLLER) fun provideIsFlowController()</ID>
     <ID>FunctionOnlyReturningConstant:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput.Companion$fun toCsvHeader()</ID>
     <ID>FunctionOnlyReturningConstant:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.TestOutput.Companion$fun toCsvHeader()</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
