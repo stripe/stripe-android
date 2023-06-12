@@ -12,8 +12,7 @@ class DiffProvider
         unsynced_keys
     end
 
-    def find_existing_key(all_keys, key_object)
-        value = key_object[:value]
+    def find_existing_key(all_keys, value)
         all_keys.each do |key|
             translations = key['translations']
 
