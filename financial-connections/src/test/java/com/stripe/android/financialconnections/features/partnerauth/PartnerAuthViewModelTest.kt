@@ -1,7 +1,5 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.test.MavericksTestRule
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
@@ -15,8 +13,8 @@ import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
-import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.model.MixedOAuthParams
+import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -67,7 +65,7 @@ internal class PartnerAuthViewModelTest {
                 .thenReturn(activeAuthSession)
 
             // When
-            viewModel.onWebAuthFlowFinished(Success("stripe://success"))
+            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Success("stripe://success"))
 
             // Then
             verify(completeAuthorizationSession).invoke(
@@ -84,7 +82,7 @@ internal class PartnerAuthViewModelTest {
         whenever(getManifest())
             .thenReturn(sessionManifest().copy(activeAuthSession = activeAuthSession))
 
-        viewModel.onWebAuthFlowFinished(Success("stripe://success"))
+        viewModel.onWebAuthFlowFinished(WebAuthFlowState.Success("stripe://success"))
 
         verify(postAuthSessionEvent).invoke(
             eq(activeAuthSession.id),
@@ -106,7 +104,7 @@ internal class PartnerAuthViewModelTest {
             whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
 
             val viewModel = createViewModel()
-            viewModel.onWebAuthFlowFinished(Fail(WebAuthFlowCancelledException()))
+            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled)
 
             verify(cancelAuthorizationSession).invoke(eq(activeAuthSession.id),)
 
@@ -139,7 +137,7 @@ internal class PartnerAuthViewModelTest {
                     )
                 )
 
-            viewModel.onWebAuthFlowFinished(Fail(WebAuthFlowCancelledException()))
+            viewModel.onWebAuthFlowFinished(WebAuthFlowState.Canceled)
 
             verify(cancelAuthorizationSession).invoke(
                 eq(activeAuthSession.id),

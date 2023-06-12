@@ -1,17 +1,13 @@
 package com.stripe.android.financialconnections.presentation
 
 import android.content.Intent
+import android.os.Parcelable
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.PersistState
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.stripe.android.core.Logger
@@ -31,8 +27,6 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Terminate
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
-import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
-import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
@@ -50,6 +44,7 @@ import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -82,7 +77,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     }
 
                     Message.ClearPartnerWebAuth -> {
-                        setState { copy(webAuthFlow = Uninitialized) }
+                        setState { copy(webAuthFlow = WebAuthFlowState.Uninitialized) }
                     }
 
                     is Terminate -> closeAuthFlow(
@@ -106,7 +101,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             when {
                 receivedUrl.contains("authentication_return", true) -> {
                     setState {
-                        copy(webAuthFlow = Success(receivedUrl))
+                        copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
                     }
                 }
 
@@ -115,22 +110,20 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     baseUrl(applicationId)
                 ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)) {
                     STATUS_SUCCESS -> setState {
-                        copy(webAuthFlow = Success(receivedUrl))
+                        copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
                     }
 
                     STATUS_CANCEL -> setState {
-                        copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
+                        copy(webAuthFlow = WebAuthFlowState.Canceled)
                     }
 
                     STATUS_FAILURE -> setState {
                         copy(
-                            webAuthFlow = Fail(
-                                WebAuthFlowFailedException(
-                                    message = "Received return_url with failed status: $receivedUrl",
-                                    reason = uriUtils.getQueryParameter(
-                                        receivedUrl,
-                                        PARAM_ERROR_REASON
-                                    )
+                            webAuthFlow = WebAuthFlowState.Failed(
+                                message = "Received return_url with failed status: $receivedUrl",
+                                reason = uriUtils.getQueryParameter(
+                                    receivedUrl,
+                                    PARAM_ERROR_REASON
                                 )
                             )
                         )
@@ -139,23 +132,20 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     // received unknown / non-handleable [PARAM_STATUS]
                     else -> setState {
                         copy(
-                            webAuthFlow = Fail(
-                                WebAuthFlowFailedException(
-                                    message = "Received return_url with unknown status: $receivedUrl",
-                                    reason = null
-                                )
+                            webAuthFlow = WebAuthFlowState.Failed(
+                                message = "Received return_url with unknown status: $receivedUrl",
+                                reason = null
                             )
+
                         )
                     }
                 }
                 // received unknown / non-handleable return url.
                 else -> setState {
                     copy(
-                        webAuthFlow = Fail(
-                            WebAuthFlowFailedException(
-                                message = "Received unknown return_url: $receivedUrl",
-                                reason = null
-                            )
+                        webAuthFlow = WebAuthFlowState.Failed(
+                            message = "Received unknown return_url: $receivedUrl",
+                            reason = null
                         )
                     )
                 }
@@ -171,8 +161,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     fun onResume() = viewModelScope.launch {
         mutex.withLock {
             val state = awaitState()
-            if (state.webAuthFlow is Loading) {
-                setState { copy(webAuthFlow = Fail(WebAuthFlowCancelledException())) }
+            if (state.webAuthFlow is WebAuthFlowState.InProgress) {
+                setState { copy(webAuthFlow = WebAuthFlowState.Canceled) }
             }
         }
     }
@@ -180,7 +170,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     fun openPartnerAuthFlowInBrowser(url: String) {
         setState {
             copy(
-                webAuthFlow = Loading(),
+                webAuthFlow = WebAuthFlowState.InProgress,
                 viewEffect = OpenUrl(url)
             )
         }
@@ -347,7 +337,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 }
 
 internal data class FinancialConnectionsSheetNativeState(
-    val webAuthFlow: Async<String>,
+    @PersistState
+    val webAuthFlow: WebAuthFlowState,
     /**
      * Tracks whether this state was recreated from a process kill.
      */
@@ -373,7 +364,7 @@ internal data class FinancialConnectionsSheetNativeState(
      */
     @Suppress("Unused")
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
-        webAuthFlow = Uninitialized,
+        webAuthFlow = WebAuthFlowState.Uninitialized,
         reducedBranding = args.initialSyncResponse.visual.reducedBranding,
         firstInit = true,
         initialPane = args.initialSyncResponse.manifest.nextPane,
@@ -381,6 +372,50 @@ internal data class FinancialConnectionsSheetNativeState(
         closeDialog = null,
         viewEffect = null
     )
+}
+
+/**
+ * Authentication with an institution opens on an external browser.
+ *
+ * This state tracks the status of the authentication flow in the browser.
+ */
+internal sealed class WebAuthFlowState : Parcelable {
+    /**
+     * The web browser has not been opened yet.
+     */
+    @Parcelize
+    object Uninitialized : WebAuthFlowState()
+
+    /**
+     * The web browser has been opened and the authentication flow is in progress.
+     */
+    @Parcelize
+    object InProgress : WebAuthFlowState()
+
+    /**
+     * The web browser has been closed and triggered a deeplink with a success result.
+     */
+    @Parcelize
+    data class Success(
+        val url: String
+    ) : WebAuthFlowState()
+
+    /**
+     * The web browser has been closed with no deeplink,
+     * and the authentication flow is considered as canceled.
+     */
+    @Parcelize
+    object Canceled : WebAuthFlowState()
+
+    /**
+     * The web browser has been closed and triggered a deeplink with a failure result,
+     * or something else went wrong (unreadable / unknown structure of the received deeplink)
+     */
+    @Parcelize
+    data class Failed(
+        val message: String,
+        val reason: String?
+    ) : WebAuthFlowState()
 }
 
 @Composable

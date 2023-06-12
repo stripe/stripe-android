@@ -4,6 +4,7 @@ import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
+import com.airbnb.mvrx.PersistState
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.model.DataAccessNotice
@@ -11,6 +12,12 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAuthori
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 
 internal data class PartnerAuthState(
+    /**
+     * The active auth session id. Used across process kills to prevent re-creating the session
+     * if one is already active.
+     */
+    @PersistState
+    val activeAuthSession: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val viewEffect: ViewEffect? = null,
     val authenticationStatus: Async<String> = Uninitialized
