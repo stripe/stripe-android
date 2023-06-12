@@ -6,6 +6,7 @@
 * [FIXED][6836](https://github.com/stripe/stripe-android/pull/6836) Prevents double navigation when tapping too quickly.
 * [FIXED][6853](https://github.com/stripe/stripe-android/pull/6853) Handle process kills after returning from browsers in Auth sessions.
 * [FIXED][6837](https://github.com/stripe/stripe-android/pull/6837) Don't create duplicated Auth sessions after user closes web browser.
+* [CHANGED][6850](https://github.com/stripe/stripe-android/pull/6850) Removes Toast shown after gracefully failing if no browser installed.
 
 ## 20.25.5 - 2023-06-05
 
