@@ -105,49 +105,50 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     }
                 }
 
-            uriUtils.compareSchemeAuthorityAndPath(
-                receivedUrl,
-                baseUrl(applicationId)
-            ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)) {
-                STATUS_SUCCESS -> setState {
-                    copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
-                }
+                uriUtils.compareSchemeAuthorityAndPath(
+                    receivedUrl,
+                    baseUrl(applicationId)
+                ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)) {
+                    STATUS_SUCCESS -> setState {
+                        copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
+                    }
 
-                STATUS_CANCEL -> setState {
-                    copy(webAuthFlow = WebAuthFlowState.Canceled)
-                }
+                    STATUS_CANCEL -> setState {
+                        copy(webAuthFlow = WebAuthFlowState.Canceled)
+                    }
 
-                STATUS_FAILURE -> setState {
-                    copy(
-                        webAuthFlow = WebAuthFlowState.Failed(
-                            message = "Received return_url with failed status: $receivedUrl",
-                            reason = uriUtils.getQueryParameter(
-                                receivedUrl,
-                                PARAM_ERROR_REASON
+                    STATUS_FAILURE -> setState {
+                        copy(
+                            webAuthFlow = WebAuthFlowState.Failed(
+                                message = "Received return_url with failed status: $receivedUrl",
+                                reason = uriUtils.getQueryParameter(
+                                    receivedUrl,
+                                    PARAM_ERROR_REASON
+                                )
                             )
                         )
-                    )
-                }
+                    }
 
-                // received unknown / non-handleable [PARAM_STATUS]
+                    // received unknown / non-handleable [PARAM_STATUS]
+                    else -> setState {
+                        copy(
+                            webAuthFlow = WebAuthFlowState.Failed(
+                                message = "Received return_url with unknown status: $receivedUrl",
+                                reason = null
+                            )
+
+                        )
+                    }
+                }
+                // received unknown / non-handleable return url.
                 else -> setState {
                     copy(
                         webAuthFlow = WebAuthFlowState.Failed(
-                            message = "Received return_url with unknown status: $receivedUrl",
+                            message = "Received unknown return_url: $receivedUrl",
                             reason = null
                         )
-
                     )
                 }
-            }
-            // received unknown / non-handleable return url.
-            else -> setState {
-                copy(
-                    webAuthFlow = WebAuthFlowState.Failed(
-                        message = "Received unknown return_url: $receivedUrl",
-                        reason = null
-                    )
-                )
             }
         }
     }
