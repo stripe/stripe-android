@@ -104,11 +104,11 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private var paymentLauncher: StripePaymentLauncher? = null
 
+    private val initializationMode: PaymentSheet.InitializationMode?
+        get() = viewModel.previousConfigureRequest?.initializationMode
+
     private val isDecoupling: Boolean
-        get() {
-            val initMode = viewModel.previousConfigureRequest?.initializationMode
-            return initMode is PaymentSheet.InitializationMode.DeferredIntent
-        }
+        get() = initializationMode is PaymentSheet.InitializationMode.DeferredIntent
 
     override var shippingDetails: AddressDetails?
         get() = viewModel.state?.config?.shippingDetails
@@ -291,7 +291,7 @@ internal class DefaultFlowController @Inject internal constructor(
             val stripeIntent = requireNotNull(state.stripeIntent)
 
             val nextStep = intentConfirmationInterceptor.intercept(
-                clientSecret = stripeIntent.clientSecret,
+                initializationMode = initializationMode!!,
                 paymentSelection = paymentSelection,
                 shippingValues = state.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
             )

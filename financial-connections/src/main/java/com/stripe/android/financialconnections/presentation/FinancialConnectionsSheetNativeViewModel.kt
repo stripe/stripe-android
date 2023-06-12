@@ -42,6 +42,8 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
@@ -62,6 +64,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
+
+    private val mutex = Mutex()
 
     init {
         setState { copy(firstInit = false) }
@@ -92,13 +96,14 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      * @param intent the new intent with the redirect URL in the intent data
      */
     fun handleOnNewIntent(intent: Intent?) = viewModelScope.launch {
-        val receivedUrl: String = intent?.data?.toString() ?: ""
-        when {
-            receivedUrl.contains("authentication_return", true) -> {
-                setState {
-                    copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
+        mutex.withLock {
+            val receivedUrl: String = intent?.data?.toString() ?: ""
+            when {
+                receivedUrl.contains("authentication_return", true) -> {
+                    setState {
+                        copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
+                    }
                 }
-            }
 
             uriUtils.compareSchemeAuthorityAndPath(
                 receivedUrl,
@@ -153,9 +158,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      *  canceled.
      */
     fun onResume() = viewModelScope.launch {
-        val state = awaitState()
-        if (state.webAuthFlow is WebAuthFlowState.InProgress) {
-            setState { copy(webAuthFlow = WebAuthFlowState.Canceled) }
+        mutex.withLock {
+            val state = awaitState()
+            if (state.webAuthFlow is WebAuthFlowState.InProgress) {
+                setState { copy(webAuthFlow = WebAuthFlowState.Canceled) }
+            }
         }
     }
 

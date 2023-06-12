@@ -16,11 +16,11 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor.NextStep
+import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import javax.inject.Inject
 import javax.inject.Named
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface IntentConfirmationInterceptor {
+internal interface IntentConfirmationInterceptor {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface NextStep {
@@ -42,14 +42,14 @@ interface IntentConfirmationInterceptor {
     }
 
     suspend fun intercept(
-        clientSecret: String?,
+        initializationMode: PaymentSheet.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): NextStep
 
     suspend fun intercept(
-        clientSecret: String?,
+        initializationMode: PaymentSheet.InitializationMode,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
@@ -64,10 +64,10 @@ interface IntentConfirmationInterceptor {
 }
 
 @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DefaultIntentConfirmationInterceptor @Inject constructor(
+internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val context: Context,
     private val stripeRepository: StripeRepository,
+    @Named(IS_FLOW_CONTROLLER) private val isFlowController: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) : IntentConfirmationInterceptor {
@@ -82,28 +82,74 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         )
 
     override suspend fun intercept(
-        clientSecret: String?,
+        initializationMode: PaymentSheet.InitializationMode,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): NextStep {
-        return if (clientSecret != null) {
-            createConfirmStep(
-                clientSecret = clientSecret,
-                shippingValues = shippingValues,
-                paymentMethodCreateParams = paymentMethodCreateParams,
-                setupForFutureUsage = setupForFutureUsage,
-            )
-        } else {
-            handleDeferredIntent(
-                shippingValues = shippingValues,
-                paymentMethodCreateParams = paymentMethodCreateParams,
-                setupForFutureUsage = setupForFutureUsage,
-            )
+        return when (initializationMode) {
+            is PaymentSheet.InitializationMode.DeferredIntent -> {
+                handleDeferredIntent(
+                    intentConfiguration = initializationMode.intentConfiguration,
+                    shippingValues = shippingValues,
+                    paymentMethodCreateParams = paymentMethodCreateParams,
+                    setupForFutureUsage = setupForFutureUsage,
+                )
+            }
+            is PaymentSheet.InitializationMode.PaymentIntent -> {
+                createConfirmStep(
+                    clientSecret = initializationMode.clientSecret,
+                    shippingValues = shippingValues,
+                    paymentMethodCreateParams = paymentMethodCreateParams,
+                    setupForFutureUsage = setupForFutureUsage,
+                )
+            }
+
+            is PaymentSheet.InitializationMode.SetupIntent -> {
+                createConfirmStep(
+                    clientSecret = initializationMode.clientSecret,
+                    shippingValues = shippingValues,
+                    paymentMethodCreateParams = paymentMethodCreateParams,
+                    setupForFutureUsage = setupForFutureUsage,
+                )
+            }
+        }
+    }
+
+    override suspend fun intercept(
+        initializationMode: PaymentSheet.InitializationMode,
+        paymentMethod: PaymentMethod,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+    ): NextStep {
+        return when (initializationMode) {
+            is PaymentSheet.InitializationMode.DeferredIntent -> {
+                handleDeferredIntent(
+                    intentConfiguration = initializationMode.intentConfiguration,
+                    paymentMethod = paymentMethod,
+                    shippingValues = shippingValues,
+                    setupForFutureUsage = setupForFutureUsage,
+                )
+            }
+            is PaymentSheet.InitializationMode.PaymentIntent -> {
+                createConfirmStep(
+                    clientSecret = initializationMode.clientSecret,
+                    shippingValues = shippingValues,
+                    paymentMethod = paymentMethod,
+                )
+            }
+            is PaymentSheet.InitializationMode.SetupIntent -> {
+                createConfirmStep(
+                    clientSecret = initializationMode.clientSecret,
+                    shippingValues = shippingValues,
+                    paymentMethod = paymentMethod,
+                )
+            }
         }
     }
 
     private suspend fun handleDeferredIntent(
+        intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
@@ -115,6 +161,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         return createPaymentMethod(params).fold(
             onSuccess = { paymentMethod ->
                 handleDeferredIntent(
+                    intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
                     shippingValues = shippingValues,
                     setupForFutureUsage = setupForFutureUsage,
@@ -129,20 +176,8 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
         )
     }
 
-    override suspend fun intercept(
-        clientSecret: String?,
-        paymentMethod: PaymentMethod,
-        shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-    ): NextStep {
-        return if (clientSecret != null) {
-            createConfirmStep(clientSecret, shippingValues, paymentMethod)
-        } else {
-            handleDeferredIntent(paymentMethod, shippingValues, setupForFutureUsage)
-        }
-    }
-
     private suspend fun handleDeferredIntent(
+        intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
@@ -151,6 +186,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
             is CreateIntentCallback -> {
                 handleIntentCreationFromPaymentMethod(
                     createIntentCallback = callback,
+                    intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
                     shouldSavePaymentMethod = setupForFutureUsage == OffSession,
                     shippingValues = shippingValues,
@@ -178,6 +214,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private suspend fun handleIntentCreationFromPaymentMethod(
         createIntentCallback: CreateIntentCallback,
+        intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -194,6 +231,7 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
                 } else {
                     handleIntentCreationSuccess(
                         clientSecret = result.clientSecret,
+                        intentConfiguration = intentConfiguration,
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues,
                     )
@@ -210,26 +248,25 @@ class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private suspend fun handleIntentCreationSuccess(
         clientSecret: String,
+        intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): NextStep {
-        return retrieveStripeIntent(clientSecret).fold(
-            onSuccess = { intent ->
-                if (intent.isConfirmed) {
-                    NextStep.Complete(isForceSuccess = false)
-                } else if (intent.requiresAction()) {
-                    NextStep.HandleNextAction(clientSecret)
-                } else {
-                    createConfirmStep(clientSecret, shippingValues, paymentMethod)
-                }
-            },
-            onFailure = { error ->
-                NextStep.Fail(
-                    cause = error,
-                    message = genericErrorMessage,
-                )
+        return retrieveStripeIntent(clientSecret).mapCatching { intent ->
+            if (intent.isConfirmed) {
+                NextStep.Complete(isForceSuccess = false)
+            } else if (intent.requiresAction()) {
+                NextStep.HandleNextAction(clientSecret)
+            } else {
+                DeferredIntentValidator.validate(intent, intentConfiguration, isFlowController)
+                createConfirmStep(clientSecret, shippingValues, paymentMethod)
             }
-        )
+        }.getOrElse { error ->
+            NextStep.Fail(
+                cause = error,
+                message = genericErrorMessage,
+            )
+        }
     }
 
     private suspend fun retrieveStripeIntent(clientSecret: String): Result<StripeIntent> {

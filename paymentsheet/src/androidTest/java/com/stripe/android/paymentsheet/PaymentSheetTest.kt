@@ -191,7 +191,7 @@ internal class PaymentSheetTest {
             paymentSheet.presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 2000,
+                        amount = 5099,
                         currency = "usd"
                     )
                 ),
