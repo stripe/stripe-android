@@ -12,8 +12,12 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAuthori
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 
 internal data class PartnerAuthState(
+    /**
+     * The active auth session id. Used across process kills to prevent re-creating the session
+     * if one is already active.
+     */
     @PersistState
-    val firstInit: Boolean = true,
+    val activeAuthSession: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val viewEffect: ViewEffect? = null,
     val authenticationStatus: Async<String> = Uninitialized

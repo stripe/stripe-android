@@ -59,11 +59,11 @@ internal class PartnerAuthViewModel @Inject constructor(
     init {
         logErrors()
         withState {
-            if (it.firstInit) {
-                setState { copy(firstInit = false) }
+            if (it.activeAuthSession == null) {
                 launchBrowserIfNonOauth()
                 createAuthSession()
             } else {
+                logger.debug("Restoring auth session ${it.activeAuthSession}")
                 restoreAuthSession()
             }
         }
@@ -74,9 +74,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             // if coming from a process kill, there should be a session
             // re-fetch the manifest and use its active auth session instead of creating a new one
             val manifest: FinancialConnectionsSessionManifest = getManifest()
-            val authSession = manifest.activeAuthSession?.also {
-                logger.debug("Restoring auth session ${it.id}")
-            } ?: createAuthorizationSession(
+            val authSession = manifest.activeAuthSession ?: createAuthorizationSession(
                 institution = requireNotNull(manifest.activeInstitution),
                 allowManualEntry = manifest.allowManualEntry
             )
@@ -109,7 +107,12 @@ internal class PartnerAuthViewModel @Inject constructor(
                     listOfNotNull(launchedEvent, loadedEvent)
                 )
             }
-        }.execute { copy(payload = it) }
+        }.execute {
+            copy(
+                payload = it,
+                activeAuthSession = it()?.authSession?.id
+            )
+        }
     }
 
     private fun launchBrowserIfNonOauth() {
