@@ -136,6 +136,20 @@ internal class DeferredIntentValidatorTest {
     @Test
     fun `Succeeds if PaymentIntent and IntentConfiguration match`() {
         val paymentIntent = PaymentIntentFactory.create()
+        val intentConfiguration = makeIntentConfigurationForPayment()
+
+        val result = DeferredIntentValidator.validate(
+            stripeIntent = paymentIntent,
+            intentConfiguration = intentConfiguration,
+            isFlowController = true,
+        )
+
+        assertThat(result).isEqualTo(paymentIntent)
+    }
+
+    @Test
+    fun `Succeeds if PaymentIntent and IntentConfiguration have same currency but in different case`() {
+        val paymentIntent = PaymentIntentFactory.create()
         val intentConfiguration = makeIntentConfigurationForPayment(
             currency = "USD", // uppercase to test case insensitivity
         )
