@@ -47,7 +47,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             return
         }
 
-        viewModel.registerFromActivity(this)
+        viewModel.registerFromActivity(
+            activityResultCaller = this,
+            lifecycleOwner = this,
+        )
 
         viewModel.setupGooglePay(
             lifecycleScope,
@@ -99,13 +102,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             Activity.RESULT_OK,
             Intent().putExtras(PaymentSheetContractV2.Result(result).toBundle())
         )
-    }
-
-    override fun onDestroy() {
-        if (!earlyExitDueToIllegalState) {
-            viewModel.unregisterFromActivity()
-        }
-        super.onDestroy()
     }
 
     private fun finishWithError(error: Throwable?) {

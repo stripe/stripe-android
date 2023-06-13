@@ -5,6 +5,8 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -438,7 +440,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * Used to set up any dependencies that require a reference to the current Activity.
      * Must be called from the Activity's `onCreate`.
      */
-    fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
+    fun registerFromActivity(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+    ) {
         linkHandler.registerFromActivity(activityResultCaller)
 
         paymentLauncher = paymentLauncherFactory.create(
@@ -451,16 +456,17 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         ).also {
             it.registerPollingAuthenticator()
         }
-    }
 
-    /**
-     * Used to clean up any dependencies that require a reference to the current Activity.
-     * Must be called from the Activity's `onDestroy`.
-     */
-    fun unregisterFromActivity() {
-        paymentLauncher?.unregisterPollingAuthenticator()
-        paymentLauncher = null
-        linkHandler.unregisterFromActivity()
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    paymentLauncher?.unregisterPollingAuthenticator()
+                    paymentLauncher = null
+                    linkHandler.unregisterFromActivity()
+                    super.onDestroy(owner)
+                }
+            }
+        )
     }
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {

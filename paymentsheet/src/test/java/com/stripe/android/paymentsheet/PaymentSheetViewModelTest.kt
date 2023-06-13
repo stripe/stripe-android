@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.testIn
@@ -1165,7 +1167,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Confirms intent if intent confirmation interceptor returns an unconfirmed intent`() = runTest {
         val viewModel = createViewModelForDeferredIntent().apply {
-            registerFromActivity(DummyActivityResultCaller())
+            registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -1188,7 +1190,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Handles next action if intent confirmation interceptor returns an intent with an outstanding action`() = runTest {
         val viewModel = createViewModelForDeferredIntent().apply {
-            registerFromActivity(DummyActivityResultCaller())
+            registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
         }
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -1312,6 +1314,17 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter, verificationMode).onForceSuccess()
             reset(eventReporter)
         }
+    }
+
+    @Test
+    fun `Invalidates authenticator when lifecycle owner is destroyed`() {
+        val lifecycleOwner = TestLifecycleOwner()
+        val viewModel = createViewModel()
+
+        viewModel.registerFromActivity(DummyActivityResultCaller(), lifecycleOwner)
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+
+        verify(paymentLauncher.authenticatorRegistry).unregisterAuthenticator(any())
     }
 
     private fun createViewModel(

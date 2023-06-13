@@ -2,8 +2,9 @@ package com.stripe.android.payments.paymentlauncher
 
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
-import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -84,10 +85,22 @@ internal class PaymentLauncherViewModel @Inject constructor(
      * Registers the calling activity to listen to payment flow results. Should be called in the
      * activity onCreate.
      */
-    internal fun register(caller: ActivityResultCaller) {
+    internal fun register(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+    ) {
         authenticatorRegistry.onNewActivityResultCaller(
-            caller,
-            ::onPaymentFlowResult
+            activityResultCaller = activityResultCaller,
+            activityResultCallback = ::onPaymentFlowResult,
+        )
+
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    authenticatorRegistry.onLauncherInvalidated()
+                    super.onDestroy(owner)
+                }
+            }
         )
     }
 
@@ -219,18 +232,6 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 }
             )
         }
-    }
-
-    /**
-     * Cleans up the [PaymentAuthenticatorRegistry] by invalidating [ActivityResultLauncher]s
-     * registered within.
-     *
-     * Because the same [PaymentAuthenticatorRegistry] is used for multiple
-     * [PaymentLauncherConfirmationActivity]s. The [ActivityResultLauncher]s registered in the old
-     * [PaymentLauncherConfirmationActivity] needs to be unregistered to prevent leaking.
-     */
-    internal fun cleanUp() {
-        authenticatorRegistry.onLauncherInvalidated()
     }
 
     /**

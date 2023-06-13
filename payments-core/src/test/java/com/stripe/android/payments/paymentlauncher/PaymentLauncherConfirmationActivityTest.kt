@@ -73,7 +73,7 @@ class PaymentLauncherConfirmationActivityTest {
         ).use {
             it.onActivity {
                 runTest {
-                    verify(viewModel).register(any())
+                    verify(viewModel).register(any(), any())
                 }
             }
         }
@@ -143,7 +143,7 @@ class PaymentLauncherConfirmationActivityTest {
             it.onActivity {
                 runTest {
                     verify(viewModel).handleNextActionForStripeIntent(eq(CLIENT_SECRET), any())
-                    verify(viewModel).register(any())
+                    verify(viewModel).register(any(), any())
                 }
             }
         }
