@@ -136,7 +136,9 @@ internal class DeferredIntentValidatorTest {
     @Test
     fun `Succeeds if PaymentIntent and IntentConfiguration match`() {
         val paymentIntent = PaymentIntentFactory.create()
-        val intentConfiguration = makeIntentConfigurationForPayment()
+        val intentConfiguration = makeIntentConfigurationForPayment(
+            currency = "USD", // uppercase to test case insensitivity
+        )
 
         val result = DeferredIntentValidator.validate(
             stripeIntent = paymentIntent,
