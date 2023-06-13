@@ -1,13 +1,16 @@
 package com.stripe.android.customersheet
 
+import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.RestrictTo
+import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.customersheet.injection.CustomerSheetComponent
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.utils.AnimationConstants
 import javax.inject.Inject
 
 /**
@@ -19,6 +22,7 @@ import javax.inject.Inject
 @ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CustomerSheet @Inject internal constructor(
+    private val application: Application,
     activityResultCaller: ActivityResultCaller,
     private val callback: CustomerSheetResultCallback,
 ) {
@@ -33,9 +37,15 @@ class CustomerSheet @Inject internal constructor(
      * are delivered through the callback passed in [CustomerSheet.create].
      */
     fun present() {
-        customerSheetActivityLauncher.launch(
-            CustomerSheetContract.Args
+        val args = CustomerSheetContract.Args
+
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            application.applicationContext,
+            AnimationConstants.FADE_IN,
+            AnimationConstants.FADE_OUT,
         )
+
+        customerSheetActivityLauncher.launch(args, options)
     }
 
     /**

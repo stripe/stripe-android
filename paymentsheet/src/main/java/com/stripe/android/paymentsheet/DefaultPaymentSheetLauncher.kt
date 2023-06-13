@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
+import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -14,6 +15,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetLauncherComponent
+import com.stripe.android.utils.AnimationConstants
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -23,7 +25,7 @@ import org.jetbrains.annotations.TestOnly
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
     lifecycleOwner: LifecycleOwner,
-    application: Application,
+    private val application: Application,
 ) : PaymentSheetLauncher {
     @InjectorKey
     private val injectorKey: String =
@@ -100,7 +102,14 @@ internal class DefaultPaymentSheetLauncher(
             config = configuration,
             injectorKey = injectorKey,
         )
-        activityResultLauncher.launch(args)
+
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            application.applicationContext,
+            AnimationConstants.FADE_IN,
+            AnimationConstants.FADE_OUT,
+        )
+
+        activityResultLauncher.launch(args, options)
     }
 
     private class Injector(

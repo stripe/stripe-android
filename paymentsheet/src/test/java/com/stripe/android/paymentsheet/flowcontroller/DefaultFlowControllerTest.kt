@@ -78,6 +78,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
@@ -334,7 +335,7 @@ internal class DefaultFlowControllerTest {
             productUsage = PRODUCT_USAGE
         )
 
-        verify(paymentOptionActivityLauncher).launch(eq(expectedArgs))
+        verify(paymentOptionActivityLauncher).launch(eq(expectedArgs), anyOrNull())
     }
 
     @Test
@@ -422,8 +423,8 @@ internal class DefaultFlowControllerTest {
             argWhere {
                 // Make sure that paymentMethods contains the new added payment methods and the initial payment methods.
                 it.state.customerPaymentMethods == initialPaymentMethods
-            }
-
+            },
+            anyOrNull(),
         )
     }
 
@@ -921,9 +922,8 @@ internal class DefaultFlowControllerTest {
         flowController.presentPaymentOptions()
 
         verify(paymentOptionActivityLauncher).launch(
-            argWhere {
-                it.state.paymentSelection == previousPaymentSelection
-            }
+            argWhere { it.state.paymentSelection == previousPaymentSelection },
+            anyOrNull(),
         )
     }
 
