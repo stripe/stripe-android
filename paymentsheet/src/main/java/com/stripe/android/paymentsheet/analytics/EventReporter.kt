@@ -39,6 +39,7 @@ internal interface EventReporter {
         paymentSelection: PaymentSelection?,
         currency: String?,
         isDecoupling: Boolean,
+        deferredIntentConfirmationType: PaymentSheetEvent.Payment.DeferredIntentConfirmationType?,
     )
 
     fun onPaymentFailure(

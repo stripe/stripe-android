@@ -38,6 +38,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.Payment.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
@@ -150,6 +151,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
 
+    private var deferredIntentConfirmationType: DeferredIntentConfirmationType? = null
+
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
         args.googlePayConfig?.let { config ->
@@ -243,6 +246,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     paymentSelection = PaymentSelection.Link,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = isDecoupling,
+                    deferredIntentConfirmationType = null, // TODO
                 )
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
@@ -475,21 +479,23 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
             when (nextStep) {
                 is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
+                    // TODO Serverside
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server
                     handleNextAction(
                         clientSecret = nextStep.clientSecret,
                         stripeIntent = stripeIntent,
                     )
                 }
                 is IntentConfirmationInterceptor.NextStep.Confirm -> {
+                    // TODO Client-side
+                    deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
                     confirmStripeIntent(nextStep.confirmParams)
                 }
                 is IntentConfirmationInterceptor.NextStep.Fail -> {
                     onError(nextStep.message)
                 }
                 is IntentConfirmationInterceptor.NextStep.Complete -> {
-                    if (nextStep.isForceSuccess) {
-                        eventReporter.onForceSuccess()
-                    }
+                    deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
                     processPayment(stripeIntent, PaymentResult.Completed)
                 }
             }
@@ -516,7 +522,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     paymentSelection = selection.value,
                     currency = stripeIntent.currency,
                     isDecoupling = isDecoupling,
+                    deferredIntentConfirmationType = deferredIntentConfirmationType,
                 )
+
+                // Reset after reporting the event
+                deferredIntentConfirmationType = null
 
                 // Default future payments to the selected payment method. New payment methods won't
                 // be the default because we don't know if the user selected save for future use.

@@ -180,6 +180,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         paymentSelection: PaymentSelection?,
         currency: String?,
         isDecoupled: Boolean,
+        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) : PaymentSheetEvent() {
         override val eventName: String =
             formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_$result")
@@ -189,11 +190,21 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 "locale" to Locale.getDefault().toString(),
                 "currency" to currency,
                 FIELD_IS_DECOUPLED to isDecoupled,
+                FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE to deferredIntentConfirmationType,
             )
 
         enum class Result(private val code: String) {
             Success("success"),
             Failure("failure");
+
+            @Keep
+            override fun toString(): String = code
+        }
+
+        enum class DeferredIntentConfirmationType(val code: String) {
+            Client("client"),
+            Server("server"),
+            None("none");
 
             @Keep
             override fun toString(): String = code
@@ -265,6 +276,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION =
             "billing_details_collection_configuration"
         const val FIELD_IS_DECOUPLED = "is_decoupled"
+        const val FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE = "deferred_intent_confirmation_type"
         const val FIELD_ATTACH_DEFAULTS = "attach_defaults"
         const val FIELD_COLLECT_NAME = "name"
         const val FIELD_COLLECT_EMAIL = "email"

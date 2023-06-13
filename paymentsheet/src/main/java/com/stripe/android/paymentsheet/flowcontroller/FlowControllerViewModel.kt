@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.flowcontroller
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.Payment.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 
@@ -20,6 +22,12 @@ internal class FlowControllerViewModel(
 
     var paymentSelection: PaymentSelection? = null
 
+    var deferredIntentConfirmationType: DeferredIntentConfirmationType?
+        get() = handle[DEFERRED_INTENT_CONFIRMATION_TYPE]
+        set(value) {
+            handle[DEFERRED_INTENT_CONFIRMATION_TYPE] = value
+        }
+
     // Used to determine if we need to reload the flow controller configuration.
     var previousConfigureRequest: FlowControllerConfigurationHandler.ConfigureRequest? = null
 
@@ -31,5 +39,6 @@ internal class FlowControllerViewModel(
 
     private companion object {
         private const val STATE_KEY = "state"
+        private const val DEFERRED_INTENT_CONFIRMATION_TYPE = "DEFERRED_INTENT_CONFIRMATION_TYPE"
     }
 }
