@@ -102,7 +102,7 @@ class OTPScreenTest {
     @Test
     fun verifyUIWithRedactedPhoneNumber() {
         setComposeTestRuleWith {
-            verify(mockOtpViewModel).generateOtp()
+            verify(mockOtpViewModel).generatePhoneOtp()
             onNodeWithTag(OTP_TITLE_TAG).assertTextEquals(TITLE)
             onNodeWithTag(OTP_BODY_TAG).assertTextEquals(
                 BODY.replace(
@@ -132,7 +132,7 @@ class OTPScreenTest {
             )
         }
         setComposeTestRuleWith {
-            verify(mockOtpViewModel).generateOtp()
+            verify(mockOtpViewModel).generatePhoneOtp()
             onNodeWithTag(OTP_TITLE_TAG).assertTextEquals(TITLE)
             onNodeWithTag(OTP_BODY_TAG).assertTextEquals(
                 BODY.replace(

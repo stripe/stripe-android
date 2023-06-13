@@ -66,7 +66,7 @@ internal fun OTPScreen(
         val otpStaticPage = verificationPage.otp
 
         LaunchedEffect(Unit) {
-            otpViewModel.generateOtp()
+            otpViewModel.generatePhoneOtp()
         }
 
         OTPViewStateEffect(
@@ -166,7 +166,7 @@ internal fun OTPScreen(
                     else -> LoadingButtonState.Idle
                 }
             ) {
-                otpViewModel.generateOtp()
+                otpViewModel.generatePhoneOtp()
             }
 
             LoadingTextButton(
@@ -181,7 +181,7 @@ internal fun OTPScreen(
                     else -> LoadingButtonState.Idle
                 }
             ) {
-                otpViewModel.onCannotVerifyClicked()
+                otpViewModel.onCannotVerifyPhoneOtpClicked()
             }
         }
     }

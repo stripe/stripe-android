@@ -73,7 +73,7 @@ internal class OTPViewModel(
         }
     }
 
-    fun generateOtp() {
+    fun generatePhoneOtp() {
         _viewState.update {
             OTPViewState.RequestingOTP
         }
@@ -81,7 +81,7 @@ internal class OTPViewModel(
 
         viewModelScope.launch {
             runCatching {
-                identityRepository.generateOtp(
+                identityRepository.generatePhoneOtp(
                     id = verificationArgs.verificationSessionId,
                     ephemeralKey = verificationArgs.ephemeralKeySecret
                 )
@@ -102,13 +102,13 @@ internal class OTPViewModel(
         }
     }
 
-    fun onCannotVerifyClicked() {
+    fun onCannotVerifyPhoneOtpClicked() {
         _viewState.update {
             OTPViewState.RequestingCannotVerify
         }
         viewModelScope.launch {
             runCatching {
-                identityRepository.cannotVerifyOtp(
+                identityRepository.cannotVerifyPhoneOtp(
                     id = verificationArgs.verificationSessionId,
                     ephemeralKey = verificationArgs.ephemeralKeySecret
                 )
