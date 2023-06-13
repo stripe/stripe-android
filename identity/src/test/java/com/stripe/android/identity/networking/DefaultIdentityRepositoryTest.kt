@@ -279,11 +279,11 @@ class DefaultIdentityRepositoryTest {
     }
 
     @Test
-    fun testGenerateOtpEndpoint() {
+    fun testGeneratePhoneOtpEndpoint() {
         verifyPostVerificationPageData(
-            targetPath = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$OTP/$GENERATE",
+            targetPath = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$PHONE_OTP/$GENERATE",
             apiCall = {
-                identityRepository.generateOtp(
+                identityRepository.generatePhoneOtp(
                     id = TEST_ID,
                     ephemeralKey = TEST_EPHEMERAL_KEY
                 )
@@ -292,12 +292,12 @@ class DefaultIdentityRepositoryTest {
     }
 
     @Test
-    fun testCannotSendOtpEndpoint() {
+    fun testCannotVerifyPhoneOtpEndpoint() {
         verifyPostVerificationPageData(
-            targetPath = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$OTP/$CANNOT_VERIFY",
+            targetPath = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$PHONE_OTP/$CANNOT_VERIFY",
             apiCall =
             {
-                identityRepository.cannotVerifyOtp(
+                identityRepository.cannotVerifyPhoneOtp(
                     id = TEST_ID,
                     ephemeralKey = TEST_EPHEMERAL_KEY
                 )

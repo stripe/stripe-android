@@ -68,7 +68,7 @@ internal interface IdentityRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun generateOtp(
+    suspend fun generatePhoneOtp(
         id: String,
         ephemeralKey: String
     ): VerificationPageData
@@ -77,7 +77,7 @@ internal interface IdentityRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun cannotVerifyOtp(
+    suspend fun cannotVerifyPhoneOtp(
         id: String,
         ephemeralKey: String
     ): VerificationPageData

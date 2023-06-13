@@ -128,12 +128,12 @@ internal class DefaultIdentityRepository @Inject constructor(
         VerificationPageData.serializer()
     )
 
-    override suspend fun generateOtp(
+    override suspend fun generatePhoneOtp(
         id: String,
         ephemeralKey: String
     ) = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
-            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$OTP/$GENERATE",
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$PHONE_OTP/$GENERATE",
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
             )
@@ -141,12 +141,12 @@ internal class DefaultIdentityRepository @Inject constructor(
         VerificationPageData.serializer()
     )
 
-    override suspend fun cannotVerifyOtp(
+    override suspend fun cannotVerifyPhoneOtp(
         id: String,
         ephemeralKey: String
     ) = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
-            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$OTP/$CANNOT_VERIFY",
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$PHONE_OTP/$CANNOT_VERIFY",
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
             )
