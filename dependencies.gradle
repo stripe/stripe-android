@@ -20,7 +20,7 @@ ext.versions = [
         androidxFragment            : '1.5.5',
         androidxLegacySupport       : '1.0.0',
         androidxLifecycle           : '2.5.1',
-        androidxNavigation          : '2.5.3',
+        androidxNavigation          : '2.6.0',
         androidxPreference          : '1.2.0',
         androidxRecyclerview        : '1.2.1',
         androidxSecurity            : '1.1.0-alpha05',
