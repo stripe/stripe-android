@@ -36,7 +36,7 @@ data class SetupIntent internal constructor(
      * Country code of the user.
      */
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    val countryCode: String?,
+    override val countryCode: String?,
 
     /**
      * The client secret of this SetupIntent. Used for client-side retrieval using a

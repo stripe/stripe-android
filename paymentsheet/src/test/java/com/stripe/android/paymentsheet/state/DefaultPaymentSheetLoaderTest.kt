@@ -417,6 +417,7 @@ internal class DefaultPaymentSheetLoaderTest {
         val expectedLinkConfig = LinkConfiguration(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             merchantName = "Merchant",
+            merchantCountryCode = "US",
             customerName = "Till",
             customerEmail = null,
             customerPhone = null,

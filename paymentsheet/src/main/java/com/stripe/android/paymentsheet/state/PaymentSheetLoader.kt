@@ -298,6 +298,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return LinkConfiguration(
             stripeIntent = stripeIntent,
             merchantName = merchantName,
+            merchantCountryCode = stripeIntent.countryCode,
             customerEmail = customerEmail,
             customerPhone = customerPhone,
             customerName = config?.defaultBillingDetails?.name,

@@ -62,6 +62,7 @@ class InlineSignupViewModelTest {
                 config = LinkConfiguration(
                     stripeIntent = mockStripeIntent(),
                     merchantName = MERCHANT_NAME,
+                    merchantCountryCode = "US",
                     customerEmail = CUSTOMER_EMAIL,
                     customerPhone = CUSTOMER_PHONE,
                     customerName = CUSTOMER_NAME,
@@ -287,6 +288,7 @@ class InlineSignupViewModelTest {
         config = LinkConfiguration(
             stripeIntent = mockStripeIntent(countryCode),
             merchantName = MERCHANT_NAME,
+            merchantCountryCode = "US",
             customerEmail = prefilledEmail,
             customerName = prefilledName,
             customerPhone = prefilledPhone,

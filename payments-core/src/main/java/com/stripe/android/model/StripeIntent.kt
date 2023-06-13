@@ -70,6 +70,12 @@ sealed interface StripeIntent : StripeModel {
      */
     val linkFundingSources: List<String>
 
+    /**
+     * Country code of the user.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val countryCode: String?
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean
