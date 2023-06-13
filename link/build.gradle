@@ -12,6 +12,7 @@ dependencies {
     implementation project(':stripe-ui-core')
 
     implementation libs.androidx.appCompat
+    implementation libs.androidx.browser
     implementation libs.androidx.constraintLayout
     implementation libs.androidx.liveDataKtx
     implementation libs.androidx.security
@@ -29,6 +30,8 @@ dependencies {
     implementation libs.compose.liveData
     implementation libs.accompanist.flowLayout
     implementation libs.compose.uiToolingPreview
+
+    implementation libs.kotlin.serialization
 
     debugImplementation libs.compose.uiTooling
     debugImplementation libs.compose.uiTestManifest

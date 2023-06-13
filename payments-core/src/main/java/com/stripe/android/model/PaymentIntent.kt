@@ -87,7 +87,7 @@ constructor(
      * Country code of the user.
      */
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    val countryCode: String?,
+    override val countryCode: String?,
 
     /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.

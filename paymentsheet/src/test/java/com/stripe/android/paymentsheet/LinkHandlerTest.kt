@@ -349,6 +349,7 @@ private fun runLinkTest(
     val configuration = LinkConfiguration(
         stripeIntent = mock(),
         merchantName = "Merchant, Inc",
+        merchantCountryCode = "US",
         customerName = "Name",
         customerEmail = "customer@email.com",
         customerPhone = "1234567890",

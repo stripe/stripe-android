@@ -11,6 +11,7 @@ import kotlinx.parcelize.Parcelize
 data class LinkConfiguration(
     val stripeIntent: StripeIntent,
     val merchantName: String,
+    val merchantCountryCode: String?,
     val customerName: String?,
     val customerEmail: String?,
     val customerPhone: String?,

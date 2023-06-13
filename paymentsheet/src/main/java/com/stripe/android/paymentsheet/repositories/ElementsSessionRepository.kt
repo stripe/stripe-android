@@ -38,6 +38,7 @@ internal sealed class ElementsSessionRepository {
                     linkSettings = null,
                     paymentMethodSpecs = null,
                     stripeIntent = stripeIntent,
+                    merchantCountry = null,
                 )
             )
         }
@@ -94,6 +95,7 @@ internal sealed class ElementsSessionRepository {
                             linkSettings = null,
                             paymentMethodSpecs = null,
                             stripeIntent = it,
+                            merchantCountry = null,
                         )
                     }
                 }
@@ -111,6 +113,7 @@ internal sealed class ElementsSessionRepository {
                             linkSettings = null,
                             paymentMethodSpecs = null,
                             stripeIntent = it,
+                            merchantCountry = null,
                         )
                     }
                 }

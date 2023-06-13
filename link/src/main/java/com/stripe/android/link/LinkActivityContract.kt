@@ -4,8 +4,12 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.net.toUri
 import androidx.core.os.bundleOf
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason.BackPressed
+import com.stripe.android.link.serialization.PopupPayload
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -14,7 +18,19 @@ import kotlinx.parcelize.Parcelize
 class LinkActivityContract :
     ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
 
-    override fun createIntent(context: Context, input: Args) = Intent()
+    override fun createIntent(context: Context, input: Args): Intent {
+        val paymentConfiguration = PaymentConfiguration.getInstance(context)
+        val payload = PopupPayload.create(
+            configuration = input.configuration,
+            context = context,
+            publishableKey = paymentConfiguration.publishableKey,
+            stripeAccount = paymentConfiguration.stripeAccountId,
+        )
+        return CustomTabsIntent.Builder()
+            .build()
+            .also { it.intent.data = payload.toUrl().toUri() }
+            .intent
+    }
 
     override fun parseResult(resultCode: Int, intent: Intent?): LinkActivityResult {
         val linkResult = intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.linkResult

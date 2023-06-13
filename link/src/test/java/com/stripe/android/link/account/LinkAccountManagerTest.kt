@@ -363,6 +363,7 @@ class LinkAccountManagerTest {
             customerPhone = null,
             customerBillingCountryCode = null,
             merchantName = "Merchant",
+            merchantCountryCode = "US",
             shippingValues = null,
         ),
         linkRepository,

@@ -19,6 +19,7 @@ class LinkConfigurationCoordinatorTest {
     private val config = LinkConfiguration(
         stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
+        merchantCountryCode = "US",
         customerName = CUSTOMER_NAME,
         customerEmail = CUSTOMER_EMAIL,
         customerPhone = CUSTOMER_PHONE,
