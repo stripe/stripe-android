@@ -7,6 +7,7 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher.Companion.supportedFundingSources
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
@@ -79,12 +80,13 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             initializationMode = initializationMode,
             configuration = paymentSheetConfiguration,
         ).fold(
-            onSuccess = { stripeIntent ->
+            onSuccess = { elementsSession ->
                 create(
-                    stripeIntent = stripeIntent,
+                    stripeIntent = elementsSession.stripeIntent,
                     customerConfig = paymentSheetConfiguration?.customer,
                     config = paymentSheetConfiguration,
                     isGooglePayReady = isGooglePayReady,
+                    merchantCountry = elementsSession.merchantCountry,
                 )
             },
             onFailure = {
@@ -114,6 +116,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         customerConfig: PaymentSheet.CustomerConfiguration?,
         config: PaymentSheet.Configuration?,
         isGooglePayReady: Boolean,
+        merchantCountry: String?,
     ): PaymentSheetLoader.Result = coroutineScope {
         val prefsRepository = prefsRepositoryFactory(customerConfig)
 
@@ -166,7 +169,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val linkState = async {
             if (isLinkAvailable) {
-                loadLinkState(config, stripeIntent)
+                loadLinkState(config, stripeIntent, merchantCountry)
             } else {
                 null
             }
@@ -226,7 +229,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration?,
-    ): Result<StripeIntent> {
+    ): Result<ElementsSession> {
         return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
             val billingDetailsCollectionConfig =
                 configuration?.billingDetailsCollectionConfiguration?.toInternal()
@@ -245,14 +248,17 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             }
 
             stripeIntentValidator.requireValid(elementsSession.stripeIntent)
+
+            elementsSession
         }
     }
 
     private suspend fun loadLinkState(
         config: PaymentSheet.Configuration?,
         stripeIntent: StripeIntent,
+        merchantCountry: String?,
     ): LinkState {
-        val linkConfig = createLinkConfiguration(config, stripeIntent)
+        val linkConfig = createLinkConfiguration(config, stripeIntent, merchantCountry)
 
         val loginState = when (accountStatusProvider(linkConfig)) {
             AccountStatus.Verified -> LinkState.LoginState.LoggedIn
@@ -271,6 +277,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun createLinkConfiguration(
         config: PaymentSheet.Configuration?,
         stripeIntent: StripeIntent,
+        merchantCountry: String?,
     ): LinkConfiguration {
         val shippingDetails: AddressDetails? = config?.shippingDetails
 
@@ -298,7 +305,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return LinkConfiguration(
             stripeIntent = stripeIntent,
             merchantName = merchantName,
-            merchantCountryCode = stripeIntent.countryCode,
+            merchantCountryCode = merchantCountry,
             customerEmail = customerEmail,
             customerPhone = customerPhone,
             customerName = config?.defaultBillingDetails?.name,

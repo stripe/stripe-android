@@ -73,8 +73,7 @@ internal data class PopupPayload(
     }
 
     companion object {
-        @Volatile
-        internal var baseUrl: String = "https://checkout.link.com/link-popup.html#"
+        private const val baseUrl: String = "https://checkout.link.com/link-popup.html#"
 
         fun create(
             configuration: LinkConfiguration,
