@@ -3,10 +3,12 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.core.app.ActivityOptionsCompat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
+import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
 import javax.inject.Singleton
 
@@ -31,7 +33,14 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent>() {
             initialDelayInSeconds = UPI_INITIAL_DELAY_IN_SECONDS,
             maxAttempts = UPI_MAX_ATTEMPTS,
         )
-        pollingLauncher?.launch(args)
+
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            host.application.applicationContext,
+            AnimationConstants.FADE_IN,
+            AnimationConstants.FADE_OUT,
+        )
+
+        pollingLauncher?.launch(args, options)
     }
 
     override fun onNewActivityResultCaller(

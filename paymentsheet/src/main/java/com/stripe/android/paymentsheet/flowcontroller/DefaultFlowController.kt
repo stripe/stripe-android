@@ -5,6 +5,7 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
+import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
@@ -55,6 +56,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.utils.AnimationConstants
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -244,15 +246,21 @@ internal class DefaultFlowController @Inject internal constructor(
             return
         }
 
-        paymentOptionActivityLauncher.launch(
-            PaymentOptionContract.Args(
-                state = state.copy(paymentSelection = viewModel.paymentSelection),
-                statusBarColor = statusBarColor(),
-                injectorKey = injectorKey,
-                enableLogging = enableLogging,
-                productUsage = productUsage,
-            )
+        val args = PaymentOptionContract.Args(
+            state = state.copy(paymentSelection = viewModel.paymentSelection),
+            statusBarColor = statusBarColor(),
+            injectorKey = injectorKey,
+            enableLogging = enableLogging,
+            productUsage = productUsage,
         )
+
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            viewModel.getApplication(),
+            AnimationConstants.FADE_IN,
+            AnimationConstants.FADE_OUT,
+        )
+
+        paymentOptionActivityLauncher.launch(args, options)
     }
 
     override fun confirm() {
