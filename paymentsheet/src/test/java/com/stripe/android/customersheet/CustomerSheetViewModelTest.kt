@@ -44,14 +44,10 @@ class CustomerSheetViewModelTest {
     @Test
     fun `CustomerSheetViewAction#OnBackPressed emits canceled result`() = runTest {
         val viewModel = createViewModel()
-        viewModel.viewState.test {
-            assertThat(
-                (awaitItem() as CustomerSheetViewState.SelectPaymentMethod).result
-            ).isEqualTo(null)
+        viewModel.result.test {
+            assertThat(awaitItem()).isEqualTo(null)
             viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
-            assertThat(
-                (awaitItem() as CustomerSheetViewState.SelectPaymentMethod).result
-            ).isEqualTo(InternalCustomerSheetResult.Canceled)
+            assertThat(awaitItem()).isEqualTo(InternalCustomerSheetResult.Canceled)
         }
     }
 
