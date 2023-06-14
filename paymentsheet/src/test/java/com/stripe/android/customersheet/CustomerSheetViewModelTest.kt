@@ -83,6 +83,8 @@ class CustomerSheetViewModelTest {
                         isProcessing = false,
                         isEditing = false,
                         isGooglePayEnabled = false,
+                        primaryButtonLabel = "Continue",
+                        primaryButtonEnabled = true,
                         errorMessage = null,
                     )
                 )
@@ -182,6 +184,52 @@ class CustomerSheetViewModelTest {
         val name = viewModel.providePaymentMethodName(PaymentMethod.Type.Card.code)
         assertThat(name)
             .isEqualTo("Card")
+    }
+
+    @Test
+    fun `When selection, primary button label should not be null`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                ),
+                selectedPaymentOption = Result.success(
+                    CustomerAdapter.PaymentOption.fromId(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+                    )
+                )
+            )
+        )
+        viewModel.viewState.test {
+            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonLabel)
+                .isNotNull()
+            assertThat(viewState.primaryButtonEnabled)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `When no selection, primary button label should be null`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                ),
+                selectedPaymentOption = Result.success(null)
+            )
+        )
+        viewModel.viewState.test {
+            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonLabel)
+                .isNull()
+            assertThat(viewState.primaryButtonEnabled)
+                .isFalse()
+        }
     }
 
     private fun createViewModel(

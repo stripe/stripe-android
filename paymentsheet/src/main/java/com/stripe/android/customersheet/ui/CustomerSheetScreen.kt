@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.PaymentMethodCode
@@ -134,6 +135,21 @@ internal fun SelectPaymentMethodContent(
                     error = error,
                     modifier = Modifier
                         .padding(vertical = 2.dp)
+                        .padding(horizontal = horizontalPadding),
+                )
+            }
+        }
+
+        AnimatedVisibility(visible = viewState.primaryButtonLabel != null) {
+            viewState.primaryButtonLabel?.let {
+                PrimaryButton(
+                    label = it,
+                    isEnabled = viewState.primaryButtonEnabled,
+                    onButtonClick = {
+                        viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
+                    },
+                    modifier = Modifier
+                        .padding(top = 20.dp)
                         .padding(horizontal = horizontalPadding),
                 )
             }

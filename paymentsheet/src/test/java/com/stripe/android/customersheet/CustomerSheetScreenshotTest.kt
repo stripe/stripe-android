@@ -39,6 +39,8 @@ class CustomerSheetScreenshotTest {
                     isProcessing = false,
                     isEditing = false,
                     isGooglePayEnabled = false,
+                    primaryButtonLabel = null,
+                    primaryButtonEnabled = false,
                 ),
                 paymentMethodNameProvider = { it!! }
             )
@@ -74,7 +76,9 @@ class CustomerSheetScreenshotTest {
                     isProcessing = false,
                     isEditing = false,
                     isGooglePayEnabled = true,
-                    errorMessage = "This is an error message."
+                    primaryButtonLabel = "Continue",
+                    primaryButtonEnabled = true,
+                    errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = {
                     counter++
@@ -97,7 +101,9 @@ class CustomerSheetScreenshotTest {
                     isProcessing = false,
                     isEditing = false,
                     isGooglePayEnabled = true,
-                    errorMessage = "This is an error message."
+                    primaryButtonLabel = "Continue",
+                    primaryButtonEnabled = true,
+                    errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = { it!! }
             )

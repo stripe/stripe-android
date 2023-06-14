@@ -15,6 +15,8 @@ internal sealed class CustomerSheetViewState {
         val isProcessing: Boolean,
         val isEditing: Boolean,
         val isGooglePayEnabled: Boolean,
+        val primaryButtonLabel: String?,
+        val primaryButtonEnabled: Boolean,
         val errorMessage: String? = null,
     ) : CustomerSheetViewState()
 }
