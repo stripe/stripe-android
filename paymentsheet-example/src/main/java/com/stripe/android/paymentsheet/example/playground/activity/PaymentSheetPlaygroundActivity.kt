@@ -203,9 +203,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         paymentSheet = PaymentSheet(
             activity = this,
-            createIntentCallback = { paymentMethod, _ ->
-                viewModel.createIntent(
+            createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
+                viewModel.createAndConfirmIntent(
                     paymentMethodId = paymentMethod.id!!,
+                    shouldSavePaymentMethod = shouldSavePaymentMethod,
                     merchantCountryCode = merchantCountryCode.value,
                     mode = mode.value,
                     returnUrl = returnUrl,

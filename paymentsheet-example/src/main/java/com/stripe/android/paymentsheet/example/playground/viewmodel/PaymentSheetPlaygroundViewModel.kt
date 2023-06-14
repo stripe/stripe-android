@@ -268,26 +268,11 @@ class PaymentSheetPlaygroundViewModel(
             }
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
-    @Suppress("UNUSED_PARAMETER")
-    fun createIntent(
-        paymentMethodId: String,
-        merchantCountryCode: String,
-        mode: String,
-        returnUrl: String,
-        backendUrl: String,
-    ): CreateIntentResult {
-        val initializationType = initializationType.value
-
-        val clientSecret = if (initializationType == InitializationType.DeferredMultiprocessor) {
-            PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT
-        } else {
-            // Note: This is not how you'd do this in a real application. Instead, your app would
-            // call your backend and create (and optionally confirm) a payment or setup intent.
-            clientSecret.value!!
-        }
-
-        return CreateIntentResult.Success(clientSecret)
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
+    private fun createIntent(): CreateIntentResult {
+        // Note: This is not how you'd do this in a real application. Instead, your app would
+        // call your backend and create (and optionally confirm) a payment or setup intent.
+        return CreateIntentResult.Success(clientSecret = clientSecret.value!!)
     }
 
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
@@ -299,17 +284,27 @@ class PaymentSheetPlaygroundViewModel(
         returnUrl: String,
         backendUrl: String,
     ): CreateIntentResult {
-        return if (initializationType.value == InitializationType.DeferredMultiprocessor) {
-            CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
-        } else {
-            createAndConfirmIntentInternal(
-                paymentMethodId = paymentMethodId,
-                shouldSavePaymentMethod = shouldSavePaymentMethod,
-                merchantCountryCode = merchantCountryCode,
-                mode = mode,
-                returnUrl = returnUrl,
-                backendUrl = backendUrl,
-            )
+        return when (initializationType.value) {
+            InitializationType.Normal -> {
+                error("createAndConfirmIntent should not be called when initialization type is Normal")
+            }
+            InitializationType.DeferredClientSideConfirmation -> {
+                createIntent()
+            }
+            InitializationType.DeferredServerSideConfirmation,
+            InitializationType.DeferredManualConfirmation -> {
+                createAndConfirmIntentInternal(
+                    paymentMethodId = paymentMethodId,
+                    shouldSavePaymentMethod = shouldSavePaymentMethod,
+                    merchantCountryCode = merchantCountryCode,
+                    mode = mode,
+                    returnUrl = returnUrl,
+                    backendUrl = backendUrl,
+                )
+            }
+            InitializationType.DeferredMultiprocessor -> {
+                CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+            }
         }
     }
 
