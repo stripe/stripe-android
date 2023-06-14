@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
-import androidx.browser.customtabs.CustomTabsIntent
-import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason.BackPressed
@@ -26,10 +24,7 @@ class LinkActivityContract :
             publishableKey = paymentConfiguration.publishableKey,
             stripeAccount = paymentConfiguration.stripeAccountId,
         )
-        return CustomTabsIntent.Builder()
-            .build()
-            .also { it.intent.data = payload.toUrl().toUri() }
-            .intent
+        return LinkForegroundActivity.createIntent(context, payload.toUrl())
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): LinkActivityResult {

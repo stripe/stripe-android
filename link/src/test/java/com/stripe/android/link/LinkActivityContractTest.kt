@@ -1,6 +1,5 @@
 package com.stripe.android.link
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
 import androidx.test.core.app.ApplicationProvider
@@ -80,8 +79,8 @@ class LinkActivityContractTest {
         )
         val contract = LinkActivityContract()
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
-        assertThat(intent.action).isEqualTo(Intent.ACTION_VIEW)
-        assertThat(intent.data.toString()).isEqualTo(
+        assertThat(intent.component?.className).isEqualTo(LinkForegroundActivity::class.java.name)
+        assertThat(intent.extras?.getString(LinkForegroundActivity.EXTRA_POPUP_URL)).isEqualTo(
             "https://checkout.link.com/link-popup.html#" +
                 "eyJwdWJsaXNoYWJsZUtleSI6InBrX3Rlc3RfYWJjZGVmZyIsInN0cmlwZUFjY291bnQiOm51bGws" +
                 "Im1lcmNoYW50SW5mbyI6eyJidXNpbmVzc05hbWUiOiJNZXJjaGFudCwgSW5jIiwiY291bnRyeSI6" +
