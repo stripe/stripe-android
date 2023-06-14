@@ -26,7 +26,7 @@ internal class CustomerSheetPage(
     fun waitForText(text: String) {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
-                .onAllNodes(hasText(text))
+                .onAllNodes(hasText(text, ignoreCase = true))
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }

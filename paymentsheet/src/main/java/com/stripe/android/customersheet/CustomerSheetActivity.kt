@@ -65,6 +65,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                         CustomerSheetScreen(
                             viewState = viewState,
                             viewActionHandler = viewModel::handleViewAction,
+                            paymentMethodNameProvider = viewModel::providePaymentMethodName,
                         )
                     }
                 }

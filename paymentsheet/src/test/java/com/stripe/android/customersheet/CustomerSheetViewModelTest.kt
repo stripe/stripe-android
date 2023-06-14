@@ -4,8 +4,10 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -22,7 +24,12 @@ class CustomerSheetViewModelTest {
             isFinancialConnectionsAvailable = { true },
             enableACHV2InDeferredFlow = true
         )
-    )
+    ).apply {
+        update(
+            PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethodTypes),
+            null
+        )
+    }
 
     @Test
     fun `init emits CustomerSheetViewState#SelectPaymentMethod`() = runTest {
@@ -69,16 +76,17 @@ class CustomerSheetViewModelTest {
                 .isEqualTo(
                     CustomerSheetViewState.SelectPaymentMethod(
                         title = null,
-                        paymentMethods = listOf(
-                            PaymentOptionsItem.SavedPaymentMethod(
-                                displayName = "····4242",
-                                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                            )
+                        savedPaymentMethods = listOf(
+                            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                         ),
-                        selectedPaymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
+                        paymentSelection = PaymentSelection.Saved(
+                            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        ),
+                        showEditMenu = true,
                         isLiveMode = false,
                         isProcessing = false,
                         isEditing = false,
+                        isGooglePayEnabled = false,
                         errorMessage = null,
                     )
                 )
@@ -100,7 +108,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When the selected payment method cannot be loaded, selectedPaymentMethod is null`() = runTest {
+    fun `When the selected payment method cannot be loaded, paymentSelection is null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
                 selectedPaymentOption = Result.failure(Exception("Failed to retrieve selected payment option."))
@@ -108,11 +116,76 @@ class CustomerSheetViewModelTest {
         )
         viewModel.viewState.test {
             val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.selectedPaymentMethodId)
+            assertThat(viewState.paymentSelection)
                 .isEqualTo(null)
             assertThat(viewState.errorMessage)
                 .isEqualTo(null)
         }
+    }
+
+    @Test
+    fun `When the Google Pay is selected payment method, paymentSelection is GooglePay`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                selectedPaymentOption = Result.success(CustomerAdapter.PaymentOption.GooglePay)
+            )
+        )
+        viewModel.viewState.test {
+            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.paymentSelection)
+                .isEqualTo(PaymentSelection.GooglePay)
+            assertThat(viewState.errorMessage)
+                .isEqualTo(null)
+        }
+    }
+
+    @Test
+    fun `When the Link is selected payment method, paymentSelection is Link`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                selectedPaymentOption = Result.success(CustomerAdapter.PaymentOption.Link)
+            )
+        )
+        viewModel.viewState.test {
+            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.paymentSelection)
+                .isEqualTo(PaymentSelection.Link)
+            assertThat(viewState.errorMessage)
+                .isEqualTo(null)
+        }
+    }
+
+    @Test
+    fun `When the payment method is selected payment method, paymentSelection is payment method`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                ),
+                selectedPaymentOption = Result.success(
+                    CustomerAdapter.PaymentOption.fromId(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+                    )
+                )
+            )
+        )
+        viewModel.viewState.test {
+            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.paymentSelection)
+                .isInstanceOf(PaymentSelection.Saved::class.java)
+            assertThat(viewState.errorMessage)
+                .isEqualTo(null)
+        }
+    }
+
+    @Test
+    fun `providePaymentMethodName provides payment method name given code`() {
+        val viewModel = createViewModel()
+        val name = viewModel.providePaymentMethodName(PaymentMethod.Type.Card.code)
+        assertThat(name)
+            .isEqualTo("Card")
     }
 
     private fun createViewModel(
