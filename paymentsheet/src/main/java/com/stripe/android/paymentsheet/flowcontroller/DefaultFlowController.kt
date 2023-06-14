@@ -47,7 +47,6 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.Payment.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -305,18 +304,16 @@ internal class DefaultFlowController @Inject internal constructor(
                 shippingValues = state.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
             )
 
+            viewModel.setIntentConfirmationType(nextStep.confirmationType?.analyticsValue)
+
             when (nextStep) {
                 is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
-                    // TODO Server-side
-                    viewModel.deferredIntentConfirmationType = DeferredIntentConfirmationType.Server
                     handleNextAction(
                         clientSecret = nextStep.clientSecret,
                         stripeIntent = stripeIntent,
                     )
                 }
                 is IntentConfirmationInterceptor.NextStep.Confirm -> {
-                    // TODO Client-side
-                    viewModel.deferredIntentConfirmationType = DeferredIntentConfirmationType.Client
                     confirmStripeIntent(nextStep.confirmParams)
                 }
                 is IntentConfirmationInterceptor.NextStep.Fail -> {
@@ -327,7 +324,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     )
                 }
                 is IntentConfirmationInterceptor.NextStep.Complete -> {
-                    viewModel.deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
                     onPaymentResult(PaymentResult.Completed)
                 }
             }
@@ -478,17 +474,12 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun logPaymentResult(paymentResult: PaymentResult?) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
-                val deferredIntentConfirmationType = viewModel.deferredIntentConfirmationType
-
                 eventReporter.onPaymentSuccess(
                     paymentSelection = viewModel.paymentSelection,
                     currency = viewModel.state?.stripeIntent?.currency,
                     isDecoupling = isDecoupling,
-                    deferredIntentConfirmationType = deferredIntentConfirmationType,
+                    confirmationType = viewModel.retrieveAndClearIntentConfirmationType(),
                 )
-
-                // Reset after reporting the event
-                viewModel.deferredIntentConfirmationType = null
             }
             is PaymentResult.Failed -> {
                 eventReporter.onPaymentFailure(

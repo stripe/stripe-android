@@ -180,7 +180,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         paymentSelection: PaymentSelection?,
         currency: String?,
         isDecoupled: Boolean,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        deferredIntentConfirmationType: String?,
     ) : PaymentSheetEvent() {
         override val eventName: String =
             formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_$result")
@@ -196,15 +196,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         enum class Result(private val code: String) {
             Success("success"),
             Failure("failure");
-
-            @Keep
-            override fun toString(): String = code
-        }
-
-        enum class DeferredIntentConfirmationType(val code: String) {
-            Client("client"),
-            Server("server"),
-            None("none");
 
             @Keep
             override fun toString(): String = code

@@ -29,7 +29,7 @@ internal object DeferredIntentValidator {
                         "but used a PaymentSheet.IntentConfiguration in setup mode."
                 }
 
-                require(paymentMode.currency == stripeIntent.currency) {
+                require(paymentMode.currency.lowercase() == stripeIntent.currency?.lowercase()) {
                     "Your PaymentIntent currency (${stripeIntent.currency}) does not match " +
                         "the PaymentSheet.IntentConfiguration currency (${paymentMode.currency})."
                 }

@@ -100,7 +100,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         currency: String?,
         isDecoupling: Boolean,
-        deferredIntentConfirmationType: PaymentSheetEvent.Payment.DeferredIntentConfirmationType?,
+        confirmationType: String?,
     ) {
         // Google Pay is treated as a saved payment method after confirmation, so we need to
         // "reset" to PaymentSelection.GooglePay for accurate reporting
@@ -120,7 +120,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 result = PaymentSheetEvent.Payment.Result.Success,
                 currency = currency,
                 isDecoupled = isDecoupling,
-                deferredIntentConfirmationType = deferredIntentConfirmationType,
+                deferredIntentConfirmationType = confirmationType.takeIf { isDecoupling },
             )
         )
     }

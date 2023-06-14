@@ -38,7 +38,6 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.Payment.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
@@ -77,7 +76,6 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as StripeR
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     application: Application,
@@ -151,7 +149,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
 
-    private var deferredIntentConfirmationType: DeferredIntentConfirmationType? = null
+    private var intentConfirmationType: IntentConfirmationInterceptor.ConfirmationType? = null
 
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
@@ -246,7 +244,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     paymentSelection = PaymentSelection.Link,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = isDecoupling,
-                    deferredIntentConfirmationType = null, // TODO
+                    confirmationType = null, // TODO
                 )
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
@@ -477,25 +475,22 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 shippingValues = args.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
             )
 
+            intentConfirmationType = nextStep.confirmationType
+
             when (nextStep) {
                 is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
-                    // TODO Serverside
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server
                     handleNextAction(
                         clientSecret = nextStep.clientSecret,
                         stripeIntent = stripeIntent,
                     )
                 }
                 is IntentConfirmationInterceptor.NextStep.Confirm -> {
-                    // TODO Client-side
-                    deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
                     confirmStripeIntent(nextStep.confirmParams)
                 }
                 is IntentConfirmationInterceptor.NextStep.Fail -> {
                     onError(nextStep.message)
                 }
                 is IntentConfirmationInterceptor.NextStep.Complete -> {
-                    deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
                     processPayment(stripeIntent, PaymentResult.Completed)
                 }
             }
@@ -522,11 +517,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     paymentSelection = selection.value,
                     currency = stripeIntent.currency,
                     isDecoupling = isDecoupling,
-                    deferredIntentConfirmationType = deferredIntentConfirmationType,
+                    confirmationType = intentConfirmationType?.analyticsValue,
                 )
 
                 // Reset after reporting the event
-                deferredIntentConfirmationType = null
+                intentConfirmationType = null
 
                 // Default future payments to the selected payment method. New payment methods won't
                 // be the default because we don't know if the user selected save for future use.

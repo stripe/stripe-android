@@ -150,7 +150,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     paymentSelection = PaymentSelection.Link,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = isDecoupling,
-                    deferredIntentConfirmationType = null, // TODO
+                    confirmationType = null, // TODO
                 )
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 onPaymentResult(PaymentResult.Completed)
