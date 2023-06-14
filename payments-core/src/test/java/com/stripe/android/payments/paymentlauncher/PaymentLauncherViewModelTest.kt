@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -79,6 +80,7 @@ class PaymentLauncherViewModelTest {
     private val analyticsRequestFactory = mock<PaymentAnalyticsRequestFactory>()
     private val uiContext = UnconfinedTestDispatcher()
     private val activityResultCaller = mock<ActivityResultCaller>()
+    private val lifecycleOwner = TestLifecycleOwner()
     private val savedStateHandle = mock<SavedStateHandle>()
 
     private val confirmPaymentIntentParams = ConfirmPaymentIntentParams(
@@ -127,9 +129,7 @@ class PaymentLauncherViewModelTest {
             savedStateHandle,
             isInstantApp
         ).apply {
-            register(
-                caller = activityResultCaller
-            )
+            register(activityResultCaller, lifecycleOwner)
         }
 
     @Before
@@ -490,6 +490,13 @@ class PaymentLauncherViewModelTest {
             assertThat(viewModel.paymentLauncherResult.value)
                 .isInstanceOf(PaymentResult.Failed::class.java)
         }
+
+    @Test
+    fun `Invalidates launcher when lifecycle owner is destroyed`() = runTest {
+        createViewModel()
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        verify(authenticatorRegistry).onLauncherInvalidated()
+    }
 
     @Test
     fun `Factory gets initialized by Injector when Injector is available`() {

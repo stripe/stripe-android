@@ -54,7 +54,11 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
         }
 
         viewModel.paymentLauncherResult.observe(this, ::finishWithResult)
-        viewModel.register(this)
+        viewModel.register(
+            activityResultCaller = this,
+            lifecycleOwner = this,
+        )
+
         val host = AuthActivityStarterHost.create(this)
         when (args) {
             is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
@@ -67,11 +71,6 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
                 viewModel.handleNextActionForStripeIntent(args.setupIntentClientSecret, host)
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.cleanUp()
     }
 
     override fun finish() {
