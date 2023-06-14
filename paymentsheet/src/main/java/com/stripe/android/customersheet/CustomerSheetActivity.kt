@@ -8,8 +8,9 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.customersheet.ui.CustomerBottomSheet
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
+import com.stripe.android.paymentsheet.utils.EdgeToEdge
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.AnimationConstants
 
@@ -54,26 +56,28 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                         finishWithResult(InternalCustomerSheetResult.Canceled)
                     }
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .navigationBarsPadding(),
-                    ) {
-                        val viewState by viewModel.viewState.collectAsState()
-                        val result by viewModel.result.collectAsState()
+                    EdgeToEdge { insets ->
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            val viewState by viewModel.viewState.collectAsState()
+                            val result by viewModel.result.collectAsState()
 
-                        LaunchedEffect(result) {
-                            result?.let { result ->
-                                setResult(result)
-                                navController.popBackStack()
+                            LaunchedEffect(result) {
+                                result?.let { result ->
+                                    setResult(result)
+                                    navController.popBackStack()
+                                }
                             }
-                        }
 
-                        CustomerSheetScreen(
-                            viewState = viewState,
-                            viewActionHandler = viewModel::handleViewAction,
-                            paymentMethodNameProvider = viewModel::providePaymentMethodName,
-                        )
+                            CustomerSheetScreen(
+                                viewState = viewState,
+                                viewActionHandler = viewModel::handleViewAction,
+                                paymentMethodNameProvider = viewModel::providePaymentMethodName,
+                            )
+
+                            Spacer(modifier = Modifier.requiredHeight(insets.navigationBar))
+                        }
                     }
                 }
             }
