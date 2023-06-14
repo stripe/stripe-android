@@ -28,6 +28,9 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val _viewState = MutableStateFlow<CustomerSheetViewState>(CustomerSheetViewState.Loading)
     val viewState: StateFlow<CustomerSheetViewState> = _viewState
 
+    private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
+    val result: StateFlow<InternalCustomerSheetResult?> = _result
+
     init {
         loadPaymentMethods()
     }
@@ -99,8 +102,8 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onBackPressed() {
-        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-            it.copy(result = InternalCustomerSheetResult.Canceled)
+        _result.update {
+            InternalCustomerSheetResult.Canceled
         }
     }
 
@@ -119,12 +122,13 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-            it.copy(result = null)
+        _result.update {
+            null
         }
         super.onCleared()
     }
 
+    @Suppress("unused")
     private inline fun <reified T : CustomerSheetViewState> updateViewState(block: (T) -> T) {
         (_viewState.value as? T)?.let {
             _viewState.update {

@@ -52,13 +52,12 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         val viewState by viewModel.viewState.collectAsState()
+                        val result by viewModel.result.collectAsState()
 
-                        LaunchedEffect(viewState) {
-                            (viewState as? CustomerSheetViewState.SelectPaymentMethod)?.let {
-                                it.result?.let { result ->
-                                    setResult(result)
-                                    navController.popBackStack()
-                                }
+                        LaunchedEffect(result) {
+                            result?.let { result ->
+                                setResult(result)
+                                navController.popBackStack()
                             }
                         }
 

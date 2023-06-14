@@ -44,80 +44,69 @@ internal class CustomerSheetActivityTest {
 
     @Test
     fun `Finish with cancel on back press`() {
-        runActivityScenario { scenario ->
-            scenario.onActivity {
-                composeTestRule.waitForIdle()
-                pressBack()
-                composeTestRule.waitForIdle()
-                assertThat(
-                    InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
-                ).isEqualTo(
-                    InternalCustomerSheetResult.Canceled
-                )
-            }
+        runActivityScenario { scenario, _ ->
+            composeTestRule.waitForIdle()
+            pressBack()
+            composeTestRule.waitForIdle()
+            assertThat(
+                InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
+            ).isEqualTo(
+                InternalCustomerSheetResult.Canceled
+            )
         }
     }
 
     @Test
     fun `Finish with cancel on canceled result`() = runTest {
         runActivityScenario(
-            viewState = createSelectPaymentMethodViewState(
-                result = InternalCustomerSheetResult.Canceled
-            ),
-        ) { scenario ->
-            scenario.onActivity {
-                composeTestRule.waitForIdle()
-                it.finish()
-                assertThat(
-                    InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
-                ).isEqualTo(
-                    InternalCustomerSheetResult.Canceled
-                )
-            }
+            viewState = createSelectPaymentMethodViewState(),
+            result = InternalCustomerSheetResult.Canceled,
+        ) { scenario, activity ->
+            composeTestRule.waitForIdle()
+            activity.finish()
+            assertThat(
+                InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
+            ).isEqualTo(
+                InternalCustomerSheetResult.Canceled
+            )
         }
     }
 
     @Test
     fun `Finish with selected on selected result`() = runTest {
         runActivityScenario(
-            viewState = createSelectPaymentMethodViewState(
-                result = InternalCustomerSheetResult.Selected(
-                    paymentMethodId = "pm_123",
-                    drawableResourceId = 123,
-                    label = "test",
-                )
+            viewState = createSelectPaymentMethodViewState(),
+            result = InternalCustomerSheetResult.Selected(
+                paymentMethodId = "pm_123",
+                drawableResourceId = 123,
+                label = "test",
             ),
-        ) { scenario ->
-            scenario.onActivity {
-                composeTestRule.waitForIdle()
-                it.finish()
-                assertThat(
-                    InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
-                ).isInstanceOf(
-                    InternalCustomerSheetResult.Selected::class.java
-                )
-            }
+        ) { scenario, activity ->
+            composeTestRule.waitForIdle()
+            activity.finish()
+            assertThat(
+                InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
+            ).isInstanceOf(
+                InternalCustomerSheetResult.Selected::class.java
+            )
         }
     }
 
     @Test
     fun `Finish with error on error result`() = runTest {
         runActivityScenario(
-            viewState = createSelectPaymentMethodViewState(
-                result = InternalCustomerSheetResult.Error(
-                    exception = Exception("test")
-                )
+            viewState = createSelectPaymentMethodViewState(),
+            result = InternalCustomerSheetResult.Error(
+                exception = Exception("test")
             ),
-        ) { scenario ->
-            scenario.onActivity {
-                composeTestRule.waitForIdle()
-                it.finish()
-                assertThat(
-                    InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
-                ).isInstanceOf(
-                    InternalCustomerSheetResult.Error::class.java
-                )
-            }
+        ) { scenario, activity ->
+            composeTestRule.waitForIdle()
+            activity.finish()
+            assertThat(
+                InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
+            ).isInstanceOf(
+                InternalCustomerSheetResult.Error::class.java
+            )
         }
     }
 
@@ -127,10 +116,8 @@ internal class CustomerSheetActivityTest {
             viewState = createSelectPaymentMethodViewState(
                 title = null
             ),
-        ) { scenario ->
-            scenario.onActivity {
-                page.waitForText("Select your payment method")
-            }
+        ) { _, _ ->
+            page.waitForText("Select your payment method")
         }
     }
 
@@ -142,10 +129,8 @@ internal class CustomerSheetActivityTest {
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 )
             ),
-        ) { scenario ->
-            scenario.onActivity {
-                page.waitForText("····4242")
-            }
+        ) { _, _ ->
+            page.waitForText("····4242")
         }
     }
 
@@ -155,10 +140,8 @@ internal class CustomerSheetActivityTest {
             viewState = createSelectPaymentMethodViewState(
                 showEditMenu = true
             ),
-        ) { scenario ->
-            scenario.onActivity {
-                page.waitForText("edit")
-            }
+        ) { _, _ ->
+            page.waitForText("edit")
         }
     }
 
@@ -168,21 +151,23 @@ internal class CustomerSheetActivityTest {
             viewState = createSelectPaymentMethodViewState(
                 isGooglePayEnabled = true
             ),
-        ) { scenario ->
-            scenario.onActivity {
-                page.waitForText("google pay")
-            }
+        ) { _, _ ->
+            page.waitForText("google pay")
         }
     }
 
     private fun activityScenario(
         viewState: CustomerSheetViewState,
+        result: InternalCustomerSheetResult?,
         providePaymentMethodName: (PaymentMethodCode) -> String,
     ): InjectableActivityScenario<CustomerSheetActivity> {
         val viewModel = mock<CustomerSheetViewModel>()
 
         whenever(viewModel.viewState).thenReturn(
             MutableStateFlow(viewState)
+        )
+        whenever(viewModel.result).thenReturn(
+            MutableStateFlow(result)
         )
         whenever(viewModel.providePaymentMethodName(any())).then {
             val code = it.arguments.first() as PaymentMethodCode
@@ -198,15 +183,21 @@ internal class CustomerSheetActivityTest {
 
     private fun runActivityScenario(
         viewState: CustomerSheetViewState = CustomerSheetViewState.Loading,
+        result: InternalCustomerSheetResult? = null,
         providePaymentMethodName: (PaymentMethodCode) -> String = { it },
-        block: (InjectableActivityScenario<CustomerSheetActivity>) -> Unit
+        block: (InjectableActivityScenario<CustomerSheetActivity>, CustomerSheetActivity) -> Unit,
     ) {
         activityScenario(
             viewState = viewState,
+            result = result,
             providePaymentMethodName = providePaymentMethodName,
         )
             .launchForResult(intent)
-            .use(block)
+            .use { injectableActivityScenario ->
+                injectableActivityScenario.onActivity {
+                    block(injectableActivityScenario, it)
+                }
+            }
     }
 
     private fun createSelectPaymentMethodViewState(
@@ -218,7 +209,6 @@ internal class CustomerSheetActivityTest {
         isProcessing: Boolean = false,
         isEditing: Boolean = false,
         isGooglePayEnabled: Boolean = false,
-        result: InternalCustomerSheetResult? = null
     ): CustomerSheetViewState.SelectPaymentMethod {
         return CustomerSheetViewState.SelectPaymentMethod(
             title = title,
@@ -229,7 +219,6 @@ internal class CustomerSheetActivityTest {
             isProcessing = isProcessing,
             isEditing = isEditing,
             isGooglePayEnabled = isGooglePayEnabled,
-            result = result,
         )
     }
 }

@@ -16,6 +16,5 @@ internal sealed class CustomerSheetViewState {
         val isEditing: Boolean,
         val isGooglePayEnabled: Boolean,
         val errorMessage: String? = null,
-        val result: InternalCustomerSheetResult? = null
     ) : CustomerSheetViewState()
 }
