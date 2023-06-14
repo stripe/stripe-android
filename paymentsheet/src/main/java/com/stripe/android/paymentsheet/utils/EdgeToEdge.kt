@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.utils
 
 import android.view.View
 import android.view.WindowInsets
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
@@ -29,19 +28,12 @@ internal fun EdgeToEdge(
 @Composable
 internal fun TransparentNavigationBar() {
     val systemUiController = rememberSystemUiController()
-    val useDarkIcons = !isSystemInDarkTheme()
 
-    LaunchedEffect(systemUiController, useDarkIcons) {
+    LaunchedEffect(systemUiController) {
         systemUiController.setNavigationBarColor(
             color = Color.Transparent,
-            darkIcons = useDarkIcons,
+            darkIcons = false,
         )
-
-        // TODO: Does this work? Changing status bar color breaks Chrome Custom Tabs toolbar color
-//        systemUiController.setSystemBarsColor(
-//            color = Color.Transparent,
-//            darkIcons = useDarkIcons,
-//        )
     }
 }
 
