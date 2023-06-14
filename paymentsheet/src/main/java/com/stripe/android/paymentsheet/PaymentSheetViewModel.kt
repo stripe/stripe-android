@@ -244,7 +244,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     paymentSelection = PaymentSelection.Link,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = isDecoupling,
-                    confirmationType = null, // TODO
+                    // TODO Revisit when integrating the new Link flow. Suspicion is that this will
+                    //  not actually be needed anymore then.
+                    confirmationType = null,
                 )
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
