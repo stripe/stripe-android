@@ -44,7 +44,7 @@ internal class CustomerSheetActivityTest {
 
     @Test
     fun `Finish with cancel on back press`() {
-        runActivityScenario { scenario, _ ->
+        runActivityScenario {
             composeTestRule.waitForIdle()
             pressBack()
             composeTestRule.waitForIdle()
@@ -61,7 +61,7 @@ internal class CustomerSheetActivityTest {
         runActivityScenario(
             viewState = createSelectPaymentMethodViewState(),
             result = InternalCustomerSheetResult.Canceled,
-        ) { scenario, activity ->
+        ) {
             composeTestRule.waitForIdle()
             activity.finish()
             assertThat(
@@ -81,7 +81,7 @@ internal class CustomerSheetActivityTest {
                 drawableResourceId = 123,
                 label = "test",
             ),
-        ) { scenario, activity ->
+        ) {
             composeTestRule.waitForIdle()
             activity.finish()
             assertThat(
@@ -99,7 +99,7 @@ internal class CustomerSheetActivityTest {
             result = InternalCustomerSheetResult.Error(
                 exception = Exception("test")
             ),
-        ) { scenario, activity ->
+        ) {
             composeTestRule.waitForIdle()
             activity.finish()
             assertThat(
@@ -116,7 +116,7 @@ internal class CustomerSheetActivityTest {
             viewState = createSelectPaymentMethodViewState(
                 title = null
             ),
-        ) { _, _ ->
+        ) {
             page.waitForText("Select your payment method")
         }
     }
@@ -129,7 +129,7 @@ internal class CustomerSheetActivityTest {
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 )
             ),
-        ) { _, _ ->
+        ) {
             page.waitForText("····4242")
         }
     }
@@ -140,7 +140,7 @@ internal class CustomerSheetActivityTest {
             viewState = createSelectPaymentMethodViewState(
                 showEditMenu = true
             ),
-        ) { _, _ ->
+        ) {
             page.waitForText("edit")
         }
     }
@@ -151,7 +151,7 @@ internal class CustomerSheetActivityTest {
             viewState = createSelectPaymentMethodViewState(
                 isGooglePayEnabled = true
             ),
-        ) { _, _ ->
+        ) {
             page.waitForText("google pay")
         }
     }
@@ -185,7 +185,7 @@ internal class CustomerSheetActivityTest {
         viewState: CustomerSheetViewState = CustomerSheetViewState.Loading,
         result: InternalCustomerSheetResult? = null,
         providePaymentMethodName: (PaymentMethodCode) -> String = { it },
-        block: (InjectableActivityScenario<CustomerSheetActivity>, CustomerSheetActivity) -> Unit,
+        testBlock: CustomerSheetTestData.() -> Unit,
     ) {
         activityScenario(
             viewState = viewState,
@@ -194,8 +194,15 @@ internal class CustomerSheetActivityTest {
         )
             .launchForResult(intent)
             .use { injectableActivityScenario ->
-                injectableActivityScenario.onActivity {
-                    block(injectableActivityScenario, it)
+                injectableActivityScenario.onActivity { activity ->
+                    with(
+                        CustomerSheetTestDataImpl(
+                            scenario = injectableActivityScenario,
+                            activity = activity
+                        )
+                    ) {
+                        testBlock()
+                    }
                 }
             }
     }
@@ -220,5 +227,15 @@ internal class CustomerSheetActivityTest {
             isEditing = isEditing,
             isGooglePayEnabled = isGooglePayEnabled,
         )
+    }
+
+    private class CustomerSheetTestDataImpl(
+        override val scenario: InjectableActivityScenario<CustomerSheetActivity>,
+        override val activity: CustomerSheetActivity
+    ) : CustomerSheetTestData
+
+    interface CustomerSheetTestData {
+        val scenario: InjectableActivityScenario<CustomerSheetActivity>
+        val activity: CustomerSheetActivity
     }
 }
