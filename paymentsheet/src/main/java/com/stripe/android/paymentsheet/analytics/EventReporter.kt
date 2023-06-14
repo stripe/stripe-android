@@ -56,8 +56,6 @@ internal interface EventReporter {
         isDecoupling: Boolean,
     )
 
-    fun onForceSuccess()
-
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom");

@@ -160,10 +160,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onForceSuccess() {
-        fireEvent(PaymentSheetEvent.ForceSuccess)
-    }
-
     private fun fireEvent(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(

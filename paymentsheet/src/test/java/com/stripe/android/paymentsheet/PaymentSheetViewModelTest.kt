@@ -72,7 +72,6 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
@@ -1311,8 +1310,7 @@ internal class PaymentSheetViewModelTest {
             val isForceSuccess = clientSecret == PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT
             fakeIntentConfirmationInterceptor.enqueueCompleteStep(isForceSuccess)
 
-            verify(eventReporter, verificationMode).onForceSuccess()
-            reset(eventReporter)
+            // TODO Wait for replacement
         }
     }
 
