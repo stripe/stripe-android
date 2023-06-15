@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Application
+import android.graphics.Color
 import android.text.SpannableString
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -32,7 +33,8 @@ class AutocompleteScreenTest {
     private val args = AddressElementActivityContract.Args(
         "publishableKey",
         AddressLauncher.Configuration(),
-        "injectorKey"
+        "injectorKey",
+        statusBarColor = Color.RED,
     )
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val eventReporter = FakeEventReporter()

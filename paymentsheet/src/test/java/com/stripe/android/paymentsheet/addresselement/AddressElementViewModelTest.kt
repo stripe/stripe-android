@@ -23,7 +23,8 @@ class AddressElementViewModelTest {
     private val defaultArgs = AddressElementActivityContract.Args(
         "publishableKey",
         AddressLauncherFixtures.BASIC_CONFIG,
-        INJECTOR_KEY
+        INJECTOR_KEY,
+        statusBarColor = null,
     )
 
     @Test

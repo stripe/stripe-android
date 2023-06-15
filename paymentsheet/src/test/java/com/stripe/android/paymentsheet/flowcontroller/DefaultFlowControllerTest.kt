@@ -178,7 +178,7 @@ internal class DefaultFlowControllerTest {
             )
         ).thenReturn(mock())
 
-        whenever(paymentLauncherAssistedFactory.create(any(), any(), any()))
+        whenever(paymentLauncherAssistedFactory.create(any(), any(), anyOrNull(), any()))
             .thenReturn(paymentLauncher)
 
         // set lifecycle to CREATED to trigger creation of payment launcher object within flowController.

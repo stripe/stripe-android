@@ -120,7 +120,7 @@ internal class PaymentSheetViewModelTest {
         on { authenticatorRegistry } doReturn mock()
     }
     private val paymentLauncherFactory = mock<StripePaymentLauncherAssistedFactory> {
-        on { create(any(), any(), any()) } doReturn paymentLauncher
+        on { create(any(), any(), anyOrNull(), any()) } doReturn paymentLauncher
     }
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 

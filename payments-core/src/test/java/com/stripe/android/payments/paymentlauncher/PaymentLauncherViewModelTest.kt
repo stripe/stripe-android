@@ -1,6 +1,7 @@
 package com.stripe.android.payments.paymentlauncher
 
 import android.app.Application
+import android.graphics.Color
 import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.Fragment
@@ -526,7 +527,8 @@ class PaymentLauncherViewModelTest {
                 TEST_STRIPE_ACCOUNT_ID,
                 false,
                 PRODUCT_USAGE,
-                mock<ConfirmPaymentIntentParams>()
+                mock<ConfirmPaymentIntentParams>(),
+                statusBarColor = Color.RED,
             )
         }
 
@@ -558,7 +560,8 @@ class PaymentLauncherViewModelTest {
                 TEST_STRIPE_ACCOUNT_ID,
                 false,
                 PRODUCT_USAGE,
-                mock<ConfirmPaymentIntentParams>()
+                mock<ConfirmPaymentIntentParams>(),
+                statusBarColor = Color.RED,
             )
         }
 

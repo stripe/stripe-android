@@ -29,7 +29,7 @@ class PaymentLauncherConfirmationActivityTest {
     private val testFactory = TestUtils.viewModelFactoryFor(viewModel)
 
     @Test
-    fun `statusBarColor is set on window`() {
+    fun `statusBarColor is set to transparent on window`() {
         val color = Color.CYAN
         mockViewModelActivityScenario().launch(
             Intent(
@@ -47,8 +47,8 @@ class PaymentLauncherConfirmationActivityTest {
                 ).toBundle()
             )
         ).use {
-            it.onActivity {
-                assertThat(it.window.statusBarColor).isEqualTo(color)
+            it.onActivity { activity ->
+                assertThat(activity.window.statusBarColor).isEqualTo(Color.TRANSPARENT)
             }
         }
     }
@@ -67,7 +67,8 @@ class PaymentLauncherConfirmationActivityTest {
                     TEST_STRIPE_ACCOUNT_ID,
                     false,
                     PRODUCT_USAGE,
-                    confirmStripeIntentParams
+                    confirmStripeIntentParams,
+                    statusBarColor = Color.RED,
                 ).toBundle()
             )
         ).use {
@@ -93,7 +94,8 @@ class PaymentLauncherConfirmationActivityTest {
                     TEST_STRIPE_ACCOUNT_ID,
                     false,
                     PRODUCT_USAGE,
-                    confirmStripeIntentParams
+                    confirmStripeIntentParams,
+                    statusBarColor = Color.RED,
                 ).toBundle()
             )
         ).use {
@@ -136,7 +138,8 @@ class PaymentLauncherConfirmationActivityTest {
                     TEST_STRIPE_ACCOUNT_ID,
                     false,
                     PRODUCT_USAGE,
-                    CLIENT_SECRET
+                    CLIENT_SECRET,
+                    statusBarColor = Color.RED,
                 ).toBundle()
             )
         ).use {
@@ -189,7 +192,8 @@ class PaymentLauncherConfirmationActivityTest {
                 TEST_STRIPE_ACCOUNT_ID,
                 false,
                 PRODUCT_USAGE,
-                CLIENT_SECRET
+                CLIENT_SECRET,
+                statusBarColor = Color.RED,
             )
     }
 }

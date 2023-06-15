@@ -79,7 +79,6 @@ import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
-import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
@@ -125,6 +124,7 @@ internal class PaymentSheetActivityTest {
     private val paymentLauncherFactory = PaymentLauncherFactory(
         context = context,
         hostActivityLauncher = mock(),
+        statusBarColor = { null },
     )
 
     private val paymentLauncher: StripePaymentLauncher by lazy {
@@ -134,7 +134,7 @@ internal class PaymentSheetActivityTest {
     }
 
     private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory> {
-        on { create(any(), any(), any()) } doReturn paymentLauncher
+        on { create(any(), any(), any(), any()) } doReturn paymentLauncher
     }
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
@@ -665,31 +665,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `sets expected statusBarColor`() {
-        val activityScenarioFactory = ActivityScenarioFactory(context)
-        val activityScenario = activityScenarioFactory.createAddPaymentMethodActivity()
-        activityScenario.moveToState(Lifecycle.State.CREATED)
-        activityScenario.onActivity { activity ->
-            activity.window.statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
-
-            val intent = contract.createIntent(
-                activity,
-                PaymentSheetContractV2.Args(
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                        clientSecret = "pi_1234_secret_9876",
-                    ),
-                    PaymentSheetFixtures.CONFIG_CUSTOMER
-                )
-            )
-
-            @Suppress("DEPRECATION")
-            val args = intent.extras?.get(PaymentSheetContractV2.EXTRA_ARGS) as PaymentSheetContractV2.Args
-            assertThat(args.statusBarColor)
-                .isEqualTo(PaymentSheetFixtures.STATUS_BAR_COLOR)
-        }
-    }
-
-    @Test
     fun `if fetched PaymentIntent is confirmed then should return Completed result`() {
         val scenario = activityScenario(
             createViewModel(
@@ -844,6 +819,7 @@ internal class PaymentSheetActivityTest {
                 merchantDisplayName = "Some name",
                 customer = invalidCustomerConfig,
             ),
+            statusBarColor = null,
         )
 
         val intent = contract.createIntent(context, args)
@@ -864,6 +840,7 @@ internal class PaymentSheetActivityTest {
         val args = PaymentSheetContractV2.Args(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(clientSecret = ""),
             config = null,
+            statusBarColor = null,
         )
 
         val intent = contract.createIntent(context, args)

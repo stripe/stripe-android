@@ -38,7 +38,9 @@ internal class CustomerSheetActivityTest {
     private val contract = CustomerSheetContract()
     private val intent = contract.createIntent(
         context = context,
-        input = CustomerSheetContract.Args
+        input = CustomerSheetContract.Args(
+            statusBarColor = null,
+        ),
     )
     private val page = CustomerSheetPage(composeTestRule)
 
