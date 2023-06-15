@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -358,11 +359,46 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When the payment configuration is live, isLiveMode should be true`() = runTest {
+        val viewModel = createViewModel(
+            paymentConfiguration = PaymentConfiguration(
+                publishableKey = "pk_live_123",
+                stripeAccountId = null,
+            )
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem().isLiveMode)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `When the payment configuration is test, isLiveMode should be false`() = runTest {
+        val viewModel = createViewModel(
+            paymentConfiguration = PaymentConfiguration(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            )
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem().isLiveMode)
+                .isFalse()
+        }
+    }
+
     private fun createViewModel(
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
-        lpmRepository: LpmRepository = this.lpmRepository
+        lpmRepository: LpmRepository = this.lpmRepository,
+        paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
+            publishableKey = "pk_test_123",
+            stripeAccountId = null,
+        )
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
+            paymentConfiguration = paymentConfiguration,
             resources = application.resources,
             customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,

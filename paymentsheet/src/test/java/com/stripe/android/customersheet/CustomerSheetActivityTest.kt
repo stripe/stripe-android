@@ -194,7 +194,9 @@ internal class CustomerSheetActivityTest {
     }
 
     private fun runActivityScenario(
-        viewState: CustomerSheetViewState = CustomerSheetViewState.Loading,
+        viewState: CustomerSheetViewState = CustomerSheetViewState.Loading(
+            isLiveMode = false,
+        ),
         result: InternalCustomerSheetResult? = null,
         providePaymentMethodName: (PaymentMethodCode) -> String = { it },
         testBlock: CustomerSheetTestData.() -> Unit,
