@@ -37,4 +37,14 @@ internal sealed class CustomerSheetViewState(
         isEditing = isEditing,
         screen = PaymentSheetScreen.SelectSavedPaymentMethods,
     )
+
+    data class AddCard(
+        override val isLiveMode: Boolean,
+        val cardNumber: String,
+    ) : CustomerSheetViewState(
+        isLiveMode = isLiveMode,
+        isProcessing = false,
+        isEditing = false,
+        screen = PaymentSheetScreen.AddAnotherPaymentMethod
+    )
 }

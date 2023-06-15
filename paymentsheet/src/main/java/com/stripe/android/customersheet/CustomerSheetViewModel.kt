@@ -29,6 +29,10 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private val isLiveMode = paymentConfiguration.publishableKey.contains("live")
 
+    private val _backstack = MutableStateFlow<List<CustomerSheetViewState>>(
+        value = emptyList()
+    )
+
     private val _viewState = MutableStateFlow<CustomerSheetViewState>(
         CustomerSheetViewState.Loading(
             isLiveMode = isLiveMode,
@@ -113,7 +117,13 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onAddCardPressed() {
-        TODO()
+        transition(
+            from = viewState.value,
+            to = CustomerSheetViewState.AddCard(
+                isLiveMode = isLiveMode,
+                cardNumber = ""
+            )
+        )
     }
 
     private fun onBackPressed() {
@@ -160,6 +170,31 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private fun onPrimaryButtonPressed() {
         TODO()
+    }
+
+    private fun transition(from: CustomerSheetViewState, to: CustomerSheetViewState) {
+        _backstack.update {
+            it + from
+        }
+        _viewState.update {
+            to
+        }
+    }
+
+    private fun popBackStack() {
+        if (_backstack.value.isEmpty()) {
+            _result.tryEmit(
+                InternalCustomerSheetResult.Canceled
+            )
+        } else {
+            val previous = _backstack.value.last()
+            _backstack.update {
+                it - previous
+            }
+            _viewState.update {
+                previous
+            }
+        }
     }
 
     override fun onCleared() {
