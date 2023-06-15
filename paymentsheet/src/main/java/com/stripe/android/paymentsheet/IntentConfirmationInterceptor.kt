@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
-import androidx.annotation.RestrictTo
 import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.R
 import com.stripe.android.core.exception.APIException
@@ -22,23 +21,43 @@ import javax.inject.Named
 
 internal interface IntentConfirmationInterceptor {
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface NextStep {
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+
         data class Fail(
             val cause: Throwable,
             val message: String,
-        ) : NextStep
+        ) : NextStep {
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Confirm(val confirmParams: ConfirmStripeIntentParams) : NextStep
+            override val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+                get() = null
+        }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class HandleNextAction(val clientSecret: String) : NextStep
+        data class Confirm(
+            val confirmParams: ConfirmStripeIntentParams,
+            val isDeferred: Boolean,
+        ) : NextStep {
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Complete(val isForceSuccess: Boolean) : NextStep
+            override val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+                get() = DeferredIntentConfirmationType.Client.takeIf { isDeferred }
+        }
+
+        data class HandleNextAction(val clientSecret: String) : NextStep {
+
+            override val deferredIntentConfirmationType: DeferredIntentConfirmationType
+                get() = DeferredIntentConfirmationType.Server
+        }
+
+        data class Complete(val isForceSuccess: Boolean) : NextStep {
+
+            override val deferredIntentConfirmationType: DeferredIntentConfirmationType
+                get() = if (isForceSuccess) {
+                    DeferredIntentConfirmationType.None
+                } else {
+                    DeferredIntentConfirmationType.Server
+                }
+        }
     }
 
     suspend fun intercept(
@@ -55,12 +74,17 @@ internal interface IntentConfirmationInterceptor {
         setupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
     ): NextStep
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         var createIntentCallback: AbsCreateIntentCallback? = null
 
         const val COMPLETE_WITHOUT_CONFIRMING_INTENT = "COMPLETE_WITHOUT_CONFIRMING_INTENT"
     }
+}
+
+internal enum class DeferredIntentConfirmationType(val value: String) {
+    Client("client"),
+    Server("server"),
+    None("none");
 }
 
 @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
@@ -136,6 +160,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     clientSecret = initializationMode.clientSecret,
                     shippingValues = shippingValues,
                     paymentMethod = paymentMethod,
+                    isDeferred = false,
                 )
             }
             is PaymentSheet.InitializationMode.SetupIntent -> {
@@ -143,6 +168,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     clientSecret = initializationMode.clientSecret,
                     shippingValues = shippingValues,
                     paymentMethod = paymentMethod,
+                    isDeferred = false,
                 )
             }
         }
@@ -184,7 +210,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): NextStep {
         return when (val callback = IntentConfirmationInterceptor.createIntentCallback) {
             is CreateIntentCallback -> {
-                handleIntentCreationFromPaymentMethod(
+                handleDeferredIntentCreationFromPaymentMethod(
                     createIntentCallback = callback,
                     intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
@@ -212,7 +238,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         }
     }
 
-    private suspend fun handleIntentCreationFromPaymentMethod(
+    private suspend fun handleDeferredIntentCreationFromPaymentMethod(
         createIntentCallback: CreateIntentCallback,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
@@ -229,7 +255,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
                     NextStep.Complete(isForceSuccess = true)
                 } else {
-                    handleIntentCreationSuccess(
+                    handleDeferredIntentCreationSuccess(
                         clientSecret = result.clientSecret,
                         intentConfiguration = intentConfiguration,
                         paymentMethod = paymentMethod,
@@ -246,7 +272,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         }
     }
 
-    private suspend fun handleIntentCreationSuccess(
+    private suspend fun handleDeferredIntentCreationSuccess(
         clientSecret: String,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
@@ -259,7 +285,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 NextStep.HandleNextAction(clientSecret)
             } else {
                 DeferredIntentValidator.validate(intent, intentConfiguration, isFlowController)
-                createConfirmStep(clientSecret, shippingValues, paymentMethod)
+                createConfirmStep(clientSecret, shippingValues, paymentMethod, isDeferred = true)
             }
         }.getOrElse { error ->
             NextStep.Fail(
@@ -282,6 +308,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         clientSecret: String,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         paymentMethod: PaymentMethod,
+        isDeferred: Boolean,
     ): NextStep.Confirm {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
@@ -289,7 +316,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         )
 
         val confirmParams = factory.create(paymentMethod)
-        return NextStep.Confirm(confirmParams)
+        return NextStep.Confirm(
+            confirmParams = confirmParams,
+            isDeferred = isDeferred,
+        )
     }
 
     private fun createConfirmStep(
@@ -303,6 +333,9 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             shipping = shippingValues,
         )
         val confirmParams = paramsFactory.create(paymentMethodCreateParams, setupForFutureUsage)
-        return NextStep.Confirm(confirmParams)
+        return NextStep.Confirm(
+            confirmParams = confirmParams,
+            isDeferred = false,
+        )
     }
 }

@@ -40,6 +40,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
@@ -75,7 +76,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -86,7 +86,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
@@ -211,7 +210,7 @@ internal class DefaultFlowControllerTest {
             .onPaymentSuccess(
                 paymentSelection = isA<PaymentSelection.New>(),
                 currency = eq("usd"),
-                isDecoupling = eq(false),
+                deferredIntentConfirmationType = isNull(),
             )
     }
 
@@ -1141,30 +1140,113 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `Sends correct analytics event based on force-success usage`() = runTest {
         val clientSecrets = listOf(
-            PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT to times(1),
-            "real_client_secret" to never(),
+            PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT to DeferredIntentConfirmationType.None,
+            "real_client_secret" to DeferredIntentConfirmationType.Server,
         )
 
-        for ((clientSecret, verificationMode) in clientSecrets) {
+        for ((clientSecret, deferredIntentConfirmationType) in clientSecrets) {
             IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
                 CreateIntentResult.Success(clientSecret)
             }
 
             val flowController = createAndConfigureFlowControllerForDeferredIntent()
+            val savedSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
             flowController.onPaymentOptionResult(
-                PaymentOptionResult.Succeeded(
-                    PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                )
+                PaymentOptionResult.Succeeded(savedSelection)
             )
             flowController.confirm()
 
             val isForceSuccess = clientSecret == PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT
             fakeIntentConfirmationInterceptor.enqueueCompleteStep(isForceSuccess)
 
-            verify(eventReporter, verificationMode).onForceSuccess()
-            reset(eventReporter)
+            verify(eventReporter).onPaymentSuccess(
+                paymentSelection = eq(savedSelection),
+                currency = anyOrNull(),
+                deferredIntentConfirmationType = eq(deferredIntentConfirmationType),
+            )
         }
+    }
+
+    @Test
+    fun `Sends no deferred_intent_confirmation_type for non-deferred intent confirmation`() = runTest {
+        val flowController = createFlowController().apply {
+            configureExpectingSuccess()
+        }
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val savedSelection = PaymentSelection.Saved(paymentMethod)
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(savedSelection)
+        )
+        flowController.confirm()
+
+        val confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
+            paymentMethodId = paymentMethod.id!!,
+            clientSecret = "pi_123_secret_456",
+        )
+
+        fakeIntentConfirmationInterceptor.enqueueConfirmStep(confirmParams)
+        flowController.onPaymentResult(PaymentResult.Completed)
+
+        verify(eventReporter).onPaymentSuccess(
+            paymentSelection = eq(savedSelection),
+            currency = anyOrNull(),
+            deferredIntentConfirmationType = isNull(),
+        )
+    }
+
+    @Test
+    fun `Sends correct deferred_intent_confirmation_type for client-side confirmation of deferred intent`() = runTest {
+        val flowController = createAndConfigureFlowControllerForDeferredIntent()
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val savedSelection = PaymentSelection.Saved(paymentMethod)
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(savedSelection)
+        )
+        flowController.confirm()
+
+        val confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
+            paymentMethodId = paymentMethod.id!!,
+            clientSecret = "pi_123_secret_456",
+        )
+
+        fakeIntentConfirmationInterceptor.enqueueConfirmStep(
+            confirmParams = confirmParams,
+            isDeferred = true,
+        )
+        flowController.onPaymentResult(PaymentResult.Completed)
+
+        verify(eventReporter).onPaymentSuccess(
+            paymentSelection = eq(savedSelection),
+            currency = anyOrNull(),
+            deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
+        )
+    }
+
+    @Test
+    fun `Sends correct deferred_intent_confirmation_type for server-side confirmation of deferred intent`() = runTest {
+        val flowController = createAndConfigureFlowControllerForDeferredIntent()
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val savedSelection = PaymentSelection.Saved(paymentMethod)
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(savedSelection)
+        )
+        flowController.confirm()
+
+        fakeIntentConfirmationInterceptor.enqueueNextActionStep("pi_123_secret_456")
+        flowController.onPaymentResult(PaymentResult.Completed)
+
+        verify(eventReporter).onPaymentSuccess(
+            paymentSelection = eq(savedSelection),
+            currency = anyOrNull(),
+            deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
+        )
     }
 
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)

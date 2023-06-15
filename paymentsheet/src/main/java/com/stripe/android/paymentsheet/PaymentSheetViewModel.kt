@@ -152,6 +152,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
 
+    private var deferredIntentConfirmationType: DeferredIntentConfirmationType? = null
+
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
         args.googlePayConfig?.let { config ->
@@ -244,7 +246,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 eventReporter.onPaymentSuccess(
                     paymentSelection = PaymentSelection.Link,
                     currency = stripeIntent.value?.currency,
-                    isDecoupling = isDecoupling,
+                    // TODO Revisit when integrating the new Link flow. Suspicion is that this will
+                    //  not actually be needed anymore then.
+                    deferredIntentConfirmationType = null,
                 )
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
@@ -479,6 +483,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 shippingValues = args.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
             )
 
+            deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
+
             when (nextStep) {
                 is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
                     handleNextAction(
@@ -493,9 +499,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     onError(nextStep.message)
                 }
                 is IntentConfirmationInterceptor.NextStep.Complete -> {
-                    if (nextStep.isForceSuccess) {
-                        eventReporter.onForceSuccess()
-                    }
                     processPayment(stripeIntent, PaymentResult.Completed)
                 }
             }
@@ -521,8 +524,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 eventReporter.onPaymentSuccess(
                     paymentSelection = selection.value,
                     currency = stripeIntent.currency,
-                    isDecoupling = isDecoupling,
+                    deferredIntentConfirmationType = deferredIntentConfirmationType,
                 )
+
+                // Reset after sending event
+                deferredIntentConfirmationType = null
 
                 // Default future payments to the selected payment method. New payment methods won't
                 // be the default because we don't know if the user selected save for future use.
