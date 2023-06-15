@@ -1,6 +1,8 @@
 package com.stripe.android.customersheet.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,40 +20,72 @@ import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.ui.core.elements.H4Text
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 internal fun CustomerSheetScreen(
     viewState: CustomerSheetViewState,
+    modifier: Modifier = Modifier,
     viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
     paymentMethodNameProvider: (PaymentMethodCode?) -> String,
 ) {
-    when (viewState) {
-        is CustomerSheetViewState.Loading -> {
-            Loading()
-        }
-        is CustomerSheetViewState.SelectPaymentMethod -> {
-            SelectPaymentMethod(
-                viewState = viewState,
-                viewActionHandler = viewActionHandler,
-                paymentMethodNameProvider = paymentMethodNameProvider,
+    val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
+    val showEditMenu = (viewState as? CustomerSheetViewState.SelectPaymentMethod)?.showEditMenu == true
+
+    PaymentSheetScaffold(
+        topBar = {
+            PaymentSheetTopBar(
+                screen = viewState.screen,
+                showEditMenu = showEditMenu,
+                isLiveMode = viewState.isLiveMode,
+                isProcessing = viewState.isProcessing,
+                isEditing = viewState.isEditing,
+                handleBackPressed = {
+                    viewActionHandler(
+                        CustomerSheetViewAction.OnBackPressed
+                    )
+                },
+                toggleEditing = {
+                    viewActionHandler(CustomerSheetViewAction.OnEditPressed)
+                },
             )
-        }
-    }
+        },
+        content = {
+            AnimatedContent(
+                targetState = viewState
+            ) { targetState ->
+                when (targetState) {
+                    is CustomerSheetViewState.Loading -> {
+                        Loading()
+                    }
+                    is CustomerSheetViewState.SelectPaymentMethod -> {
+                        SelectPaymentMethod(
+                            viewState = targetState,
+                            viewActionHandler = viewActionHandler,
+                            paymentMethodNameProvider = paymentMethodNameProvider,
+                        )
+                    }
+                }
+            }
+        },
+        modifier = modifier.padding(bottom = bottomPadding)
+    )
 }
 
 @Composable
-internal fun Loading() {
+internal fun Loading(
+    modifier: Modifier = Modifier,
+) {
     val padding = dimensionResource(
         R.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(padding),
         contentAlignment = Alignment.Center,
@@ -65,45 +99,13 @@ internal fun SelectPaymentMethod(
     viewState: CustomerSheetViewState.SelectPaymentMethod,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
     paymentMethodNameProvider: (PaymentMethodCode?) -> String,
-) {
-    val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
-
-    PaymentSheetScaffold(
-        topBar = {
-            PaymentSheetTopBar(
-                screen = PaymentSheetScreen.SelectSavedPaymentMethods,
-                showEditMenu = viewState.showEditMenu,
-                isLiveMode = viewState.isLiveMode,
-                isProcessing = viewState.isProcessing,
-                isEditing = viewState.isEditing,
-                handleBackPressed = {
-                    viewActionHandler(CustomerSheetViewAction.OnBackPressed)
-                },
-                toggleEditing = {
-                    viewActionHandler(CustomerSheetViewAction.OnEditPressed)
-                },
-            )
-        },
-        content = {
-            SelectPaymentMethodContent(
-                viewState = viewState,
-                viewActionHandler = viewActionHandler,
-                paymentMethodNameProvider = paymentMethodNameProvider,
-            )
-        },
-        modifier = Modifier.padding(bottom = bottomPadding)
-    )
-}
-
-@Composable
-internal fun SelectPaymentMethodContent(
-    viewState: CustomerSheetViewState.SelectPaymentMethod,
-    viewActionHandler: (CustomerSheetViewAction) -> Unit,
-    paymentMethodNameProvider: (PaymentMethodCode?) -> String,
+    modifier: Modifier = Modifier,
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    Column {
+    Column(
+        modifier = modifier
+    ) {
         H4Text(
             text = viewState.title ?: stringResource(
                 R.string.stripe_paymentsheet_select_payment_method

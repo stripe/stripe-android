@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.injection.CustomerSessionScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -19,13 +20,20 @@ import javax.inject.Inject
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
 internal class CustomerSheetViewModel @Inject constructor(
+    paymentConfiguration: PaymentConfiguration,
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
     private val customerAdapter: CustomerAdapter,
     private val lpmRepository: LpmRepository,
 ) : ViewModel() {
 
-    private val _viewState = MutableStateFlow<CustomerSheetViewState>(CustomerSheetViewState.Loading)
+    private val isLiveMode = paymentConfiguration.publishableKey.contains("live")
+
+    private val _viewState = MutableStateFlow<CustomerSheetViewState>(
+        CustomerSheetViewState.Loading(
+            isLiveMode = isLiveMode,
+        )
+    )
     val viewState: StateFlow<CustomerSheetViewState> = _viewState
 
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
@@ -88,7 +96,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     savedPaymentMethods = savedPaymentMethods,
                     paymentSelection = paymentSelection,
                     showEditMenu = savedPaymentMethods.isNotEmpty(),
-                    isLiveMode = false,
+                    isLiveMode = isLiveMode,
                     isProcessing = false,
                     isEditing = false,
                     isGooglePayEnabled = configuration.googlePayEnabled,
