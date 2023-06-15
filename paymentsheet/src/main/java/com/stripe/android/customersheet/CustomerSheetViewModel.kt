@@ -124,6 +124,8 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onItemSelected(paymentSelection: PaymentSelection?) {
+        // TODO consider clearing the error message onItemSelected, currently the only error source
+        // is when the payment methods cannot be loaded
         when (paymentSelection) {
             is PaymentSelection.GooglePay, is PaymentSelection.Saved -> {
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
@@ -132,7 +134,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                         primaryButtonLabel = resources.getString(
                             com.stripe.android.ui.core.R.string.stripe_continue_button_label
                         ),
-                        primaryButtonEnabled = true
+                        primaryButtonEnabled = true,
                     )
                 }
             }
@@ -141,7 +143,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     it.copy(
                         paymentSelection = null,
                         primaryButtonLabel = null,
-                        primaryButtonEnabled = false
+                        primaryButtonEnabled = false,
                     )
                 }
             }
