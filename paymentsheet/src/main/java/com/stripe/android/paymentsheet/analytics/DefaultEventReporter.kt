@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
@@ -99,7 +100,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection?,
         currency: String?,
-        isDecoupling: Boolean,
+        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) {
         // Google Pay is treated as a saved payment method after confirmation, so we need to
         // "reset" to PaymentSelection.GooglePay for accurate reporting
@@ -118,7 +119,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                 durationMillis = durationMillisFrom(paymentSheetShownMillis),
                 result = PaymentSheetEvent.Payment.Result.Success,
                 currency = currency,
-                isDecoupled = isDecoupling,
+                isDecoupled = deferredIntentConfirmationType != null,
+                deferredIntentConfirmationType = deferredIntentConfirmationType,
             )
         )
     }
@@ -136,6 +138,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 result = PaymentSheetEvent.Payment.Result.Failure,
                 currency = currency,
                 isDecoupled = isDecoupling,
+                deferredIntentConfirmationType = null,
             )
         )
     }

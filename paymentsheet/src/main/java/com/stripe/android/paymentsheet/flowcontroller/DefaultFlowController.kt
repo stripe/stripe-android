@@ -304,6 +304,8 @@ internal class DefaultFlowController @Inject internal constructor(
                 shippingValues = state.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
             )
 
+            viewModel.deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
+
             when (nextStep) {
                 is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
                     handleNextAction(
@@ -475,8 +477,9 @@ internal class DefaultFlowController @Inject internal constructor(
                 eventReporter.onPaymentSuccess(
                     paymentSelection = viewModel.paymentSelection,
                     currency = viewModel.state?.stripeIntent?.currency,
-                    isDecoupling = isDecoupling,
+                    deferredIntentConfirmationType = viewModel.deferredIntentConfirmationType,
                 )
+                viewModel.deferredIntentConfirmationType = null
             }
             is PaymentResult.Failed -> {
                 eventReporter.onPaymentFailure(

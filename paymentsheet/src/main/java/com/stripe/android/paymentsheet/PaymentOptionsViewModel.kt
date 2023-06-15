@@ -149,7 +149,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 eventReporter.onPaymentSuccess(
                     paymentSelection = PaymentSelection.Link,
                     currency = stripeIntent.value?.currency,
-                    isDecoupling = isDecoupling,
+                    // TODO Revisit when integrating the new Link flow. Suspicion is that this will
+                    //  not actually be needed anymore then.
+                    deferredIntentConfirmationType = null,
                 )
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 onPaymentResult(PaymentResult.Completed)

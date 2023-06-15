@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
+import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
@@ -38,7 +39,7 @@ internal interface EventReporter {
     fun onPaymentSuccess(
         paymentSelection: PaymentSelection?,
         currency: String?,
-        isDecoupling: Boolean,
+        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     )
 
     fun onPaymentFailure(
