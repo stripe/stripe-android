@@ -24,28 +24,20 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
-import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.getLabel
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -62,9 +54,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
-import org.mockito.kotlin.whenever
 import org.robolectric.annotation.Config
-import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
@@ -82,7 +72,6 @@ internal class PaymentOptionsActivityTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
-    private lateinit var injector: NonFallbackInjector
 
     private val StripeActivityPaymentOptionsBinding.continueButton: PrimaryButton
         get() = root.findViewById(R.id.primary_button)
@@ -348,7 +337,6 @@ internal class PaymentOptionsActivityTest {
                 onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
             },
         ) { linkHandler, linkInteractor, savedStateHandle ->
-            registerFormViewModelInjector(lpmRepository)
             PaymentOptionsViewModel(
                 args = args,
                 prefsRepositoryFactory = { FakePrefsRepository() },
@@ -361,9 +349,8 @@ internal class PaymentOptionsActivityTest {
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
-            ).also {
-                it.injector = injector
-            }
+                formViewModelSubComponentBuilderProvider = mock(),
+            )
         }
 
         val scenario = injectableActivityScenario<PaymentOptionsActivity> {
@@ -373,42 +360,5 @@ internal class PaymentOptionsActivityTest {
         }
 
         scenario.launchForResult(intent).use(block)
-    }
-
-    private fun registerFormViewModelInjector(
-        lpmRepository: LpmRepository,
-    ) {
-        val formViewModel = FormViewModel(
-            context = context,
-            formArguments = FormArguments(
-                PaymentMethod.Type.Card.code,
-                showCheckbox = true,
-                showCheckboxControlledFields = true,
-                merchantName = "Merchant, Inc.",
-                amount = Amount(50, "USD"),
-                initialPaymentMethodCreateParams = null
-            ),
-            lpmRepository = lpmRepository,
-            addressRepository = AddressRepository(context.resources, Dispatchers.Unconfined),
-            showCheckboxFlow = mock()
-        )
-
-        val mockFormBuilder = mock<FormViewModelSubcomponent.Builder>()
-        val mockFormSubcomponent = mock<FormViewModelSubcomponent>()
-        val mockFormSubComponentBuilderProvider =
-            mock<Provider<FormViewModelSubcomponent.Builder>>()
-        whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
-        whenever(mockFormBuilder.formArguments(any())).thenReturn(mockFormBuilder)
-        whenever(mockFormBuilder.showCheckboxFlow(any())).thenReturn(mockFormBuilder)
-        whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
-        whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
-
-        injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*>) {
-                (injectable as? FormViewModel.Factory)?.let {
-                    injectable.subComponentBuilderProvider = mockFormSubComponentBuilderProvider
-                }
-            }
-        }
     }
 }

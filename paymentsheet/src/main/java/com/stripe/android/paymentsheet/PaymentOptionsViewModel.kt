@@ -12,13 +12,13 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.currency
@@ -57,6 +57,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
 ) : BaseSheetViewModel(
     application = application,
     config = args.state.config,
@@ -70,6 +71,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkHandler = linkHandler,
     linkConfigurationCoordinator = linkConfigurationCoordinator,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
+    formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -336,7 +338,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val savedStateHandle = extras.createSavedStateHandle()
             val starterArgs = starterArgsSupplier()
 
-            val injector = injectWithFallback(
+            injectWithFallback(
                 starterArgs.injectorKey,
                 FallbackInitializeParam(application, starterArgs.productUsage)
             )
@@ -347,9 +349,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 .savedStateHandle(savedStateHandle)
                 .build()
 
-            val viewModel = subcomponent.viewModel
-            viewModel.injector = requireNotNull(injector as NonFallbackInjector)
-            return viewModel as T
+            return subcomponent.viewModel as T
         }
 
         override fun fallbackInitialize(arg: FallbackInitializeParam): Injector {
