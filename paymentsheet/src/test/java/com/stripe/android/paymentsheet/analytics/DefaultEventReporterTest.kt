@@ -112,7 +112,7 @@ class DefaultEventReporterTest {
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             currency = "usd",
-            isDecoupling = false,
+            deferredIntentConfirmationType = null,
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
@@ -143,7 +143,7 @@ class DefaultEventReporterTest {
                 isGooglePay = true,
             ),
             currency = "usd",
-            isDecoupling = false,
+            deferredIntentConfirmationType = null,
         )
 
         verify(analyticsRequestExecutor).executeAsync(

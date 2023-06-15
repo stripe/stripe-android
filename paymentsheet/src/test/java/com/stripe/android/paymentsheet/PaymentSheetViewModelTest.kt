@@ -64,13 +64,12 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.Mockito.never
-import org.mockito.Mockito.times
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -426,7 +425,7 @@ internal class PaymentSheetViewModelTest {
                 .onPaymentSuccess(
                     paymentSelection = selection,
                     currency = "usd",
-                    isDecoupling = false,
+                    deferredIntentConfirmationType = null,
                 )
             assertThat(prefsRepository.paymentSelectionArgs)
                 .containsExactly(selection)
@@ -475,7 +474,7 @@ internal class PaymentSheetViewModelTest {
                 .onPaymentSuccess(
                     paymentSelection = selection,
                     currency = "usd",
-                    isDecoupling = false,
+                    deferredIntentConfirmationType = null,
                 )
 
             assertThat(prefsRepository.paymentSelectionArgs).isEmpty()
@@ -1292,11 +1291,11 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Sends correct analytics event based on force-success usage`() = runTest {
         val clientSecrets = listOf(
-            PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT to times(1),
-            "real_client_secret" to never(),
+            PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT to DeferredIntentConfirmationType.None,
+            "real_client_secret" to DeferredIntentConfirmationType.Server,
         )
 
-        for ((clientSecret, verificationMode) in clientSecrets) {
+        for ((clientSecret, deferredIntentConfirmationType) in clientSecrets) {
             IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
                 CreateIntentResult.Success(clientSecret)
             }
@@ -1310,7 +1309,11 @@ internal class PaymentSheetViewModelTest {
             val isForceSuccess = clientSecret == PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT
             fakeIntentConfirmationInterceptor.enqueueCompleteStep(isForceSuccess)
 
-            // TODO Wait for replacement
+            verify(eventReporter).onPaymentSuccess(
+                paymentSelection = eq(savedSelection),
+                currency = anyOrNull(),
+                deferredIntentConfirmationType = eq(deferredIntentConfirmationType),
+            )
         }
     }
 
@@ -1323,6 +1326,79 @@ internal class PaymentSheetViewModelTest {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
         verify(paymentLauncher.authenticatorRegistry).unregisterAuthenticator(any())
+    }
+
+    @Test
+    fun `Sends no deferred_intent_confirmation_type for non-deferred intent confirmation`() = runTest {
+        val viewModel = createViewModel()
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val savedSelection = PaymentSelection.Saved(paymentMethod)
+
+        viewModel.updateSelection(savedSelection)
+        viewModel.checkout()
+
+        val confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
+            paymentMethodId = paymentMethod.id!!,
+            clientSecret = "pi_123_secret_456",
+        )
+
+        fakeIntentConfirmationInterceptor.enqueueConfirmStep(confirmParams)
+        viewModel.onPaymentResult(PaymentResult.Completed)
+
+        verify(eventReporter).onPaymentSuccess(
+            paymentSelection = eq(savedSelection),
+            currency = anyOrNull(),
+            deferredIntentConfirmationType = isNull(),
+        )
+    }
+
+    @Test
+    fun `Sends correct deferred_intent_confirmation_type for client-side confirmation of deferred intent`() = runTest {
+        val viewModel = createViewModelForDeferredIntent()
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val savedSelection = PaymentSelection.Saved(paymentMethod)
+
+        viewModel.updateSelection(savedSelection)
+        viewModel.checkout()
+
+        val confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
+            paymentMethodId = paymentMethod.id!!,
+            clientSecret = "pi_123_secret_456",
+        )
+
+        fakeIntentConfirmationInterceptor.enqueueConfirmStep(
+            confirmParams = confirmParams,
+            isDeferred = true,
+        )
+        viewModel.onPaymentResult(PaymentResult.Completed)
+
+        verify(eventReporter).onPaymentSuccess(
+            paymentSelection = eq(savedSelection),
+            currency = anyOrNull(),
+            deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
+        )
+    }
+
+    @Test
+    fun `Sends correct deferred_intent_confirmation_type for server-side confirmation of deferred intent`() = runTest {
+        val viewModel = createViewModelForDeferredIntent()
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val savedSelection = PaymentSelection.Saved(paymentMethod)
+
+        viewModel.updateSelection(savedSelection)
+        viewModel.checkout()
+
+        fakeIntentConfirmationInterceptor.enqueueNextActionStep("pi_123_secret_456")
+        viewModel.onPaymentResult(PaymentResult.Completed)
+
+        verify(eventReporter).onPaymentSuccess(
+            paymentSelection = eq(savedSelection),
+            currency = anyOrNull(),
+            deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
+        )
     }
 
     private fun createViewModel(

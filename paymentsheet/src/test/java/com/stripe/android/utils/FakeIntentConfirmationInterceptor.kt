@@ -12,8 +12,14 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
 
     private val channel = Channel<IntentConfirmationInterceptor.NextStep>(capacity = 1)
 
-    fun enqueueConfirmStep(confirmParams: ConfirmStripeIntentParams) {
-        val nextStep = IntentConfirmationInterceptor.NextStep.Confirm(confirmParams)
+    fun enqueueConfirmStep(
+        confirmParams: ConfirmStripeIntentParams,
+        isDeferred: Boolean = false,
+    ) {
+        val nextStep = IntentConfirmationInterceptor.NextStep.Confirm(
+            confirmParams = confirmParams,
+            isDeferred = isDeferred,
+        )
         channel.trySend(nextStep)
     }
 

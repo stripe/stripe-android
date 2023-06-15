@@ -62,6 +62,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDecoupled = false,
+            deferredIntentConfirmationType = null,
         )
         assertThat(
             newPMEvent.eventName
@@ -89,6 +90,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDecoupled = false,
+            deferredIntentConfirmationType = null,
         )
         assertThat(
             savedPMEvent.eventName
@@ -116,6 +118,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDecoupled = false,
+            deferredIntentConfirmationType = null,
         )
         assertThat(
             googlePayEvent.eventName
@@ -143,6 +146,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDecoupled = false,
+            deferredIntentConfirmationType = null,
         )
         assertThat(
             linkEvent.eventName
@@ -176,6 +180,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDecoupled = false,
+            deferredIntentConfirmationType = null,
         )
         assertThat(
             inlineLinkEvent.eventName
@@ -207,6 +212,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Failure,
             currency = "usd",
             isDecoupled = false,
+            deferredIntentConfirmationType = null,
         )
         assertThat(
             newPMEvent.eventName
@@ -234,6 +240,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Failure,
             currency = "usd",
             isDecoupled = false,
+            deferredIntentConfirmationType = null,
         )
         assertThat(
             savedPMEvent.eventName
@@ -261,6 +268,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Failure,
             currency = "usd",
             isDecoupled = false,
+            deferredIntentConfirmationType = null,
         )
         assertThat(
             googlePayEvent.eventName
@@ -288,6 +296,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Failure,
             currency = "usd",
             isDecoupled = false,
+            deferredIntentConfirmationType = null,
         )
         assertThat(
             linkEvent.eventName
@@ -321,6 +330,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Failure,
             currency = "usd",
             isDecoupled = false,
+            deferredIntentConfirmationType = null,
         )
         assertThat(
             inlineLinkEvent.eventName
