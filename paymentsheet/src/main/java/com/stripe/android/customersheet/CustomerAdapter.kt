@@ -7,11 +7,11 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.SavedSelection
 
 /**
- * [CustomerAdapter] A bridge to your backend to fetch Customer-related information. Typically,
+ * A bridge to your backend to fetch customer-related information. Typically,
  * you will not need to implement this interface yourself. You should instead use
- * [CustomerAdaper.create], which manages retrieving and updating a Stripe customer for you.
+ * [CustomerAdapter.create], which manages retrieving and updating a Stripe customer for you.
  *
- * The methods in this interface should act on a Stripe [Customer] object.
+ * The methods in this interface should act on a Stripe `Customer` object.
  *
  * Implement this interface if you would prefer retrieving and updating your Stripe customer object
  * via your own backend instead of using the default implementation.
