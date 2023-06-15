@@ -123,9 +123,31 @@ internal class CustomerSheetViewModel @Inject constructor(
         TODO()
     }
 
-    @Suppress("UNUSED_PARAMETER")
     private fun onItemSelected(paymentSelection: PaymentSelection?) {
-        TODO()
+        // TODO consider clearing the error message onItemSelected, currently the only error source
+        // is when the payment methods cannot be loaded
+        when (paymentSelection) {
+            is PaymentSelection.GooglePay, is PaymentSelection.Saved -> {
+                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                    it.copy(
+                        paymentSelection = paymentSelection,
+                        primaryButtonLabel = resources.getString(
+                            com.stripe.android.ui.core.R.string.stripe_continue_button_label
+                        ),
+                        primaryButtonEnabled = true,
+                    )
+                }
+            }
+            else -> {
+                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                    it.copy(
+                        paymentSelection = null,
+                        primaryButtonLabel = null,
+                        primaryButtonEnabled = false,
+                    )
+                }
+            }
+        }
     }
 
     private fun onPrimaryButtonPressed() {

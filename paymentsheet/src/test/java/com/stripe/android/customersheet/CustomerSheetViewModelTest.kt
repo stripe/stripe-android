@@ -232,6 +232,132 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When OnItemSelected with payment method, primary button label should not be null`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                ),
+                selectedPaymentOption = Result.success(null)
+            )
+        )
+        viewModel.viewState.test {
+            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonLabel)
+                .isNull()
+            assertThat(viewState.primaryButtonEnabled)
+                .isFalse()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    selection = PaymentSelection.Saved(
+                        paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                )
+            )
+
+            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+
+            assertThat(viewState.primaryButtonLabel)
+                .isNotNull()
+            assertThat(viewState.primaryButtonEnabled)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `When OnItemSelected with Google Pay, primary button label should not be null`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                ),
+                selectedPaymentOption = Result.success(null)
+            )
+        )
+        viewModel.viewState.test {
+            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.primaryButtonLabel)
+                .isNull()
+            assertThat(viewState.primaryButtonEnabled)
+                .isFalse()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    selection = PaymentSelection.GooglePay
+                )
+            )
+
+            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+
+            assertThat(viewState.primaryButtonLabel)
+                .isNotNull()
+            assertThat(viewState.primaryButtonEnabled)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `When OnItemSelected with Link, primary button label should be null`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                ),
+                selectedPaymentOption = Result.success(null)
+            )
+        )
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    selection = PaymentSelection.Link
+                )
+            )
+
+            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+
+            assertThat(viewState.primaryButtonLabel)
+                .isNull()
+            assertThat(viewState.primaryButtonEnabled)
+                .isFalse()
+        }
+    }
+
+    @Test
+    fun `When OnItemSelected with null, primary button label should be null`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                ),
+                selectedPaymentOption = Result.success(null)
+            )
+        )
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    selection = null
+                )
+            )
+
+            val viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+
+            assertThat(viewState.primaryButtonLabel)
+                .isNull()
+            assertThat(viewState.primaryButtonEnabled)
+                .isFalse()
+        }
+    }
+
     private fun createViewModel(
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         lpmRepository: LpmRepository = this.lpmRepository
