@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.injection
 
+import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
@@ -14,6 +15,10 @@ internal interface CustomerSheetComponent {
 
     @Subcomponent.Builder
     interface Builder {
+
+        @BindsInstance
+        fun activity(activity: ComponentActivity): Builder
+
         @BindsInstance
         fun activityResultCaller(activityResultCaller: ActivityResultCaller): Builder
 

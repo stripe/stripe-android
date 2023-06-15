@@ -15,8 +15,7 @@ internal class PaymentOptionContract :
         context: Context,
         input: Args
     ): Intent {
-        return Intent(context, PaymentOptionsActivity::class.java)
-            .putExtra(EXTRA_ARGS, input)
+        return Intent(context, PaymentOptionsActivity::class.java).putExtra(EXTRA_ARGS, input)
     }
 
     override fun parseResult(

@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -8,10 +9,12 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.customersheet.ui.CustomerBottomSheet
@@ -39,6 +42,9 @@ internal class CustomerSheetActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window?.statusBarColor = Color.TRANSPARENT
+
         setContent {
             StripeTheme {
                 val navController = rememberNavController()
@@ -49,7 +55,9 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                     }
                 ) {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding(),
                     ) {
                         val viewState by viewModel.viewState.collectAsState()
                         val result by viewModel.result.collectAsState()

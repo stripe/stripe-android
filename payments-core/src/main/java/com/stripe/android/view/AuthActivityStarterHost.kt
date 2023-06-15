@@ -86,11 +86,12 @@ sealed class AuthActivityStarterHost {
 
         @JvmSynthetic
         internal fun create(
-            activity: ComponentActivity
+            activity: ComponentActivity,
+            statusBarColor: () -> Int? = { activity.window?.statusBarColor },
         ): AuthActivityStarterHost {
             return ActivityHost(
                 activity = activity,
-                statusBarColor = activity.window?.statusBarColor
+                statusBarColor = statusBarColor(),
             )
         }
     }

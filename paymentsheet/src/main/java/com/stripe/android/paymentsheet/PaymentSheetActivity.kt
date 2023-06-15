@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.ViewGroup
 import androidx.activity.viewModels
@@ -60,9 +61,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
         )
 
-        starterArgs?.statusBarColor?.let {
-            window.statusBarColor = it
-        }
+        window?.statusBarColor = Color.TRANSPARENT
 
         setContentView(viewBinding.root)
 

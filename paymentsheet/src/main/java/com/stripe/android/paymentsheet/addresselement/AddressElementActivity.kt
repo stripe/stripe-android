@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -59,9 +60,7 @@ internal class AddressElementActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         starterArgs.config?.appearance?.parseAppearance()
 
-        starterArgs.statusBarColor?.let {
-            window.statusBarColor = it
-        }
+        window?.statusBarColor = Color.TRANSPARENT
 
         // set a default result in case the user closes the sheet manually
         setResult()

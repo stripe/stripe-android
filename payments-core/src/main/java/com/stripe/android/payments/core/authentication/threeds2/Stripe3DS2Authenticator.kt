@@ -73,7 +73,7 @@ internal class Stripe3DS2Authenticator @Inject constructor(
                 authenticatable.nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2,
                 requestOptions,
                 enableLogging = enableLogging,
-                host.statusBarColor,
+                statusBarColor = host.statusBarColor,
                 injectorKey,
                 publishableKeyProvider(),
                 productUsage

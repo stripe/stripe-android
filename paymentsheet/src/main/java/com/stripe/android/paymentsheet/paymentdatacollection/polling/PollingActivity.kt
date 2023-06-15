@@ -27,9 +27,7 @@ internal class PollingActivity : AppCompatActivity() {
             listener
         )
 
-        args.statusBarColor?.let { color ->
-            window.statusBarColor = color
-        }
+        window?.statusBarColor = Color.TRANSPARENT
 
         if (savedInstanceState == null) {
             val fragment = PollingFragment.newInstance(args)

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -13,6 +12,7 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.utils.findActivity
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -22,7 +22,7 @@ class PaymentSheetContract :
         context: Context,
         input: Args
     ): Intent {
-        val statusBarColor = (context as? Activity)?.window?.statusBarColor
+        val statusBarColor = context.findActivity()?.window?.statusBarColor
         val args = input.copy(statusBarColor = statusBarColor)
         return Intent(context, PaymentSheetActivity::class.java).putExtra(EXTRA_ARGS, args.toV2())
     }

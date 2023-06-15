@@ -43,7 +43,7 @@ internal class SourceAuthenticator @Inject constructor(
     ) {
         if (authenticatable.flow == Source.Flow.Redirect) {
             startSourceAuth(
-                paymentBrowserAuthStarterFactory(host),
+                host,
                 authenticatable,
                 requestOptions
             )
@@ -53,13 +53,16 @@ internal class SourceAuthenticator @Inject constructor(
     }
 
     private suspend fun startSourceAuth(
-        paymentBrowserAuthStarter: PaymentBrowserAuthStarter,
+        host: AuthActivityStarterHost,
         source: Source,
         requestOptions: ApiRequest.Options
     ) = withContext(uiContext) {
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceRedirect)
         )
+
+        val paymentBrowserAuthStarter = paymentBrowserAuthStarterFactory(host)
+
         paymentBrowserAuthStarter.start(
             PaymentBrowserAuthContract.Args(
                 objectId = source.id.orEmpty(),
@@ -69,8 +72,9 @@ internal class SourceAuthenticator @Inject constructor(
                 returnUrl = source.redirect?.returnUrl,
                 enableLogging = enableLogging,
                 stripeAccountId = requestOptions.stripeAccount,
+                statusBarColor = host.statusBarColor,
                 publishableKey = publishableKeyProvider(),
-                isInstantApp = isInstantApp
+                isInstantApp = isInstantApp,
             )
         )
     }

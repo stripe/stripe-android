@@ -11,6 +11,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.utils.findActivity
 
 /**
  * API to confirm and handle next actions for [PaymentIntent] and [SetupIntent].
@@ -93,13 +94,17 @@ interface PaymentLauncher {
             publishableKey: String,
             stripeAccountId: String? = null,
             callback: PaymentResultCallback
-        ) = PaymentLauncherFactory(
-            LocalContext.current,
-            rememberLauncherForActivityResult(
-                PaymentLauncherContract(),
-                callback::onPaymentResult
-            )
-        ).create(publishableKey, stripeAccountId)
+        ): PaymentLauncher {
+            val context = LocalContext.current
+            return PaymentLauncherFactory(
+                context = context,
+                hostActivityLauncher = rememberLauncherForActivityResult(
+                    PaymentLauncherContract(),
+                    callback::onPaymentResult
+                ),
+                statusBarColor = { context.findActivity()?.window?.statusBarColor },
+            ).create(publishableKey, stripeAccountId)
+        }
 
         /**
          * Create a [PaymentLauncher] used for Jetpack Compose.
@@ -124,8 +129,9 @@ interface PaymentLauncher {
 
             return remember(publishableKey, stripeAccountId) {
                 PaymentLauncherFactory(
-                    context,
-                    activityResultLauncher
+                    context = context,
+                    hostActivityLauncher = activityResultLauncher,
+                    statusBarColor = { context.findActivity()?.window?.statusBarColor },
                 ).create(publishableKey, stripeAccountId)
             }
         }

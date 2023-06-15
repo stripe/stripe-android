@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.ViewGroup
 import androidx.activity.viewModels
@@ -44,9 +45,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             return
         }
 
-        starterArgs.statusBarColor?.let {
-            window.statusBarColor = it
-        }
+        window?.statusBarColor = Color.TRANSPARENT
         setContentView(viewBinding.root)
 
         viewModel.paymentOptionResult.launchAndCollectIn(this) {

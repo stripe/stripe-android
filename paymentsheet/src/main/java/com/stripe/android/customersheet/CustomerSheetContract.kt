@@ -14,5 +14,7 @@ internal class CustomerSheetContract :
         return InternalCustomerSheetResult.fromIntent(intent)
     }
 
-    internal object Args
+    internal data class Args(
+        val statusBarColor: Int?,
+    )
 }

@@ -129,8 +129,9 @@ internal class WebIntentAuthenticator @Inject constructor(
                 stripeAccountId = stripeAccount,
                 shouldCancelSource = shouldCancelSource,
                 shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation,
+                statusBarColor = host.statusBarColor,
                 publishableKey = publishableKeyProvider(),
-                isInstantApp = isInstantApp
+                isInstantApp = isInstantApp,
             )
         )
     }

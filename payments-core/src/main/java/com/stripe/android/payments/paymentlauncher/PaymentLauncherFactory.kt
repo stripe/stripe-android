@@ -18,29 +18,32 @@ import kotlinx.coroutines.Dispatchers
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentLauncherFactory(
     private val context: Context,
-    private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
+    private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>,
+    private val statusBarColor: () -> Int?,
 ) {
 
     constructor(
         activity: ComponentActivity,
         callback: PaymentLauncher.PaymentResultCallback
     ) : this(
-        activity.applicationContext,
-        activity.registerForActivityResult(
+        context = activity.applicationContext,
+        hostActivityLauncher = activity.registerForActivityResult(
             PaymentLauncherContract(),
             callback::onPaymentResult
-        )
+        ),
+        statusBarColor = { activity.window?.statusBarColor },
     )
 
     constructor(
         fragment: Fragment,
         callback: PaymentLauncher.PaymentResultCallback
     ) : this(
-        fragment.requireActivity().applicationContext,
-        fragment.registerForActivityResult(
+        context = fragment.requireActivity().applicationContext,
+        hostActivityLauncher = fragment.registerForActivityResult(
             PaymentLauncherContract(),
             callback::onPaymentResult
-        )
+        ),
+        statusBarColor = { fragment.requireActivity().window?.statusBarColor },
     )
 
     fun create(
@@ -54,20 +57,21 @@ class PaymentLauncherFactory(
             productUsage
         )
         return StripePaymentLauncher(
-            { publishableKey },
-            { stripeAccountId },
-            hostActivityLauncher,
-            context,
-            BuildConfig.DEBUG,
-            Dispatchers.IO,
-            Dispatchers.Main,
-            StripeApiRepository(
-                context,
-                { publishableKey },
-                paymentAnalyticsRequestFactory = analyticsRequestFactory
+            publishableKeyProvider = { publishableKey },
+            stripeAccountIdProvider = { stripeAccountId },
+            hostActivityLauncher = hostActivityLauncher,
+            statusBarColor = statusBarColor(),
+            context = context,
+            enableLogging = BuildConfig.DEBUG,
+            ioContext = Dispatchers.IO,
+            uiContext = Dispatchers.Main,
+            stripeRepository = StripeApiRepository(
+                context = context,
+                publishableKeyProvider = { publishableKey },
+                paymentAnalyticsRequestFactory = analyticsRequestFactory,
             ),
-            analyticsRequestFactory,
-            productUsage = productUsage
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            productUsage = productUsage,
         )
     }
 }

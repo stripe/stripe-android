@@ -23,6 +23,7 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CustomerSheet @Inject internal constructor(
     private val application: Application,
+    private val activity: ComponentActivity,
     activityResultCaller: ActivityResultCaller,
     private val callback: CustomerSheetResultCallback,
 ) {
@@ -37,7 +38,9 @@ class CustomerSheet @Inject internal constructor(
      * are delivered through the callback passed in [CustomerSheet.create].
      */
     fun present() {
-        val args = CustomerSheetContract.Args
+        val args = CustomerSheetContract.Args(
+            statusBarColor = activity.window?.statusBarColor,
+        )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
             application.applicationContext,
@@ -118,7 +121,7 @@ class CustomerSheet @Inject internal constructor(
         /**
          * Create a [CustomerSheet]
          *
-         * @param activity The [Activity] that is presenting [CustomerSheet].
+         * @param activity The [ComponentActivity] that is presenting [CustomerSheet].
          * @param configuration The [Configuration] options used to render the [CustomerSheet].
          * @param customerAdapter The bridge to communicate with your server to manage a customer.
          * @param callback called when a [CustomerSheetResult] is available.
@@ -130,6 +133,7 @@ class CustomerSheet @Inject internal constructor(
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             return getInstance(
+                activity = activity,
                 viewModelStoreOwner = activity,
                 activityResultCaller = activity,
                 configuration = configuration,
@@ -153,6 +157,7 @@ class CustomerSheet @Inject internal constructor(
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             return getInstance(
+                activity = fragment.requireActivity(),
                 viewModelStoreOwner = fragment,
                 activityResultCaller = fragment,
                 configuration = configuration,
@@ -162,6 +167,7 @@ class CustomerSheet @Inject internal constructor(
         }
 
         private fun getInstance(
+            activity: ComponentActivity,
             viewModelStoreOwner: ViewModelStoreOwner,
             activityResultCaller: ActivityResultCaller,
             configuration: Configuration,
@@ -179,6 +185,7 @@ class CustomerSheet @Inject internal constructor(
 
             val customerSheetComponent: CustomerSheetComponent =
                 customerSessionComponent.customerSheetComponentBuilder
+                    .activity(activity)
                     .activityResultCaller(activityResultCaller)
                     .build()
 

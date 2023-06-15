@@ -3,6 +3,7 @@ package com.stripe.android.payments.paymentlauncher
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.viewModels
@@ -49,9 +50,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             // Prevent back presses while confirming payment
         }
 
-        args.statusBarColor?.let {
-            window.statusBarColor = it
-        }
+        window?.statusBarColor = Color.TRANSPARENT
 
         viewModel.paymentLauncherResult.observe(this, ::finishWithResult)
         viewModel.register(
@@ -59,7 +58,11 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             lifecycleOwner = this,
         )
 
-        val host = AuthActivityStarterHost.create(this)
+        val host = AuthActivityStarterHost.create(
+            activity = this,
+            statusBarColor = { args.statusBarColor },
+        )
+
         when (args) {
             is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
                 viewModel.confirmStripeIntent(args.confirmStripeIntentParams, host)

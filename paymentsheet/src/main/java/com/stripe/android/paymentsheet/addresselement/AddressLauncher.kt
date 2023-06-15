@@ -15,6 +15,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
 import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.utils.findActivity
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -22,7 +23,8 @@ import kotlinx.parcelize.Parcelize
  */
 class AddressLauncher internal constructor(
     private val application: Application,
-    private val activityResultLauncher: ActivityResultLauncher<AddressElementActivityContract.Args>
+    private val activityResultLauncher: ActivityResultLauncher<AddressElementActivityContract.Args>,
+    private val statusBarColor: Int?,
 ) {
     @InjectorKey
     private val injectorKey: String =
@@ -44,6 +46,7 @@ class AddressLauncher internal constructor(
         ) {
             callback.onAddressLauncherResult(it)
         },
+        statusBarColor = activity.window?.statusBarColor,
     )
 
     /**
@@ -62,6 +65,7 @@ class AddressLauncher internal constructor(
         ) {
             callback.onAddressLauncherResult(it)
         },
+        statusBarColor = fragment.requireActivity().window?.statusBarColor,
     )
 
     @JvmOverloads
@@ -70,9 +74,10 @@ class AddressLauncher internal constructor(
         configuration: Configuration = Configuration()
     ) {
         val args = AddressElementActivityContract.Args(
-            publishableKey,
-            configuration,
-            injectorKey
+            publishableKey = publishableKey,
+            config = configuration,
+            injectorKey = injectorKey,
+            statusBarColor = statusBarColor,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -234,6 +239,7 @@ fun rememberAddressLauncher(
         AddressLauncher(
             application = context.applicationContext as Application,
             activityResultLauncher = activityResultLauncher,
+            statusBarColor = context.findActivity()?.window?.statusBarColor,
         )
     }
 }
