@@ -98,6 +98,16 @@ class LpmRepository constructor(
 
     fun values(): List<SupportedPaymentMethod> = lpmInitialFormData.values()
 
+    fun updateForCard(
+        cardBillingDetailsCollectionConfiguration: CardBillingDetailsCollectionConfiguration
+    ) {
+        lpmInitialFormData.putAll(
+            mapOf(
+                "card" to hardcodedCardSpec(cardBillingDetailsCollectionConfiguration)
+            )
+        )
+    }
+
     /**
      * This method will read the [StripeIntent] and their specs as two separate parameters.
      * Any spec not found from the server will be read from disk json file.

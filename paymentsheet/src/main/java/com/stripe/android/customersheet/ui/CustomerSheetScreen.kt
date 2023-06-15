@@ -22,15 +22,16 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
-import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.flow.flowOf
+import javax.inject.Provider
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -39,6 +40,7 @@ internal fun CustomerSheetScreen(
     modifier: Modifier = Modifier,
     viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
     paymentMethodNameProvider: (PaymentMethodCode?) -> String,
+    subComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
 ) {
     val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
     val showEditMenu = (viewState as? CustomerSheetViewState.SelectPaymentMethod)?.showEditMenu == true
@@ -80,6 +82,7 @@ internal fun CustomerSheetScreen(
                         AddCard(
                             viewState = targetState,
                             viewActionHandler = viewActionHandler,
+                            subComponentBuilderProvider = subComponentBuilderProvider,
                         )
                     }
                 }
@@ -175,6 +178,7 @@ internal fun SelectPaymentMethod(
 internal fun AddCard(
     viewState: CustomerSheetViewState.AddCard,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
+    subComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
 ) {
     val context = LocalContext.current
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
@@ -191,22 +195,18 @@ internal fun AddCard(
         )
 
         PaymentMethodForm(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
+            args = FormArguments(
+                paymentMethodCode = PaymentMethod.Type.Card.code,
+                showCheckbox = false,
+                showCheckboxControlledFields = false,
+                merchantName = "", // Not showing checkbox, so this is unneeded
+            ),
             enabled = true,
             onFormFieldValuesChanged = {
 
             },
-            completeFormValues = flowOf(),
-            hiddenIdentifiers = setOf(),
-            elements = listOf(
-                CardDetailsSectionElement(
-                    context = context,
-                    initialValues = mapOf(),
-                    viewOnlyFields = setOf(),
-                    identifier = IdentifierSpec.Generic("card_details"),
-                )
-            ),
-            lastTextFieldIdentifier = null,
+            showCheckboxFlow = flowOf(false), // TODO: emptyFlow makes full billing address appear, but flowOf(false) doesnt
+            subComponentBuilderProvider = subComponentBuilderProvider,
             modifier = Modifier.padding(bottom = 20.dp)
         )
 

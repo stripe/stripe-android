@@ -6,15 +6,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Provider
 
 @Composable
 internal fun PaymentMethodForm(
@@ -22,7 +23,7 @@ internal fun PaymentMethodForm(
     enabled: Boolean,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     showCheckboxFlow: Flow<Boolean>,
-    injector: NonFallbackInjector,
+    subComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     modifier: Modifier = Modifier,
 ) {
     val formViewModel: FormViewModel = viewModel(
@@ -30,7 +31,7 @@ internal fun PaymentMethodForm(
         factory = FormViewModel.Factory(
             config = args,
             showCheckboxFlow = showCheckboxFlow,
-            injector = injector,
+            subComponentBuilderProvider = subComponentBuilderProvider,
         )
     )
 

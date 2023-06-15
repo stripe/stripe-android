@@ -9,13 +9,16 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.injection.CustomerSessionScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
@@ -25,6 +28,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val configuration: CustomerSheet.Configuration,
     private val customerAdapter: CustomerAdapter,
     private val lpmRepository: LpmRepository,
+    val subComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
 ) : ViewModel() {
 
     private val isLiveMode = paymentConfiguration.publishableKey.contains("live")
@@ -44,6 +48,11 @@ internal class CustomerSheetViewModel @Inject constructor(
     val result: StateFlow<InternalCustomerSheetResult?> = _result
 
     init {
+        lpmRepository.updateForCard(
+            CardBillingDetailsCollectionConfiguration(
+                address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            )
+        )
         loadPaymentMethods()
     }
 

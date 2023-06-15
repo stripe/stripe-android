@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -22,7 +21,7 @@ import kotlin.coroutines.CoroutineContext
  * Note: this repository is mutable and stateful. The address information saved within the Element
  * list will carry over to other screens.
  */
-@Singleton
+// TODO: Fix me!
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressRepository @Inject constructor(
     resources: Resources,

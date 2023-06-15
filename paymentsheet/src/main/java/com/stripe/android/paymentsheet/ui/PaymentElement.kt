@@ -76,7 +76,7 @@ internal fun PaymentElement(
                 enabled = enabled,
                 onFormFieldValuesChanged = onFormFieldValuesChanged,
                 showCheckboxFlow = showCheckboxFlow,
-                injector = sheetViewModel.injector,
+                subComponentBuilderProvider = sheetViewModel.subComponentBuilderProvider,
                 modifier = Modifier.padding(horizontal = horizontalPadding)
             )
         }

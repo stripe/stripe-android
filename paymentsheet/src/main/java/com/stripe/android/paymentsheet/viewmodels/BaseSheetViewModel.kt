@@ -6,7 +6,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.UserInput
@@ -23,6 +22,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
 import com.stripe.android.paymentsheet.model.currency
@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -73,13 +74,8 @@ internal abstract class BaseSheetViewModel(
     val linkHandler: LinkHandler,
     val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val headerTextFactory: HeaderTextFactory,
+    val subComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
 ) : AndroidViewModel(application) {
-    /**
-     * This ViewModel exists during the whole user flow, and needs to share the Dagger dependencies
-     * with the other, screen-specific ViewModels. So it holds a reference to the injector which is
-     * passed as a parameter to the other ViewModel factories.
-     */
-    lateinit var injector: NonFallbackInjector
 
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
