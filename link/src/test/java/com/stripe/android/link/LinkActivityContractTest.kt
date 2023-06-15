@@ -87,7 +87,8 @@ class LinkActivityContractTest {
                 "IlVTIn0sImN1c3RvbWVySW5mbyI6eyJlbWFpbCI6ImN1c3RvbWVyQGVtYWlsLmNvbSIsImNvdW50" +
                 "cnkiOiJVUyJ9LCJwYXltZW50SW5mbyI6eyJjdXJyZW5jeSI6InVzZCIsImFtb3VudCI6MTA5OX0s" +
                 "InJldHVyblVybCI6InN0cmlwZXNkazovL2xpbmtfcmV0dXJuX3VybC9jb20uc3RyaXBlLmFuZHJv" +
-                "aWQubGluay50ZXN0IiwibG9jYWxlIjoiVVMifQ=="
+                "aWQubGluay50ZXN0IiwibG9jYWxlIjoiVVMiLCJwYXRoIjoibW9iaWxlX3BheSIsImludGVncmF0" +
+                "aW9uVHlwZSI6Im1vYmlsZSJ9"
         )
     }
 }

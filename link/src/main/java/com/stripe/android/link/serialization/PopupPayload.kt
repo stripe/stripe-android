@@ -68,12 +68,14 @@ internal data class PopupPayload(
     )
 
     fun toUrl(): String {
-        val json = Json.encodeToString(serializer(), this)
+        val json = PopupPayloadJson.encodeToString(serializer(), this)
         return baseUrl + Base64.encodeToString(json.encodeToByteArray(), Base64.NO_WRAP)
     }
 
     companion object {
         private const val baseUrl: String = "https://checkout.link.com/link-popup.html#"
+
+        val PopupPayloadJson = Json { encodeDefaults = true }
 
         fun create(
             configuration: LinkConfiguration,
