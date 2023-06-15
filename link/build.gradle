@@ -49,6 +49,7 @@ dependencies {
     testImplementation testLibs.androidx.core
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.turbine
+    testImplementation testLibs.espresso.intents
 
     androidTestImplementation testLibs.truth
     androidTestImplementation testLibs.androidx.junit
