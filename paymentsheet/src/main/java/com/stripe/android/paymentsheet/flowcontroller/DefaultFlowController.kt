@@ -141,12 +141,13 @@ internal class DefaultFlowController @Inject internal constructor(
             object : DefaultLifecycleObserver {
                 override fun onCreate(owner: LifecycleOwner) {
                     paymentLauncher = paymentLauncherFactory.create(
-                        { lazyPaymentConfiguration.get().publishableKey },
-                        { lazyPaymentConfiguration.get().stripeAccountId },
-                        activityResultCaller.registerForActivityResult(
+                        publishableKey = { lazyPaymentConfiguration.get().publishableKey },
+                        stripeAccountId = { lazyPaymentConfiguration.get().stripeAccountId },
+                        statusBarColor = statusBarColor(),
+                        hostActivityLauncher = activityResultCaller.registerForActivityResult(
                             PaymentLauncherContract(),
                             ::onPaymentResult
-                        )
+                        ),
                     ).also {
                         it.registerPollingAuthenticator()
                     }

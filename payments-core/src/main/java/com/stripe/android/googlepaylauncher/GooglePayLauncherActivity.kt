@@ -2,6 +2,7 @@ package com.stripe.android.googlepaylauncher
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -56,10 +57,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
             return
         }
 
-        val statusColor = intent.getIntExtra(GooglePayLauncherContract.EXTRA_STATUS_BAR_COLOR, -1)
-        if (statusColor != -1) {
-            window.statusBarColor = statusColor
-        }
+        window.statusBarColor = Color.TRANSPARENT
 
         viewModel.googlePayResult.observe(this) { googlePayResult ->
             googlePayResult?.let(::finishWithResult)

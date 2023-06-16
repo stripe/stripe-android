@@ -59,7 +59,11 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             lifecycleOwner = this,
         )
 
-        val host = AuthActivityStarterHost.create(this)
+        val host = AuthActivityStarterHost.create(
+            activity = this,
+            statusBarColor = { args.statusBarColor },
+        )
+
         when (args) {
             is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
                 viewModel.confirmStripeIntent(args.confirmStripeIntentParams, host)

@@ -1,5 +1,8 @@
 package com.stripe.android.payments.paymentlauncher
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -93,13 +96,17 @@ interface PaymentLauncher {
             publishableKey: String,
             stripeAccountId: String? = null,
             callback: PaymentResultCallback
-        ) = PaymentLauncherFactory(
-            LocalContext.current,
-            rememberLauncherForActivityResult(
-                PaymentLauncherContract(),
-                callback::onPaymentResult
-            )
-        ).create(publishableKey, stripeAccountId)
+        ): PaymentLauncher {
+            val context = LocalContext.current
+            return PaymentLauncherFactory(
+                context = context,
+                hostActivityLauncher = rememberLauncherForActivityResult(
+                    PaymentLauncherContract(),
+                    callback::onPaymentResult
+                ),
+                statusBarColor = { context.findActivity()?.window?.statusBarColor },
+            ).create(publishableKey, stripeAccountId)
+        }
 
         /**
          * Create a [PaymentLauncher] used for Jetpack Compose.
@@ -124,10 +131,20 @@ interface PaymentLauncher {
 
             return remember(publishableKey, stripeAccountId) {
                 PaymentLauncherFactory(
-                    context,
-                    activityResultLauncher
+                    context = context,
+                    hostActivityLauncher = activityResultLauncher,
+                    statusBarColor = { context.findActivity()?.window?.statusBarColor },
                 ).create(publishableKey, stripeAccountId)
             }
         }
     }
+}
+
+private fun Context.findActivity(): Activity? {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is Activity) return context
+        context = context.baseContext
+    }
+    return null
 }

@@ -453,9 +453,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         linkHandler.registerFromActivity(activityResultCaller)
 
         paymentLauncher = paymentLauncherFactory.create(
-            { lazyPaymentConfig.get().publishableKey },
-            { lazyPaymentConfig.get().stripeAccountId },
-            activityResultCaller.registerForActivityResult(
+            publishableKey = { lazyPaymentConfig.get().publishableKey },
+            stripeAccountId = { lazyPaymentConfig.get().stripeAccountId },
+            statusBarColor = args.statusBarColor,
+            hostActivityLauncher = activityResultCaller.registerForActivityResult(
                 PaymentLauncherContract(),
                 ::onPaymentResult
             )
