@@ -61,13 +61,22 @@ internal fun rememberBottomSheetState(
     }
 }
 
+/**
+ * Renders the provided [sheetContent] in a modal bottom sheet.
+ *
+ * @param state The [BottomSheetState] that controls the visibility of the bottom sheet.
+ * @param onShow Called when the bottom sheet is displayed for the first time. This might be used to
+ * navigate to a specific screen.
+ * @param onDismissed Called when the user dismisses the bottom sheet by swiping down. You should
+ * inform your view model about this change.
+ */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun BottomSheet(
     state: BottomSheetState,
     modifier: Modifier = Modifier,
+    onDismissed: () -> Unit,
     onShow: () -> Unit = {},
-    onDismissed: () -> Unit = {},
     sheetContent: @Composable ColumnScope.() -> Unit,
 ) {
     val systemUiController = rememberSystemUiController()
