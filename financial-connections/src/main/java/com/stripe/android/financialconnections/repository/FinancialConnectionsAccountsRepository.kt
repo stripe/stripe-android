@@ -5,6 +5,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
+import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.PaymentAccountParams
@@ -40,7 +41,7 @@ internal interface FinancialConnectionsAccountsRepository {
     suspend fun getNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String,
-    ): PartnerAccountsList
+    ): NetworkedAccountsList
 
     suspend fun postLinkAccountSessionPaymentAccount(
         clientSecret: String,
@@ -121,7 +122,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     override suspend fun getNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String
-    ): PartnerAccountsList {
+    ): NetworkedAccountsList {
         val request = apiRequestFactory.createGet(
             url = networkedAccountsUrl,
             options = apiOptions,
@@ -133,7 +134,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         )
         return requestExecutor.execute(
             request,
-            PartnerAccountsList.serializer()
+            NetworkedAccountsList.serializer()
         ).also {
             updateCachedAccounts("getNetworkedAccounts", it.data)
         }

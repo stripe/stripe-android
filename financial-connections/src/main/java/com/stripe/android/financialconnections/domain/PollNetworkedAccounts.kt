@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.PollNetworkedAccounts.Companion.MAX_TRIES
 import com.stripe.android.financialconnections.domain.PollNetworkedAccounts.Companion.POLLING_TIME_MS
-import com.stripe.android.financialconnections.model.PartnerAccountsList
+import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.utils.retryOnException
 import com.stripe.android.financialconnections.utils.shouldRetry
@@ -21,7 +21,7 @@ internal class PollNetworkedAccounts @Inject constructor(
 
     suspend operator fun invoke(
         consumerSessionClientSecret: String,
-    ): PartnerAccountsList = retryOnException(
+    ): NetworkedAccountsList = retryOnException(
         times = MAX_TRIES,
         delayMilliseconds = POLLING_TIME_MS,
         retryCondition = { exception -> exception.shouldRetry }

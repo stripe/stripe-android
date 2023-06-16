@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.serializer.EntrySerializer
 import com.stripe.android.financialconnections.model.serializer.MarkdownToHtmlSerializer
 import kotlinx.parcelize.Parcelize
@@ -16,6 +17,8 @@ internal data class TextUpdate(
     val networkingLinkSignupPane: NetworkingLinkSignupPane? = null,
     @SerialName("oauth_prepane")
     val oauthPrepane: OauthPrepane? = null,
+    @SerialName("returning_networking_user_account_picker")
+    val returningNetworkingUserAccountPicker: ReturningNetworkingUserAccountPicker? = null
 ) : Parcelable
 
 @Serializable
@@ -204,4 +207,35 @@ internal data class LegalDetailsNotice(
 internal data class LegalDetailsBody(
     @SerialName("bullets")
     val bullets: List<Bullet>
+) : Parcelable
+
+
+@Serializable
+@Parcelize
+internal data class ReturningNetworkingUserAccountPicker(
+    @SerialName("title") val title: String,
+    @SerialName("default_cta") val defaultCta: String,
+    @SerialName("add_new_account") val addNewAccount: AddNewAccount? = null,
+    @SerialName("accounts") val accounts: List<NetworkedAccount>
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class NetworkedAccount(
+    @SerialName("id") val id: String,
+    @SerialName("allow_selection") val allowSelection: Boolean,
+    @SerialName("caption") val caption: String? = null,
+    @SerialName("selection_cta") val selectionCta: String? = null,
+    @SerialName("icon") val icon: Image? = null,
+    @SerialName("selection_cta_icon") val selectionCtaIcon: Image? = null,
+    @SerialName("next_pane_on_selection") val nextPaneOnSelection: Pane? = null
+) : Parcelable
+
+
+@Serializable
+@Parcelize
+internal data class AddNewAccount(
+    @SerialName("body") val body: String? = null,
+    @SerialName("icon") val icon: Image? = null,
+    @SerialName("next_pane") val nextPane: String? = null
 ) : Parcelable

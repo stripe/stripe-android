@@ -1,5 +1,7 @@
 package com.stripe.android.financialconnections.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -55,6 +57,7 @@ internal data class PartnerAccountsList(
  * @param status
  */
 @Serializable
+@Parcelize
 @Suppress("ConstructorParameterNaming")
 internal data class PartnerAccount(
 
@@ -96,7 +99,7 @@ internal data class PartnerAccount(
 
     @SerialName(value = "status") val status: FinancialConnectionsAccount.Status? = null
 
-) {
+): Parcelable {
 
     internal val allowSelection: Boolean
         get() = _allowSelection ?: true

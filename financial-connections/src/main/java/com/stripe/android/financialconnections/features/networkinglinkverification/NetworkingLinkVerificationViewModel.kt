@@ -28,7 +28,7 @@ import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.PartnerAccountsList
+import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -137,7 +137,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     }
 
     private suspend fun onNetworkedAccountsSuccess(
-        accounts: PartnerAccountsList,
+        accounts: NetworkedAccountsList,
         updatedManifest: FinancialConnectionsSessionManifest
     ) {
         if (accounts.data.isEmpty()) {
