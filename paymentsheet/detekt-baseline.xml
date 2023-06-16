@@ -40,6 +40,7 @@
     <ID>MagicNumber:PaymentOptionUi.kt$18</ID>
     <ID>MagicNumber:PrimaryButton.kt$PrimaryButton$0.5f</ID>
     <ID>MagicNumber:USBankAccountForm.kt$0.5f</ID>
+    <ID>MatchingDeclarationName:BottomSheet.kt$BottomSheetState</ID>
     <ID>MaxLineLength:BillingAddressViewTest.kt$BillingAddressViewTest$fun</ID>
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$fun</ID>
     <ID>MaxLineLength:DefaultPaymentSheetLoaderTest.kt$DefaultPaymentSheetLoaderTest$fun</ID>
