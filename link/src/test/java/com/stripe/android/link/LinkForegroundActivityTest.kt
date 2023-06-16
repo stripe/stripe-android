@@ -154,7 +154,7 @@ internal class LinkForegroundActivityTest {
             )
         }
         assertThat(scenario.result.resultCode)
-            .isEqualTo(LinkForegroundActivity.RESULT_PAYMENT_METHOD)
+            .isEqualTo(LinkForegroundActivity.RESULT_COMPLETE)
         assertThat(scenario.result.resultData.data)
             .isEqualTo(redirectUrl)
     }
@@ -177,7 +177,7 @@ internal class LinkForegroundActivityTest {
         assertThat(controller.get().isFinishing).isTrue()
         val shadowActivity = Shadows.shadowOf(controller.get()) as ShadowActivity
         assertThat(shadowActivity.resultCode)
-            .isEqualTo(LinkForegroundActivity.RESULT_PAYMENT_METHOD)
+            .isEqualTo(LinkForegroundActivity.RESULT_COMPLETE)
         assertThat(shadowActivity.resultIntent.data)
             .isEqualTo(redirectUrl)
     }
