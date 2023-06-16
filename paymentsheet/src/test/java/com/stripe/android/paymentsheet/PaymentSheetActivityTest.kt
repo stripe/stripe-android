@@ -28,8 +28,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
@@ -116,7 +114,6 @@ internal class PaymentSheetActivityTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
-    private lateinit var injector: NonFallbackInjector
 
     private val eventReporter = mock<EventReporter>()
     private val googlePayPaymentMethodLauncherFactory =
@@ -968,8 +965,6 @@ internal class PaymentSheetActivityTest {
         whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
         whenever(lpmRepository.serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
 
-        registerFormViewModelInjector()
-
         TestViewModelFactory.create(
             linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>().stub {
                 onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
@@ -1004,9 +999,8 @@ internal class PaymentSheetActivityTest {
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
-            ).also {
-                it.injector = injector
-            }
+                formViewModelSubComponentBuilderProvider = formViewModelSubcomponentBuilder()
+            )
         }
     }
 
@@ -1025,7 +1019,7 @@ internal class PaymentSheetActivityTest {
             }
         }
 
-    private fun registerFormViewModelInjector() {
+    private fun formViewModelSubcomponentBuilder(): Provider<FormViewModelSubcomponent.Builder> {
         val lpmRepository = mock<LpmRepository>().apply {
             whenever(fromCode(any())).thenReturn(
                 LpmRepository.SupportedPaymentMethod(
@@ -1071,12 +1065,7 @@ internal class PaymentSheetActivityTest {
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
-        injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*>) {
-                (injectable as FormViewModel.Factory).subComponentBuilderProvider =
-                    mockFormSubComponentBuilderProvider
-            }
-        }
+        return mockFormSubComponentBuilderProvider
     }
 
     private companion object {

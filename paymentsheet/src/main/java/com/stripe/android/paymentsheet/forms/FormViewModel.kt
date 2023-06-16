@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.injection.NonFallbackInjectable
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.forms.BillingDetailsHelpers.connectBillingDetailsFields
@@ -53,15 +52,12 @@ internal class FormViewModel @Inject internal constructor(
     internal class Factory(
         val config: FormArguments,
         val showCheckboxFlow: Flow<Boolean>,
-        private val injector: NonFallbackInjector
+        private val formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
     ) : ViewModelProvider.Factory, NonFallbackInjectable {
-        @Inject
-        lateinit var subComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            injector.inject(this)
-            return subComponentBuilderProvider.get()
+            return formViewModelSubComponentBuilderProvider.get()
                 .formArguments(config)
                 .showCheckboxFlow(showCheckboxFlow)
                 .build().viewModel as T

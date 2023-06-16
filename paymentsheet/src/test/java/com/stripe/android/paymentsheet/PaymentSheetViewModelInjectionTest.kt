@@ -30,7 +30,7 @@ internal class PaymentSheetViewModelInjectionTest : BasePaymentSheetViewModelInj
             val viewModel = createViewModel()
 
             val factory = PaymentSheetViewModel.Factory { args }
-            registerViewModel(args.injectorKey, viewModel, lpmRepository)
+            registerViewModel(args.injectorKey, viewModel)
 
             val creationExtras = activity.fakeCreationExtras()
             val result = factory.create(PaymentSheetViewModel::class.java, creationExtras)

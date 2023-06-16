@@ -88,6 +88,7 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
+                formViewModelSubComponentBuilderProvider = mock(),
             )
         }
     }
@@ -137,9 +138,6 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
             override fun inject(injectable: Injectable<*>) {
                 (injectable as? PaymentOptionsViewModel.Factory)?.let {
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider
-                }
-                (injectable as? FormViewModel.Factory)?.let {
-                    injectable.subComponentBuilderProvider = mockFormSubComponentBuilderProvider
                 }
             }
         }

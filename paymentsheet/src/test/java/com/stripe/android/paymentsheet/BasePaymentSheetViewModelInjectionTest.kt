@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
-import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
@@ -19,20 +18,14 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
@@ -48,7 +41,6 @@ internal open class BasePaymentSheetViewModelInjectionTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val eventReporter = mock<EventReporter>()
     private val googlePayPaymentMethodLauncherFactory =
         createGooglePayPaymentMethodLauncherFactory()
@@ -118,6 +110,7 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+                formViewModelSubComponentBuilderProvider = mock(),
             )
         }
     }
@@ -125,21 +118,6 @@ internal open class BasePaymentSheetViewModelInjectionTest {
     fun registerViewModel(
         @InjectorKey injectorKey: String,
         viewModel: PaymentSheetViewModel,
-        lpmRepository: LpmRepository,
-        formViewModel: FormViewModel = FormViewModel(
-            context = context,
-            formArguments = FormArguments(
-                PaymentMethod.Type.Card.code,
-                showCheckbox = true,
-                showCheckboxControlledFields = true,
-                merchantName = "Merchant, Inc.",
-                amount = Amount(50, "USD"),
-                initialPaymentMethodCreateParams = null
-            ),
-            lpmRepository = lpmRepository,
-            addressRepository = createAddressRepository(),
-            showCheckboxFlow = mock()
-        )
     ) {
         injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
@@ -156,30 +134,8 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                     whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider
                 }
-                (injectable as? FormViewModel.Factory)?.let {
-                    val mockBuilder = mock<FormViewModelSubcomponent.Builder>()
-                    val mockSubcomponent = mock<FormViewModelSubcomponent>()
-                    val mockSubComponentBuilderProvider =
-                        mock<Provider<FormViewModelSubcomponent.Builder>>()
-
-                    whenever(mockBuilder.formArguments(any())).thenReturn(mockBuilder)
-                    whenever(mockBuilder.showCheckboxFlow(any())).thenReturn(mockBuilder)
-                    whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
-                    whenever(mockBuilder.formArguments(any())).thenReturn(mockBuilder)
-                    whenever(mockSubcomponent.viewModel).thenReturn(formViewModel)
-                    whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
-                    injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider
-                }
             }
         }
-        viewModel.injector = injector
         WeakMapInjectorRegistry.register(injector, injectorKey)
     }
-}
-
-private fun createAddressRepository(): AddressRepository {
-    return AddressRepository(
-        resources = ApplicationProvider.getApplicationContext<Application>().resources,
-        workContext = Dispatchers.Unconfined,
-    )
 }
