@@ -109,4 +109,16 @@ class CustomerSheetScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testAddPaymentMethod() {
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = CustomerSheetViewState.AddPaymentMethod(
+                    isLiveMode = false,
+                ),
+                paymentMethodNameProvider = { it!! }
+            )
+        }
+    }
 }

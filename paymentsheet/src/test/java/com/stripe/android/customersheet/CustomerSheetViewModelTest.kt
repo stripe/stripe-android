@@ -234,7 +234,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When OnItemSelected with payment method, primary button label should not be null`() = runTest {
+    fun `When CustomerViewAction#OnItemSelected with payment method, primary button label should not be null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = Result.success(
@@ -270,7 +270,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When OnItemSelected with Google Pay, primary button label should not be null`() = runTest {
+    fun `When CustomerViewAction#OnItemSelected with Google Pay, primary button label should not be null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = Result.success(
@@ -304,7 +304,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When OnItemSelected with Link, primary button label should be null`() = runTest {
+    fun `When CustomerViewAction#OnItemSelected with Link, primary button label should be null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = Result.success(
@@ -332,7 +332,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When OnItemSelected with null, primary button label should be null`() = runTest {
+    fun `When CustomerViewAction#OnItemSelected with null, primary button label should be null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = Result.success(
@@ -386,6 +386,19 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             assertThat(awaitItem().isLiveMode)
                 .isFalse()
+        }
+    }
+
+    @Test
+    fun `When CustomerViewAction#OnAddCardPressed, view state is updated to CustomerViewAction#AddPaymentMethod`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.viewState.test {
+            assertThat(awaitItem())
+                .isInstanceOf(CustomerSheetViewState.SelectPaymentMethod::class.java)
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+            assertThat(awaitItem())
+                .isInstanceOf(CustomerSheetViewState.AddPaymentMethod::class.java)
         }
     }
 

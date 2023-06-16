@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -27,6 +28,14 @@ internal class CustomerSheetPage(
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodes(hasText(text, ignoreCase = true))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    fun waitForTextExactly(text: String) {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodes(hasTextExactly(text))
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }
