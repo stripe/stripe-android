@@ -43,7 +43,6 @@ class CustomerSheetViewModelTest {
         LpmRepository.LpmRepositoryArguments(
             resources = application.resources,
             isFinancialConnectionsAvailable = { true },
-            enableACHV2InDeferredFlow = true
         )
     ).apply {
         update(
