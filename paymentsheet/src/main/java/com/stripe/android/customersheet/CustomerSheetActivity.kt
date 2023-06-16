@@ -25,7 +25,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
     internal var viewModelFactory: ViewModelProvider.Factory = CustomerSheetViewModel.Factory
 
     /**
-     * TODO verify that the [viewModels] delegate caches the right dependencies
+     * TODO (jameswoo) verify that the [viewModels] delegate caches the right dependencies
      *
      * The ViewModel lifecycle is cached by this implementation, and the merchant might pass in
      * different dependencies, adapter, result callback, etc. This may require us to recreate our

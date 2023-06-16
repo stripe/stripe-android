@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Stack
 import javax.inject.Inject
 
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -29,9 +30,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private val isLiveMode = paymentConfiguration.publishableKey.contains("live")
 
-    private val _backstack = MutableStateFlow<List<CustomerSheetViewState>>(
-        value = emptyList()
-    )
+    private val backstack = Stack<CustomerSheetViewState>()
 
     private val _viewState = MutableStateFlow<CustomerSheetViewState>(
         CustomerSheetViewState.Loading(
@@ -94,8 +93,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                     errorMessage = throwable.message
                 }
             )
-            _viewState.update {
-                CustomerSheetViewState.SelectPaymentMethod(
+
+            transition(
+                to = CustomerSheetViewState.SelectPaymentMethod(
                     title = configuration.headerTextForSelectionScreen,
                     savedPaymentMethods = savedPaymentMethods,
                     paymentSelection = paymentSelection,
@@ -112,13 +112,12 @@ internal class CustomerSheetViewModel @Inject constructor(
                     primaryButtonEnabled = paymentSelection != null,
                     errorMessage = errorMessage,
                 )
-            }
+            )
         }
     }
 
     private fun onAddCardPressed() {
         transition(
-            from = viewState.value,
             to = CustomerSheetViewState.AddPaymentMethod(
                 isLiveMode = isLiveMode,
             )
@@ -126,7 +125,17 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onBackPressed() {
-        popBackStack()
+        val shouldExit = backstack.peek() is CustomerSheetViewState.SelectPaymentMethod
+        if (backstack.empty() || shouldExit) {
+            _result.tryEmit(
+                InternalCustomerSheetResult.Canceled
+            )
+        } else {
+            backstack.pop()
+            _viewState.update {
+                backstack.peek()
+            }
+        }
     }
 
     private fun onEditPressed() {
@@ -139,8 +148,8 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onItemSelected(paymentSelection: PaymentSelection?) {
-        // TODO consider clearing the error message onItemSelected, currently the only error source
-        // is when the payment methods cannot be loaded
+        // TODO (jameswoo) consider clearing the error message onItemSelected, currently the only
+        // error source is when the payment methods cannot be loaded
         when (paymentSelection) {
             is PaymentSelection.GooglePay, is PaymentSelection.Saved -> {
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
@@ -169,28 +178,10 @@ internal class CustomerSheetViewModel @Inject constructor(
         TODO()
     }
 
-    private fun transition(from: CustomerSheetViewState, to: CustomerSheetViewState) {
-        _backstack.update {
-            it + from
-        }
+    private fun transition(to: CustomerSheetViewState) {
+        backstack.push(to)
         _viewState.update {
             to
-        }
-    }
-
-    private fun popBackStack() {
-        if (_backstack.value.isEmpty()) {
-            _result.tryEmit(
-                InternalCustomerSheetResult.Canceled
-            )
-        } else {
-            val previous = _backstack.value.last()
-            _backstack.update {
-                it - previous
-            }
-            _viewState.update {
-                previous
-            }
         }
     }
 

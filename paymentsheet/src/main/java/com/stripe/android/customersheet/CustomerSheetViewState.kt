@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 
 internal sealed class CustomerSheetViewState(
+    open val showEditMenu: Boolean,
     open val isLiveMode: Boolean,
     open val isProcessing: Boolean,
     open val isEditing: Boolean,
@@ -13,6 +14,7 @@ internal sealed class CustomerSheetViewState(
     data class Loading(
         override val isLiveMode: Boolean,
     ) : CustomerSheetViewState(
+        showEditMenu = false,
         isLiveMode = isLiveMode,
         isProcessing = false,
         isEditing = false,
@@ -23,7 +25,7 @@ internal sealed class CustomerSheetViewState(
         val title: String?,
         val savedPaymentMethods: List<PaymentMethod>,
         val paymentSelection: PaymentSelection?,
-        val showEditMenu: Boolean,
+        override val showEditMenu: Boolean,
         override val isLiveMode: Boolean,
         override val isProcessing: Boolean,
         override val isEditing: Boolean,
@@ -32,6 +34,7 @@ internal sealed class CustomerSheetViewState(
         val primaryButtonEnabled: Boolean,
         val errorMessage: String? = null,
     ) : CustomerSheetViewState(
+        showEditMenu = showEditMenu,
         isLiveMode = isLiveMode,
         isProcessing = isProcessing,
         isEditing = isEditing,
@@ -41,6 +44,7 @@ internal sealed class CustomerSheetViewState(
     data class AddPaymentMethod(
         override val isLiveMode: Boolean,
     ) : CustomerSheetViewState(
+        showEditMenu = false,
         isLiveMode = isLiveMode,
         isProcessing = false,
         isEditing = false,

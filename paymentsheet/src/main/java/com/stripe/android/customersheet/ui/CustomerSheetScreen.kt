@@ -41,13 +41,12 @@ internal fun CustomerSheetScreen(
     paymentMethodNameProvider: (PaymentMethodCode?) -> String,
 ) {
     val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
-    val showEditMenu = (viewState as? CustomerSheetViewState.SelectPaymentMethod)?.showEditMenu == true
 
     PaymentSheetScaffold(
         topBar = {
             PaymentSheetTopBar(
                 screen = viewState.screen,
-                showEditMenu = showEditMenu,
+                showEditMenu = viewState.showEditMenu,
                 isLiveMode = viewState.isLiveMode,
                 isProcessing = viewState.isProcessing,
                 isEditing = viewState.isEditing,
@@ -211,6 +210,7 @@ internal fun AddCard(
         )
 
         PrimaryButton(
+            // TODO (jameswoo) add to lokalize
             label = "Add",
             isEnabled = true,
             onButtonClick = {
