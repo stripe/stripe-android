@@ -4,9 +4,13 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -91,9 +95,7 @@ internal fun PaymentSheetScreenContent(
 
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    Column(
-        modifier = modifier.padding(bottom = bottomPadding),
-    ) {
+    Column(modifier) {
         headerText?.let { text ->
             H4Text(
                 text = stringResource(text),
@@ -138,6 +140,9 @@ internal fun PaymentSheetScreenContent(
                     .padding(horizontal = horizontalPadding),
             )
         }
+
+        Spacer(modifier = Modifier.requiredHeight(bottomPadding))
+        Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
     }
 }
 

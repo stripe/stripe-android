@@ -60,10 +60,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
         )
 
-        starterArgs?.statusBarColor?.let {
-            window.statusBarColor = it
-        }
-
         setContentView(viewBinding.root)
 
         viewBinding.content.setContent {

@@ -29,8 +29,7 @@ class PaymentLauncherConfirmationActivityTest {
     private val testFactory = TestUtils.viewModelFactoryFor(viewModel)
 
     @Test
-    fun `statusBarColor is set on window`() {
-        val color = Color.CYAN
+    fun `statusBarColor is set to transparent on window`() {
         mockViewModelActivityScenario().launch(
             Intent(
                 ApplicationProvider.getApplicationContext(),
@@ -43,12 +42,12 @@ class PaymentLauncherConfirmationActivityTest {
                     false,
                     PRODUCT_USAGE,
                     mock(),
-                    color
+                    Color.CYAN
                 ).toBundle()
             )
         ).use {
-            it.onActivity {
-                assertThat(it.window.statusBarColor).isEqualTo(color)
+            it.onActivity { activity ->
+                assertThat(activity.window.statusBarColor).isEqualTo(Color.TRANSPARENT)
             }
         }
     }

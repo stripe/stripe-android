@@ -44,9 +44,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             return
         }
 
-        starterArgs.statusBarColor?.let {
-            window.statusBarColor = it
-        }
         setContentView(viewBinding.root)
 
         viewModel.paymentOptionResult.launchAndCollectIn(this) {
