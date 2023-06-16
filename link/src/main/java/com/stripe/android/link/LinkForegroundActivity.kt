@@ -15,7 +15,7 @@ internal class LinkForegroundActivity : AppCompatActivity() {
         const val ACTION_REDIRECT = "LinkForegroundActivity.redirect"
         const val EXTRA_POPUP_URL = "LinkPopupUrl"
         const val EXTRA_FAILURE = "LinkFailure"
-        const val RESULT_PAYMENT_METHOD = 49871
+        const val RESULT_COMPLETE = 49871
         const val RESULT_FAILURE = 91367
 
         private const val SAVED_STATE_HAS_LAUNCHED_POPUP = "LinkHasLaunchedPopup"
@@ -69,7 +69,7 @@ internal class LinkForegroundActivity : AppCompatActivity() {
 
     private fun handleRedirectIfAvailable(intent: Intent) {
         if (intent.action == ACTION_REDIRECT) {
-            setResult(RESULT_PAYMENT_METHOD, intent)
+            setResult(RESULT_COMPLETE, intent)
             finish()
         }
     }

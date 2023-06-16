@@ -22,8 +22,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="stripesdk"
-                    android:host="link_return_url"
+                    android:scheme="link-popup"
+                    android:host="complete"
                     android:path="/${applicationId}" />
             </intent-filter>
         </activity>

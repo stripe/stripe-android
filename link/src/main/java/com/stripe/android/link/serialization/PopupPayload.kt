@@ -28,8 +28,8 @@ internal data class PopupPayload(
     @SerialName("paymentInfo")
     val paymentInfo: PaymentInfo?,
 
-    @SerialName("returnUrl")
-    val returnUrl: String,
+    @SerialName("appId")
+    val appId: String,
 
     @SerialName("locale")
     val locale: String,
@@ -107,7 +107,7 @@ internal data class PopupPayload(
                     country = customerBillingCountryCode,
                 ),
                 paymentInfo = stripeIntent.toPaymentInfo(),
-                returnUrl = "stripesdk://link_return_url/${context.applicationInfo.packageName}",
+                appId = context.applicationInfo.packageName,
                 locale = context.currentLocale(),
             )
         }

@@ -14,12 +14,12 @@ internal class PopupPayloadTest {
             serializer = PopupPayload.serializer(),
             value = createPayload(),
         )
-        assertThat(json).isEqualTo("""{"publishableKey":"pk_test_abc","stripeAccount":"123","merchantInfo":{"businessName":"Jay's Taco Stand","country":"US"},"customerInfo":{"email":"jaystacostandfake@gmail.com","country":"US"},"paymentInfo":{"currency":"USD","amount":5555},"returnUrl":"stripesdk://link_return_url","locale":"US","path":"mobile_pay","integrationType":"mobile"}""")
+        assertThat(json).isEqualTo("""{"publishableKey":"pk_test_abc","stripeAccount":"123","merchantInfo":{"businessName":"Jay's Taco Stand","country":"US"},"customerInfo":{"email":"jaystacostandfake@gmail.com","country":"US"},"paymentInfo":{"currency":"USD","amount":5555},"appId":"example.stripe.unittest","locale":"US","path":"mobile_pay","integrationType":"mobile"}""")
     }
 
     @Test
     fun testToUrl() {
-        assertThat(createPayload().toUrl()).isEqualTo("https://checkout.link.com/link-popup.html#eyJwdWJsaXNoYWJsZUtleSI6InBrX3Rlc3RfYWJjIiwic3RyaXBlQWNjb3VudCI6IjEyMyIsIm1lcmNoYW50SW5mbyI6eyJidXNpbmVzc05hbWUiOiJKYXkncyBUYWNvIFN0YW5kIiwiY291bnRyeSI6IlVTIn0sImN1c3RvbWVySW5mbyI6eyJlbWFpbCI6ImpheXN0YWNvc3RhbmRmYWtlQGdtYWlsLmNvbSIsImNvdW50cnkiOiJVUyJ9LCJwYXltZW50SW5mbyI6eyJjdXJyZW5jeSI6IlVTRCIsImFtb3VudCI6NTU1NX0sInJldHVyblVybCI6InN0cmlwZXNkazovL2xpbmtfcmV0dXJuX3VybCIsImxvY2FsZSI6IlVTIiwicGF0aCI6Im1vYmlsZV9wYXkiLCJpbnRlZ3JhdGlvblR5cGUiOiJtb2JpbGUifQ==")
+        assertThat(createPayload().toUrl()).isEqualTo("https://checkout.link.com/link-popup.html#eyJwdWJsaXNoYWJsZUtleSI6InBrX3Rlc3RfYWJjIiwic3RyaXBlQWNjb3VudCI6IjEyMyIsIm1lcmNoYW50SW5mbyI6eyJidXNpbmVzc05hbWUiOiJKYXkncyBUYWNvIFN0YW5kIiwiY291bnRyeSI6IlVTIn0sImN1c3RvbWVySW5mbyI6eyJlbWFpbCI6ImpheXN0YWNvc3RhbmRmYWtlQGdtYWlsLmNvbSIsImNvdW50cnkiOiJVUyJ9LCJwYXltZW50SW5mbyI6eyJjdXJyZW5jeSI6IlVTRCIsImFtb3VudCI6NTU1NX0sImFwcElkIjoiZXhhbXBsZS5zdHJpcGUudW5pdHRlc3QiLCJsb2NhbGUiOiJVUyIsInBhdGgiOiJtb2JpbGVfcGF5IiwiaW50ZWdyYXRpb25UeXBlIjoibW9iaWxlIn0=")
     }
 
     private fun createPayload(): PopupPayload = PopupPayload(
@@ -37,7 +37,7 @@ internal class PopupPayloadTest {
             currency = "USD",
             amount = 5555,
         ),
-        returnUrl = "stripesdk://link_return_url",
+        appId = "example.stripe.unittest",
         locale = "US",
     )
 }
