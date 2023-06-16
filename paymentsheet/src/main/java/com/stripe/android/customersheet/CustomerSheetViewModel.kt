@@ -48,6 +48,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     fun handleViewAction(viewAction: CustomerSheetViewAction) {
         when (viewAction) {
+            is CustomerSheetViewAction.OnDismissed -> onDismissed()
             is CustomerSheetViewAction.OnAddCardPressed -> onAddCardPressed()
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
@@ -122,6 +123,12 @@ internal class CustomerSheetViewModel @Inject constructor(
                 isLiveMode = isLiveMode,
             )
         )
+    }
+
+    private fun onDismissed() {
+        _result.update {
+            InternalCustomerSheetResult.Canceled
+        }
     }
 
     private fun onBackPressed() {
