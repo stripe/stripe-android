@@ -168,6 +168,16 @@ internal class CustomerSheetActivityTest {
         }
     }
 
+    @Test
+    fun `When adding a payment method, title and primary button label is for adding payment method`() {
+        runActivityScenario(
+            viewState = createAddPaymentMethodViewState(),
+        ) {
+            page.waitForText("Add your payment information")
+            page.waitForTextExactly("Add")
+        }
+    }
+
     private fun activityScenario(
         viewState: CustomerSheetViewState,
         result: InternalCustomerSheetResult?,
@@ -244,6 +254,14 @@ internal class CustomerSheetActivityTest {
             isGooglePayEnabled = isGooglePayEnabled,
             primaryButtonLabel = primaryButtonLabel,
             primaryButtonEnabled = primaryButtonEnabled,
+        )
+    }
+
+    private fun createAddPaymentMethodViewState(
+        isLiveMode: Boolean = false,
+    ): CustomerSheetViewState.AddPaymentMethod {
+        return CustomerSheetViewState.AddPaymentMethod(
+            isLiveMode = isLiveMode,
         )
     }
 
