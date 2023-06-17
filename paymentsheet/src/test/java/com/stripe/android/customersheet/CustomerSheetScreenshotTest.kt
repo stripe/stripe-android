@@ -12,6 +12,7 @@ import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import com.stripe.android.utils.screenshots.SystemAppearance
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
 import org.junit.Test
 
@@ -42,7 +43,7 @@ class CustomerSheetScreenshotTest {
                     primaryButtonLabel = null,
                     primaryButtonEnabled = false,
                 ),
-                paymentMethodNameProvider = { it!! }
+                paymentMethodNameProvider = { it!! },
             )
         }
     }
@@ -115,6 +116,8 @@ class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.AddPaymentMethod(
+                    formViewDataFlow = flowOf(),
+                    enabled = true,
                     isLiveMode = false,
                 ),
                 paymentMethodNameProvider = { it!! }

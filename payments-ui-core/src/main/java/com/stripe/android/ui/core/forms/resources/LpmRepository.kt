@@ -159,6 +159,23 @@ class LpmRepository constructor(
         }
     }
 
+    /**
+     * This method can be used to initialize the LpmRepository with the hardcoded card spec.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun initializeWithCardSpec(
+        billingConfiguration: CardBillingDetailsCollectionConfiguration =
+            CardBillingDetailsCollectionConfiguration(),
+    ) {
+        lpmInitialFormData.putAll(
+            mapOf(
+                PaymentMethod.Type.Card.code to hardcodedCardSpec(
+                    billingDetailsCollectionConfiguration = billingConfiguration
+                )
+            )
+        )
+    }
+
     @VisibleForTesting
     fun updateFromDisk(stripeIntent: StripeIntent) {
         update(stripeIntent, readFromDisk())

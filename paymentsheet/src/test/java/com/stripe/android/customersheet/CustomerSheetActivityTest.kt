@@ -11,11 +11,13 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -259,8 +261,12 @@ internal class CustomerSheetActivityTest {
 
     private fun createAddPaymentMethodViewState(
         isLiveMode: Boolean = false,
+        formViewData: FormViewModel.ViewData = FormViewModel.ViewData(),
+        enabled: Boolean = true,
     ): CustomerSheetViewState.AddPaymentMethod {
         return CustomerSheetViewState.AddPaymentMethod(
+            formViewDataFlow = flowOf(formViewData),
+            enabled = enabled,
             isLiveMode = isLiveMode,
         )
     }

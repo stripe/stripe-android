@@ -469,4 +469,19 @@ class LpmRepositoryTest {
         assertThat(addressSpec.collectionMode)
             .isEqualTo(CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
     }
+
+    @Test
+    fun `LpmRepository#initializeWithCardSpec initializes the LpmRepository with hard coded card spec`() {
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+        )
+
+        assertThat(lpmRepository.values()).isEmpty()
+        lpmRepository.initializeWithCardSpec()
+        val card = lpmRepository.fromCode("card")
+        assertThat(card).isNotNull()
+    }
 }

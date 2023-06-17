@@ -9,28 +9,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewState
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.ui.ErrorMessage
-import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
-import com.stripe.android.ui.core.elements.CardDetailsSectionElement
+import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.uicore.elements.IdentifierSpec
-import kotlinx.coroutines.flow.flowOf
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -170,15 +169,23 @@ internal fun SelectPaymentMethod(
     }
 }
 
-@Suppress("UNUSED_PARAMETER")
 @Composable
 internal fun AddCard(
     viewState: CustomerSheetViewState.AddPaymentMethod,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+
+    val viewData by viewState.formViewDataFlow.collectAsState(initial = FormViewModel.ViewData())
+
+    LaunchedEffect(viewData.completeFormValues) {
+        viewActionHandler(
+            CustomerSheetViewAction.OnFormValuesChanged(
+                viewData.completeFormValues
+            )
+        )
+    }
 
     Column(
         modifier = modifier.padding(horizontal = horizontalPadding)
@@ -191,22 +198,12 @@ internal fun AddCard(
                 .padding(bottom = 20.dp)
         )
 
-        PaymentMethodForm(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
-            enabled = true,
-            onFormFieldValuesChanged = { },
-            completeFormValues = flowOf(),
-            hiddenIdentifiers = setOf(),
-            elements = listOf(
-                CardDetailsSectionElement(
-                    context = context,
-                    initialValues = mapOf(),
-                    viewOnlyFields = setOf(),
-                    identifier = IdentifierSpec.Generic("card_details"),
-                )
-            ),
-            lastTextFieldIdentifier = null,
-            modifier = Modifier.padding(bottom = 20.dp)
+        FormUI(
+            hiddenIdentifiers = viewData.hiddenIdentifiers,
+            enabled = viewState.enabled,
+            elements = viewData.elements,
+            lastTextFieldIdentifier = viewData.lastTextFieldIdentifier,
+            modifier = Modifier.padding(bottom = 20.dp),
         )
 
         PrimaryButton(
