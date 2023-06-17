@@ -9,6 +9,7 @@ import androidx.annotation.FontRes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -1046,7 +1047,15 @@ class PaymentSheet internal constructor(
          * The three-letter ISO 4217 alphabetic currency code, e.g. "USD" or "EUR".
          * Required in order to support Google Pay when processing a Setup Intent.
          */
-        val currencyCode: String? = null
+        val currencyCode: String? = null,
+
+        /**
+         * The shipping address requirements for the Google Pay request.
+         */
+        val shippingAddressConfig: GooglePayPaymentMethodLauncher.ShippingAddressConfig =
+            GooglePayPaymentMethodLauncher.ShippingAddressConfig(
+                isRequired = true
+            ),
     ) : Parcelable {
         constructor(
             environment: Environment,

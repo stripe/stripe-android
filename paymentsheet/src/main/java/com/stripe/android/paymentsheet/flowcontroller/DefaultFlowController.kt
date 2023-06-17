@@ -294,6 +294,7 @@ internal class DefaultFlowController @Inject internal constructor(
     fun confirmPaymentSelection(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
+        googlePayShipping: ConfirmPaymentIntentParams.Shipping? = null,
     ) {
         viewModelScope.launch {
             val stripeIntent = requireNotNull(state.stripeIntent)
@@ -301,7 +302,8 @@ internal class DefaultFlowController @Inject internal constructor(
             val nextStep = intentConfirmationInterceptor.intercept(
                 initializationMode = initializationMode!!,
                 paymentSelection = paymentSelection,
-                shippingValues = state.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
+                shippingValues = googlePayShipping
+                    ?: state.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
             )
 
             viewModel.deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
@@ -385,7 +387,8 @@ internal class DefaultFlowController @Inject internal constructor(
                         viewModel.paymentSelection = paymentSelection
                         confirmPaymentSelection(
                             paymentSelection,
-                            state
+                            state,
+                            googlePayResult.shippingInformation?.toConfirmPaymentIntentShipping(),
                         )
                     },
                     onFailure = {

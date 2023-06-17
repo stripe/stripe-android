@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.addresselement
 import android.os.Parcelable
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ShippingInformation
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
@@ -70,5 +71,20 @@ internal fun AddressDetails.toConfirmPaymentIntentShipping(): ConfirmPaymentInte
             .setPostalCode(this.address?.postalCode)
             .build(),
         phone = this.phoneNumber
+    )
+}
+
+internal fun ShippingInformation.toConfirmPaymentIntentShipping(): ConfirmPaymentIntentParams.Shipping {
+    return ConfirmPaymentIntentParams.Shipping(
+        name = this.name ?: "",
+        address = Address.Builder()
+            .setLine1(this.address?.line1)
+            .setLine2(this.address?.line2)
+            .setCity(this.address?.city)
+            .setState(this.address?.state)
+            .setCountry(this.address?.country)
+            .setPostalCode(this.address?.postalCode)
+            .build(),
+        phone = this.phone
     )
 }

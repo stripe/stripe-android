@@ -14,6 +14,14 @@ internal fun GooglePayLauncher.BillingAddressConfig.convert() =
         isPhoneNumberRequired
     )
 
+internal fun GooglePayPaymentMethodLauncher.ShippingAddressConfig.convert() =
+    GooglePayJsonFactory.ShippingAddressParameters(
+        isRequired,
+        allowedCountryCodes,
+        phoneNumberRequired,
+    )
+
+
 internal fun GooglePayPaymentMethodLauncher.BillingAddressConfig.convert() =
     GooglePayJsonFactory.BillingAddressParameters(
         isRequired,

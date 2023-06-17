@@ -23,6 +23,7 @@ import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherViewModelSubcomponent
+import com.stripe.android.model.GooglePayResult
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.utils.requireApplication
@@ -67,6 +68,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             merchantInfo = GooglePayJsonFactory.MerchantInfo(
                 merchantName = args.config.merchantName
             ),
+            shippingAddressParameters = args.config.shippingAddressConfig.convert(),
             billingAddressParameters = args.config.billingAddressConfig.convert(),
             isEmailRequired = args.config.isEmailRequired,
             allowCreditCards = args.config.allowCreditCards
@@ -103,13 +105,18 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
 
         val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
 
+        val googlePayResult = GooglePayResult.fromJson(paymentDataJson)
+
         return runCatching {
             requireNotNull(
                 stripeRepository.createPaymentMethod(params, requestOptions)
             )
         }.fold(
             onSuccess = {
-                GooglePayPaymentMethodLauncher.Result.Completed(it)
+                GooglePayPaymentMethodLauncher.Result.Completed(
+                    paymentMethod = it,
+                    shippingInformation = googlePayResult.shippingInformation
+                )
             },
             onFailure = {
                 GooglePayPaymentMethodLauncher.Result.Failed(

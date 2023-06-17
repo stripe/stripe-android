@@ -29,7 +29,9 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherComponent
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.ShippingInformation
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
@@ -272,6 +274,12 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         var isEmailRequired: Boolean = false,
 
         /**
+         * Shipping address collection configuration.
+         */
+
+        var shippingAddressConfig: ShippingAddressConfig = ShippingAddressConfig(),
+
+        /**
          * Billing address collection configuration.
          */
         var billingAddressConfig: BillingAddressConfig = BillingAddressConfig(),
@@ -295,6 +303,25 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         internal val isJcbEnabled: Boolean
             get() = merchantCountryCode.equals(Locale.JAPAN.country, ignoreCase = true)
     }
+
+    @Parcelize
+    data class ShippingAddressConfig @JvmOverloads constructor(
+        /**
+         * Set to true to request a full shipping address.
+         */
+        internal val isRequired: Boolean = false,
+
+        /**
+         * ISO 3166-1 alpha-2 country code values of the countries where shipping is allowed.
+         * If this object isn't specified, all shipping address countries are allowed.
+         */
+        internal val allowedCountryCodes: Set<String> = emptySet(),
+
+        /**
+         * Set to true if a phone number is required for the provided shipping address.
+         */
+        internal val phoneNumberRequired: Boolean = false
+    ) : Parcelable
 
     @Parcelize
     data class BillingAddressConfig @JvmOverloads constructor(
@@ -334,7 +361,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          */
         @Parcelize
         data class Completed(
-            val paymentMethod: PaymentMethod
+            val paymentMethod: PaymentMethod,
+            val shippingInformation: ShippingInformation? = null,
         ) : Result()
 
         /**

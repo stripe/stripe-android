@@ -174,7 +174,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             GooglePayEnvironment.Test
                     },
                     merchantCountryCode = config.countryCode,
-                    merchantName = merchantName
+                    merchantName = merchantName,
+                    shippingAddressConfig = config.shippingAddressConfig,
                 )
             }
         }
@@ -475,14 +476,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
-    private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
+    private fun confirmPaymentSelection(
+        paymentSelection: PaymentSelection?,
+        googlePayShipping: ConfirmPaymentIntentParams.Shipping? = null,
+    ) {
         viewModelScope.launch {
             val stripeIntent = requireNotNull(stripeIntent.value)
 
             val nextStep = intentConfirmationInterceptor.intercept(
                 initializationMode = args.initializationMode,
                 paymentSelection = paymentSelection,
-                shippingValues = args.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
+                shippingValues = googlePayShipping
+                    ?: args.config?.shippingDetails?.toConfirmPaymentIntentShipping(),
             )
 
             deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
@@ -581,7 +586,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 )
 
                 updateSelection(newPaymentSelection)
-                confirmPaymentSelection(newPaymentSelection)
+                confirmPaymentSelection(
+                    paymentSelection = newPaymentSelection,
+                    googlePayShipping = result.shippingInformation?.toConfirmPaymentIntentShipping()
+                )
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 logger.error("Error processing Google Pay payment", result.error)
