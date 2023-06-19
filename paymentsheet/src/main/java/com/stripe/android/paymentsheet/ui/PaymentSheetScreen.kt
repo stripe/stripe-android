@@ -25,7 +25,7 @@ import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
-import com.stripe.android.paymentsheet.state.WalletsContainerState
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
@@ -88,8 +88,8 @@ internal fun PaymentSheetScreenContent(
     modifier: Modifier = Modifier,
 ) {
     val headerText by viewModel.headerText.collectAsState(null)
+    val walletsState by viewModel.walletsState.collectAsState()
     val buyButtonState by viewModel.buyButtonState.collectAsState(initial = null)
-
     val currentScreen by viewModel.currentScreen.collectAsState()
     val notes by viewModel.notesText.collectAsState()
 
@@ -111,7 +111,13 @@ internal fun PaymentSheetScreenContent(
             )
         }
 
-        Wallet(viewModel)
+        walletsState?.let { state ->
+            Wallet(
+                state = state,
+                onGooglePayPressed = viewModel::checkoutWithGooglePay,
+                onLinkPressed = viewModel::handleLinkPressed,
+            )
+        }
 
         currentScreen.Content(
             viewModel = viewModel,
@@ -145,52 +151,44 @@ internal fun PaymentSheetScreenContent(
 
 @Composable
 internal fun Wallet(
-    viewModel: PaymentSheetViewModel,
+    state: WalletsState,
+    onGooglePayPressed: () -> Unit,
+    onLinkPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val containerState by viewModel.walletsContainerState.collectAsState(
-        initial = WalletsContainerState(),
-    )
-
-    val email by viewModel.linkConfigurationCoordinator.emailFlow.collectAsState(initial = null)
-    val googlePayButtonState by viewModel.googlePayButtonState.collectAsState(initial = null)
-    val buttonsEnabled by viewModel.buttonsEnabled.collectAsState(initial = false)
-
     val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    if (containerState.shouldShow) {
-        Column(modifier = modifier.padding(horizontal = padding)) {
-            if (containerState.showGooglePay) {
-                GooglePayButton(
-                    state = googlePayButtonState?.convert(),
-                    allowCreditCards = containerState.googlePayAllowCreditCards,
-                    billingAddressParameters = containerState.googlePayBillingAddressParameters,
-                    isEnabled = buttonsEnabled,
-                    onPressed = viewModel::checkoutWithGooglePay,
-                )
-            }
-
-            if (containerState.showLink) {
-                LinkButton(
-                    email = email,
-                    enabled = buttonsEnabled,
-                    onClick = viewModel::handleLinkPressed,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .requiredHeight(48.dp),
-                )
-            }
-
-            googlePayButtonState?.errorMessage?.let { error ->
-                ErrorMessage(
-                    error = error.message,
-                    modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
-                )
-            }
-
-            val text = stringResource(containerState.dividerTextResource)
-            GooglePayDividerUi(text)
+    Column(modifier = modifier.padding(horizontal = padding)) {
+        state.googlePay?.let { googlePay ->
+            GooglePayButton(
+                state = googlePay.buttonState?.convert(),
+                allowCreditCards = googlePay.allowCreditCards,
+                billingAddressParameters = googlePay.billingAddressParameters,
+                isEnabled = state.buttonsEnabled,
+                onPressed = onGooglePayPressed,
+            )
         }
+
+        state.link?.let { link ->
+            LinkButton(
+                email = link.email,
+                enabled = state.buttonsEnabled,
+                onClick = onLinkPressed,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .requiredHeight(48.dp),
+            )
+        }
+
+        state.googlePay?.buttonState?.errorMessage?.let { error ->
+            ErrorMessage(
+                error = error.message,
+                modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
+            )
+        }
+
+        val text = stringResource(state.dividerTextResource)
+        GooglePayDividerUi(text)
     }
 }
 
