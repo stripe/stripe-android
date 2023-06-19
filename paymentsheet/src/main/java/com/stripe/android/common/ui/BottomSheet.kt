@@ -16,7 +16,6 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.ModalBottomSheetValue.Expanded
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -98,22 +97,18 @@ internal fun BottomSheet(
         onDismissed()
     }
 
-    DisposableEffect(systemUiController, statusBarColorAlpha) {
+    LaunchedEffect(systemUiController, statusBarColorAlpha) {
         systemUiController.setStatusBarColor(
             color = scrimColor.copy(statusBarColorAlpha),
             darkIcons = false,
         )
-
-        onDispose {}
     }
 
-    DisposableEffect(systemUiController) {
+    LaunchedEffect(systemUiController) {
         systemUiController.setNavigationBarColor(
             color = Color.Transparent,
             darkIcons = false,
         )
-
-        onDispose {}
     }
 
     ModalBottomSheetLayout(
