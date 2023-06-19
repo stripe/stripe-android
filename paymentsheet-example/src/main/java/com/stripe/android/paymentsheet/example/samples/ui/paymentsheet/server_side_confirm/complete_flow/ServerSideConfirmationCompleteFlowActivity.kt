@@ -1,27 +1,25 @@
-package com.stripe.android.paymentsheet.example.samples.ui.custom_flow
+package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow
 
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.snackbar.Snackbar
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.samples.model.toIntentConfiguration
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog
 import com.stripe.android.paymentsheet.example.samples.ui.shared.ErrorScreen
-import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
+import com.stripe.android.paymentsheet.example.samples.ui.shared.SubscriptionToggle
 
-internal class CustomFlowActivity : AppCompatActivity() {
+internal class ServerSideConfirmationCompleteFlowActivity : AppCompatActivity() {
 
     private val snackbar by lazy {
         Snackbar.make(findViewById(android.R.id.content), "", Snackbar.LENGTH_SHORT)
@@ -29,29 +27,23 @@ internal class CustomFlowActivity : AppCompatActivity() {
             .setTextColor(Color.WHITE)
     }
 
-    private val viewModel by viewModels<CustomFlowViewModel>()
+    private val viewModel by viewModels<ServerSideConfirmationCompleteFlowViewModel>()
 
-    private lateinit var flowController: PaymentSheet.FlowController
+    private lateinit var paymentSheet: PaymentSheet
 
+    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        flowController = PaymentSheet.FlowController.create(
+        paymentSheet = PaymentSheet(
             activity = this,
-            paymentOptionCallback = viewModel::handlePaymentOptionChanged,
+            createIntentCallback = viewModel::createAndConfirmIntent,
             paymentResultCallback = viewModel::handlePaymentSheetResult,
         )
 
         setContent {
             PaymentSheetExampleTheme {
                 val uiState by viewModel.state.collectAsState()
-                val paymentMethodLabel = determinePaymentMethodLabel(uiState)
-
-                uiState.paymentInfo?.let { paymentInfo ->
-                    LaunchedEffect(paymentInfo) {
-                        configureFlowController(paymentInfo)
-                    }
-                }
 
                 uiState.status?.let { status ->
                     if (uiState.didComplete) {
@@ -72,45 +64,26 @@ internal class CustomFlowActivity : AppCompatActivity() {
                     Receipt(
                         isLoading = uiState.isProcessing,
                         cartState = uiState.cartState,
+                        isEditable = true,
+                        onQuantityChanged = viewModel::updateQuantity,
                     ) {
-                        PaymentMethodSelector(
-                            isEnabled = uiState.isPaymentMethodButtonEnabled,
-                            paymentMethodLabel = paymentMethodLabel,
-                            paymentMethodIcon = uiState.paymentOption?.icon(),
-                            onClick = flowController::presentPaymentOptions,
+                        SubscriptionToggle(
+                            checked = uiState.cartState.isSubscription,
+                            onCheckedChange = viewModel::updateSubscription,
                         )
+
                         BuyButton(
                             buyButtonEnabled = uiState.isBuyButtonEnabled,
                             onClick = {
-                                viewModel.handleBuyButtonPressed()
-                                flowController.confirm()
+                                paymentSheet.presentWithIntentConfiguration(
+                                    intentConfiguration = uiState.cartState.toIntentConfiguration(),
+                                    configuration = uiState.paymentSheetConfig,
+                                )
                             }
                         )
                     }
                 }
             }
-        }
-    }
-
-    private fun configureFlowController(paymentInfo: CustomFlowViewState.PaymentInfo) {
-        flowController.configureWithPaymentIntent(
-            paymentIntentClientSecret = paymentInfo.clientSecret,
-            configuration = paymentInfo.paymentSheetConfig,
-            callback = viewModel::handleFlowControllerConfigured,
-        )
-    }
-}
-
-@Composable
-private fun determinePaymentMethodLabel(uiState: CustomFlowViewState): String {
-    val context = LocalContext.current
-    return remember(uiState) {
-        if (uiState.paymentOption?.label != null) {
-            uiState.paymentOption.label
-        } else if (!uiState.isProcessing) {
-            context.getString(R.string.select)
-        } else {
-            context.getString(R.string.loading)
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow
+package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

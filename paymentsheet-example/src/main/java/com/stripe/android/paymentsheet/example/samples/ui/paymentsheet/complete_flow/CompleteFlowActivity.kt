@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui.complete_flow
+package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow
 
 import android.graphics.Color
 import android.os.Bundle

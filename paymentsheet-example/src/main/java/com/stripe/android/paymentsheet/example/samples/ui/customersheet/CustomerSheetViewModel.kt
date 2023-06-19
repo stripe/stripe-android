@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui.customer
+package com.stripe.android.paymentsheet.example.samples.ui.customersheet
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

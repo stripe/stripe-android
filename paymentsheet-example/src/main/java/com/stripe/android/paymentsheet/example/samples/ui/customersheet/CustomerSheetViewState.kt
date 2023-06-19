@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui.customer
+package com.stripe.android.paymentsheet.example.samples.ui.customersheet
 
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
