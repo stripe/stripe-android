@@ -36,7 +36,9 @@
 
     <style name="StripePaymentSheetDefaultTheme" parent="StripePaymentSheetBaseTheme" />
 
-    <style name="StripeGooglePayDefaultTheme" parent="StripePaymentSheetBaseTheme" />
+    <style name="StripeGooglePayDefaultTheme" parent="StripePaymentSheetBaseTheme">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
 
     <style name="StripePayLauncherDefaultTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>

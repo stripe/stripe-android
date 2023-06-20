@@ -1,7 +1,6 @@
 package com.stripe.android.googlepaylauncher
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -38,8 +37,6 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        window.statusBarColor = Color.TRANSPARENT
 
         setFadeAnimations()
 
