@@ -4,6 +4,9 @@
 
 ## 20.25.7 - 2023-06-20
 
+### Financial Connections
+* [FIXED][6900](https://github.com/stripe/stripe-android/pull/6900) Stop using getParcelableExtra from API 33 (see https://issuetracker.google.com/issues/240585930)
+
 ## 20.25.6 - 2023-06-12
 
 ### Financial Connections
