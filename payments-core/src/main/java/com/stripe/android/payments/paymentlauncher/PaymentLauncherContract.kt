@@ -1,6 +1,5 @@
 package com.stripe.android.payments.paymentlauncher
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
@@ -19,7 +18,6 @@ import kotlinx.parcelize.Parcelize
 class PaymentLauncherContract :
     ActivityResultContract<PaymentLauncherContract.Args, PaymentResult>() {
     override fun createIntent(context: Context, input: Args): Intent {
-        input.statusBarColor = (context as? Activity)?.window?.statusBarColor
         return Intent(
             context,
             PaymentLauncherConfirmationActivity::class.java
@@ -36,7 +34,7 @@ class PaymentLauncherContract :
         open val stripeAccountId: String?,
         open val enableLogging: Boolean,
         open val productUsage: Set<String>,
-        @ColorInt open var statusBarColor: Int? = null
+        @ColorInt open var statusBarColor: Int? = null,
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
@@ -48,7 +46,7 @@ class PaymentLauncherContract :
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
             val confirmStripeIntentParams: ConfirmStripeIntentParams,
-            @ColorInt override var statusBarColor: Int? = null
+            @ColorInt override var statusBarColor: Int?,
         ) : Args(
             injectorKey,
             publishableKey,
@@ -66,7 +64,7 @@ class PaymentLauncherContract :
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
             val paymentIntentClientSecret: String,
-            @ColorInt override var statusBarColor: Int? = null
+            @ColorInt override var statusBarColor: Int?,
         ) : Args(
             injectorKey,
             publishableKey,
@@ -84,7 +82,7 @@ class PaymentLauncherContract :
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
             val setupIntentClientSecret: String,
-            @ColorInt override var statusBarColor: Int? = null
+            @ColorInt override var statusBarColor: Int?,
         ) : Args(
             injectorKey,
             publishableKey,

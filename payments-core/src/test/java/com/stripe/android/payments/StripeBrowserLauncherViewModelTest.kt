@@ -2,6 +2,7 @@ package com.stripe.android.payments
 
 import android.app.Application
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
@@ -113,6 +114,7 @@ class StripeBrowserLauncherViewModelTest {
             requestCode = 50000,
             clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
             url = "https://bank.com",
+            statusBarColor = Color.RED,
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             isInstantApp = false
         )

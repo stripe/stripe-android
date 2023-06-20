@@ -38,11 +38,6 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val statusColor = intent.getIntExtra(GooglePayPaymentMethodLauncherContract.EXTRA_STATUS_BAR_COLOR, -1)
-        if (statusColor != -1) {
-            window.statusBarColor = statusColor
-        }
-
         setFadeAnimations()
 
         val nullableArgs = GooglePayPaymentMethodLauncherContract.Args.fromIntent(intent)

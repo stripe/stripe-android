@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -20,9 +19,7 @@ internal class PaymentSheetContractV2 :
         context: Context,
         input: Args
     ): Intent {
-        val statusBarColor = (context as? Activity)?.window?.statusBarColor
-        return Intent(context, PaymentSheetActivity::class.java)
-            .putExtra(EXTRA_ARGS, input.copy(statusBarColor = statusBarColor))
+        return Intent(context, PaymentSheetActivity::class.java).putExtra(EXTRA_ARGS, input)
     }
 
     override fun parseResult(
@@ -40,7 +37,7 @@ internal class PaymentSheetContractV2 :
     data class Args(
         internal val initializationMode: PaymentSheet.InitializationMode,
         internal val config: PaymentSheet.Configuration?,
-        @ColorInt internal val statusBarColor: Int? = null,
+        @ColorInt internal val statusBarColor: Int?,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     ) : ActivityStarter.Args {
 

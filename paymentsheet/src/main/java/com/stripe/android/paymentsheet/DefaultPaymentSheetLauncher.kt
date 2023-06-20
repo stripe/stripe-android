@@ -24,6 +24,7 @@ import org.jetbrains.annotations.TestOnly
  */
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
+    private val activity: ComponentActivity,
     lifecycleOwner: LifecycleOwner,
     private val application: Application,
 ) : PaymentSheetLauncher {
@@ -60,6 +61,7 @@ internal class DefaultPaymentSheetLauncher(
         ) {
             callback.onPaymentSheetResult(it)
         },
+        activity = activity,
         lifecycleOwner = activity,
         application = activity.application,
     )
@@ -73,6 +75,7 @@ internal class DefaultPaymentSheetLauncher(
         ) {
             callback.onPaymentSheetResult(it)
         },
+        activity = fragment.requireActivity(),
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
     )
@@ -89,6 +92,7 @@ internal class DefaultPaymentSheetLauncher(
         ) {
             callback.onPaymentSheetResult(it)
         },
+        activity = fragment.requireActivity(),
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
     )
@@ -101,6 +105,7 @@ internal class DefaultPaymentSheetLauncher(
             initializationMode = mode,
             config = configuration,
             injectorKey = injectorKey,
+            statusBarColor = activity.window?.statusBarColor,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(

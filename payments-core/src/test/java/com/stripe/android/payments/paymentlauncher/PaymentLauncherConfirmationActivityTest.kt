@@ -67,7 +67,8 @@ class PaymentLauncherConfirmationActivityTest {
                     TEST_STRIPE_ACCOUNT_ID,
                     false,
                     PRODUCT_USAGE,
-                    confirmStripeIntentParams
+                    confirmStripeIntentParams,
+                    statusBarColor = Color.RED,
                 ).toBundle()
             )
         ).use {
@@ -93,7 +94,8 @@ class PaymentLauncherConfirmationActivityTest {
                     TEST_STRIPE_ACCOUNT_ID,
                     false,
                     PRODUCT_USAGE,
-                    confirmStripeIntentParams
+                    confirmStripeIntentParams,
+                    statusBarColor = Color.RED,
                 ).toBundle()
             )
         ).use {
@@ -136,7 +138,8 @@ class PaymentLauncherConfirmationActivityTest {
                     TEST_STRIPE_ACCOUNT_ID,
                     false,
                     PRODUCT_USAGE,
-                    CLIENT_SECRET
+                    CLIENT_SECRET,
+                    statusBarColor = Color.RED,
                 ).toBundle()
             )
         ).use {
@@ -189,7 +192,8 @@ class PaymentLauncherConfirmationActivityTest {
                 TEST_STRIPE_ACCOUNT_ID,
                 false,
                 PRODUCT_USAGE,
-                CLIENT_SECRET
+                CLIENT_SECRET,
+                statusBarColor = Color.RED,
             )
     }
 }

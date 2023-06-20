@@ -64,6 +64,7 @@ class DefaultPaymentSheetLauncherTest {
 
         DefaultPaymentSheetLauncher(
             activityResultLauncher = mock(),
+            activity = mock(),
             lifecycleOwner = lifecycleOwner,
             application = ApplicationProvider.getApplicationContext(),
         )
