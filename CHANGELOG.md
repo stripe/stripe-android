@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.25.7 - 2023-06-20
+
 ## 20.25.6 - 2023-06-12
 
 ### Financial Connections
