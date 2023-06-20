@@ -19,7 +19,7 @@ import kotlinx.coroutines.Dispatchers
 class PaymentLauncherFactory(
     private val context: Context,
     private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>,
-    private val statusBarColor: () -> Int?,
+    private val statusBarColor: Int?,
 ) {
 
     constructor(
@@ -31,7 +31,7 @@ class PaymentLauncherFactory(
             PaymentLauncherContract(),
             callback::onPaymentResult
         ),
-        statusBarColor = { activity.window?.statusBarColor },
+        statusBarColor = activity.window?.statusBarColor,
     )
 
     constructor(
@@ -43,7 +43,7 @@ class PaymentLauncherFactory(
             PaymentLauncherContract(),
             callback::onPaymentResult
         ),
-        statusBarColor = { fragment.requireActivity().window?.statusBarColor },
+        statusBarColor = fragment.requireActivity().window?.statusBarColor,
     )
 
     fun create(
@@ -60,7 +60,7 @@ class PaymentLauncherFactory(
             publishableKeyProvider = { publishableKey },
             stripeAccountIdProvider = { stripeAccountId },
             hostActivityLauncher = hostActivityLauncher,
-            statusBarColor = statusBarColor(),
+            statusBarColor = statusBarColor,
             context = context,
             enableLogging = BuildConfig.DEBUG,
             ioContext = Dispatchers.IO,

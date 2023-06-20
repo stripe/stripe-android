@@ -104,7 +104,7 @@ interface PaymentLauncher {
                     PaymentLauncherContract(),
                     callback::onPaymentResult
                 ),
-                statusBarColor = { context.findActivity()?.window?.statusBarColor },
+                statusBarColor = context.findActivity()?.window?.statusBarColor,
             ).create(publishableKey, stripeAccountId)
         }
 
@@ -133,7 +133,7 @@ interface PaymentLauncher {
                 PaymentLauncherFactory(
                     context = context,
                     hostActivityLauncher = activityResultLauncher,
-                    statusBarColor = { context.findActivity()?.window?.statusBarColor },
+                    statusBarColor = context.findActivity()?.window?.statusBarColor,
                 ).create(publishableKey, stripeAccountId)
             }
         }

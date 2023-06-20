@@ -61,7 +61,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
         val host = AuthActivityStarterHost.create(
             activity = this,
-            statusBarColor = { args.statusBarColor },
+            statusBarColor = args.statusBarColor,
         )
 
         when (args) {

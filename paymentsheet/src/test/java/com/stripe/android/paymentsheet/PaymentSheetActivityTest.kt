@@ -121,7 +121,7 @@ internal class PaymentSheetActivityTest {
     private val paymentLauncherFactory = PaymentLauncherFactory(
         context = context,
         hostActivityLauncher = mock(),
-        statusBarColor = { null },
+        statusBarColor = null,
     )
 
     private val paymentLauncher: StripePaymentLauncher by lazy {
