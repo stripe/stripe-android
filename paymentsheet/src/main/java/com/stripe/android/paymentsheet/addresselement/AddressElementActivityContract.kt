@@ -1,10 +1,8 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.annotation.ColorInt
 import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.InjectorKey
@@ -15,9 +13,7 @@ internal class AddressElementActivityContract :
     ActivityResultContract<AddressElementActivityContract.Args, AddressLauncherResult>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
-        val statusBarColor = (context as? Activity)?.window?.statusBarColor
-        return Intent(context, AddressElementActivity::class.java)
-            .putExtra(EXTRA_ARGS, input.copy(statusBarColor = statusBarColor))
+        return Intent(context, AddressElementActivity::class.java).putExtra(EXTRA_ARGS, input)
     }
 
     @Suppress("DEPRECATION")
@@ -38,7 +34,6 @@ internal class AddressElementActivityContract :
         internal val publishableKey: String,
         internal val config: AddressLauncher.Configuration?,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY,
-        @ColorInt internal val statusBarColor: Int? = null
     ) : ActivityStarter.Args {
 
         internal companion object {

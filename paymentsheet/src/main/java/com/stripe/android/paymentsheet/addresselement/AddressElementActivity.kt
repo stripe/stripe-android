@@ -8,16 +8,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Surface
-import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
@@ -28,6 +21,8 @@ import androidx.navigation.navArgument
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.stripe.android.common.ui.BottomSheet
+import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.ui.Loading
 import com.stripe.android.uicore.StripeTheme
@@ -50,8 +45,6 @@ internal class AddressElementActivity : ComponentActivity() {
         requireNotNull(AddressElementActivityContract.Args.fromIntent(intent))
     }
 
-    private lateinit var navController: NavHostController
-
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,89 +52,69 @@ internal class AddressElementActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         starterArgs.config?.appearance?.parseAppearance()
 
-        starterArgs.statusBarColor?.let {
-            window.statusBarColor = it
-        }
-
-        // set a default result in case the user closes the sheet manually
-        setResult()
-
         setContent {
-            val modalBottomSheetState = rememberModalBottomSheetState(
-                initialValue = ModalBottomSheetValue.Hidden,
+            val navController = rememberAnimatedNavController()
+            viewModel.navigator.navigationController = navController
+
+            val bottomSheetState = rememberBottomSheetState(
                 confirmValueChange = {
                     val route = navController.currentDestination?.route
                     route != AddressElementScreen.Autocomplete.route
                 },
-                skipHalfExpanded = true,
-                animationSpec = tween(),
             )
 
             BackHandler {
                 viewModel.navigator.onBack()
             }
 
-            navController = rememberAnimatedNavController()
-            viewModel.navigator.navigationController = navController
-
             val coroutineScope = rememberCoroutineScope()
-
-            LaunchedEffect(Unit) {
-                modalBottomSheetState.show()
-                navController.navigateToContent()
-            }
 
             viewModel.navigator.onDismiss = {
                 setResult(it)
                 coroutineScope.launch {
-                    modalBottomSheetState.hide()
+                    bottomSheetState.hide()
                     finish()
                 }
             }
 
             StripeTheme {
-                ModalBottomSheetLayout(
-                    sheetState = modalBottomSheetState,
-                    sheetContent = {
-                        Surface(
-                            modifier = Modifier.fillMaxSize()
+                BottomSheet(
+                    state = bottomSheetState,
+                    onShow = navController::navigateToContent,
+                    onDismissed = viewModel.navigator::dismiss,
+                ) {
+                    Surface(modifier = Modifier.fillMaxSize()) {
+                        AnimatedNavHost(
+                            navController = navController,
+                            startDestination = AddressElementScreen.Loading.route,
                         ) {
-                            AnimatedNavHost(
-                                navController = navController,
-                                startDestination = AddressElementScreen.Loading.route,
-                            ) {
-                                composable(AddressElementScreen.Loading.route) {
-                                    Loading()
-                                }
-                                composable(AddressElementScreen.InputAddress.route) {
-                                    InputAddressScreen(viewModel.injector)
-                                }
-                                composable(
-                                    AddressElementScreen.Autocomplete.route,
-                                    arguments = listOf(
-                                        navArgument(AddressElementScreen.Autocomplete.countryArg) {
-                                            type = NavType.StringType
-                                        }
+                            composable(AddressElementScreen.Loading.route) {
+                                Loading()
+                            }
+                            composable(AddressElementScreen.InputAddress.route) {
+                                InputAddressScreen(viewModel.injector)
+                            }
+                            composable(
+                                AddressElementScreen.Autocomplete.route,
+                                arguments = listOf(
+                                    navArgument(AddressElementScreen.Autocomplete.countryArg) {
+                                        type = NavType.StringType
+                                    }
+                                )
+                            ) { backStackEntry ->
+                                val country = backStackEntry
+                                    .arguments
+                                    ?.getString(
+                                        AddressElementScreen.Autocomplete.countryArg
                                     )
-                                ) { backStackEntry ->
-                                    val country = backStackEntry
-                                        .arguments
-                                        ?.getString(
-                                            AddressElementScreen.Autocomplete.countryArg
-                                        )
-                                    AutocompleteScreen(
-                                        viewModel.injector,
-                                        country
-                                    )
-                                }
+                                AutocompleteScreen(
+                                    viewModel.injector,
+                                    country
+                                )
                             }
                         }
-                    },
-                    content = {},
-                    modifier = Modifier
-                        .navigationBarsPadding()
-                        .systemBarsPadding()
-                )
+                    }
+                }
             }
         }
     }
