@@ -7,12 +7,12 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import com.stripe.android.utils.screenshots.SystemAppearance
-import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
 import org.junit.Test
 
@@ -113,7 +113,7 @@ class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.AddPaymentMethod(
-                    formViewDataFlow = flowOf(),
+                    formViewData = FormViewModel.ViewData(),
                     enabled = true,
                     isLiveMode = false,
                 ),

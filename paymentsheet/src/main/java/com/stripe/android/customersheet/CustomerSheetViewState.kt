@@ -6,7 +6,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
-import kotlinx.coroutines.flow.Flow
 
 internal sealed class CustomerSheetViewState(
     open val savedPaymentMethods: List<PaymentMethod>,
@@ -55,7 +54,7 @@ internal sealed class CustomerSheetViewState(
     )
 
     data class AddPaymentMethod(
-        val formViewDataFlow: Flow<FormViewModel.ViewData>,
+        val formViewData: FormViewModel.ViewData,
         val enabled: Boolean,
         override val isLiveMode: Boolean,
     ) : CustomerSheetViewState(

@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
@@ -21,7 +19,6 @@ import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
@@ -166,12 +163,10 @@ internal fun AddCard(
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    val viewData by viewState.formViewDataFlow.collectAsState(initial = FormViewModel.ViewData())
-
-    LaunchedEffect(viewData.completeFormValues) {
+    LaunchedEffect(viewState.formViewData.completeFormValues) {
         viewActionHandler(
             CustomerSheetViewAction.OnFormValuesChanged(
-                viewData.completeFormValues
+                viewState.formViewData.completeFormValues
             )
         )
     }
@@ -188,10 +183,10 @@ internal fun AddCard(
         )
 
         FormUI(
-            hiddenIdentifiers = viewData.hiddenIdentifiers,
+            hiddenIdentifiers = viewState.formViewData.hiddenIdentifiers,
             enabled = viewState.enabled,
-            elements = viewData.elements,
-            lastTextFieldIdentifier = viewData.lastTextFieldIdentifier,
+            elements = viewState.formViewData.elements,
+            lastTextFieldIdentifier = viewState.formViewData.lastTextFieldIdentifier,
             modifier = Modifier.padding(bottom = 20.dp),
         )
 
