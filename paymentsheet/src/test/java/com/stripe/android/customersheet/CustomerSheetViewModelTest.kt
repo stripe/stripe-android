@@ -7,13 +7,22 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.uicore.address.AddressRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -410,12 +419,39 @@ class CustomerSheetViewModelTest {
             stripeAccountId = null,
         )
     ): CustomerSheetViewModel {
+        val formViewModel = FormViewModel(
+            context = application,
+            formArguments = FormArguments(
+                PaymentMethod.Type.Card.code,
+                showCheckbox = false,
+                showCheckboxControlledFields = false,
+                merchantName = "",
+                initialPaymentMethodCreateParams = null
+            ),
+            lpmRepository = lpmRepository,
+            addressRepository = AddressRepository(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                workContext = Dispatchers.Unconfined,
+            ),
+            showCheckboxFlow = mock()
+        )
+        val mockFormBuilder = mock<FormViewModelSubcomponent.Builder>()
+        val mockFormSubcomponent = mock<FormViewModelSubcomponent>()
+        val mockFormSubComponentBuilderProvider =
+            mock<Provider<FormViewModelSubcomponent.Builder>>()
+        whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
+        whenever(mockFormBuilder.formArguments(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormBuilder.showCheckboxFlow(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
+        whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
+
         return CustomerSheetViewModel(
             paymentConfiguration = paymentConfiguration,
+            formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,
             resources = application.resources,
             customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
-            configuration = CustomerSheet.Configuration()
+            configuration = CustomerSheet.Configuration(),
         )
     }
 }

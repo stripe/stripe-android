@@ -20,6 +20,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.flow.Flow
@@ -129,8 +130,8 @@ internal class FormViewModel @Inject internal constructor(
             it?.hiddenIdentifiers ?: flowOf(emptySet())
         }.flattenConcat(),
         externalHiddenIdentifiers
-    ) { showFutureUse, cardBillingIdentifiers, saveFutureUseIdentifiers ->
-        val hiddenIdentifiers = saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
+    ) { showFutureUse, cardBillingIdentifiers, externalHiddenIdentifiers ->
+        val hiddenIdentifiers = externalHiddenIdentifiers.plus(cardBillingIdentifiers)
 
         val saveForFutureUseElement = saveForFutureUseElement.firstOrNull()
         if (!showFutureUse && saveForFutureUseElement != null) {
@@ -198,7 +199,7 @@ internal class FormViewModel @Inject internal constructor(
 
     @VisibleForTesting
     val defaultValuesToInclude get(): Map<IdentifierSpec, String> {
-        var defaults = mutableMapOf<IdentifierSpec, String>()
+        val defaults = mutableMapOf<IdentifierSpec, String>()
 
         if (formArguments.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod) {
             formArguments.billingDetails?.let { billingDetails ->
@@ -234,4 +235,25 @@ internal class FormViewModel @Inject internal constructor(
             !hiddenIds.contains(it)
         }
     }
+
+    internal val viewDataFlow = combine(
+        elementsFlow,
+        completeFormValues,
+        hiddenIdentifiers,
+        lastTextFieldIdentifier,
+    ) { elements, completeFormValues, hiddenIdentifiers, lastTextFieldIdentifier ->
+        ViewData(
+            elements = elements,
+            completeFormValues = completeFormValues,
+            hiddenIdentifiers = hiddenIdentifiers,
+            lastTextFieldIdentifier = lastTextFieldIdentifier,
+        )
+    }
+
+    internal class ViewData(
+        val elements: List<FormElement> = listOf(),
+        val completeFormValues: FormFieldValues? = null,
+        val hiddenIdentifiers: Set<IdentifierSpec> = setOf(),
+        val lastTextFieldIdentifier: IdentifierSpec? = null,
+    )
 }

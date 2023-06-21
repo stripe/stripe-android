@@ -1,8 +1,10 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import kotlinx.coroutines.flow.Flow
 
 internal sealed class CustomerSheetViewState(
     open val showEditMenu: Boolean,
@@ -42,6 +44,8 @@ internal sealed class CustomerSheetViewState(
     )
 
     data class AddPaymentMethod(
+        val formViewDataFlow: Flow<FormViewModel.ViewData>,
+        val enabled: Boolean,
         override val isLiveMode: Boolean,
     ) : CustomerSheetViewState(
         showEditMenu = false,
