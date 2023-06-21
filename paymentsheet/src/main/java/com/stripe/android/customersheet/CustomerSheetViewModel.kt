@@ -10,6 +10,7 @@ import com.stripe.android.customersheet.injection.CustomerSessionScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -146,11 +147,21 @@ internal class CustomerSheetViewModel @Inject constructor(
 
         transition(
             to = CustomerSheetViewState.AddPaymentMethod(
-                formViewDataFlow = formViewModel.viewDataFlow,
+                formViewData = FormViewModel.ViewData(),
                 enabled = true,
                 isLiveMode = isLiveMode,
             )
         )
+
+        viewModelScope.launch {
+            formViewModel.viewDataFlow.collect { data ->
+                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                    it.copy(
+                        formViewData = data
+                    )
+                }
+            }
+        }
     }
 
     private fun onDismissed() {
