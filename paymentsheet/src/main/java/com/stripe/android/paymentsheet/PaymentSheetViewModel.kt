@@ -13,7 +13,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
@@ -30,7 +29,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -54,9 +52,10 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.paymentsheet.state.WalletsContainerState
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -68,7 +67,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -136,9 +135,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
 
-    val googlePayButtonState: Flow<PaymentSheetViewState?> = viewState.filter {
+    val googlePayButtonState: StateFlow<PaymentSheetViewState?> = viewState.filter {
         checkoutIdentifier == CheckoutIdentifier.SheetTopGooglePay
-    }
+    }.stateIn(
+        scope = CoroutineScope(workContext),
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
 
     val buyButtonState: Flow<PaymentSheetViewState?> = viewState.filter {
         checkoutIdentifier == CheckoutIdentifier.SheetBottomBuy
@@ -185,32 +188,28 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         initialValue = null,
     )
 
-    internal val walletsContainerState: Flow<WalletsContainerState> = combine(
+    private val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
+
+    internal val walletsState: StateFlow<WalletsState?> = combineStateFlows(
         linkHandler.isLinkEnabled,
+        linkEmailFlow,
         googlePayState,
+        googlePayButtonState,
+        buttonsEnabled,
         supportedPaymentMethodsFlow,
-    ) { isLinkAvailable, googlePayState, paymentMethodTypes ->
-        WalletsContainerState(
-            showLink = isLinkAvailable == true,
-            showGooglePay = googlePayState.isReadyForUse,
-            dividerTextResource = if (paymentMethodTypes.singleOrNull() == Card.code) {
-                R.string.stripe_paymentsheet_or_pay_with_card
-            } else {
-                R.string.stripe_paymentsheet_or_pay_using
-            },
-            googlePayAllowCreditCards = googlePayLauncherConfig?.allowCreditCards ?: false,
-            googlePayBillingAddressParameters = googlePayLauncherConfig?.let {
-                GooglePayJsonFactory.BillingAddressParameters(
-                    it.billingAddressConfig.isRequired,
-                    when (it.billingAddressConfig.format) {
-                        GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min ->
-                            GooglePayJsonFactory.BillingAddressParameters.Format.Min
-                        GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full ->
-                            GooglePayJsonFactory.BillingAddressParameters.Format.Full
-                    },
-                    it.billingAddressConfig.isPhoneNumberRequired
-                )
-            }
+    ) { isLinkAvailable, linkEmail, googlePayState, googlePayButtonState, buttonsEnabled, paymentMethodTypes ->
+        WalletsState.create(
+            isLinkAvailable = isLinkAvailable,
+            linkEmail = linkEmail,
+            googlePayState = googlePayState,
+            googlePayButtonState = googlePayButtonState,
+            buttonsEnabled = buttonsEnabled,
+            paymentMethodTypes = paymentMethodTypes,
+            googlePayLauncherConfig = googlePayLauncherConfig,
         )
     }
 

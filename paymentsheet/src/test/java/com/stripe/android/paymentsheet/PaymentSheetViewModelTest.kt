@@ -1091,20 +1091,28 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Shows Google Pay wallet button if Link is available`() = runTest {
+    fun `Shows Google Pay wallet button if Google Pay is available`() = runTest {
         val viewModel = createViewModel(isGooglePayReady = true)
 
-        viewModel.walletsContainerState.test {
-            assertThat(awaitItem().showGooglePay).isTrue()
+        viewModel.walletsState.test {
+            assertThat(awaitItem()?.googlePay).isNotNull()
         }
     }
 
     @Test
-    fun `Hides Google Pay wallet button if Link is not available`() = runTest {
-        val viewModel = createViewModel()
+    fun `Hides Google Pay wallet button if Google Pay is not available`() = runTest {
+        val viewModel = createViewModel(
+            isGooglePayReady = false,
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
+        )
 
-        viewModel.walletsContainerState.test {
-            assertThat(awaitItem().showGooglePay).isFalse()
+        viewModel.walletsState.test {
+            val state = awaitItem()
+            assertThat(state).isNotNull()
+            assertThat(state?.googlePay).isNull()
         }
     }
 
@@ -1117,8 +1125,8 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        viewModel.walletsContainerState.test {
-            assertThat(awaitItem().showLink).isTrue()
+        viewModel.walletsState.test {
+            assertThat(awaitItem()?.link).isNotNull()
             expectNoEvents()
         }
     }
@@ -1126,20 +1134,25 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Hides Link wallet button if Link is not available`() = runTest {
         val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card"))
-        val viewModel = createViewModel(stripeIntent = intent)
+        val viewModel = createViewModel(stripeIntent = intent, isGooglePayReady = true)
 
-        viewModel.walletsContainerState.test {
-            assertThat(awaitItem().showLink).isFalse()
+        viewModel.walletsState.test {
+            val state = awaitItem()
+            assertThat(state).isNotNull()
+            assertThat(state?.link).isNull()
         }
     }
 
     @Test
     fun `Shows the correct divider text if intent only supports card`() = runTest {
         val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card"))
-        val viewModel = createViewModel(stripeIntent = intent)
+        val viewModel = createViewModel(
+            isGooglePayReady = true,
+            stripeIntent = intent,
+        )
 
-        viewModel.walletsContainerState.test {
-            val textResource = awaitItem().dividerTextResource
+        viewModel.walletsState.test {
+            val textResource = awaitItem()?.dividerTextResource
             assertThat(textResource).isEqualTo(R.string.stripe_paymentsheet_or_pay_with_card)
         }
     }
@@ -1148,6 +1161,7 @@ internal class PaymentSheetViewModelTest {
     fun `Shows the correct divider text if intent supports multiple payment method types`() = runTest {
         val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card", "cashapp"))
         val viewModel = createViewModel(
+            isGooglePayReady = true,
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
                     allowsDelayedPaymentMethods = true,
@@ -1156,8 +1170,8 @@ internal class PaymentSheetViewModelTest {
             stripeIntent = intent,
         )
 
-        viewModel.walletsContainerState.test {
-            val textResource = awaitItem().dividerTextResource
+        viewModel.walletsState.test {
+            val textResource = awaitItem()?.dividerTextResource
             assertThat(textResource).isEqualTo(R.string.stripe_paymentsheet_or_pay_using)
         }
     }
