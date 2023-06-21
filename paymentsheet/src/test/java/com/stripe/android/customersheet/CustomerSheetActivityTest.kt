@@ -137,17 +137,6 @@ internal class CustomerSheetActivityTest {
     }
 
     @Test
-    fun `When showEditMenu is true, edit menu is visible`() {
-        runActivityScenario(
-            viewState = createSelectPaymentMethodViewState(
-                showEditMenu = true
-            ),
-        ) {
-            page.waitForText("edit")
-        }
-    }
-
-    @Test
     fun `When isGooglePayEnabled is true, google pay is visible`() {
         runActivityScenario(
             viewState = createSelectPaymentMethodViewState(
@@ -237,7 +226,6 @@ internal class CustomerSheetActivityTest {
         title: String? = null,
         savedPaymentMethods: List<PaymentMethod> = listOf(),
         paymentSelection: PaymentSelection? = null,
-        showEditMenu: Boolean = false,
         isLiveMode: Boolean = false,
         isProcessing: Boolean = false,
         isEditing: Boolean = false,
@@ -249,7 +237,6 @@ internal class CustomerSheetActivityTest {
             title = title,
             savedPaymentMethods = savedPaymentMethods,
             paymentSelection = paymentSelection,
-            showEditMenu = showEditMenu,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isEditing = isEditing,

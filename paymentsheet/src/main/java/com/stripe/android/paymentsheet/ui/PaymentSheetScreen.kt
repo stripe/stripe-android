@@ -38,22 +38,14 @@ internal fun PaymentSheetScreen(
     val contentVisible by viewModel.contentVisible.collectAsState()
     val processing by viewModel.processing.collectAsState()
 
-    val screen = viewModel.currentScreen.collectAsState().value
-    val paymentMethods = viewModel.paymentMethods.collectAsState().value
-    val isLiveMode = viewModel.stripeIntent.collectAsState().value?.isLiveMode
-    val isProcessing = viewModel.processing.collectAsState().value
-    val isEditing = viewModel.editing.collectAsState().value
+    val topBarState by viewModel.topBarState.collectAsState()
 
     DismissKeyboardOnProcessing(processing)
 
     PaymentSheetScaffold(
         topBar = {
             PaymentSheetTopBar(
-                screen = screen,
-                showEditMenu = !paymentMethods.isNullOrEmpty(),
-                isLiveMode = isLiveMode,
-                isProcessing = isProcessing,
-                isEditing = isEditing,
+                state = topBarState,
                 handleBackPressed = viewModel::handleBackPressed,
                 toggleEditing = viewModel::toggleEditing,
             )

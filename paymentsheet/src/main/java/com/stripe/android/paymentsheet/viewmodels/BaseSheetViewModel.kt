@@ -35,6 +35,8 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -196,6 +198,19 @@ internal abstract class BaseSheetViewModel(
             started = SharingStarted.WhileSubscribed(),
             initialValue = PaymentOptionsState(),
         )
+
+    val topBarState: StateFlow<PaymentSheetTopBarState> = combine(
+        currentScreen,
+        paymentMethods,
+        stripeIntent.map { it?.isLiveMode ?: true },
+        processing,
+        editing,
+        PaymentSheetTopBarStateFactory::create,
+    ).stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = PaymentSheetTopBarStateFactory.createDefault(),
+    )
 
     init {
         viewModelScope.launch {

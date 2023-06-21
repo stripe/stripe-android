@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.stripeColors
@@ -41,23 +40,11 @@ internal const val SHEET_NAVIGATION_BUTTON_TAG = "SHEET_NAVIGATION_BUTTON_TAG"
 
 @Composable
 internal fun PaymentSheetTopBar(
-    screen: PaymentSheetScreen,
-    showEditMenu: Boolean,
-    isLiveMode: Boolean?,
-    isProcessing: Boolean,
-    isEditing: Boolean,
+    state: PaymentSheetTopBarState,
     handleBackPressed: () -> Unit,
     toggleEditing: () -> Unit,
     elevation: Dp = 0.dp,
 ) {
-    val state = rememberPaymentSheetTopBarState(
-        screen = screen,
-        showEditMenu = showEditMenu,
-        isLiveMode = isLiveMode ?: true,
-        isProcessing = isProcessing,
-        isEditing = isEditing,
-    )
-
     PaymentSheetTopBar(
         state = state,
         elevation = elevation,
