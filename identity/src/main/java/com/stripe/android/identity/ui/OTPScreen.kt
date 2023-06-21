@@ -120,7 +120,8 @@ internal fun OTPScreen(
                 )
 
                 OTPElementUI(
-                    enabled = (viewState == InputtingOTP ||
+                    enabled = (
+                        viewState == InputtingOTP ||
                         viewState == ErrorOTP ||
                         viewState is RequestingCannotVerifySuccess
                         ),
