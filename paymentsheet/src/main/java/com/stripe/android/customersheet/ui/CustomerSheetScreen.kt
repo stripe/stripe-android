@@ -1,8 +1,6 @@
 package com.stripe.android.customersheet.ui
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,7 +29,6 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.H4Text
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 internal fun CustomerSheetScreen(
     viewState: CustomerSheetViewState,
@@ -60,26 +57,22 @@ internal fun CustomerSheetScreen(
             )
         },
         content = {
-            AnimatedContent(
-                targetState = viewState
-            ) { targetState ->
-                when (targetState) {
-                    is CustomerSheetViewState.Loading -> {
-                        Loading()
-                    }
-                    is CustomerSheetViewState.SelectPaymentMethod -> {
-                        SelectPaymentMethod(
-                            viewState = targetState,
-                            viewActionHandler = viewActionHandler,
-                            paymentMethodNameProvider = paymentMethodNameProvider,
-                        )
-                    }
-                    is CustomerSheetViewState.AddPaymentMethod -> {
-                        AddCard(
-                            viewState = targetState,
-                            viewActionHandler = viewActionHandler,
-                        )
-                    }
+            when (viewState) {
+                is CustomerSheetViewState.Loading -> {
+                    Loading()
+                }
+                is CustomerSheetViewState.SelectPaymentMethod -> {
+                    SelectPaymentMethod(
+                        viewState = viewState,
+                        viewActionHandler = viewActionHandler,
+                        paymentMethodNameProvider = paymentMethodNameProvider,
+                    )
+                }
+                is CustomerSheetViewState.AddPaymentMethod -> {
+                    AddCard(
+                        viewState = viewState,
+                        viewActionHandler = viewActionHandler,
+                    )
                 }
             }
         },
