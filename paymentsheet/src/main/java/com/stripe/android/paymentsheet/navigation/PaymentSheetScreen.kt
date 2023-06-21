@@ -3,9 +3,9 @@ package com.stripe.android.paymentsheet.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.PaymentOptions
-import com.stripe.android.paymentsheet.ui.PaymentSheetLoading
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal sealed interface PaymentSheetScreen {
@@ -23,7 +23,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            PaymentSheetLoading(modifier)
+            BottomSheetLoadingIndicator(modifier)
         }
     }
 
