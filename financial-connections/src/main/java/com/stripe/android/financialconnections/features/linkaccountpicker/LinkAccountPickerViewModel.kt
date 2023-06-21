@@ -21,8 +21,10 @@ import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
+import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
@@ -54,19 +56,28 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             )
             val consumerSession = requireNotNull(getCachedConsumerSession())
             val accountsResponse = pollNetworkedAccounts(consumerSession.clientSecret)
-            val accounts = accountsResponse
-                .data
-                // Override allow selection to disable disconnected accounts
-                // TODO@carlosmuvi update once native supports account repairability
-                .map { it.copy(_allowSelection = it.status == Status.ACTIVE) }
-                .sortedBy { it.allowSelection.not() }
+            val display = requireNotNull(
+                accountsResponse
+                    .display?.text?.returningNetworkingUserAccountPicker
+            )
+            // zip the accounts with their display info by id.
+            val accounts = requireNotNull(accountsResponse.data)
+                .map { partnerAccount ->
+                    Pair(
+                        partnerAccount,
+                        display.accounts.first { partnerAccount.id == it.id }
+                    )
+                }
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
-                repairAuthorizationEnabled = accountsResponse.repairAuthorizationEnabled ?: false,
+                accounts = accounts,
+                addNewAccount = display.addNewAccount!!,
+                title = display.title,
+                defaultCta = display.defaultCta,
+                repairAuthorizationEnabled = accountsResponse.repairAuthorizationEnabled,
                 stepUpAuthenticationRequired = manifest.stepUpAuthenticationRequired ?: false,
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 businessName = manifest.businessName,
-                accounts = accounts,
                 // We always want to refer to Link rather than Stripe on Link panes.
                 accessibleData = accessibleData.copy(isStripeDirect = false)
             )
@@ -78,7 +89,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             LinkAccountPickerState::payload,
             onSuccess = {
                 // Select first account by default.
-                setState { copy(selectedAccountId = it.accounts.firstOrNull()?.id) }
+                setState { copy(selectedAccountId = it.accounts.firstOrNull()?.first?.id) }
             },
             onFail = { error ->
                 logger.error("Error fetching payload", error)
@@ -109,11 +120,11 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         val state = awaitState()
         val payload = requireNotNull(state.payload())
         val selectedAccount =
-            requireNotNull(payload.accounts.first { it.id == state.selectedAccountId })
+            requireNotNull(payload.accounts.first { it.first.id == state.selectedAccountId })
         when {
-            selectedAccount.status != Status.ACTIVE -> repairAccount()
+            selectedAccount.first.status != Status.ACTIVE -> repairAccount()
             payload.stepUpAuthenticationRequired -> goNext(Pane.LINK_STEP_UP_VERIFICATION)
-            else -> selectAccount(payload, selectedAccount)
+            else -> selectAccount(payload, selectedAccount.first)
         }
         Unit
     }.execute { copy(selectNetworkedAccountAsync = it) }
@@ -170,11 +181,14 @@ internal data class LinkAccountPickerState(
 ) : MavericksState {
 
     data class Payload(
-        val accounts: List<PartnerAccount>,
+        val title: String,
+        val accounts: List<Pair<PartnerAccount, NetworkedAccount>>,
+        val addNewAccount: AddNewAccount,
         val accessibleData: AccessibleDataCalloutModel,
         val businessName: String?,
         val consumerSessionClientSecret: String,
         val repairAuthorizationEnabled: Boolean,
-        val stepUpAuthenticationRequired: Boolean
+        val stepUpAuthenticationRequired: Boolean,
+        val defaultCta: String
     )
 }

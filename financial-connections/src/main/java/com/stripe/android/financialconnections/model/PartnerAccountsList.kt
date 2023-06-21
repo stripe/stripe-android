@@ -99,12 +99,12 @@ internal data class PartnerAccount(
 
     @SerialName(value = "status") val status: FinancialConnectionsAccount.Status? = null
 
-): Parcelable {
+) : Parcelable {
 
     internal val allowSelection: Boolean
         get() = _allowSelection ?: true
 
-    internal val encryptedNumbers get() = displayableAccountNumbers?.let { "••••$it" } ?: ""
+    internal val redactedAccountNumbers get() = displayableAccountNumbers?.let { "••••$it" } ?: ""
 
-    internal val fullName get() = "${this.name} $encryptedNumbers"
+    internal val fullName get() = "${this.name} $redactedAccountNumbers"
 }

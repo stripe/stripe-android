@@ -209,7 +209,6 @@ internal data class LegalDetailsBody(
     val bullets: List<Bullet>
 ) : Parcelable
 
-
 @Serializable
 @Parcelize
 internal data class ReturningNetworkingUserAccountPicker(
@@ -231,11 +230,10 @@ internal data class NetworkedAccount(
     @SerialName("next_pane_on_selection") val nextPaneOnSelection: Pane? = null
 ) : Parcelable
 
-
 @Serializable
 @Parcelize
 internal data class AddNewAccount(
     @SerialName("body") val body: String? = null,
     @SerialName("icon") val icon: Image? = null,
-    @SerialName("next_pane") val nextPane: String? = null
+    @SerialName("next_pane") val nextPane: Pane? = null
 ) : Parcelable

@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat.getLocales
+import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
@@ -35,10 +36,16 @@ internal fun AccountItem(
     selected: Boolean,
     onAccountClicked: (PartnerAccount) -> Unit,
     account: PartnerAccount,
+    networkedAccount: NetworkedAccount? = null,
     selectorContent: @Composable RowScope.() -> Unit
 ) {
-    val verticalPadding =
-        remember(account) { if (account.displayableAccountNumbers != null) 10.dp else 12.dp }
+    val selectable = networkedAccount?.allowSelection ?: account.allowSelection
+    val (title, subtitle) = getAccountTexts(
+        account = account,
+        networkedAccount = networkedAccount,
+        allowSelection = selectable
+    )
+    val verticalPadding = remember(account) { if (subtitle == null) 10.dp else 12.dp }
     val shape = remember { RoundedCornerShape(8.dp) }
     Box(
         modifier = Modifier
@@ -52,7 +59,7 @@ internal fun AccountItem(
                 },
                 shape = shape
             )
-            .clickableSingle(enabled = account.allowSelection) { onAccountClicked(account) }
+            .clickableSingle(enabled = selectable) { onAccountClicked(account) }
             .padding(vertical = verticalPadding, horizontal = 16.dp)
     ) {
         Row(
@@ -61,7 +68,6 @@ internal fun AccountItem(
         ) {
             selectorContent()
             Spacer(modifier = Modifier.size(16.dp))
-            val (title, subtitle) = getAccountTexts(account = account)
             Column(
                 Modifier.weight(0.7f)
             ) {
@@ -69,7 +75,7 @@ internal fun AccountItem(
                     text = title,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
-                    color = if (account.allowSelection) {
+                    color = if (selectable) {
                         FinancialConnectionsTheme.colors.textPrimary
                     } else {
                         FinancialConnectionsTheme.colors.textDisabled
@@ -91,21 +97,26 @@ internal fun AccountItem(
 
 @Composable
 private fun getAccountTexts(
+    allowSelection: Boolean,
     account: PartnerAccount,
+    networkedAccount: NetworkedAccount?,
 ): Pair<String, String?> {
     val formattedBalance = account.getFormattedBalance()
-    val title = when {
-        account.allowSelection.not() ||
-            formattedBalance != null -> "${account.name} ${account.encryptedNumbers}"
 
-        else -> account.name
-    }
     val subtitle = when {
-        account.allowSelection.not() -> account.allowSelectionMessage
+        networkedAccount?.caption != null -> networkedAccount.caption
+        allowSelection.not() -> account.allowSelectionMessage
         formattedBalance != null -> formattedBalance
-        account.encryptedNumbers.isNotEmpty() -> account.encryptedNumbers
+        account.redactedAccountNumbers.isNotEmpty() -> account.redactedAccountNumbers
         else -> null
     }
+
+    // just show redacted account numbers in the title if they're not in the subtitle.
+    val title = when {
+        subtitle != account.redactedAccountNumbers -> "${account.name} ${account.redactedAccountNumbers}"
+        else -> account.name
+    }
+
     return title to subtitle
 }
 
