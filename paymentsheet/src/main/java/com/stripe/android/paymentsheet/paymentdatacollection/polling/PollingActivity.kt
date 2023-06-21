@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.payments.PaymentFlowResult
@@ -25,16 +26,16 @@ internal class PollingActivity : AppCompatActivity() {
         requireNotNull(PollingContract.Args.fromIntent(intent))
     }
 
-    private val viewModel by viewModels<PollingViewModel> {
-        PollingViewModel.Factory {
-            PollingViewModel.Args(
-                clientSecret = args.clientSecret,
-                timeLimit = args.timeLimitInSeconds.seconds,
-                initialDelay = args.initialDelayInSeconds.seconds,
-                maxAttempts = args.maxAttempts,
-            )
-        }
+    internal var viewModelFactory: ViewModelProvider.Factory = PollingViewModel.Factory {
+        PollingViewModel.Args(
+            clientSecret = args.clientSecret,
+            timeLimit = args.timeLimitInSeconds.seconds,
+            initialDelay = args.initialDelayInSeconds.seconds,
+            maxAttempts = args.maxAttempts,
+        )
     }
+
+    private val viewModel by viewModels<PollingViewModel> { viewModelFactory }
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {

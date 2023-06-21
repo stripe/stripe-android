@@ -39,7 +39,7 @@ import kotlin.time.Duration.Companion.seconds
 
 private const val KEY_CURRENT_POLLING_START_TIME = "KEY_CURRENT_POLLING_START_TIME"
 
-internal interface TimeProvider {
+internal fun interface TimeProvider {
     fun currentTimeInMillis(): Long
 }
 
