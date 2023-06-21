@@ -1127,37 +1127,6 @@ public final class com/stripe/android/paymentsheet/databinding/StripeActivityPay
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeActivityPaymentSheetBinding;
 }
 
-public final class com/stripe/android/paymentsheet/databinding/StripeBillingAddressLayoutBinding : androidx/viewbinding/ViewBinding {
-	public final field address1 Lcom/google/android/material/textfield/TextInputEditText;
-	public final field address1Divider Landroid/view/View;
-	public final field address1Layout Lcom/google/android/material/textfield/TextInputLayout;
-	public final field address2 Lcom/google/android/material/textfield/TextInputEditText;
-	public final field address2Divider Landroid/view/View;
-	public final field address2Layout Lcom/google/android/material/textfield/TextInputLayout;
-	public final field city Lcom/google/android/material/textfield/TextInputEditText;
-	public final field cityLayout Lcom/google/android/material/textfield/TextInputLayout;
-	public final field cityPostalContainer Landroid/widget/LinearLayout;
-	public final field cityPostalDivider Landroid/view/View;
-	public final field countryLayout Lcom/stripe/android/view/CountryTextInputLayout;
-	public final field postalCode Lcom/stripe/android/view/StripeEditText;
-	public final field postalCodeLayout Lcom/google/android/material/textfield/TextInputLayout;
-	public final field state Lcom/google/android/material/textfield/TextInputEditText;
-	public final field stateDivider Landroid/view/View;
-	public final field stateLayout Lcom/google/android/material/textfield/TextInputLayout;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeBillingAddressLayoutBinding;
-	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripeBillingAddressLayoutBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/StripeCountryDropdownItemBinding : androidx/viewbinding/ViewBinding {
-	public final field text1 Landroid/widget/TextView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeCountryDropdownItemBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/TextView;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/StripeCountryDropdownItemBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeCountryDropdownItemBinding;
-}
-
 public final class com/stripe/android/paymentsheet/databinding/StripeFragmentPaymentOptionsPrimaryButtonBinding : androidx/viewbinding/ViewBinding {
 	public final field paymentOptionsPrimaryButtonFragmentContainerView Landroidx/fragment/app/FragmentContainerView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentOptionsPrimaryButtonBinding;
@@ -1194,13 +1163,6 @@ public final class com/stripe/android/paymentsheet/databinding/StripeGooglePayBu
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding;
 }
 
-public final class com/stripe/android/paymentsheet/databinding/StripeHorizontalDividerBinding : androidx/viewbinding/ViewBinding {
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeHorizontalDividerBinding;
-	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/StripeHorizontalDividerBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeHorizontalDividerBinding;
-}
-
 public final class com/stripe/android/paymentsheet/databinding/StripePrimaryButtonBinding : androidx/viewbinding/ViewBinding {
 	public final field confirmedIcon Landroid/widget/ImageView;
 	public final field confirmingIcon Lcom/google/android/material/progressindicator/CircularProgressIndicator;
@@ -1209,13 +1171,6 @@ public final class com/stripe/android/paymentsheet/databinding/StripePrimaryButt
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripePrimaryButtonBinding;
 	public fun getRoot ()Landroid/view/View;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripePrimaryButtonBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/StripeVerticalDividerBinding : androidx/viewbinding/ViewBinding {
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeVerticalDividerBinding;
-	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/StripeVerticalDividerBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeVerticalDividerBinding;
 }
 
 public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowController$Args$Creator : android/os/Parcelable$Creator {
