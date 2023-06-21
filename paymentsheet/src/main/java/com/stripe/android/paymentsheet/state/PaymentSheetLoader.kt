@@ -356,7 +356,7 @@ private fun List<PaymentMethod>.withLastUsedPaymentMethodFirst(
 }
 
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
-    return PaymentSelection.Saved(this, PaymentSelection.Saved.WalletType.GooglePay)
+    return PaymentSelection.Saved(this)
 }
 
 private fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal(): CardBillingDetailsCollectionConfiguration {
