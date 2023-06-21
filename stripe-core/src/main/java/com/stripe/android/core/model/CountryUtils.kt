@@ -1,7 +1,6 @@
 package com.stripe.android.core.model
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import java.text.Normalizer
 import java.util.Locale
 
@@ -68,8 +67,8 @@ object CountryUtils {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun getOrderedCountries(currentLocale: Locale) = getSortedLocalizedCountries(currentLocale)
 
-    @VisibleForTesting
-    internal fun formatNameForSorting(name: String): String {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun normalize(name: String): String {
         // Before normalization: åland islands
         // After normalization: aºland islands
         // After regex: aland islands
@@ -117,7 +116,7 @@ object CountryUtils {
             ).plus(
                 localizedCountries
                     .filterNot { it.code == currentLocale.getCountryCode() }
-                    .sortedBy { formatNameForSorting(it.name) }
+                    .sortedBy { normalize(it.name) }
             )
 
             cachedOrderedLocalizedCountries

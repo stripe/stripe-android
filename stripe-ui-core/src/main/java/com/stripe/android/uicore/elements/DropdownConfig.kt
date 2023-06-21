@@ -16,6 +16,9 @@ interface DropdownConfig {
     /** This is the list of displayable items to show in the drop down **/
     val displayItems: List<String>
 
+    /** Whether we display a search bar above the list of items **/
+    val showSearch: Boolean
+
     /** Whether the dropdown menu should be shown in a small form when collapsed **/
     val tinyMode: Boolean
         get() = false

@@ -15,6 +15,9 @@ class SimpleDropdownConfig(
 
     override val displayItems = items.map { it.displayText }
 
+    override val showSearch: Boolean
+        get() = false
+
     override fun getSelectedItemLabel(index: Int) = displayItems[index]
 
     override fun convertFromRaw(rawValue: String) =

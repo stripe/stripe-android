@@ -38,6 +38,9 @@ class DropdownFieldController(
 
     val tinyMode = config.tinyMode
 
+    val showSearch: Boolean
+        get() = config.showSearch
+
     init {
         initialValue?.let { onRawValueChange(it) }
     }

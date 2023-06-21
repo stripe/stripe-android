@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -11,10 +12,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -23,26 +27,35 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
+import androidx.compose.material.TextField as ComposeTextField
 
 @Preview
 @Composable
@@ -169,35 +182,78 @@ fun Dropdown(
         }
 
         if (expanded) {
-            Dialog(
+            DropdownDialog(
+                items = items,
+                selectedIndex = selectedIndex,
+                showSearch = controller.showSearch,
+                currentTextColor = currentTextColor,
                 onDismissRequest = { expanded = false },
-                properties = DialogProperties(
-                    usePlatformDefaultWidth = false,
-                )
+                onItemSelected = { item ->
+                    expanded = false
+                    val index = items.indexOf(item)
+                    controller.onValueChange(index)
+                },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+internal fun DropdownDialog(
+    items: List<String>,
+    selectedIndex: Int,
+    showSearch: Boolean,
+    currentTextColor: Color,
+    onDismissRequest: () -> Unit,
+    onItemSelected: (String) -> Unit,
+) {
+    var query by remember { mutableStateOf("") }
+
+    val filteredItems = remember(query) {
+        items.filter { item ->
+            val normalized = CountryUtils.normalize(item)
+            normalized.contains(query, ignoreCase = true)
+        }
+    }
+
+    val selectedItem = remember(selectedIndex) {
+        items[selectedIndex]
+    }
+
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+        )
+    ) {
+        Surface(
+            elevation = 8.dp,
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colors.surface,
+            modifier = Modifier.padding(16.dp),
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
             ) {
-                Surface(
-                    elevation = 8.dp,
-                    shape = MaterialTheme.shapes.medium,
-                    color = MaterialTheme.colors.surface,
-                    modifier = Modifier.padding(16.dp),
-                ) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
-                    ) {
-                        itemsIndexed(items) { index, item ->
-                            DropdownMenuItem(
-                                displayValue = item,
-                                isSelected = index == selectedIndex,
-                                currentTextColor = currentTextColor,
-                                onClick = {
-                                    expanded = false
-                                    controller.onValueChange(index)
-                                }
-                            )
-                        }
+                if (showSearch) {
+                    stickyHeader {
+                        DropdownSearchBar(
+                            value = query,
+                            onValueChange = { query = it },
+                        )
                     }
+                }
+
+                items(filteredItems) { item ->
+                    DropdownMenuItem(
+                        displayValue = item,
+                        isSelected = item == selectedItem,
+                        currentTextColor = currentTextColor,
+                        onClick = { onItemSelected(item) },
+                    )
                 }
             }
         }
@@ -205,7 +261,57 @@ fun Dropdown(
 }
 
 @Composable
-internal fun DropdownMenuItem(
+private fun DropdownSearchBar(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val focusRequester = remember { FocusRequester() }
+    var didRequestFocus by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if (!didRequestFocus) {
+            focusRequester.requestFocus()
+            didRequestFocus = true
+        }
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colors.surface),
+    ) {
+        ComposeTextField(
+            value = value,
+            onValueChange = onValueChange,
+            colors = TextFieldColors(),
+            singleLine = true,
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.stripe_ic_search),
+                    contentDescription = null,
+                    modifier = Modifier.height(24.dp),
+                    tint = MaterialTheme.colors.onSurface,
+                )
+            },
+            placeholder = {
+                // TODO
+                Placeholder(text = "Search")
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                capitalization = KeyboardCapitalization.Words,
+                imeAction = ImeAction.Search,
+            ),
+            modifier = Modifier.focusRequester(focusRequester),
+        )
+
+        Divider()
+    }
+}
+
+@Composable
+private fun DropdownMenuItem(
     displayValue: String,
     isSelected: Boolean,
     currentTextColor: Color,
@@ -215,9 +321,9 @@ internal fun DropdownMenuItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .requiredSizeIn(minHeight = DropdownMenuItemDefaultMinHeight)
+            .requiredHeightIn(min = DropdownMenuItemDefaultMinHeight)
             .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp)
     ) {
         Text(
             text = displayValue,

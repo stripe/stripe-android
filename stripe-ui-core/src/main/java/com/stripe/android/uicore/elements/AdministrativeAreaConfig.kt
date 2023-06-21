@@ -21,6 +21,9 @@ class AdministrativeAreaConfig(
 
     override val displayItems: List<String> = fullAdministrativeAreaNames
 
+    override val showSearch: Boolean
+        get() = false
+
     override fun getSelectedItemLabel(index: Int) = fullAdministrativeAreaNames[index]
 
     override fun convertFromRaw(rawValue: String): String {

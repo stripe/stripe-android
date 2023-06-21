@@ -44,6 +44,9 @@ class CountryConfig(
 
     override val displayItems: List<String> = countries.map(expandedLabelMapper)
 
+    override val showSearch: Boolean
+        get() = countries.size > 5
+
     override fun getSelectedItemLabel(index: Int) =
         countries.getOrNull(index)?.let(collapsedLabelMapper) ?: ""
 
