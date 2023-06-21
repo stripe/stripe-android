@@ -102,15 +102,11 @@ internal class DefaultEventReporter @Inject internal constructor(
         currency: String?,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) {
-        // Google Pay is treated as a saved payment method after confirmation, so we need to
-        // "reset" to PaymentSelection.GooglePay for accurate reporting
-        val isGooglePay = (paymentSelection as? PaymentSelection.Saved)?.isGooglePay == true
+        // Wallets are treated as a saved payment method after confirmation, so we need
+        // to "reset" to the correct PaymentSelection for accurate reporting.
+        val savedSelection = (paymentSelection as? PaymentSelection.Saved)
 
-        val realSelection = if (isGooglePay) {
-            PaymentSelection.GooglePay
-        } else {
-            paymentSelection
-        }
+        val realSelection = savedSelection?.walletType?.paymentSelection ?: paymentSelection
 
         fireEvent(
             PaymentSheetEvent.Payment(

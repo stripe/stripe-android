@@ -73,7 +73,9 @@ class LinkHandlerTest {
         handler.launchLink()
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
         handler.onLinkActivityResult(LinkActivityResult.Completed(mock()))
-        assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Completed)
+        assertThat(processingStateTurbine.awaitItem()).isInstanceOf(
+            LinkHandler.ProcessingState.PaymentMethodCollected::class.java
+        )
     }
 
     @Test

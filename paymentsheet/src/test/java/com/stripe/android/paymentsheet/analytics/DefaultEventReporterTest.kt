@@ -140,7 +140,7 @@ class DefaultEventReporterTest {
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                isGooglePay = true,
+                walletType = PaymentSelection.Saved.WalletType.GooglePay,
             ),
             currency = "usd",
             deferredIntentConfirmationType = null,
@@ -149,6 +149,36 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_payment_googlepay_success" &&
+                    req.params["duration"] == 1f
+            }
+        )
+    }
+
+    @Test
+    fun `onPaymentSuccess() for Link payment should fire analytics request with expected event value`() {
+        // Log initial event so that duration is tracked
+        completeEventReporter.onShowExistingPaymentOptions(
+            linkEnabled = true,
+            activeLinkSession = false,
+            currency = "usd",
+            isDecoupling = false,
+        )
+
+        reset(analyticsRequestExecutor)
+        whenever(eventTimeProvider.currentTimeMillis()).thenReturn(2000L)
+
+        completeEventReporter.onPaymentSuccess(
+            paymentSelection = PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                walletType = PaymentSelection.Saved.WalletType.Link,
+            ),
+            currency = "usd",
+            deferredIntentConfirmationType = null,
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_complete_payment_link_success" &&
                     req.params["duration"] == 1f
             }
         )

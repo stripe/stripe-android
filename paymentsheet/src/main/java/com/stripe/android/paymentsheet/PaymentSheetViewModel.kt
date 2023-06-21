@@ -243,16 +243,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             LinkHandler.ProcessingState.Cancelled -> {
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
             }
-            LinkHandler.ProcessingState.Completed -> {
-                eventReporter.onPaymentSuccess(
-                    paymentSelection = PaymentSelection.Link,
-                    currency = stripeIntent.value?.currency,
-                    // TODO Revisit when integrating the new Link flow. Suspicion is that this will
-                    //  not actually be needed anymore then.
-                    deferredIntentConfirmationType = null,
+            is LinkHandler.ProcessingState.PaymentMethodCollected -> {
+                setContentVisible(true)
+                updateSelection(
+                    PaymentSelection.Saved(
+                        paymentMethod = processingState.paymentMethod,
+                        walletType = PaymentSelection.Saved.WalletType.Link,
+                    )
                 )
-                prefsRepository.savePaymentSelection(PaymentSelection.Link)
-                _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
+                checkout()
             }
             is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
                 setContentVisible(true)
@@ -577,7 +576,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is GooglePayPaymentMethodLauncher.Result.Completed -> {
                 val newPaymentSelection = PaymentSelection.Saved(
                     paymentMethod = result.paymentMethod,
-                    isGooglePay = true,
+                    walletType = PaymentSelection.Saved.WalletType.GooglePay,
                 )
 
                 updateSelection(newPaymentSelection)

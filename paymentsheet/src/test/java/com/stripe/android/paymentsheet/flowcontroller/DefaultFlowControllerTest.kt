@@ -18,6 +18,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
@@ -849,6 +850,70 @@ internal class DefaultFlowControllerTest {
 
             flowController.onGooglePayResult(
                 GooglePayPaymentMethodLauncher.Result.Completed(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                )
+            )
+
+            verify(paymentLauncher).confirm(
+                argWhere { params: ConfirmPaymentIntentParams ->
+                    params.paymentMethodId == "pm_123456789"
+                }
+            )
+        }
+
+    @Test
+    fun `confirmPayment() with Link should launch Link`() = runTest {
+        whenever(linkConfigurationCoordinator.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
+        val flowController = createFlowController()
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        )
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(PaymentSelection.Link)
+        )
+        flowController.confirm()
+
+        verify(linkPaymentLauncher).present(any(), anyOrNull())
+    }
+
+    @Test
+    fun `onLinkActivityResult() when canceled should invoke callback with canceled result`() = runTest {
+        verifyNoInteractions(eventReporter)
+
+        val flowController = createFlowController()
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        )
+
+        flowController.onLinkActivityResult(
+            LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.BackPressed)
+        )
+
+        verify(paymentResultCallback).onPaymentSheetResult(
+            PaymentSheetResult.Canceled
+        )
+    }
+
+    @Test
+    fun `onLinkActivityResult() when Completed result should invoke confirm()`() =
+        runTest {
+            val flowController = createFlowController()
+
+            flowController.configureExpectingSuccess(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            )
+
+            fakeIntentConfirmationInterceptor.enqueueConfirmStep(
+                confirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                    paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
+                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET
+                )
+            )
+
+            flowController.onLinkActivityResult(
+                LinkActivityResult.Completed(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             )
