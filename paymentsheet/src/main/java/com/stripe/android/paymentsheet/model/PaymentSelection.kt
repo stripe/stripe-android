@@ -57,7 +57,8 @@ internal sealed class PaymentSelection : Parcelable {
     @Parcelize
     data class Saved(
         val paymentMethod: PaymentMethod,
-        internal val isGooglePay: Boolean = false
+        val isGooglePay: Boolean = false,
+        val isLink: Boolean = false,
     ) : PaymentSelection() {
 
         override val requiresConfirmation: Boolean

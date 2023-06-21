@@ -422,8 +422,37 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun onLinkActivityResult(result: LinkActivityResult) =
-        onPaymentResult(result.convertToPaymentResult())
+    fun onLinkActivityResult(result: LinkActivityResult): Unit = when (result) {
+        is LinkActivityResult.Canceled -> onPaymentResult(PaymentResult.Canceled)
+        is LinkActivityResult.Failed -> onPaymentResult(PaymentResult.Failed(result.error))
+        is LinkActivityResult.Completed -> {
+            runCatching {
+                requireNotNull(viewModel.state)
+            }.fold(
+                onSuccess = { state ->
+                    val paymentSelection = PaymentSelection.Saved(
+                        result.paymentMethod,
+                        isLink = true
+                    )
+                    viewModel.paymentSelection = paymentSelection
+                    confirmPaymentSelection(
+                        paymentSelection,
+                        state
+                    )
+                },
+                onFailure = {
+                    eventReporter.onPaymentFailure(
+                        paymentSelection = PaymentSelection.Link,
+                        currency = viewModel.state?.stripeIntent?.currency,
+                        isDecoupling = isDecoupling,
+                    )
+                    paymentResultCallback.onPaymentSheetResult(
+                        PaymentSheetResult.Failed(it)
+                    )
+                }
+            )
+        }
+    }
 
     @JvmSynthetic
     internal fun onPaymentOptionResult(
@@ -557,12 +586,6 @@ internal class DefaultFlowController @Inject internal constructor(
         is PaymentResult.Completed -> PaymentSheetResult.Completed
         is PaymentResult.Canceled -> PaymentSheetResult.Canceled
         is PaymentResult.Failed -> PaymentSheetResult.Failed(throwable)
-    }
-
-    private fun LinkActivityResult.convertToPaymentResult() = when (this) {
-        is LinkActivityResult.Completed -> PaymentResult.Completed
-        is LinkActivityResult.Canceled -> PaymentResult.Canceled
-        is LinkActivityResult.Failed -> PaymentResult.Failed(error)
     }
 
     class GooglePayException(

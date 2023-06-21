@@ -147,16 +147,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
             LinkHandler.ProcessingState.Cancelled -> {
                 onPaymentResult(PaymentResult.Canceled)
             }
-            LinkHandler.ProcessingState.Completed -> {
-                eventReporter.onPaymentSuccess(
-                    paymentSelection = PaymentSelection.Link,
-                    currency = stripeIntent.value?.currency,
-                    // TODO Revisit when integrating the new Link flow. Suspicion is that this will
-                    //  not actually be needed anymore then.
-                    deferredIntentConfirmationType = null,
-                )
-                prefsRepository.savePaymentSelection(PaymentSelection.Link)
-                onPaymentResult(PaymentResult.Completed)
+            is LinkHandler.ProcessingState.PaymentMethodCollected -> {
+                val message = "This can't happen. Will follow up to remodel the states better."
+                throw IllegalStateException(message)
             }
             is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
                 setContentVisible(true)

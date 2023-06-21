@@ -40,6 +40,9 @@ internal data class PopupPayload(
     @SerialName("integrationType")
     val integrationType: String = "mobile"
 
+    @SerialName("paymentObject")
+    val paymentObject: String = "link_payment_method"
+
     @Serializable
     data class MerchantInfo(
         @SerialName("businessName")
@@ -73,7 +76,7 @@ internal data class PopupPayload(
     }
 
     companion object {
-        private const val baseUrl: String = "https://checkout.link.com/link-popup.html#"
+        private const val baseUrl: String = "https://checkout.link.com/#"
 
         val PopupPayloadJson = Json { encodeDefaults = true }
 

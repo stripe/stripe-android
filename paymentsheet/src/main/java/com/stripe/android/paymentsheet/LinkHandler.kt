@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -41,7 +42,7 @@ internal class LinkHandler @Inject constructor(
 
         object Cancelled : ProcessingState()
 
-        object Completed : ProcessingState()
+        data class PaymentMethodCollected(val paymentMethod: PaymentMethod) : ProcessingState()
 
         class CompletedWithPaymentResult(val result: PaymentResult) : ProcessingState()
     }
@@ -176,13 +177,13 @@ internal class LinkHandler @Inject constructor(
      * Method called with the result of launching the Link UI to collect a payment.
      */
     fun onLinkActivityResult(result: LinkActivityResult) {
-        val completePaymentFlow = result is LinkActivityResult.Completed
+        val paymentMethod = (result as? LinkActivityResult.Completed)?.paymentMethod
         val cancelPaymentFlow = result is LinkActivityResult.Canceled &&
             result.reason == LinkActivityResult.Canceled.Reason.BackPressed
 
-        if (completePaymentFlow) {
+        if (paymentMethod != null) {
             // If payment was completed inside the Link UI, dismiss immediately.
-            _processingState.tryEmit(ProcessingState.Completed)
+            _processingState.tryEmit(ProcessingState.PaymentMethodCollected(paymentMethod))
         } else if (cancelPaymentFlow) {
             // We launched the user straight into Link, but they decided to exit out of it.
             _processingState.tryEmit(ProcessingState.Cancelled)
