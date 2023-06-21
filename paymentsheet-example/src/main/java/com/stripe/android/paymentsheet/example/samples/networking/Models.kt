@@ -16,6 +16,12 @@ import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as ApiResult
 
 @Serializable
+data class ExamplePublishableKeyResponse(
+    @SerialName("publishable_key")
+    val publishableKey: String,
+)
+
+@Serializable
 data class ExampleCheckoutRequest(
     @SerialName("hot_dog_count")
     val hotDogCount: Int,

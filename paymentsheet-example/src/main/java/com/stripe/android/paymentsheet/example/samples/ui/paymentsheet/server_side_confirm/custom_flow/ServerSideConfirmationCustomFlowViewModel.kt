@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow
+package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -25,7 +25,7 @@ import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.example.samples.networking.toCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.toCreateIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.toUpdateRequest
-import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowViewModel.ConfigureResult
+import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowViewModel.ConfigureResult
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview

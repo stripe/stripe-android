@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui.custom_flow
+package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow
 
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartState

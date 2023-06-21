@@ -36,11 +36,12 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
-import com.stripe.android.paymentsheet.example.samples.ui.complete_flow.CompleteFlowActivity
-import com.stripe.android.paymentsheet.example.samples.ui.custom_flow.CustomFlowActivity
-import com.stripe.android.paymentsheet.example.samples.ui.customer.CustomerSheetActivity
-import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
-import com.stripe.android.paymentsheet.example.samples.ui.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
+import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetActivity
+import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow.CompleteFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow.CustomFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 private const val SurfaceOverlayOpacity = 0.12f
@@ -95,6 +96,12 @@ class MainActivity : AppCompatActivity() {
                 )
             ),
             MenuItem(
+                titleResId = R.string.address_element_title,
+                subtitleResId = R.string.address_element_subtitle,
+                klass = AddressElementExampleActivity::class.java,
+                section = MenuItem.Section.AddressElement,
+            ),
+            MenuItem(
                 titleResId = R.string.playground_title,
                 subtitleResId = R.string.playground_subtitle,
                 klass = PaymentSheetPlaygroundActivity::class.java,
@@ -132,6 +139,7 @@ private data class MenuItem(
         CompleteFlow,
         CustomFlow,
         CustomerSheet,
+        AddressElement,
         Internal,
     }
 }
@@ -144,18 +152,23 @@ private fun MainScreen(items: List<MenuItem>) {
 
     LazyColumn {
         Section(
-            title = "Complete flow",
+            title = "Complete Flow",
             items = groupedItems.getOrElse(MenuItem.Section.CompleteFlow) { emptyList() },
         )
 
         Section(
-            title = "Custom flow",
+            title = "Custom Flow",
             items = groupedItems.getOrElse(MenuItem.Section.CustomFlow) { emptyList() },
         )
 
         Section(
-            title = "Customer sheet",
+            title = "Customer Sheet",
             items = groupedItems.getOrElse(MenuItem.Section.CustomerSheet) { emptyList() }
+        )
+
+        Section(
+            title = "Address Element",
+            items = groupedItems.getOrElse(MenuItem.Section.AddressElement) { emptyList() }
         )
 
         Section(
