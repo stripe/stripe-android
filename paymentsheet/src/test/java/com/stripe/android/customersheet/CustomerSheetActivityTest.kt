@@ -168,6 +168,36 @@ internal class CustomerSheetActivityTest {
         }
     }
 
+    @Test
+    fun `When payment method available, edit mode is available`() {
+        runActivityScenario(
+            viewState = createSelectPaymentMethodViewState(
+                isGooglePayEnabled = true,
+                isEditing = false,
+                savedPaymentMethods = List(3) {
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                }
+            ),
+        ) {
+            page.waitForText("edit")
+        }
+    }
+
+    @Test
+    fun `When edit is pressed, payment methods enters edit mode`() {
+        runActivityScenario(
+            viewState = createSelectPaymentMethodViewState(
+                isGooglePayEnabled = true,
+                isEditing = true,
+                savedPaymentMethods = List(3) {
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                }
+            ),
+        ) {
+            page.waitForText("done")
+        }
+    }
+
     private fun activityScenario(
         viewState: CustomerSheetViewState,
         result: InternalCustomerSheetResult?,

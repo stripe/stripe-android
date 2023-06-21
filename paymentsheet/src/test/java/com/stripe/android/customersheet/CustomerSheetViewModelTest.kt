@@ -410,6 +410,22 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When CustomerViewAction#OnEditPressed, view state isEditing should be updated`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.viewState.test {
+            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.isEditing)
+                .isFalse()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+
+            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.isEditing)
+                .isTrue()
+        }
+    }
+
     private fun createViewModel(
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         lpmRepository: LpmRepository = this.lpmRepository,
