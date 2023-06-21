@@ -18,14 +18,9 @@ internal fun BottomSheetLoadingIndicator(
     modifier: Modifier = Modifier,
 ) {
     val height = dimensionResource(R.dimen.stripe_paymentsheet_loading_container_height)
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height),
-    ) {
-        LoadingIndicator()
-    }
+    LoadingIndicator(
+        modifier = modifier.fillMaxWidth().height(height),
+    )
 }
 
 @Composable
