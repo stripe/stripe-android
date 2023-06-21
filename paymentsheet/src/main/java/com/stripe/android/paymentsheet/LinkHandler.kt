@@ -107,7 +107,7 @@ internal class LinkHandler @Inject constructor(
                 }
                 AccountStatus.VerificationStarted,
                 AccountStatus.NeedsVerification -> {
-                    TODO()
+                    linkLauncher.present(configuration, params)
                 }
                 AccountStatus.SignedOut,
                 AccountStatus.Error -> {

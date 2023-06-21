@@ -140,7 +140,7 @@ class DefaultEventReporterTest {
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                isGooglePay = true,
+                walletType = PaymentSelection.Saved.WalletType.GooglePay,
             ),
             currency = "usd",
             deferredIntentConfirmationType = null,
@@ -170,7 +170,7 @@ class DefaultEventReporterTest {
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                isLink = true,
+                walletType = PaymentSelection.Saved.WalletType.Link,
             ),
             currency = "usd",
             deferredIntentConfirmationType = null,

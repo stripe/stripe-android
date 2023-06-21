@@ -148,8 +148,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onPaymentResult(PaymentResult.Canceled)
             }
             is LinkHandler.ProcessingState.PaymentMethodCollected -> {
-                val message = "This can't happen. Will follow up to remodel the states better."
-                throw IllegalStateException(message)
+                TODO("This can't happen. Will follow up to remodel the states better.")
             }
             is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
                 setContentVisible(true)

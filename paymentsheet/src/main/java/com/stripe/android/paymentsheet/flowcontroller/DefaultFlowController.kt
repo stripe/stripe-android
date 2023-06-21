@@ -381,7 +381,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     onSuccess = { state ->
                         val paymentSelection = PaymentSelection.Saved(
                             googlePayResult.paymentMethod,
-                            isGooglePay = true
+                            PaymentSelection.Saved.WalletType.GooglePay,
                         )
                         viewModel.paymentSelection = paymentSelection
                         confirmPaymentSelection(
@@ -432,7 +432,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 onSuccess = { state ->
                     val paymentSelection = PaymentSelection.Saved(
                         result.paymentMethod,
-                        isLink = true
+                        PaymentSelection.Saved.WalletType.Link,
                     )
                     viewModel.paymentSelection = paymentSelection
                     confirmPaymentSelection(

@@ -249,7 +249,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 updateSelection(
                     PaymentSelection.Saved(
                         paymentMethod = processingState.paymentMethod,
-                        isLink = true,
+                        walletType = PaymentSelection.Saved.WalletType.Link,
                     )
                 )
                 checkout()
@@ -577,7 +577,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is GooglePayPaymentMethodLauncher.Result.Completed -> {
                 val newPaymentSelection = PaymentSelection.Saved(
                     paymentMethod = result.paymentMethod,
-                    isGooglePay = true,
+                    walletType = PaymentSelection.Saved.WalletType.GooglePay,
                 )
 
                 updateSelection(newPaymentSelection)

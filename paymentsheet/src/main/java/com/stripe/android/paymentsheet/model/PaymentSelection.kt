@@ -57,9 +57,12 @@ internal sealed class PaymentSelection : Parcelable {
     @Parcelize
     data class Saved(
         val paymentMethod: PaymentMethod,
-        val isGooglePay: Boolean = false,
-        val isLink: Boolean = false,
+        val walletType: WalletType? = null,
     ) : PaymentSelection() {
+
+        enum class WalletType(val paymentSelection: PaymentSelection) {
+            GooglePay(PaymentSelection.GooglePay), Link(PaymentSelection.Link)
+        }
 
         override val requiresConfirmation: Boolean
             get() = paymentMethod.type == USBankAccount
