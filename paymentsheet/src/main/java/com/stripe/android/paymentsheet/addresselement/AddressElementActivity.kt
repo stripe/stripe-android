@@ -22,9 +22,9 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.stripe.android.common.ui.BottomSheet
+import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.paymentsheet.parseAppearance
-import com.stripe.android.paymentsheet.ui.Loading
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.AnimationConstants
 import kotlinx.coroutines.launch
@@ -89,7 +89,7 @@ internal class AddressElementActivity : ComponentActivity() {
                             startDestination = AddressElementScreen.Loading.route,
                         ) {
                             composable(AddressElementScreen.Loading.route) {
-                                Loading()
+                                LoadingIndicator(modifier = Modifier.fillMaxSize())
                             }
                             composable(AddressElementScreen.InputAddress.route) {
                                 InputAddressScreen(viewModel.injector)
