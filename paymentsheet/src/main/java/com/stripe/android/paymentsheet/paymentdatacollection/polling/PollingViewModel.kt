@@ -8,12 +8,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.DaggerPollingComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.PollingViewModelSubcomponent
 import com.stripe.android.polling.IntentStatusPoller
@@ -37,7 +39,7 @@ import kotlin.time.Duration.Companion.seconds
 
 private const val KEY_CURRENT_POLLING_START_TIME = "KEY_CURRENT_POLLING_START_TIME"
 
-internal interface TimeProvider {
+internal fun interface TimeProvider {
     fun currentTimeInMillis(): Long
 }
 
@@ -52,6 +54,32 @@ internal enum class PollingState {
     Success,
     Failed,
     Canceled,
+}
+
+internal fun PollingState.toFlowResult(
+    args: PollingContract.Args,
+): PaymentFlowResult.Unvalidated? {
+    return when (this) {
+        PollingState.Active -> {
+            null
+        }
+        PollingState.Failed -> {
+            null
+        }
+        PollingState.Success -> {
+            PaymentFlowResult.Unvalidated(
+                clientSecret = args.clientSecret,
+                flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
+            )
+        }
+        PollingState.Canceled -> {
+            PaymentFlowResult.Unvalidated(
+                clientSecret = args.clientSecret,
+                flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                canCancelSource = false,
+            )
+        }
+    }
 }
 
 internal data class PollingUiState(
