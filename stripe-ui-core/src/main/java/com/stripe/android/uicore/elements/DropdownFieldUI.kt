@@ -4,19 +4,20 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSizeIn
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.DropdownMenu
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -38,13 +39,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
 
 @Preview
 @Composable
 private fun DropDownPreview() {
-    DropDown(
+    Dropdown(
         controller = DropdownFieldController(
             CountryConfig(tinyMode = true)
         ),
@@ -66,7 +69,7 @@ private fun DropDownPreview() {
  */
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun DropDown(
+fun Dropdown(
     controller: DropdownFieldController,
     enabled: Boolean,
     modifier: Modifier = Modifier
@@ -92,6 +95,7 @@ fun DropDown(
     }
 
     val inputModeManager = LocalInputModeManager.current
+
     Box(
         modifier = modifier
             .wrapContentSize(Alignment.TopStart)
@@ -164,24 +168,37 @@ fun DropDown(
             }
         }
 
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier
-                .background(color = MaterialTheme.stripeColors.component)
-                .width(DropdownMenuItemDefaultMaxWidth)
-                .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
-        ) {
-            items.forEachIndexed { index, displayValue ->
-                DropdownMenuItem(
-                    displayValue = displayValue,
-                    isSelected = index == selectedIndex,
-                    currentTextColor = currentTextColor,
-                    onClick = {
-                        expanded = false
-                        controller.onValueChange(index)
-                    }
+        if (expanded) {
+            Dialog(
+                onDismissRequest = { expanded = false },
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false,
                 )
+            ) {
+                Surface(
+                    elevation = 8.dp,
+                    shape = MaterialTheme.shapes.medium,
+                    color = MaterialTheme.colors.surface,
+                    modifier = Modifier.padding(16.dp),
+                ) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
+                    ) {
+                        itemsIndexed(items) { index, item ->
+                            DropdownMenuItem(
+                                displayValue = item,
+                                isSelected = index == selectedIndex,
+                                currentTextColor = currentTextColor,
+                                onClick = {
+                                    expanded = false
+                                    controller.onValueChange(index)
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -196,24 +213,14 @@ internal fun DropdownMenuItem(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start,
         modifier = Modifier
             .fillMaxWidth()
-            .requiredSizeIn(
-                minHeight = DropdownMenuItemDefaultMinHeight
-            )
-            .clickable {
-                onClick()
-            }
+            .padding(horizontal = 16.dp)
+            .requiredSizeIn(minHeight = DropdownMenuItemDefaultMinHeight)
+            .clickable(onClick = onClick)
     ) {
         Text(
             text = displayValue,
-            modifier = Modifier
-                // This padding makes up for the checkmark at the end.
-                .padding(
-                    start = 13.dp
-                )
-                .fillMaxWidth(.8f),
             color = if (isSelected) {
                 MaterialTheme.colors.primary
             } else {
@@ -226,12 +233,13 @@ internal fun DropdownMenuItem(
             }
         )
 
+        Spacer(modifier = Modifier.weight(1f))
+
         if (isSelected) {
             Icon(
-                Icons.Filled.Check,
+                imageVector = Icons.Filled.Check,
                 contentDescription = null,
-                modifier = Modifier
-                    .height(24.dp),
+                modifier = Modifier.height(24.dp),
                 tint = MaterialTheme.colors.primary
             )
         }
@@ -239,5 +247,4 @@ internal fun DropdownMenuItem(
 }
 
 // Size defaults.
-internal val DropdownMenuItemDefaultMaxWidth = 280.dp
 internal val DropdownMenuItemDefaultMinHeight = 48.dp

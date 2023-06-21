@@ -137,7 +137,7 @@ fun PhoneNumberElementUI(
             Text(text = placeholder)
         },
         leadingIcon = {
-            DropDown(
+            Dropdown(
                 controller = controller.countryDropdownController,
                 enabled = enabled,
                 modifier = Modifier.padding(start = 16.dp, end = 8.dp)

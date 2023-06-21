@@ -14,7 +14,7 @@ class DropdownScreenshotTest {
     @Test
     fun testDropdownDefaultEnabled() {
         paparazziRule.snapshot {
-            DropDown(
+            Dropdown(
                 controller = DropdownFieldController(
                     CountryConfig(tinyMode = true)
                 ),
@@ -26,7 +26,7 @@ class DropdownScreenshotTest {
     @Test
     fun testDropdownDefaultDisabled() {
         paparazziRule.snapshot {
-            DropDown(
+            Dropdown(
                 controller = DropdownFieldController(
                     CountryConfig(tinyMode = true)
                 ),
@@ -38,7 +38,7 @@ class DropdownScreenshotTest {
     @Test
     fun testDropdownWithDisableDropdownWithSingleElement() {
         paparazziRule.snapshot {
-            DropDown(
+            Dropdown(
                 controller = DropdownFieldController(
                     CountryConfig(
                         onlyShowCountryCodes = setOf("US"),
@@ -53,7 +53,7 @@ class DropdownScreenshotTest {
     @Test
     fun testDropdownWithoutDisableDropdownWithSingleElement() {
         paparazziRule.snapshot {
-            DropDown(
+            Dropdown(
                 controller = DropdownFieldController(
                     CountryConfig(
                         onlyShowCountryCodes = setOf("US")
