@@ -137,7 +137,8 @@ internal class GooglePayLauncherViewModel(
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
                     countryCode = args.config.merchantCountryCode,
                     transactionId = stripeIntent.id,
-                    totalPrice = stripeIntent.amount?.toInt(),
+                    totalPrice = stripeIntent.amount,
+                    totalPriceLabel = null,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase
                 )
             }
@@ -147,7 +148,8 @@ internal class GooglePayLauncherViewModel(
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                     countryCode = args.config.merchantCountryCode,
                     transactionId = stripeIntent.id,
-                    totalPrice = 0,
+                    totalPrice = 0L,
+                    totalPriceLabel = null,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
                 )
             }

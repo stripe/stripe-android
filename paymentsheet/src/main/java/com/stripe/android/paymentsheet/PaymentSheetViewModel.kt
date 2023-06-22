@@ -22,7 +22,7 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -324,7 +324,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     fun setupGooglePay(
         lifecycleScope: CoroutineScope,
-        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
+        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>
     ) {
         googlePayLauncherConfig?.let { config ->
             googlePayPaymentMethodLauncher =
@@ -375,7 +375,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 googlePayPaymentMethodLauncher?.present(
                     currencyCode = (stripeIntent as? PaymentIntent)?.currency
                         ?: args.googlePayConfig?.currencyCode.orEmpty(),
-                    amount = (stripeIntent as? PaymentIntent)?.amount?.toInt() ?: 0,
+                    amount = (stripeIntent as? PaymentIntent)?.amount ?: 0L,
                     transactionId = stripeIntent.id
                 )
             }

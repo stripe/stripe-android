@@ -4,21 +4,19 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 
-@Deprecated(
-    message = "This class isn't meant for public use and will be removed in a future release. " +
-        "Use GooglePayPaymentMethodLauncher directly.",
-)
-class GooglePayPaymentMethodLauncherContract :
-    ActivityResultContract<GooglePayPaymentMethodLauncherContract.Args, GooglePayPaymentMethodLauncher.Result>() {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class GooglePayPaymentMethodLauncherContractV2 :
+    ActivityResultContract<GooglePayPaymentMethodLauncherContractV2.Args, GooglePayPaymentMethodLauncher.Result>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
         return Intent(context, GooglePayPaymentMethodLauncherActivity::class.java)
-            .putExtras(input.toV2().toBundle())
+            .putExtras(input.toBundle())
     }
 
     override fun parseResult(
@@ -42,11 +40,12 @@ class GooglePayPaymentMethodLauncherContract :
      *     existing ID or generate a specific one for Google Pay transaction attempts.
      *     This field is required when you send callbacks to the Google Transaction Events API.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class Args internal constructor(
         internal val config: GooglePayPaymentMethodLauncher.Config,
         internal val currencyCode: String,
-        internal val amount: Int,
+        internal val amount: Long,
         internal val transactionId: String? = null,
         internal val injectionParams: InjectionParams? = null
     ) : Parcelable {
@@ -54,7 +53,7 @@ class GooglePayPaymentMethodLauncherContract :
         constructor(
             config: GooglePayPaymentMethodLauncher.Config,
             currencyCode: String,
-            amount: Int,
+            amount: Long,
             transactionId: String? = null
         ) : this(config, currencyCode, amount, transactionId, null)
 
@@ -81,22 +80,4 @@ class GooglePayPaymentMethodLauncherContract :
     internal companion object {
         internal const val EXTRA_RESULT = "extra_result"
     }
-}
-
-private fun GooglePayPaymentMethodLauncherContract.Args.toV2(): GooglePayPaymentMethodLauncherContractV2.Args {
-    return GooglePayPaymentMethodLauncherContractV2.Args(
-        config = config,
-        currencyCode = currencyCode,
-        amount = amount.toLong(),
-        transactionId = transactionId,
-        injectionParams = injectionParams?.let { params ->
-            GooglePayPaymentMethodLauncherContractV2.Args.InjectionParams(
-                injectorKey = params.injectorKey,
-                productUsage = params.productUsage,
-                enableLogging = params.enableLogging,
-                stripeAccountId = params.stripeAccountId,
-                publishableKey = params.publishableKey,
-            )
-        },
-    )
 }

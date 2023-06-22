@@ -62,7 +62,7 @@ class GooglePayPaymentMethodLauncherTest {
                 CONFIG,
                 readyCallback,
                 fragment.registerForActivityResult(
-                    GooglePayPaymentMethodLauncherContract(),
+                    GooglePayPaymentMethodLauncherContractV2(),
                     FakeActivityResultRegistry(result)
                 ) {
                     resultCallback.onResult(it)
@@ -101,7 +101,7 @@ class GooglePayPaymentMethodLauncherTest {
                 CONFIG,
                 readyCallback,
                 fragment.registerForActivityResult(
-                    GooglePayPaymentMethodLauncherContract(),
+                    GooglePayPaymentMethodLauncherContractV2(),
                     FakeActivityResultRegistry(result)
                 ) {
                     resultCallback.onResult(it)
@@ -129,7 +129,7 @@ class GooglePayPaymentMethodLauncherTest {
                 CONFIG,
                 readyCallback,
                 fragment.registerForActivityResult(
-                    GooglePayPaymentMethodLauncherContract(),
+                    GooglePayPaymentMethodLauncherContractV2(),
                     FakeActivityResultRegistry(
                         GooglePayPaymentMethodLauncher.Result.Completed(
                             PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -168,7 +168,7 @@ class GooglePayPaymentMethodLauncherTest {
                 CONFIG,
                 readyCallback,
                 fragment.registerForActivityResult(
-                    GooglePayPaymentMethodLauncherContract(),
+                    GooglePayPaymentMethodLauncherContractV2(),
                     FakeActivityResultRegistry(
                         GooglePayPaymentMethodLauncher.Result.Completed(
                             PaymentMethodFixtures.CARD_PAYMENT_METHOD
