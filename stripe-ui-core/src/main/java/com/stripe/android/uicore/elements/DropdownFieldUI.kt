@@ -1,6 +1,8 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,12 +23,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -198,7 +204,7 @@ fun Dropdown(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @Composable
 internal fun DropdownDialog(
     items: List<String>,
@@ -221,39 +227,53 @@ internal fun DropdownDialog(
         items[selectedIndex]
     }
 
+    val hasResults = remember(filteredItems) {
+        filteredItems.isNotEmpty()
+    }
+
     Dialog(
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-        )
+        properties = DialogProperties(),
     ) {
         Surface(
             elevation = 8.dp,
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colors.surface,
-            modifier = Modifier.padding(16.dp),
         ) {
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
+                    .requiredSizeIn(maxHeight = DropdownMaxHeight),
             ) {
                 if (showSearch) {
-                    stickyHeader {
-                        DropdownSearchBar(
-                            value = query,
-                            onValueChange = { query = it },
-                        )
-                    }
+                    DropdownSearchBar(
+                        value = query,
+                        onValueChange = { query = it },
+                    )
                 }
 
-                items(filteredItems) { item ->
-                    DropdownMenuItem(
-                        displayValue = item,
-                        isSelected = item == selectedItem,
-                        currentTextColor = currentTextColor,
-                        onClick = { onItemSelected(item) },
-                    )
+                Crossfade(
+                    targetState = hasResults,
+                    label = "SearchResultsCrossfade",
+                ) { showList ->
+                    if (showList) {
+                        LazyColumn {
+                            items(
+                                items = filteredItems,
+                                key = { it },
+                            ) { item ->
+                                DropdownMenuItem(
+                                    displayValue = item,
+                                    isSelected = item == selectedItem,
+                                    currentTextColor = currentTextColor,
+                                    onClick = { onItemSelected(item) },
+                                    modifier = Modifier.animateItemPlacement(),
+                                )
+                            }
+                        }
+                    } else {
+                        NoResultsPlaceholder()
+                    }
                 }
             }
         }
@@ -271,7 +291,7 @@ private fun DropdownSearchBar(
 
     LaunchedEffect(Unit) {
         if (!didRequestFocus) {
-            focusRequester.requestFocus()
+//            focusRequester.requestFocus()
             didRequestFocus = true
         }
     }
@@ -284,26 +304,39 @@ private fun DropdownSearchBar(
         ComposeTextField(
             value = value,
             onValueChange = onValueChange,
-            colors = TextFieldColors(),
+            colors = textFieldColors(),
             singleLine = true,
             leadingIcon = {
                 Icon(
-                    painter = painterResource(id = R.drawable.stripe_ic_search),
+                    imageVector = Icons.Default.Search,
                     contentDescription = null,
                     modifier = Modifier.height(24.dp),
                     tint = MaterialTheme.colors.onSurface,
                 )
             },
+            trailingIcon = {
+                if (value.isNotEmpty()) {
+                    IconButton(onClick = { onValueChange("") }) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = null,
+                            modifier = Modifier.height(24.dp),
+                            tint = MaterialTheme.colors.onSurface,
+                        )
+                    }
+                }
+            },
             placeholder = {
-                // TODO
-                Placeholder(text = "Search")
+                Placeholder(text = stringResource(R.string.stripe_address_search_content_description))
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
                 capitalization = KeyboardCapitalization.Words,
                 imeAction = ImeAction.Search,
             ),
-            modifier = Modifier.focusRequester(focusRequester),
+            modifier = Modifier
+                .focusRequester(focusRequester)
+                .fillMaxWidth(),
         )
 
         Divider()
@@ -315,11 +348,12 @@ private fun DropdownMenuItem(
     displayValue: String,
     isSelected: Boolean,
     currentTextColor: Color,
-    onClick: () -> Unit = {}
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .requiredHeightIn(min = DropdownMenuItemDefaultMinHeight)
             .clickable(onClick = onClick)
@@ -352,5 +386,22 @@ private fun DropdownMenuItem(
     }
 }
 
+@Composable
+private fun NoResultsPlaceholder(
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize(),
+    ) {
+        Text(
+            text = "No results", // TODO
+            color = MaterialTheme.stripeColors.placeholderText,
+            style = MaterialTheme.typography.body1,
+        )
+    }
+}
+
 // Size defaults.
 internal val DropdownMenuItemDefaultMinHeight = 48.dp
+internal val DropdownMaxHeight = DropdownMenuItemDefaultMinHeight * 8.7f

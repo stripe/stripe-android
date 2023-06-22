@@ -97,7 +97,7 @@ fun PhoneNumberElementUI(
     val label by controller.label.collectAsState(CoreR.string.stripe_address_label_phone_number)
     val placeholder by controller.placeholder.collectAsState("")
     val visualTransformation by controller.visualTransformation.collectAsState(VisualTransformation.None)
-    val colors = TextFieldColors(shouldShowError != null)
+    val colors = textFieldColors(shouldShowError != null)
     val focusRequester = remember { FocusRequester() }
     var hasFocus by rememberSaveable { mutableStateOf(false) }
 
