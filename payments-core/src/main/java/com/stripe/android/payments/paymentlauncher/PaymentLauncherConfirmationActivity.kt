@@ -49,10 +49,6 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             // Prevent back presses while confirming payment
         }
 
-        args.statusBarColor?.let {
-            window.statusBarColor = it
-        }
-
         viewModel.paymentLauncherResult.observe(this, ::finishWithResult)
         viewModel.register(
             activityResultCaller = this,

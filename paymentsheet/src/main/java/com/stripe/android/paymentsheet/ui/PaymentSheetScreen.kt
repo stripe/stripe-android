@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
@@ -85,15 +86,9 @@ internal fun PaymentSheetScreenContent(
     val currentScreen by viewModel.currentScreen.collectAsState()
     val notes by viewModel.notesText.collectAsState()
 
-    val bottomPadding = dimensionResource(
-        R.dimen.stripe_paymentsheet_button_container_spacing_bottom
-    )
-
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    Column(
-        modifier = modifier.padding(bottom = bottomPadding),
-    ) {
+    Column(modifier) {
         headerText?.let { text ->
             H4Text(
                 text = stringResource(text),
@@ -138,6 +133,8 @@ internal fun PaymentSheetScreenContent(
                     .padding(horizontal = horizontalPadding),
             )
         }
+
+        PaymentSheetContentPadding()
     }
 }
 
