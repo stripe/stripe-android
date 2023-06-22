@@ -185,7 +185,10 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onEditPressed() {
-        TODO()
+        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+            val isEditing = it.isEditing
+            it.copy(isEditing = !isEditing)
+        }
     }
 
     @Suppress("UNUSED_PARAMETER")

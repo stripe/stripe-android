@@ -88,6 +88,46 @@ class CustomerSheetScreenshotTest {
     }
 
     @Test
+    fun testEditModeWithPaymentMethods() {
+        paparazzi.snapshot {
+            val savedPaymentMethods = List(5) {
+                PaymentMethod(
+                    id = "pm_123$it",
+                    created = null,
+                    code = "card",
+                    liveMode = false,
+                    type = PaymentMethod.Type.Card,
+                    card = PaymentMethod.Card(
+                        brand = CardBrand.orderedBrands[it],
+                        last4 = "424$it",
+                    )
+                )
+            }
+            var counter = 0
+            CustomerSheetScreen(
+                viewState = CustomerSheetViewState.SelectPaymentMethod(
+                    title = "Screenshot testing",
+                    savedPaymentMethods = savedPaymentMethods,
+                    paymentSelection = PaymentSelection.Saved(
+                        savedPaymentMethods.first()
+                    ),
+                    isLiveMode = false,
+                    isProcessing = false,
+                    isEditing = true,
+                    isGooglePayEnabled = true,
+                    primaryButtonLabel = "Continue",
+                    primaryButtonEnabled = true,
+                    errorMessage = "This is an error message.",
+                ),
+                paymentMethodNameProvider = {
+                    counter++
+                    "424$counter"
+                }
+            )
+        }
+    }
+
+    @Test
     fun testGooglePay() {
         paparazzi.snapshot {
             CustomerSheetScreen(
