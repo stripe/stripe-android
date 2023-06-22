@@ -427,7 +427,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When CustomerViewAction#OnPrimaryButtonPressed for saved payment method, selected result is emitted`() = runTest {
+    fun `When primary button is pressed for saved payment method, selected payment method is emitted`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = Result.success(
@@ -450,7 +450,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When CustomerViewAction#OnPrimaryButtonPressed for saved payment method that cannot be saved, error message is emitted`() = runTest {
+    fun `When primary button is pressed for saved payment method that cannot be saved, error message is emitted`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
                 paymentMethods = Result.success(

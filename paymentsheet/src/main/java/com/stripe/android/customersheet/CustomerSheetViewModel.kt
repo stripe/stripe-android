@@ -255,16 +255,17 @@ internal class CustomerSheetViewModel @Inject constructor(
             ).onFailure {
                 // TODO (jameswoo) Figure out what to do if payment option is unable to be persisted
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                    // TODO (jameswoo) translate string
                     it.copy(errorMessage = "Unable to save the selected payment option")
                 }
             }.onSuccess {
                 val paymentMethod = savedPaymentSelection.paymentMethod
-                val paymentMethodId = paymentMethod.id
+                val paymentMethodId = paymentMethod.id!!
                 val paymentMethodIcon = paymentMethod.getSavedPaymentMethodIcon()
                 val paymentMethodLabel = paymentMethod.getLabel(resources)
 
                 // TODO (jameswoo) Figure out what to do if these are null
-                if (paymentMethodId == null || paymentMethodIcon == null || paymentMethodLabel == null) {
+                if (paymentMethodIcon == null || paymentMethodLabel == null) {
                     _result.emit(
                         InternalCustomerSheetResult.Error(
                             IllegalArgumentException("$paymentMethod is not supported")

@@ -26,7 +26,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
             return CustomerSheetResult.Selected(
                 selection = PaymentOptionSelection(
                     paymentMethodId = paymentMethodId,
-                    // Use [PaymentOptionFactory]
+                    // TODO (jameswoo) Use [PaymentOptionFactory]
                     paymentOption = PaymentOption(
                         drawableResourceId = drawableResourceId,
                         label = label,
