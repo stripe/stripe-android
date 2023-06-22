@@ -4,8 +4,9 @@ import com.stripe.android.model.PaymentMethod
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class FakeCustomerAdapter(
+    var selectedPaymentOption: Result<CustomerAdapter.PaymentOption?> = Result.success(null),
     private val paymentMethods: Result<List<PaymentMethod>> = Result.success(listOf()),
-    private val selectedPaymentOption: Result<CustomerAdapter.PaymentOption?> = Result.success(null),
+    private val onSetSelectedPaymentOption: ((paymentOption: CustomerAdapter.PaymentOption?) -> Result<Unit>)? = null
 ) : CustomerAdapter {
     override suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>> {
         return paymentMethods
@@ -22,7 +23,10 @@ internal class FakeCustomerAdapter(
     override suspend fun setSelectedPaymentOption(
         paymentOption: CustomerAdapter.PaymentOption?
     ): Result<Unit> {
-        TODO("Not yet implemented")
+        return onSetSelectedPaymentOption?.invoke(paymentOption) ?: run {
+            selectedPaymentOption = Result.success(paymentOption)
+            Result.success(Unit)
+        }
     }
 
     override suspend fun retrieveSelectedPaymentOption(): Result<CustomerAdapter.PaymentOption?> {
