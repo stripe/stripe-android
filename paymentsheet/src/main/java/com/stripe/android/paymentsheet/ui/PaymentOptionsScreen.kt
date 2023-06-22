@@ -1,12 +1,8 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentOptionsPrimaryButtonBinding
 import com.stripe.android.paymentsheet.navigation.Content
+import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
@@ -48,6 +45,7 @@ internal fun PaymentOptionsScreen(
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun PaymentOptionsScreenContent(
     viewModel: PaymentOptionsViewModel,
@@ -60,7 +58,6 @@ internal fun PaymentOptionsScreenContent(
     val notesText by viewModel.notesText.collectAsState()
 
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-    val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
 
     Column(modifier) {
         headerText?.let { text ->
@@ -99,7 +96,6 @@ internal fun PaymentOptionsScreenContent(
             )
         }
 
-        Spacer(modifier = Modifier.requiredHeight(bottomPadding))
-        Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
+        PaymentSheetContentPadding()
     }
 }

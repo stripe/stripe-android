@@ -22,7 +22,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat.Type
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updateMargins
-import androidx.core.view.updatePadding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.LinkHandler
@@ -127,9 +126,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                     top = initialState.top + insets.getInsets(Type.systemBars()).top,
                 )
             }
-
-            // Keyboard inset
-            view.updatePadding(bottom = initialState.bottom + insets.getInsets(Type.ime()).bottom)
         }
     }
 
