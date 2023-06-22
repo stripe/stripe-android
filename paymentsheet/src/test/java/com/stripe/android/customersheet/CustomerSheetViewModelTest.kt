@@ -426,6 +426,57 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When primary button is pressed for saved payment method, selected payment method is emitted`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                ),
+                selectedPaymentOption = Result.success(
+                    CustomerAdapter.PaymentOption.fromId(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+                    )
+                )
+            )
+        )
+        viewModel.result.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            assertThat(awaitItem()).isInstanceOf(InternalCustomerSheetResult.Selected::class.java)
+        }
+    }
+
+    @Test
+    fun `When primary button is pressed for saved payment method that cannot be saved, error message is emitted`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                ),
+                selectedPaymentOption = Result.success(
+                    CustomerAdapter.PaymentOption.fromId(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+                    )
+                ),
+                onSetSelectedPaymentOption = {
+                    Result.failure(Exception("Unable to set payment option"))
+                }
+            )
+        )
+        viewModel.viewState.test {
+            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.errorMessage).isNull()
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.errorMessage).isEqualTo("Unable to save the selected payment option")
+        }
+    }
+
     private fun createViewModel(
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         lpmRepository: LpmRepository = this.lpmRepository,

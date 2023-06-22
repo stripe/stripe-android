@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.injection.CustomerSessionScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -13,7 +14,10 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.ui.getLabel
+import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -229,6 +233,58 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onPrimaryButtonPressed() {
+        when (val currentViewState = viewState.value) {
+            is CustomerSheetViewState.AddPaymentMethod -> {
+                TODO()
+            }
+            is CustomerSheetViewState.SelectPaymentMethod -> {
+                when (val paymentSelection = currentViewState.paymentSelection) {
+                    PaymentSelection.GooglePay -> selectGooglePay()
+                    is PaymentSelection.Saved -> selectSavedPaymentMethod(paymentSelection)
+                    else -> error("$paymentSelection is not supported")
+                }
+            }
+            else -> error("${viewState.value} is not supported")
+        }
+    }
+
+    private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved) {
+        viewModelScope.launch {
+            customerAdapter.setSelectedPaymentOption(
+                savedPaymentSelection.toSavedSelection()?.toPaymentOption()
+            ).onFailure {
+                // TODO (jameswoo) Figure out what to do if payment option is unable to be persisted
+                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                    // TODO (jameswoo) translate string
+                    it.copy(errorMessage = "Unable to save the selected payment option")
+                }
+            }.onSuccess {
+                val paymentMethod = savedPaymentSelection.paymentMethod
+                val paymentMethodId = paymentMethod.id!!
+                val paymentMethodIcon = paymentMethod.getSavedPaymentMethodIcon()
+                val paymentMethodLabel = paymentMethod.getLabel(resources)
+
+                // TODO (jameswoo) Figure out what to do if these are null
+                if (paymentMethodIcon == null || paymentMethodLabel == null) {
+                    _result.emit(
+                        InternalCustomerSheetResult.Error(
+                            IllegalArgumentException("$paymentMethod is not supported")
+                        )
+                    )
+                } else {
+                    _result.emit(
+                        InternalCustomerSheetResult.Selected(
+                            paymentMethodId = paymentMethodId,
+                            drawableResourceId = paymentMethodIcon,
+                            label = paymentMethodLabel,
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun selectGooglePay() {
         TODO()
     }
 
