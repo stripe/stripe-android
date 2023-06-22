@@ -88,9 +88,7 @@ internal fun OTPScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
+                modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())
             ) {
                 Text(
                     text = otpStaticPage.title,
@@ -98,11 +96,7 @@ internal fun OTPScreen(
                     modifier = Modifier
                         .testTag(OTP_TITLE_TAG)
                         .fillMaxWidth()
-                        .padding(
-                            vertical = dimensionResource(
-                                id = R.dimen.stripe_item_vertical_margin
-                            )
-                        )
+                        .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
                 )
 
                 Text(
@@ -121,17 +115,11 @@ internal fun OTPScreen(
 
                 OTPElementUI(
                     enabled = (
-                        viewState == InputtingOTP ||
-                        viewState == ErrorOTP ||
-                        viewState is RequestingCannotVerifySuccess
+                        viewState == InputtingOTP || viewState == ErrorOTP || viewState is RequestingCannotVerifySuccess
                         ),
                     element = otpViewModel.otpElement,
                     modifier = Modifier
-                        .padding(
-                            vertical = dimensionResource(
-                                id = R.dimen.stripe_item_vertical_margin
-                            )
-                        )
+                        .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
                         .testTag(OTP_ELEMENT_TAG)
                 )
 
@@ -163,7 +151,7 @@ internal fun OTPScreen(
                     is SubmittingOTP -> LoadingButtonState.Disabled
                     RequestingOTP -> LoadingButtonState.Loading
                     RequestingCannotVerify -> LoadingButtonState.Disabled
-                    is OTPViewState.RequestingError -> LoadingButtonState.Disabled
+                    is RequestingError -> LoadingButtonState.Disabled
                     else -> LoadingButtonState.Idle
                 }
             ) {
@@ -178,7 +166,7 @@ internal fun OTPScreen(
                     is SubmittingOTP -> LoadingButtonState.Disabled
                     RequestingOTP -> LoadingButtonState.Disabled
                     RequestingCannotVerify -> LoadingButtonState.Loading
-                    is OTPViewState.RequestingError -> LoadingButtonState.Disabled
+                    is RequestingError -> LoadingButtonState.Disabled
                     else -> LoadingButtonState.Idle
                 }
             ) {
@@ -202,12 +190,9 @@ private fun OTPViewStateEffect(
                 identityViewModel.postVerificationPageDataForOTP(
                     otp = newViewState.otp,
                     navController = navController,
-                    onMissingOtp = {
-                        viewModel.onInputErrorOtp()
-                    }
+                    onMissingOtp = { viewModel.onInputErrorOtp() }
                 )
             }
-
             is RequestingError -> {
                 postErrorAndNavigateToFinalErrorScreen(
                     identityViewModel,
@@ -216,7 +201,6 @@ private fun OTPViewStateEffect(
                     newViewState.cause
                 )
             }
-
             is RequestingCannotVerifySuccess -> {
                 val verificationPageData = newViewState.verificationPageData
                 // requirements.errors might contain Phone Verification declined
@@ -266,10 +250,7 @@ private fun OTPViewStateEffect(
                     )
                 }
             }
-
-            else -> {
-                // no-op
-            }
+            else -> {} // no-op
         }
     }
 }

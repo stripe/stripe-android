@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-// !!!WIP!!! remove default values
+// TODO(ccen) WIP - to read from server
 internal data class VerificationPageStaticContentOTPPage(
     @SerialName("title")
     val title: String = "Enter verification code",

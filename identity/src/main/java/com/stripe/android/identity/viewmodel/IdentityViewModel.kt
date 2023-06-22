@@ -1401,27 +1401,25 @@ internal class IdentityViewModel constructor(
         }
     }
 
-    // 3 possible results:
-    //  1. correct OTP - navigate based on missings(could be none or document related)
-    //  2. incorrect OTP - missings still contains otp, show inline error on OTP screen
-    //  3. requirement.error - show error
+    /**
+     * Post verification with OTP, and decide next step based on result with 3 possible cases.
+     *  1. correct OTP - navigate based on missings(could be none or document related)
+     *  2. incorrect OTP - missings still contains otp, show inline error on OTP screen
+     *  3. requirement.error - show error
+     *
+     *  TODO(ccen) WIP - to read from server
+     */
     suspend fun postVerificationPageDataForOTP(
         otp: String,
         navController: NavController,
         onMissingOtp: () -> Unit
     ) {
-        // !!!WIP!!! - check if need to calculate the correct clearData here
-        // case 1 - missing document
-        // case 3 - error
         postVerificationPageDataAndMaybeNavigate(
             navController,
             CollectedDataParam(phoneOtp = otp),
             fromRoute = OTPDestination.ROUTE.route,
-            // case 2
-            // tell OTP screen to show inline error
             onMissingOtp = onMissingOtp
         ) {
-            // case 1 - no missings
             submitAndNavigate(
                 navController = navController,
                 fromRoute = OTPDestination.ROUTE.route
