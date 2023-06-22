@@ -477,6 +477,24 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When primary button is pressed for google pay, google pay is emitted`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                selectedPaymentOption = Result.success(
+                    CustomerAdapter.PaymentOption.GooglePay
+                )
+            )
+        )
+        viewModel.result.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+            val result = awaitItem() as InternalCustomerSheetResult.Selected
+            assertThat(result.label).isEqualTo("Google Pay")
+        }
+    }
+
     private fun createViewModel(
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         lpmRepository: LpmRepository = this.lpmRepository,

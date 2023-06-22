@@ -2,14 +2,13 @@ package com.stripe.android.customersheet
 
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.injection.CustomerSessionScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
@@ -239,7 +238,7 @@ internal class CustomerSheetViewModel @Inject constructor(
             }
             is CustomerSheetViewState.SelectPaymentMethod -> {
                 when (val paymentSelection = currentViewState.paymentSelection) {
-                    PaymentSelection.GooglePay -> selectGooglePay()
+                    is PaymentSelection.GooglePay -> selectGooglePay()
                     is PaymentSelection.Saved -> selectSavedPaymentMethod(paymentSelection)
                     else -> error("$paymentSelection is not supported")
                 }
@@ -266,13 +265,13 @@ internal class CustomerSheetViewModel @Inject constructor(
 
                 // TODO (jameswoo) Figure out what to do if these are null
                 if (paymentMethodIcon == null || paymentMethodLabel == null) {
-                    _result.emit(
+                    _result.tryEmit(
                         InternalCustomerSheetResult.Error(
                             IllegalArgumentException("$paymentMethod is not supported")
                         )
                     )
                 } else {
-                    _result.emit(
+                    _result.tryEmit(
                         InternalCustomerSheetResult.Selected(
                             paymentMethodId = paymentMethodId,
                             drawableResourceId = paymentMethodIcon,
@@ -285,7 +284,24 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun selectGooglePay() {
-        TODO()
+        viewModelScope.launch {
+            customerAdapter.setSelectedPaymentOption(CustomerAdapter.PaymentOption.GooglePay)
+                .onFailure {
+                    // TODO (jameswoo) Figure out what to do if payment option is unable to be persisted
+                    updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                        // TODO (jameswoo) translate string
+                        it.copy(errorMessage = "Unable to save Google Pay")
+                    }
+                }.onSuccess {
+                    _result.tryEmit(
+                        InternalCustomerSheetResult.Selected(
+                            paymentMethodId = CustomerAdapter.PaymentOption.GooglePay.id,
+                            drawableResourceId = R.drawable.stripe_google_pay_mark,
+                            label = resources.getString(com.stripe.android.R.string.stripe_google_pay),
+                        )
+                    )
+                }
+        }
     }
 
     private fun transition(to: CustomerSheetViewState) {
@@ -295,26 +311,12 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        _result.update {
-            null
-        }
-        super.onCleared()
-    }
-
     @Suppress("unused")
     private inline fun <reified T : CustomerSheetViewState> updateViewState(block: (T) -> T) {
         (_viewState.value as? T)?.let {
             _viewState.update {
                 block(it as T)
             }
-        }
-    }
-
-    object Factory : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            @Suppress("UNCHECKED_CAST")
-            return CustomerSessionViewModel.component.customerSheetViewModel as T
         }
     }
 }
