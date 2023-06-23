@@ -105,7 +105,8 @@ class TestPaymentSheetScreenshots {
     @Test
     fun testPaymentSheetNewCustomer() {
         testDriver.screenshotRegression(
-            testParams.copy(forceDarkMode = false)
+            // Temporary change to trigger failure in the screenshot test
+            testParams.copy(forceDarkMode = false, customer = Customer.Returning)
         )
     }
 
