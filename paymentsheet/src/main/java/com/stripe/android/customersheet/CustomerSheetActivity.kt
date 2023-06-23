@@ -95,6 +95,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
     private fun finishWithResult(result: InternalCustomerSheetResult) {
         setResult(RESULT_OK, Intent().putExtras(result.toBundle()))
+        viewModel.clear()
         finish()
     }
 

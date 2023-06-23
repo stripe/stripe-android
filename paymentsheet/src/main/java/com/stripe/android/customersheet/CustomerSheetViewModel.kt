@@ -83,6 +83,15 @@ internal class CustomerSheetViewModel @Inject constructor(
         }.orEmpty()
     }
 
+    // TODO (jameswoo) required for now to clear the result. This allows the view model to not enter
+    // a state where the result was already set before. This should be fixed by correctly modeling
+    // the lifecycle of this view model.
+    fun clear() {
+        _result.update {
+            null
+        }
+    }
+
     private fun loadPaymentMethods() {
         viewModelScope.launch {
             var savedPaymentMethods: List<PaymentMethod> = emptyList()
