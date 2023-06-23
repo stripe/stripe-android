@@ -27,6 +27,11 @@ internal class PaymentSheetTestRunnerContext(
         }
     }
 
+    /**
+     * Normally we know a test succeeds when it calls [PaymentSheetResultCallback], but some tests
+     * succeed based on other criteria. In these cases, call this method to manually mark a test as
+     * succeeded.
+     */
     fun markTestSucceeded() {
         countDownLatch.countDown()
     }
