@@ -155,7 +155,6 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
     }
 
-    // TODO This one will be difficult
     @Test
     fun testActivityRecreationDoesNotMakeSubsequentCallsToElementsSession() {
         networkRule.enqueue(
@@ -285,7 +284,6 @@ internal class FlowControllerTest {
         configureFlowController("pi_example2_secret_example2")
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun testDeferredIntentCardPayment() = runFlowControllerTest(
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
@@ -355,7 +353,6 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun testDeferredIntentFailedCardPayment() = runFlowControllerTest(
         createIntentCallback = { _, _ ->
@@ -412,11 +409,9 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
-
-        // TODO Wait for text?
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
+    @OptIn(DelicatePaymentSheetApi::class)
     @Test
     fun testDeferredIntentCardPaymentWithForcedSuccess() = runFlowControllerTest(
         createIntentCallback = { _, _ ->
@@ -468,7 +463,6 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun testDeferredIntentCardPaymentWithInvalidStripeIntent() = runFlowControllerTest(
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },

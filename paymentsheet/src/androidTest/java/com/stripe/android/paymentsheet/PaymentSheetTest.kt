@@ -120,7 +120,6 @@ internal class PaymentSheetTest {
         }
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun testDeferredIntentCardPayment() = runPaymentSheetTest(
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
@@ -181,7 +180,6 @@ internal class PaymentSheetTest {
         page.clickPrimaryButton()
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun testDeferredIntentFailedCardPayment() = runPaymentSheetTest(
         createIntentCallback = { _, _ ->
@@ -230,7 +228,7 @@ internal class PaymentSheetTest {
         testContext.markTestSucceeded()
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
+    @OptIn(DelicatePaymentSheetApi::class)
     @Test
     fun testDeferredIntentCardPaymentWithForcedSuccess() = runPaymentSheetTest(
         createIntentCallback = { _, _ ->
