@@ -25,7 +25,7 @@ internal class ErrorsKtTest {
                 throw retryException()
             }
         }
-        assertThat(testResult.exceptionOrNull()!!).isInstanceOf(TimeoutException::class.java)
+        assertThat(testResult.exceptionOrNull()!!).isInstanceOf(PollingReachedMaxRetriesException::class.java)
     }
 
     private fun retryException() = APIException(statusCode = HttpURLConnection.HTTP_ACCEPTED)
@@ -81,6 +81,6 @@ internal class ErrorsKtTest {
                 if (counter == 3) true else throw retryException()
             }
         }
-        assertThat(testResult.exceptionOrNull()!!).isInstanceOf(TimeoutException::class.java)
+        assertThat(testResult.exceptionOrNull()!!).isInstanceOf(PollingReachedMaxRetriesException::class.java)
     }
 }
