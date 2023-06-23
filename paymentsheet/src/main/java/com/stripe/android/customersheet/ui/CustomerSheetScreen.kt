@@ -3,6 +3,8 @@ package com.stripe.android.customersheet.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -16,6 +18,7 @@ import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
@@ -79,6 +82,15 @@ internal fun SelectPaymentMethod(
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
+    val scrollState: LazyListState = rememberLazyListState()
+    LaunchedEffect(viewState.selectedIndex) {
+        viewState.selectedIndex?.let {
+            scrollState.animateScrollToItem(
+                index = viewState.selectedIndex,
+            )
+        }
+    }
+
     Column(
         modifier = modifier
     ) {
@@ -91,20 +103,30 @@ internal fun SelectPaymentMethod(
                 .padding(horizontal = horizontalPadding)
         )
 
+        val state = PaymentOptionsStateFactory.create(
+            paymentMethods = viewState.savedPaymentMethods,
+            showGooglePay = viewState.isGooglePayEnabled,
+            showLink = false,
+            currentSelection = viewState.paymentSelection,
+            nameProvider = paymentMethodNameProvider,
+        )
+
         PaymentOptions(
-            state = PaymentOptionsStateFactory.create(
-                paymentMethods = viewState.savedPaymentMethods,
-                showGooglePay = viewState.isGooglePayEnabled,
-                showLink = false,
-                currentSelection = viewState.paymentSelection,
-                nameProvider = paymentMethodNameProvider,
-            ),
+            state = state,
             isEditing = viewState.isEditing,
             isProcessing = viewState.isProcessing,
             onAddCardPressed = { viewActionHandler(CustomerSheetViewAction.OnAddCardPressed) },
-            onItemSelected = { viewActionHandler(CustomerSheetViewAction.OnItemSelected(it)) },
+            onItemSelected = {
+                viewActionHandler(
+                    CustomerSheetViewAction.OnItemSelected(
+                        index = state.selectedIndex,
+                        selection = it
+                    )
+                )
+            },
             onItemRemoved = { viewActionHandler(CustomerSheetViewAction.OnItemRemoved(it)) },
             modifier = Modifier.padding(bottom = 2.dp),
+            scrollState = scrollState,
         )
 
         AnimatedVisibility(visible = viewState.errorMessage != null) {
@@ -170,10 +192,22 @@ internal fun AddCard(
             modifier = Modifier.padding(bottom = 20.dp),
         )
 
+        AnimatedVisibility(visible = viewState.errorMessage != null) {
+            viewState.errorMessage?.let { error ->
+                ErrorMessage(
+                    error = error,
+                    modifier = Modifier
+                        .padding(vertical = 2.dp)
+                        .padding(horizontal = horizontalPadding),
+                )
+            }
+        }
+
         PrimaryButton(
             // TODO (jameswoo) add to lokalize
             label = "Add",
             isEnabled = true,
+            isLoading = viewState.isProcessing,
             onButtonClick = {
                 viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
             },

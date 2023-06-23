@@ -62,7 +62,7 @@ interface CustomerAdapter {
      * [setupIntentClientSecretProvider] in the [CustomerAdapter.create] call.
      * @return the client secret for the [SetupIntent].
      */
-    suspend fun setupIntentClientSecretForCustomerAttach(): Result<String>
+    suspend fun setupIntentClientSecretForCustomerAttach(): Result<String>?
 
     @ExperimentalCustomerSheetApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

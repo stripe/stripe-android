@@ -11,6 +11,9 @@ internal sealed class CustomerSheetViewAction {
     object OnAddCardPressed : CustomerSheetViewAction()
     object OnPrimaryButtonPressed : CustomerSheetViewAction()
     class OnFormValuesChanged(val formFieldValues: FormFieldValues?) : CustomerSheetViewAction()
-    class OnItemSelected(val selection: PaymentSelection?) : CustomerSheetViewAction()
+    class OnItemSelected(
+        val index: Int,
+        val selection: PaymentSelection?,
+    ) : CustomerSheetViewAction()
     class OnItemRemoved(val paymentMethod: PaymentMethod) : CustomerSheetViewAction()
 }

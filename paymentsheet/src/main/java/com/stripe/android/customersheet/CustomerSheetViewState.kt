@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -37,6 +38,7 @@ internal sealed class CustomerSheetViewState(
     data class SelectPaymentMethod(
         val title: String?,
         override val savedPaymentMethods: List<PaymentMethod>,
+        val selectedIndex: Int? = null,
         val paymentSelection: PaymentSelection?,
         override val isLiveMode: Boolean,
         override val isProcessing: Boolean,
@@ -53,9 +55,12 @@ internal sealed class CustomerSheetViewState(
         screen = PaymentSheetScreen.SelectSavedPaymentMethods,
     )
 
-    data class AddPaymentMethod(
+    data class AddPaymentMethod constructor(
+        val paymentMethodCode: PaymentMethodCode,
         val formViewData: FormViewModel.ViewData,
         val enabled: Boolean,
+        val errorMessage: String? = null,
+        override val isProcessing: Boolean,
         override val isLiveMode: Boolean,
     ) : CustomerSheetViewState(
         savedPaymentMethods = emptyList(),

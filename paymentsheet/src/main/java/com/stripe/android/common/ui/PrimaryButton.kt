@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -31,6 +32,7 @@ internal fun PrimaryButton(
     isEnabled: Boolean,
     onButtonClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     // We need to use PaymentsTheme.primaryButtonStyle instead of MaterialTheme
     // because of the rules API for primary button.
@@ -70,11 +72,17 @@ internal fun PrimaryButton(
                     disabledBackgroundColor = background
                 )
             ) {
-                Text(
-                    text = label,
-                    color = onBackground.copy(alpha = LocalContentAlpha.current),
-                    style = textStyle
-                )
+                if (isLoading) {
+                    LoadingIndicator(
+                        color = MaterialTheme.colors.onPrimary,
+                    )
+                } else {
+                    Text(
+                        text = label,
+                        color = onBackground.copy(alpha = LocalContentAlpha.current),
+                        style = textStyle
+                    )
+                }
             }
         }
     }
