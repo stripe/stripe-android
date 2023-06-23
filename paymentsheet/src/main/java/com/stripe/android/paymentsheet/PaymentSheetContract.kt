@@ -16,6 +16,12 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
+@Suppress("DEPRECATION")
+@Deprecated(
+    message = "This isn't meant for public usage and will be removed in a future " +
+        "release. If you're looking to integrate with PaymentSheet in Compose, " +
+        "use rememberPaymentSheet() instead.",
+)
 class PaymentSheetContract :
     ActivityResultContract<PaymentSheetContract.Args, PaymentSheetResult>() {
     override fun createIntent(

@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.RestrictTo
 import com.stripe.android.link.injection.LinkLauncherSubcomponent
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
@@ -22,6 +23,17 @@ class LinkPaymentLauncher @Inject internal constructor(
 
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
+
+    fun register(
+        activityResultRegistry: ActivityResultRegistry,
+        callback: (LinkActivityResult) -> Unit,
+    ) {
+        linkActivityResultLauncher = activityResultRegistry.register(
+            "LinkPaymentLauncher",
+            LinkActivityContract(),
+            callback,
+        )
+    }
 
     fun register(
         activityResultCaller: ActivityResultCaller,

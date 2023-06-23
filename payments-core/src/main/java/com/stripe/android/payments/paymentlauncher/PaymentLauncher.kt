@@ -1,8 +1,5 @@
 package com.stripe.android.payments.paymentlauncher
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -14,6 +11,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.utils.rememberActivityOrNull
 
 /**
  * API to confirm and handle next actions for [PaymentIntent] and [SetupIntent].
@@ -98,13 +96,14 @@ interface PaymentLauncher {
             callback: PaymentResultCallback
         ): PaymentLauncher {
             val context = LocalContext.current
+            val activity = rememberActivityOrNull()
             return PaymentLauncherFactory(
                 context = context,
                 hostActivityLauncher = rememberLauncherForActivityResult(
                     PaymentLauncherContract(),
                     callback::onPaymentResult
                 ),
-                statusBarColor = context.findActivity()?.window?.statusBarColor,
+                statusBarColor = activity?.window?.statusBarColor,
             ).create(publishableKey, stripeAccountId)
         }
 
@@ -124,6 +123,8 @@ interface PaymentLauncher {
             callback: PaymentResultCallback
         ): PaymentLauncher {
             val context = LocalContext.current
+            val activity = rememberActivityOrNull()
+
             val activityResultLauncher = rememberLauncherForActivityResult(
                 PaymentLauncherContract(),
                 callback::onPaymentResult
@@ -133,18 +134,9 @@ interface PaymentLauncher {
                 PaymentLauncherFactory(
                     context = context,
                     hostActivityLauncher = activityResultLauncher,
-                    statusBarColor = context.findActivity()?.window?.statusBarColor,
+                    statusBarColor = activity?.window?.statusBarColor,
                 ).create(publishableKey, stripeAccountId)
             }
         }
     }
-}
-
-private fun Context.findActivity(): Activity? {
-    var context = this
-    while (context is ContextWrapper) {
-        if (context is Activity) return context
-        context = context.baseContext
-    }
-    return null
 }

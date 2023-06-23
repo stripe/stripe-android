@@ -2,8 +2,10 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Activity
 import android.os.Parcelable
-import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -75,7 +77,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
-    activityResultCaller: ActivityResultCaller,
+    activityResultRegistryOwner: ActivityResultRegistryOwner,
     @InjectorKey private val injectorKey: String,
     // Properties provided through injection
     private val eventReporter: EventReporter,
@@ -137,6 +139,32 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     init {
+        val paymentLauncherActivityResultLauncher = activityResultRegistryOwner.register(
+            PaymentLauncherContract(),
+            ::onPaymentResult
+        )
+
+        paymentOptionActivityLauncher = activityResultRegistryOwner.register(
+            PaymentOptionContract(),
+            ::onPaymentOptionResult
+        )
+
+        googlePayActivityLauncher = activityResultRegistryOwner.register(
+            GooglePayPaymentMethodLauncherContractV2(),
+            ::onGooglePayResult
+        )
+
+        val activityResultLaunchers = setOf(
+            paymentLauncherActivityResultLauncher,
+            paymentOptionActivityLauncher,
+            googlePayActivityLauncher,
+        )
+
+        linkLauncher.register(
+            activityResultRegistry = activityResultRegistryOwner.activityResultRegistry,
+            callback = ::onLinkActivityResult,
+        )
+
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onCreate(owner: LifecycleOwner) {
@@ -144,38 +172,20 @@ internal class DefaultFlowController @Inject internal constructor(
                         publishableKey = { lazyPaymentConfiguration.get().publishableKey },
                         stripeAccountId = { lazyPaymentConfiguration.get().stripeAccountId },
                         statusBarColor = statusBarColor(),
-                        hostActivityLauncher = activityResultCaller.registerForActivityResult(
-                            PaymentLauncherContract(),
-                            ::onPaymentResult
-                        ),
+                        hostActivityLauncher = paymentLauncherActivityResultLauncher,
                     ).also {
                         it.registerPollingAuthenticator()
                     }
-
-                    linkLauncher.register(
-                        activityResultCaller = activityResultCaller,
-                        callback = ::onLinkActivityResult,
-                    )
                 }
 
                 override fun onDestroy(owner: LifecycleOwner) {
+                    activityResultLaunchers.forEach { it.unregister() }
                     paymentLauncher?.unregisterPollingAuthenticator()
                     paymentLauncher = null
                     linkLauncher.unregister()
                 }
             }
         )
-
-        paymentOptionActivityLauncher =
-            activityResultCaller.registerForActivityResult(
-                PaymentOptionContract(),
-                ::onPaymentOptionResult
-            )
-        googlePayActivityLauncher =
-            activityResultCaller.registerForActivityResult(
-                GooglePayPaymentMethodLauncherContractV2(),
-                ::onGooglePayResult
-            )
     }
 
     override fun configureWithPaymentIntent(
@@ -598,28 +608,37 @@ internal class DefaultFlowController @Inject internal constructor(
         val config: PaymentSheet.Configuration?
     ) : Parcelable
 
+    private fun <I, O> ActivityResultRegistryOwner.register(
+        contract: ActivityResultContract<I, O>,
+        callback: ActivityResultCallback<O>,
+    ): ActivityResultLauncher<I> {
+        val key = "FlowController_${contract::class.java.name}"
+        return activityResultRegistry.register(key, contract, callback)
+    }
+
     companion object {
         fun getInstance(
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleOwner: LifecycleOwner,
-            activityResultCaller: ActivityResultCaller,
+            activityResultRegistryOwner: ActivityResultRegistryOwner,
             statusBarColor: () -> Int?,
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback
         ): PaymentSheet.FlowController {
-            val injectorKey =
-                WeakMapInjectorRegistry.nextKey(
-                    requireNotNull(PaymentSheet.FlowController::class.simpleName)
-                )
-            val flowControllerViewModel =
-                ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
+            val injectorKey = WeakMapInjectorRegistry.nextKey(
+                prefix = requireNotNull(PaymentSheet.FlowController::class.simpleName),
+            )
+
+            val flowControllerViewModel = ViewModelProvider(
+                owner = viewModelStoreOwner,
+            )[FlowControllerViewModel::class.java]
 
             val flowControllerStateComponent = flowControllerViewModel.flowControllerStateComponent
 
             val flowControllerComponent: FlowControllerComponent =
                 flowControllerStateComponent.flowControllerComponentBuilder
                     .lifeCycleOwner(lifecycleOwner)
-                    .activityResultCaller(activityResultCaller)
+                    .activityResultRegistryOwner(activityResultRegistryOwner)
                     .statusBarColor(statusBarColor)
                     .paymentOptionCallback(paymentOptionCallback)
                     .paymentResultCallback(paymentResultCallback)
