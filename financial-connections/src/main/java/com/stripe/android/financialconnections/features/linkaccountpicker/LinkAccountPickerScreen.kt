@@ -170,7 +170,9 @@ private fun LinkAccountPickerLoaded(
             }
             SelectNewAccount(
                 text = payload.addNewAccount,
-                onClick = onNewBankAccountClick
+                onClick = {
+                    if (selectNetworkedAccountAsync !is Loading) onNewBankAccountClick()
+                }
             )
             Spacer(modifier = Modifier.size(16.dp))
         }
@@ -274,7 +276,7 @@ fun SelectNewAccountIcon(
             Image(
                 modifier = modifier,
                 imageVector = Icons.Filled.Add,
-                contentScale = ContentScale.Inside,
+                contentScale = ContentScale.FillBounds,
                 colorFilter = ColorFilter.tint(brandColor),
                 contentDescription = contentDescription
             )

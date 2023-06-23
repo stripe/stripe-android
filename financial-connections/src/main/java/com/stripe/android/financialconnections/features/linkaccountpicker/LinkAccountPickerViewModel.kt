@@ -71,7 +71,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
                 accounts = accounts,
-                addNewAccount = display.addNewAccount!!,
+                addNewAccount = requireNotNull(display.addNewAccount),
                 title = display.title,
                 defaultCta = display.defaultCta,
                 repairAuthorizationEnabled = accountsResponse.repairAuthorizationEnabled,
@@ -113,7 +113,8 @@ internal class LinkAccountPickerViewModel @Inject constructor(
 
     fun onNewBankAccountClick() = viewModelScope.launch {
         eventTracker.track(Click("click.new_account", PANE))
-        goNext(Pane.INSTITUTION_PICKER)
+        val nextPane = awaitState().payload()?.addNewAccount?.nextPane ?: Pane.INSTITUTION_PICKER
+        goNext(nextPane)
     }
 
     fun onSelectAccountClick() = suspend {
