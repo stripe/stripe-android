@@ -4,9 +4,9 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -109,6 +108,7 @@ private fun LinkAccountPickerContent(
             is Success -> LinkAccountPickerLoaded(
                 scrollState = scrollState,
                 payload = payload(),
+                cta = state.cta,
                 selectedAccountId = state.selectedAccountId,
                 selectNetworkedAccountAsync = state.selectNetworkedAccountAsync,
                 onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick,
@@ -142,7 +142,8 @@ private fun LinkAccountPickerLoaded(
     onSelectAccountClick: () -> Unit,
     onNewBankAccountClick: () -> Unit,
     onAccountClick: (PartnerAccount) -> Unit,
-    scrollState: ScrollState
+    scrollState: ScrollState,
+    cta: String?
 ) {
     Column(
         Modifier
@@ -186,7 +187,7 @@ private fun LinkAccountPickerLoaded(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                Text(text = stringResource(R.string.stripe_link_account_picker_cta))
+                Text(text = cta ?: stringResource(R.string.stripe_link_account_picker_cta))
             }
         }
     }
@@ -244,44 +245,51 @@ private fun SelectNewAccount(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val icon = text.icon?.default
-            val brandColor = FinancialConnectionsTheme.colors.textBrand
-            val modifier = Modifier
-                .size(24.dp)
-                .background(color = brandColor.copy(alpha = 0.1f), CircleShape)
-                .padding(3.dp)
-                .clip(CircleShape)
-            when {
-                icon.isNullOrEmpty() -> {
-                    Image(
-                        modifier = modifier,
-                        imageVector = Icons.Filled.Add,
-                        colorFilter = ColorFilter.tint(brandColor),
-                        contentDescription = requireNotNull(text.body)
-                    )
-                }
-
-                else -> StripeImage(
-                    url = icon,
-                    imageLoader = LocalImageLoader.current,
-                    contentDescription = null,
-                    modifier = modifier,
-                    contentScale = ContentScale.Crop,
-                    errorContent = {
-                        Image(
-                            modifier = modifier,
-                            imageVector = Icons.Filled.Add,
-                            colorFilter = ColorFilter.tint(brandColor),
-                            contentDescription = requireNotNull(text.body)
-                        )
-                    }
-                )
-            }
+            SelectNewAccountIcon(
+                icon = text.icon?.default,
+                contentDescription = requireNotNull(text.body),
+            )
             Spacer(modifier = Modifier.size(16.dp))
             Text(
                 text = requireNotNull(text.body),
                 style = FinancialConnectionsTheme.typography.body,
                 color = FinancialConnectionsTheme.colors.textBrand
+            )
+        }
+    }
+}
+
+@Composable
+fun SelectNewAccountIcon(
+    icon: String?,
+    contentDescription: String,
+) {
+
+    Box {
+        val brandColor = FinancialConnectionsTheme.colors.textBrand
+        val modifier = Modifier
+            .size(12.dp)
+            .align(Alignment.Center)
+        val placeholderImage = @Composable {
+            Image(
+                modifier = modifier,
+                imageVector = Icons.Filled.Add,
+                contentScale = ContentScale.Inside,
+                colorFilter = ColorFilter.tint(brandColor),
+                contentDescription = contentDescription
+            )
+        }
+        Canvas(modifier = Modifier.size(24.dp)) {
+            drawCircle(color = brandColor.copy(alpha = 0.1f))
+        }
+        when {
+            icon.isNullOrEmpty() -> placeholderImage()
+            else -> StripeImage(
+                url = icon,
+                imageLoader = LocalImageLoader.current,
+                contentDescription = null,
+                modifier = modifier.padding(),
+                errorContent = { placeholderImage() }
             )
         }
     }

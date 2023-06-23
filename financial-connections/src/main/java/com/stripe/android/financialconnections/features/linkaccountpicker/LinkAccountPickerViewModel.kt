@@ -191,4 +191,11 @@ internal data class LinkAccountPickerState(
         val stepUpAuthenticationRequired: Boolean,
         val defaultCta: String
     )
+
+    val cta: String?
+        get() = payload()?.let { payload ->
+            payload.accounts.firstOrNull { it.first.id == selectedAccountId }
+                ?.second?.selectionCta
+                ?: payload.defaultCta
+        }
 }

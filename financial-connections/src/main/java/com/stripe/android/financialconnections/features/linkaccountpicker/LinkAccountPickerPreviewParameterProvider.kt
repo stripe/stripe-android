@@ -22,29 +22,18 @@ internal class LinkAccountPickerPreviewParameterProvider :
     override val count: Int
         get() = super.count
 
-    private val returningNetworkingUserAccountPicker = ReturningNetworkingUserAccountPicker(
-        title = "title",
-        defaultCta = "cta",
-        accounts = emptyList(),
-        addNewAccount = AddNewAccount(
-            body = "New bank account",
-            icon = null,
-            nextPane = Pane.SUCCESS
-        )
-    )
-
     private fun canonical() = LinkAccountPickerState(
         payload = Success(
             LinkAccountPickerState.Payload(
-                title = returningNetworkingUserAccountPicker.title,
+                title = display().title,
                 accounts = partnerAccountList(),
-                addNewAccount = returningNetworkingUserAccountPicker.addNewAccount!!,
+                addNewAccount = display().addNewAccount!!,
                 accessibleData = accessibleCallout(),
                 businessName = "Random business",
                 consumerSessionClientSecret = "secret",
                 repairAuthorizationEnabled = false,
                 stepUpAuthenticationRequired = false,
-                defaultCta = returningNetworkingUserAccountPicker.defaultCta,
+                defaultCta = display().defaultCta,
             )
         ),
     )
@@ -53,15 +42,15 @@ internal class LinkAccountPickerPreviewParameterProvider :
         selectedAccountId = partnerAccountList().first().first.id,
         payload = Success(
             LinkAccountPickerState.Payload(
-                title = returningNetworkingUserAccountPicker.title,
+                title = display().title,
                 accounts = partnerAccountList(),
-                addNewAccount = returningNetworkingUserAccountPicker.addNewAccount!!,
+                addNewAccount = display().addNewAccount!!,
                 accessibleData = accessibleCallout(),
                 businessName = "Random business",
                 consumerSessionClientSecret = "secret",
                 repairAuthorizationEnabled = false,
                 stepUpAuthenticationRequired = false,
-                defaultCta = returningNetworkingUserAccountPicker.defaultCta,
+                defaultCta = display().defaultCta,
             )
         ),
     )
@@ -154,5 +143,16 @@ internal class LinkAccountPickerPreviewParameterProvider :
         isStripeDirect = true,
         isNetworking = true,
         dataPolicyUrl = ""
+    )
+
+    private fun display() = ReturningNetworkingUserAccountPicker(
+        title = "Select account",
+        defaultCta = "Connect account",
+        accounts = emptyList(),
+        addNewAccount = AddNewAccount(
+            body = "New bank account",
+            icon = null,
+            nextPane = Pane.SUCCESS
+        )
     )
 }

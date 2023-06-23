@@ -24,9 +24,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat.getLocales
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
+import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import java.util.Locale
 
@@ -90,6 +92,15 @@ internal fun AccountItem(
                         style = FinancialConnectionsTheme.typography.captionTight
                     )
                 }
+            }
+            networkedAccount?.icon?.default?.let {
+                StripeImage(
+                    url = it,
+                    imageLoader = LocalImageLoader.current,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(16.dp)
+                )
             }
         }
     }
