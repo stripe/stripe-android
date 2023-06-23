@@ -13,7 +13,7 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Polls OAuth results from backend after user finishes authorization on web browser.
  *
- * Will retry upon 202 backend responses every [POLLING_TIME_MS] up to [MAX_TRIES]
+ * Will retry upon 202 backend responses.
  */
 internal class PollAuthorizationSessionOAuthResults @Inject constructor(
     private val repository: FinancialConnectionsRepository,
@@ -36,10 +36,5 @@ internal class PollAuthorizationSessionOAuthResults @Inject constructor(
                 sessionId = session.id
             )
         }
-    }
-
-    private companion object {
-        private const val POLLING_TIME_MS = 2000L
-        private const val MAX_TRIES = 300
     }
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.utils
 
 import com.stripe.android.core.exception.StripeException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
@@ -13,6 +14,7 @@ import kotlin.time.Duration.Companion.seconds
  * If the block execution fails, and [retryCondition] is met, the operation is retried.
  * Otherwise the resulting exception will be thrown.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 internal suspend fun <T> retryOnException(
     options: PollTimingOptions,
     retryCondition: suspend (Throwable) -> Boolean,

@@ -20,7 +20,7 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Polls accounts from backend after authorization session completes.
  *
- * Will retry upon 202 backend responses every [POLLING_TIME_MS] up to [MAX_TRIES]
+ * Will retry upon 202 backend responses.
  */
 internal class PollAuthorizationSessionAccounts @Inject constructor(
     private val repository: FinancialConnectionsAccountsRepository,
