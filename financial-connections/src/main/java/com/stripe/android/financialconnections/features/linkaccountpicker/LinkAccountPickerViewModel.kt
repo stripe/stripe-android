@@ -76,10 +76,6 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private fun observeAsyncs() {
         onAsync(
             LinkAccountPickerState::payload,
-            onSuccess = {
-                // Select first selectable account by default.
-                setState { copy(selectedAccountId = it.accounts.firstOrNull { it.allowSelection }?.id) }
-            },
             onFail = { error ->
                 logger.error("Error fetching payload", error)
                 eventTracker.track(Error(PANE, error))
