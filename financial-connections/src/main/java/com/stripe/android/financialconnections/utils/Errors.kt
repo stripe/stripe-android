@@ -6,7 +6,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
 import java.net.HttpURLConnection
-import java.util.concurrent.TimeoutException
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -33,7 +32,7 @@ internal suspend fun <T> retryOnException(
         either.fold(
             onFailure = { exception ->
                 when {
-                    remainingTimes == 0 -> throw TimeoutException("reached max number of retries")
+                    remainingTimes == 0 -> throw PollingReachedMaxRetriesException(options)
                     retryCondition(exception).not() -> throw exception
                 }
             },
@@ -47,6 +46,16 @@ internal data class PollTimingOptions(
     val initialDelayMs: Long = 1.75.seconds.inWholeMilliseconds,
     val maxNumberOfRetries: Int = 180,
     val retryInterval: Long = 0.25.seconds.inWholeMilliseconds
+)
+
+/**
+ * Thrown when polling has reached the max number of retries.
+ */
+internal class PollingReachedMaxRetriesException(
+    pollingOptions: PollTimingOptions
+) : StripeException(
+    message = "reached max number of retries ${pollingOptions.maxNumberOfRetries}.",
+    statusCode = HttpURLConnection.HTTP_ACCEPTED
 )
 
 /**
