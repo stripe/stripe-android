@@ -162,6 +162,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 formViewData = FormViewModel.ViewData(),
                 enabled = true,
                 isLiveMode = isLiveMode,
+                isProcessing = false,
             )
         )
 
