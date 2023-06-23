@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
 import java.net.HttpURLConnection
 import java.util.concurrent.TimeoutException
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Executes and returns the result of the given [block].
@@ -13,15 +14,19 @@ import java.util.concurrent.TimeoutException
  * Otherwise the resulting exception will be thrown.
  */
 internal suspend fun <T> retryOnException(
-    times: Int = Int.MAX_VALUE,
-    initialDelay: Long = 0,
-    delayMilliseconds: Long = 100,
+    options: PollTimingOptions,
     retryCondition: suspend (Throwable) -> Boolean,
     block: suspend () -> T
 ): T = channelFlow {
-    var remainingTimes = times - 1
+    var remainingTimes = options.maxNumberOfRetries - 1
     while (!isClosedForSend) {
-        delay(if (remainingTimes == times - 1) initialDelay else delayMilliseconds)
+        delay(
+            if (remainingTimes == options.maxNumberOfRetries - 1) {
+                options.initialDelayMs
+            } else {
+                options.retryInterval
+            }
+        )
         val either = runCatching { block() }
         either.fold(
             onFailure = { exception ->
@@ -35,6 +40,12 @@ internal suspend fun <T> retryOnException(
         remainingTimes--
     }
 }.first()
+
+data class PollTimingOptions(
+    val initialDelayMs: Long = 1.75.seconds.inWholeMilliseconds,
+    val maxNumberOfRetries: Int = 180,
+    val retryInterval: Long = 0.25.seconds.inWholeMilliseconds
+)
 
 /**
  * returns true if exception represents a [HttpURLConnection.HTTP_ACCEPTED] API response.

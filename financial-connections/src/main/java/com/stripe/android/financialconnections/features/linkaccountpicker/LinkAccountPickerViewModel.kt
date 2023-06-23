@@ -12,10 +12,10 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -32,7 +32,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     initialState: LinkAccountPickerState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
-    private val pollNetworkedAccounts: PollNetworkedAccounts,
+    private val fetchNetworkedAccounts: FetchNetworkedAccounts,
     private val selectNetworkedAccount: SelectNetworkedAccount,
     private val updateLocalManifest: UpdateLocalManifest,
     private val updateCachedAccounts: UpdateCachedAccounts,
@@ -53,7 +53,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
             )
             val consumerSession = requireNotNull(getCachedConsumerSession())
-            val accountsResponse = pollNetworkedAccounts(consumerSession.clientSecret)
+            val accountsResponse = fetchNetworkedAccounts(consumerSession.clientSecret)
             val accounts = accountsResponse
                 .data
                 // Override allow selection to disable disconnected accounts

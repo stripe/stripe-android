@@ -7,9 +7,11 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
+import com.stripe.android.financialconnections.utils.PollTimingOptions
 import com.stripe.android.financialconnections.utils.retryOnException
 import com.stripe.android.financialconnections.utils.shouldRetry
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 internal class PollAttachPaymentAccount @Inject constructor(
     private val repository: FinancialConnectionsAccountsRepository,
@@ -25,8 +27,9 @@ internal class PollAttachPaymentAccount @Inject constructor(
         params: PaymentAccountParams
     ): LinkAccountSessionPaymentAccount {
         return retryOnException(
-            times = MAX_TRIES,
-            delayMilliseconds = POLLING_TIME_MS,
+            PollTimingOptions(
+                initialDelayMs = 1.seconds.inWholeMilliseconds,
+            ),
             retryCondition = { exception -> exception.shouldRetry }
         ) {
             try {
@@ -58,11 +61,7 @@ internal class PollAttachPaymentAccount @Inject constructor(
                     institution = institution,
                     stripeException = this
                 )
+
             else -> this
         }
-
-    private companion object {
-        private const val POLLING_TIME_MS = 250L
-        private const val MAX_TRIES = 180
-    }
 }

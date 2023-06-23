@@ -6,13 +6,16 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.common.getBusinessName
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
+import com.stripe.android.financialconnections.utils.PollTimingOptions
 import com.stripe.android.financialconnections.utils.retryOnException
 import com.stripe.android.financialconnections.utils.shouldRetry
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Polls accounts from backend after authorization session completes.
@@ -28,16 +31,17 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
         canRetry: Boolean,
         manifest: FinancialConnectionsSessionManifest
     ): PartnerAccountsList {
+        val activeAuthSession = requireNotNull(manifest.activeAuthSession)
         return retryOnException(
-            times = MAX_TRIES,
-            delayMilliseconds = POLLING_TIME_MS,
+            PollTimingOptions(
+                initialDelayMs = activeAuthSession.flow.toPollIntervalMs(),
+            ),
             retryCondition = { exception -> exception.shouldRetry }
         ) {
             try {
-                val authSession = requireNotNull(manifest.activeAuthSession)
                 val accounts = repository.postAuthorizationSessionAccounts(
                     clientSecret = configuration.financialConnectionsSessionClientSecret,
-                    sessionId = authSession.id
+                    sessionId = activeAuthSession.id
                 )
                 if (accounts.data.isEmpty()) {
                     throw AccountLoadError(
@@ -85,8 +89,23 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
             )
         }
 
-    private companion object {
-        private const val POLLING_TIME_MS = 2000L
-        private const val MAX_TRIES = 10
+    private fun FinancialConnectionsAuthorizationSession.Flow?.toPollIntervalMs(): Long {
+        val defaultInitialPollDelay: Long = 1.75.seconds.inWholeMilliseconds
+        return when (this) {
+            FinancialConnectionsAuthorizationSession.Flow.TESTMODE,
+            FinancialConnectionsAuthorizationSession.Flow.TESTMODE_OAUTH,
+            FinancialConnectionsAuthorizationSession.Flow.TESTMODE_OAUTH_WEBVIEW,
+            FinancialConnectionsAuthorizationSession.Flow.FINICITY_CONNECT_V2_LITE -> {
+                // Post auth flow, Finicity non-OAuth account retrieval latency is extremely quick - p90 < 1sec.
+                0
+            }
+
+            FinancialConnectionsAuthorizationSession.Flow.MX_CONNECT -> {
+                // 10 account retrieval latency on MX non-OAuth sessions is currently 460 ms
+                0.5.seconds.inWholeMilliseconds
+            }
+
+            else -> defaultInitialPollDelay
+        }
     }
 }
