@@ -41,6 +41,10 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/stripe_setup
       - name: run tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
+          PR_BRANCH: ${{ github.head_ref }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 28
@@ -50,9 +54,7 @@ jobs:
           disable-animations: true
           sdcard-path-or-size: 512M
           profile: Nexus 6
-          # We need to append these weird flags because of a Java 17 bug in Shot
-          # See: https://github.com/pedrovgs/Shot/issues/268
-          script: ./gradlew paymentsheet-example:executeScreenshotTests -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot -Dorg.gradle.jvmargs="--add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.nio.channels=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED"
+          script: ruby scripts/record_screenshots.rb
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
@@ -61,6 +63,12 @@ jobs:
             **/build/reports/shot/debug/verification/
             **/tmp/shot/screenshot/
             **/build/reports/androidTests/connected/
+      - uses: peter-evans/create-or-update-comment@v2
+        if: steps.failed-screenshots.outputs.PR_COMMENT
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: ${{ steps.failed-screenshots.outputs.PR_COMMENT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 #       - name: Notify failure endpoint
 #         id: notifyFailureEndpoint
 #         if: failure()
