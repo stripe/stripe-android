@@ -44,7 +44,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
-          PR_BRANCH: ${{ github.head_ref }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 28
@@ -54,7 +53,7 @@ jobs:
           disable-animations: true
           sdcard-path-or-size: 512M
           profile: Nexus 6
-          script: ruby scripts/record_screenshots.rb
+          script: ruby scripts/check_payment_sheet_screenshots.rb
       - uses: actions/upload-artifact@v3
         if: failure()
         with:

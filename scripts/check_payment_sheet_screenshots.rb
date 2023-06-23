@@ -2,18 +2,9 @@
 
 require 'open3'
 
-def current_branch
-    pr_branch = ENV['PR_BRANCH']
-    if pr_branch.nil? || pr_branch.empty?
-        'master'
-    else
-        pr_branch
-    end
-end
-
-def create_new_branch_name(current_branch)
+def create_new_branch_name
     timestamp = Time.now.strftime("%Y-%m-%d-%H-%M-%S")
-    "ci/updated-screenshots-for-#{current_branch}-#{timestamp}"
+    "ci/updated-screenshots-#{timestamp}"
 end
 
 def execute_or_fail(command)
@@ -31,14 +22,12 @@ def setup
         abort("Missing GITHUB_REPOSITORY environment variable.")
     end
 
-    branch = current_branch
-
-    return token, repo, branch
+    return token, repo
 end
 
 # ------------------------------
 
-token, repo, base_branch = setup
+token, repo = setup
 
 # Record the screenshots
 record_command = './gradlew paymentsheet-example:executeScreenshotTests -Precord -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot'
@@ -56,7 +45,7 @@ if stdout.empty?
 end
 
 # Commit the changes
-new_branch_name = create_new_branch_name(base_branch)
+new_branch_name = create_new_branch_name
 execute_or_fail("git checkout -b #{new_branch_name}")
 execute_or_fail("git add .")
 execute_or_fail("git commit -m \"Update screenshots\"")
@@ -65,14 +54,6 @@ execute_or_fail("git commit -m \"Update screenshots\"")
 push_url = "https://#{token}@github.com/#{repo}.git"
 execute_or_fail("git push --force #{push_url}")
 
-# Comment on original pull request
-diff_url = "https://github.com/#{repo}/compare/#{base_branch}...#{new_branch_name}"
-
-if base_branch == "master"
-    # If this is a push to master, output the diff URL for later usage
-    puts "Screenshot tests failed.\n\nMerge the screenshot diff here if it's an intentional change: #{diff_url}"
-else
-    # If this is a pull request, comment on it
-    comment = "Screenshot tests failed.\n\n[See differences](#{diff_url})\n\nMerge the branch if it's an intentional change."
-    system("::set-output name=PR_COMMENT::\"#{comment}\"")
-end
+# Print the URL for the fixing pull request
+diff_url = "https://github.com/#{repo}/compare/#{new_branch_name}?expand=1"
+puts "Screenshot tests failed.\n\nMerge the screenshot diff here if it's an intentional change: #{diff_url}"
