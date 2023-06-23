@@ -107,4 +107,3 @@ private fun FinancialConnectionsAuthorizationSession.Flow?.toPollIntervalMs(): L
         else -> defaultInitialPollDelay
     }
 }
-
