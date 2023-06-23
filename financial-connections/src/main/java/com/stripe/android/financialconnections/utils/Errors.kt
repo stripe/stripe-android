@@ -43,7 +43,7 @@ internal suspend fun <T> retryOnException(
     }
 }.first()
 
-data class PollTimingOptions(
+internal data class PollTimingOptions(
     val initialDelayMs: Long = 1.75.seconds.inWholeMilliseconds,
     val maxNumberOfRetries: Int = 180,
     val retryInterval: Long = 0.25.seconds.inWholeMilliseconds
