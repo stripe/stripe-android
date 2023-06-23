@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -16,8 +18,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
@@ -64,6 +68,7 @@ internal fun OTPScreen(
         )
         val viewState by otpViewModel.viewState.collectAsState()
         val otpStaticPage = verificationPage.otp
+        val focusRequester = remember { FocusRequester() }
 
         LaunchedEffect(Unit) {
             otpViewModel.generatePhoneOtp()
@@ -73,7 +78,8 @@ internal fun OTPScreen(
             viewState = viewState,
             navController = navController,
             identityViewModel = identityViewModel,
-            viewModel = otpViewModel
+            viewModel = otpViewModel,
+            focusRequester = focusRequester
         )
 
         Column(
@@ -88,7 +94,9 @@ internal fun OTPScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column(
-                modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
             ) {
                 Text(
                     text = otpStaticPage.title,
@@ -120,12 +128,17 @@ internal fun OTPScreen(
                     element = otpViewModel.otpElement,
                     modifier = Modifier
                         .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
-                        .testTag(OTP_ELEMENT_TAG)
+                        .testTag(OTP_ELEMENT_TAG),
+                    focusRequester = focusRequester
                 )
 
                 if (viewState == ErrorOTP) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                top = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
+                            ),
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Icon(
@@ -142,9 +155,24 @@ internal fun OTPScreen(
                         )
                     }
                 }
+
+                if (viewState is SubmittingOTP) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = dimensionResource(id = R.dimen.stripe_item_vertical_margin)),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(24.dp),
+                            strokeWidth = 3.dp
+                        )
+                    }
+                }
             }
 
-            LoadingButton(
+            LoadingTextButton(
                 modifier = Modifier.testTag(OTP_RESEND_BUTTON_TAG),
                 text = otpStaticPage.resendButtonText.uppercase(),
                 state = when (viewState) {
@@ -178,31 +206,42 @@ internal fun OTPScreen(
 
 @Composable
 private fun OTPViewStateEffect(
-    viewState: OTPViewState,
+    viewState: OTPViewState?,
     navController: NavController,
     identityViewModel: IdentityViewModel,
-    viewModel: OTPViewModel
+    viewModel: OTPViewModel,
+    focusRequester: FocusRequester
 ) {
     val context = LocalContext.current
     LaunchedEffect(viewState) {
-        when (val newViewState = viewState) {
+        when (viewState) {
+            is InputtingOTP -> {
+                focusRequester.requestFocus()
+            }
+
             is SubmittingOTP -> {
                 identityViewModel.postVerificationPageDataForOTP(
-                    otp = newViewState.otp,
+                    otp = viewState.otp,
                     navController = navController,
                     onMissingOtp = { viewModel.onInputErrorOtp() }
                 )
             }
+
+            is ErrorOTP -> {
+                focusRequester.requestFocus()
+            }
+
             is RequestingError -> {
                 postErrorAndNavigateToFinalErrorScreen(
                     identityViewModel,
                     navController,
                     context,
-                    newViewState.cause
+                    viewState.cause
                 )
             }
+
             is RequestingCannotVerifySuccess -> {
-                val verificationPageData = newViewState.verificationPageData
+                val verificationPageData = viewState.verificationPageData
                 // requirements.errors might contain Phone Verification declined
                 // requirements.missings might contain document related fields
                 // screen transition will happen for either case
@@ -250,6 +289,7 @@ private fun OTPViewStateEffect(
                     )
                 }
             }
+
             else -> {} // no-op
         }
     }

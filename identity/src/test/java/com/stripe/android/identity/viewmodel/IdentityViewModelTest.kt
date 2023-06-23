@@ -23,6 +23,7 @@ import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_BACK
 import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_CONSENT
 import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_DOCTYPE
 import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_FRONT
+import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_PHONE_OTP
 import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_SELFIE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
@@ -127,6 +128,7 @@ internal class IdentityViewModelTest {
     private val mockCollectedDataParam = mock<CollectedDataParam>()
     private val mockOnMissingFront = mock<() -> Unit>()
     private val mockOnMissingBack = mock<() -> Unit>()
+    private val mockOnMissingPhoneOtp = mock<() -> Unit>()
     private val mockOnReadyToSubmit = mock<() -> Unit>()
     private val mockTfLiteInitializer = mock<InterpreterInitializer>()
 
@@ -378,6 +380,7 @@ internal class IdentityViewModelTest {
             ConsentDestination.ROUTE.route,
             mockOnMissingFront,
             mockOnMissingBack,
+            mockOnMissingPhoneOtp,
             mockOnReadyToSubmit
         )
 
@@ -436,6 +439,15 @@ internal class IdentityViewModelTest {
             VERIFICATION_PAGE_DATA_MISSING_BACK
         ) {
             verify(mockOnMissingBack).invoke()
+        }
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeNavigate - missingPhoneOtp`() {
+        testPostVerificationPageDataAndMaybeNavigateWithCallback(
+            VERIFICATION_PAGE_DATA_MISSING_PHONE_OTP
+        ) {
+            verify(mockOnMissingPhoneOtp).invoke()
         }
     }
 
@@ -587,6 +599,7 @@ internal class IdentityViewModelTest {
             ConsentDestination.ROUTE.route,
             mockOnMissingFront,
             mockOnMissingBack,
+            mockOnMissingPhoneOtp,
             mockOnReadyToSubmit
         )
 
@@ -635,6 +648,7 @@ internal class IdentityViewModelTest {
             ConsentDestination.ROUTE.route,
             mockOnMissingFront,
             mockOnMissingBack,
+            mockOnMissingPhoneOtp,
             mockOnReadyToSubmit
         )
 

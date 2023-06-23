@@ -1078,18 +1078,18 @@ internal class IdentityViewModel constructor(
             )
             navController.navigateToErrorScreenWithDefaultValues(getApplication())
         },
-        onMissingOtp: () -> Unit = {
-            errorCause.postValue(
-                IllegalStateException(
-                    "unhandled onMissingOtp from $fromRoute with $collectedDataParam"
-                )
-            )
-            navController.navigateToErrorScreenWithDefaultValues(getApplication())
-        },
         onMissingBack: () -> Unit = {
             errorCause.postValue(
                 IllegalStateException(
                     "unhandled onMissingBack from $fromRoute with $collectedDataParam"
+                )
+            )
+            navController.navigateToErrorScreenWithDefaultValues(getApplication())
+        },
+        onMissingPhoneOtp: () -> Unit = {
+            errorCause.postValue(
+                IllegalStateException(
+                    "unhandled onMissingOtp from $fromRoute with $collectedDataParam"
                 )
             )
             navController.navigateToErrorScreenWithDefaultValues(getApplication())
@@ -1111,7 +1111,7 @@ internal class IdentityViewModel constructor(
             navController.navigateOnVerificationPageData(
                 verificationPageData = verificationPageData,
                 onMissingFront = onMissingFront,
-                onMissingOtp = onMissingOtp,
+                onMissingOtp = onMissingPhoneOtp,
                 onMissingBack = onMissingBack,
                 onReadyToSubmit = onReadyToSubmit
             )
@@ -1418,7 +1418,7 @@ internal class IdentityViewModel constructor(
             navController,
             CollectedDataParam(phoneOtp = otp),
             fromRoute = OTPDestination.ROUTE.route,
-            onMissingOtp = onMissingOtp
+            onMissingPhoneOtp = onMissingOtp
         ) {
             submitAndNavigate(
                 navController = navController,

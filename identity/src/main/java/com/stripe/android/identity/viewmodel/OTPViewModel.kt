@@ -35,8 +35,8 @@ internal class OTPViewModel(
     private val identityRepository: IdentityRepository,
     private val verificationArgs: IdentityVerificationSheetContract.Args
 ) : ViewModel() {
-    private val _viewState = MutableStateFlow<OTPViewState>(OTPViewState.InputtingOTP)
-    val viewState: StateFlow<OTPViewState> = _viewState
+    private val _viewState = MutableStateFlow<OTPViewState?>(null)
+    val viewState: StateFlow<OTPViewState?> = _viewState
 
     val otpElement =
         OTPElement(
@@ -57,14 +57,13 @@ internal class OTPViewModel(
         _viewState.update {
             OTPViewState.SubmittingOTP(otp)
         }
-        otpElement.controller.reset()
     }
 
-    // When the user has input error OTP
     fun onInputErrorOtp() {
         _viewState.update {
             OTPViewState.ErrorOTP
         }
+        otpElement.controller.reset()
     }
 
     private fun onRequestingError(cause: Throwable) {
