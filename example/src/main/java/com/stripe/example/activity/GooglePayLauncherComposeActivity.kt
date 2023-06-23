@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayLauncher
+import com.stripe.android.googlepaylauncher.rememberGooglePayLauncher
 import kotlinx.coroutines.launch
 
 class GooglePayLauncherComposeActivity : StripeIntentActivity() {
@@ -79,7 +80,7 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
             }
         }
 
-        val googlePayLauncher = GooglePayLauncher.rememberLauncher(
+        val googlePayLauncher = rememberGooglePayLauncher(
             config = googlePayConfig,
             readyCallback = { ready ->
                 if (googlePayReady == null) {
