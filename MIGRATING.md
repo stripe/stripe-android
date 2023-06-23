@@ -1,6 +1,8 @@
 # Migration Guide
 
 ## Migrating from versions < 20.26.0
+- Changes to `PaymentSheetContract`:
+  * The class has been deprecated and will be removed in a future release. Use the `PaymentSheet` constructor or the new `rememberPaymentSheet()` method.
 - Changes to `GooglePayLauncherContract`
   * The class has been deprecated and will be removed in a future release. Use `GooglePayLauncher` directly.
 - Changes to `GooglePayPaymentMethodLauncherContract`
