@@ -14,6 +14,7 @@ import dagger.Subcomponent
 interface LinkLauncherSubcomponent {
     val linkAnalyticsHelper: LinkAnalyticsHelper
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Subcomponent.Builder
     interface Builder {
 
