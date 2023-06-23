@@ -14,22 +14,21 @@ import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module
 internal interface LinkCommonModule {
     @Binds
-    @Singleton
+    @LinkScope
     fun bindLinkRepository(linkApiRepository: LinkApiRepository): LinkRepository
 
     @Binds
-    @Singleton
+    @LinkScope
     fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
 
     companion object {
         @Provides
-        @Singleton
+        @LinkScope
         fun provideConsumersApiService(
             logger: Logger,
             @IOContext workContext: CoroutineContext,
