@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import androidx.fragment.app.Fragment
-import com.stripe.android.ObjectBuilder
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
 import kotlinx.parcelize.Parcelize
@@ -30,7 +29,7 @@ class PaymentFlowActivityStarter :
         internal val isPaymentSessionActive: Boolean = false,
         internal val windowFlags: Int? = null
     ) : ActivityStarter.Args {
-        class Builder : ObjectBuilder<Args> {
+        class Builder {
             private var paymentSessionConfig: PaymentSessionConfig? = null
             private var paymentSessionData: PaymentSessionData? = null
             private var isPaymentSessionActive = false
@@ -59,7 +58,7 @@ class PaymentFlowActivityStarter :
                 this.windowFlags = windowFlags
             }
 
-            override fun build(): Args {
+            fun build(): Args {
                 return Args(
                     paymentSessionConfig = requireNotNull(paymentSessionConfig) {
                         "PaymentFlowActivity launched without PaymentSessionConfig"
