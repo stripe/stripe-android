@@ -153,9 +153,11 @@ class CustomerSheetScreenshotTest {
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = CustomerSheetViewState.AddPaymentMethod(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
                     formViewData = FormViewModel.ViewData(),
                     enabled = true,
                     isLiveMode = false,
+                    isProcessing = false,
                 ),
                 paymentMethodNameProvider = { it!! }
             )

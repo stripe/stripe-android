@@ -2,14 +2,14 @@ package com.stripe.android.customersheet
 
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.injection.CustomerSessionScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
@@ -31,10 +31,12 @@ import javax.inject.Provider
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
+@Suppress("unused")
 internal class CustomerSheetViewModel @Inject constructor(
-    paymentConfiguration: PaymentConfiguration,
+    private val paymentConfiguration: PaymentConfiguration,
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
+    private val stripeRepository: StripeRepository,
     private val customerAdapter: CustomerAdapter,
     private val lpmRepository: LpmRepository,
     private val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
@@ -82,6 +84,15 @@ internal class CustomerSheetViewModel @Inject constructor(
         return paymentMethod?.displayNameResource?.let {
             resources.getString(it)
         }.orEmpty()
+    }
+
+    // TODO (jameswoo) required for now to clear the result. This allows the view model to not enter
+    // a state where the result was already set before. This should be fixed by correctly modeling
+    // the lifecycle of this view model.
+    fun clear() {
+        _result.update {
+            null
+        }
     }
 
     private fun loadPaymentMethods() {
@@ -136,8 +147,9 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onAddCardPressed() {
+        val paymentMethodCode = PaymentMethod.Type.Card.code
         val formArguments = FormArguments(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
+            paymentMethodCode = paymentMethodCode,
             showCheckbox = false,
             showCheckboxControlledFields = false,
             merchantName = "", // Not showing checkbox, so this is unneeded
@@ -151,9 +163,11 @@ internal class CustomerSheetViewModel @Inject constructor(
 
         transition(
             to = CustomerSheetViewState.AddPaymentMethod(
+                paymentMethodCode = paymentMethodCode,
                 formViewData = FormViewModel.ViewData(),
                 enabled = true,
                 isLiveMode = isLiveMode,
+                isProcessing = false,
             )
         )
 
@@ -200,9 +214,30 @@ internal class CustomerSheetViewModel @Inject constructor(
         // TODO (jameswoo) handle onFormValuesChanged
     }
 
-    @Suppress("UNUSED_PARAMETER")
     private fun onItemRemoved(paymentMethod: PaymentMethod) {
-        TODO()
+        viewModelScope.launch {
+            customerAdapter.detachPaymentMethod(paymentMethodId = paymentMethod.id!!)
+                .onFailure {
+                    updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                        // TODO (jameswoo) translate error message
+                        it.copy(
+                            errorMessage = "Unable to remove payment method",
+                        )
+                    }
+                }.onSuccess { paymentMethod ->
+                    updateViewState<CustomerSheetViewState.SelectPaymentMethod> { viewState ->
+                        viewState.copy(
+                            savedPaymentMethods = viewState.savedPaymentMethods.filter { pm ->
+                                pm.id != paymentMethod.id!!
+                            },
+                            paymentSelection = viewState.paymentSelection.takeUnless { selection ->
+                                selection is PaymentSelection.Saved &&
+                                    selection.paymentMethod == paymentMethod
+                            },
+                        )
+                    }
+                }
+        }
     }
 
     private fun onItemSelected(paymentSelection: PaymentSelection?) {
@@ -235,17 +270,33 @@ internal class CustomerSheetViewModel @Inject constructor(
     private fun onPrimaryButtonPressed() {
         when (val currentViewState = viewState.value) {
             is CustomerSheetViewState.AddPaymentMethod -> {
-                TODO()
+                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                    it.copy(isProcessing = true)
+                }
+                lpmRepository.fromCode(currentViewState.paymentMethodCode)?.let { paymentMethodSpec ->
+                    addPaymentMethod(
+                        paymentMethodSpec = paymentMethodSpec,
+                        formViewData = currentViewState.formViewData,
+                    )
+                } ?: error("${currentViewState.paymentMethodCode} is not supported")
             }
             is CustomerSheetViewState.SelectPaymentMethod -> {
                 when (val paymentSelection = currentViewState.paymentSelection) {
-                    PaymentSelection.GooglePay -> selectGooglePay()
+                    is PaymentSelection.GooglePay -> selectGooglePay()
                     is PaymentSelection.Saved -> selectSavedPaymentMethod(paymentSelection)
                     else -> error("$paymentSelection is not supported")
                 }
             }
             else -> error("${viewState.value} is not supported")
         }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun addPaymentMethod(
+        paymentMethodSpec: LpmRepository.SupportedPaymentMethod,
+        formViewData: FormViewModel.ViewData,
+    ) {
+        // TODO (jameswoo) implement
     }
 
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved) {
@@ -266,13 +317,13 @@ internal class CustomerSheetViewModel @Inject constructor(
 
                 // TODO (jameswoo) Figure out what to do if these are null
                 if (paymentMethodIcon == null || paymentMethodLabel == null) {
-                    _result.emit(
+                    _result.tryEmit(
                         InternalCustomerSheetResult.Error(
                             IllegalArgumentException("$paymentMethod is not supported")
                         )
                     )
                 } else {
-                    _result.emit(
+                    _result.tryEmit(
                         InternalCustomerSheetResult.Selected(
                             paymentMethodId = paymentMethodId,
                             drawableResourceId = paymentMethodIcon,
@@ -285,7 +336,24 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun selectGooglePay() {
-        TODO()
+        viewModelScope.launch {
+            customerAdapter.setSelectedPaymentOption(CustomerAdapter.PaymentOption.GooglePay)
+                .onFailure {
+                    // TODO (jameswoo) Figure out what to do if payment option is unable to be persisted
+                    updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                        // TODO (jameswoo) translate string
+                        it.copy(errorMessage = "Unable to save Google Pay")
+                    }
+                }.onSuccess {
+                    _result.tryEmit(
+                        InternalCustomerSheetResult.Selected(
+                            paymentMethodId = CustomerAdapter.PaymentOption.GooglePay.id,
+                            drawableResourceId = R.drawable.stripe_google_pay_mark,
+                            label = resources.getString(com.stripe.android.R.string.stripe_google_pay),
+                        )
+                    )
+                }
+        }
     }
 
     private fun transition(to: CustomerSheetViewState) {
@@ -295,26 +363,12 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        _result.update {
-            null
-        }
-        super.onCleared()
-    }
-
     @Suppress("unused")
     private inline fun <reified T : CustomerSheetViewState> updateViewState(block: (T) -> T) {
         (_viewState.value as? T)?.let {
             _viewState.update {
                 block(it as T)
             }
-        }
-    }
-
-    object Factory : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            @Suppress("UNCHECKED_CAST")
-            return CustomerSessionViewModel.component.customerSheetViewModel as T
         }
     }
 }

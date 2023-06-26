@@ -1,5 +1,11 @@
 # Migration Guide
 
+## Migrating from versions < 20.26.0
+- Changes to `GooglePayLauncherContract`
+  * The class has been deprecated and will be removed in a future release. Use `GooglePayLauncher` directly.
+- Changes to `GooglePayPaymentMethodLauncherContract`
+  * The class has been deprecated and will be removed in a future release. Use `GooglePayPaymentMethodLauncher` directly.
+
 ## Migrating from versions < 20.5.0
 - Changes to `PaymentSheet.Configuration`
   * `primaryButtonColor` is now deprecated. Please use the new `Appearance` parameter instead:

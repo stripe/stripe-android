@@ -18,7 +18,7 @@ import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -96,7 +96,7 @@ internal class DefaultFlowController @Inject internal constructor(
 ) : PaymentSheet.FlowController, NonFallbackInjector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val googlePayActivityLauncher:
-        ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
+        ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>
 
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
@@ -173,7 +173,7 @@ internal class DefaultFlowController @Inject internal constructor(
             )
         googlePayActivityLauncher =
             activityResultCaller.registerForActivityResult(
-                GooglePayPaymentMethodLauncherContract(),
+                GooglePayPaymentMethodLauncherContractV2(),
                 ::onGooglePayResult
             )
     }
@@ -577,7 +577,7 @@ internal class DefaultFlowController @Inject internal constructor(
         ).present(
             currencyCode = (state.stripeIntent as? PaymentIntent)?.currency
                 ?: googlePayConfig.currencyCode.orEmpty(),
-            amount = (state.stripeIntent as? PaymentIntent)?.amount?.toInt() ?: 0,
+            amount = (state.stripeIntent as? PaymentIntent)?.amount ?: 0L,
             transactionId = state.stripeIntent.id
         )
     }

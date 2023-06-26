@@ -12,10 +12,10 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -34,7 +34,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     initialState: LinkAccountPickerState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
-    private val pollNetworkedAccounts: PollNetworkedAccounts,
+    private val fetchNetworkedAccounts: FetchNetworkedAccounts,
     private val selectNetworkedAccount: SelectNetworkedAccount,
     private val updateLocalManifest: UpdateLocalManifest,
     private val updateCachedAccounts: UpdateCachedAccounts,
@@ -55,7 +55,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
             )
             val consumerSession = requireNotNull(getCachedConsumerSession())
-            val accountsResponse = pollNetworkedAccounts(consumerSession.clientSecret)
+            val accountsResponse = fetchNetworkedAccounts(consumerSession.clientSecret)
             val display = requireNotNull(
                 accountsResponse
                     .display?.text?.returningNetworkingUserAccountPicker
@@ -87,10 +87,6 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private fun observeAsyncs() {
         onAsync(
             LinkAccountPickerState::payload,
-            onSuccess = {
-                // Select first account by default.
-                setState { copy(selectedAccountId = it.accounts.firstOrNull()?.first?.id) }
-            },
             onFail = { error ->
                 logger.error("Error fetching payload", error)
                 eventTracker.track(Error(PANE, error))

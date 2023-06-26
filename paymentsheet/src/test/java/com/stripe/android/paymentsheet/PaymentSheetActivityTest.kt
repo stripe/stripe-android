@@ -30,7 +30,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
@@ -987,7 +987,7 @@ internal class PaymentSheetActivityTest {
                 lifecycleScope: CoroutineScope,
                 config: GooglePayPaymentMethodLauncher.Config,
                 readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
-                activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+                activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
                 skipReadyCheck: Boolean
             ): GooglePayPaymentMethodLauncher {
                 val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()

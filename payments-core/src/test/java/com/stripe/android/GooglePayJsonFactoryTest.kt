@@ -144,7 +144,7 @@ class GooglePayJsonFactoryTest {
             transactionInfo = GooglePayJsonFactory.TransactionInfo(
                 currencyCode = "USD",
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
-                totalPrice = 500,
+                totalPrice = 500L,
                 countryCode = "US",
                 transactionId = transactionId,
                 totalPriceLabel = "Your total price",

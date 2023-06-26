@@ -298,7 +298,9 @@ public final class com/stripe/android/GooglePayJsonFactory$TransactionInfo : and
 	public fun <init> (Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$CheckoutOption;)V
 	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$CheckoutOption;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun copy (Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$CheckoutOption;)Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo;
+	public final fun copy (Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$CheckoutOption;)Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo;
 	public static synthetic fun copy$default (Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo;Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$CheckoutOption;ILjava/lang/Object;)Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo;
+	public static synthetic fun copy$default (Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo;Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$CheckoutOption;ILjava/lang/Object;)Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -373,6 +375,7 @@ public final class com/stripe/android/PayWithGoogleUtils {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/PayWithGoogleUtils;
 	public static final fun getPriceString (ILjava/util/Currency;)Ljava/lang/String;
+	public static final fun getPriceString (JLjava/util/Currency;)Ljava/lang/String;
 }
 
 public final class com/stripe/android/PaymentAuthConfig {
@@ -1350,7 +1353,10 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public final fun present (Ljava/lang/String;)V
 	public final fun present (Ljava/lang/String;I)V
 	public final fun present (Ljava/lang/String;ILjava/lang/String;)V
+	public final fun present (Ljava/lang/String;J)V
+	public final fun present (Ljava/lang/String;JLjava/lang/String;)V
 	public static synthetic fun present$default (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Object;)V
+	public static synthetic fun present$default (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;Ljava/lang/String;JLjava/lang/String;ILjava/lang/Object;)V
 }
 
 public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig : android/os/Parcelable {
@@ -1555,6 +1561,22 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherContract$Args$InjectionParams;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherContract$Args$InjectionParams;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherContractV2$Args$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherContractV2$Args;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherContractV2$Args;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherContractV2$Args$InjectionParams$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherContractV2$Args$InjectionParams;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherContractV2$Args$InjectionParams;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -6469,6 +6491,7 @@ public final class com/stripe/android/networking/FraudDetectionData$Creator : an
 }
 
 public final class com/stripe/android/networking/StripeRepository$DefaultImpls {
+	public static synthetic fun buildPaymentUserAgent$default (Lcom/stripe/android/networking/StripeRepository;Ljava/util/Set;ILjava/lang/Object;)Ljava/lang/String;
 	public static synthetic fun confirmPaymentIntent$default (Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static synthetic fun confirmSetupIntent$default (Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/model/ConfirmSetupIntentParams;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static synthetic fun retrievePaymentIntent$default (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;

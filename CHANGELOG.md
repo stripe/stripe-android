@@ -2,6 +2,15 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Payments
+* [ADDED][6912](https://github.com/stripe/stripe-android/pull/6912) `GooglePayPaymentMethodLauncher` can now be presented with an amount of type `Long`. The method to present with an `Int` has been deprecated.
+* [DEPRECATED][6912](https://github.com/stripe/stripe-android/pull/6912) `GooglePayLauncherContract` and `GooglePayPaymentMethodLauncherContract` have been deprecated and will be removed in a future release. Use `GooglePayLauncher` and `GooglePayPaymentMethodLauncher` directly instead.
+
+## 20.25.8 - 2023-06-26
+
+### Financial Connections
+* [CHANGED][6919](https://github.com/stripe/stripe-android/pull/6919) Updated polling options for account retrieval and OAuth results to match other platforms.
+
 ## 20.25.7 - 2023-06-20
 
 ### Financial Connections

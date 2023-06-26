@@ -59,7 +59,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @Assisted lifecycleScope: CoroutineScope,
     @Assisted private val config: Config,
     @Assisted private val readyCallback: ReadyCallback,
-    @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+    @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
     @Assisted private val skipReadyCheck: Boolean,
     context: Context,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
@@ -136,7 +136,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         activity,
         activity.lifecycleScope,
         activity.registerForActivityResult(
-            GooglePayPaymentMethodLauncherContract()
+            GooglePayPaymentMethodLauncherContractV2()
         ) {
             resultCallback.onResult(it)
         },
@@ -164,7 +164,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         fragment.requireContext(),
         fragment.viewLifecycleOwner.lifecycleScope,
         fragment.registerForActivityResult(
-            GooglePayPaymentMethodLauncherContract()
+            GooglePayPaymentMethodLauncherContractV2()
         ) {
             resultCallback.onResult(it)
         },
@@ -175,7 +175,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     private constructor (
         context: Context,
         lifecycleScope: CoroutineScope,
-        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         config: Config,
         readyCallback: ReadyCallback
     ) : this(
@@ -231,10 +231,38 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
      * existing ID or generate a specific one for Google Pay transaction attempts.
      * This field is required when you send callbacks to the Google Transaction Events API.
      */
+    @Deprecated(
+        message = "Use the present method that takes a Long as the amount instead.",
+        replaceWith = ReplaceWith(
+            expression = "present(currencyCode, amount.toLong(), transactionId)",
+        ),
+    )
     @JvmOverloads
     fun present(
         currencyCode: String,
-        amount: Int = 0,
+        amount: Int,
+        transactionId: String? = null
+    ) {
+        present(currencyCode, amount.toLong(), transactionId)
+    }
+
+    /**
+     * Present the Google Pay UI.
+     *
+     * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
+     *
+     * @param currencyCode ISO 4217 alphabetic currency code. (e.g. "USD", "EUR")
+     * @param amount Amount intended to be collected. A positive integer representing how much to
+     * charge in the smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge ¥100,
+     * a zero-decimal currency). If the amount is not yet known, use 0.
+     * @param transactionId A unique ID that identifies a transaction attempt. Merchants may use an
+     * existing ID or generate a specific one for Google Pay transaction attempts.
+     * This field is required when you send callbacks to the Google Transaction Events API.
+     */
+    @JvmOverloads
+    fun present(
+        currencyCode: String,
+        amount: Long = 0L,
         transactionId: String? = null
     ) {
         check(skipReadyCheck || isReady) {
@@ -242,12 +270,12 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         }
 
         activityResultLauncher.launch(
-            GooglePayPaymentMethodLauncherContract.Args(
+            GooglePayPaymentMethodLauncherContractV2.Args(
                 config = config,
                 currencyCode = currencyCode,
                 amount = amount,
                 transactionId = transactionId,
-                injectionParams = GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
+                injectionParams = GooglePayPaymentMethodLauncherContractV2.Args.InjectionParams(
                     injectorKey,
                     productUsage,
                     enableLogging,
@@ -404,7 +432,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
             val context = LocalContext.current
             val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
             val activityResultLauncher = rememberLauncherForActivityResult(
-                GooglePayPaymentMethodLauncherContract(),
+                GooglePayPaymentMethodLauncherContractV2(),
                 resultCallback::onResult
             )
 

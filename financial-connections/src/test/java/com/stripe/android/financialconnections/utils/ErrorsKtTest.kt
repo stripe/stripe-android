@@ -2,25 +2,29 @@ package com.stripe.android.financialconnections.utils
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.net.HttpURLConnection
-import java.util.concurrent.TimeoutException
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class ErrorsKtTest {
 
     @Test
     fun `should throw timeout if reaches max times`() = runTest {
         val testResult = kotlin.runCatching {
             retryOnException(
-                times = 5,
-                delayMilliseconds = 1_000,
+                PollTimingOptions(
+                    maxNumberOfRetries = 5,
+                    initialDelayMs = 0,
+                    retryInterval = 1000
+                ),
                 retryCondition = { exception -> exception.shouldRetry }
             ) {
                 throw retryException()
             }
         }
-        assertThat(testResult.exceptionOrNull()!!).isInstanceOf(TimeoutException::class.java)
+        assertThat(testResult.exceptionOrNull()!!).isInstanceOf(PollingReachedMaxRetriesException::class.java)
     }
 
     private fun retryException() = APIException(statusCode = HttpURLConnection.HTTP_ACCEPTED)
@@ -29,8 +33,11 @@ internal class ErrorsKtTest {
     fun `should emit once if block always succeeds`() = runTest {
         var counter = 0
         val result = retryOnException(
-            times = 5,
-            delayMilliseconds = 1_000,
+            PollTimingOptions(
+                maxNumberOfRetries = 5,
+                initialDelayMs = 0,
+                retryInterval = 1000
+            ),
             retryCondition = { exception -> exception.shouldRetry }
         ) {
             counter++
@@ -44,7 +51,10 @@ internal class ErrorsKtTest {
     fun `should retry and emit once when succeeds`() = runTest {
         var counter = 0
         val result = retryOnException(
-            delayMilliseconds = 1_000,
+            PollTimingOptions(
+                initialDelayMs = 0,
+                retryInterval = 1000
+            ),
             retryCondition = { exception -> exception.shouldRetry }
         ) {
             counter++
@@ -59,14 +69,17 @@ internal class ErrorsKtTest {
         val testResult = kotlin.runCatching {
             var counter = 0
             retryOnException(
-                times = 2,
-                delayMilliseconds = 1_000,
+                PollTimingOptions(
+                    maxNumberOfRetries = 2,
+                    initialDelayMs = 0,
+                    retryInterval = 1000
+                ),
                 retryCondition = { exception -> exception.shouldRetry }
             ) {
                 counter++
                 if (counter == 3) true else throw retryException()
             }
         }
-        assertThat(testResult.exceptionOrNull()!!).isInstanceOf(TimeoutException::class.java)
+        assertThat(testResult.exceptionOrNull()!!).isInstanceOf(PollingReachedMaxRetriesException::class.java)
     }
 }

@@ -9,12 +9,16 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 
+@Deprecated(
+    message = "This class isn't meant for public use and will be removed in a future release. " +
+        "Use GooglePayPaymentMethodLauncher directly.",
+)
 class GooglePayPaymentMethodLauncherContract :
     ActivityResultContract<GooglePayPaymentMethodLauncherContract.Args, GooglePayPaymentMethodLauncher.Result>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
         return Intent(context, GooglePayPaymentMethodLauncherActivity::class.java)
-            .putExtras(input.toBundle())
+            .putExtras(input.toV2().toBundle())
     }
 
     override fun parseResult(
@@ -77,4 +81,22 @@ class GooglePayPaymentMethodLauncherContract :
     internal companion object {
         internal const val EXTRA_RESULT = "extra_result"
     }
+}
+
+private fun GooglePayPaymentMethodLauncherContract.Args.toV2(): GooglePayPaymentMethodLauncherContractV2.Args {
+    return GooglePayPaymentMethodLauncherContractV2.Args(
+        config = config,
+        currencyCode = currencyCode,
+        amount = amount.toLong(),
+        transactionId = transactionId,
+        injectionParams = injectionParams?.let { params ->
+            GooglePayPaymentMethodLauncherContractV2.Args.InjectionParams(
+                injectorKey = params.injectorKey,
+                productUsage = params.productUsage,
+                enableLogging = params.enableLogging,
+                stripeAccountId = params.stripeAccountId,
+                publishableKey = params.publishableKey,
+            )
+        },
+    )
 }

@@ -14,7 +14,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
-import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -218,7 +217,7 @@ internal class CustomerSheetActivityTest {
 
         return injectableActivityScenario {
             injectActivity {
-                viewModelFactory = viewModelFactoryFor(viewModel)
+                this.viewModelProvider = { viewModel }
             }
         }
     }
@@ -276,14 +275,18 @@ internal class CustomerSheetActivityTest {
     }
 
     private fun createAddPaymentMethodViewState(
+        paymentMethodCode: PaymentMethodCode = PaymentMethod.Type.Card.code,
         isLiveMode: Boolean = false,
         formViewData: FormViewModel.ViewData = FormViewModel.ViewData(),
         enabled: Boolean = true,
+        isProcessing: Boolean = false,
     ): CustomerSheetViewState.AddPaymentMethod {
         return CustomerSheetViewState.AddPaymentMethod(
+            paymentMethodCode = paymentMethodCode,
             formViewData = formViewData,
             enabled = enabled,
             isLiveMode = isLiveMode,
+            isProcessing = isProcessing
         )
     }
 

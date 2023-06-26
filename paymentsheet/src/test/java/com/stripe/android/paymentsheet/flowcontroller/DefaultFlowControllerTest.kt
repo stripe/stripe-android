@@ -15,7 +15,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
@@ -119,7 +119,7 @@ internal class DefaultFlowControllerTest {
         mock<ActivityResultLauncher<AddressElementActivityContract.Args>>()
 
     private val googlePayActivityLauncher =
-        mock<ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>>()
+        mock<ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>>()
     val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
 
     private val linkActivityResultLauncher =
@@ -159,7 +159,7 @@ internal class DefaultFlowControllerTest {
 
         whenever(
             activityResultCaller.registerForActivityResult(
-                any<GooglePayPaymentMethodLauncherContract>(),
+                any<GooglePayPaymentMethodLauncherContractV2>(),
                 any()
             )
         ).thenReturn(googlePayActivityLauncher)
@@ -810,7 +810,7 @@ internal class DefaultFlowControllerTest {
         )
         flowController.confirm()
 
-        verify(googlePayPaymentMethodLauncher).present("usd", 1099, "pi_1F7J1aCRMbs6FrXfaJcvbxF6")
+        verify(googlePayPaymentMethodLauncher).present("usd", 1099L, "pi_1F7J1aCRMbs6FrXfaJcvbxF6")
     }
 
     @Test
@@ -1407,7 +1407,7 @@ internal class DefaultFlowControllerTest {
                 lifecycleScope: CoroutineScope,
                 config: GooglePayPaymentMethodLauncher.Config,
                 readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
-                activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+                activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
                 skipReadyCheck: Boolean
             ): GooglePayPaymentMethodLauncher {
                 return googlePayPaymentMethodLauncher

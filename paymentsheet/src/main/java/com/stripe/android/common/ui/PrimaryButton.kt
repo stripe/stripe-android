@@ -2,12 +2,16 @@ package com.stripe.android.common.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -31,6 +35,7 @@ internal fun PrimaryButton(
     isEnabled: Boolean,
     onButtonClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     // We need to use PaymentsTheme.primaryButtonStyle instead of MaterialTheme
     // because of the rules API for primary button.
@@ -70,10 +75,40 @@ internal fun PrimaryButton(
                     disabledBackgroundColor = background
                 )
             ) {
-                Text(
+                PrimaryButtonContent(
                     text = label,
                     color = onBackground.copy(alpha = LocalContentAlpha.current),
-                    style = textStyle
+                    style = textStyle,
+                    isLoading = isLoading,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PrimaryButtonContent(
+    text: String,
+    color: Color,
+    style: TextStyle,
+    isLoading: Boolean,
+) {
+    BoxWithConstraints(contentAlignment = Alignment.CenterStart) {
+        Text(
+            text = text,
+            color = color,
+            style = style,
+            modifier = Modifier.align(Alignment.Center),
+        )
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .width(maxWidth)
+                    .padding(end = 8.dp)
+            ) {
+                LoadingIndicator(
+                    color = MaterialTheme.colors.onPrimary,
+                    modifier = Modifier.align(Alignment.CenterEnd)
                 )
             }
         }

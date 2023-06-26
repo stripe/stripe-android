@@ -415,4 +415,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     ): CardMetadata? {
         TODO("Not yet implemented")
     }
+
+    override fun buildPaymentUserAgent(attribution: Set<String>): String {
+        TODO("Not yet implemented")
+    }
 }
