@@ -141,8 +141,8 @@ class CardFormView @JvmOverloads constructor(
                 brand = cardMultilineWidget.brand,
                 loggingTokens = setOf(CARD_FORM_VIEW),
                 number = cardMultilineWidget.validatedCardNumber?.value.orEmpty(),
-                expMonth = expirationDate.month,
-                expYear = expirationDate.year,
+                expiryMonth = expirationDate.month,
+                expiryYear = expirationDate.year,
                 cvc = cardMultilineWidget.cvcEditText.text?.toString(),
                 address = Address.Builder()
                     .setCountryCode(countryLayout.selectedCountryCode)

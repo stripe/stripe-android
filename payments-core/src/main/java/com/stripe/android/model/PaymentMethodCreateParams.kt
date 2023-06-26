@@ -590,8 +590,8 @@ data class PaymentMethodCreateParams internal constructor(
             return create(
                 card = Card(
                     number = cardParams.number,
-                    expiryMonth = cardParams.expMonth,
-                    expiryYear = cardParams.expYear,
+                    expiryMonth = cardParams.expiryMonth,
+                    expiryYear = cardParams.expiryYear,
                     cvc = cardParams.cvc,
                     attribution = cardParams.attribution
                 ),

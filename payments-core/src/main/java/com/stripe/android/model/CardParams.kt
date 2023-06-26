@@ -22,7 +22,7 @@ data class CardParams internal constructor(
      *
      * The card number, as a string without any separators.
      */
-    internal var number: String,
+    val number: String,
 
     /**
      * [card.exp_month](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_month)
@@ -31,7 +31,7 @@ data class CardParams internal constructor(
      *
      * Two-digit number representing the card's expiration month.
      */
-    internal var expMonth: Int,
+    val expiryMonth: Int,
 
     /**
      * [card.exp_year](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_year)
@@ -40,7 +40,7 @@ data class CardParams internal constructor(
      *
      * Two- or four-digit number representing the card's expiration year.
      */
-    internal var expYear: Int,
+    val expiryYear: Int,
 
     /**
      * [card.cvc](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-cvc)
@@ -50,7 +50,7 @@ data class CardParams internal constructor(
      * Card security code. Highly recommended to always include this value, but it's required only
      * for accounts based in European countries.
      */
-    internal var cvc: String? = null,
+    val cvc: String? = null,
 
     /**
      * [card.name](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-name)
@@ -162,8 +162,8 @@ data class CardParams internal constructor(
         brand = CardUtils.getPossibleCardBrand(number),
         loggingTokens = emptySet(),
         number = number,
-        expMonth = expMonth,
-        expYear = expYear,
+        expiryMonth = expMonth,
+        expiryYear = expYear,
         address = address,
         cvc = cvc,
         name = name,
@@ -174,8 +174,8 @@ data class CardParams internal constructor(
     override val typeDataParams: Map<String, Any>
         get() = listOf(
             PARAM_NUMBER to number,
-            PARAM_EXP_MONTH to expMonth,
-            PARAM_EXP_YEAR to expYear,
+            PARAM_EXP_MONTH to expiryMonth,
+            PARAM_EXP_YEAR to expiryYear,
             PARAM_CVC to cvc,
             PARAM_NAME to name,
             PARAM_CURRENCY to currency,

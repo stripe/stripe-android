@@ -183,8 +183,8 @@ class CardInputWidget @JvmOverloads constructor(
                 PaymentMethodCreateParams.Card(
                     number = it.number,
                     cvc = it.cvc,
-                    expiryMonth = it.expMonth,
-                    expiryYear = it.expYear,
+                    expiryMonth = it.expiryMonth,
+                    expiryYear = it.expiryYear,
                     attribution = it.attribution
                 )
             }
@@ -257,8 +257,8 @@ class CardInputWidget @JvmOverloads constructor(
                         brand = brand,
                         loggingTokens = setOf(LOGGING_TOKEN),
                         number = cardNumber.value,
-                        expMonth = expirationDate.month,
-                        expYear = expirationDate.year,
+                        expiryMonth = expirationDate.month,
+                        expiryYear = expirationDate.year,
                         cvc = cvc.value,
                         address = Address.Builder()
                             .setPostalCode(postalCodeValue.takeUnless { it.isNullOrBlank() })

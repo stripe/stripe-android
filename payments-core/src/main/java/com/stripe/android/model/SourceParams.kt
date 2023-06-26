@@ -557,8 +557,8 @@ data class SourceParams internal constructor(
                 SourceType.CARD,
                 typeData = TypeData.Card(
                     cardParams.number,
-                    cardParams.expMonth,
-                    cardParams.expYear,
+                    cardParams.expiryMonth,
+                    cardParams.expiryYear,
                     cardParams.cvc
                 ),
                 attribution = cardParams.attribution,

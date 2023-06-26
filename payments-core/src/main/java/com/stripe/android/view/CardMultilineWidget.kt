@@ -162,8 +162,8 @@ class CardMultilineWidget @JvmOverloads constructor(
                 PaymentMethodCreateParams.Card(
                     number = it.number,
                     cvc = it.cvc,
-                    expiryMonth = it.expMonth,
-                    expiryYear = it.expYear,
+                    expiryMonth = it.expiryMonth,
+                    expiryYear = it.expiryYear,
                     attribution = it.attribution
                 )
             }
@@ -227,8 +227,8 @@ class CardMultilineWidget @JvmOverloads constructor(
                 brand = brand,
                 loggingTokens = setOf(CARD_MULTILINE_TOKEN),
                 number = validatedCardNumber?.value.orEmpty(),
-                expMonth = expirationDate.month,
-                expYear = expirationDate.year,
+                expiryMonth = expirationDate.month,
+                expiryYear = expirationDate.year,
                 cvc = cvcValue,
                 address = Address.Builder()
                     .setPostalCode(postalCode.takeUnless { it.isNullOrBlank() })
