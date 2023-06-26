@@ -209,9 +209,20 @@ internal class CustomerSheetViewModel @Inject constructor(
         // TODO (jameswoo) handle onFormValuesChanged
     }
 
-    @Suppress("UNUSED_PARAMETER")
     private fun onItemRemoved(paymentMethod: PaymentMethod) {
-        TODO()
+        viewModelScope.launch {
+            paymentMethod.id?.let { paymentMethodId ->
+                customerAdapter.detachPaymentMethod(paymentMethodId = paymentMethodId)
+                    .onFailure {
+                        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                            // TODO (jameswoo) translate error message
+                            it.copy(
+                                errorMessage = "Failed to remove payment method",
+                            )
+                        }
+                    }
+            }
+        }
     }
 
     private fun onItemSelected(paymentSelection: PaymentSelection?) {
