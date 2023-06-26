@@ -2145,6 +2145,10 @@ public final class com/stripe/android/model/CardParams : com/stripe/android/mode
 	public synthetic fun <init> (Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/stripe/android/model/CardBrand;
 	public final fun component10 ()Ljava/util/Map;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Lcom/stripe/android/model/Address;
 	public final fun component9 ()Ljava/lang/String;
@@ -2155,9 +2159,13 @@ public final class com/stripe/android/model/CardParams : com/stripe/android/mode
 	public final fun getAddress ()Lcom/stripe/android/model/Address;
 	public final fun getBrand ()Lcom/stripe/android/model/CardBrand;
 	public final fun getCurrency ()Ljava/lang/String;
+	public final fun getCvc ()Ljava/lang/String;
+	public final fun getExpiryMonth ()I
+	public final fun getExpiryYear ()I
 	public final fun getLast4 ()Ljava/lang/String;
 	public final fun getMetadata ()Ljava/util/Map;
 	public final fun getName ()Ljava/lang/String;
+	public final fun getNumber ()Ljava/lang/String;
 	public fun getTypeDataParams ()Ljava/util/Map;
 	public fun hashCode ()I
 	public final fun setAddress (Lcom/stripe/android/model/Address;)V
