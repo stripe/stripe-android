@@ -33,6 +33,9 @@ internal data class PopupPayload(
 
     @SerialName("locale")
     val locale: String,
+
+    @SerialName("paymentUserAgent")
+    val paymentUserAgent: String,
 ) {
     @SerialName("path")
     val path: String = "mobile_pay"
@@ -85,11 +88,13 @@ internal data class PopupPayload(
             context: Context,
             publishableKey: String,
             stripeAccount: String?,
+            paymentUserAgent: String,
         ): PopupPayload {
             return configuration.toPopupPayload(
                 context = context,
                 publishableKey = publishableKey,
                 stripeAccount = stripeAccount,
+                paymentUserAgent = paymentUserAgent,
             )
         }
 
@@ -97,6 +102,7 @@ internal data class PopupPayload(
             context: Context,
             publishableKey: String,
             stripeAccount: String?,
+            paymentUserAgent: String,
         ): PopupPayload {
             return PopupPayload(
                 publishableKey = publishableKey,
@@ -112,6 +118,7 @@ internal data class PopupPayload(
                 paymentInfo = stripeIntent.toPaymentInfo(),
                 appId = context.applicationInfo.packageName,
                 locale = context.currentLocale(),
+                paymentUserAgent = paymentUserAgent,
             )
         }
 

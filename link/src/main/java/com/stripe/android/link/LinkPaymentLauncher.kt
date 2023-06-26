@@ -15,7 +15,8 @@ import javax.inject.Singleton
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LinkPaymentLauncher @Inject internal constructor(
-    linkLauncherSubcomponentBuilder: LinkLauncherSubcomponent.Builder
+    linkLauncherSubcomponentBuilder: LinkLauncherSubcomponent.Builder,
+    private val linkActivityContract: LinkActivityContract,
 ) {
     private val analyticsHelper = linkLauncherSubcomponentBuilder.build().linkAnalyticsHelper
 
@@ -27,7 +28,7 @@ class LinkPaymentLauncher @Inject internal constructor(
         callback: (LinkActivityResult) -> Unit,
     ) {
         linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
-            LinkActivityContract()
+            linkActivityContract
         ) { linkActivityResult ->
             analyticsHelper.onLinkResult(linkActivityResult)
             callback(linkActivityResult)

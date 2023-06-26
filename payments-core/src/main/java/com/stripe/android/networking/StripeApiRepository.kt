@@ -1693,11 +1693,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     private fun buildPaymentUserAgentPair(attribution: Set<String> = emptySet()) =
-        PAYMENT_USER_AGENT to
-            setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}")
-                .plus(productUsageTokens)
-                .plus(attribution)
-                .joinToString(";")
+        PAYMENT_USER_AGENT to buildPaymentUserAgent(attribution)
+
+    override fun buildPaymentUserAgent(attribution: Set<String>): String {
+        return setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}")
+            .plus(productUsageTokens)
+            .plus(attribution)
+            .joinToString(";")
+    }
 
     /**
      *  Add payment_user_agent to the map if it contains Payment Method data,

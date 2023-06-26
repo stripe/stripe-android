@@ -457,4 +457,7 @@ interface StripeRepository {
         cardNumber: String,
         requestOptions: ApiRequest.Options
     ): CardMetadata?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String
 }
