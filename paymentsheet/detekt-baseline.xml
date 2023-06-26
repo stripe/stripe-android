@@ -13,6 +13,7 @@
     <ID>FunctionOnlyReturningConstant:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule.Companion$@Provides @Singleton @Named(IS_FLOW_CONTROLLER) fun provideIsFlowController()</ID>
     <ID>FunctionOnlyReturningConstant:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput.Companion$fun toCsvHeader()</ID>
     <ID>FunctionOnlyReturningConstant:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.TestOutput.Companion$fun toCsvHeader()</ID>
+    <ID>LargeClass:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
     <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
     <ID>LargeClass:PaymentSheetActivityTest.kt$PaymentSheetActivityTest</ID>

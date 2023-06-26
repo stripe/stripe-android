@@ -78,7 +78,7 @@ internal class CustomerSheetViewModelModule {
         LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
 
     @Provides
-    fun viewState(paymentConfiguration: PaymentConfiguration): CustomerSheetViewState {
+    fun initialViewState(paymentConfiguration: PaymentConfiguration): CustomerSheetViewState {
         return CustomerSheetViewState.Loading(
             isLiveMode = paymentConfiguration.publishableKey.contains("live")
         )

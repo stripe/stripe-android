@@ -7,6 +7,7 @@ import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
@@ -45,6 +46,26 @@ class CustomerSheetViewModelTest {
             PaymentIntentFactory.create(paymentMethodTypes = this.supportedPaymentMethodTypes),
             null
         )
+    }
+
+    @Test
+    fun `The initial view model view state should be loading with live mode based on payment configuration`() {
+        val viewModelModule = CustomerSheetViewModelModule()
+        var initialViewState = viewModelModule.initialViewState(
+            PaymentConfiguration(
+                publishableKey = "pk_test_123"
+            )
+        ) as CustomerSheetViewState.Loading
+
+        assertThat(initialViewState.isLiveMode).isFalse()
+
+        initialViewState = viewModelModule.initialViewState(
+            PaymentConfiguration(
+                publishableKey = "pk_live_123"
+            )
+        ) as CustomerSheetViewState.Loading
+
+        assertThat(initialViewState.isLiveMode).isTrue()
     }
 
     @Test
