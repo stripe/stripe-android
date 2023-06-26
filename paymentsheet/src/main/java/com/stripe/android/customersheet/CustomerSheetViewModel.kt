@@ -147,8 +147,9 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private fun onAddCardPressed() {
+        val paymentMethodCode = PaymentMethod.Type.Card.code
         val formArguments = FormArguments(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
+            paymentMethodCode = paymentMethodCode,
             showCheckbox = false,
             showCheckboxControlledFields = false,
             merchantName = "", // Not showing checkbox, so this is unneeded
@@ -162,6 +163,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
         transition(
             to = CustomerSheetViewState.AddPaymentMethod(
+                paymentMethodCode = paymentMethodCode,
                 formViewData = FormViewModel.ViewData(),
                 enabled = true,
                 isLiveMode = isLiveMode,
@@ -268,7 +270,15 @@ internal class CustomerSheetViewModel @Inject constructor(
     private fun onPrimaryButtonPressed() {
         when (val currentViewState = viewState.value) {
             is CustomerSheetViewState.AddPaymentMethod -> {
-                TODO()
+                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                    it.copy(isProcessing = true)
+                }
+                lpmRepository.fromCode(currentViewState.paymentMethodCode)?.let { paymentMethodSpec ->
+                    addPaymentMethod(
+                        paymentMethodSpec = paymentMethodSpec,
+                        formViewData = currentViewState.formViewData,
+                    )
+                } ?: error("${currentViewState.paymentMethodCode} is not supported")
             }
             is CustomerSheetViewState.SelectPaymentMethod -> {
                 when (val paymentSelection = currentViewState.paymentSelection) {
@@ -279,6 +289,14 @@ internal class CustomerSheetViewModel @Inject constructor(
             }
             else -> error("${viewState.value} is not supported")
         }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun addPaymentMethod(
+        paymentMethodSpec: LpmRepository.SupportedPaymentMethod,
+        formViewData: FormViewModel.ViewData,
+    ) {
+        // TODO (jameswoo) implement
     }
 
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved) {

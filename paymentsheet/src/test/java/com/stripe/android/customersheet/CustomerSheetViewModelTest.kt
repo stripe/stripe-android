@@ -567,6 +567,19 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When primary button is pressed in the add payment flow, view should be loading`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(CustomerSheetViewState.SelectPaymentMethod::class.java)
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+            assertThat(awaitItem()).isInstanceOf(CustomerSheetViewState.AddPaymentMethod::class.java)
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            assertThat(awaitItem().isProcessing).isTrue()
+        }
+    }
+
     private fun createViewModel(
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         stripeRepository: StripeRepository = FakeStripeRepository(),
