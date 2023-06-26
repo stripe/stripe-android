@@ -10,8 +10,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -48,7 +48,7 @@ class LinkActivityContractTest {
             null,
         )
         val stripeRepository = mock<StripeRepository>()
-        `when`(stripeRepository.buildPaymentUserAgent(any())).thenReturn("test")
+        whenever(stripeRepository.buildPaymentUserAgent(any())).thenReturn("test")
         val contract = LinkActivityContract(stripeRepository)
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
         assertThat(intent.component?.className).isEqualTo(LinkForegroundActivity::class.java.name)
