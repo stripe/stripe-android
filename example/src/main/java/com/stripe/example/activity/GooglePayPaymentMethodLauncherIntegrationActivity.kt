@@ -50,7 +50,7 @@ class GooglePayPaymentMethodLauncherIntegrationActivity : AppCompatActivity() {
 
             googlePayLauncher.present(
                 currencyCode = "EUR",
-                amount = 2500
+                amount = 2500L,
             )
         }
     }

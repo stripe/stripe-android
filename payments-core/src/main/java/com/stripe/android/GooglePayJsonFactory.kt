@@ -3,7 +3,6 @@ package com.stripe.android
 import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.GooglePayJsonFactory.TransactionInfo.TotalPriceStatus
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -300,54 +299,76 @@ class GooglePayJsonFactory constructor(
         }
     }
 
-    /**
-     * [TransactionInfo](https://developers.google.com/pay/api/android/reference/request-objects#TransactionInfo)
-     */
     @Parcelize
-    data class TransactionInfo @JvmOverloads constructor(
-        /**
-         * ISO 4217 alphabetic currency code.
-         */
+    data class TransactionInfo internal constructor(
         internal val currencyCode: String,
-
-        /**
-         * The status of the total price used.
-         */
         internal val totalPriceStatus: TotalPriceStatus,
-
-        /**
-         * ISO 3166-1 alpha-2 country code where the transaction is processed.
-         * This is required for merchants based in European Economic Area (EEA) countries.
-         */
-        internal val countryCode: String? = null,
-
-        /**
-         * A unique ID that identifies a transaction attempt. Merchants may use an existing ID or
-         * generate a specific one for Google Pay transaction attempts. This field is required
-         * when you send callbacks to the Google Transaction Events API.
-         */
-        internal val transactionId: String? = null,
-
-        /**
-         * Total monetary value of the transaction.
-         *
-         * This field is required unless [totalPriceStatus] is set to [TotalPriceStatus.NotCurrentlyKnown].
-         *
-         * The value of this field is represented in the [smallest currency unit](https://stripe.com/docs/currencies#zero-decimal).
-         * For example, when [currencyCode] is `"USD"`, a value of `100` represents 100 cents ($1.00).
-         */
-        internal val totalPrice: Int? = null,
-
-        /**
-         * Custom label for the total price within the display items.
-         */
-        internal val totalPriceLabel: String? = null,
-
-        /**
-         * Affects the submit button text displayed in the Google Pay payment sheet.
-         */
-        internal val checkoutOption: CheckoutOption? = null
+        internal val countryCode: String?,
+        internal val transactionId: String?,
+        internal val totalPrice: Long?,
+        internal val totalPriceLabel: String?,
+        internal val checkoutOption: CheckoutOption?,
     ) : Parcelable {
+
+        /**
+         * [TransactionInfo](https://developers.google.com/pay/api/android/reference/request-objects#TransactionInfo)
+         *
+         * @param currencyCode ISO 4217 alphabetic currency code.
+         * @param totalPriceStatus The status of the total price used.
+         * @param countryCode ISO 3166-1 alpha-2 country code where the transaction is processed. This
+         * is required for merchants based in European Economic Area (EEA) countries.
+         * @param transactionId A unique ID that identifies a transaction attempt. Merchants may use an
+         * existing ID or generate a specific one for Google Pay transaction attempts. This field is
+         * required when you send callbacks to the Google Transaction Events API.
+         * @param totalPrice Total monetary value of the transaction. This field is required unless
+         * [totalPriceStatus] is set to [TotalPriceStatus.NotCurrentlyKnown]. The value of this field is
+         * represented in the [smallest currency unit](https://stripe.com/docs/currencies#zero-decimal).
+         * For example, when [currencyCode] is `"USD"`, a value of `100` represents 100 cents ($1.00).
+         * @param totalPriceLabel Custom label for the total price within the display items.
+         * @param checkoutOption Affects the submit button text displayed in the Google Pay payment sheet.
+         */
+        @JvmOverloads
+        constructor(
+            currencyCode: String,
+            totalPriceStatus: TotalPriceStatus,
+            countryCode: String? = null,
+            transactionId: String? = null,
+            totalPrice: Int? = null,
+            totalPriceLabel: String? = null,
+            checkoutOption: CheckoutOption? = null,
+        ) : this(
+            currencyCode = currencyCode,
+            totalPriceStatus = totalPriceStatus,
+            countryCode = countryCode,
+            transactionId = transactionId,
+            totalPrice = totalPrice?.toLong(),
+            totalPriceLabel = totalPriceLabel,
+            checkoutOption = checkoutOption,
+        )
+
+        @Deprecated(
+            message = "This method isn't meant for public usage and will be removed in a future release.",
+        )
+        fun copy(
+            currencyCode: String = this.currencyCode,
+            totalPriceStatus: TotalPriceStatus = this.totalPriceStatus,
+            countryCode: String? = this.countryCode,
+            transactionId: String? = this.transactionId,
+            totalPrice: Int? = this.totalPrice?.toInt(),
+            totalPriceLabel: String? = this.totalPriceLabel,
+            checkoutOption: CheckoutOption? = this.checkoutOption,
+        ): TransactionInfo {
+            return copy(
+                currencyCode = currencyCode,
+                totalPriceStatus = totalPriceStatus,
+                countryCode = countryCode,
+                transactionId = transactionId,
+                totalPrice = totalPrice?.toLong(),
+                totalPriceLabel = totalPriceLabel,
+                checkoutOption = checkoutOption,
+            )
+        }
+
         /**
          * The status of the total price used.
          */

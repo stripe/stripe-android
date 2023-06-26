@@ -97,7 +97,7 @@ class GooglePayLauncherViewModelTest {
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
                     countryCode = "us",
                     transactionId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
-                    totalPrice = 1099,
+                    totalPrice = 1099L,
                     totalPriceLabel = null,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase
                 )
@@ -117,7 +117,7 @@ class GooglePayLauncherViewModelTest {
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                     countryCode = "us",
                     transactionId = "seti_1GSmaFCRMbs",
-                    totalPrice = 0,
+                    totalPrice = 0L,
                     totalPriceLabel = null,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
                 )
