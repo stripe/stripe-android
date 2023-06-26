@@ -211,32 +211,27 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private fun onItemRemoved(paymentMethod: PaymentMethod) {
         viewModelScope.launch {
-            paymentMethod.id?.let { paymentMethodId ->
-                customerAdapter.detachPaymentMethod(paymentMethodId = paymentMethodId)
-                    .onFailure { throwable ->
-                        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                            // TODO (jameswoo) translate error message
-                            it.copy(
-                                errorMessage = "Unable to remove payment method",
-                            )
-                        }
-                    }.onSuccess { paymentMethod ->
-                        updateViewState<CustomerSheetViewState.SelectPaymentMethod> { previousViewState ->
-                            val paymentMethodSelection = previousViewState.paymentSelection as? PaymentSelection.Saved
-                            val previousPaymentMethods = previousViewState.savedPaymentMethods.toMutableList()
-                            val paymentMethodToRemove = previousPaymentMethods.find { it.id == paymentMethodId }
-                            previousPaymentMethods.remove(paymentMethodToRemove)
-                            previousViewState.copy(
-                                savedPaymentMethods = previousPaymentMethods,
-                                paymentSelection = if (paymentMethodSelection?.paymentMethod == paymentMethod) {
-                                    null
-                                } else {
-                                    previousViewState.paymentSelection
-                                }
-                            )
-                        }
+            customerAdapter.detachPaymentMethod(paymentMethodId = paymentMethod.id!!)
+                .onFailure {
+                    updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                        // TODO (jameswoo) translate error message
+                        it.copy(
+                            errorMessage = "Unable to remove payment method",
+                        )
                     }
-            }
+                }.onSuccess { paymentMethod ->
+                    updateViewState<CustomerSheetViewState.SelectPaymentMethod> { viewState ->
+                        viewState.copy(
+                            savedPaymentMethods = viewState.savedPaymentMethods.filter { pm ->
+                                pm.id != paymentMethod.id!!
+                            },
+                            paymentSelection = viewState.paymentSelection.takeUnless { selection ->
+                                selection is PaymentSelection.Saved &&
+                                    selection.paymentMethod == paymentMethod
+                            },
+                        )
+                    }
+                }
         }
     }
 
