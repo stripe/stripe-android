@@ -213,11 +213,25 @@ internal class CustomerSheetViewModel @Inject constructor(
         viewModelScope.launch {
             paymentMethod.id?.let { paymentMethodId ->
                 customerAdapter.detachPaymentMethod(paymentMethodId = paymentMethodId)
-                    .onFailure {
+                    .onFailure { throwable ->
                         updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                            // TODO (jameswoo) translate error message
                             it.copy(
-                                errorMessage = "Failed to remove payment method",
+                                errorMessage = throwable.message,
+                            )
+                        }
+                    }.onSuccess { paymentMethod ->
+                        updateViewState<CustomerSheetViewState.SelectPaymentMethod> { previousViewState ->
+                            val paymentMethodSelection = previousViewState.paymentSelection as? PaymentSelection.Saved
+                            val previousPaymentMethods = previousViewState.savedPaymentMethods.toMutableList()
+                            val paymentMethodToRemove = previousPaymentMethods.find { it.id == paymentMethodId }
+                            previousPaymentMethods.remove(paymentMethodToRemove)
+                            previousViewState.copy(
+                                savedPaymentMethods = previousPaymentMethods,
+                                paymentSelection = if (paymentMethodSelection?.paymentMethod == paymentMethod) {
+                                    null
+                                } else {
+                                    previousViewState.paymentSelection
+                                }
                             )
                         }
                     }

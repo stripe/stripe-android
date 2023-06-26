@@ -427,6 +427,39 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `When removing a payment method, payment method list should be updated`() = runTest {
+        val viewModel = createViewModel(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                ),
+                selectedPaymentOption = Result.success(
+                    CustomerAdapter.PaymentOption.fromId(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+                    )
+                )
+            )
+        )
+        viewModel.viewState.test {
+            var viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.savedPaymentMethods).hasSize(1)
+            assertThat(viewState.paymentSelection).isNotNull()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemRemoved(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                )
+            )
+
+            viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
+            assertThat(viewState.savedPaymentMethods).hasSize(0)
+            assertThat(viewState.paymentSelection).isNull()
+        }
+    }
+
+    @Test
     fun `When primary button is pressed for saved payment method, selected payment method is emitted`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(

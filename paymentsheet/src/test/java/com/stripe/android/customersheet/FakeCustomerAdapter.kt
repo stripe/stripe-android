@@ -17,7 +17,7 @@ internal class FakeCustomerAdapter(
     }
 
     override suspend fun detachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
-        TODO("Not yet implemented")
+        return Result.success(paymentMethods.getOrNull()?.find { it.id!! == paymentMethodId }!!)
     }
 
     override suspend fun setSelectedPaymentOption(
