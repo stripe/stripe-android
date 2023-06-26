@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.content.Context
-import androidx.annotation.VisibleForTesting
+import android.content.res.Resources
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -105,7 +104,7 @@ internal fun AddPaymentMethod(
                 formArguments = arguments,
                 onFormFieldValuesChanged = { formValues ->
                     val newSelection = formValues?.transformToPaymentSelection(
-                        context = context,
+                        resources = context.resources,
                         paymentMethod = selectedItem,
                     )
                     sheetViewModel.updateSelection(newSelection)
@@ -141,9 +140,8 @@ private fun BaseSheetViewModel.showLinkInlineSignupView(
         (linkAccountStatus in validStatusStates || linkInlineSelectionValid)
 }
 
-@VisibleForTesting
 internal fun FormFieldValues.transformToPaymentSelection(
-    context: Context,
+    resources: Resources,
     paymentMethod: LpmRepository.SupportedPaymentMethod
 ): PaymentSelection.New {
     val params = FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
@@ -162,7 +160,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
         )
     } else {
         PaymentSelection.New.GenericPaymentMethod(
-            labelResource = context.getString(paymentMethod.displayNameResource),
+            labelResource = resources.getString(paymentMethod.displayNameResource),
             iconResource = paymentMethod.iconResource,
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
