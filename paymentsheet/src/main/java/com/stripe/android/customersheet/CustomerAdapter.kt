@@ -21,6 +21,12 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 @ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CustomerAdapter {
+
+    /**
+     * Whether this backend adapter is able to create setup intents.
+     */
+    val canCreateSetupIntents: Boolean
+
     /**
      * Retrieves a list of payment methods attached to a customer
      * @return a list of [PaymentMethod]s.

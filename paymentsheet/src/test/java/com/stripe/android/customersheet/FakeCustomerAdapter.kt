@@ -9,6 +9,10 @@ internal class FakeCustomerAdapter(
     private val onSetSelectedPaymentOption: ((paymentOption: CustomerAdapter.PaymentOption?) -> Result<Unit>)? = null,
     private val onDetachPaymentMethod: ((paymentMethodId: String) -> Result<PaymentMethod>)? = null,
 ) : CustomerAdapter {
+
+    override val canCreateSetupIntents: Boolean
+        get() = true
+
     override suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>> {
         return paymentMethods
     }
