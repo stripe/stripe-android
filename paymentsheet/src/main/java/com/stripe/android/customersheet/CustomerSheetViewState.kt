@@ -57,6 +57,7 @@ internal sealed class CustomerSheetViewState(
         val formViewData: FormViewModel.ViewData,
         val enabled: Boolean,
         override val isLiveMode: Boolean,
+        override val isProcessing: Boolean,
     ) : CustomerSheetViewState(
         savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,

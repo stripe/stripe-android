@@ -156,6 +156,7 @@ class CustomerSheetScreenshotTest {
                     formViewData = FormViewModel.ViewData(),
                     enabled = true,
                     isLiveMode = false,
+                    isProcessing = false,
                 ),
                 paymentMethodNameProvider = { it!! }
             )
