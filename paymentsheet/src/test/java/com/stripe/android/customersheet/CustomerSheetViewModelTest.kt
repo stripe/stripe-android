@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet
 
 import android.app.Application
-import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.testIn
@@ -446,8 +445,8 @@ class CustomerSheetViewModelTest {
                 )
             )
         )
-        val viewStateTurbine = viewModel.viewState.testIn(viewModel.viewModelScope)
-        val resultTurbine = viewModel.result.testIn(viewModel.viewModelScope)
+        val viewStateTurbine = viewModel.viewState.testIn(backgroundScope)
+        val resultTurbine = viewModel.result.testIn(backgroundScope)
 
         assertThat(viewStateTurbine.awaitItem()).isInstanceOf(CustomerSheetViewState.SelectPaymentMethod::class.java)
         assertThat(resultTurbine.awaitItem()).isNull()
