@@ -487,7 +487,7 @@ class CustomerSheetViewModelTest {
             viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
             assertThat(viewState.savedPaymentMethods).hasSize(1)
             assertThat(viewState.errorMessage)
-                .isEqualTo("Cannot remove this payment method")
+                .isEqualTo("Unable to remove payment method")
         }
     }
 

@@ -215,8 +215,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                 customerAdapter.detachPaymentMethod(paymentMethodId = paymentMethodId)
                     .onFailure { throwable ->
                         updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                            // TODO (jameswoo) translate error message
                             it.copy(
-                                errorMessage = throwable.message,
+                                errorMessage = "Unable to remove payment method",
                             )
                         }
                     }.onSuccess { paymentMethod ->
