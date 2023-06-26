@@ -30,7 +30,7 @@ class LinkPaymentLauncher @Inject internal constructor(
     ) {
         linkActivityResultLauncher = activityResultRegistry.register(
             "LinkPaymentLauncher",
-            LinkActivityContract(),
+            linkActivityContract,
             callback,
         )
     }
