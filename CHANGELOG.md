@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Financial Connections
+* [CHANGED][6919](https://github.com/stripe/stripe-android/pull/6919) Updated polling options for account retrieval and OAuth results to match other platforms.
+
 ## 20.25.7 - 2023-06-20
 
 ### Financial Connections

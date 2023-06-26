@@ -20,11 +20,11 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationSuccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.VerificationSuccessNoAccounts
 import com.stripe.android.financialconnections.domain.ConfirmVerification
+import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
-import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -45,7 +45,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
-    private val pollNetworkedAccounts: PollNetworkedAccounts,
+    private val fetchNetworkedAccounts: FetchNetworkedAccounts,
     private val goNext: GoNext,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
@@ -119,7 +119,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             verificationCode = otp
         )
         val updatedManifest = markLinkVerified()
-        runCatching { pollNetworkedAccounts(payload.consumerSessionClientSecret) }
+        runCatching { fetchNetworkedAccounts(payload.consumerSessionClientSecret) }
             .fold(
                 onSuccess = { onNetworkedAccountsSuccess(it, updatedManifest) },
                 onFailure = { onNetworkedAccountsFailed(it, updatedManifest) }

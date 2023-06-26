@@ -9,10 +9,10 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.domain.PollNetworkedAccounts
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -40,7 +40,7 @@ class LinkAccountPickerViewModelTest {
     private val getManifest = mock<GetManifest>()
     private val goNext = mock<GoNext>()
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
-    private val pollNetworkedAccounts = mock<PollNetworkedAccounts>()
+    private val fetchNetworkedAccounts = mock<FetchNetworkedAccounts>()
     private val updateLocalManifest = mock<UpdateLocalManifest>()
     private val updateCachedAccounts = mock<UpdateCachedAccounts>()
     private val selectNetworkedAccount = mock<SelectNetworkedAccount>()
@@ -54,7 +54,7 @@ class LinkAccountPickerViewModelTest {
         logger = Logger.noop(),
         eventTracker = eventTracker,
         getCachedConsumerSession = getCachedConsumerSession,
-        pollNetworkedAccounts = pollNetworkedAccounts,
+        fetchNetworkedAccounts = fetchNetworkedAccounts,
         selectNetworkedAccount = selectNetworkedAccount,
         updateLocalManifest = updateLocalManifest,
         updateCachedAccounts = updateCachedAccounts,
@@ -66,7 +66,7 @@ class LinkAccountPickerViewModelTest {
         val accounts = twoAccounts()
         whenever(getManifest()).thenReturn(sessionManifest())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
-        whenever(pollNetworkedAccounts(any())).thenReturn(accounts)
+        whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
 
         val viewModel = buildViewModel(LinkAccountPickerState())
 
@@ -78,7 +78,7 @@ class LinkAccountPickerViewModelTest {
     fun `init - non active accounts are rendered as disabled`() = runTest {
         whenever(getManifest()).thenReturn(sessionManifest())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
-        whenever(pollNetworkedAccounts(any())).thenReturn(
+        whenever(fetchNetworkedAccounts(any())).thenReturn(
             partnerAccountList().copy(
                 count = 3,
                 data = listOf(
@@ -108,7 +108,7 @@ class LinkAccountPickerViewModelTest {
         val accounts = twoAccounts()
         whenever(getManifest()).thenReturn(sessionManifest())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
-        whenever(pollNetworkedAccounts(any())).thenReturn(accounts)
+        whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
 
         val viewModel = buildViewModel(LinkAccountPickerState())
         viewModel.onNewBankAccountClick()
@@ -122,7 +122,7 @@ class LinkAccountPickerViewModelTest {
         val selectedAccount = accounts.data.first()
         whenever(getManifest()).thenReturn(sessionManifest())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
-        whenever(pollNetworkedAccounts(any())).thenReturn(accounts)
+        whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
         whenever(
             selectNetworkedAccount(
                 consumerSessionClientSecret = any(),
@@ -148,7 +148,7 @@ class LinkAccountPickerViewModelTest {
         val selectedAccount = accounts.data.first()
         whenever(getManifest()).thenReturn(sessionManifest().copy(stepUpAuthenticationRequired = true))
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
-        whenever(pollNetworkedAccounts(any())).thenReturn(accounts)
+        whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
         whenever(
             selectNetworkedAccount(
                 consumerSessionClientSecret = any(),
