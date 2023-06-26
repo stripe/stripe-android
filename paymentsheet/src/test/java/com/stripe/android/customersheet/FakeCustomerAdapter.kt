@@ -6,7 +6,8 @@ import com.stripe.android.model.PaymentMethod
 internal class FakeCustomerAdapter(
     var selectedPaymentOption: Result<CustomerAdapter.PaymentOption?> = Result.success(null),
     private val paymentMethods: Result<List<PaymentMethod>> = Result.success(listOf()),
-    private val onSetSelectedPaymentOption: ((paymentOption: CustomerAdapter.PaymentOption?) -> Result<Unit>)? = null
+    private val onSetSelectedPaymentOption: ((paymentOption: CustomerAdapter.PaymentOption?) -> Result<Unit>)? = null,
+    private val onDetachPaymentMethod: ((paymentMethodId: String) -> Result<PaymentMethod>)? = null,
 ) : CustomerAdapter {
     override suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>> {
         return paymentMethods
@@ -17,7 +18,8 @@ internal class FakeCustomerAdapter(
     }
 
     override suspend fun detachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
-        return Result.success(paymentMethods.getOrNull()?.find { it.id!! == paymentMethodId }!!)
+        return onDetachPaymentMethod?.invoke(paymentMethodId)
+            ?: Result.success(paymentMethods.getOrNull()?.find { it.id!! == paymentMethodId }!!)
     }
 
     override suspend fun setSelectedPaymentOption(
