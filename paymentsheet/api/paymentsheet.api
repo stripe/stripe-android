@@ -51,6 +51,10 @@ public abstract interface annotation class com/stripe/android/paymentsheet/Delic
 public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalPaymentSheetDecouplingApi : java/lang/annotation/Annotation {
 }
 
+public final class com/stripe/android/paymentsheet/FlowControllerComposeKt {
+	public static final fun rememberPaymentSheetFlowController (Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentMethodsUIKt {
 	public static final field TEST_TAG_LIST Ljava/lang/String;
 }
@@ -751,6 +755,10 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Typography$Creat
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$Typography;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheetComposeKt {
+	public static final fun rememberPaymentSheet (Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheetContract : androidx/activity/result/contract/ActivityResultContract {

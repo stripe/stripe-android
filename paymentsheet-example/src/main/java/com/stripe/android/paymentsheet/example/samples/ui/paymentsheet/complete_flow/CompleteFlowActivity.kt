@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
+import com.stripe.android.paymentsheet.rememberPaymentSheet
 
 internal class CompleteFlowActivity : AppCompatActivity() {
 
@@ -25,23 +26,20 @@ internal class CompleteFlowActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<CompleteFlowViewModel>()
 
-    private lateinit var paymentSheet: PaymentSheet
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        paymentSheet = PaymentSheet(
-            activity = this,
-            callback = viewModel::handlePaymentSheetResult,
-        )
-
         setContent {
+            val paymentSheet = rememberPaymentSheet(
+                paymentResultCallback = viewModel::handlePaymentSheetResult,
+            )
+
             PaymentSheetExampleTheme {
                 val uiState by viewModel.state.collectAsState()
 
                 uiState.paymentInfo?.let { paymentInfo ->
                     LaunchedEffect(paymentInfo) {
-                        presentPaymentSheet(paymentInfo)
+                        presentPaymentSheet(paymentSheet, paymentInfo)
                     }
                 }
 
@@ -71,7 +69,10 @@ internal class CompleteFlowActivity : AppCompatActivity() {
         }
     }
 
-    private fun presentPaymentSheet(paymentInfo: CompleteFlowViewState.PaymentInfo) {
+    private fun presentPaymentSheet(
+        paymentSheet: PaymentSheet,
+        paymentInfo: CompleteFlowViewState.PaymentInfo,
+    ) {
         if (!paymentInfo.shouldPresent) {
             return
         }

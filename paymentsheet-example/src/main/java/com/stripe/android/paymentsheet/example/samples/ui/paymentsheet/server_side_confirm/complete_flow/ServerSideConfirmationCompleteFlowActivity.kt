@@ -10,7 +10,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.toIntentConfiguration
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog
@@ -18,6 +17,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.ErrorScreen
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
 import com.stripe.android.paymentsheet.example.samples.ui.shared.SubscriptionToggle
+import com.stripe.android.paymentsheet.rememberPaymentSheet
 
 internal class ServerSideConfirmationCompleteFlowActivity : AppCompatActivity() {
 
@@ -29,20 +29,17 @@ internal class ServerSideConfirmationCompleteFlowActivity : AppCompatActivity() 
 
     private val viewModel by viewModels<ServerSideConfirmationCompleteFlowViewModel>()
 
-    private lateinit var paymentSheet: PaymentSheet
-
     @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        paymentSheet = PaymentSheet(
-            activity = this,
-            createIntentCallback = viewModel::createAndConfirmIntent,
-            paymentResultCallback = viewModel::handlePaymentSheetResult,
-        )
-
         setContent {
             PaymentSheetExampleTheme {
+                val paymentSheet = rememberPaymentSheet(
+                    createIntentCallback = viewModel::createAndConfirmIntent,
+                    paymentResultCallback = viewModel::handlePaymentSheetResult,
+                )
+
                 val uiState by viewModel.state.collectAsState()
 
                 uiState.status?.let { status ->

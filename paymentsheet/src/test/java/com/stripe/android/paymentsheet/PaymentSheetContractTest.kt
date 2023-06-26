@@ -20,12 +20,14 @@ class PaymentSheetContractTest {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
+    @Suppress("DEPRECATION")
     fun `parseResult() with missing data should return failed result`() {
         assertThat(PaymentSheetContract().parseResult(0, Intent()))
             .isInstanceOf(PaymentSheetResult.Failed::class.java)
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `Converts PaymentSheetContractV2 result correctly back to PaymentSheetContract result`() {
         val contract = PaymentSheetContract()
         val args = PaymentSheetContract.Args.createPaymentIntentArgs("pi_123_secret_456")
