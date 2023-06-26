@@ -3,6 +3,7 @@ package com.stripe.android.link
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
+import com.stripe.android.link.injection.LinkLauncherSubcomponent
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import javax.inject.Inject
@@ -13,7 +14,11 @@ import javax.inject.Singleton
  */
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkPaymentLauncher @Inject internal constructor() {
+class LinkPaymentLauncher @Inject internal constructor(
+    linkLauncherSubcomponentBuilder: LinkLauncherSubcomponent.Builder
+) {
+    private val analyticsHelper = linkLauncherSubcomponentBuilder.build().linkAnalyticsHelper
+
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
 
@@ -22,9 +27,11 @@ class LinkPaymentLauncher @Inject internal constructor() {
         callback: (LinkActivityResult) -> Unit,
     ) {
         linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
-            LinkActivityContract(),
-            callback,
-        )
+            LinkActivityContract()
+        ) { linkActivityResult ->
+            analyticsHelper.onLinkResult(linkActivityResult)
+            callback(linkActivityResult)
+        }
     }
 
     fun unregister() {
@@ -48,6 +55,7 @@ class LinkPaymentLauncher @Inject internal constructor() {
             prefilledNewCardParams,
         )
         linkActivityResultLauncher?.launch(args)
+        analyticsHelper.onLinkLaunched()
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

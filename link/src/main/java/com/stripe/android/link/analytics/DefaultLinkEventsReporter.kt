@@ -63,6 +63,27 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.TwoFACancel)
     }
 
+    override fun onPopupShow() {
+        fireEvent(LinkEvent.PopupShow)
+    }
+
+    override fun onPopupSuccess() {
+        fireEvent(LinkEvent.PopupSuccess)
+    }
+
+    override fun onPopupCancel() {
+        fireEvent(LinkEvent.PopupCancel)
+    }
+
+    override fun onPopupError(exception: Throwable) {
+        val params = mapOf("error" to (exception.message ?: exception.toString()))
+        fireEvent(LinkEvent.PopupError, params)
+    }
+
+    override fun onPopupLogout() {
+        fireEvent(LinkEvent.PopupLogout)
+    }
+
     private fun durationInSecondsFromStart(start: Long?) = start?.let {
         System.currentTimeMillis() - it
     }?.takeIf { it > 0 }?.let {
