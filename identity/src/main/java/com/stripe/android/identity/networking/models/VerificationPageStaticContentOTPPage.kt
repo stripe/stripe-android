@@ -7,18 +7,17 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-// TODO(ccen) WIP - to read from server
 internal data class VerificationPageStaticContentOTPPage(
     @SerialName("title")
-    val title: String = "Enter verification code",
+    val title: String,
     @SerialName("body")
-    val body: String = "Enter the code sent to you phone %redacted_phone_number% to continue.",
+    val body: String,
     @SerialName("redacted_phone_number")
-    val redactedPhoneNumber: String? = "(***)*****35",
+    val redactedPhoneNumber: String?,
     @SerialName("error_otp_message")
-    val errorOtpMessage: String = "Error confirming verification code",
+    val errorOtpMessage: String,
     @SerialName("resend_button_text")
-    val resendButtonText: String = "Resend code",
+    val resendButtonText: String,
     @SerialName("cannot_verify_button_text")
-    val cannotVerifyButtonText: String = "I cannot verify this phone number",
+    val cannotVerifyButtonText: String,
 ) : Parcelable

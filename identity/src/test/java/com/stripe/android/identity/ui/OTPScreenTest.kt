@@ -51,7 +51,7 @@ class OTPScreenTest {
     val composeTestRule = createComposeRule()
 
     private val verificationPageOTP = mock<VerificationPage>().also {
-        whenever(it.otp).thenReturn(
+        whenever(it.phoneOtp).thenReturn(
             VerificationPageStaticContentOTPPage(
                 title = TITLE,
                 body = BODY,
@@ -64,7 +64,7 @@ class OTPScreenTest {
     }
 
     private val verificationPageOTPWithoutPhoneNumber = mock<VerificationPage>().also {
-        whenever(it.otp).thenReturn(
+        whenever(it.phoneOtp).thenReturn(
             VerificationPageStaticContentOTPPage(
                 title = TITLE,
                 body = BODY,
@@ -127,7 +127,7 @@ class OTPScreenTest {
         collectedDataFlow.update {
             it.copy(
                 phone = PhoneParam(
-                    number = LOCALLY_COLLECTED_PHONE
+                    phoneNumber = LOCALLY_COLLECTED_PHONE
                 )
             )
         }
@@ -137,7 +137,7 @@ class OTPScreenTest {
             onNodeWithTag(OTP_BODY_TAG).assertTextEquals(
                 BODY.replace(
                     PHONE_NUMBER_PATTERN,
-                    LOCALLY_COLLECTED_PHONE
+                    LOCALLY_COLLECTED_PHONE.takeLast(4)
                 )
             )
             onNodeWithTag(OTP_ELEMENT_TAG).assertExists()
@@ -264,7 +264,7 @@ class OTPScreenTest {
         private const val OTP = "123456"
         private const val TITLE = "Title"
         private const val BODY = "body with $PHONE_NUMBER_PATTERN"
-        private const val REDACTED_PHONE_NUMBER = "xxx-xxx-1234"
+        private const val REDACTED_PHONE_NUMBER = "1234"
         private const val ERROR_OTP_MESSAGE = "Error OTP!"
         private const val RESEND_BUTTON_TEXT = "Resend"
         private const val CANNOT_VERIFY_BUTTON_TEXT = "Cannot verify"

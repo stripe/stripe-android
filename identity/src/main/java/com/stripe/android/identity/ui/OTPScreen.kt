@@ -67,7 +67,7 @@ internal fun OTPScreen(
             factory = otpViewModelFactory
         )
         val viewState by otpViewModel.viewState.collectAsState()
-        val otpStaticPage = verificationPage.otp
+        val otpStaticPage = requireNotNull(verificationPage.phoneOtp)
         val focusRequester = remember { FocusRequester() }
 
         LaunchedEffect(Unit) {
@@ -111,7 +111,7 @@ internal fun OTPScreen(
                     text = otpStaticPage.body.replace(
                         PHONE_NUMBER_PATTERN,
                         otpStaticPage.redactedPhoneNumber
-                            ?: identityViewModel.collectedData.value.phone?.number
+                            ?: identityViewModel.collectedData.value.phone?.phoneNumber?.takeLast(4)
                             ?: EMPTY_PHONE_NUMBER
                     ),
                     style = MaterialTheme.typography.body1,
@@ -306,7 +306,7 @@ private fun postErrorAndNavigateToFinalErrorScreen(
 }
 
 private const val EMPTY_PHONE_NUMBER = ""
-internal const val PHONE_NUMBER_PATTERN = "%redacted_phone_number%"
+internal const val PHONE_NUMBER_PATTERN = "&phone_number&"
 internal const val OTP_TITLE_TAG = "OtpTitleTag"
 internal const val OTP_BODY_TAG = "OtpBodyTag"
 internal const val OTP_ELEMENT_TAG = "OtpElementTag"

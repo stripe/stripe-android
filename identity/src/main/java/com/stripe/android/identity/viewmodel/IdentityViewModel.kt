@@ -963,21 +963,23 @@ internal class IdentityViewModel constructor(
         }
     }
 
-    private fun calculateClearDataParam(dataToBeCollected: CollectedDataParam): ClearDataParam {
-        val initialMissings =
-            _verificationPage.value?.data?.requirements?.missing ?: Requirement.values().toList()
+    private fun calculateClearDataParam(dataToBeCollected: CollectedDataParam) =
+        ClearDataParam.createFromRequirements(
+            initialMissings.toMutableSet().minus(
+                collectedData.value.collectedRequirements()
+            ).minus(dataToBeCollected.collectedRequirements())
+        )
+
+    private val initialMissings: List<Requirement>
+        get() {
+            return _verificationPage.value?.data?.requirements?.missing ?: Requirement.values().toList()
                 .also {
                     Log.e(
                         TAG,
                         "_verificationPage is null, using Requirement.values() as initialMissings"
                     )
                 }
-        return ClearDataParam.createFromRequirements(
-            initialMissings.toMutableSet().minus(
-                collectedData.value.collectedRequirements()
-            ).minus(dataToBeCollected.collectedRequirements())
-        )
-    }
+        }
 
     /**
      * Send a POST request to VerificationPageData,
@@ -1231,8 +1233,16 @@ internal class IdentityViewModel constructor(
     }
 
     fun clearCollectedData(field: Requirement) {
+        // Remove the requirement from _collectedData.
         _collectedData.updateStateAndSave {
             it.clearData(field)
+        }
+        // Add the requirement to _missingRequirements.
+        // If the requirement doesn't appear in initialMissings, don't add
+        if (initialMissings.contains(field)) {
+            _missingRequirements.updateStateAndSave {
+                it.plus(field)
+            }
         }
     }
 
@@ -1393,6 +1403,9 @@ internal class IdentityViewModel constructor(
             navController,
             individualCollectedStates.toCollectedDataParam(),
             fromRoute = IndividualDestination.ROUTE.route,
+            onMissingPhoneOtp = {
+                navController.navigateTo(OTPDestination)
+            }
         ) {
             submitAndNavigate(
                 navController = navController,
@@ -1406,8 +1419,6 @@ internal class IdentityViewModel constructor(
      *  1. correct OTP - navigate based on missings(could be none or document related)
      *  2. incorrect OTP - missings still contains otp, show inline error on OTP screen
      *  3. requirement.error - show error
-     *
-     *  TODO(ccen) WIP - to read from server
      */
     suspend fun postVerificationPageDataForOTP(
         otp: String,

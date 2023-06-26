@@ -166,7 +166,13 @@ internal data class CollectedDataParam(
                     idDocumentType = another.idDocumentType ?: this.idDocumentType,
                     idDocumentFront = another.idDocumentFront ?: this.idDocumentFront,
                     idDocumentBack = another.idDocumentBack ?: this.idDocumentBack,
-                    face = another.face ?: this.face
+                    face = another.face ?: this.face,
+                    idNumber = another.idNumber ?: this.idNumber,
+                    dob = another.dob ?: this.dob,
+                    name = another.name ?: this.name,
+                    address = another.address ?: this.address,
+                    phone = another.phone ?: this.phone,
+                    phoneOtp = another.phoneOtp ?: this.phoneOtp,
                 )
             } ?: this
         }
@@ -182,7 +188,8 @@ internal data class CollectedDataParam(
                 Requirement.DOB -> this.copy(dob = null)
                 Requirement.NAME -> this.copy(name = null)
                 Requirement.ADDRESS -> this.copy(address = null)
-                else -> { this }
+                Requirement.PHONE_NUMBER -> this.copy(phone = null)
+                Requirement.PHONE_OTP -> this.copy(phoneOtp = null)
             }
         }
 
@@ -202,6 +209,24 @@ internal data class CollectedDataParam(
             }
             this.face?.let {
                 requirements.add(Requirement.FACE)
+            }
+            this.name?.let {
+                requirements.add(Requirement.NAME)
+            }
+            this.dob?.let {
+                requirements.add(Requirement.DOB)
+            }
+            this.idNumber?.let {
+                requirements.add(Requirement.IDNUMBER)
+            }
+            this.address?.let {
+                requirements.add(Requirement.ADDRESS)
+            }
+            this.phone?.let {
+                requirements.add(Requirement.PHONE_NUMBER)
+            }
+            this.phoneOtp?.let {
+                requirements.add(Requirement.PHONE_OTP)
             }
             return requirements
         }

@@ -8,8 +8,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 internal data class PhoneParam(
-    @SerialName("country_code")
-    val countryCode: String? = null,
-    @SerialName("number")
-    val number: String? = null
+    @SerialName("country")
+    val country: String? = null,
+    @SerialName("phone_number")
+    val phoneNumber: String? = null
 ) : Parcelable

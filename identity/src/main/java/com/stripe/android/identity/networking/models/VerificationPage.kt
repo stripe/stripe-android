@@ -19,9 +19,8 @@ internal data class VerificationPage(
     val documentSelect: VerificationPageStaticContentDocumentSelectPage,
     @SerialName("individual")
     val individual: VerificationPageStaticContentIndividualPage,
-    // TODO(ccen) WIP - to read from server
-    @SerialName("otp")
-    val otp: VerificationPageStaticContentOTPPage = VerificationPageStaticContentOTPPage(),
+    @SerialName("phone_otp")
+    val phoneOtp: VerificationPageStaticContentOTPPage? = null,
     @SerialName("individual_welcome")
     val individualWelcome: VerificationPageStaticContentIndividualWelcomePage,
     @SerialName("selfie")

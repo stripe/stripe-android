@@ -65,7 +65,13 @@ internal data class VerificationPageData(
 
         fun VerificationPageData.isMissingIndividualRequirements() =
             requirements.missings?.intersect(
-                listOf(Requirement.IDNUMBER, Requirement.DOB, Requirement.NAME, Requirement.ADDRESS)
+                listOf(
+                    Requirement.IDNUMBER,
+                    Requirement.DOB,
+                    Requirement.NAME,
+                    Requirement.ADDRESS,
+                    Requirement.PHONE_NUMBER
+                )
             )?.isNotEmpty() == true
     }
 }
