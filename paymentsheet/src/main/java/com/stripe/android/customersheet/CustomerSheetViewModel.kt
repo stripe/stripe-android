@@ -4,10 +4,12 @@ import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.injection.CustomerSessionScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -18,6 +20,7 @@ import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
+import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,8 +34,8 @@ import javax.inject.Provider
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
-@Suppress("unused")
 internal class CustomerSheetViewModel @Inject constructor(
+    injectedViewState: CustomerSheetViewState,
     private val paymentConfiguration: PaymentConfiguration,
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
@@ -46,11 +49,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private val backstack = Stack<CustomerSheetViewState>()
 
-    private val _viewState = MutableStateFlow<CustomerSheetViewState>(
-        CustomerSheetViewState.Loading(
-            isLiveMode = isLiveMode,
-        )
-    )
+    private val _viewState = MutableStateFlow(injectedViewState)
     val viewState: StateFlow<CustomerSheetViewState> = _viewState
 
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
@@ -62,6 +61,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                 address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never
             )
         )
+    }
+
+    fun initialize() {
         loadPaymentMethods()
     }
 
@@ -291,12 +293,43 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
     private fun addPaymentMethod(
         paymentMethodSpec: LpmRepository.SupportedPaymentMethod,
         formViewData: FormViewModel.ViewData,
     ) {
-        // TODO (jameswoo) implement
+        viewModelScope.launch {
+            val params = formViewData.completeFormValues?.transformToPaymentMethodCreateParams(paymentMethodSpec)
+            createPaymentMethod(params)?.let {
+                attachPaymentMethodToCustomer(it)
+            } ?: run {
+                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                    // TODO (jameswoo) translate message
+                    it.copy(errorMessage = "Could not create payment method")
+                }
+            }
+        }
+    }
+
+    private suspend fun createPaymentMethod(
+        createParams: PaymentMethodCreateParams?
+    ): PaymentMethod? {
+        return createParams?.let {
+            stripeRepository.createPaymentMethod(
+                paymentMethodCreateParams = createParams,
+                options = ApiRequest.Options(
+                    apiKey = paymentConfiguration.publishableKey,
+                    stripeAccount = paymentConfiguration.stripeAccountId,
+                ),
+            )
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
+        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            it.copy(isProcessing = false)
+        }
+        // TODO (jameswoo) implement attaching payment method to customer and move back to select payment method screen
     }
 
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved) {
@@ -363,7 +396,6 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    @Suppress("unused")
     private inline fun <reified T : CustomerSheetViewState> updateViewState(block: (T) -> T) {
         (_viewState.value as? T)?.let {
             _viewState.update {

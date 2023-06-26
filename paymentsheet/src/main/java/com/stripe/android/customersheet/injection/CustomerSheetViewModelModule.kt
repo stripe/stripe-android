@@ -10,6 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -75,4 +76,11 @@ internal class CustomerSheetViewModelModule {
     @Provides
     fun provideLocale() =
         LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
+
+    @Provides
+    fun viewState(paymentConfiguration: PaymentConfiguration): CustomerSheetViewState {
+        return CustomerSheetViewState.Loading(
+            isLiveMode = paymentConfiguration.publishableKey.contains("live")
+        )
+    }
 }

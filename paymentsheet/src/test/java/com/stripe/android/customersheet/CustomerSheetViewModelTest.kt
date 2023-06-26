@@ -6,9 +6,12 @@ import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -569,18 +572,38 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `When primary button is pressed in the add payment flow, view should be loading`() = runTest {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            injectedViewState = CustomerSheetViewState.AddPaymentMethod(
+                paymentMethodCode = PaymentMethod.Type.Card.code,
+                formViewData = FormViewModel.ViewData(
+                    completeFormValues = FormFieldValues(
+                        showsMandate = false,
+                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    )
+                ),
+                enabled = true,
+                isLiveMode = false,
+                isProcessing = false,
+            ),
+            stripeRepository = FakeStripeRepository(
+                onCreatePaymentMethod = {
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                }
+            )
+        )
 
         viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf(CustomerSheetViewState.SelectPaymentMethod::class.java)
-            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
             assertThat(awaitItem()).isInstanceOf(CustomerSheetViewState.AddPaymentMethod::class.java)
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
             assertThat(awaitItem().isProcessing).isTrue()
+
+            // Payment method was created and attached to the customer
+            assertThat(awaitItem().isProcessing).isFalse()
         }
     }
 
     private fun createViewModel(
+        injectedViewState: CustomerSheetViewState? = null,
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         stripeRepository: StripeRepository = FakeStripeRepository(),
         lpmRepository: LpmRepository = this.lpmRepository,
@@ -616,6 +639,7 @@ class CustomerSheetViewModelTest {
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
         return CustomerSheetViewModel(
+            injectedViewState = injectedViewState ?: CustomerSheetViewState.Loading(false),
             paymentConfiguration = paymentConfiguration,
             formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,
             resources = application.resources,
@@ -623,8 +647,23 @@ class CustomerSheetViewModelTest {
             customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
             configuration = CustomerSheet.Configuration(),
-        )
+        ).apply {
+            if (injectedViewState == null) {
+                initialize()
+            }
+        }
     }
 
-    class FakeStripeRepository : AbsFakeStripeRepository()
+    class FakeStripeRepository(
+        private val onCreatePaymentMethod:
+            ((paymentMethodCreateParams: PaymentMethodCreateParams) -> PaymentMethod)? = null
+    ) : AbsFakeStripeRepository() {
+        override suspend fun createPaymentMethod(
+            paymentMethodCreateParams: PaymentMethodCreateParams,
+            options: ApiRequest.Options
+        ): PaymentMethod? {
+            return onCreatePaymentMethod?.invoke(paymentMethodCreateParams)
+                ?: super.createPaymentMethod(paymentMethodCreateParams, options)
+        }
+    }
 }

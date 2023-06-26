@@ -170,6 +170,15 @@ internal fun AddCard(
             modifier = Modifier.padding(bottom = 20.dp),
         )
 
+        AnimatedVisibility(visible = viewState.errorMessage != null) {
+            viewState.errorMessage?.let { error ->
+                ErrorMessage(
+                    error = error,
+                    modifier = Modifier.padding(vertical = 2.dp),
+                )
+            }
+        }
+
         PrimaryButton(
             // TODO (jameswoo) add to lokalize
             label = "Add",

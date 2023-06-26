@@ -19,6 +19,7 @@ import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -140,17 +141,23 @@ private fun BaseSheetViewModel.showLinkInlineSignupView(
         (linkAccountStatus in validStatusStates || linkInlineSelectionValid)
 }
 
-internal fun FormFieldValues.transformToPaymentSelection(
-    resources: Resources,
+internal fun FormFieldValues.transformToPaymentMethodCreateParams(
     paymentMethod: LpmRepository.SupportedPaymentMethod
-): PaymentSelection.New {
-    val params = FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
+): PaymentMethodCreateParams {
+    return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
         fieldValuePairs = fieldValuePairs.filterNot { entry ->
             entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
         },
         code = paymentMethod.code,
         requiresMandate = paymentMethod.requiresMandate,
     )
+}
+
+internal fun FormFieldValues.transformToPaymentSelection(
+    resources: Resources,
+    paymentMethod: LpmRepository.SupportedPaymentMethod
+): PaymentSelection.New {
+    val params = transformToPaymentMethodCreateParams(paymentMethod)
 
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         PaymentSelection.New.Card(
