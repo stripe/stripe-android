@@ -80,7 +80,7 @@ internal class CustomerSheetViewModelModule {
     @Provides
     fun initialViewState(paymentConfiguration: PaymentConfiguration): CustomerSheetViewState {
         return CustomerSheetViewState.Loading(
-            isLiveMode = paymentConfiguration.publishableKey.contains("live")
+            isLiveMode = paymentConfiguration.publishableKey.startsWith("pk_live")
         )
     }
 }

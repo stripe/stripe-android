@@ -66,6 +66,14 @@ class CustomerSheetViewModelTest {
         ) as CustomerSheetViewState.Loading
 
         assertThat(initialViewState.isLiveMode).isTrue()
+
+        initialViewState = viewModelModule.initialViewState(
+            PaymentConfiguration(
+                publishableKey = "pk_test_51HvTI7Lu5o3livep6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"
+            )
+        ) as CustomerSheetViewState.Loading
+
+        assertThat(initialViewState.isLiveMode).isFalse()
     }
 
     @Test
