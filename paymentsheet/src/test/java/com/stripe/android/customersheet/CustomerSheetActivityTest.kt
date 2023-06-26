@@ -275,12 +275,14 @@ internal class CustomerSheetActivityTest {
     }
 
     private fun createAddPaymentMethodViewState(
+        paymentMethodCode: PaymentMethodCode = PaymentMethod.Type.Card.code,
         isLiveMode: Boolean = false,
         formViewData: FormViewModel.ViewData = FormViewModel.ViewData(),
         enabled: Boolean = true,
         isProcessing: Boolean = false,
     ): CustomerSheetViewState.AddPaymentMethod {
         return CustomerSheetViewState.AddPaymentMethod(
+            paymentMethodCode = paymentMethodCode,
             formViewData = formViewData,
             enabled = enabled,
             isLiveMode = isLiveMode,
