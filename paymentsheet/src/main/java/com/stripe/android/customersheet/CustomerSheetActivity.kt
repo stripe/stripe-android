@@ -55,8 +55,6 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        viewModel.initialize()
-
         setContent {
             StripeTheme {
                 val bottomSheetState = rememberBottomSheetState()

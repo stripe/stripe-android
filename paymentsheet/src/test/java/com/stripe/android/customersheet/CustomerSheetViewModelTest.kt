@@ -602,6 +602,35 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When payment method could not be created, error message is visible`() = runTest {
+        val viewModel = createViewModel(
+            injectedViewState = CustomerSheetViewState.AddPaymentMethod(
+                paymentMethodCode = PaymentMethod.Type.Card.code,
+                formViewData = FormViewModel.ViewData(
+                    completeFormValues = FormFieldValues(
+                        showsMandate = false,
+                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    )
+                ),
+                enabled = true,
+                isLiveMode = false,
+                isProcessing = false,
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(viewState.errorMessage).isNull()
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(viewState.isProcessing).isTrue()
+            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(viewState.errorMessage).isEqualTo("Could not create payment method")
+            assertThat(viewState.isProcessing).isFalse()
+        }
+    }
+
     private fun createViewModel(
         injectedViewState: CustomerSheetViewState? = null,
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
@@ -639,7 +668,7 @@ class CustomerSheetViewModelTest {
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
         return CustomerSheetViewModel(
-            injectedViewState = injectedViewState ?: CustomerSheetViewState.Loading(false),
+            initialViewState = injectedViewState ?: CustomerSheetViewState.Loading(false),
             paymentConfiguration = paymentConfiguration,
             formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,
             resources = application.resources,
@@ -647,11 +676,7 @@ class CustomerSheetViewModelTest {
             customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
             configuration = CustomerSheet.Configuration(),
-        ).apply {
-            if (injectedViewState == null) {
-                initialize()
-            }
-        }
+        )
     }
 
     class FakeStripeRepository(
@@ -663,7 +688,6 @@ class CustomerSheetViewModelTest {
             options: ApiRequest.Options
         ): PaymentMethod? {
             return onCreatePaymentMethod?.invoke(paymentMethodCreateParams)
-                ?: super.createPaymentMethod(paymentMethodCreateParams, options)
         }
     }
 }

@@ -35,7 +35,7 @@ import javax.inject.Provider
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
 internal class CustomerSheetViewModel @Inject constructor(
-    injectedViewState: CustomerSheetViewState,
+    initialViewState: CustomerSheetViewState,
     private val paymentConfiguration: PaymentConfiguration,
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
@@ -49,7 +49,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private val backstack = Stack<CustomerSheetViewState>()
 
-    private val _viewState = MutableStateFlow(injectedViewState)
+    private val _viewState = MutableStateFlow(initialViewState)
     val viewState: StateFlow<CustomerSheetViewState> = _viewState
 
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
@@ -61,10 +61,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                 address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never
             )
         )
-    }
-
-    fun initialize() {
-        loadPaymentMethods()
+        if (initialViewState is CustomerSheetViewState.Loading) {
+            loadPaymentMethods()
+        }
     }
 
     fun handleViewAction(viewAction: CustomerSheetViewAction) {
@@ -304,7 +303,10 @@ internal class CustomerSheetViewModel @Inject constructor(
             } ?: run {
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     // TODO (jameswoo) translate message
-                    it.copy(errorMessage = "Could not create payment method")
+                    it.copy(
+                        errorMessage = "Could not create payment method",
+                        isProcessing = false,
+                    )
                 }
             }
         }
