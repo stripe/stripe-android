@@ -8,6 +8,7 @@ import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.
 import com.stripe.android.customersheet.injection.CustomerSessionScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -30,10 +31,12 @@ import javax.inject.Provider
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
+@Suppress("unused")
 internal class CustomerSheetViewModel @Inject constructor(
-    paymentConfiguration: PaymentConfiguration,
+    private val paymentConfiguration: PaymentConfiguration,
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
+    private val stripeRepository: StripeRepository,
     private val customerAdapter: CustomerAdapter,
     private val lpmRepository: LpmRepository,
     private val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,

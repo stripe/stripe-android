@@ -1,16 +1,20 @@
 package com.stripe.android.customersheet
 
 import android.app.Application
+import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
+import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
@@ -442,11 +446,15 @@ class CustomerSheetViewModelTest {
                 )
             )
         )
-        viewModel.result.test {
-            assertThat(awaitItem()).isNull()
-            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            assertThat(awaitItem()).isInstanceOf(InternalCustomerSheetResult.Selected::class.java)
-        }
+        val viewStateTurbine = viewModel.viewState.testIn(viewModel.viewModelScope)
+        val resultTurbine = viewModel.result.testIn(viewModel.viewModelScope)
+
+        assertThat(viewStateTurbine.awaitItem()).isInstanceOf(CustomerSheetViewState.SelectPaymentMethod::class.java)
+        assertThat(resultTurbine.awaitItem()).isNull()
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+        assertThat(resultTurbine.awaitItem()).isInstanceOf(InternalCustomerSheetResult.Selected::class.java)
     }
 
     @Test
@@ -497,6 +505,7 @@ class CustomerSheetViewModelTest {
 
     private fun createViewModel(
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
+        stripeRepository: StripeRepository = FakeStripeRepository(),
         lpmRepository: LpmRepository = this.lpmRepository,
         paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
             publishableKey = "pk_test_123",
@@ -533,9 +542,12 @@ class CustomerSheetViewModelTest {
             paymentConfiguration = paymentConfiguration,
             formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,
             resources = application.resources,
+            stripeRepository = stripeRepository,
             customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
             configuration = CustomerSheet.Configuration(),
         )
     }
+
+    class FakeStripeRepository : AbsFakeStripeRepository()
 }
