@@ -47,4 +47,24 @@ internal sealed class LinkEvent : AnalyticsEvent {
     object TwoFACancel : LinkEvent() {
         override val eventName = "link.2fa.cancel"
     }
+
+    object PopupShow : LinkEvent() {
+        override val eventName = "link_popup_show"
+    }
+
+    object PopupSuccess : LinkEvent() {
+        override val eventName = "link_popup_success"
+    }
+
+    object PopupCancel : LinkEvent() {
+        override val eventName = "link_popup_cancel"
+    }
+
+    object PopupError : LinkEvent() {
+        override val eventName = "link_popup_error"
+    }
+
+    object PopupLogout : LinkEvent() {
+        override val eventName = "link_popup_logout"
+    }
 }

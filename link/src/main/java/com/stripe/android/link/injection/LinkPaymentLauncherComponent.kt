@@ -30,6 +30,7 @@ import kotlin.coroutines.CoroutineContext
  * inline sign up, before Link is launched.
  */
 @Singleton
+@LinkScope
 @Component(
     modules = [
         LinkCommonModule::class,

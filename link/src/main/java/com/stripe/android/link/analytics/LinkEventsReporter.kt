@@ -16,4 +16,10 @@ internal interface LinkEventsReporter {
     fun on2FAComplete()
     fun on2FAFailure()
     fun on2FACancel()
+
+    fun onPopupShow()
+    fun onPopupSuccess()
+    fun onPopupCancel()
+    fun onPopupError(error: Throwable)
+    fun onPopupLogout()
 }
