@@ -4,7 +4,7 @@ import com.stripe.android.customersheet.CustomerSheetViewModel
 import dagger.Subcomponent
 
 @Subcomponent
-@CustomerSheetActivityScope
+@CustomerSheetViewModelScope
 internal interface CustomerSheetViewModelComponent {
     val viewModel: CustomerSheetViewModel
 

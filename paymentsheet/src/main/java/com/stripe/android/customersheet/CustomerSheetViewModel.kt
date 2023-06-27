@@ -8,6 +8,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -37,7 +38,7 @@ import javax.inject.Provider
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-@CustomerSheetActivityScope
+@CustomerSheetViewModelScope
 internal class CustomerSheetViewModel @Inject constructor(
     // TODO (jameswoo) should the current view state be derived from backstack?
     private val backstack: Stack<CustomerSheetViewState>,
