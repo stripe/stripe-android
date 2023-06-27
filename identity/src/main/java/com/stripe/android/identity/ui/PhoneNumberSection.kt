@@ -32,8 +32,8 @@ internal fun PhoneNumberSection(
         derivedStateOf {
             if (isComplete) {
                 PhoneParam(
-                    countryCode = phoneNumberController.getCountryCode(),
-                    number = currentPhoneNumber
+                    country = phoneNumberController.getCountryCode(),
+                    phoneNumber = currentPhoneNumber
                 )
             } else {
                 null

@@ -54,6 +54,7 @@ internal fun IndividualScreen(
         val missing by remember {
             mutableStateOf(identityViewModel.missingRequirements.value)
         }
+
         val individualPage = requireNotNull(verificationPage.individual)
         val coroutineScope = rememberCoroutineScope()
         val collectedStates: IndividualCollectedStates by remember {

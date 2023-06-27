@@ -146,6 +146,7 @@ class ConsentScreenTest {
                     eq(ConsentDestination.ROUTE.route),
                     any(),
                     any(),
+                    any(),
                     any()
                 )
             }

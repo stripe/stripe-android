@@ -57,6 +57,17 @@ internal val VERIFICATION_PAGE_DATA_MISSING_BACK = VerificationPageData(
     submitted = false
 )
 
+internal val VERIFICATION_PAGE_DATA_MISSING_PHONE_OTP = VerificationPageData(
+    id = "id",
+    objectType = "type",
+    requirements = VerificationPageDataRequirements(
+        errors = emptyList(),
+        missings = listOf(Requirement.PHONE_OTP)
+    ),
+    status = VerificationPageData.Status.REQUIRESINPUT,
+    submitted = false
+)
+
 internal val VERIFICATION_PAGE_DATA_MISSING_CONSENT = VerificationPageData(
     id = "id",
     objectType = "type",
