@@ -2,6 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <!-- Content description for camera icon -->
     <string name="stripe_description_camera">camera icon</string>
+    <string name="stripe_phone_number">Phone Number</string>
     <string name="stripe_test_model_title">You\'re currently in testmode</string>
     <string name="stripe_test_model_content">This page is only shown in testmode.</string>
     <string name="stripe_complete_with_test_data">Complete with test data</string>
