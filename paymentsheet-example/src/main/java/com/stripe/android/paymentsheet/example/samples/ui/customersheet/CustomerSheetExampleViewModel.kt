@@ -10,6 +10,7 @@ import com.github.kittinunf.fuel.core.requests.suspendable
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
+import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentResponse
@@ -26,13 +27,13 @@ import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as FuelResult
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-class CustomerSheetViewModel(
+class CustomerSheetExampleViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
-    private val _state = MutableStateFlow<CustomerSheetViewState>(
-        value = CustomerSheetViewState.Loading
+    private val _state = MutableStateFlow<CustomerSheetExampleViewState>(
+        value = CustomerSheetExampleViewState.Loading
     )
-    val state: StateFlow<CustomerSheetViewState> = _state
+    val state: StateFlow<CustomerSheetExampleViewState> = _state
 
     internal val customerAdapter: CustomerAdapter = CustomerAdapter.create(
         context = getApplication(),
@@ -79,7 +80,7 @@ class CustomerSheetViewModel(
                     publishableKey = result.value.publishableKey,
                 )
                 _state.update {
-                    CustomerSheetViewState.Data(
+                    CustomerSheetExampleViewState.Data(
                         customerEphemeralKey = CustomerEphemeralKey.create(
                             customerId = result.value.customerId,
                             ephemeralKey = result.value.customerEphemeralKeySecret,
@@ -89,7 +90,7 @@ class CustomerSheetViewModel(
             }
             is FuelResult.Failure -> {
                 _state.update {
-                    CustomerSheetViewState.FailedToLoad(
+                    CustomerSheetExampleViewState.FailedToLoad(
                         message = result.error.message.toString()
                     )
                 }
@@ -132,6 +133,16 @@ class CustomerSheetViewModel(
                 .jsonBody(requestBody)
                 .suspendable()
                 .awaitModel(ExampleCreateSetupIntentResponse.serializer())
+        }
+    }
+
+    fun onCustomerSheetResult(result: CustomerSheetResult) {
+        (state.value as? CustomerSheetExampleViewState.Data)?.let { state ->
+            _state.update {
+                state.copy(
+                    result = result
+                )
+            }
         }
     }
 

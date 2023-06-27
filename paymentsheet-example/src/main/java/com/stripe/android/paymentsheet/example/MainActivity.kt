@@ -37,7 +37,7 @@ import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
-import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetActivity
+import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow.CustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
             MenuItem(
                 titleResId = R.string.customer_title,
                 subtitleResId = R.string.customer_subtitle,
-                klass = CustomerSheetActivity::class.java,
+                klass = CustomerSheetExampleActivity::class.java,
                 section = MenuItem.Section.CustomerSheet,
                 badge = MenuItem.Badge(
                     labelResId = R.string.under_construction_badge_label,
