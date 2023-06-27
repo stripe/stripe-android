@@ -34,7 +34,7 @@ import java.util.Stack
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
-import com.stripe.android.ui.core.R as UiCoreR
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
@@ -393,7 +393,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     paymentMethod = paymentMethod
                 ),
                 primaryButtonLabel = resources.getString(
-                    UiCoreR.string.stripe_continue_button_label
+                    PaymentsUiCoreR.string.stripe_continue_button_label
                 ),
                 primaryButtonEnabled = true,
             )
