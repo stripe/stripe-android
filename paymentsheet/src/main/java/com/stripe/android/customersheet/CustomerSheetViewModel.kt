@@ -4,9 +4,11 @@ import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.injection.CustomerSessionScope
+import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -30,26 +32,26 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Stack
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
 internal class CustomerSheetViewModel @Inject constructor(
-    initialViewState: CustomerSheetViewState,
+    // TODO (jameswoo) should the current view state be derived from backstack?
+    private val backstack: Stack<CustomerSheetViewState>,
     private val paymentConfiguration: PaymentConfiguration,
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
     private val stripeRepository: StripeRepository,
     private val customerAdapter: CustomerAdapter,
     private val lpmRepository: LpmRepository,
+    @Named(IS_LIVE_MODE) private val isLiveMode: Boolean,
     private val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
 ) : ViewModel() {
 
-    private val isLiveMode = paymentConfiguration.publishableKey.contains("live")
-
-    private val backstack = Stack<CustomerSheetViewState>()
-
-    private val _viewState = MutableStateFlow(initialViewState)
+    private val _viewState = MutableStateFlow(backstack.peek())
     val viewState: StateFlow<CustomerSheetViewState> = _viewState
 
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
@@ -61,7 +63,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never
             )
         )
-        if (initialViewState is CustomerSheetViewState.Loading) {
+        if (viewState.value is CustomerSheetViewState.Loading) {
             loadPaymentMethods()
         }
     }
@@ -297,10 +299,12 @@ internal class CustomerSheetViewModel @Inject constructor(
         formViewData: FormViewModel.ViewData,
     ) {
         viewModelScope.launch {
-            val params = formViewData.completeFormValues?.transformToPaymentMethodCreateParams(paymentMethodSpec)
-            createPaymentMethod(params)?.let {
-                attachPaymentMethodToCustomer(it)
-            } ?: run {
+            runCatching {
+                val params = formViewData.completeFormValues
+                    ?.transformToPaymentMethodCreateParams(paymentMethodSpec)
+                val paymentMethod = requireNotNull(createPaymentMethod(params))
+                attachPaymentMethodToCustomer(paymentMethod)
+            }.onFailure {
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     // TODO (jameswoo) translate message
                     it.copy(
@@ -326,12 +330,74 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
-        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
-            it.copy(isProcessing = false)
+        viewModelScope.launch {
+            if (customerAdapter.canCreateSetupIntents) {
+                attachWithSetupIntent(paymentMethod = paymentMethod)
+            } else {
+                attachPaymentMethod(paymentMethod = paymentMethod)
+            }
         }
-        // TODO (jameswoo) implement attaching payment method to customer and move back to select payment method screen
+    }
+
+    private suspend fun attachWithSetupIntent(paymentMethod: PaymentMethod) {
+        customerAdapter.setupIntentClientSecretForCustomerAttach()
+            .mapCatching { clientSecret ->
+                requireNotNull(
+                    stripeRepository.confirmSetupIntent(
+                        confirmSetupIntentParams = ConfirmSetupIntentParams.create(
+                            paymentMethodId = paymentMethod.id!!,
+                            clientSecret = clientSecret,
+                        ),
+                        options = ApiRequest.Options(
+                            apiKey = paymentConfiguration.publishableKey,
+                            stripeAccount = paymentConfiguration.stripeAccountId,
+                        ),
+                    )
+                )
+            }.onSuccess {
+                handlePaymentMethodAttachSuccess(paymentMethod)
+            }.onFailure {
+                // TODO (jameswoo) translate error message
+                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                    it.copy(
+                        errorMessage = "Unable to attach this payment method",
+                        isProcessing = false,
+                    )
+                }
+            }
+    }
+
+    private suspend fun attachPaymentMethod(paymentMethod: PaymentMethod) {
+        customerAdapter.attachPaymentMethod(paymentMethod.id!!)
+            .onSuccess {
+                handlePaymentMethodAttachSuccess(paymentMethod)
+            }
+            .onFailure {
+                // TODO (jameswoo) translate error message
+                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                    it.copy(
+                        errorMessage = "Unable to attach this payment method",
+                        isProcessing = false,
+                    )
+                }
+            }
+    }
+
+    private fun handlePaymentMethodAttachSuccess(paymentMethod: PaymentMethod) {
+        onBackPressed()
+        updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+            it.copy(
+                savedPaymentMethods = listOf(paymentMethod) + it.savedPaymentMethods,
+                paymentSelection = PaymentSelection.Saved(
+                    paymentMethod = paymentMethod
+                ),
+                primaryButtonLabel = resources.getString(
+                    PaymentsUiCoreR.string.stripe_continue_button_label
+                ),
+                primaryButtonEnabled = true,
+            )
+        }
     }
 
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved) {
