@@ -68,6 +68,24 @@ internal interface IdentityRepository {
         APIConnectionException::class,
         APIException::class
     )
+    suspend fun generatePhoneOtp(
+        id: String,
+        ephemeralKey: String
+    ): VerificationPageData
+
+    @Throws(
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun cannotVerifyPhoneOtp(
+        id: String,
+        ephemeralKey: String
+    ): VerificationPageData
+
+    @Throws(
+        APIConnectionException::class,
+        APIException::class
+    )
     suspend fun uploadImage(
         verificationId: String,
         ephemeralKey: String,

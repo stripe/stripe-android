@@ -6,6 +6,7 @@
     <ID>CyclomaticComplexMethod:DocumenetScanScreen.kt$@Composable internal fun DocumentScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, frontScanType: IdentityScanState.ScanType, backScanType: IdentityScanState.ScanType?, shouldStartFromBack: Boolean, messageRes: DocumentScanMessageRes, collectedDataParamType: CollectedDataParam.Type, route: String )</ID>
     <ID>CyclomaticComplexMethod:IdentityTopLevelDestination.kt$internal fun String.routeToScreenName(): String</ID>
     <ID>CyclomaticComplexMethod:IdentityViewModel.kt$IdentityViewModel$fun updateNewScanType(scanType: IdentityScanState.ScanType)</ID>
+    <ID>CyclomaticComplexMethod:OTPScreen.kt$@Composable internal fun OTPScreen( navController: NavController, identityViewModel: IdentityViewModel, otpViewModelFactory: ViewModelProvider.Factory = OTPViewModel.Factory( identityRepository = identityViewModel.identityRepository, verificationArgs = identityViewModel.verificationArgs ) )</ID>
     <ID>CyclomaticComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, shouldShowTakePhoto: Boolean, shouldShowChoosePhoto: Boolean )</ID>
     <ID>FunctionOnlyReturningConstant:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$private fun isFaceFocused(): Boolean</ID>
     <ID>LargeClass:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
@@ -30,6 +31,8 @@
     <ID>LongMethod:IdentityViewModelTest.kt$IdentityViewModelTest$private fun testUploadSelfieScanSuccessResult( selfie: FaceDetectorTransitioner.Selfie, isHighRes: Boolean )</ID>
     <ID>LongMethod:IndividualScreen.kt$@Composable internal fun IndividualScreen( navController: NavController, identityViewModel: IdentityViewModel )</ID>
     <ID>LongMethod:IndividualScreen.kt$@Composable private fun IndividualScreenBodyContent( enabled: Boolean, navController: NavController, identityViewModel: IdentityViewModel, individualPage: VerificationPageStaticContentIndividualPage, missing: Set&lt;Requirement>, collectedStates: IndividualCollectedStates, onUpdateLoadingButtonState: (LoadingButtonState) -> Unit )</ID>
+    <ID>LongMethod:OTPScreen.kt$@Composable internal fun OTPScreen( navController: NavController, identityViewModel: IdentityViewModel, otpViewModelFactory: ViewModelProvider.Factory = OTPViewModel.Factory( identityRepository = identityViewModel.identityRepository, verificationArgs = identityViewModel.verificationArgs ) )</ID>
+    <ID>LongMethod:OTPScreen.kt$@Composable private fun OTPViewStateEffect( viewState: OTPViewState?, navController: NavController, identityViewModel: IdentityViewModel, viewModel: OTPViewModel, focusRequester: FocusRequester )</ID>
     <ID>LongMethod:SelfieScreen.kt$@Composable internal fun SelfieScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, )</ID>
     <ID>LongMethod:SelfieScreen.kt$@Composable private fun ResultView( displayState: IdentityScanState, allowImageCollectionHtml: String, allowImageCollectionCheckboxEnabled: Boolean, allowImageCollection: Boolean, navController: NavController, onAllowImageCollectionChanged: (Boolean) -> Unit )</ID>
     <ID>LongMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, shouldShowTakePhoto: Boolean, shouldShowChoosePhoto: Boolean )</ID>
@@ -50,6 +53,7 @@
     <ID>MagicNumber:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$7</ID>
     <ID>MagicNumber:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$8</ID>
     <ID>MagicNumber:IDNumberSection.kt$USIDConfig.&lt;no name provided>$4</ID>
+    <ID>MagicNumber:OTPScreen.kt$4</ID>
     <ID>MagicNumber:RoundToMaxDecimals.kt$10</ID>
     <ID>MatchingDeclarationName:ComposeLoadingButton.kt$LoadingButtonState</ID>
     <ID>MaxLineLength:DefaultIdentityRepositoryTest.kt$DefaultIdentityRepositoryTest$fun</ID>
@@ -68,7 +72,9 @@
     <ID>ReturnCount:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
     <ID>SwallowedException:IdentityTheme.kt$e: ReflectiveOperationException</ID>
     <ID>ThrowsCount:DefaultIdentityRepository.kt$DefaultIdentityRepository$private suspend fun &lt;Response : StripeModel> executeRequestWithModelJsonParser( request: StripeRequest, responseJsonParser: ModelJsonParser&lt;Response>, onSuccessExecutionTimeBlock: (Long) -> Unit = {} ): Response</ID>
+    <ID>TooManyFunctions:DefaultIdentityRepository.kt$DefaultIdentityRepository : IdentityRepository</ID>
     <ID>TooManyFunctions:IdentityAnalyticsRequestFactory.kt$IdentityAnalyticsRequestFactory</ID>
+    <ID>TooManyFunctions:IdentityRepository.kt$IdentityRepository</ID>
     <ID>TooManyFunctions:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
     <ID>TooManyFunctions:UploadDestinations.kt$DocumentUploadDestination$Companion</ID>
     <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationConfirmButtonTag = "ConfirmButton"</ID>
