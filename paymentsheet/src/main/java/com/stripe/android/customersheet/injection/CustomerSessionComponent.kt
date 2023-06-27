@@ -5,7 +5,6 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSessionViewModel
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResultCallback
-import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
@@ -21,8 +20,7 @@ import dagger.Component
 )
 internal interface CustomerSessionComponent {
     val customerSheetComponentBuilder: CustomerSheetComponent.Builder
-
-    val customerSheetViewModel: CustomerSheetViewModel
+    val customerSheetViewModelComponentBuilder: CustomerSheetViewModelComponent.Builder
 
     val configuration: CustomerSheet.Configuration
     val customerAdapter: CustomerAdapter

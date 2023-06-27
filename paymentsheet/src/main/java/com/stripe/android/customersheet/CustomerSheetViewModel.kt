@@ -2,12 +2,12 @@ package com.stripe.android.customersheet
 
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
-import com.stripe.android.customersheet.injection.CustomerSessionScope
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -37,7 +37,7 @@ import javax.inject.Provider
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-@CustomerSessionScope
+@CustomerSheetScope
 internal class CustomerSheetViewModel @Inject constructor(
     // TODO (jameswoo) should the current view state be derived from backstack?
     private val backstack: Stack<CustomerSheetViewState>,
@@ -87,15 +87,6 @@ internal class CustomerSheetViewModel @Inject constructor(
         return paymentMethod?.displayNameResource?.let {
             resources.getString(it)
         }.orEmpty()
-    }
-
-    // TODO (jameswoo) required for now to clear the result. This allows the view model to not enter
-    // a state where the result was already set before. This should be fixed by correctly modeling
-    // the lifecycle of this view model.
-    fun clear() {
-        _result.update {
-            null
-        }
     }
 
     private fun loadPaymentMethods() {
@@ -469,6 +460,15 @@ internal class CustomerSheetViewModel @Inject constructor(
             _viewState.update {
                 block(it as T)
             }
+        }
+    }
+
+    class Factory : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return CustomerSessionViewModel.component.customerSheetViewModelComponentBuilder
+                .build().viewModel as T
         }
     }
 }
