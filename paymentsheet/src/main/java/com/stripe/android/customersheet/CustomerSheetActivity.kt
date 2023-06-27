@@ -13,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.customersheet.CustomerSheetViewAction.OnDismissed
@@ -26,9 +27,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
     // TODO (jameswoo) Figure out how to create real view model in CustomerSheetActivityTest
     @VisibleForTesting
-    internal var viewModelProvider = {
-        CustomerSessionViewModel.component.customerSheetViewModel
-    }
+    internal var viewModelProvider: ViewModelProvider.Factory = CustomerSheetViewModel.Factory
 
     /**
      * TODO (jameswoo) verify that the [viewModels] delegate caches the right dependencies
@@ -37,16 +36,9 @@ internal class CustomerSheetActivity : AppCompatActivity() {
      * different dependencies, adapter, result callback, etc. This may require us to recreate our
      * [CustomerSessionScope], which would make it out of sync with what the [viewModels]
      * implementation caches.
-     *
-     * TODO (jameswoo) The activity view model and the session view model have a similar lifespan,
-     * the activity view model should have a short life compared to the session view model. The
-     * activity view model should have a reference to the session view model
-     *
-     * We are not using `by viewModel` here because we don't want to clear the view model when
-     * the activity is destroyed.
      */
-    private val viewModel by lazy {
-        viewModelProvider()
+    private val viewModel: CustomerSheetViewModel by viewModels {
+        viewModelProvider
     }
 
     @OptIn(ExperimentalMaterialApi::class)
@@ -95,7 +87,6 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
     private fun finishWithResult(result: InternalCustomerSheetResult) {
         setResult(RESULT_OK, Intent().putExtras(result.toBundle()))
-        viewModel.clear()
         finish()
     }
 
