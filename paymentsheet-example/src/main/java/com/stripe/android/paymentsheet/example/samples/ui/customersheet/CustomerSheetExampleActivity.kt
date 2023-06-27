@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.samples.ui.customersheet
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -24,14 +23,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-internal class CustomerSheetActivity : AppCompatActivity() {
-    private val viewModel by viewModels<CustomerSheetViewModel>()
+internal class CustomerSheetExampleActivity : AppCompatActivity() {
+    private val viewModel by viewModels<CustomerSheetExampleViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,9 +45,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                     configuration = CustomerSheet.Configuration.Builder()
                         .googlePayEnabled(true)
                         .build(),
-                    callback = {
-                        Toast.makeText(this, "Got result $it", Toast.LENGTH_LONG).show()
-                    },
+                    callback = viewModel::onCustomerSheetResult,
                 )
 
                 val viewState by viewModel.state.collectAsState()
@@ -63,19 +61,24 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                     )
 
                     when (val state = viewState) {
-                        is CustomerSheetViewState.Data -> {
+                        is CustomerSheetExampleViewState.Data -> {
+                            val label = (state.result as? CustomerSheetResult.Selected)
+                                ?.selection
+                                ?.paymentOption
+                                ?.label
                             PaymentDefaults(
+                                paymentMethodLabel = label ?: "Select",
                                 onUpdateDefaultPaymentMethod = {
                                     customerSheet.present()
                                 }
                             )
                         }
-                        is CustomerSheetViewState.FailedToLoad -> {
+                        is CustomerSheetExampleViewState.FailedToLoad -> {
                             Text(
                                 text = state.message
                             )
                         }
-                        CustomerSheetViewState.Loading -> {
+                        is CustomerSheetExampleViewState.Loading -> {
                             LinearProgressIndicator(
                                 Modifier
                                     .fillMaxWidth()
@@ -91,6 +94,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
 @Composable
 private fun PaymentDefaults(
+    paymentMethodLabel: String,
     onUpdateDefaultPaymentMethod: () -> Unit
 ) {
     Row(
@@ -106,7 +110,7 @@ private fun PaymentDefaults(
             onClick = onUpdateDefaultPaymentMethod
         ) {
             Text(
-                text = "Visa 4242",
+                text = paymentMethodLabel,
             )
         }
     }
