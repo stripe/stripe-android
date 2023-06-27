@@ -23,7 +23,10 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 interface CustomerAdapter {
 
     /**
-     * Whether this backend adapter is able to create setup intents.
+     * Whether this backend adapter is able to create setup intents. A [SetupIntent] is recommended
+     * when attaching a new card to a Customer, and required for non-card payments methods. If you
+     * are implementing your own [CustomerAdapter], return true if
+     * [setupIntentClientSecretForCustomerAttach] is implemented, Otherwise, return false.
      */
     val canCreateSetupIntents: Boolean
 
