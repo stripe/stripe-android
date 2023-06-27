@@ -66,6 +66,6 @@ internal sealed class CustomerSheetViewState(
         isLiveMode = isLiveMode,
         isProcessing = false,
         isEditing = false,
-        screen = PaymentSheetScreen.AddAnotherPaymentMethod
+        screen = PaymentSheetScreen.AddAnotherPaymentMethod,
     )
 }

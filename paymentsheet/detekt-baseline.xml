@@ -70,7 +70,10 @@
     <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)</ID>
     <ID>NestedBlockDepth:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$private fun generatePaymentIntentScenarios(): List&lt;PaymentIntentTestInput></ID>
     <ID>ReturnCount:AddressUtils.kt$internal fun CharSequence.levenshtein(other: CharSequence): Int</ID>
+    <ID>SwallowedException:CustomerSheetViewModel.kt$CustomerSheetViewModel$ex: Exception</ID>
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
+    <ID>TooGenericExceptionCaught:CustomerSheetViewModel.kt$CustomerSheetViewModel$ex: Exception</ID>
+    <ID>TooGenericExceptionThrown:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$throw Exception("Cannot confirm setup intent")</ID>
     <ID>TooManyFunctions:CustomerSheetViewModelModule.kt$CustomerSheetViewModelModule</ID>
     <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowControllerNonFallbackInjector</ID>
     <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>
