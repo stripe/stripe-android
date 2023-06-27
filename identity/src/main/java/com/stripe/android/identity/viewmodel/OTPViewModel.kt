@@ -51,6 +51,7 @@ internal class OTPViewModel(
                 onValidOTPInput(otp = it)
             }
         }
+        generatePhoneOtp()
     }
 
     private fun onValidOTPInput(otp: String) {

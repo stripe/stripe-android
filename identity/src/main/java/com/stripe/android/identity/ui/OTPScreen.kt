@@ -70,10 +70,6 @@ internal fun OTPScreen(
         val otpStaticPage = requireNotNull(verificationPage.phoneOtp)
         val focusRequester = remember { FocusRequester() }
 
-        LaunchedEffect(Unit) {
-            otpViewModel.generatePhoneOtp()
-        }
-
         OTPViewStateEffect(
             viewState = viewState,
             navController = navController,
