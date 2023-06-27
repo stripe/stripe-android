@@ -34,6 +34,7 @@ import java.util.Stack
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
+import com.stripe.android.ui.core.R as UiCoreR
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
@@ -339,9 +340,9 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private suspend fun attachWithSetupIntent(paymentMethod: PaymentMethod) {
         customerAdapter.setupIntentClientSecretForCustomerAttach()
-            .onSuccess { clientSecret ->
-                try {
-                    val setupIntent = stripeRepository.confirmSetupIntent(
+            .mapCatching { clientSecret ->
+                requireNotNull(
+                    stripeRepository.confirmSetupIntent(
                         confirmSetupIntentParams = ConfirmSetupIntentParams.create(
                             paymentMethodId = paymentMethod.id!!,
                             clientSecret = clientSecret,
@@ -351,18 +352,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                             stripeAccount = paymentConfiguration.stripeAccountId,
                         ),
                     )
-                    setupIntent?.let {
-                        handlePaymentMethodAttachSuccess(paymentMethod)
-                    }
-                } catch (ex: Exception) {
-                    // TODO (jameswoo) translate error message
-                    updateViewState<CustomerSheetViewState.AddPaymentMethod> {
-                        it.copy(
-                            errorMessage = "Unable to attach this payment method",
-                            isProcessing = false,
-                        )
-                    }
-                }
+                )
+            }.onSuccess {
+                handlePaymentMethodAttachSuccess(paymentMethod)
             }.onFailure {
                 // TODO (jameswoo) translate error message
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
@@ -399,7 +391,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     paymentMethod = paymentMethod
                 ),
                 primaryButtonLabel = resources.getString(
-                    com.stripe.android.ui.core.R.string.stripe_continue_button_label
+                    UiCoreR.string.stripe_continue_button_label
                 ),
                 primaryButtonEnabled = true,
             )
