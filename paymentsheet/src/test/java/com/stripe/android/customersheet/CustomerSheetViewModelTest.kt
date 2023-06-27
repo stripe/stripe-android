@@ -6,6 +6,9 @@ import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -103,12 +106,12 @@ class CustomerSheetViewModelTest {
     fun `When payment methods loaded, CustomerSheetViewState is populated`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = Result.success(
+                paymentMethods = CustomerAdapter.Result.success(
                     listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     )
                 ),
-                selectedPaymentOption = Result.success(
+                selectedPaymentOption = CustomerAdapter.Result.success(
                     CustomerAdapter.PaymentOption.fromId(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
                     )
@@ -142,7 +145,10 @@ class CustomerSheetViewModelTest {
     fun `When payment methods cannot be loaded, errorMessage is emitted`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = Result.failure(Exception("Failed to retrieve payment methods."))
+                paymentMethods = CustomerAdapter.Result.failure<List<PaymentMethod>>(
+                    cause = APIException(message = "Failed to retrieve payment methods."),
+                    displayMessage = "Failed to retrieve payment methods."
+                )
             )
         )
         viewModel.viewState.test {
@@ -156,7 +162,9 @@ class CustomerSheetViewModelTest {
     fun `When the selected payment method cannot be loaded, paymentSelection is null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                selectedPaymentOption = Result.failure(Exception("Failed to retrieve selected payment option."))
+                selectedPaymentOption = CustomerAdapter.Result.failure<CustomerAdapter.PaymentOption?>(
+                    cause = Exception("Failed to retrieve selected payment option.")
+                )
             )
         )
         viewModel.viewState.test {
@@ -172,7 +180,7 @@ class CustomerSheetViewModelTest {
     fun `When the Google Pay is selected payment method, paymentSelection is GooglePay`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                selectedPaymentOption = Result.success(CustomerAdapter.PaymentOption.GooglePay)
+                selectedPaymentOption = CustomerAdapter.Result.success(CustomerAdapter.PaymentOption.GooglePay)
             )
         )
         viewModel.viewState.test {
@@ -188,7 +196,7 @@ class CustomerSheetViewModelTest {
     fun `When the Link is selected payment method, paymentSelection is Link`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                selectedPaymentOption = Result.success(CustomerAdapter.PaymentOption.Link)
+                selectedPaymentOption = CustomerAdapter.Result.success(CustomerAdapter.PaymentOption.Link)
             )
         )
         viewModel.viewState.test {
@@ -204,12 +212,12 @@ class CustomerSheetViewModelTest {
     fun `When the payment method is selected payment method, paymentSelection is payment method`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = Result.success(
+                paymentMethods = CustomerAdapter.Result.success(
                     listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     )
                 ),
-                selectedPaymentOption = Result.success(
+                selectedPaymentOption = CustomerAdapter.Result.success(
                     CustomerAdapter.PaymentOption.fromId(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
                     )
@@ -237,12 +245,12 @@ class CustomerSheetViewModelTest {
     fun `When selection, primary button label should not be null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = Result.success(
+                paymentMethods = CustomerAdapter.Result.success(
                     listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     )
                 ),
-                selectedPaymentOption = Result.success(
+                selectedPaymentOption = CustomerAdapter.Result.success(
                     CustomerAdapter.PaymentOption.fromId(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
                     )
@@ -262,12 +270,12 @@ class CustomerSheetViewModelTest {
     fun `When no selection, primary button label should be null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = Result.success(
+                paymentMethods = CustomerAdapter.Result.success(
                     listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     )
                 ),
-                selectedPaymentOption = Result.success(null)
+                selectedPaymentOption = CustomerAdapter.Result.success(null)
             )
         )
         viewModel.viewState.test {
@@ -283,12 +291,12 @@ class CustomerSheetViewModelTest {
     fun `When CustomerViewAction#OnItemSelected with payment method, primary button label should not be null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = Result.success(
+                paymentMethods = CustomerAdapter.Result.success(
                     listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     )
                 ),
-                selectedPaymentOption = Result.success(null)
+                selectedPaymentOption = CustomerAdapter.Result.success(null)
             )
         )
         viewModel.viewState.test {
@@ -319,12 +327,12 @@ class CustomerSheetViewModelTest {
     fun `When CustomerViewAction#OnItemSelected with Google Pay, primary button label should not be null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = Result.success(
+                paymentMethods = CustomerAdapter.Result.success(
                     listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     )
                 ),
-                selectedPaymentOption = Result.success(null)
+                selectedPaymentOption = CustomerAdapter.Result.success(null)
             )
         )
         viewModel.viewState.test {
@@ -353,12 +361,12 @@ class CustomerSheetViewModelTest {
     fun `When CustomerViewAction#OnItemSelected with Link, primary button label should be null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = Result.success(
+                paymentMethods = CustomerAdapter.Result.success(
                     listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     )
                 ),
-                selectedPaymentOption = Result.success(null)
+                selectedPaymentOption = CustomerAdapter.Result.success(null)
             )
         )
         viewModel.viewState.test {
@@ -381,12 +389,12 @@ class CustomerSheetViewModelTest {
     fun `When CustomerViewAction#OnItemSelected with null, primary button label should be null`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = Result.success(
+                paymentMethods = CustomerAdapter.Result.success(
                     listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     )
                 ),
-                selectedPaymentOption = Result.success(null)
+                selectedPaymentOption = CustomerAdapter.Result.success(null)
             )
         )
         viewModel.viewState.test {
@@ -453,12 +461,12 @@ class CustomerSheetViewModelTest {
     fun `When removing a payment method, payment method list should be updated`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = Result.success(
+                paymentMethods = CustomerAdapter.Result.success(
                     listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     )
                 ),
-                selectedPaymentOption = Result.success(
+                selectedPaymentOption = CustomerAdapter.Result.success(
                     CustomerAdapter.PaymentOption.fromId(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
                     )
@@ -486,13 +494,20 @@ class CustomerSheetViewModelTest {
     fun `When removing a payment method fails, error message is displayed`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = Result.success(
+                paymentMethods = CustomerAdapter.Result.success(
                     listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     )
                 ),
                 onDetachPaymentMethod = {
-                    Result.failure(Exception("Cannot remove this payment method"))
+                    CustomerAdapter.Result.failure(
+                        cause = APIException(
+                            stripeError = StripeError(
+                                message = "Cannot remove this payment method."
+                            )
+                        ),
+                        displayMessage = "Cannot remove this payment method."
+                    )
                 }
             )
         )
@@ -510,7 +525,7 @@ class CustomerSheetViewModelTest {
             viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
             assertThat(viewState.savedPaymentMethods).hasSize(1)
             assertThat(viewState.errorMessage)
-                .isEqualTo("Unable to remove payment method")
+                .isEqualTo("Cannot remove this payment method.")
         }
     }
 
@@ -518,12 +533,12 @@ class CustomerSheetViewModelTest {
     fun `When primary button is pressed for saved payment method, selected payment method is emitted`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = Result.success(
+                paymentMethods = CustomerAdapter.Result.success(
                     listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     )
                 ),
-                selectedPaymentOption = Result.success(
+                selectedPaymentOption = CustomerAdapter.Result.success(
                     CustomerAdapter.PaymentOption.fromId(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
                     )
@@ -545,18 +560,20 @@ class CustomerSheetViewModelTest {
     fun `When primary button is pressed for saved payment method that cannot be saved, error message is emitted`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = Result.success(
+                paymentMethods = CustomerAdapter.Result.success(
                     listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     )
                 ),
-                selectedPaymentOption = Result.success(
+                selectedPaymentOption = CustomerAdapter.Result.success(
                     CustomerAdapter.PaymentOption.fromId(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
                     )
                 ),
                 onSetSelectedPaymentOption = {
-                    Result.failure(Exception("Unable to set payment option"))
+                    CustomerAdapter.Result.failure(
+                        Exception("Unable to set payment option")
+                    )
                 }
             )
         )
@@ -565,7 +582,7 @@ class CustomerSheetViewModelTest {
             assertThat(viewState.errorMessage).isNull()
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
             viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
-            assertThat(viewState.errorMessage).isEqualTo("Unable to save the selected payment option")
+            assertThat(viewState.errorMessage).isEqualTo("Something went wrong")
         }
     }
 
@@ -573,7 +590,7 @@ class CustomerSheetViewModelTest {
     fun `When primary button is pressed for google pay, google pay is emitted`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                selectedPaymentOption = Result.success(
+                selectedPaymentOption = CustomerAdapter.Result.success(
                     CustomerAdapter.PaymentOption.GooglePay
                 )
             )
@@ -638,6 +655,15 @@ class CustomerSheetViewModelTest {
                     isProcessing = false,
                 )
             ),
+            stripeRepository = FakeStripeRepository(
+                onCreatePaymentMethod = {
+                    throw APIException(
+                        stripeError = StripeError(
+                            message = "Could not create payment method."
+                        )
+                    )
+                }
+            )
         )
 
         viewModel.viewState.test {
@@ -647,7 +673,7 @@ class CustomerSheetViewModelTest {
             viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
             assertThat(viewState.isProcessing).isTrue()
             viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.errorMessage).isEqualTo("Could not create payment method")
+            assertThat(viewState.errorMessage).isEqualTo("Could not create payment method.")
             assertThat(viewState.isProcessing).isFalse()
         }
     }
@@ -684,7 +710,7 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
                 onSetupIntentClientSecretForCustomerAttach = {
-                    Result.success("seti_123")
+                    CustomerAdapter.Result.success("seti_123")
                 },
             ),
             stripeRepository = FakeStripeRepository(
@@ -745,7 +771,7 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = false,
                 onAttachPaymentMethod = {
-                    Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                    CustomerAdapter.Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 },
                 onSetupIntentClientSecretForCustomerAttach = null,
             ),
@@ -791,14 +817,20 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
                 onSetupIntentClientSecretForCustomerAttach = {
-                    Result.success("seti_123")
+                    CustomerAdapter.Result.success("seti_123")
                 },
             ),
             stripeRepository = FakeStripeRepository(
                 onCreatePaymentMethod = {
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 },
-                onConfirmSetupIntent = { throw Exception("Cannot confirm setup intent") },
+                onConfirmSetupIntent = {
+                    throw APIException(
+                        stripeError = StripeError(
+                            message = "Could not attach payment method."
+                        )
+                    )
+                },
             ),
         )
 
@@ -811,7 +843,7 @@ class CustomerSheetViewModelTest {
             viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
             assertThat(viewState.isProcessing).isTrue()
             viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.errorMessage).isEqualTo("Unable to attach this payment method")
+            assertThat(viewState.errorMessage).isEqualTo("Could not attach payment method.")
             assertThat(viewState.isProcessing).isFalse()
         }
     }
@@ -852,7 +884,7 @@ class CustomerSheetViewModelTest {
             viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
             assertThat(viewState.isProcessing).isTrue()
             viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.errorMessage).isEqualTo("Unable to attach this payment method")
+            assertThat(viewState.errorMessage).isEqualTo("Merchant provided error message")
             assertThat(viewState.isProcessing).isFalse()
         }
     }
@@ -876,7 +908,16 @@ class CustomerSheetViewModelTest {
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = false,
                 onSetupIntentClientSecretForCustomerAttach = null,
-                onAttachPaymentMethod = { Result.failure(Exception("Cannot attach payment method")) },
+                onAttachPaymentMethod = {
+                    CustomerAdapter.Result.failure(
+                        cause = APIException(
+                            stripeError = StripeError(
+                                message = "Cannot attach payment method."
+                            )
+                        ),
+                        displayMessage = "Cannot attach payment method."
+                    )
+                },
             ),
             stripeRepository = FakeStripeRepository(
                 onCreatePaymentMethod = {
@@ -894,7 +935,7 @@ class CustomerSheetViewModelTest {
             viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
             assertThat(viewState.isProcessing).isTrue()
             viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.errorMessage).isEqualTo("Unable to attach this payment method")
+            assertThat(viewState.errorMessage).isEqualTo("Cannot attach payment method.")
             assertThat(viewState.isProcessing).isFalse()
         }
     }
@@ -947,6 +988,7 @@ class CustomerSheetViewModelTest {
             backstack = backstack,
             paymentConfiguration = paymentConfiguration,
             formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,
+            logger = Logger.noop(),
             resources = application.resources,
             stripeRepository = stripeRepository,
             customerAdapter = customerAdapter,

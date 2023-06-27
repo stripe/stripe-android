@@ -5,43 +5,49 @@ import com.stripe.android.model.PaymentMethod
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class FakeCustomerAdapter(
     override var canCreateSetupIntents: Boolean = true,
-    var selectedPaymentOption: Result<CustomerAdapter.PaymentOption?> = Result.success(null),
-    private val paymentMethods: Result<List<PaymentMethod>> = Result.success(listOf()),
-    private val onSetSelectedPaymentOption: ((paymentOption: CustomerAdapter.PaymentOption?) -> Result<Unit>)? = null,
-    private val onAttachPaymentMethod: ((paymentMethodId: String) -> Result<PaymentMethod>)? = null,
-    private val onDetachPaymentMethod: ((paymentMethodId: String) -> Result<PaymentMethod>)? = null,
-    private val onSetupIntentClientSecretForCustomerAttach: (() -> Result<String>)? = null
+    var selectedPaymentOption: CustomerAdapter.Result<CustomerAdapter.PaymentOption?> =
+        CustomerAdapter.Result.success(null),
+    private val paymentMethods: CustomerAdapter.Result<List<PaymentMethod>> =
+        CustomerAdapter.Result.success(listOf()),
+    private val onSetSelectedPaymentOption:
+        ((paymentOption: CustomerAdapter.PaymentOption?) -> CustomerAdapter.Result<Unit>)? = null,
+    private val onAttachPaymentMethod: ((paymentMethodId: String) -> CustomerAdapter.Result<PaymentMethod>)? = null,
+    private val onDetachPaymentMethod: ((paymentMethodId: String) -> CustomerAdapter.Result<PaymentMethod>)? = null,
+    private val onSetupIntentClientSecretForCustomerAttach: (() -> CustomerAdapter.Result<String>)? = null
 ) : CustomerAdapter {
 
-    override suspend fun retrievePaymentMethods(): Result<List<PaymentMethod>> {
+    override suspend fun retrievePaymentMethods(): CustomerAdapter.Result<List<PaymentMethod>> {
         return paymentMethods
     }
 
-    override suspend fun attachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
+    override suspend fun attachPaymentMethod(paymentMethodId: String): CustomerAdapter.Result<PaymentMethod> {
         return onAttachPaymentMethod?.invoke(paymentMethodId)
-            ?: Result.success(paymentMethods.getOrNull()?.find { it.id!! == paymentMethodId }!!)
+            ?: CustomerAdapter.Result.success(paymentMethods.getOrNull()?.find { it.id!! == paymentMethodId }!!)
     }
 
-    override suspend fun detachPaymentMethod(paymentMethodId: String): Result<PaymentMethod> {
+    override suspend fun detachPaymentMethod(paymentMethodId: String): CustomerAdapter.Result<PaymentMethod> {
         return onDetachPaymentMethod?.invoke(paymentMethodId)
-            ?: Result.success(paymentMethods.getOrNull()?.find { it.id!! == paymentMethodId }!!)
+            ?: CustomerAdapter.Result.success(paymentMethods.getOrNull()?.find { it.id!! == paymentMethodId }!!)
     }
 
     override suspend fun setSelectedPaymentOption(
         paymentOption: CustomerAdapter.PaymentOption?
-    ): Result<Unit> {
+    ): CustomerAdapter.Result<Unit> {
         return onSetSelectedPaymentOption?.invoke(paymentOption) ?: run {
-            selectedPaymentOption = Result.success(paymentOption)
-            Result.success(Unit)
+            selectedPaymentOption = CustomerAdapter.Result.success(paymentOption)
+            CustomerAdapter.Result.success(Unit)
         }
     }
 
-    override suspend fun retrieveSelectedPaymentOption(): Result<CustomerAdapter.PaymentOption?> {
+    override suspend fun retrieveSelectedPaymentOption(): CustomerAdapter.Result<CustomerAdapter.PaymentOption?> {
         return selectedPaymentOption
     }
 
-    override suspend fun setupIntentClientSecretForCustomerAttach(): Result<String> {
+    override suspend fun setupIntentClientSecretForCustomerAttach(): CustomerAdapter.Result<String> {
         return onSetupIntentClientSecretForCustomerAttach?.invoke()
-            ?: Result.failure(Exception("Provider not implemented"))
+            ?: CustomerAdapter.Result.failure(
+                displayMessage = "Merchant provided error message",
+                cause = Exception("Some error"),
+            )
     }
 }
