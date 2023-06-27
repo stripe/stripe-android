@@ -22,6 +22,7 @@ data class CardParams internal constructor(
      *
      * The card number, as a string without any separators.
      */
+    @property:DelicateStripeApi
     val number: String,
 
     /**
@@ -31,7 +32,8 @@ data class CardParams internal constructor(
      *
      * Two-digit number representing the card's expiration month.
      */
-    val expiryMonth: Int,
+    @property:DelicateStripeApi
+    val expMonth: Int,
 
     /**
      * [card.exp_year](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_year)
@@ -40,7 +42,8 @@ data class CardParams internal constructor(
      *
      * Two- or four-digit number representing the card's expiration year.
      */
-    val expiryYear: Int,
+    @property:DelicateStripeApi
+    val expYear: Int,
 
     /**
      * [card.cvc](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-cvc)
@@ -50,6 +53,7 @@ data class CardParams internal constructor(
      * Card security code. Highly recommended to always include this value, but it's required only
      * for accounts based in European countries.
      */
+    @property:DelicateStripeApi
     val cvc: String? = null,
 
     /**
@@ -85,7 +89,10 @@ data class CardParams internal constructor(
      */
     var metadata: Map<String, String>? = null
 ) : TokenParams(Token.Type.Card, loggingTokens) {
-    val last4: String get() = number.takeLast(4)
+
+    val last4: String
+        @OptIn(DelicateStripeApi::class)
+        get() = number.takeLast(4)
 
     @JvmOverloads
     constructor(
@@ -162,8 +169,8 @@ data class CardParams internal constructor(
         brand = CardUtils.getPossibleCardBrand(number),
         loggingTokens = emptySet(),
         number = number,
-        expiryMonth = expMonth,
-        expiryYear = expYear,
+        expMonth = expMonth,
+        expYear = expYear,
         address = address,
         cvc = cvc,
         name = name,
@@ -172,10 +179,11 @@ data class CardParams internal constructor(
     )
 
     override val typeDataParams: Map<String, Any>
+        @OptIn(DelicateStripeApi::class)
         get() = listOf(
             PARAM_NUMBER to number,
-            PARAM_EXP_MONTH to expiryMonth,
-            PARAM_EXP_YEAR to expiryYear,
+            PARAM_EXP_MONTH to expMonth,
+            PARAM_EXP_YEAR to expYear,
             PARAM_CVC to cvc,
             PARAM_NAME to name,
             PARAM_CURRENCY to currency,

@@ -136,7 +136,7 @@ internal class CardInputWidgetTest {
                     brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
-                    expiryMonth = 12,
+                    expMonth = 12,
                     expiryYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
@@ -174,8 +174,8 @@ internal class CardInputWidgetTest {
                     brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .setPostalCode(POSTAL_CODE_VALUE)
@@ -217,8 +217,8 @@ internal class CardInputWidgetTest {
                     brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_AMEX,
                     address = Address.Builder()
                         .build()
@@ -255,8 +255,8 @@ internal class CardInputWidgetTest {
                     brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_AMEX,
                     address = Address.Builder()
                         .setPostalCode(POSTAL_CODE_VALUE)
@@ -300,8 +300,8 @@ internal class CardInputWidgetTest {
                     brand = CardBrand.DinersClub,
                     loggingTokens = ATTRIBUTION,
                     number = DINERS_CLUB_14_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .build()
@@ -336,8 +336,8 @@ internal class CardInputWidgetTest {
                     brand = CardBrand.DinersClub,
                     loggingTokens = ATTRIBUTION,
                     number = DINERS_CLUB_14_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .setPostalCode(POSTAL_CODE_VALUE)
@@ -431,8 +431,8 @@ internal class CardInputWidgetTest {
                     brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address()
                 )
@@ -456,8 +456,8 @@ internal class CardInputWidgetTest {
                     brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address()
                 )
@@ -482,8 +482,8 @@ internal class CardInputWidgetTest {
                     brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .setPostalCode(POSTAL_CODE_VALUE)
@@ -1112,8 +1112,8 @@ internal class CardInputWidgetTest {
                     brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2079,
+                    expMonth = 12,
+                    expYear = 2079,
                     cvc = CVC_VALUE_AMEX,
                     address = Address.Builder()
                         .build()
@@ -1147,8 +1147,8 @@ internal class CardInputWidgetTest {
                     brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2079,
+                    expMonth = 12,
+                    expYear = 2079,
                     cvc = CVC_VALUE_AMEX,
                     address = Address.Builder()
                         .setPostalCode(POSTAL_CODE_VALUE)
@@ -1517,8 +1517,8 @@ internal class CardInputWidgetTest {
                     brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .setPostalCode(POSTAL_CODE_VALUE)

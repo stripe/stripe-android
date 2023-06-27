@@ -25,6 +25,7 @@ import com.stripe.android.databinding.StripeCardMultilineWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.DelicateStripeApi
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -157,13 +158,14 @@ class CardMultilineWidget @JvmOverloads constructor(
      * otherwise `null`
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
+        @OptIn(DelicateStripeApi::class)
         get() {
             return cardParams?.let {
                 PaymentMethodCreateParams.Card(
                     number = it.number,
                     cvc = it.cvc,
-                    expiryMonth = it.expiryMonth,
-                    expiryYear = it.expiryYear,
+                    expiryMonth = it.expMonth,
+                    expiryYear = it.expYear,
                     attribution = it.attribution
                 )
             }
@@ -227,8 +229,8 @@ class CardMultilineWidget @JvmOverloads constructor(
                 brand = brand,
                 loggingTokens = setOf(CARD_MULTILINE_TOKEN),
                 number = validatedCardNumber?.value.orEmpty(),
-                expiryMonth = expirationDate.month,
-                expiryYear = expirationDate.year,
+                expMonth = expirationDate.month,
+                expYear = expirationDate.year,
                 cvc = cvcValue,
                 address = Address.Builder()
                     .setPostalCode(postalCode.takeUnless { it.isNullOrBlank() })

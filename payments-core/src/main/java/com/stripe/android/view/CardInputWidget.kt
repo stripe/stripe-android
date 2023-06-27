@@ -36,6 +36,7 @@ import com.stripe.android.databinding.StripeCardInputWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.DelicateStripeApi
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -178,13 +179,14 @@ class CardInputWidget @JvmOverloads constructor(
      * otherwise `null`. If a field is invalid focus will shift to the invalid field.
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
+        @OptIn(DelicateStripeApi::class)
         get() {
             return cardParams?.let {
                 PaymentMethodCreateParams.Card(
                     number = it.number,
                     cvc = it.cvc,
-                    expiryMonth = it.expiryMonth,
-                    expiryYear = it.expiryYear,
+                    expiryMonth = it.expMonth,
+                    expiryYear = it.expYear,
                     attribution = it.attribution
                 )
             }
@@ -257,8 +259,8 @@ class CardInputWidget @JvmOverloads constructor(
                         brand = brand,
                         loggingTokens = setOf(LOGGING_TOKEN),
                         number = cardNumber.value,
-                        expiryMonth = expirationDate.month,
-                        expiryYear = expirationDate.year,
+                        expMonth = expirationDate.month,
+                        expYear = expirationDate.year,
                         cvc = cvc.value,
                         address = Address.Builder()
                             .setPostalCode(postalCodeValue.takeUnless { it.isNullOrBlank() })

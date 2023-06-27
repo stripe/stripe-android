@@ -27,7 +27,7 @@ internal object CardParamsFixtures {
         brand = CardBrand.Visa,
         loggingTokens = setOf(CardInputWidget.LOGGING_TOKEN),
         number = CardNumberFixtures.VISA_NO_SPACES,
-        expiryMonth = 12,
+        expMonth = 12,
         expiryYear = 2025,
         cvc = "123"
     )

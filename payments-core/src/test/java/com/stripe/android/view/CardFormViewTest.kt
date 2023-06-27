@@ -109,8 +109,8 @@ class CardFormViewTest {
                     brand = CardBrand.Visa,
                     loggingTokens = setOf(CardFormView.CARD_FORM_VIEW),
                     number = CardNumberFixtures.VISA_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = VALID_CVC,
                     address = Address.Builder()
                         .setCountryCode(CountryCode.US)

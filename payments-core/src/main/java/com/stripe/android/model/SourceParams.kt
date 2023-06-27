@@ -553,12 +553,13 @@ data class SourceParams internal constructor(
         fun createCardParams(
             cardParams: CardParams
         ): SourceParams {
+            @OptIn(DelicateStripeApi::class)
             return SourceParams(
                 SourceType.CARD,
                 typeData = TypeData.Card(
                     cardParams.number,
-                    cardParams.expiryMonth,
-                    cardParams.expiryYear,
+                    cardParams.expMonth,
+                    cardParams.expYear,
                     cardParams.cvc
                 ),
                 attribution = cardParams.attribution,

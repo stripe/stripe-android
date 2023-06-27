@@ -173,8 +173,8 @@ internal class CardMultilineWidgetTest {
                     brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .setPostalCode(POSTAL_CODE_VALUE)
@@ -196,8 +196,8 @@ internal class CardMultilineWidgetTest {
                     brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .build()
@@ -218,8 +218,8 @@ internal class CardMultilineWidgetTest {
                     brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .build()
@@ -240,8 +240,8 @@ internal class CardMultilineWidgetTest {
                     brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_AMEX,
                     address = Address.Builder()
                         .build()
@@ -262,8 +262,8 @@ internal class CardMultilineWidgetTest {
                     brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .build()
@@ -749,8 +749,8 @@ internal class CardMultilineWidgetTest {
                     brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .setPostalCode(POSTAL_CODE_VALUE)
@@ -773,8 +773,8 @@ internal class CardMultilineWidgetTest {
                     brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .setPostalCode(POSTAL_CODE_VALUE)
@@ -842,8 +842,8 @@ internal class CardMultilineWidgetTest {
                     brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .build()
@@ -893,8 +893,8 @@ internal class CardMultilineWidgetTest {
                     brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .setPostalCode(POSTAL_CODE_VALUE)

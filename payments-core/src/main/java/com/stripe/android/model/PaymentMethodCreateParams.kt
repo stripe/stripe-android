@@ -587,11 +587,12 @@ data class PaymentMethodCreateParams internal constructor(
         fun createCard(
             cardParams: CardParams
         ): PaymentMethodCreateParams {
+            @OptIn(DelicateStripeApi::class)
             return create(
                 card = Card(
                     number = cardParams.number,
-                    expiryMonth = cardParams.expiryMonth,
-                    expiryYear = cardParams.expiryYear,
+                    expiryMonth = cardParams.expMonth,
+                    expiryYear = cardParams.expYear,
                     cvc = cardParams.cvc,
                     attribution = cardParams.attribution
                 ),
