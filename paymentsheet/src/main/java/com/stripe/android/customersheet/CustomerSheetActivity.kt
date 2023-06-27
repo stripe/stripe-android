@@ -27,7 +27,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
     // TODO (jameswoo) Figure out how to create real view model in CustomerSheetActivityTest
     @VisibleForTesting
-    internal var viewModelProvider: ViewModelProvider.Factory = CustomerSheetViewModel.Factory()
+    internal var viewModelProvider: ViewModelProvider.Factory = CustomerSheetViewModel.Factory
 
     /**
      * TODO (jameswoo) verify that the [viewModels] delegate caches the right dependencies

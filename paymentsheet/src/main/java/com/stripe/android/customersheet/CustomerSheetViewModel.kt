@@ -37,7 +37,7 @@ import javax.inject.Provider
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-@CustomerSheetScope
+@CustomerSheetActivityScope
 internal class CustomerSheetViewModel @Inject constructor(
     // TODO (jameswoo) should the current view state be derived from backstack?
     private val backstack: Stack<CustomerSheetViewState>,
@@ -463,7 +463,7 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    class Factory : ViewModelProvider.Factory {
+    object Factory : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
