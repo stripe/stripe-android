@@ -2,10 +2,12 @@ package com.stripe.android.customersheet
 
 import android.app.Application
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.customersheet.injection.CustomerSheetComponent
@@ -23,14 +25,28 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CustomerSheet @Inject internal constructor(
     private val application: Application,
-    activityResultCaller: ActivityResultCaller,
+    lifecycleOwner: LifecycleOwner,
+    activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val callback: CustomerSheetResultCallback,
 ) {
 
-    private val customerSheetActivityLauncher = activityResultCaller.registerForActivityResult(
-        CustomerSheetContract(),
-        ::onCustomerSheetResult
-    )
+    private val customerSheetActivityLauncher =
+        activityResultRegistryOwner.activityResultRegistry.register(
+            "CustomerSheet",
+            CustomerSheetContract(),
+            ::onCustomerSheetResult,
+        )
+
+    init {
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    customerSheetActivityLauncher.unregister()
+                    super.onDestroy(owner)
+                }
+            }
+        )
+    }
 
     /**
      * Presents a sheet to manage the customer through a [CustomerAdapter]. Results of the sheet
@@ -130,8 +146,9 @@ class CustomerSheet @Inject internal constructor(
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             return getInstance(
+                lifecycleOwner = activity,
                 viewModelStoreOwner = activity,
-                activityResultCaller = activity,
+                activityResultRegistryOwner = activity,
                 configuration = configuration,
                 customerAdapter = customerAdapter,
                 callback = callback,
@@ -153,17 +170,20 @@ class CustomerSheet @Inject internal constructor(
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             return getInstance(
+                lifecycleOwner = fragment,
                 viewModelStoreOwner = fragment,
-                activityResultCaller = fragment,
+                activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
+                    ?: fragment.requireActivity(),
                 configuration = configuration,
                 customerAdapter = customerAdapter,
                 callback = callback,
             )
         }
 
-        private fun getInstance(
+        internal fun getInstance(
+            lifecycleOwner: LifecycleOwner,
             viewModelStoreOwner: ViewModelStoreOwner,
-            activityResultCaller: ActivityResultCaller,
+            activityResultRegistryOwner: ActivityResultRegistryOwner,
             configuration: Configuration,
             customerAdapter: CustomerAdapter,
             callback: CustomerSheetResultCallback,
@@ -179,7 +199,8 @@ class CustomerSheet @Inject internal constructor(
 
             val customerSheetComponent: CustomerSheetComponent =
                 customerSessionComponent.customerSheetComponentBuilder
-                    .activityResultCaller(activityResultCaller)
+                    .lifecycleOwner(lifecycleOwner)
+                    .activityResultRegistryOwner(activityResultRegistryOwner)
                     .build()
 
             return customerSheetComponent.customerSheet

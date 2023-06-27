@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.injection
 
-import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import dagger.BindsInstance
@@ -14,8 +15,16 @@ internal interface CustomerSheetComponent {
 
     @Subcomponent.Builder
     interface Builder {
+
         @BindsInstance
-        fun activityResultCaller(activityResultCaller: ActivityResultCaller): Builder
+        fun lifecycleOwner(
+            lifecycleOwner: LifecycleOwner,
+        ): Builder
+
+        @BindsInstance
+        fun activityResultRegistryOwner(
+            activityResultRegistryOwner: ActivityResultRegistryOwner,
+        ): Builder
 
         fun build(): CustomerSheetComponent
     }

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
@@ -37,20 +38,20 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
         supportActionBar?.title = getString(R.string.customer_toolbar_title)
 
-        val customerSheet = CustomerSheet.create(
-            activity = this,
-            configuration = CustomerSheet.Configuration.Builder()
-                .googlePayEnabled(true)
-                .build(),
-            customerAdapter = viewModel.customerAdapter,
-            callback = {
-                Toast.makeText(this, "Got result $it", Toast.LENGTH_LONG).show()
-            }
-        )
-
         setContent {
             PaymentSheetExampleTheme {
+                val customerSheet = rememberCustomerSheet(
+                    customerAdapter = viewModel.customerAdapter,
+                    configuration = CustomerSheet.Configuration.Builder()
+                        .googlePayEnabled(true)
+                        .build(),
+                    callback = {
+                        Toast.makeText(this, "Got result $it", Toast.LENGTH_LONG).show()
+                    },
+                )
+
                 val viewState by viewModel.state.collectAsState()
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
