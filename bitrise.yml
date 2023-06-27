@@ -5,8 +5,8 @@ project_type: android
 trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
-  - pull_request_source_branch: '*'
-    pipeline: main-trigger-pipeline
+  - pull_request_source_branch: 'carlosmuvi/test-maestro-1.29'
+    workflow: maestro-financial-connections
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -64,11 +64,11 @@ workflows:
           inputs:
             - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
             - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-      - pagerduty@0:
-          inputs:
-            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
-            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
-          is_always_run: true
+#      - pagerduty@0:
+#          inputs:
+#            - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
+#            - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
+#          is_always_run: true
           run_if: .IsBuildFailed
       - custom-test-results-export@0:
           inputs:
