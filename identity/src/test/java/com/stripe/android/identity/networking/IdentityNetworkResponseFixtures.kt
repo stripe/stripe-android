@@ -109,7 +109,10 @@ internal val VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
           "US": "United States"
         },
         "id_number_country_not_listed_text_button_text": "My country is not listed",
-        "title": "Provide personal information"
+        "title": "Provide personal information",
+        "phone_number_countries": {
+          "US": "United States"
+        }
       },
       "individual_welcome": {
         "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
@@ -228,7 +231,10 @@ internal val VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
           "US": "United States"
         },
         "id_number_country_not_listed_text_button_text": "My country is not listed",
-        "title": "Provide personal information"
+        "title": "Provide personal information",
+        "phone_number_countries": {
+          "US": "United States"
+        }
       },
       "individual_welcome": {
         "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
@@ -352,7 +358,10 @@ internal val VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING = """
           "US": "United States"
         },
         "id_number_country_not_listed_text_button_text": "My country is not listed",
-        "title": "Provide personal information"
+        "title": "Provide personal information",
+        "phone_number_countries": {
+          "US": "United States"
+        }
       },
       "individual_welcome": {
         "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
@@ -527,7 +536,10 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING = """
           "US": "United States"
         },
         "id_number_country_not_listed_text_button_text": "My country is not listed",
-        "title": "Provide personal information"
+        "title": "Provide personal information",
+        "phone_number_countries": {
+          "US": "United States"
+        }
       },
       "individual_welcome": {
         "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
@@ -654,7 +666,10 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING = """
           "US": "United States"
         },
         "id_number_country_not_listed_text_button_text": "My country is not listed",
-        "title": "Provide personal information"
+        "title": "Provide personal information",
+        "phone_number_countries": {
+          "US": "United States"
+        }
       },
       "individual_welcome": {
         "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
@@ -780,7 +795,10 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_
           "US": "United States"
         },
         "id_number_country_not_listed_text_button_text": "My country is not listed",
-        "title": "Provide personal information"
+        "title": "Provide personal information",
+        "phone_number_countries": {
+          "US": "United States"
+        }
       },
       "individual_welcome": {
         "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
@@ -907,7 +925,10 @@ internal val VERIFICATION_PAGE_TYPE_ID_NUMBER_JSON_STRING = """
           "US": "United States"
         },
         "id_number_country_not_listed_text_button_text": "My country is not listed",
-        "title": "Provide personal information"
+        "title": "Provide personal information",
+        "phone_number_countries": {
+          "US": "United States"
+        }
       },
       "individual_welcome": {
         "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
@@ -1031,7 +1052,10 @@ internal val VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING = """
           "US": "United States"
         },
         "id_number_country_not_listed_text_button_text": "My country is not listed",
-        "title": "Provide personal information"
+        "title": "Provide personal information",
+        "phone_number_countries": {
+          "US": "United States"
+        }
       },
       "individual_welcome": {
         "body": "You’ll need to share some personal information to complete the verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>",
