@@ -39,7 +39,7 @@ import com.stripe.android.ui.core.R as UiCoreR
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSessionScope
 internal class CustomerSheetViewModel @Inject constructor(
-    initialViewState: CustomerSheetViewState,
+    // TODO (jameswoo) should the current view state be derived from backstack?
     private val backstack: Stack<CustomerSheetViewState>,
     private val paymentConfiguration: PaymentConfiguration,
     private val resources: Resources,
@@ -51,7 +51,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
 ) : ViewModel() {
 
-    private val _viewState = MutableStateFlow(initialViewState)
+    private val _viewState = MutableStateFlow(backstack.peek())
     val viewState: StateFlow<CustomerSheetViewState> = _viewState
 
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
@@ -63,7 +63,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never
             )
         )
-        if (initialViewState is CustomerSheetViewState.Loading) {
+        if (viewState.value is CustomerSheetViewState.Loading) {
             loadPaymentMethods()
         }
     }
@@ -299,10 +299,12 @@ internal class CustomerSheetViewModel @Inject constructor(
         formViewData: FormViewModel.ViewData,
     ) {
         viewModelScope.launch {
-            val params = formViewData.completeFormValues?.transformToPaymentMethodCreateParams(paymentMethodSpec)
-            createPaymentMethod(params)?.let {
-                attachPaymentMethodToCustomer(it)
-            } ?: run {
+            runCatching {
+                val params = formViewData.completeFormValues
+                    ?.transformToPaymentMethodCreateParams(paymentMethodSpec)
+                val paymentMethod = requireNotNull(createPaymentMethod(params))
+                attachPaymentMethodToCustomer(paymentMethod)
+            }.onFailure {
                 updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                     // TODO (jameswoo) translate message
                     it.copy(

@@ -86,14 +86,13 @@ internal class CustomerSheetViewModelModule {
     }
 
     @Provides
-    fun initialViewState(
+    fun backstack(
         @Named(IS_LIVE_MODE) isLiveMode: Boolean
-    ): CustomerSheetViewState {
-        return CustomerSheetViewState.Loading(
-            isLiveMode = isLiveMode
+    ): Stack<CustomerSheetViewState> = Stack<CustomerSheetViewState>().apply {
+        push(
+            CustomerSheetViewState.Loading(
+                isLiveMode = isLiveMode
+            )
         )
     }
-
-    @Provides
-    fun initialBackstack(): Stack<CustomerSheetViewState> = Stack()
 }

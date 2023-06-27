@@ -591,17 +591,19 @@ class CustomerSheetViewModelTest {
     @Test
     fun `When primary button is pressed in the add payment flow, view should be loading`() = runTest {
         val viewModel = createViewModel(
-            initialViewState = CustomerSheetViewState.AddPaymentMethod(
-                paymentMethodCode = PaymentMethod.Type.Card.code,
-                formViewData = FormViewModel.ViewData(
-                    completeFormValues = FormFieldValues(
-                        showsMandate = false,
-                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
-                    )
-                ),
-                enabled = true,
-                isLiveMode = false,
-                isProcessing = false,
+            backstack = buildBackstack(
+                CustomerSheetViewState.AddPaymentMethod(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    formViewData = FormViewModel.ViewData(
+                        completeFormValues = FormFieldValues(
+                            showsMandate = false,
+                            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                        )
+                    ),
+                    enabled = true,
+                    isLiveMode = false,
+                    isProcessing = false,
+                )
             ),
             stripeRepository = FakeStripeRepository(
                 onCreatePaymentMethod = {
@@ -623,17 +625,19 @@ class CustomerSheetViewModelTest {
     @Test
     fun `When payment method could not be created, error message is visible`() = runTest {
         val viewModel = createViewModel(
-            initialViewState = CustomerSheetViewState.AddPaymentMethod(
-                paymentMethodCode = PaymentMethod.Type.Card.code,
-                formViewData = FormViewModel.ViewData(
-                    completeFormValues = FormFieldValues(
-                        showsMandate = false,
-                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
-                    )
-                ),
-                enabled = true,
-                isLiveMode = false,
-                isProcessing = false,
+            backstack = buildBackstack(
+                CustomerSheetViewState.AddPaymentMethod(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    formViewData = FormViewModel.ViewData(
+                        completeFormValues = FormFieldValues(
+                            showsMandate = false,
+                            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                        )
+                    ),
+                    enabled = true,
+                    isLiveMode = false,
+                    isProcessing = false,
+                )
             ),
         )
 
@@ -664,7 +668,20 @@ class CustomerSheetViewModelTest {
             isProcessing = false,
         )
         val viewModel = createViewModel(
-            initialViewState = initialViewState,
+            backstack = buildBackstack(
+                CustomerSheetViewState.SelectPaymentMethod(
+                    title = null,
+                    savedPaymentMethods = listOf(),
+                    paymentSelection = null,
+                    isLiveMode = false,
+                    isProcessing = false,
+                    isEditing = false,
+                    isGooglePayEnabled = false,
+                    primaryButtonLabel = null,
+                    primaryButtonEnabled = false,
+                ),
+                initialViewState
+            ),
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
                 onSetupIntentClientSecretForCustomerAttach = {
@@ -679,22 +696,6 @@ class CustomerSheetViewModelTest {
                     SetupIntentFixtures.SI_SUCCEEDED
                 }
             ),
-            backstack = Stack<CustomerSheetViewState>().apply {
-                push(
-                    CustomerSheetViewState.SelectPaymentMethod(
-                        title = null,
-                        savedPaymentMethods = listOf(),
-                        paymentSelection = null,
-                        isLiveMode = false,
-                        isProcessing = false,
-                        isEditing = false,
-                        isGooglePayEnabled = false,
-                        primaryButtonLabel = null,
-                        primaryButtonEnabled = false,
-                    )
-                )
-                push(initialViewState)
-            }
         )
 
         viewModel.viewState.test {
@@ -728,7 +729,20 @@ class CustomerSheetViewModelTest {
             isProcessing = false,
         )
         val viewModel = createViewModel(
-            initialViewState = initialViewState,
+            backstack = buildBackstack(
+                CustomerSheetViewState.SelectPaymentMethod(
+                    title = null,
+                    savedPaymentMethods = listOf(),
+                    paymentSelection = null,
+                    isLiveMode = false,
+                    isProcessing = false,
+                    isEditing = false,
+                    isGooglePayEnabled = false,
+                    primaryButtonLabel = null,
+                    primaryButtonEnabled = false,
+                ),
+                initialViewState
+            ),
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = false,
                 onAttachPaymentMethod = {
@@ -741,22 +755,6 @@ class CustomerSheetViewModelTest {
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 },
             ),
-            backstack = Stack<CustomerSheetViewState>().apply {
-                push(
-                    CustomerSheetViewState.SelectPaymentMethod(
-                        title = null,
-                        savedPaymentMethods = listOf(),
-                        paymentSelection = null,
-                        isLiveMode = false,
-                        isProcessing = false,
-                        isEditing = false,
-                        isGooglePayEnabled = false,
-                        primaryButtonLabel = null,
-                        primaryButtonEnabled = false,
-                    )
-                )
-                push(initialViewState)
-            }
         )
 
         viewModel.viewState.test {
@@ -790,7 +788,7 @@ class CustomerSheetViewModelTest {
             isProcessing = false,
         )
         val viewModel = createViewModel(
-            initialViewState = initialViewState,
+            backstack = buildBackstack(initialViewState),
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
                 onSetupIntentClientSecretForCustomerAttach = {
@@ -834,7 +832,7 @@ class CustomerSheetViewModelTest {
             isProcessing = false,
         )
         val viewModel = createViewModel(
-            initialViewState = initialViewState,
+            backstack = buildBackstack(initialViewState),
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
                 onSetupIntentClientSecretForCustomerAttach = null,
@@ -875,7 +873,7 @@ class CustomerSheetViewModelTest {
             isProcessing = false,
         )
         val viewModel = createViewModel(
-            initialViewState = initialViewState,
+            backstack = buildBackstack(initialViewState),
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = false,
                 onSetupIntentClientSecretForCustomerAttach = null,
@@ -903,8 +901,10 @@ class CustomerSheetViewModelTest {
     }
 
     private fun createViewModel(
-        initialViewState: CustomerSheetViewState? = null,
-        backstack: Stack<CustomerSheetViewState> = Stack(),
+        isLiveMode: Boolean = false,
+        backstack: Stack<CustomerSheetViewState> = Stack<CustomerSheetViewState>().apply {
+            push(CustomerSheetViewState.Loading(isLiveMode))
+        },
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         stripeRepository: StripeRepository = FakeStripeRepository(),
         lpmRepository: LpmRepository = this.lpmRepository,
@@ -912,7 +912,6 @@ class CustomerSheetViewModelTest {
             publishableKey = "pk_test_123",
             stripeAccountId = null,
         ),
-        isLiveMode: Boolean = false,
     ): CustomerSheetViewModel {
         val formViewModel = FormViewModel(
             context = application,
@@ -941,7 +940,6 @@ class CustomerSheetViewModelTest {
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
         return CustomerSheetViewModel(
-            initialViewState = initialViewState ?: CustomerSheetViewState.Loading(isLiveMode),
             backstack = backstack,
             paymentConfiguration = paymentConfiguration,
             formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,
@@ -952,6 +950,14 @@ class CustomerSheetViewModelTest {
             configuration = CustomerSheet.Configuration(),
             isLiveMode = isLiveMode,
         )
+    }
+
+    private fun buildBackstack(vararg states: CustomerSheetViewState): Stack<CustomerSheetViewState> {
+        return Stack<CustomerSheetViewState>().apply {
+            states.forEach {
+                push(it)
+            }
+        }
     }
 
     class FakeStripeRepository(
