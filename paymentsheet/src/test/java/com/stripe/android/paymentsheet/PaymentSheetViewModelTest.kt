@@ -12,6 +12,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
@@ -138,11 +139,15 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `init should fire analytics event`() {
+        val beforeSessionId = AnalyticsRequestFactory.sessionId
         createViewModel()
         verify(eventReporter).onInit(
             configuration = eq(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY),
             isDecoupling = eq(false),
         )
+
+        // Creating the view model should regenerate the analytics sessionId.
+        assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
     }
 
     @Test
