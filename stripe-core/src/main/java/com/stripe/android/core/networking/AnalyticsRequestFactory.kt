@@ -85,6 +85,7 @@ open class AnalyticsRequestFactory(
         @Volatile
         @VisibleForTesting
         var sessionId: UUID = UUID.randomUUID()
+            private set
 
         private const val ANALYTICS_PREFIX = "analytics"
         private const val ANALYTICS_NAME = "stripe_android"
