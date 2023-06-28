@@ -95,7 +95,7 @@ open class AnalyticsRequestFactory(
         const val ANALYTICS_UA = "$ANALYTICS_PREFIX.$ANALYTICS_NAME-$ANALYTICS_VERSION"
 
         fun regenerateSessionId() {
-           sessionId = UUID.randomUUID()
+            sessionId = UUID.randomUUID()
         }
     }
 }
