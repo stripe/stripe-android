@@ -45,7 +45,6 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.utils.isRemote
 import com.stripe.android.identity.utils.urlWithoutQuery
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -151,11 +150,13 @@ private fun SuccessUI(
                     testTag = SCROLLABLE_COLUMN_TAG
                 }
         ) {
-            val shouldShowHeader =
-                consentPage.title != null && consentPage.privacyPolicy != null && consentPage.timeEstimate != null
-
-            if (shouldShowHeader) {
-                ConsentHeader(merchantLogoUri = merchantLogoUri, consentPage = consentPage)
+            if (consentPage.title != null && consentPage.privacyPolicy != null && consentPage.timeEstimate != null) {
+                ConsentHeader(
+                    merchantLogoUri = merchantLogoUri,
+                    title = consentPage.title,
+                    privacyPolicy = consentPage.privacyPolicy,
+                    timeEstimate = consentPage.timeEstimate
+                )
             }
 
             Html(
@@ -220,11 +221,10 @@ private fun SuccessUI(
 @Composable
 private fun ConsentHeader(
     merchantLogoUri: Uri,
-    consentPage: VerificationPageStaticContentConsentPage
+    title: String,
+    privacyPolicy: String,
+    timeEstimate: String
 ) {
-    val title = requireNotNull(consentPage.title)
-    val privacyPolicy = requireNotNull(consentPage.privacyPolicy)
-    val timeEstimate = requireNotNull(consentPage.timeEstimate)
     Row(
         modifier = Modifier
             .fillMaxWidth()
