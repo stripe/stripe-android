@@ -137,7 +137,7 @@ internal class CardInputWidgetTest {
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
-                    expiryYear = 2050,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
                     address = Address.Builder()
                         .build()
