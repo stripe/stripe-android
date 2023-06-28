@@ -104,14 +104,13 @@ class GooglePayLauncher internal constructor(
         readyCallback: ReadyCallback,
         resultCallback: ResultCallback
     ) : this(
-        fragment.viewLifecycleOwner.lifecycleScope,
-        config,
-        readyCallback,
-        fragment.registerForActivityResult(
-            GooglePayLauncherContract()
-        ) {
-            resultCallback.onResult(it)
-        },
+        lifecycleScope = fragment.lifecycleScope,
+        config = config,
+        readyCallback = readyCallback,
+        activityResultLauncher = fragment.registerForActivityResult(
+            GooglePayLauncherContract(),
+            resultCallback::onResult,
+        ),
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
                 context = fragment.requireActivity().application,
@@ -121,12 +120,12 @@ class GooglePayLauncher internal constructor(
                 allowCreditCards = config.allowCreditCards
             )
         },
-        PaymentAnalyticsRequestFactory(
-            fragment.requireContext(),
-            PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
-            setOf(PRODUCT_USAGE)
+        paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+            context = fragment.requireContext(),
+            publishableKey = PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
+            defaultProductUsageTokens = setOf(PRODUCT_USAGE),
         ),
-        DefaultAnalyticsRequestExecutor()
+        analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
     )
 
     init {
