@@ -24,7 +24,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -119,6 +118,4 @@ private fun runGooglePayLauncherTest(
     if (verifyResult) {
         verify(resultCallback).onResult(eq(result))
     }
-
-    reset(readyCallback, resultCallback)
 }
