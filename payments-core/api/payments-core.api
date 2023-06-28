@@ -2160,8 +2160,8 @@ public final class com/stripe/android/model/CardParams : com/stripe/android/mode
 	public final fun getBrand ()Lcom/stripe/android/model/CardBrand;
 	public final fun getCurrency ()Ljava/lang/String;
 	public final fun getCvc ()Ljava/lang/String;
-	public final fun getExpiryMonth ()I
-	public final fun getExpiryYear ()I
+	public final fun getExpMonth ()I
+	public final fun getExpYear ()I
 	public final fun getLast4 ()Ljava/lang/String;
 	public final fun getMetadata ()Ljava/util/Map;
 	public final fun getName ()Ljava/lang/String;
@@ -2750,6 +2750,9 @@ public final class com/stripe/android/model/DeferredIntentParams$Mode$Setup$Crea
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/DeferredIntentParams$Mode$Setup;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public abstract interface annotation class com/stripe/android/model/DelicateStripeApi : java/lang/annotation/Annotation {
 }
 
 public final class com/stripe/android/model/ElementsSession$Creator : android/os/Parcelable$Creator {
