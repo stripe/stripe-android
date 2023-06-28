@@ -19,6 +19,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayLauncher
 import com.stripe.android.googlepaylauncher.GooglePayLauncherContract
+import com.stripe.android.googlepaylauncher.rememberGooglePayLauncher
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -98,7 +99,7 @@ private fun runGooglePayLauncherTest(
                 }
                 LauncherIntegrationType.Compose -> {
                     activity.setContent {
-                        launcher = GooglePayLauncher.rememberLauncher(
+                        launcher = rememberGooglePayLauncher(
                             config = defaultConfig,
                             readyCallback = readyCallback,
                             resultCallback = resultCallback,
