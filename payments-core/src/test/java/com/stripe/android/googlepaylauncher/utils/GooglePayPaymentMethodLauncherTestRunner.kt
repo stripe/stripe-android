@@ -20,6 +20,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayLauncherContract
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result.Completed
+import com.stripe.android.googlepaylauncher.rememberGooglePayPaymentMethodLauncher
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import org.mockito.Mockito
 import org.mockito.kotlin.any
@@ -99,7 +100,7 @@ private fun runGooglePayPaymentMethodLauncherTest(
                 }
                 LauncherIntegrationType.Compose -> {
                     activity.setContent {
-                        launcher = GooglePayPaymentMethodLauncher.rememberLauncher(
+                        launcher = rememberGooglePayPaymentMethodLauncher(
                             config = defaultConfig,
                             readyCallback = readyCallback,
                             resultCallback = resultCallback,
