@@ -4,9 +4,11 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentMethodCreateParams
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,9 +20,11 @@ class LinkConfigurationCoordinator @Inject internal constructor(
 ) {
     private val componentFlow = MutableStateFlow<LinkComponent?>(null)
 
+    @OptIn(FlowPreview::class)
     val emailFlow: Flow<String?> = componentFlow
         .filterNotNull()
-        .map { it.configuration.customerEmail }
+        .flatMapMerge { it.linkAccountManager.linkAccount }
+        .map { it?.email }
 
     /**
      * The dependency injector Component for all injectable classes in Link while in an embedded
