@@ -17,7 +17,7 @@ import dagger.Provides
 import kotlin.coroutines.CoroutineContext
 
 @Module
-internal interface LinkCommonModule {
+internal interface LinkModule {
     @Binds
     @LinkScope
     fun bindLinkRepository(linkApiRepository: LinkApiRepository): LinkRepository

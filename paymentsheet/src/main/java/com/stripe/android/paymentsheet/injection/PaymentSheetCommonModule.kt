@@ -7,7 +7,8 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
-import com.stripe.android.link.injection.LinkLauncherSubcomponent
+import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
@@ -35,7 +36,12 @@ import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-@Module(subcomponents = [LinkLauncherSubcomponent::class])
+@Module(
+    subcomponents = [
+        LinkAnalyticsComponent::class,
+        LinkComponent::class,
+    ],
+)
 internal abstract class PaymentSheetCommonModule {
 
     @Binds

@@ -5,6 +5,7 @@ import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.injection.LinkScope
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
@@ -19,12 +20,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Manages the Link account for the current user, persisting it across app usages.
  */
-@Singleton
+@LinkScope
 internal class LinkAccountManager @Inject constructor(
     private val config: LinkConfiguration,
     private val linkRepository: LinkRepository,
