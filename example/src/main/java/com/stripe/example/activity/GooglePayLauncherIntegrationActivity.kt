@@ -58,6 +58,9 @@ class GooglePayLauncherIntegrationActivity : StripeIntentActivity() {
                     format = GooglePayLauncher.BillingAddressConfig.Format.Full,
                     isPhoneNumberRequired = false
                 ),
+                shippingAddressConfig = GooglePayLauncher.ShippingAddressConfig(
+                    isRequired = true
+                ),
                 existingPaymentMethodRequired = false
             ),
             readyCallback = ::onGooglePayReady,
