@@ -40,7 +40,7 @@ fun LinkInlineSignedIn(
 ) {
     linkConfigurationCoordinator.component?.let { component ->
         val viewModel: InlineSignupViewModel = viewModel(
-            factory = InlineSignupViewModel.Factory(component.injector)
+            factory = InlineSignupViewModel.Factory(component)
         )
 
         val accountEmail = viewModel.accountEmail.collectAsState(initial = "")
