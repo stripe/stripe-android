@@ -9,13 +9,16 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
+import java.util.Stack
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
@@ -75,4 +78,21 @@ internal class CustomerSheetViewModelModule {
     @Provides
     fun provideLocale() =
         LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
+
+    @Provides
+    @Named(IS_LIVE_MODE)
+    fun isLiveMode(paymentConfiguration: PaymentConfiguration): Boolean {
+        return paymentConfiguration.publishableKey.startsWith("pk_live")
+    }
+
+    @Provides
+    fun backstack(
+        @Named(IS_LIVE_MODE) isLiveMode: Boolean
+    ): Stack<CustomerSheetViewState> = Stack<CustomerSheetViewState>().apply {
+        push(
+            CustomerSheetViewState.Loading(
+                isLiveMode = isLiveMode
+            )
+        )
+    }
 }

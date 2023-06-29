@@ -2,6 +2,10 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [ADDED][6583](https://github.com/stripe/stripe-android/pull/6583) Added top-level methods `rememberPaymentSheet()` and `rememberPaymentSheetFlowController()` for easier integration in Compose.
+* [DEPRECATED][6583](https://github.com/stripe/stripe-android/pull/6583) `PaymentSheetContract` has been deprecated and will be removed in a future release. Use the `PaymentSheet` constructor or new `rememberPaymentSheet()` method instead.
+
 ### Payments
 * [ADDED][6912](https://github.com/stripe/stripe-android/pull/6912) `GooglePayPaymentMethodLauncher` can now be presented with an amount of type `Long`. The method to present with an `Int` has been deprecated.
 * [DEPRECATED][6912](https://github.com/stripe/stripe-android/pull/6912) `GooglePayLauncherContract` and `GooglePayPaymentMethodLauncherContract` have been deprecated and will be removed in a future release. Use `GooglePayLauncher` and `GooglePayPaymentMethodLauncher` directly instead.
@@ -10,6 +14,10 @@
 
 ### Financial Connections
 * [CHANGED][6919](https://github.com/stripe/stripe-android/pull/6919) Updated polling options for account retrieval and OAuth results to match other platforms.
+
+## Payments
+[ADDED][6925](https://github.com/stripe/stripe-android/pull/6925) Added top-level remember methods for `PaymentLauncher`, `GooglePayLauncher`, and `GooglePayPaymentMethodLauncher`.
+[DEPRECATED][6925](https://github.com/stripe/stripe-android/pull/6925) Deprecated static `rememberLauncher()` methods for `PaymentLauncher`, `GooglePayLauncher`, and `GooglePayPaymentMethodLauncher`.
 
 ## 20.25.7 - 2023-06-20
 

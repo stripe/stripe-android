@@ -7,11 +7,11 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.SavedSelection
 
 /**
- * [CustomerAdapter] A bridge to your backend to fetch Customer-related information. Typically,
+ * A bridge to your backend to fetch customer-related information. Typically,
  * you will not need to implement this interface yourself. You should instead use
- * [CustomerAdaper.create], which manages retrieving and updating a Stripe customer for you.
+ * [CustomerAdapter.create], which manages retrieving and updating a Stripe customer for you.
  *
- * The methods in this interface should act on a Stripe [Customer] object.
+ * The methods in this interface should act on a Stripe `Customer` object.
  *
  * Implement this interface if you would prefer retrieving and updating your Stripe customer object
  * via your own backend instead of using the default implementation.
@@ -21,6 +21,15 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 @ExperimentalCustomerSheetApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CustomerAdapter {
+
+    /**
+     * Whether this backend adapter is able to create setup intents. A [SetupIntent] is recommended
+     * when attaching a new card to a Customer, and required for non-card payments methods. If you
+     * are implementing your own [CustomerAdapter], return true if
+     * [setupIntentClientSecretForCustomerAttach] is implemented, Otherwise, return false.
+     */
+    val canCreateSetupIntents: Boolean
+
     /**
      * Retrieves a list of payment methods attached to a customer
      * @return a list of [PaymentMethod]s.

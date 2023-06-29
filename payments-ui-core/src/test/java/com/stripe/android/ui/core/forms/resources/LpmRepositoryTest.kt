@@ -27,7 +27,6 @@ class LpmRepositoryTest {
         LpmRepository.LpmRepositoryArguments(
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
             isFinancialConnectionsAvailable = { true },
-            enableACHV2InDeferredFlow = true
         )
     )
 
@@ -340,37 +339,11 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify LpmRepository filters out USBankAccount if flag is disabled`() = runTest {
-        val lpmRepository = LpmRepository(
-            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-            arguments = LpmRepository.LpmRepositoryArguments(
-                resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                enableACHV2InDeferredFlow = false
-            ),
-        )
-
-        val deferredPaymentIntent = PaymentIntentFactory.create(
-            paymentMethodTypes = listOf("card", "us_bank_account", "cashapp"),
-        ).copy(
-            clientSecret = null,
-        )
-
-        lpmRepository.update(
-            stripeIntent = deferredPaymentIntent,
-            serverLpmSpecs = null,
-        )
-
-        val supportedPaymentMethods = lpmRepository.values().map { it.code }
-        assertThat(supportedPaymentMethods).containsExactly(Card.code, CashAppPay.code)
-    }
-
-    @Test
     fun `Verify LpmRepository filters out USBankAccount if verification method is unsupported`() = runTest {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                enableACHV2InDeferredFlow = true
             ),
         )
 
@@ -402,7 +375,6 @@ class LpmRepositoryTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                enableACHV2InDeferredFlow = false
             ),
         )
 

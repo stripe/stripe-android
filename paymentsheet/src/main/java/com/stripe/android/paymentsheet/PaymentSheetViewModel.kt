@@ -20,6 +20,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -222,6 +223,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
+        AnalyticsRequestFactory.regenerateSessionId()
         eventReporter.onInit(
             configuration = config,
             isDecoupling = isDecoupling,

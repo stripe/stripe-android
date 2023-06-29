@@ -8,6 +8,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
@@ -80,6 +81,7 @@ class FlowControllerConfigurationHandlerTest {
         val configureErrors = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
+        val beforeSessionId = AnalyticsRequestFactory.sessionId
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
@@ -99,6 +101,8 @@ class FlowControllerConfigurationHandlerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
         )
+        // Configure should regenerate the analytics sessionId.
+        assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
     }
 
     @Test
@@ -116,6 +120,7 @@ class FlowControllerConfigurationHandlerTest {
         viewModel.previousConfigureRequest = configureRequest
         viewModel.paymentSelection = PaymentSelection.GooglePay
 
+        val beforeSessionId = AnalyticsRequestFactory.sessionId
         configurationHandler.configure(
             scope = this,
             initializationMode = initializationMode,
@@ -134,6 +139,9 @@ class FlowControllerConfigurationHandlerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDecoupling = false,
         )
+
+        // Configure should not regenerate the analytics sessionId when using the same configuration.
+        assertThat(beforeSessionId).isEqualTo(AnalyticsRequestFactory.sessionId)
     }
 
     @Test

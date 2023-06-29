@@ -1,8 +1,5 @@
 package com.stripe.android.payments.paymentlauncher
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -14,6 +11,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.utils.rememberActivityOrNull
 
 /**
  * API to confirm and handle next actions for [PaymentIntent] and [SetupIntent].
@@ -87,9 +85,10 @@ interface PaymentLauncher {
          * recompositions.
          */
         @Deprecated(
-            "This method creates a new PaymentLauncher object every time it is called, even" +
-                "during recompositions.",
-            replaceWith = ReplaceWith("PaymentLauncher.rememberLauncher(publishableKey, stripeAccountId, callback)")
+            message = "Use rememberPaymentLauncher() instead",
+            replaceWith = ReplaceWith(
+                expression = "rememberPaymentLauncher(publishableKey, stripeAccountId, callback)",
+            ),
         )
         @Composable
         fun createForCompose(
@@ -97,15 +96,7 @@ interface PaymentLauncher {
             stripeAccountId: String? = null,
             callback: PaymentResultCallback
         ): PaymentLauncher {
-            val context = LocalContext.current
-            return PaymentLauncherFactory(
-                context = context,
-                hostActivityLauncher = rememberLauncherForActivityResult(
-                    PaymentLauncherContract(),
-                    callback::onPaymentResult
-                ),
-                statusBarColor = context.findActivity()?.window?.statusBarColor,
-            ).create(publishableKey, stripeAccountId)
+            return rememberPaymentLauncher(publishableKey, stripeAccountId, callback)
         }
 
         /**
@@ -117,34 +108,51 @@ interface PaymentLauncher {
          * The PaymentLauncher created is remembered across recompositions. Recomposition will
          * always return the value produced by composition.
          */
+        @Deprecated(
+            message = "Use rememberPaymentLauncher() instead",
+            replaceWith = ReplaceWith(
+                expression = "rememberPaymentLauncher(publishableKey, stripeAccountId, callback)",
+            ),
+        )
         @Composable
         fun rememberLauncher(
             publishableKey: String,
             stripeAccountId: String? = null,
             callback: PaymentResultCallback
         ): PaymentLauncher {
-            val context = LocalContext.current
-            val activityResultLauncher = rememberLauncherForActivityResult(
-                PaymentLauncherContract(),
-                callback::onPaymentResult
-            )
-
-            return remember(publishableKey, stripeAccountId) {
-                PaymentLauncherFactory(
-                    context = context,
-                    hostActivityLauncher = activityResultLauncher,
-                    statusBarColor = context.findActivity()?.window?.statusBarColor,
-                ).create(publishableKey, stripeAccountId)
-            }
+            return rememberPaymentLauncher(publishableKey, stripeAccountId, callback)
         }
     }
 }
 
-private fun Context.findActivity(): Activity? {
-    var context = this
-    while (context is ContextWrapper) {
-        if (context is Activity) return context
-        context = context.baseContext
+/**
+ * Creates a [PaymentLauncher] that is remembered across compositions.
+ *
+ * This *must* be called unconditionally, as part of the initialization path.
+ *
+ * @param publishableKey The publishable key to use
+ * @param stripeAccountId Optional, the Connect account to associate with this request
+ * @param callback Called with the result of the payment operation
+ */
+@Composable
+fun rememberPaymentLauncher(
+    publishableKey: String,
+    stripeAccountId: String? = null,
+    callback: PaymentLauncher.PaymentResultCallback
+): PaymentLauncher {
+    val context = LocalContext.current
+    val activity = rememberActivityOrNull()
+
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        PaymentLauncherContract(),
+        callback::onPaymentResult
+    )
+
+    return remember(publishableKey, stripeAccountId) {
+        PaymentLauncherFactory(
+            context = context,
+            hostActivityLauncher = activityResultLauncher,
+            statusBarColor = activity?.window?.statusBarColor,
+        ).create(publishableKey, stripeAccountId)
     }
-    return null
 }

@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet.utils
 
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
 
 @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal class FlowControllerTestFactory(
@@ -17,11 +19,13 @@ internal class FlowControllerTestFactory(
 
     enum class IntegrationType {
         Activity,
+        Compose,
     }
 
     fun make(activity: ComponentActivity): PaymentSheet.FlowController {
         return when (integrationType) {
             IntegrationType.Activity -> forActivity(activity)
+            IntegrationType.Compose -> forCompose(activity)
         }
     }
 
@@ -46,6 +50,31 @@ internal class FlowControllerTestFactory(
                 },
                 paymentResultCallback = resultCallback,
             )
+        }
+        return flowController
+    }
+
+    private fun forCompose(activity: ComponentActivity): PaymentSheet.FlowController {
+        lateinit var flowController: PaymentSheet.FlowController
+        activity.setContent {
+            flowController = if (createIntentCallback != null) {
+                rememberPaymentSheetFlowController(
+                    createIntentCallback = createIntentCallback,
+                    paymentOptionCallback = { paymentOption ->
+                        paymentOptionCallback.onPaymentOption(paymentOption)
+                        flowController.confirm()
+                    },
+                    paymentResultCallback = resultCallback,
+                )
+            } else {
+                rememberPaymentSheetFlowController(
+                    paymentOptionCallback = { paymentOption ->
+                        paymentOptionCallback.onPaymentOption(paymentOption)
+                        flowController.confirm()
+                    },
+                    paymentResultCallback = resultCallback,
+                )
+            }
         }
         return flowController
     }

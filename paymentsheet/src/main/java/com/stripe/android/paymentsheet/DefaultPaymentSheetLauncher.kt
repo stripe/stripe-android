@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Activity
 import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
@@ -24,7 +25,7 @@ import org.jetbrains.annotations.TestOnly
  */
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
-    private val activity: ComponentActivity,
+    private val activity: Activity,
     lifecycleOwner: LifecycleOwner,
     private val application: Application,
 ) : PaymentSheetLauncher {

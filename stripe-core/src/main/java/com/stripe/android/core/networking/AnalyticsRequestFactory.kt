@@ -17,9 +17,6 @@ open class AnalyticsRequestFactory(
     private val packageName: String,
     private val publishableKeyProvider: Provider<String>
 ) {
-    @VisibleForTesting
-    val sessionId: UUID = UUID.randomUUID()
-
     /**
      * Builds an Analytics request for the given [AnalyticsEvent],
      * including common params + event-specific params defined in [AnalyticsEvent.params]
@@ -85,6 +82,11 @@ open class AnalyticsRequestFactory(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        @Volatile
+        @VisibleForTesting
+        var sessionId: UUID = UUID.randomUUID()
+            private set
+
         private const val ANALYTICS_PREFIX = "analytics"
         private const val ANALYTICS_NAME = "stripe_android"
         private const val ANALYTICS_VERSION = "1.0"
@@ -92,6 +94,10 @@ open class AnalyticsRequestFactory(
         private val DEVICE_TYPE: String = "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}"
 
         const val ANALYTICS_UA = "$ANALYTICS_PREFIX.$ANALYTICS_NAME-$ANALYTICS_VERSION"
+
+        fun regenerateSessionId() {
+            sessionId = UUID.randomUUID()
+        }
     }
 }
 

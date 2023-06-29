@@ -1309,6 +1309,10 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncherContrac
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/googlepaylauncher/GooglePayLauncherKt {
+	public static final fun rememberGooglePayLauncher (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher;
+}
+
 public final class com/stripe/android/googlepaylauncher/GooglePayLauncherResult$Canceled$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncherResult$Canceled;
@@ -1347,7 +1351,6 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public static final field DEVELOPER_ERROR I
 	public static final field INTERNAL_ERROR I
 	public static final field NETWORK_ERROR I
-	public synthetic fun <init> (Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;Landroidx/activity/result/ActivityResultLauncher;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Landroidx/activity/ComponentActivity;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ResultCallback;)V
 	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ResultCallback;)V
 	public final fun present (Ljava/lang/String;)V
@@ -1578,6 +1581,10 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherContractV2$Args$InjectionParams;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherKt {
+	public static final fun rememberGooglePayPaymentMethodLauncher (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;
 }
 
 public abstract interface class com/stripe/android/googlepaylauncher/GooglePayRepository {
@@ -6919,6 +6926,10 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherCo
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherKt {
+	public static final fun rememberPaymentLauncher (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;Landroidx/compose/runtime/Composer;II)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 }
 
 public abstract class com/stripe/android/payments/paymentlauncher/PaymentResult : android/os/Parcelable {

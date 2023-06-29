@@ -395,6 +395,21 @@ class CustomerAdapterTest {
         )
     }
 
+    @Test
+    fun `canCreateSetupIntents should return true if setupIntentClientSecretForCustomerAttach is not null`() {
+        var adapter = createAdapter(
+            setupIntentClientSecretProvider = null,
+        )
+
+        assertThat(adapter.canCreateSetupIntents).isFalse()
+
+        adapter = createAdapter(
+            setupIntentClientSecretProvider = { Result.success("client_secret") },
+        )
+
+        assertThat(adapter.canCreateSetupIntents).isTrue()
+    }
+
     private fun createAdapter(
         customerEphemeralKeyProvider: CustomerEphemeralKeyProvider =
             CustomerEphemeralKeyProvider {

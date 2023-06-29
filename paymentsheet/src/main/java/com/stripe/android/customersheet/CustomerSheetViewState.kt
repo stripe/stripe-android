@@ -60,11 +60,12 @@ internal sealed class CustomerSheetViewState(
         val enabled: Boolean,
         override val isLiveMode: Boolean,
         override val isProcessing: Boolean,
+        val errorMessage: String? = null,
     ) : CustomerSheetViewState(
         savedPaymentMethods = emptyList(),
         isLiveMode = isLiveMode,
         isProcessing = false,
         isEditing = false,
-        screen = PaymentSheetScreen.AddAnotherPaymentMethod
+        screen = PaymentSheetScreen.AddAnotherPaymentMethod,
     )
 }

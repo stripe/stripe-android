@@ -1,126 +1,66 @@
 package com.stripe.android.googlepaylauncher
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.FrameLayout
-import androidx.activity.result.ActivityResultRegistry
-import androidx.activity.result.contract.ActivityResultContract
-import androidx.core.app.ActivityOptionsCompat
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.lifecycle.Lifecycle
-import androidx.test.core.app.ApplicationProvider
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.test.espresso.intent.rule.IntentsTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.googlepaylauncher.utils.LauncherIntegrationType
+import com.stripe.android.googlepaylauncher.utils.runGooglePayLauncherTest
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
-class GooglePayLauncherTest {
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
+internal class GooglePayLauncherTest {
 
-    private val scenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
-        TestFragment()
-    }
-
-    private val readyCallbackInvocations = mutableListOf<Boolean>()
-    private val results = mutableListOf<GooglePayLauncher.Result>()
-
-    private val readyCallback = GooglePayLauncher.ReadyCallback(readyCallbackInvocations::add)
-    private val resultCallback = GooglePayLauncher.ResultCallback(results::add)
-
-    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        ApplicationProvider.getApplicationContext(),
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-    )
-    private val firedEvents = mutableListOf<String>()
-    private val analyticsRequestExecutor = AnalyticsRequestExecutor {
-        firedEvents.add(it.params["event"].toString())
-    }
+    @get:Rule
+    val intentsTestRule = IntentsTestRule(ComponentActivity::class.java)
 
     @Test
     fun `presentForPaymentIntent() should successfully return a result when Google Pay is available`() {
-        scenario.onFragment { fragment ->
-            val launcher = GooglePayLauncher(
-                testScope,
-                CONFIG,
-                readyCallback,
-                fragment.registerForActivityResult(
-                    GooglePayLauncherContract(),
-                    FakeActivityResultRegistry(GooglePayLauncher.Result.Completed)
-                ) {
-                    resultCallback.onResult(it)
-                },
-                { FakeGooglePayRepository(true) },
-                analyticsRequestFactory,
-                analyticsRequestExecutor
-            )
-            scenario.moveToState(Lifecycle.State.RESUMED)
-
-            assertThat(readyCallbackInvocations)
-                .containsExactly(true)
-
+        runGooglePayLauncherTest { _, launcher ->
             launcher.presentForPaymentIntent("pi_123_secret_456")
-
-            assertThat(results)
-                .containsExactly(GooglePayLauncher.Result.Completed)
         }
     }
 
     @Test
     fun `init should fire expected event`() {
-        scenario.onFragment { fragment ->
+        runGooglePayLauncherTest(
+            integrationTypes = arrayOf(LauncherIntegrationType.Activity),
+            expectResult = false,
+        ) { activity, _ ->
+            val firedEvents = mutableListOf<String>()
+
+            // Have to use the internal constructor here to provide a mock request executor
+            // ¯\_(ツ)_/¯
             GooglePayLauncher(
-                testScope,
-                CONFIG,
-                readyCallback,
-                fragment.registerForActivityResult(
-                    GooglePayLauncherContract(),
-                    FakeActivityResultRegistry(GooglePayLauncher.Result.Completed)
-                ) {
-                    resultCallback.onResult(it)
-                },
-                { FakeGooglePayRepository(true) },
-                analyticsRequestFactory,
-                analyticsRequestExecutor
+                lifecycleScope = activity.lifecycleScope,
+                config = CONFIG,
+                readyCallback = mock(),
+                activityResultLauncher = mock(),
+                googlePayRepositoryFactory = mock(),
+                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                    context = activity,
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                ),
+                analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
             )
 
-            assertThat(firedEvents)
-                .containsExactly("stripe_android.googlepaylauncher_init")
+            assertThat(firedEvents).containsExactly("stripe_android.googlepaylauncher_init")
         }
     }
 
     @Test
     fun `presentForPaymentIntent() should throw IllegalStateException when Google Pay is not available`() {
-        scenario.onFragment { fragment ->
-            val launcher = GooglePayLauncher(
-                testScope,
-                CONFIG,
-                readyCallback,
-                fragment.registerForActivityResult(
-                    GooglePayLauncherContract(),
-                    FakeActivityResultRegistry(GooglePayLauncher.Result.Completed)
-                ) {
-                    resultCallback.onResult(it)
-                },
-                { FakeGooglePayRepository(false) },
-                analyticsRequestFactory,
-                analyticsRequestExecutor
-            )
-            scenario.moveToState(Lifecycle.State.RESUMED)
-
-            assertThat(readyCallbackInvocations)
-                .containsExactly(false)
-
+        runGooglePayLauncherTest(
+            isReady = false,
+            expectResult = false,
+        ) { _, launcher ->
             assertFailsWith<IllegalStateException> {
                 launcher.presentForPaymentIntent("pi_123")
             }
@@ -140,30 +80,6 @@ class GooglePayLauncherTest {
         assertThat(
             CONFIG.copy(merchantCountryCode = "jp").isJcbEnabled
         ).isTrue()
-    }
-
-    private class FakeActivityResultRegistry(
-        private val result: GooglePayLauncher.Result
-    ) : ActivityResultRegistry() {
-        override fun <I, O> onLaunch(
-            requestCode: Int,
-            contract: ActivityResultContract<I, O>,
-            input: I,
-            options: ActivityOptionsCompat?
-        ) {
-            dispatchResult(
-                requestCode,
-                result
-            )
-        }
-    }
-
-    internal class TestFragment : Fragment() {
-        override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View = FrameLayout(inflater.context)
     }
 
     private companion object {

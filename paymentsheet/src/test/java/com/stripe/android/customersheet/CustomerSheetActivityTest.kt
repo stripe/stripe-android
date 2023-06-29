@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
+import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -217,7 +218,7 @@ internal class CustomerSheetActivityTest {
 
         return injectableActivityScenario {
             injectActivity {
-                this.viewModelProvider = { viewModel }
+                this.viewModelProvider = viewModelFactoryFor(viewModel)
             }
         }
     }
