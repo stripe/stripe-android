@@ -22,7 +22,6 @@ import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.AddNewAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Status
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -116,36 +115,37 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     fun onSelectAccountClick() = suspend {
         val state = awaitState()
         val payload = requireNotNull(state.payload())
-        val selectedAccount =
+        val (account, networkedAccount) =
             requireNotNull(payload.accounts.first { it.first.id == state.selectedAccountId })
-        when {
-            selectedAccount.first.status != Status.ACTIVE -> repairAccount()
-            payload.stepUpAuthenticationRequired -> goNext(Pane.LINK_STEP_UP_VERIFICATION)
-            else -> selectAccount(payload, selectedAccount.first)
+        val nextPane = networkedAccount.nextPaneOnSelection
+        when (nextPane) {
+            Pane.SUCCESS -> {
+                val activeInstitution = selectNetworkedAccount(
+                    consumerSessionClientSecret = payload.consumerSessionClientSecret,
+                    selectedAccountId = account.id
+                )
+                // Updates manifest active institution after account networked.
+                updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
+                // Updates cached accounts with the one selected.
+                updateCachedAccounts { listOf(account) }
+                eventTracker.track(Click("click.link_accounts", PANE))
+            }
+
+            Pane.BANK_AUTH_REPAIR -> {
+                eventTracker.track(Click("click.repair_accounts", PANE))
+                TODO("Account repair flow not yet implemented")
+            }
+
+            Pane.PARTNER_AUTH -> {
+                updateLocalManifest { it.copy(activeInstitution = account.institution) }
+                eventTracker.track(Click("click.step_up_verification", PANE))
+            }
+
+            else -> Unit
         }
+        nextPane?.let { goNext(it) }
         Unit
     }.execute { copy(selectNetworkedAccountAsync = it) }
-
-    private suspend fun repairAccount() {
-        eventTracker.track(Click("click.repair_accounts", PANE))
-        TODO("Account repair flow not yet implemented")
-    }
-
-    private suspend fun selectAccount(
-        payload: LinkAccountPickerState.Payload,
-        selectedAccount: PartnerAccount
-    ) {
-        val activeInstitution = selectNetworkedAccount(
-            consumerSessionClientSecret = payload.consumerSessionClientSecret,
-            selectedAccountId = selectedAccount.id
-        )
-        // Updates manifest active institution after account networked.
-        updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
-        // Updates cached accounts with the one selected.
-        updateCachedAccounts { listOf(selectedAccount) }
-        eventTracker.track(Click("click.link_accounts", PANE))
-        goNext(Pane.SUCCESS)
-    }
 
     fun onAccountClick(partnerAccount: PartnerAccount) {
         setState { copy(selectedAccountId = partnerAccount.id) }

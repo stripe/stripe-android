@@ -33,7 +33,7 @@ import com.stripe.android.uicore.text.MiddleEllipsisText
 import java.util.Locale
 
 @Composable
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "LongMethod")
 internal fun AccountItem(
     selected: Boolean,
     onAccountClicked: (PartnerAccount) -> Unit,
