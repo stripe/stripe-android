@@ -16,44 +16,35 @@ data class CardParams internal constructor(
     private val loggingTokens: Set<String> = emptySet(),
 
     /**
-     * [card.number](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-number)
-     *
-     * Required
-     *
      * The card number, as a string without any separators.
+     *
+     * [card.number](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-number)
      */
-    @property:DelicateStripeApi
+    @property:DelicateCardDetailsApi
     val number: String,
 
     /**
-     * [card.exp_month](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_month)
-     *
-     * Required
-     *
      * Two-digit number representing the card's expiration month.
+     *
+     * [card.exp_month](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_month)
      */
-    @property:DelicateStripeApi
+    @property:DelicateCardDetailsApi
     val expMonth: Int,
 
     /**
-     * [card.exp_year](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_year)
-     *
-     * Required
-     *
      * Two- or four-digit number representing the card's expiration year.
+     *
+     * [card.exp_year](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_year)
      */
-    @property:DelicateStripeApi
+    @property:DelicateCardDetailsApi
     val expYear: Int,
 
     /**
+     * Card security code.
+     *
      * [card.cvc](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-cvc)
-     *
-     * Usually required
-     *
-     * Card security code. Highly recommended to always include this value, but it's required only
-     * for accounts based in European countries.
      */
-    @property:DelicateStripeApi
+    @property:DelicateCardDetailsApi
     val cvc: String? = null,
 
     /**
@@ -91,7 +82,7 @@ data class CardParams internal constructor(
 ) : TokenParams(Token.Type.Card, loggingTokens) {
 
     val last4: String
-        @OptIn(DelicateStripeApi::class)
+        @OptIn(DelicateCardDetailsApi::class)
         get() = number.takeLast(4)
 
     @JvmOverloads
@@ -179,7 +170,7 @@ data class CardParams internal constructor(
     )
 
     override val typeDataParams: Map<String, Any>
-        @OptIn(DelicateStripeApi::class)
+        @OptIn(DelicateCardDetailsApi::class)
         get() = listOf(
             PARAM_NUMBER to number,
             PARAM_EXP_MONTH to expMonth,

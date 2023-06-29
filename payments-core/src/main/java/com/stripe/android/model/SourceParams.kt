@@ -553,7 +553,7 @@ data class SourceParams internal constructor(
         fun createCardParams(
             cardParams: CardParams
         ): SourceParams {
-            @OptIn(DelicateStripeApi::class)
+            @OptIn(DelicateCardDetailsApi::class)
             return SourceParams(
                 SourceType.CARD,
                 typeData = TypeData.Card(

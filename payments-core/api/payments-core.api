@@ -2752,7 +2752,7 @@ public final class com/stripe/android/model/DeferredIntentParams$Mode$Setup$Crea
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public abstract interface annotation class com/stripe/android/model/DelicateStripeApi : java/lang/annotation/Annotation {
+public abstract interface annotation class com/stripe/android/model/DelicateCardDetailsApi : java/lang/annotation/Annotation {
 }
 
 public final class com/stripe/android/model/ElementsSession$Creator : android/os/Parcelable$Creator {
