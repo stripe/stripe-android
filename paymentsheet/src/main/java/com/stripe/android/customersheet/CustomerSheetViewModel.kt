@@ -17,16 +17,12 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.toInternal
-import com.stripe.android.paymentsheet.ui.getLabel
-import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,6 +58,12 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
     val result: StateFlow<InternalCustomerSheetResult?> = _result
+
+    private val currentSelection: PaymentSelection?
+        get() = backstack
+            .filterIsInstance<CustomerSheetViewState.SelectPaymentMethod>()
+            .firstOrNull()
+            ?.paymentSelection
 
     init {
         lpmRepository.initializeWithCardSpec(
@@ -182,7 +184,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private fun onDismissed() {
         _result.update {
-            InternalCustomerSheetResult.Canceled
+            InternalCustomerSheetResult.Canceled(currentSelection)
         }
     }
 
@@ -190,7 +192,7 @@ internal class CustomerSheetViewModel @Inject constructor(
         val shouldExit = backstack.peek() is CustomerSheetViewState.SelectPaymentMethod
         if (backstack.empty() || shouldExit) {
             _result.tryEmit(
-                InternalCustomerSheetResult.Canceled
+                InternalCustomerSheetResult.Canceled(currentSelection)
             )
         } else {
             backstack.pop()
@@ -414,29 +416,14 @@ internal class CustomerSheetViewModel @Inject constructor(
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved) {
         viewModelScope.launch {
             customerAdapter.setSelectedPaymentOption(
-                savedPaymentSelection.toSavedSelection()?.toPaymentOption()
+                savedPaymentSelection.toPaymentOption()
             ).onSuccess {
-                val paymentMethod = savedPaymentSelection.paymentMethod
-                val paymentMethodId = paymentMethod.id!!
-                val paymentMethodIcon = paymentMethod.getSavedPaymentMethodIcon()
-                val paymentMethodLabel = paymentMethod.getLabel(resources)
-
                 // TODO (jameswoo) Figure out what to do if these are null
-                if (paymentMethodIcon == null || paymentMethodLabel == null) {
-                    _result.tryEmit(
-                        InternalCustomerSheetResult.Error(
-                            IllegalArgumentException("$paymentMethod is not supported")
-                        )
+                _result.tryEmit(
+                    InternalCustomerSheetResult.Selected(
+                        paymentSelection = savedPaymentSelection,
                     )
-                } else {
-                    _result.tryEmit(
-                        InternalCustomerSheetResult.Selected(
-                            paymentMethodId = paymentMethodId,
-                            drawableResourceId = paymentMethodIcon,
-                            label = paymentMethodLabel,
-                        )
-                    )
-                }
+                )
             }.onFailure { cause, displayMessage ->
                 logger.error(
                     msg = "Failed to persist the payment selection: $savedPaymentSelection",
@@ -455,9 +442,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 .onSuccess {
                     _result.tryEmit(
                         InternalCustomerSheetResult.Selected(
-                            paymentMethodId = CustomerAdapter.PaymentOption.GooglePay.id,
-                            drawableResourceId = R.drawable.stripe_google_pay_mark,
-                            label = resources.getString(com.stripe.android.R.string.stripe_google_pay),
+                            paymentSelection = PaymentSelection.GooglePay,
                         )
                     )
                 }.onFailure { cause, displayMessage ->
