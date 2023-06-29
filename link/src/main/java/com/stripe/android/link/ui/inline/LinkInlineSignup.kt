@@ -99,7 +99,7 @@ fun LinkInlineSignup(
 ) {
     linkConfigurationCoordinator.component?.let { component ->
         val viewModel: InlineSignupViewModel = viewModel(
-            factory = InlineSignupViewModel.Factory(component.injector)
+            factory = InlineSignupViewModel.Factory(component)
         )
 
         val viewState by viewModel.viewState.collectAsState()

@@ -6,11 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.injection.NonFallbackInjectable
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.link.ui.signup.SignUpState
@@ -228,16 +228,11 @@ internal class InlineSignupViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val injector: NonFallbackInjector
+        private val linkComponent: LinkComponent
     ) : ViewModelProvider.Factory, NonFallbackInjectable {
-
-        @Inject
-        lateinit var viewModel: InlineSignupViewModel
-
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            injector.inject(this)
-            return viewModel as T
+            return linkComponent.inlineSignupViewModel as T
         }
     }
 }
