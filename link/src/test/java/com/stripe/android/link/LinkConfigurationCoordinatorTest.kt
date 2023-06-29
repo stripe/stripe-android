@@ -1,21 +1,26 @@
 package com.stripe.android.link
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.injection.LinkComponent
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.FakeAndroidKeyStore
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.stub
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class LinkConfigurationCoordinatorTest {
-    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val config = LinkConfiguration(
         stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
@@ -27,22 +32,32 @@ class LinkConfigurationCoordinatorTest {
         shippingValues = null,
     )
 
-    private var linkConfigurationCoordinator = LinkConfigurationCoordinator(
-        context,
-        setOf(PRODUCT_USAGE),
-        { PUBLISHABLE_KEY },
-        { STRIPE_ACCOUNT_ID },
-        enableLogging = true,
-        ioContext = Dispatchers.IO,
-        uiContext = mock(),
-        paymentAnalyticsRequestFactory = mock(),
-        analyticsRequestExecutor = mock(),
-        stripeRepository = mock(),
-        addressRepository = mock(),
-    )
+    private val linkComponentBuilder: LinkComponent.Builder = mock()
+
+    private var linkConfigurationCoordinator = LinkConfigurationCoordinator(linkComponentBuilder)
 
     init {
         FakeAndroidKeyStore.setup()
+
+        val configurationCapture = argumentCaptor<LinkConfiguration>()
+
+        whenever(linkComponentBuilder.configuration(configurationCapture.capture()))
+            .thenReturn(linkComponentBuilder)
+        whenever(linkComponentBuilder.build()).thenAnswer {
+            val component = mock<LinkComponent>()
+            val linkAccountManager = mock<LinkAccountManager>()
+            whenever(component.linkAccountManager).thenReturn(linkAccountManager)
+            whenever(linkAccountManager.accountStatus).thenReturn(flowOf(AccountStatus.Verified))
+            linkAccountManager.stub {
+                onBlocking { linkAccountManager.signInWithUserInput(any()) }.doReturn(
+                    Result.failure(IllegalStateException("Test"))
+                )
+            }
+
+            whenever(component.configuration).thenReturn(configurationCapture.lastValue)
+
+            component
+        }
     }
 
     @Test
@@ -61,10 +76,6 @@ class LinkConfigurationCoordinatorTest {
     }
 
     companion object {
-        const val PRODUCT_USAGE = "productUsage"
-        const val PUBLISHABLE_KEY = "publishableKey"
-        const val STRIPE_ACCOUNT_ID = "stripeAccountId"
-
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "email"
         const val CUSTOMER_PHONE = "phone"

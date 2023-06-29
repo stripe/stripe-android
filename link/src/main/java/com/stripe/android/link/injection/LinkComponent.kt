@@ -49,7 +49,7 @@ abstract class LinkComponent {
     }
 
     @Subcomponent.Builder
-    interface Builder {
+    internal interface Builder {
         @BindsInstance
         fun configuration(configuration: LinkConfiguration): Builder
 
