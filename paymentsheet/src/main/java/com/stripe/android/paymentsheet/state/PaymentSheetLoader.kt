@@ -359,7 +359,8 @@ private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
     return PaymentSelection.Saved(this)
 }
 
-private fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal(): CardBillingDetailsCollectionConfiguration {
+internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal():
+    CardBillingDetailsCollectionConfiguration {
     return CardBillingDetailsCollectionConfiguration(
         collectName = name == Always,
         collectEmail = email == Always,

@@ -99,6 +99,29 @@ class CustomerSheet @Inject internal constructor(
          * The text to display at the top of the presented bottom sheet.
          */
         val headerTextForSelectionScreen: String? = null,
+
+        /**
+         * [CustomerSheet] pre-populates fields with the values provided. If
+         * [PaymentSheet.BillingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod]
+         * is true, these values will be attached to the payment method even if they are not
+         * collected by the [CustomerSheet] UI.
+         */
+        val defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
+
+        /**
+         * Describes how billing details should be collected. All values default to
+         * [PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic].
+         * If [PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never] is
+         * used for a required field for the Payment Method used while adding this payment method
+         * you must provide an appropriate value as part of [defaultBillingDetails].
+         */
+        val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+            PaymentSheet.BillingDetailsCollectionConfiguration(),
+
+        /**
+         * Your customer-facing business name. The default value is the name of your app.
+         */
+        val merchantDisplayName: String? = null,
     ) {
         @ExperimentalCustomerSheetApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -106,6 +129,11 @@ class CustomerSheet @Inject internal constructor(
             private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
             private var googlePayEnabled: Boolean = false
             private var headerTextForSelectionScreen: String? = null
+            private var defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails()
+            private var billingDetailsCollectionConfiguration:
+                PaymentSheet.BillingDetailsCollectionConfiguration =
+                    PaymentSheet.BillingDetailsCollectionConfiguration()
+            private var merchantDisplayName: String? = null
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
                 this.appearance = appearance
@@ -119,10 +147,27 @@ class CustomerSheet @Inject internal constructor(
                 this.headerTextForSelectionScreen = headerTextForSelectionScreen
             }
 
+            fun defaultBillingDetails(details: PaymentSheet.BillingDetails) = apply {
+                this.defaultBillingDetails = details
+            }
+
+            fun billingDetailsCollectionConfiguration(
+                configuration: PaymentSheet.BillingDetailsCollectionConfiguration
+            ) = apply {
+                this.billingDetailsCollectionConfiguration = configuration
+            }
+
+            fun merchantDisplayName(name: String?) = apply {
+                this.merchantDisplayName = name
+            }
+
             fun build() = Configuration(
                 appearance = appearance,
                 googlePayEnabled = googlePayEnabled,
                 headerTextForSelectionScreen = headerTextForSelectionScreen,
+                defaultBillingDetails = defaultBillingDetails,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                merchantDisplayName = merchantDisplayName,
             )
         }
     }
