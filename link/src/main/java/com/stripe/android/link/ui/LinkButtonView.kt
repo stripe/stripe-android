@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -40,10 +41,6 @@ private val LinkButtonHorizontalPadding = 10.dp
 private val LinkButtonShape: RoundedCornerShape
     get() = RoundedCornerShape(
         StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
-    )
-private val LinkButtonEmailShape: RoundedCornerShape
-    get() = RoundedCornerShape(
-        StripeTheme.primaryButtonStyle.shape.cornerRadius.dp / 2
     )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -90,38 +87,63 @@ fun LinkButton(
                     bottom = LinkButtonVerticalPadding
                 )
             ) {
+                Spacer(modifier = Modifier.weight(1f))
+                if (email == null) {
+                    Text(
+                        text = "Pay with",
+                        modifier = Modifier
+                            .padding(start = 6.dp),
+                        color = MaterialTheme.linkColors.buttonLabel,
+                        fontSize = 14.sp,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+                }
                 Icon(
                     painter = painterResource(R.drawable.stripe_link_logo),
                     contentDescription = stringResource(StripeR.string.stripe_link),
                     modifier = Modifier
-                        .height(22.dp)
+                        .height(16.dp)
                         .padding(
-                            horizontal = 5.dp,
-                            vertical = 3.dp
+                            start = 6.dp,
+                            end = 6.dp,
+                            bottom = 1.dp,
                         ),
                     tint = MaterialTheme.linkColors.buttonLabel
                         .copy(alpha = LocalContentAlpha.current)
                 )
                 email?.let {
-                    Spacer(modifier = Modifier.weight(1f))
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = Color.Black.copy(alpha = 0.05f),
-                                shape = LinkButtonEmailShape
-                            )
-                    ) {
-                        Text(
-                            text = it,
+                    Box(modifier = Modifier.padding(4.dp)) {
+                        Box(
                             modifier = Modifier
-                                .padding(6.dp),
-                            color = MaterialTheme.linkColors.buttonLabel,
-                            fontSize = 14.sp,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1
+                                .background(Color(0xFF1AC59B))
+                                .width(1.dp)
+                                .height(22.dp),
                         )
                     }
+                    Text(
+                        text = it,
+                        modifier = Modifier
+                            .padding(6.dp),
+                        color = MaterialTheme.linkColors.buttonLabel,
+                        fontSize = 14.sp,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
                 }
+                Icon(
+                    painter = painterResource(R.drawable.stripe_link_arrow),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .height(16.dp)
+                        .padding(
+                            end = 6.dp,
+                            top = 1.dp,
+                        ),
+                    tint = MaterialTheme.linkColors.buttonLabel
+                        .copy(alpha = LocalContentAlpha.current)
+                )
+                Spacer(modifier = Modifier.weight(1f))
             }
         }
     }
