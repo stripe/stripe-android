@@ -158,7 +158,7 @@ internal fun Wallet(
 
         state.link?.let { link ->
             LinkButton(
-                email = null,
+                email = link.email,
                 enabled = state.buttonsEnabled,
                 onClick = onLinkPressed,
             )
