@@ -27,7 +27,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             LinkAccountPickerState.Payload(
                 title = display().title,
                 accounts = partnerAccountList(),
-                addNewAccount = display().addNewAccount!!,
+                addNewAccount = requireNotNull(display().addNewAccount),
                 accessibleData = accessibleCallout(),
                 businessName = "Random business",
                 consumerSessionClientSecret = "secret",
@@ -44,7 +44,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
             LinkAccountPickerState.Payload(
                 title = display().title,
                 accounts = partnerAccountList(),
-                addNewAccount = display().addNewAccount!!,
+                addNewAccount = requireNotNull(display().addNewAccount),
                 accessibleData = accessibleCallout(),
                 businessName = "Random business",
                 consumerSessionClientSecret = "secret",
