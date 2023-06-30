@@ -15,10 +15,12 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -46,6 +48,7 @@ import com.stripe.android.identity.viewmodel.OTPViewState.RequestingError
 import com.stripe.android.identity.viewmodel.OTPViewState.RequestingOTP
 import com.stripe.android.identity.viewmodel.OTPViewState.SubmittingOTP
 import com.stripe.android.uicore.elements.OTPElementUI
+import kotlinx.coroutines.launch
 
 /**
  * Screen to collect an OTP from user's phone number or email address
@@ -66,6 +69,11 @@ internal fun OTPScreen(
         val otpViewModel: OTPViewModel = viewModel(
             factory = otpViewModelFactory
         )
+
+        LaunchedEffect(Unit) {
+            otpViewModel.initialize()
+        }
+
         val viewState by otpViewModel.viewState.collectAsState()
         val otpStaticPage = requireNotNull(verificationPage.phoneOtp)
         val focusRequester = remember { FocusRequester() }
@@ -209,6 +217,8 @@ private fun OTPViewStateEffect(
     focusRequester: FocusRequester
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
     LaunchedEffect(viewState) {
         when (viewState) {
             is InputtingOTP -> {
@@ -275,18 +285,24 @@ private fun OTPViewStateEffect(
                             )
                         },
                         onReadyToSubmit = {
-                            postErrorAndNavigateToFinalErrorScreen(
-                                identityViewModel,
-                                navController,
-                                context,
-                                IllegalStateException("Sending CannotVerify receives ready to submit")
-                            )
+                            coroutineScope.launch {
+                                identityViewModel.submitAndNavigate(
+                                    navController = navController,
+                                    fromRoute = OTPDestination.ROUTE.route
+                                )
+                            }
                         }
                     )
                 }
             }
 
             else -> {} // no-op
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.resetViewState()
         }
     }
 }

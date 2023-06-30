@@ -16,6 +16,9 @@ import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.IdentityVerificationSheetContract
+import com.stripe.android.identity.SUBMITTED_AND_CLOSED_VERIFICATION_PAGE_DATA
+import com.stripe.android.identity.SUBMITTED_AND_NOT_CLOSED_NO_MISSING_VERIFICATION_PAGE_DATA
+import com.stripe.android.identity.SUBMITTED_AND_NOT_CLOSED_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE
 import com.stripe.android.identity.VERIFICATION_PAGE_DATA_HAS_ERROR
@@ -544,6 +547,113 @@ internal class IdentityViewModelTest {
 
             verify(mockController).navigate(
                 eq(ConfirmationDestination.routeWithArgs),
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+        }
+    }
+
+    @Test
+    fun `submitAndNavigate - submitted and closed - navigate to success`() {
+        runBlocking {
+            whenever(
+                mockIdentityRepository.postVerificationPageSubmit(
+                    any(),
+                    any()
+                )
+            ).thenReturn(SUBMITTED_AND_CLOSED_VERIFICATION_PAGE_DATA)
+
+            viewModel._verificationPage.postValue(
+                Resource.success(
+                    SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE
+                )
+            )
+
+            viewModel.submitAndNavigate(
+                mockController,
+                ConsentDestination.ROUTE.route
+            )
+
+            verify(mockIdentityRepository).postVerificationPageSubmit(
+                eq(VERIFICATION_SESSION_ID),
+                eq(EPHEMERAL_KEY)
+            )
+
+            assertThat(viewModel.verificationPageSubmit.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
+
+            verify(mockController).navigate(
+                eq(ConfirmationDestination.routeWithArgs),
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+        }
+    }
+
+    @Test
+    fun `submitAndNavigate - submitted but not closed - fallback to consent`() {
+        runBlocking {
+            whenever(
+                mockIdentityRepository.postVerificationPageSubmit(
+                    any(),
+                    any()
+                )
+            ).thenReturn(SUBMITTED_AND_NOT_CLOSED_VERIFICATION_PAGE_DATA)
+
+            viewModel._verificationPage.postValue(
+                Resource.success(
+                    SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE
+                )
+            )
+
+            viewModel.submitAndNavigate(
+                mockController,
+                ConsentDestination.ROUTE.route
+            )
+
+            verify(mockIdentityRepository).postVerificationPageSubmit(
+                eq(VERIFICATION_SESSION_ID),
+                eq(EPHEMERAL_KEY)
+            )
+
+            assertThat(viewModel.verificationPageSubmit.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
+
+            verify(mockController).navigate(
+                eq(ConsentDestination.routeWithArgs),
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+        }
+    }
+
+    @Test
+    fun `submitAndNavigate - submitted but not closed and no missings - error`() {
+        runBlocking {
+            whenever(
+                mockIdentityRepository.postVerificationPageSubmit(
+                    any(),
+                    any()
+                )
+            ).thenReturn(SUBMITTED_AND_NOT_CLOSED_NO_MISSING_VERIFICATION_PAGE_DATA)
+
+            viewModel._verificationPage.postValue(
+                Resource.success(
+                    SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE
+                )
+            )
+
+            viewModel.submitAndNavigate(
+                mockController,
+                ConsentDestination.ROUTE.route
+            )
+
+            verify(mockIdentityRepository).postVerificationPageSubmit(
+                eq(VERIFICATION_SESSION_ID),
+                eq(EPHEMERAL_KEY)
+            )
+
+            assertThat(viewModel.verificationPageSubmit.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
+
+            verify(mockController).navigate(
+                argWhere {
+                    it.startsWith(ErrorDestination.ERROR)
+                },
                 any<NavOptionsBuilder.() -> Unit>()
             )
         }
