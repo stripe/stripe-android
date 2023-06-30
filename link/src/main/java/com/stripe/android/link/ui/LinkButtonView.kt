@@ -3,10 +3,8 @@
 package com.stripe.android.link.ui
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -14,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
@@ -22,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -71,6 +69,7 @@ fun LinkButton(
             Button(
                 onClick = onClick,
                 modifier = modifier
+                    .fillMaxWidth()
                     .clip(LinkButtonShape)
                     .testTag(LinkButtonTestTag),
                 enabled = enabled,
@@ -87,64 +86,97 @@ fun LinkButton(
                     bottom = LinkButtonVerticalPadding
                 )
             ) {
-                Spacer(modifier = Modifier.weight(1f))
                 if (email == null) {
-                    Text(
-                        text = "Pay with",
-                        modifier = Modifier
-                            .padding(start = 6.dp),
-                        color = MaterialTheme.linkColors.buttonLabel,
-                        fontSize = 14.sp,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
-                    )
+                    SignedOutButtonContent()
+                } else {
+                    SignedInButtonContent(email = email)
                 }
-                Icon(
-                    painter = painterResource(R.drawable.stripe_link_logo),
-                    contentDescription = stringResource(StripeR.string.stripe_link),
-                    modifier = Modifier
-                        .height(16.dp)
-                        .padding(
-                            start = 6.dp,
-                            end = 6.dp,
-                            bottom = 1.dp,
-                        ),
-                    tint = MaterialTheme.linkColors.buttonLabel
-                        .copy(alpha = LocalContentAlpha.current)
-                )
-                email?.let {
-                    Box(modifier = Modifier.padding(4.dp)) {
-                        Box(
-                            modifier = Modifier
-                                .background(Color(0xFF1AC59B))
-                                .width(1.dp)
-                                .height(22.dp),
-                        )
-                    }
-                    Text(
-                        text = it,
-                        modifier = Modifier
-                            .padding(6.dp),
-                        color = MaterialTheme.linkColors.buttonLabel,
-                        fontSize = 14.sp,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
-                    )
-                }
-                Icon(
-                    painter = painterResource(R.drawable.stripe_link_arrow),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .height(16.dp)
-                        .padding(
-                            end = 6.dp,
-                            top = 1.dp,
-                        ),
-                    tint = MaterialTheme.linkColors.buttonLabel
-                        .copy(alpha = LocalContentAlpha.current)
-                )
-                Spacer(modifier = Modifier.weight(1f))
             }
         }
     }
+}
+
+@Composable
+private fun SignedInButtonContent(email: String) {
+    LinkIcon()
+    LinkDivider()
+    LinkAccountInfo(email)
+    LinkArrow()
+}
+
+@Composable
+private fun SignedOutButtonContent() {
+    PayWithText()
+    LinkIcon()
+    LinkArrow()
+}
+
+@Composable
+private fun LinkIcon() {
+    Icon(
+        painter = painterResource(R.drawable.stripe_link_logo),
+        contentDescription = stringResource(StripeR.string.stripe_link),
+        modifier = Modifier
+            .height(16.dp)
+            .padding(
+                start = 6.dp,
+                end = 6.dp,
+                bottom = 1.dp,
+            ),
+        tint = MaterialTheme.linkColors.buttonLabel
+            .copy(alpha = LocalContentAlpha.current)
+    )
+}
+
+@Composable
+private fun LinkDivider() {
+    Divider(
+        modifier = Modifier
+            .padding(4.dp)
+            .width(1.dp)
+            .height(22.dp),
+        color = MaterialTheme.linkColors.actionLabelLight,
+    )
+}
+
+@Composable
+private fun LinkAccountInfo(email: String) {
+    Text(
+        text = email,
+        modifier = Modifier
+            .padding(6.dp),
+        color = MaterialTheme.linkColors.buttonLabel,
+        fontSize = 14.sp,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1
+    )
+}
+
+@Composable
+private fun LinkArrow() {
+    Icon(
+        painter = painterResource(R.drawable.stripe_link_arrow),
+        contentDescription = null,
+        modifier = Modifier
+            .height(16.dp)
+            .padding(
+                end = 6.dp,
+                top = 1.dp,
+            ),
+        tint = MaterialTheme.linkColors.buttonLabel
+            .copy(alpha = LocalContentAlpha.current)
+    )
+}
+
+@Composable
+private fun PayWithText() {
+    Text(
+        text = "Pay with", // TODO(jaynewstrom) Link: Add localization
+        modifier = Modifier
+            .padding(start = 6.dp),
+        color = MaterialTheme.linkColors.buttonLabel,
+        fontSize = 14.sp,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1
+    )
 }
