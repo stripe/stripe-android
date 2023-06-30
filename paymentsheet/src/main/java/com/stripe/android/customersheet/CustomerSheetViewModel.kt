@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import android.app.Application
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -21,10 +22,10 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
-import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,6 +41,7 @@ import com.stripe.android.ui.core.R as PaymentsUiCoreR
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSheetViewModelScope
 internal class CustomerSheetViewModel @Inject constructor(
+    private val application: Application,
     // TODO (jameswoo) should the current view state be derived from backstack?
     private val backstack: Stack<CustomerSheetViewState>,
     private val paymentConfiguration: PaymentConfiguration,
@@ -60,9 +62,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     init {
         lpmRepository.initializeWithCardSpec(
-            CardBillingDetailsCollectionConfiguration(
-                address = CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-            )
+            configuration.billingDetailsCollectionConfiguration.toInternal()
         )
         if (viewState.value is CustomerSheetViewState.Loading) {
             loadPaymentMethods()
@@ -147,7 +147,10 @@ internal class CustomerSheetViewModel @Inject constructor(
             paymentMethodCode = paymentMethodCode,
             showCheckbox = false,
             showCheckboxControlledFields = false,
-            merchantName = "", // Not showing checkbox, so this is unneeded
+            merchantName = configuration.merchantDisplayName
+                ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+            billingDetails = configuration.defaultBillingDetails,
+            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration
         )
 
         val formViewModel = formViewModelSubcomponentBuilderProvider.get()

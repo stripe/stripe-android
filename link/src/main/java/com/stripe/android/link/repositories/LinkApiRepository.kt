@@ -5,6 +5,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.injection.LinkScope
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
@@ -17,13 +18,12 @@ import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Repository that uses [StripeRepository] for Link services.
  */
-@Singleton
+@LinkScope
 internal class LinkApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,

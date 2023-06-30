@@ -911,6 +911,7 @@ class CustomerSheetViewModelTest {
             publishableKey = "pk_test_123",
             stripeAccountId = null,
         ),
+        configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(),
     ): CustomerSheetViewModel {
         val formViewModel = FormViewModel(
             context = application,
@@ -918,8 +919,11 @@ class CustomerSheetViewModelTest {
                 PaymentMethod.Type.Card.code,
                 showCheckbox = false,
                 showCheckboxControlledFields = false,
-                merchantName = "",
-                initialPaymentMethodCreateParams = null
+                initialPaymentMethodCreateParams = null,
+                merchantName = configuration.merchantDisplayName
+                    ?: application.applicationInfo.loadLabel(application.packageManager).toString(),
+                billingDetails = configuration.defaultBillingDetails,
+                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration
             ),
             lpmRepository = lpmRepository,
             addressRepository = AddressRepository(
@@ -939,6 +943,7 @@ class CustomerSheetViewModelTest {
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
         return CustomerSheetViewModel(
+            application = application,
             backstack = backstack,
             paymentConfiguration = paymentConfiguration,
             formViewModelSubcomponentBuilderProvider = mockFormSubComponentBuilderProvider,
@@ -946,7 +951,7 @@ class CustomerSheetViewModelTest {
             stripeRepository = stripeRepository,
             customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
-            configuration = CustomerSheet.Configuration(),
+            configuration = configuration,
             isLiveMode = isLiveMode,
         )
     }

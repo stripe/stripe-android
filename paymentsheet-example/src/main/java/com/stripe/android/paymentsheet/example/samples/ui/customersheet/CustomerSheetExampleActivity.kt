@@ -26,6 +26,7 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
@@ -42,9 +43,7 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
             PaymentSheetExampleTheme {
                 val customerSheet = rememberCustomerSheet(
                     customerAdapter = viewModel.customerAdapter,
-                    configuration = CustomerSheet.Configuration.Builder()
-                        .googlePayEnabled(true)
-                        .build(),
+                    configuration = buildConfig(),
                     callback = viewModel::onCustomerSheetResult,
                 )
 
@@ -89,6 +88,21 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun buildConfig(): CustomerSheet.Configuration {
+        return CustomerSheet.Configuration.Builder()
+            .defaultBillingDetails(
+                PaymentSheet.BillingDetails(
+                    name = "CustomerSheet Testing"
+                )
+            ).billingDetailsCollectionConfiguration(
+                PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                )
+            )
+            .googlePayEnabled(true)
+            .build()
     }
 }
 
