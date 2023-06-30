@@ -57,7 +57,7 @@ internal fun AccountItem(
         networkedAccount = networkedAccount,
         allowSelection = selectable
     )
-    val verticalPadding = remember(account) { if (subtitle == null) 10.dp else 12.dp }
+    val verticalPadding = remember(account) { if (subtitle != null) 10.dp else 12.dp }
     val shape = remember { RoundedCornerShape(8.dp) }
     Box(
         modifier = Modifier
