@@ -60,13 +60,12 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                     .display?.text?.returningNetworkingUserAccountPicker
             )
             // zip the accounts with their display info by id.
-            val accounts = requireNotNull(accountsResponse.data)
-                .map { partnerAccount ->
-                    Pair(
-                        partnerAccount,
-                        display.accounts.first { partnerAccount.id == it.id }
-                    )
-                }
+            val accounts = display.accounts.mapNotNull { networkedAccount: NetworkedAccount ->
+                accountsResponse.data.firstOrNull { it.id == networkedAccount.id }
+                    ?.let { matchingPartnerAccount ->
+                        Pair(matchingPartnerAccount, networkedAccount)
+                    }
+            }
             eventTracker.track(PaneLoaded(PANE))
             LinkAccountPickerState.Payload(
                 accounts = accounts,
@@ -118,6 +117,8 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         val (account, networkedAccount) =
             requireNotNull(payload.accounts.first { it.first.id == state.selectedAccountId })
         val nextPane = networkedAccount.nextPaneOnSelection
+        // Caches the selected account.
+        updateCachedAccounts { listOf(account) }
         when (nextPane) {
             Pane.SUCCESS -> {
                 val activeInstitution = selectNetworkedAccount(
@@ -127,7 +128,6 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 // Updates manifest active institution after account networked.
                 updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
                 // Updates cached accounts with the one selected.
-                updateCachedAccounts { listOf(account) }
                 eventTracker.track(Click("click.link_accounts", PANE))
             }
 
@@ -138,7 +138,6 @@ internal class LinkAccountPickerViewModel @Inject constructor(
 
             Pane.PARTNER_AUTH -> {
                 updateLocalManifest { it.copy(activeInstitution = account.institution) }
-                eventTracker.track(Click("click.step_up_verification", PANE))
             }
 
             else -> Unit

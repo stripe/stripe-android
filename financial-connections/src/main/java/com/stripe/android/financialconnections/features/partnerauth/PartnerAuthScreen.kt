@@ -250,11 +250,18 @@ private fun LoadedContent(
 ) {
     when (authenticationStatus) {
         is Uninitialized -> when (payload.authSession.isOAuth) {
-            true -> InstitutionalPrePaneContent(
-                onContinueClick = onContinueClick,
-                content = payload.authSession.display!!.text.oauthPrepane!!,
-                onClickableTextClick = onClickableTextClick,
-            )
+            true -> {
+                val oauthPrepane = payload.authSession.display?.text?.oauthPrepane
+                if (oauthPrepane != null) {
+                    InstitutionalPrePaneContent(
+                        onContinueClick = onContinueClick,
+                        content = oauthPrepane,
+                        onClickableTextClick = onClickableTextClick,
+                    )
+                } else {
+                    InstitutionUnknownErrorContent(onSelectAnotherBank)
+                }
+            }
 
             false -> LoadingContent(
                 title = stringResource(id = R.string.stripe_partnerauth_loading_title),

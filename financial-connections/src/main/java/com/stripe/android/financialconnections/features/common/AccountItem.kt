@@ -126,7 +126,8 @@ private fun getAccountTexts(
 
     val subtitle = when {
         networkedAccount?.caption != null -> networkedAccount.caption
-        allowSelection.not() -> account.allowSelectionMessage
+        allowSelection.not() && account.allowSelectionMessage?.isNotBlank() == true ->
+            account.allowSelectionMessage
         formattedBalance != null -> formattedBalance
         account.redactedAccountNumbers.isNotEmpty() -> account.redactedAccountNumbers
         else -> null
