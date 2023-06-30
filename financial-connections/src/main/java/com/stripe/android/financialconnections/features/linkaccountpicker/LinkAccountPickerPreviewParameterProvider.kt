@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.features.common.AccessibleDataCal
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
@@ -56,6 +57,29 @@ internal class LinkAccountPickerPreviewParameterProvider :
     )
 
     private fun partnerAccountList() = listOf(
+        PartnerAccount(
+            authorization = "Authorization",
+            category = FinancialConnectionsAccount.Category.CASH,
+            id = "id0",
+            name = "Repairable Account",
+            balanceAmount = 1000,
+            status = FinancialConnectionsAccount.Status.ACTIVE,
+            displayableAccountNumbers = "1234",
+            currency = "USD",
+            _allowSelection = true,
+            allowSelectionMessage = "",
+            subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+            supportedPaymentMethodTypes = emptyList()
+        ) to NetworkedAccount(
+            id = "id0",
+            allowSelection = true,
+            caption = "Select to repair and connect",
+            icon = Image(
+                default = "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--warning-orange-3x.png"
+            ),
+            nextPaneOnSelection = Pane.BANK_AUTH_REPAIR,
+            selectionCta = "Repair and connect account"
+        ),
         PartnerAccount(
             authorization = "Authorization",
             category = FinancialConnectionsAccount.Category.CASH,
@@ -145,14 +169,16 @@ internal class LinkAccountPickerPreviewParameterProvider :
         dataPolicyUrl = ""
     )
 
-    private fun display() = ReturningNetworkingUserAccountPicker(
+    fun display() = ReturningNetworkingUserAccountPicker(
         title = "Select account",
         defaultCta = "Connect account",
         accounts = emptyList(),
         addNewAccount = AddNewAccount(
             body = "New bank account",
-            icon = null,
-            nextPane = Pane.SUCCESS
+            icon = Image(
+                default = "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--add-purple-3x.png"
+            ),
+            nextPane = Pane.INSTITUTION_PICKER
         )
     )
 }
