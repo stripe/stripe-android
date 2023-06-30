@@ -46,7 +46,11 @@ class FinancialConnectionsPlaygroundViewModel(
         when (flow) {
             Flow.Data -> startForData(merchant, keys, email.takeIf { it.isNotEmpty() })
             Flow.Token -> startForToken(merchant, keys, email.takeIf { it.isNotEmpty() })
-            Flow.PaymentIntent -> startWithPaymentIntent(merchant, keys, email.takeIf { it.isNotEmpty() })
+            Flow.PaymentIntent -> startWithPaymentIntent(
+                merchant,
+                keys,
+                email.takeIf { it.isNotEmpty() }
+            )
         }
     }
 
@@ -202,17 +206,16 @@ class FinancialConnectionsPlaygroundViewModel(
         _state.update { it.copy(status = it.status + "Session attached! Confirming Intent") }
         viewModelScope.launch {
             val statusText = when (result) {
-                is CollectBankAccountResult.Completed -> {
-                    val confirmedIntent = stripe(
-                        _state.value.publishableKey!!
-                    ).confirmPaymentIntent(
-                        ConfirmPaymentIntentParams.create(
-                            clientSecret = requireNotNull(result.response.intent.clientSecret),
-                            paymentMethodType = PaymentMethod.Type.USBankAccount
-                        )
+                is CollectBankAccountResult.Completed -> runCatching {
+                    val params = ConfirmPaymentIntentParams.create(
+                        clientSecret = requireNotNull(result.response.intent.clientSecret),
+                        paymentMethodType = PaymentMethod.Type.USBankAccount
                     )
-                    "Intent Confirmed!: $confirmedIntent"
-                }
+                    stripe(_state.value.publishableKey!!).confirmPaymentIntent(params)
+                }.fold(
+                    onSuccess = { "Intent Confirmed!: $it" },
+                    onFailure = { "Confirming intent Failed!: $it" }
+                )
 
                 is CollectBankAccountResult.Failed -> "Failed! ${result.error}"
                 is CollectBankAccountResult.Cancelled -> "Cancelled!"

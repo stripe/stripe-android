@@ -266,7 +266,6 @@ fun SelectNewAccountIcon(
     icon: String?,
     contentDescription: String,
 ) {
-
     Box {
         val brandColor = FinancialConnectionsTheme.colors.textBrand
         val modifier = Modifier

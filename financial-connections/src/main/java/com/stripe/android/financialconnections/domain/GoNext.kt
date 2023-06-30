@@ -52,5 +52,4 @@ internal fun Pane.toNavigationCommand(
     Pane.UNEXPECTED_ERROR -> {
         TODO("Unimplemented navigation command: ${this.value}")
     }
-
 }

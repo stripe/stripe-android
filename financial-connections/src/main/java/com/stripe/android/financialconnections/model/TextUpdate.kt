@@ -214,7 +214,7 @@ internal data class LegalDetailsBody(
 internal data class ReturningNetworkingUserAccountPicker(
     @SerialName("title") val title: String,
     @SerialName("default_cta") val defaultCta: String,
-    @SerialName("add_new_account") val addNewAccount: AddNewAccount? = null,
+    @SerialName("add_new_account") val addNewAccount: AddNewAccount,
     @SerialName("accounts") val accounts: List<NetworkedAccount>
 ) : Parcelable
 
