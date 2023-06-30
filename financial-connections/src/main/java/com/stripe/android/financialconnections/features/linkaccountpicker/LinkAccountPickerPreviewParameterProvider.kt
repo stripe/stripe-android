@@ -30,10 +30,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 accounts = partnerAccountList(),
                 addNewAccount = requireNotNull(display().addNewAccount),
                 accessibleData = accessibleCallout(),
-                businessName = "Random business",
                 consumerSessionClientSecret = "secret",
-                repairAuthorizationEnabled = false,
-                stepUpAuthenticationRequired = false,
                 defaultCta = display().defaultCta,
             )
         ),
@@ -47,10 +44,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 accounts = partnerAccountList(),
                 addNewAccount = requireNotNull(display().addNewAccount),
                 accessibleData = accessibleCallout(),
-                businessName = "Random business",
                 consumerSessionClientSecret = "secret",
-                repairAuthorizationEnabled = false,
-                stepUpAuthenticationRequired = false,
                 defaultCta = display().defaultCta,
             )
         ),

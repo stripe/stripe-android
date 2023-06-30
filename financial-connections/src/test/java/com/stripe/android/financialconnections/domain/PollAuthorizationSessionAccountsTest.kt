@@ -45,9 +45,7 @@ internal class PollAuthorizationSessionAccountsTest {
             data = listOf(
                 partnerAccount()
             ),
-            hasMore = false,
             nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
-            url = ""
         )
 
         whenever(repository.postAuthorizationSessionAccounts(any(), any()))
@@ -94,9 +92,7 @@ internal class PollAuthorizationSessionAccountsTest {
 
         val emptyList = PartnerAccountsList(
             data = emptyList(),
-            hasMore = false,
             nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
-            url = ""
         )
 
         whenever(repository.postAuthorizationSessionAccounts(any(), any())).doReturn(emptyList)

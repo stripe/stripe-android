@@ -72,10 +72,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 addNewAccount = requireNotNull(display.addNewAccount),
                 title = display.title,
                 defaultCta = display.defaultCta,
-                repairAuthorizationEnabled = accountsResponse.repairAuthorizationEnabled,
-                stepUpAuthenticationRequired = manifest.stepUpAuthenticationRequired ?: false,
                 consumerSessionClientSecret = consumerSession.clientSecret,
-                businessName = manifest.businessName,
                 // We always want to refer to Link rather than Stripe on Link panes.
                 accessibleData = accessibleData.copy(isStripeDirect = false)
             )
@@ -181,10 +178,7 @@ internal data class LinkAccountPickerState(
         val accounts: List<Pair<PartnerAccount, NetworkedAccount>>,
         val addNewAccount: AddNewAccount,
         val accessibleData: AccessibleDataCalloutModel,
-        val businessName: String?,
         val consumerSessionClientSecret: String,
-        val repairAuthorizationEnabled: Boolean,
-        val stepUpAuthenticationRequired: Boolean,
         val defaultCta: String
     )
 

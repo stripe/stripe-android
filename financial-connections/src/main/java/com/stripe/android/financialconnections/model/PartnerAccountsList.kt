@@ -8,33 +8,17 @@ import kotlinx.serialization.Serializable
 
 /**
  *
- * @param `data`
- * @param hasMore True if this list has another page of items after this one that can be fetched.
+ * @param data list of partner accounts
  * @param nextPane
- * @param url The URL where this list can be accessed.
- * @param count
- * @param repairAuthorizationEnabled
- * @param totalCount
  **/
 @Serializable
 internal data class PartnerAccountsList(
 
     @SerialName(value = "data") @Required val data: List<PartnerAccount>,
 
-    @SerialName(value = "has_more") @Required val hasMore: Boolean,
-
     @SerialName(value = "next_pane") @Required val nextPane: FinancialConnectionsSessionManifest.Pane,
 
-    @SerialName(value = "url") @Required val url: String,
-
-    @SerialName(value = "count") val count: Int? = null,
-
-    @SerialName(value = "repair_authorization_enabled") val repairAuthorizationEnabled: Boolean? = null,
-
     @SerialName(value = "skip_account_selection") val skipAccountSelection: Boolean? = null,
-
-    @SerialName(value = "total_count") val totalCount: Int? = null
-
 )
 
 /**

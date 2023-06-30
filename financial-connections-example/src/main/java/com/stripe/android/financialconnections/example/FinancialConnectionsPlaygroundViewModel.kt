@@ -245,7 +245,6 @@ class FinancialConnectionsPlaygroundViewModel(
                         status = it.status + "Failed! ${result.error}"
                     )
                 }
-
             }
 
             is CollectBankAccountResult.Cancelled -> {
