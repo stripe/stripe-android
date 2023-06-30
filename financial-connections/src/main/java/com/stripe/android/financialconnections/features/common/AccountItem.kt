@@ -32,6 +32,15 @@ import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import java.util.Locale
 
+/**
+ * A single account item in an account picker list.
+ *
+ * @param selected whether this account is selected
+ * @param onAccountClicked callback when this account is clicked
+ * @param account the account info to display
+ * @param networkedAccount For networked accounts, extra info to display
+ * @param selectorContent content to display on the left side of the account item
+ */
 @Composable
 @Suppress("MagicNumber", "LongMethod")
 internal fun AccountItem(
@@ -41,6 +50,7 @@ internal fun AccountItem(
     networkedAccount: NetworkedAccount? = null,
     selectorContent: @Composable RowScope.() -> Unit
 ) {
+    // networked account's allowSelection takes precedence over the account's.
     val selectable = networkedAccount?.allowSelection ?: account.allowSelection
     val (title, subtitle) = getAccountTexts(
         account = account,
