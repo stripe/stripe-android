@@ -629,7 +629,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         transitionTo(target)
     }
 
-    internal class Factory constructor(
+    internal class Factory(
         private val starterArgsSupplier: () -> PaymentSheetContractV2.Args,
     ) : ViewModelProvider.Factory {
 
