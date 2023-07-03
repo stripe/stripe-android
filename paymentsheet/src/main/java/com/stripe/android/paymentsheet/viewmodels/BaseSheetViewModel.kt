@@ -255,7 +255,6 @@ internal abstract class BaseSheetViewModel(
             PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
-                    activeLinkSession = linkHandler.activeLinkSession.value,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = stripeIntent.value?.clientSecret == null,
                 )
@@ -264,7 +263,6 @@ internal abstract class BaseSheetViewModel(
             AddAnotherPaymentMethod -> {
                 eventReporter.onShowNewPaymentOptionForm(
                     linkEnabled = linkHandler.isLinkEnabled.value == true,
-                    activeLinkSession = linkHandler.activeLinkSession.value,
                     currency = stripeIntent.value?.currency,
                     isDecoupling = stripeIntent.value?.clientSecret == null,
                 )

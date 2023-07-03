@@ -18,14 +18,12 @@ internal interface EventReporter {
 
     fun onShowExistingPaymentOptions(
         linkEnabled: Boolean,
-        activeLinkSession: Boolean,
         currency: String?,
         isDecoupling: Boolean,
     )
 
     fun onShowNewPaymentOptionForm(
         linkEnabled: Boolean,
-        activeLinkSession: Boolean,
         currency: String?,
         isDecoupling: Boolean,
     )

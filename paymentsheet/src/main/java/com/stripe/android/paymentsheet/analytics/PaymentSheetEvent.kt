@@ -128,14 +128,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class ShowNewPaymentOptionForm(
         mode: EventReporter.Mode,
         linkEnabled: Boolean,
-        activeLinkSession: Boolean,
         currency: String?,
         isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_newpm_show")
         override val additionalParams: Map<String, Any?> = mapOf(
             "link_enabled" to linkEnabled,
-            "active_link_session" to activeLinkSession,
             "locale" to Locale.getDefault().toString(),
             "currency" to currency,
             FIELD_IS_DECOUPLED to isDecoupled,
@@ -145,14 +143,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class ShowExistingPaymentOptions(
         mode: EventReporter.Mode,
         linkEnabled: Boolean,
-        activeLinkSession: Boolean,
         currency: String?,
         isDecoupled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_savedpm_show")
         override val additionalParams: Map<String, Any?> = mapOf(
             "link_enabled" to linkEnabled,
-            "active_link_session" to activeLinkSession,
             "locale" to Locale.getDefault().toString(),
             "currency" to currency,
             FIELD_IS_DECOUPLED to isDecoupled,
