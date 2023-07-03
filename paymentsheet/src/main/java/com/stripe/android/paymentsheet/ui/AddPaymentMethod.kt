@@ -65,13 +65,14 @@ internal fun AddPaymentMethod(
     }
 
     val paymentSelection by sheetViewModel.selection.collectAsState()
+    val linkEnabled by linkHandler.isLinkEnabled.collectAsState()
     var linkSignupState by remember {
         mutableStateOf<InlineSignupViewState?>(null)
     }
 
-    LaunchedEffect(paymentSelection, linkSignupState) {
+    LaunchedEffect(paymentSelection, linkSignupState, linkEnabled) {
         val state = linkSignupState
-        val isUsingLinkInline = paymentSelection is PaymentSelection.New.Card
+        val isUsingLinkInline = linkEnabled == true && paymentSelection is PaymentSelection.New.Card
 
         if (state != null) {
             sheetViewModel.updatePrimaryButtonForLinkSignup(state)
