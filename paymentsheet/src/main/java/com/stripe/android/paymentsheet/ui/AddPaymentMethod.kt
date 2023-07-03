@@ -65,14 +65,15 @@ internal fun AddPaymentMethod(
     }
 
     val paymentSelection by sheetViewModel.selection.collectAsState()
-    val linkEnabled by linkHandler.isLinkEnabled.collectAsState()
+    val linkInlineSelection by linkHandler.linkInlineSelection.collectAsState()
     var linkSignupState by remember {
         mutableStateOf<InlineSignupViewState?>(null)
     }
 
-    LaunchedEffect(paymentSelection, linkSignupState, linkEnabled) {
+    LaunchedEffect(paymentSelection, linkSignupState, linkInlineSelection) {
         val state = linkSignupState
-        val isUsingLinkInline = linkEnabled == true && paymentSelection is PaymentSelection.New.Card
+        val isUsingLinkInline = linkInlineSelection != null &&
+            paymentSelection is PaymentSelection.New.Card
 
         if (state != null) {
             sheetViewModel.updatePrimaryButtonForLinkSignup(state)
@@ -133,10 +134,11 @@ private fun BaseSheetViewModel.showLinkInlineSignupView(
         AccountStatus.VerificationStarted,
         AccountStatus.SignedOut,
     )
+    val linkInlineSelectionValid = linkHandler.linkInlineSelection.value != null
     return linkHandler.isLinkEnabled.value == true && stripeIntent.value
         ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
         paymentMethodCode == PaymentMethod.Type.Card.code &&
-        (linkAccountStatus in validStatusStates)
+        (linkAccountStatus in validStatusStates || linkInlineSelectionValid)
 }
 
 internal fun FormFieldValues.transformToPaymentMethodCreateParams(
