@@ -42,7 +42,6 @@ import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -126,9 +125,6 @@ internal class DefaultFlowController @Inject internal constructor(
 
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
-            is PaymentOptionsViewModel.Factory -> {
-                flowControllerComponent.stateComponent.inject(injectable)
-            }
             is FormViewModel.Factory -> {
                 flowControllerComponent.stateComponent.inject(injectable)
             }
