@@ -36,20 +36,10 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class LinkHandlerTest {
     @Test
-    fun `Prepares state correctly for logged in user`() = runLinkTest {
-        accountStatusFlow.emit(AccountStatus.Verified)
-        handler.setupLink(LinkState(configuration, LinkState.LoginState.LoggedIn))
-        assertThat(handler.isLinkEnabled.first()).isTrue()
-        assertThat(handler.activeLinkSession.first()).isTrue()
-        assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
-    }
-
-    @Test
     fun `Prepares state correctly for logged out user`() = runLinkTest {
         accountStatusFlow.emit(AccountStatus.SignedOut)
         handler.setupLink(LinkState(configuration, LinkState.LoginState.LoggedOut))
         assertThat(handler.isLinkEnabled.first()).isTrue()
-        assertThat(handler.activeLinkSession.first()).isFalse()
         assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.SignedOut)
         assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION)).isNull()
     }
@@ -138,7 +128,6 @@ class LinkHandlerTest {
             }
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
-            assertThat(handler.activeLinkSession.value).isTrue()
             verify(linkLauncher).present(eq(configuration), any())
         }
 
@@ -171,7 +160,6 @@ class LinkHandlerTest {
             }
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             assertThat(awaitItem()).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
-            assertThat(handler.activeLinkSession.value).isTrue()
             verify(linkLauncher, never()).present(eq(configuration), any())
         }
 
@@ -211,7 +199,6 @@ class LinkHandlerTest {
             accountStatusFlow.emit(AccountStatus.Verified)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
             assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
-            assertThat(handler.activeLinkSession.value).isTrue()
             verify(linkLauncher).present(eq(configuration), any())
         }
 
@@ -248,7 +235,6 @@ class LinkHandlerTest {
             accountStatusFlow.emit(AccountStatus.Verified)
             assertThat(awaitItem()).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
             assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
-            assertThat(handler.activeLinkSession.value).isTrue()
             verify(linkLauncher, never()).present(eq(configuration), any())
         }
 
@@ -277,7 +263,6 @@ class LinkHandlerTest {
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Error("Whoops"))
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Ready)
-            assertThat(handler.activeLinkSession.value).isFalse()
             verify(linkLauncher, never()).present(eq(configuration), any())
         }
 
@@ -306,7 +291,6 @@ class LinkHandlerTest {
             }
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Ready)
-            assertThat(handler.activeLinkSession.value).isFalse()
             verify(linkLauncher, never()).present(eq(configuration), any())
         }
 

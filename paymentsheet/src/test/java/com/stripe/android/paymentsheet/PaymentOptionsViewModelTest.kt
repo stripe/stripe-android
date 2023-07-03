@@ -208,7 +208,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link)
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
@@ -219,7 +218,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link)
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
     }
 

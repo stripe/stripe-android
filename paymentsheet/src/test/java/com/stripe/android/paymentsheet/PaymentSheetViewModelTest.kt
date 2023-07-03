@@ -313,7 +313,6 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
@@ -323,7 +322,6 @@ internal class PaymentSheetViewModelTest {
             linkState = null,
         )
 
-        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
     }
 
@@ -934,7 +932,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(false),
-            activeLinkSession = eq(false),
             currency = eq("usd"),
             isDecoupling = eq(false),
         )
@@ -958,7 +955,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(true),
-            activeLinkSession = eq(false),
             currency = eq("usd"),
             isDecoupling = eq(false),
         )
@@ -982,7 +978,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(true),
-            activeLinkSession = eq(true),
             currency = eq("usd"),
             isDecoupling = eq(false),
         )
@@ -1001,7 +996,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onShowExistingPaymentOptions(
             linkEnabled = eq(false),
-            activeLinkSession = eq(false),
             currency = eq("usd"),
             isDecoupling = eq(false),
         )
@@ -1010,7 +1004,6 @@ internal class PaymentSheetViewModelTest {
 
         verify(eventReporter).onShowNewPaymentOptionForm(
             linkEnabled = eq(false),
-            activeLinkSession = eq(false),
             currency = eq("usd"),
             isDecoupling = eq(false),
         )
