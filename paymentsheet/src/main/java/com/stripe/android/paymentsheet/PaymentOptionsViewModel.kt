@@ -121,6 +121,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
         }
 
+        linkHandler.linkInlineSelection.value = args.state.paymentSelection as? PaymentSelection.New.LinkInline
         linkHandler.setupLink(linkState)
 
         // After recovering from don't keep activities the stripe intent will be saved,
