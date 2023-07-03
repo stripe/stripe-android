@@ -182,55 +182,6 @@ class LinkApiRepositoryTest {
     }
 
     @Test
-    fun `logout sends correct parameters`() = runTest {
-        val secret = "secret"
-        val cookie = "cookie2"
-        val consumerKey = "key2"
-        linkRepository.logout(secret, consumerKey, cookie)
-
-        verify(stripeRepository).logoutConsumer(
-            eq(secret),
-            eq(cookie),
-            eq(ApiRequest.Options(consumerKey))
-        )
-    }
-
-    @Test
-    fun `logout without consumerPublishableKey sends correct parameters`() = runTest {
-        val secret = "secret"
-        val cookie = "cookie2"
-        linkRepository.logout(secret, null, cookie)
-
-        verify(stripeRepository).logoutConsumer(
-            eq(secret),
-            eq(cookie),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
-        )
-    }
-
-    @Test
-    fun `logout returns successful result`() = runTest {
-        val consumerSession = mock<ConsumerSession>()
-        whenever(stripeRepository.logoutConsumer(any(), any(), any()))
-            .thenReturn(consumerSession)
-
-        val result = linkRepository.logout("secret", "key", "cookie")
-
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).isEqualTo(consumerSession)
-    }
-
-    @Test
-    fun `logout catches exception and returns failure`() = runTest {
-        whenever(stripeRepository.logoutConsumer(any(), any(), any()))
-            .thenThrow(RuntimeException("error"))
-
-        val result = linkRepository.logout("secret", "key", "cookie")
-
-        assertThat(result.isFailure).isTrue()
-    }
-
-    @Test
     fun `createPaymentDetails for card sends correct parameters`() = runTest {
         val secret = "secret"
         val email = "email@stripe.com"

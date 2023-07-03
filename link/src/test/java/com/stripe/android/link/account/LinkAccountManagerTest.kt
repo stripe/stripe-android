@@ -20,18 +20,14 @@ import org.mockito.Mockito.times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
 class LinkAccountManagerTest {
     private val linkRepository = mock<LinkRepository>()
     private val linkEventsReporter = mock<LinkEventsReporter>()
-    private val cookieStore = mock<CookieStore>().apply {
-        whenever(getAuthSessionCookie()).thenReturn("cookie")
-    }
+    private val cookieStore = mock<CookieStore>()
 
     private val verifiedSession = mock<ConsumerSession.VerificationSession>().apply {
         whenever(type).thenReturn(ConsumerSession.VerificationSession.SessionType.Sms)
@@ -44,40 +40,18 @@ class LinkAccountManagerTest {
     }
 
     @Test
-    fun `When auth cookie exists then it is used at start`() = runSuspendTest {
-        val cookie = "cookie"
-        whenever(cookieStore.getAuthSessionCookie()).thenReturn(cookie)
-        whenever(cookieStore.getNewUserEmail()).thenReturn("email")
-
-        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Verified)
-
-        verify(linkRepository).lookupConsumer(isNull(), eq(cookie))
-    }
-
-    @Test
     fun `When cookie exists and network call fails then account status is Error`() = runSuspendTest {
-        whenever(cookieStore.getAuthSessionCookie()).thenReturn("cookie")
+        val accountManager = accountManager(EMAIL)
+        accountManager.authSessionCookie = "cookie"
         whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
             .thenReturn(Result.failure(Exception()))
 
-        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Error)
-    }
-
-    @Test
-    fun `When new user email exists then it is used at start`() = runSuspendTest {
-        val email = "email"
-        whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
-        whenever(cookieStore.getNewUserEmail()).thenReturn(email)
-
-        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Verified)
-
-        verify(linkRepository).lookupConsumer(eq(email), isNull())
+        assertThat(accountManager.accountStatus.first()).isEqualTo(AccountStatus.Error)
     }
 
     @Test
     fun `When new user email exists and network call fails then account status is Error`() = runSuspendTest {
         val email = "email"
-        whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
         whenever(cookieStore.getNewUserEmail()).thenReturn(email)
         whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
             .thenReturn(Result.failure(Exception()))
@@ -87,26 +61,13 @@ class LinkAccountManagerTest {
 
     @Test
     fun `When customerEmail is set in arguments then it is looked up`() = runSuspendTest {
-        whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
-
         assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Verified)
 
         verify(linkRepository).lookupConsumer(EMAIL, null)
     }
 
     @Test
-    fun `When customerEmail has signed out then it is not looked up`() = runSuspendTest {
-        whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
-        whenever(cookieStore.isEmailLoggedOut(EMAIL)).thenReturn(true)
-
-        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.SignedOut)
-
-        verifyNoInteractions(linkRepository)
-    }
-
-    @Test
     fun `When customerEmail is set and network call fails then account status is Error`() = runSuspendTest {
-        whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
         whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
             .thenReturn(Result.failure(Exception()))
 
@@ -161,16 +122,6 @@ class LinkAccountManagerTest {
         accountManager().lookupConsumer(EMAIL, false)
 
         verify(linkEventsReporter).onAccountLookupFailure()
-    }
-
-    @Test
-    fun `When cookie is invalid it is deleted after consumer lookup`() = runSuspendTest {
-        mockNonexistentAccountLookup()
-        val accountManager = accountManager()
-
-        accountManager.lookupConsumer(null)
-
-        verify(cookieStore).updateAuthSessionCookie("")
     }
 
     @Test
@@ -256,42 +207,8 @@ class LinkAccountManagerTest {
     }
 
     @Test
-    fun `createPaymentDetails for card retries on auth error`() = runSuspendTest {
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
-
-        whenever(
-            linkRepository.createCardPaymentDetails(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
-        ).thenReturn(
-            Result.failure(AuthenticationException(StripeError())),
-            Result.success(mock())
-        )
-
-        accountManager.createCardPaymentDetails(mock(), "", mock())
-
-        verify(linkRepository, times(2))
-            .createCardPaymentDetails(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
-        verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
-
-        assertThat(accountManager.linkAccount.value).isNotNull()
-    }
-
-    @Test
-    fun `createPaymentDetails for card does not retry on auth error if no cookie exists`() =
+    fun `createPaymentDetails for card does not retry on auth error`() =
         runSuspendTest {
-            whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
             val accountManager = accountManager()
             accountManager.setAccountNullable(mockConsumerSession)
 
@@ -342,14 +259,6 @@ class LinkAccountManagerTest {
                 consentAction = any()
             )
         ).thenReturn(Result.success(mockConsumerSession))
-    }
-
-    private suspend fun mockNonexistentAccountLookup() {
-        val consumerSessionLookup = mock<ConsumerSessionLookup>().apply {
-            whenever(exists).thenReturn(false)
-        }
-        whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
-            .thenReturn(Result.success(consumerSessionLookup))
     }
 
     private fun accountManager(
