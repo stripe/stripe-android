@@ -4,7 +4,6 @@ package com.stripe.android.link.ui
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -100,7 +99,7 @@ fun LinkButton(
 }
 
 @Composable
-private fun SignedInButtonContent(email: String) = Row {
+private fun SignedInButtonContent(email: String) {
     LinkIcon()
     LinkDivider()
     LinkAccountInfo(email)
@@ -108,7 +107,7 @@ private fun SignedInButtonContent(email: String) = Row {
 }
 
 @Composable
-private fun SignedOutButtonContent() = Row {
+private fun SignedOutButtonContent() {
     PayWithText()
     LinkIcon()
     LinkArrow()
