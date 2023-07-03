@@ -51,8 +51,6 @@ internal class LinkHandler @Inject constructor(
         MutableSharedFlow<ProcessingState>(replay = 1, extraBufferCapacity = 5)
     val processingState: Flow<ProcessingState> = _processingState
 
-    val linkInlineSelection = MutableStateFlow<PaymentSelection.New.LinkInline?>(null)
-
     private val _isLinkEnabled = MutableStateFlow<Boolean?>(null)
     val isLinkEnabled: StateFlow<Boolean?> = _isLinkEnabled
 
