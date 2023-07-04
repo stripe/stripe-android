@@ -123,9 +123,6 @@ internal class DefaultPaymentSheetLauncher(
     ) : NonFallbackInjector {
         override fun inject(injectable: Injectable<*>) {
             when (injectable) {
-                is PaymentSheetViewModel.Factory -> {
-                    paymentSheetLauncherComponent.inject(injectable)
-                }
                 is FormViewModel.Factory -> {
                     paymentSheetLauncherComponent.inject(injectable)
                 }

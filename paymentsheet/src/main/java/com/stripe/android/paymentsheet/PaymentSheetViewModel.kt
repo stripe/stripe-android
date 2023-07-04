@@ -17,9 +17,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -43,7 +40,6 @@ import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
-import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
@@ -635,41 +631,24 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal class Factory(
         private val starterArgsSupplier: () -> PaymentSheetContractV2.Args,
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
-
-        internal data class FallbackInitializeParam(val application: Application)
-
-        @Inject
-        lateinit var subComponentBuilderProvider: Provider<PaymentSheetViewModelSubcomponent.Builder>
+    ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val args = starterArgsSupplier()
-
             val application = extras.requireApplication()
             val savedStateHandle = extras.createSavedStateHandle()
 
-            injectWithFallback(
-                injectorKey = args.injectorKey,
-                fallbackInitializeParam = FallbackInitializeParam(application),
-            )
-
-            val subcomponent = subComponentBuilderProvider.get()
-                .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
+            val component = DaggerPaymentSheetLauncherComponent
+                .builder()
+                .application(application)
+                .injectorKey(DUMMY_INJECTOR_KEY)
+                .build()
+                .paymentSheetViewModelSubcomponentBuilder
+                .paymentSheetViewModelModule(PaymentSheetViewModelModule(starterArgsSupplier()))
                 .savedStateHandle(savedStateHandle)
                 .build()
 
-            return subcomponent.viewModel as T
-        }
-
-        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector {
-            val component = DaggerPaymentSheetLauncherComponent
-                .builder()
-                .application(arg.application)
-                .injectorKey(DUMMY_INJECTOR_KEY)
-                .build()
-            component.inject(this)
-            return component
+            return component.viewModel as T
         }
     }
 
