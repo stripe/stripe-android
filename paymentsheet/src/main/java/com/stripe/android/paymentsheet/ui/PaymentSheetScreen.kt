@@ -4,9 +4,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -163,9 +161,6 @@ internal fun Wallet(
                 email = link.email,
                 enabled = state.buttonsEnabled,
                 onClick = onLinkPressed,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredHeight(48.dp),
             )
         }
 

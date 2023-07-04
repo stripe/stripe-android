@@ -3,16 +3,18 @@
 package com.stripe.android.link.ui
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
@@ -21,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -40,10 +41,6 @@ private val LinkButtonHorizontalPadding = 10.dp
 private val LinkButtonShape: RoundedCornerShape
     get() = RoundedCornerShape(
         StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
-    )
-private val LinkButtonEmailShape: RoundedCornerShape
-    get() = RoundedCornerShape(
-        StripeTheme.primaryButtonStyle.shape.cornerRadius.dp / 2
     )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -74,6 +71,8 @@ fun LinkButton(
             Button(
                 onClick = onClick,
                 modifier = modifier
+                    .fillMaxWidth()
+                    .requiredHeight(48.dp)
                     .clip(LinkButtonShape)
                     .testTag(LinkButtonTestTag),
                 enabled = enabled,
@@ -90,39 +89,99 @@ fun LinkButton(
                     bottom = LinkButtonVerticalPadding
                 )
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.stripe_link_logo),
-                    contentDescription = stringResource(StripeR.string.stripe_link),
-                    modifier = Modifier
-                        .height(22.dp)
-                        .padding(
-                            horizontal = 5.dp,
-                            vertical = 3.dp
-                        ),
-                    tint = MaterialTheme.linkColors.buttonLabel
-                        .copy(alpha = LocalContentAlpha.current)
-                )
-                email?.let {
-                    Spacer(modifier = Modifier.weight(1f))
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = Color.Black.copy(alpha = 0.05f),
-                                shape = LinkButtonEmailShape
-                            )
-                    ) {
-                        Text(
-                            text = it,
-                            modifier = Modifier
-                                .padding(6.dp),
-                            color = MaterialTheme.linkColors.buttonLabel,
-                            fontSize = 14.sp,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1
-                        )
-                    }
+                if (email == null) {
+                    SignedOutButtonContent()
+                } else {
+                    SignedInButtonContent(email = email)
                 }
             }
         }
     }
+}
+
+@Suppress("UnusedReceiverParameter")
+@Composable
+private fun RowScope.SignedInButtonContent(email: String) {
+    LinkIcon()
+    LinkDivider()
+    LinkAccountInfo(email)
+    LinkArrow()
+}
+
+@Suppress("UnusedReceiverParameter")
+@Composable
+private fun RowScope.SignedOutButtonContent() {
+    PayWithText()
+    LinkIcon()
+    LinkArrow()
+}
+
+@Composable
+private fun LinkIcon() {
+    Icon(
+        painter = painterResource(R.drawable.stripe_link_logo),
+        contentDescription = stringResource(StripeR.string.stripe_link),
+        modifier = Modifier
+            .height(16.dp)
+            .padding(
+                start = 6.dp,
+                end = 6.dp,
+                bottom = 1.dp,
+            ),
+        tint = MaterialTheme.linkColors.buttonLabel
+            .copy(alpha = LocalContentAlpha.current)
+    )
+}
+
+@Composable
+private fun LinkDivider() {
+    Divider(
+        modifier = Modifier
+            .padding(4.dp)
+            .width(1.dp)
+            .height(22.dp),
+        color = MaterialTheme.linkColors.actionLabelLight,
+    )
+}
+
+@Composable
+private fun LinkAccountInfo(email: String) {
+    Text(
+        text = email,
+        modifier = Modifier
+            .padding(6.dp),
+        color = MaterialTheme.linkColors.buttonLabel,
+        fontSize = 14.sp,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1
+    )
+}
+
+@Composable
+private fun LinkArrow() {
+    Icon(
+        painter = painterResource(R.drawable.stripe_link_arrow),
+        contentDescription = null,
+        modifier = Modifier
+            .height(16.dp)
+            .padding(
+                end = 6.dp,
+                top = 1.dp,
+            ),
+        tint = MaterialTheme.linkColors.buttonLabel
+            .copy(alpha = LocalContentAlpha.current)
+    )
+}
+
+@Composable
+private fun PayWithText() {
+    Text(
+        text = "Pay with", // TODO(jaynewstrom) Link: Add localization
+        modifier = Modifier
+            .padding(start = 6.dp),
+        color = MaterialTheme.linkColors.buttonLabel,
+        fontSize = 14.sp,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1
+    )
 }
