@@ -20,7 +20,7 @@ class CookieStore @Inject internal constructor(
      * Clear all local data.
      */
     fun clear() {
-        allCookies.forEach { store.delete(it) }
+        store.delete(SIGNED_UP_EMAIL)
     }
 
     /**
@@ -47,9 +47,5 @@ class CookieStore @Inject internal constructor(
 
     internal companion object {
         const val SIGNED_UP_EMAIL = "signed_up_email"
-
-        val allCookies = arrayOf(
-            SIGNED_UP_EMAIL
-        )
     }
 }

@@ -13,9 +13,7 @@ class CookieStoreTest {
     fun `clear deletes all data`() {
         createCookieStore().clear()
 
-        CookieStore.allCookies.forEach {
-            verify(store).delete(it)
-        }
+        verify(store).delete(SIGNED_UP_EMAIL)
     }
 
     @Test
