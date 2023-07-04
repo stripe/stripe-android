@@ -71,6 +71,7 @@ public abstract interface annotation class com/stripe/android/paymentsheet/Exper
 }
 
 public final class com/stripe/android/paymentsheet/FlowControllerComposeKt {
+	public static final fun rememberPaymentSheetFlowController (Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public static final fun rememberPaymentSheetFlowController (Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 }
 
@@ -847,6 +848,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Typography$Creat
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheetComposeKt {
+	public static final fun rememberPaymentSheet (Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
 	public static final fun rememberPaymentSheet (Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
 }
 
