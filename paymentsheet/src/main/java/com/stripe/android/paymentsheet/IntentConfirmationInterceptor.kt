@@ -87,7 +87,6 @@ internal enum class DeferredIntentConfirmationType(val value: String) {
     None("none");
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val context: Context,
     private val stripeRepository: StripeRepository,

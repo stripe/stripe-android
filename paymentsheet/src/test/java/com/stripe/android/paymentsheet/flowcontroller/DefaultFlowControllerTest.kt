@@ -44,7 +44,6 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
-import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -1213,7 +1212,7 @@ internal class DefaultFlowControllerTest {
         verify(paymentOptionActivityLauncher, never()).launch(any())
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
+    @OptIn(DelicatePaymentSheetApi::class)
     @Test
     fun `Sends correct analytics event based on force-success usage`() = runTest {
         val clientSecrets = listOf(
@@ -1326,7 +1325,6 @@ internal class DefaultFlowControllerTest {
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private fun createAndConfigureFlowControllerForDeferredIntent(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     ): DefaultFlowController {

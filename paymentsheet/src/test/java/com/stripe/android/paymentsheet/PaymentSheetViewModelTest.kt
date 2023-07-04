@@ -1275,7 +1275,6 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
         IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
@@ -1290,7 +1289,6 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
         IntentConfirmationInterceptor.createIntentCallback =
@@ -1306,7 +1304,7 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
+    @OptIn(DelicatePaymentSheetApi::class)
     @Test
     fun `Sends correct analytics event based on force-success usage`() = runTest {
         val clientSecrets = listOf(
@@ -1465,7 +1463,6 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private fun createViewModelForDeferredIntent(
         args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         paymentIntent: PaymentIntent = PAYMENT_INTENT,

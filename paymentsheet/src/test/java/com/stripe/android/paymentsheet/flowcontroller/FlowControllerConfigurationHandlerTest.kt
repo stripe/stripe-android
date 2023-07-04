@@ -11,7 +11,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -332,7 +331,6 @@ class FlowControllerConfigurationHandlerTest {
             assertThat(onInitCallbacks).isEqualTo(0)
         }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Cancels current configure job if new call to configure comes in`() = runTest {
         val loader = DelayingPaymentSheetLoader()
@@ -436,7 +434,6 @@ class FlowControllerConfigurationHandlerTest {
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
         val configureTurbine = Turbine<Throwable?>()
@@ -469,7 +466,6 @@ class FlowControllerConfigurationHandlerTest {
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     @Test
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
         val configureTurbine = Turbine<Throwable?>()
