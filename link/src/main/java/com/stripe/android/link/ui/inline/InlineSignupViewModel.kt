@@ -36,11 +36,9 @@ internal class InlineSignupViewModel @Inject constructor(
     private val logger: Logger
 ) : ViewModel() {
 
-    private val isLoggedOut = linkAccountManager.hasUserLoggedOut(config.customerEmail)
-
-    private val prefilledEmail = config.customerEmail.takeUnless { isLoggedOut }
-    private val prefilledPhone = config.customerPhone?.takeUnless { isLoggedOut }.orEmpty()
-    private val prefilledName = config.customerName?.takeUnless { isLoggedOut }
+    private val prefilledEmail = config.customerEmail
+    private val prefilledPhone = config.customerPhone.orEmpty()
+    private val prefilledName = config.customerName
 
     val emailController = EmailConfig.createController(prefilledEmail)
 
@@ -87,8 +85,6 @@ internal class InlineSignupViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
-    val accountEmail = linkAccountManager.linkAccount.map { it?.email }
-
     val requiresNameCollection: Boolean
         get() {
             val countryCode = when (val stripeIntent = config.stripeIntent) {
@@ -111,12 +107,6 @@ internal class InlineSignupViewModel @Inject constructor(
             hasExpanded = true
             watchUserInput()
             linkEventsReporter.onInlineSignupCheckboxChecked()
-        }
-    }
-
-    fun logout() {
-        viewModelScope.launch {
-            linkAccountManager.logout()
         }
     }
 
@@ -181,7 +171,6 @@ internal class InlineSignupViewModel @Inject constructor(
 
     private suspend fun lookupConsumerEmail(email: String) {
         clearError()
-        linkAccountManager.logout()
         linkAccountManager.lookupConsumer(email, startSession = false).fold(
             onSuccess = {
                 if (it != null) {

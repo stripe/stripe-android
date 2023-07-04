@@ -79,27 +79,6 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
-    override suspend fun logout(
-        consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
-        authSessionCookie: String?
-    ): Result<ConsumerSession> = withContext(workContext) {
-        runCatching {
-            requireNotNull(
-                stripeRepository.logoutConsumer(
-                    consumerSessionClientSecret,
-                    authSessionCookie,
-                    consumerPublishableKey?.let {
-                        ApiRequest.Options(it)
-                    } ?: ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
-                    )
-                )
-            )
-        }
-    }
-
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         userEmail: String,
