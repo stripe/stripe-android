@@ -61,7 +61,6 @@ class DefaultEventReporterTest {
     fun `onShowExistingPaymentOptions() should fire analytics request with expected event value`() {
         completeEventReporter.onShowExistingPaymentOptions(
             linkEnabled = true,
-            activeLinkSession = false,
             currency = "usd",
             isDecoupling = false,
         )
@@ -70,7 +69,6 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["event"] == "mc_complete_sheet_savedpm_show" &&
                     req.params["link_enabled"] == true &&
-                    req.params["active_link_session"] == false &&
                     req.params["currency"] == "usd" &&
                     req.params["locale"] == "en_US"
             }
@@ -81,7 +79,6 @@ class DefaultEventReporterTest {
     fun `onShowNewPaymentOptionForm() should fire analytics request with expected event value`() {
         completeEventReporter.onShowNewPaymentOptionForm(
             linkEnabled = false,
-            activeLinkSession = true,
             currency = "usd",
             isDecoupling = false,
         )
@@ -90,7 +87,6 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["event"] == "mc_complete_sheet_newpm_show" &&
                     req.params["link_enabled"] == false &&
-                    req.params["active_link_session"] == true &&
                     req.params["currency"] == "usd" &&
                     req.params["locale"] == "en_US"
             }
@@ -102,7 +98,6 @@ class DefaultEventReporterTest {
         // Log initial event so that duration is tracked
         completeEventReporter.onShowExistingPaymentOptions(
             linkEnabled = false,
-            activeLinkSession = false,
             currency = "usd",
             isDecoupling = false,
         )
@@ -129,7 +124,6 @@ class DefaultEventReporterTest {
         // Log initial event so that duration is tracked
         completeEventReporter.onShowExistingPaymentOptions(
             linkEnabled = false,
-            activeLinkSession = false,
             currency = "usd",
             isDecoupling = false,
         )
@@ -159,7 +153,6 @@ class DefaultEventReporterTest {
         // Log initial event so that duration is tracked
         completeEventReporter.onShowExistingPaymentOptions(
             linkEnabled = true,
-            activeLinkSession = false,
             currency = "usd",
             isDecoupling = false,
         )
@@ -189,7 +182,6 @@ class DefaultEventReporterTest {
         // Log initial event so that duration is tracked
         completeEventReporter.onShowExistingPaymentOptions(
             linkEnabled = false,
-            activeLinkSession = false,
             currency = "usd",
             isDecoupling = false,
         )

@@ -56,9 +56,6 @@ internal class LinkHandler @Inject constructor(
     private val _isLinkEnabled = MutableStateFlow<Boolean?>(null)
     val isLinkEnabled: StateFlow<Boolean?> = _isLinkEnabled
 
-    private val _activeLinkSession = MutableStateFlow(false)
-    val activeLinkSession: StateFlow<Boolean> = _activeLinkSession
-
     private val linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
 
     val accountStatus: Flow<AccountStatus> = linkConfiguration
@@ -78,7 +75,6 @@ internal class LinkHandler @Inject constructor(
 
     fun setupLink(state: LinkState?) {
         _isLinkEnabled.value = state != null
-        _activeLinkSession.value = state?.loginState == LinkState.LoginState.LoggedIn
 
         if (state == null) return
 
@@ -98,7 +94,6 @@ internal class LinkHandler @Inject constructor(
 
             when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
                 AccountStatus.Verified -> {
-                    _activeLinkSession.value = true
                     completeLinkInlinePayment(
                         configuration,
                         params,
@@ -111,7 +106,6 @@ internal class LinkHandler @Inject constructor(
                 }
                 AccountStatus.SignedOut,
                 AccountStatus.Error -> {
-                    _activeLinkSession.value = false
                     userInput?.let {
                         linkConfigurationCoordinator.signInWithUserInput(configuration, userInput).fold(
                             onSuccess = {
