@@ -14,8 +14,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -74,7 +72,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
-    @InjectorKey private val injectorKey: String,
     // Properties provided through injection
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
@@ -242,7 +239,6 @@ internal class DefaultFlowController @Inject internal constructor(
         val args = PaymentOptionContract.Args(
             state = state.copy(paymentSelection = viewModel.paymentSelection),
             statusBarColor = statusBarColor(),
-            injectorKey = injectorKey,
             enableLogging = enableLogging,
             productUsage = productUsage,
         )
@@ -607,10 +603,6 @@ internal class DefaultFlowController @Inject internal constructor(
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback
         ): PaymentSheet.FlowController {
-            val injectorKey = WeakMapInjectorRegistry.nextKey(
-                prefix = requireNotNull(PaymentSheet.FlowController::class.simpleName),
-            )
-
             val flowControllerViewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
             )[FlowControllerViewModel::class.java]
@@ -624,7 +616,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     .statusBarColor(statusBarColor)
                     .paymentOptionCallback(paymentOptionCallback)
                     .paymentResultCallback(paymentResultCallback)
-                    .injectorKey(injectorKey)
                     .build()
             val flowController = flowControllerComponent.flowController
             flowController.flowControllerComponent = flowControllerComponent
