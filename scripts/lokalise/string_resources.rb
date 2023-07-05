@@ -36,6 +36,7 @@ class StringResources
                 # Get the main element information
                 key_name = element.attributes['name']
                 value = element.text
+                lokalise_value = escape_for_lokalise(value)
 
                 # Get the line number with this shitty workaround because REXML changes the quotes from
                 # double to single quotes.
@@ -66,6 +67,7 @@ class StringResources
                 key_object = {
                     "key_name": key_name,
                     "value": value,
+                    "lokalise_value": lokalise_value,
                     "filename": filename,
                     "description": description,
                 }
@@ -75,5 +77,13 @@ class StringResources
         end
 
         key_objects
+    end
+
+    def escape_for_lokalise(value)
+        value
+            # Wrap any placeholders in square brackets
+            .gsub("%s", "[%s]")
+            # Wrap any numbered placeholders such as ""%1$s" in square brackets
+            .gsub(/[%]*[0-9]*[$][s]/) { |value| "[#{value}]" }
     end
 end

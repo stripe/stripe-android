@@ -10,7 +10,7 @@ class LokaliseClient
     end
 
     def create_key(key_object)
-        url = URI("https://api.lokalise.com/api2/projects/project_id/keys")
+        url = URI("https://api.lokalise.com/api2/projects/#{project_id}/keys")
 
         http = Net::HTTP.new(url.host, url.port)
         http.use_ssl = true
@@ -30,22 +30,22 @@ class LokaliseClient
             "keys": [
                 {
                     "key_name": {
-                        "android": key_object['key_name'],
+                        "android": key_object[:key_name],
                     },
                     "platforms": ["android"],
                     "filenames": {
-                        "android": key_object['filename'],
+                        "android": key_object[:filename],
                     },
                     "translations": [
                         {
                             "language_iso": "en",
-                            "translation": key_object['value'],
+                            "translation": key_object[:value],
                             "is_reviewed": true,
                             "is_unverified": false,
                             "is_archived": false,
                         }
                     ],
-                    "description": key_object['description'],
+                    "description": key_object[:description],
                 }
             ]
         }
@@ -59,7 +59,7 @@ class LokaliseClient
     end
 
     def update_key(existing_key, key_object)
-        url = URI("https://api.lokalise.com/api2/projects/project_id/keys")
+        url = URI("https://api.lokalise.com/api2/projects/#{project_id}/keys")
 
         http = Net::HTTP.new(url.host, url.port)
         http.use_ssl = true
@@ -75,8 +75,8 @@ class LokaliseClient
             request["X-Api-Token"] = api_token
         end
 
-        key['key_name']['android'] = key_object['key_name']
-        key['filenames']['android'] = key_object['filename']
+        key['key_name']['android'] = key_object[:key_name]
+        key['filenames']['android'] = key_object[:filename]
         key['platforms'] << 'android'
 
         body = {
@@ -88,11 +88,7 @@ class LokaliseClient
         response = http.request(request)
         success = response.kind_of? Net::HTTPSuccess
 
-        if !success
-            puts "Failed to update key: #{key_object[:key_name]}"
-        else
-            puts "Updated key: #{key_object[:key_name]}"
-        end
+        success
     end
 
     private
@@ -114,7 +110,7 @@ class LokaliseClient
     end
 
     def fetch_keys_for_page(page)
-        url = URI("https://api.lokalise.com/api2/projects/747824695e51bc2f4aa912.89576472/keys?include_translations=1&limit=500&page=#{page}")
+        url = URI("https://api.lokalise.com/api2/projects/#{project_id}/keys?include_translations=1&limit=500&page=#{page}")
 
         http = Net::HTTP.new(url.host, url.port)
         http.use_ssl = true
@@ -137,5 +133,9 @@ class LokaliseClient
     def filter_android_keys(all_keys)
         android_keys = all_keys.select { |key| key['platforms'].include? 'android' }
         android_keys.map { |key| key['key_name']['android'] }
+    end
+
+    def project_id
+        "747824695e51bc2f4aa912.89576472"
     end
 end

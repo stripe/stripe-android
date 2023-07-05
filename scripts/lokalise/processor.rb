@@ -96,17 +96,33 @@ class Processor
     end
 
     def find_existing_key(value)
+        escaped_value = escape_for_lokalise(value)
+
         @all_keys.each do |key|
             translations = key['translations']
 
             translations.each do |translation|
                 # If we find a translation that matches the key_object's value, then this is the key
                 # that we need to update
-                if translation['language_iso'] == 'en' && translation['translation'] == value
+                language = translation['language_iso']
+                content = translation['translation']
+
+                if language == 'en' && (content == value || content == escaped_value)
                     return key
                 end
             end
         end
+
         return nil
+    end
+
+    def escape_for_lokalise(value)
+        value
+            # Wrap any placeholders in square brackets
+            .gsub("%s", "[%s]")
+            # Wrap any numbered placeholders such as ""%1$s" in square brackets
+            .gsub(/[%]*[0-9]*[$][s]/) { |value| "[#{value}]" }
+            # Remove escaping characters
+            .gsub("\\", "")
     end
 end
