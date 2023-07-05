@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.core.graphics.toColorInt
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -112,7 +111,6 @@ internal object PaymentSheetFixtures {
             linkState = null,
         ),
         statusBarColor = STATUS_BAR_COLOR,
-        injectorKey = DUMMY_INJECTOR_KEY,
         enableLogging = false,
         productUsage = mock()
     )

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
-import android.app.Application
 import android.os.SystemClock
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -9,15 +8,9 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.DaggerPollingComponent
-import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.PollingViewModelSubcomponent
 import com.stripe.android.polling.IntentStatusPoller
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.CoroutineDispatcher
@@ -31,7 +24,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.milliseconds
@@ -205,31 +197,9 @@ internal class PollingViewModel @Inject constructor(
 
     internal class Factory(
         private val argsSupplier: () -> Args,
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
-        internal data class FallbackInitializeParam(
-            val application: Application
-        )
-
-        @Inject
-        lateinit var subcomponentBuilderProvider: Provider<PollingViewModelSubcomponent.Builder>
-
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val args = argsSupplier()
-
-            val application = extras.requireApplication()
-            val savedStateHandle = extras.createSavedStateHandle()
-
-            injectWithFallback(args.injectorKey, FallbackInitializeParam(application))
-
-            return subcomponentBuilderProvider.get()
-                .args(args)
-                .savedStateHandle(savedStateHandle)
-                .build()
-                .viewModel as T
-        }
-
-        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector? {
             val args = argsSupplier()
 
             val config = IntentStatusPoller.Config(
@@ -237,15 +207,17 @@ internal class PollingViewModel @Inject constructor(
                 maxAttempts = args.maxAttempts,
             )
 
-            DaggerPollingComponent
+            return DaggerPollingComponent
                 .builder()
-                .application(arg.application)
-                .injectorKey(DUMMY_INJECTOR_KEY)
+                .application(extras.requireApplication())
                 .config(config)
                 .ioDispatcher(Dispatchers.IO)
                 .build()
-                .inject(this)
-            return null
+                .subcomponentBuilder
+                .args(args)
+                .savedStateHandle(extras.createSavedStateHandle())
+                .build()
+                .viewModel as T
         }
     }
 
@@ -254,7 +226,6 @@ internal class PollingViewModel @Inject constructor(
         val timeLimit: Duration,
         val initialDelay: Duration,
         val maxAttempts: Int,
-        @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     )
 }
 
