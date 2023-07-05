@@ -3,7 +3,7 @@
 ## XX.XX.XX - 2023-XX-XX
 
 ### PaymentSheet
-* [ADDED][6857](https://github.com/stripe/stripe-android/pull/6857) The API for [finalizing payments on the server](https://stripe.com/docs/payments/finalize-payments-on-the-server?platform=android) is now stable.
+* [ADDED][6857](https://github.com/stripe/stripe-android/pull/6857) You can now collect payment details before creating a PaymentIntent or SetupIntent. See [our docs](https://stripe.com/docs/payments/accept-a-payment-deferred) for more info. This integration also allows you to [confirm the Intent on the server](https://stripe.com/docs/payments/finalize-payments-on-the-server).
 
 ### PaymentSheet
 * [ADDED][6583](https://github.com/stripe/stripe-android/pull/6583) Added top-level methods `rememberPaymentSheet()` and `rememberPaymentSheetFlowController()` for easier integration in Compose.
