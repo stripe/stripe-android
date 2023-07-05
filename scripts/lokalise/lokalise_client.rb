@@ -6,9 +6,7 @@ require 'uri'
 class LokaliseClient
 
     def fetch_keys
-        all_keys = fetch_keys_from_lokalise
-        android_keys = filter_android_keys(all_keys)
-        return all_keys, android_keys
+        fetch_keys_from_lokalise
     end
 
     def create_key(key_object)

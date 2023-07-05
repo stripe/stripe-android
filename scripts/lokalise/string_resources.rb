@@ -2,9 +2,9 @@ require 'rexml/document'
 
 include REXML
 
-class LocalStringsProvider
+class StringResources
 
-    def load
+    def fetch
         project_root = File.dirname(Dir.pwd)
         modules = [
             'identity',

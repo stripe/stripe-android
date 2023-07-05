@@ -9,67 +9,31 @@
 # `scripts/localise/check_untranslated_strings.rb` to fail a build if any string isn't translated
 # yet.
 
-require_relative 'diff_provider'
-require_relative 'local_strings'
 require_relative 'lokalise_client'
+require_relative 'processor'
+require_relative 'string_resources'
 
-def handle_result(client, diff_provider, all_keys, diff)
-    if diff.empty?
-        puts "No unsynced strings"
+def handle_result(client, actions)
+    if actions.empty?
+        puts "✅ No unsynced strings"
+        exit 0
     else
-        actions = diff.map do |unsynced_key|
-            key_name = unsynced_key[:key_name]
-            value = unsynced_key[:value]
-            existing_key = diff_provider.find_existing_key(all_keys, value)
-
-            if existing_key.nil?
-                {
-                    action: "create",
-                    message: "Create key \"#{key_name}\" with value \"#{value}\"",
-                    key_object: unsynced_key,
-                }
-            else
-                existing_key_name = existing_key['key_name']['ios']
-                {
-                    action: "update",
-                    message: "Update key \"#{existing_key_name}\" with local string \"#{key_name}\"",
-                    existing_key: existing_key,
-                    key_object: unsynced_key,
-                }
-            end
-        end
-
         # Ask user to confirm actions
-        puts "Found #{diff.length} unsynced key(s). Do you want to perform the following actions? (y/n)"
-        actions.each do |action|
-            puts "* #{action[:message]}"
+        puts "⛔️ Required Lokalise actions:"
+        actions.each_with_index do |action, index|
+            puts "#{index+1}. #{action.description}"
         end
+        puts "Continue? (y/n)"
 
         answer = gets.chomp
         if answer == "y"
-            actions.each do |action|
-                key_object = action[:key_object]
-                if action[:action] == "create"
-                    puts "Creating key: #{key_object[:key_name]}"
-#                     success = client.create_key(key_object)
-#                     if success
-#                         puts "Created key: #{key_object[:key_name]}"
-#                     else
-#                         puts "Failed to create key: #{key_object[:key_name]}"
-#                     end
-                else
-                    puts "Updating key: #{key_object[:key_name]}"
-#                     existing_key = action[:existing_key]
-#                     success = client.update_key(existing_key, key_object)
-#                     if success
-#                         puts "Updated key: #{key_object[:key_name]}"
-#                     else
-#                         puts "Failed to update key: #{key_object[:key_name]}"
-#                     end
-                end
+            outcomes = actions.each_with_index.map { |action, index| action.perform(client) }
+
+            outcomes.each_with_index do |outcome, index|
+                puts "#{index+1}. #{outcome}"
             end
         else
-            abort("You aborted the automated script. Please create/update the keys manually.")
+            abort("🤷 You aborted the automated script. Please create/update the keys manually… somehow…")
         end
     end
 end
@@ -77,11 +41,12 @@ end
 # ---------------- Start of script ----------------
 
 client = LokaliseClient.new
-strings_provider = LocalStringsProvider.new
-diff_provider = DiffProvider.new
+lokalise_keys = client.fetch_keys
 
-all_keys, remote_keys = client.fetch_keys
-local_keys = strings_provider.load
+string_resources = StringResources.new
+local_keys = string_resources.fetch
 
-diff = diff_provider.determine_unsynced_keys(local_keys, remote_keys)
-handle_result(client, diff_provider, all_keys, diff)
+processor = Processor.new(lokalise_keys)
+actions = processor.determine_required_actions(local_keys)
+
+handle_result(client, actions)

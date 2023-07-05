@@ -8,20 +8,20 @@
 # `scripts/lokalise/update_lokalise_with_new_strings.rb` locally to create or update the keys in
 # Lokalise.
 
-require_relative 'diff_provider'
-require_relative 'local_strings'
 require_relative 'lokalise_client'
+require_relative 'processor'
+require_relative 'string_resources'
 
-def handle_result(diff)
-    if diff.empty?
-        puts "No unsynced strings"
+def handle_result(actions)
+    if actions.empty?
+        puts "✅ No Lokalise actions required."
         exit 0
     else
-        puts "Found #{unsynced_keys.length} unsynced key(s)."
-        diff.each do |key|
-            puts "* #{key[:key_name]}"
+        puts "⛔️ Required Lokalise actions:"
+        actions.each_with_index do |action, index|
+            puts "#{index+1}. #{action.description}"
         end
-        puts "Run `scripts/lokalise/update_lokalise_with_new_strings.rb` locally to update Lokalise."
+        puts "👉 Run `scripts/lokalise/update_lokalise_with_new_strings.rb` locally to update Lokalise."
         exit 1
     end
 end
@@ -29,11 +29,12 @@ end
 # ---------------- Start of script ----------------
 
 client = LokaliseClient.new
-strings_provider = LocalStringsProvider.new
-diff_provider = DiffProvider.new
+lokalise_keys = client.fetch_keys
 
-all_keys, remote_keys = client.fetch_keys
-local_keys = strings_provider.load
+string_resources = StringResources.new
+local_keys = string_resources.fetch
 
-diff = diff_provider.determine_unsynced_keys(local_keys, remote_keys)
-handle_result(diff)
+processor = Processor.new(lokalise_keys)
+actions = processor.determine_required_actions(local_keys)
+
+handle_result(actions)
