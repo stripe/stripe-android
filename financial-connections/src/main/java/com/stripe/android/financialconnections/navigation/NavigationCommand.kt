@@ -8,8 +8,7 @@ import androidx.navigation.navArgument
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
 
 internal interface NavigationCommand {
     val arguments: List<NamedNavArgument>
@@ -135,13 +134,17 @@ internal class NavigationManager(
     private val logger: Logger,
     private val externalScope: CoroutineScope
 ) {
-    var commands = MutableSharedFlow<NavigationCommand>()
-    fun navigate(
-        directions: NavigationCommand
-    ) {
-        logger.debug("NavigationManager navigating to: $directions")
-        externalScope.launch {
-            commands.emit(directions)
-        }
+
+    val navigationState: MutableStateFlow<NavigationState> =
+        MutableStateFlow(NavigationState.Idle)
+
+    fun navigate(state: NavigationState) {
+        logger.debug("NavigationManager navigating to: $navigationState")
+        navigationState.value = state
+    }
+
+    fun onNavigated(state: NavigationState) {
+        // clear navigation state, if state is the current state:
+        navigationState.compareAndSet(state, NavigationState.Idle)
     }
 }

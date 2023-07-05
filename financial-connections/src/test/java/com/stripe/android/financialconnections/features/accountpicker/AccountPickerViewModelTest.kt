@@ -8,7 +8,6 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -31,7 +30,6 @@ internal class AccountPickerViewModelTest {
 
     private val pollAuthorizationSessionAccounts = mock<PollAuthorizationSessionAccounts>()
     private val getManifest = mock<GetManifest>()
-    private val goNext = mock<GoNext>()
     private val navigationManager = mock<NavigationManager>()
     private val selectAccounts = mock<SelectAccounts>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
@@ -43,7 +41,6 @@ internal class AccountPickerViewModelTest {
         eventTracker = eventTracker,
         selectAccounts = selectAccounts,
         getManifest = getManifest,
-        goNext = goNext,
         navigationManager = navigationManager,
         logger = Logger.noop(),
         pollAuthorizationSessionAccounts = pollAuthorizationSessionAccounts

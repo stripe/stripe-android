@@ -22,13 +22,17 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
+import com.stripe.android.financialconnections.domain.toNavigationCommand
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccountsList
+import com.stripe.android.financialconnections.navigation.NavigationDirections.institutionPicker
+import com.stripe.android.financialconnections.navigation.NavigationDirections.linkAccountPicker
+import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -46,7 +50,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
     private val fetchNetworkedAccounts: FetchNetworkedAccounts,
-    private val goNext: GoNext,
+    private val navigationManager: NavigationManager,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
     private val logger: Logger
@@ -64,7 +68,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
                         verificationType = VerificationType.SMS,
                         onConsumerNotFound = {
                             analyticsTracker.track(VerificationError(PANE, ConsumerNotFoundError))
-                            goNext(Pane.INSTITUTION_PICKER)
+                            navigationManager.navigate(NavigateToRoute(institutionPicker))
                         },
                         onLookupError = { error ->
                             analyticsTracker.track(VerificationError(PANE, LookupConsumerSession))
@@ -133,7 +137,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         logger.error("Error fetching networked accounts", error)
         analyticsTracker.track(Error(PANE, error))
         analyticsTracker.track(VerificationError(PANE, NetworkedAccountsRetrieveMethodError))
-        goNext(updatedManifest.nextPane)
+        navigationManager.navigate(NavigateToRoute(updatedManifest.nextPane.toNavigationCommand()))
     }
 
     private suspend fun onNetworkedAccountsSuccess(
@@ -143,11 +147,11 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         if (accounts.data.isEmpty()) {
             // Networked user has no accounts
             analyticsTracker.track(VerificationSuccessNoAccounts(PANE))
-            goNext(updatedManifest.nextPane)
+            navigationManager.navigate(NavigateToRoute(updatedManifest.nextPane.toNavigationCommand()))
         } else {
             // Networked user has linked accounts
             analyticsTracker.track(VerificationSuccess(PANE))
-            goNext(Pane.LINK_ACCOUNT_PICKER)
+            navigationManager.navigate(NavigateToRoute(linkAccountPicker))
         }
     }
 

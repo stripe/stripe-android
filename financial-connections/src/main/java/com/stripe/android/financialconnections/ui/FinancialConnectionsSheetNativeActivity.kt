@@ -13,6 +13,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -48,6 +50,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.NavigationState
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
@@ -270,18 +273,52 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     }
 
     @Composable
-    private fun NavigationEffect(navController: NavHostController) {
-        LaunchedEffect(navigationManager.commands) {
-            navigationManager.commands.collect { command ->
-                val from = navController.currentDestination?.route
-                if (command.destination.isNotEmpty() && command.destination != from) {
-                    logger.debug("Navigating from $from to ${command.destination}")
-                    navController.navigate(command.destination) {
-                        launchSingleTop = true
-                        popUpIfNotBackwardsNavigable(navController)
-                    }
+    private fun NavigationEffect(
+        navController: NavHostController
+    ) {
+        val navigationState by navigationManager.navigationState.collectAsState()
+
+        LaunchedEffect(navigationState) {
+            logger.debug("updateNavigationState to $navigationState")
+            val from = navController.currentDestination?.route
+            when (val viewState = navigationState) {
+                is NavigationState.NavigateToRoute -> {
+                    navigateToRoute(viewState, from, navController)
+                    navigationManager.onNavigated(navigationState)
                 }
+
+                is NavigationState.PopToRoute -> {
+                    popToRoute(viewState, from, navController)
+                    navigationManager.onNavigated(navigationState)
+                }
+
+                is NavigationState.Idle -> {}
             }
+        }
+    }
+
+    private fun popToRoute(
+        viewState: NavigationState.PopToRoute,
+        from: String?,
+        navController: NavHostController
+    ) {
+        val destination = viewState.command.destination
+        if (destination.isNotEmpty() && destination != from) {
+            logger.debug("Popping from $from to $destination")
+            navController.navigate(destination) { launchSingleTop = true }
+        }
+        navController.popBackStack(destination, false)
+    }
+
+    private fun navigateToRoute(
+        viewState: NavigationState.NavigateToRoute,
+        from: String?,
+        navController: NavHostController
+    ) {
+        val destination = viewState.command.destination
+        if (destination.isNotEmpty() && destination != from) {
+            logger.debug("Navigating from $from to $destination")
+            navController.navigate(destination) { launchSingleTop = true }
         }
     }
 
