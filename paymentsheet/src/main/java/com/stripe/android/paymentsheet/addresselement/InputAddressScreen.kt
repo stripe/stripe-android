@@ -19,11 +19,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.elements.CheckboxElementUI
+import javax.inject.Provider
 
 @Composable
 internal fun InputAddressScreen(
@@ -80,11 +81,11 @@ internal fun InputAddressScreen(
 
 @Composable
 internal fun InputAddressScreen(
-    injector: NonFallbackInjector
+    inputAddressViewModelSubcomponentBuilderProvider: Provider<InputAddressViewModelSubcomponent.Builder>
 ) {
     val viewModel: InputAddressViewModel = viewModel(
         factory = InputAddressViewModel.Factory(
-            injector
+            inputAddressViewModelSubcomponentBuilderProvider
         )
     )
     val formController by viewModel.formController.collectAsState()

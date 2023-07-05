@@ -6,8 +6,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.core.injection.NonFallbackInjectable
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
@@ -28,7 +26,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Provider
 import com.stripe.android.R as StripeR
@@ -216,19 +213,14 @@ internal class AutocompleteViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val injector: NonFallbackInjector,
+        private val autoCompleteViewModelSubcomponentBuilderProvider: Provider<AutocompleteViewModelSubcomponent.Builder>,
         private val args: Args,
         private val applicationSupplier: () -> Application
-    ) : ViewModelProvider.Factory, NonFallbackInjectable {
-
-        @Inject
-        lateinit var subComponentBuilderProvider:
-            Provider<AutocompleteViewModelSubcomponent.Builder>
+    ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            injector.inject(this)
-            return subComponentBuilderProvider.get()
+            return autoCompleteViewModelSubcomponentBuilderProvider.get()
                 .application(applicationSupplier())
                 .configuration(args)
                 .build().autoCompleteViewModel as T
