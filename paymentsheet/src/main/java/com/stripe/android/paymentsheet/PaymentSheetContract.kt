@@ -66,7 +66,6 @@ class PaymentSheetContract :
                 },
                 config = config,
                 statusBarColor = statusBarColor,
-                injectorKey = injectorKey,
             )
         }
 

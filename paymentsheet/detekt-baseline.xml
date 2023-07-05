@@ -23,7 +23,6 @@
     <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel)</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
-    <ID>LongMethod:PaymentElement.kt$@Composable internal fun PaymentElement( sheetViewModel: BaseSheetViewModel, enabled: Boolean, supportedPaymentMethods: List&lt;LpmRepository.SupportedPaymentMethod>, selectedItem: LpmRepository.SupportedPaymentMethod, showLinkInlineSignup: Boolean, linkConfigurationCoordinator: LinkConfigurationCoordinator, showCheckboxFlow: Flow&lt;Boolean>, onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit, onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit, formArguments: FormArguments, onFormFieldValuesChanged: (FormFieldValues?) -> Unit, )</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( stripeIntent: StripeIntent, customerConfig: PaymentSheet.CustomerConfiguration?, config: PaymentSheet.Configuration?, isGooglePayReady: Boolean, merchantCountry: String?, ): PaymentSheetLoader.Result</ID>
@@ -73,7 +72,7 @@
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
     <ID>TooGenericExceptionThrown:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$throw Exception("Cannot confirm setup intent")</ID>
     <ID>TooManyFunctions:CustomerSheetViewModelModule.kt$CustomerSheetViewModelModule</ID>
-    <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowControllerNonFallbackInjector</ID>
+    <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowController</ID>
     <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>
     <ID>TooManyFunctions:PaymentOptionsViewModel.kt$PaymentOptionsViewModel : BaseSheetViewModel</ID>
     <ID>TooManyFunctions:PaymentSheetViewModel.kt$PaymentSheetViewModel : BaseSheetViewModel</ID>

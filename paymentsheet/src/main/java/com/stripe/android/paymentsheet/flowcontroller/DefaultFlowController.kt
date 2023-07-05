@@ -14,9 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -50,7 +48,6 @@ import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShip
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.intercept
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -94,7 +91,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
-) : PaymentSheet.FlowController, NonFallbackInjector {
+) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val googlePayActivityLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>
@@ -122,17 +119,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             )
         }
-
-    override fun inject(injectable: Injectable<*>) {
-        when (injectable) {
-            is FormViewModel.Factory -> {
-                flowControllerComponent.stateComponent.inject(injectable)
-            }
-            else -> {
-                throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-            }
-        }
-    }
 
     init {
         val paymentLauncherActivityResultLauncher = activityResultRegistryOwner.register(
@@ -642,7 +628,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     .build()
             val flowController = flowControllerComponent.flowController
             flowController.flowControllerComponent = flowControllerComponent
-            WeakMapInjectorRegistry.register(flowController, injectorKey)
             return flowController
         }
     }
