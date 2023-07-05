@@ -138,10 +138,6 @@ public final class com/stripe/android/core/injection/InjectorKt {
 public final class com/stripe/android/core/injection/NamedConstantsKt {
 }
 
-public final class com/stripe/android/core/injection/NonFallbackInjectable$DefaultImpls {
-	public static fun fallbackInitialize (Lcom/stripe/android/core/injection/NonFallbackInjectable;Lkotlin/Unit;)Ljava/lang/Void;
-}
-
 public final class com/stripe/android/core/model/Country$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/core/model/Country$$serializer;
 	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
