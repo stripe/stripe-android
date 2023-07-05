@@ -10,13 +10,13 @@ import com.stripe.android.financialconnections.TestFinancialConnectionsAnalytics
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.SUCCESS
+import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
+import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -34,7 +34,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     @get:Rule
     val mavericksTestRule = MavericksTestRule()
 
-    private val goNext = mock<GoNext>()
+    private val navigationManager = TestNavigationManager()
     private val confirmVerification = mock<ConfirmVerification>()
     private val startVerification = mock<StartVerification>()
     private val markLinkVerified = mock<MarkLinkVerified>()
@@ -47,7 +47,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     private fun buildViewModel(
         state: NetworkingSaveToLinkVerificationState = NetworkingSaveToLinkVerificationState()
     ) = NetworkingSaveToLinkVerificationViewModel(
-        goNext = goNext,
+        navigationManager = navigationManager,
         eventTracker = eventTracker,
         confirmVerification = confirmVerification,
         markLinkVerified = markLinkVerified,
@@ -105,7 +105,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 "linked_accounts.networking.verification.success",
                 mapOf("pane" to "networking_save_to_link_verification")
             )
-            verify(goNext).invoke(SUCCESS)
+            navigationManager.assertNavigatedTo(NavigationDirections.success)
         }
 
     @Test
@@ -161,6 +161,6 @@ class NetworkingSaveToLinkVerificationViewModelTest {
 
         verifyNoInteractions(confirmVerification)
         verifyNoInteractions(saveAccountToLink)
-        verify(goNext).invoke(SUCCESS)
+        navigationManager.assertNavigatedTo(NavigationDirections.success)
     }
 }

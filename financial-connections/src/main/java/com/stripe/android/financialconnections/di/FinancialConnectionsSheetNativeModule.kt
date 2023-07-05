@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.features.reset.ResetSubcomponent
 import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
@@ -53,7 +54,7 @@ internal class FinancialConnectionsSheetNativeModule {
     @Provides
     fun providesNavigationManager(
         logger: Logger
-    ) = NavigationManager(
+    ): NavigationManager = NavigationManagerImpl(
         logger = logger
     )
 

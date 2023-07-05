@@ -5,9 +5,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.NavType.EnumType
 import androidx.navigation.navArgument
-import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
-import kotlinx.coroutines.flow.MutableStateFlow
 
 internal interface NavigationCommand {
     val arguments: List<NamedNavArgument>
@@ -129,20 +127,3 @@ internal object NavigationDirections {
     }
 }
 
-internal class NavigationManager(
-    private val logger: Logger
-) {
-
-    val navigationState: MutableStateFlow<NavigationState> =
-        MutableStateFlow(NavigationState.Idle)
-
-    fun navigate(state: NavigationState) {
-        logger.debug("NavigationManager navigating to: $navigationState")
-        navigationState.value = state
-    }
-
-    fun onNavigated(state: NavigationState) {
-        // clear navigation state, if state is the current state:
-        navigationState.compareAndSet(state, NavigationState.Idle)
-    }
-}
