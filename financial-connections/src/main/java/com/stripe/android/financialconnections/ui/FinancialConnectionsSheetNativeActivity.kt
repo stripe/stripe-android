@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -287,27 +286,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     navigationManager.onNavigated(navigationState)
                 }
 
-                is NavigationState.PopToRoute -> {
-                    popToRoute(viewState, from, navController)
-                    navigationManager.onNavigated(navigationState)
-                }
-
                 is NavigationState.Idle -> {}
             }
         }
-    }
-
-    private fun popToRoute(
-        viewState: NavigationState.PopToRoute,
-        from: String?,
-        navController: NavHostController
-    ) {
-        val destination = viewState.command.destination
-        if (destination.isNotEmpty() && destination != from) {
-            logger.debug("Popping from $from to $destination")
-            navController.navigate(destination) { launchSingleTop = true }
-        }
-        navController.popBackStack(destination, inclusive = viewState.inclusive)
     }
 
     private fun navigateToRoute(
@@ -318,23 +299,12 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         val destination = viewState.command.destination
         if (destination.isNotEmpty() && destination != from) {
             logger.debug("Navigating from $from to $destination")
-            navController.navigate(destination) { launchSingleTop = true }
-        }
-    }
-
-    /**
-     * Removes screens that are not backwards-navigable from the backstack.
-     */
-    private fun NavOptionsBuilder.popUpIfNotBackwardsNavigable(navController: NavHostController) {
-        val destination: String = navController.currentBackStackEntry?.destination?.route ?: return
-        val destinationsToSkipOnBack = listOf(
-            NavigationDirections.partnerAuth.destination,
-            NavigationDirections.reset.destination
-        )
-        if (destinationsToSkipOnBack.contains(navController.currentDestination?.route)
-        ) {
-            popUpTo(destination) {
-                inclusive = true
+            navController.navigate(destination) {
+                launchSingleTop = true
+                val currentScreen: String? = navController.currentBackStackEntry?.destination?.route
+                if (currentScreen != null && viewState.popCurrentFromBackStack) {
+                    popUpTo(currentScreen) { inclusive = true }
+                }
             }
         }
     }

@@ -34,7 +34,6 @@ import com.stripe.android.financialconnections.navigation.NavigationDirections.a
 import com.stripe.android.financialconnections.navigation.NavigationDirections.manualEntry
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
-import com.stripe.android.financialconnections.navigation.NavigationState.PopToRoute
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -163,7 +162,12 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 
     fun onSelectAnotherBank() {
-        navigationManager.navigate(PopToRoute(NavigationDirections.reset))
+        navigationManager.navigate(
+            NavigateToRoute(
+                command = NavigationDirections.reset,
+                popCurrentFromBackStack = true
+            )
+        )
     }
 
     fun onWebAuthFlowFinished(
@@ -222,7 +226,12 @@ internal class PartnerAuthViewModel @Inject constructor(
             } else {
                 // For OAuth institutions, navigate to Session cancellation's next pane.
                 postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
-                navigationManager.navigate(NavigateToRoute(result.nextPane.toNavigationCommand()))
+                navigationManager.navigate(
+                    NavigateToRoute(
+                        command = result.nextPane.toNavigationCommand(),
+                        popCurrentFromBackStack = true
+                    )
+                )
             }
         }.onFailure {
             logger.error("failed cancelling session after cancelled web flow", it)
@@ -244,9 +253,19 @@ internal class PartnerAuthViewModel @Inject constructor(
                     publicToken = oAuthResults.publicToken
                 )
                 logger.debug("Session authorized!")
-                navigationManager.navigate(PopToRoute(updatedSession.nextPane.toNavigationCommand()))
+                navigationManager.navigate(
+                    NavigateToRoute(
+                        command = updatedSession.nextPane.toNavigationCommand(),
+                        popCurrentFromBackStack = true
+                    )
+                )
             } else {
-                navigationManager.navigate(PopToRoute(accountPicker))
+                navigationManager.navigate(
+                    NavigateToRoute(
+                        command = accountPicker,
+                        popCurrentFromBackStack = true
+                    )
+                )
             }
         }.onFailure {
             logger.error("failed authorizing session", it)
@@ -254,9 +273,12 @@ internal class PartnerAuthViewModel @Inject constructor(
         }
     }
 
-    fun onEnterDetailsManuallyClick() {
-        navigationManager.navigate(PopToRoute(manualEntry))
-    }
+    fun onEnterDetailsManuallyClick() = navigationManager.navigate(
+        NavigateToRoute(
+            command = manualEntry,
+            popCurrentFromBackStack = true
+        )
+    )
 
     fun onClickableTextClick(uri: String) {
         // if clicked uri contains an eventName query param, track click event.

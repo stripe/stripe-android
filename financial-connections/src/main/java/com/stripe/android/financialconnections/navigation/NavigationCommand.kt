@@ -7,7 +7,6 @@ import androidx.navigation.NavType.EnumType
 import androidx.navigation.navArgument
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal interface NavigationCommand {
@@ -131,8 +130,7 @@ internal object NavigationDirections {
 }
 
 internal class NavigationManager(
-    private val logger: Logger,
-    private val externalScope: CoroutineScope
+    private val logger: Logger
 ) {
 
     val navigationState: MutableStateFlow<NavigationState> =

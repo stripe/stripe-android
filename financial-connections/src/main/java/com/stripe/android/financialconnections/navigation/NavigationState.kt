@@ -11,14 +11,7 @@ internal sealed class NavigationState {
 
     data class NavigateToRoute(
         val command: NavigationCommand,
+        val popCurrentFromBackStack: Boolean = false,
         val id: String = UUID.randomUUID().toString()
-    ) :
-        NavigationState()
-
-    data class PopToRoute(
-        val command: NavigationCommand,
-        val inclusive: Boolean = false,
-        val id: String = UUID.randomUUID().toString()
-    ) :
-        NavigationState()
+    ) : NavigationState()
 }

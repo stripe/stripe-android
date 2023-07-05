@@ -54,8 +54,7 @@ internal class FinancialConnectionsSheetNativeModule {
     fun providesNavigationManager(
         logger: Logger
     ) = NavigationManager(
-        logger = logger,
-        externalScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        logger = logger
     )
 
     @Provides

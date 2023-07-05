@@ -77,7 +77,12 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         suspend {
             eventTracker.track(Click("click.skip_sign_in", PANE))
             disableNetworking().also {
-                navigationManager.navigate(NavigateToRoute(it.nextPane.toNavigationCommand()))
+                navigationManager.navigate(
+                    NavigateToRoute(
+                        command = it.nextPane.toNavigationCommand(),
+                        popCurrentFromBackStack = true
+                    )
+                )
             }
         }.execute { copy(disableNetworkingAsync = it) }
     }
