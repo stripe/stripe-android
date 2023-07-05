@@ -34,6 +34,7 @@ import com.stripe.android.financialconnections.navigation.NavigationDirections.a
 import com.stripe.android.financialconnections.navigation.NavigationDirections.manualEntry
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
+import com.stripe.android.financialconnections.navigation.NavigationState.PopToRoute
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -162,7 +163,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 
     fun onSelectAnotherBank() {
-        navigationManager.navigate(NavigateToRoute(NavigationDirections.reset))
+        navigationManager.navigate(PopToRoute(NavigationDirections.reset))
     }
 
     fun onWebAuthFlowFinished(
@@ -243,9 +244,9 @@ internal class PartnerAuthViewModel @Inject constructor(
                     publicToken = oAuthResults.publicToken
                 )
                 logger.debug("Session authorized!")
-                navigationManager.navigate(NavigateToRoute(updatedSession.nextPane.toNavigationCommand()))
+                navigationManager.navigate(PopToRoute(updatedSession.nextPane.toNavigationCommand()))
             } else {
-                navigationManager.navigate(NavigateToRoute(accountPicker))
+                navigationManager.navigate(PopToRoute(accountPicker))
             }
         }.onFailure {
             logger.error("failed authorizing session", it)
@@ -254,7 +255,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 
     fun onEnterDetailsManuallyClick() {
-        navigationManager.navigate(NavigateToRoute(manualEntry))
+        navigationManager.navigate(PopToRoute(manualEntry))
     }
 
     fun onClickableTextClick(uri: String) {

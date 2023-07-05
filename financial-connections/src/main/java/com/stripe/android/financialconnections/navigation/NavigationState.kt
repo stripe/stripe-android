@@ -17,6 +17,7 @@ internal sealed class NavigationState {
 
     data class PopToRoute(
         val command: NavigationCommand,
+        val inclusive: Boolean = false,
         val id: String = UUID.randomUUID().toString()
     ) :
         NavigationState()

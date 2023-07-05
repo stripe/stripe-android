@@ -307,7 +307,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             logger.debug("Popping from $from to $destination")
             navController.navigate(destination) { launchSingleTop = true }
         }
-        navController.popBackStack(destination, false)
+        navController.popBackStack(destination, inclusive = viewState.inclusive)
     }
 
     private fun navigateToRoute(
