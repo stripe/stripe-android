@@ -7,7 +7,6 @@ import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -115,7 +114,7 @@ internal class StripeCustomerAdapter @Inject constructor(
 
     override suspend fun setupIntentClientSecretForCustomerAttach(): Result<String> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
-            setupIntentClientSecretProvider?.provide(customerEphemeralKey.customerId)
+            setupIntentClientSecretProvider?.provideSetupIntentClientSecret(customerEphemeralKey.customerId)
         }.getOrElse {
             Result.failure(it)
         } ?: throw IllegalArgumentException("setupIntentClientSecretProvider cannot be null")
@@ -129,7 +128,7 @@ internal class StripeCustomerAdapter @Inject constructor(
                 )
             }?.result ?: run {
                 val newCachedCustomerEphemeralKey = CachedCustomerEphemeralKey(
-                    result = customerEphemeralKeyProvider.provide(),
+                    result = customerEphemeralKeyProvider.provideCustomerEphemeralKey(),
                     date = timeProvider(),
                 )
                 cachedCustomerEphemeralKey = newCachedCustomerEphemeralKey

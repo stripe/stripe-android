@@ -159,7 +159,7 @@ interface CustomerAdapter {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface CustomerEphemeralKeyProvider {
 
-    suspend fun provide(): Result<CustomerEphemeralKey>
+    suspend fun provideCustomerEphemeralKey(): Result<CustomerEphemeralKey>
 }
 
 /**
@@ -169,7 +169,7 @@ fun interface CustomerEphemeralKeyProvider {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface SetupIntentClientSecretProvider {
 
-    suspend fun provide(customerId: String): Result<String>
+    suspend fun provideSetupIntentClientSecret(customerId: String): Result<String>
 }
 
 @ExperimentalCustomerSheetApi
