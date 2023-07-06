@@ -126,4 +126,3 @@ internal object NavigationDirections {
         override val destination = ""
     }
 }
-

@@ -30,4 +30,3 @@ internal class TestNavigationManager : NavigationManager {
         assertThat(last.command.destination).isEqualTo(destination.destination)
     }
 }
-

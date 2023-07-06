@@ -11,8 +11,7 @@ internal interface NavigationManager {
 
 internal class NavigationManagerImpl(
     private val logger: Logger
-): NavigationManager {
-
+) : NavigationManager {
 
     override val navigationState: MutableStateFlow<NavigationState> =
         MutableStateFlow(NavigationState.Idle)
