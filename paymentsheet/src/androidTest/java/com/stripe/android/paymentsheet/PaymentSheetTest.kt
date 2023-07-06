@@ -16,7 +16,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 @RunWith(AndroidJUnit4::class)
 internal class PaymentSheetTest {
     @get:Rule

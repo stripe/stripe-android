@@ -13,7 +13,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
-import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
@@ -268,14 +267,13 @@ class PaymentSheetPlaygroundViewModel(
             }
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private fun createIntent(): CreateIntentResult {
         // Note: This is not how you'd do this in a real application. Instead, your app would
         // call your backend and create (and optionally confirm) a payment or setup intent.
         return CreateIntentResult.Success(clientSecret = clientSecret.value!!)
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
+    @OptIn(DelicatePaymentSheetApi::class)
     suspend fun createAndConfirmIntent(
         paymentMethodId: String,
         shouldSavePaymentMethod: Boolean,
@@ -308,7 +306,6 @@ class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private suspend fun createAndConfirmIntentInternal(
         paymentMethodId: String,
         shouldSavePaymentMethod: Boolean,

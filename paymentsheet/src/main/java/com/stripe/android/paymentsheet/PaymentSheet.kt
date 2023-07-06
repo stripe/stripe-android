@@ -49,7 +49,6 @@ class PaymentSheet internal constructor(
      * @param paymentResultCallback Called with the result of the payment or setup after
      * [PaymentSheet] is dismissed.
      */
-    @ExperimentalPaymentSheetDecouplingApi
     constructor(
         activity: ComponentActivity,
         createIntentCallback: CreateIntentCallback,
@@ -82,7 +81,6 @@ class PaymentSheet internal constructor(
      * @param paymentResultCallback Called with the result of the payment or setup after
      * [PaymentSheet] is dismissed.
      */
-    @ExperimentalPaymentSheetDecouplingApi
     constructor(
         fragment: Fragment,
         createIntentCallback: CreateIntentCallback,
@@ -139,7 +137,6 @@ class PaymentSheet internal constructor(
      * @param intentConfiguration The [IntentConfiguration] to use.
      * @param configuration An optional [PaymentSheet] configuration.
      */
-    @ExperimentalPaymentSheetDecouplingApi
     @JvmOverloads
     fun presentWithIntentConfiguration(
         intentConfiguration: IntentConfiguration,
@@ -175,7 +172,6 @@ class PaymentSheet internal constructor(
             }
         }
 
-        @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
         @Parcelize
         internal data class DeferredIntent(
             val intentConfiguration: IntentConfiguration,
@@ -200,7 +196,6 @@ class PaymentSheet internal constructor(
      * @param onBehalfOf The account (if any) for which the funds of the intent are intended. See
      * [our docs](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-on_behalf_of) for more info.
      */
-    @ExperimentalPaymentSheetDecouplingApi
     @Parcelize
     class IntentConfiguration @JvmOverloads constructor(
         val mode: Mode,
@@ -211,7 +206,6 @@ class PaymentSheet internal constructor(
         /**
          * Contains information about the desired payment or setup flow.
          */
-        @ExperimentalPaymentSheetDecouplingApi
         sealed class Mode : Parcelable {
 
             internal abstract val setupFutureUse: SetupFutureUse?
@@ -230,7 +224,6 @@ class PaymentSheet internal constructor(
              * @param captureMethod Controls when the funds will be captured from the customer's
              * account. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method) for more info.
              */
-            @ExperimentalPaymentSheetDecouplingApi
             @Parcelize
             class Payment @JvmOverloads constructor(
                 val amount: Long,
@@ -247,7 +240,6 @@ class PaymentSheet internal constructor(
              * @param setupFutureUse Indicates that you intend to make future payments. See
              * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
              */
-            @ExperimentalPaymentSheetDecouplingApi
             @Parcelize
             class Setup @JvmOverloads constructor(
                 val currency: String? = null,
@@ -263,7 +255,6 @@ class PaymentSheet internal constructor(
          * Indicates that you intend to make future payments with this [PaymentIntent]'s payment
          * method. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
          */
-        @ExperimentalPaymentSheetDecouplingApi
         enum class SetupFutureUse {
 
             /**
@@ -283,7 +274,6 @@ class PaymentSheet internal constructor(
          *
          * See [docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method).
          */
-        @ExperimentalPaymentSheetDecouplingApi
         enum class CaptureMethod {
 
             /**
@@ -1099,7 +1089,6 @@ class PaymentSheet internal constructor(
          * @param configuration An optional [PaymentSheet] configuration.
          * @param callback called with the result of configuring the FlowController.
          */
-        @ExperimentalPaymentSheetDecouplingApi
         fun configureWithIntentConfiguration(
             intentConfiguration: IntentConfiguration,
             configuration: Configuration? = null,
@@ -1175,7 +1164,6 @@ class PaymentSheet internal constructor(
              * @param paymentResultCallback Called with the result of the payment after
              * [PaymentSheet] is dismissed.
              */
-            @ExperimentalPaymentSheetDecouplingApi
             @JvmStatic
             fun create(
                 activity: ComponentActivity,
@@ -1223,7 +1211,6 @@ class PaymentSheet internal constructor(
              * @param paymentResultCallback Called with the result of the payment after
              * [PaymentSheet] is dismissed.
              */
-            @ExperimentalPaymentSheetDecouplingApi
             @JvmStatic
             fun create(
                 fragment: Fragment,

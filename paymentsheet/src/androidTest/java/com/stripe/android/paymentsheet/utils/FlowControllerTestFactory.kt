@@ -3,13 +3,11 @@ package com.stripe.android.paymentsheet.utils
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal class FlowControllerTestFactory(
     private val integrationType: IntegrationType,
     private val createIntentCallback: CreateIntentCallback? = null,

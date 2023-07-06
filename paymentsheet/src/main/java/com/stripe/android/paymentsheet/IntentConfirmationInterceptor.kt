@@ -75,7 +75,7 @@ internal interface IntentConfirmationInterceptor {
     ): NextStep
 
     companion object {
-        var createIntentCallback: AbsCreateIntentCallback? = null
+        var createIntentCallback: CreateIntentCallback? = null
 
         const val COMPLETE_WITHOUT_CONFIRMING_INTENT = "COMPLETE_WITHOUT_CONFIRMING_INTENT"
     }
@@ -87,7 +87,6 @@ internal enum class DeferredIntentConfirmationType(val value: String) {
     None("none");
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val context: Context,
     private val stripeRepository: StripeRepository,

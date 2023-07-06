@@ -21,7 +21,6 @@ import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 @RunWith(AndroidJUnit4::class)
 internal class FlowControllerTest {
     @get:Rule

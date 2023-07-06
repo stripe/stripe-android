@@ -33,7 +33,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -191,7 +190,6 @@ internal class DefaultFlowController @Inject internal constructor(
         )
     }
 
-    @ExperimentalPaymentSheetDecouplingApi
     override fun configureWithIntentConfiguration(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: PaymentSheet.Configuration?,
