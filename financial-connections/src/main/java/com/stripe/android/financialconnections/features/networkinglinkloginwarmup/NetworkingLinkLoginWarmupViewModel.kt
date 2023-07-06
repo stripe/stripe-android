@@ -80,6 +80,9 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
                 navigationManager.navigate(
                     NavigateToRoute(
                         command = it.nextPane.toNavigationCommand(),
+                        // skipping disables networking, which means
+                        // we don't want the user to navigate back to
+                        // the warm-up pane.
                         popCurrentFromBackStack = true
                     )
                 )
