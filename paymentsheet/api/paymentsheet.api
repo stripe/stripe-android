@@ -45,7 +45,7 @@ public final class com/stripe/android/paymentsheet/ComposableSingletons$PaymentO
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public abstract interface class com/stripe/android/paymentsheet/CreateIntentCallback : com/stripe/android/paymentsheet/AbsCreateIntentCallback {
+public abstract interface class com/stripe/android/paymentsheet/CreateIntentCallback {
 	public abstract fun onCreateIntent (Lcom/stripe/android/model/PaymentMethod;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 

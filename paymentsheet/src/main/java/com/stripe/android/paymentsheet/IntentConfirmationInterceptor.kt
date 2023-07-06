@@ -75,7 +75,7 @@ internal interface IntentConfirmationInterceptor {
     ): NextStep
 
     companion object {
-        var createIntentCallback: AbsCreateIntentCallback? = null
+        var createIntentCallback: CreateIntentCallback? = null
 
         const val COMPLETE_WITHOUT_CONFIRMING_INTENT = "COMPLETE_WITHOUT_CONFIRMING_INTENT"
     }
