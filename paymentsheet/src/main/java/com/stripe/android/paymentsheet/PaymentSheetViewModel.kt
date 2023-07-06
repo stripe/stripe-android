@@ -15,7 +15,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -641,7 +640,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val component = DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(application)
-                .injectorKey(DUMMY_INJECTOR_KEY)
                 .build()
                 .paymentSheetViewModelSubcomponentBuilder
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(starterArgsSupplier()))

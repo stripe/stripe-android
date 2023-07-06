@@ -116,7 +116,6 @@
     <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory$* [IsReadyToPayRequest](https://developers.google.com/pay/api/android/reference/request-objects#IsReadyToPayRequest)</ID>
     <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory.BillingAddressParameters$*</ID>
     <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory.ShippingAddressParameters$* [ShippingAddressParameters](https://developers.google.com/pay/api/android/reference/request-objects#ShippingAddressParameters)</ID>
-    <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory.TransactionInfo$*</ID>
     <ID>MaxLineLength:GooglePayLauncher.kt$GooglePayLauncher$*</ID>
     <ID>MaxLineLength:GooglePayLauncherActivity.kt$GooglePayLauncherActivity$*</ID>
     <ID>MaxLineLength:GooglePayPaymentMethodLauncherActivity.kt$GooglePayPaymentMethodLauncherActivity$*</ID>

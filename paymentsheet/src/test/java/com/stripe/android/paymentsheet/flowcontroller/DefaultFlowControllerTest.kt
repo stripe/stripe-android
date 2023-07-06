@@ -342,7 +342,6 @@ internal class DefaultFlowControllerTest {
                 linkState = null,
             ),
             statusBarColor = STATUS_BAR_COLOR,
-            injectorKey = INJECTOR_KEY,
             enableLogging = ENABLE_LOGGING,
             productUsage = PRODUCT_USAGE
         )
@@ -1384,7 +1383,6 @@ internal class DefaultFlowControllerTest {
         ),
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
-        injectorKey = INJECTOR_KEY,
         eventReporter = eventReporter,
         viewModel = viewModel,
         paymentLauncherFactory = paymentLauncherAssistedFactory,
@@ -1453,7 +1451,6 @@ internal class DefaultFlowControllerTest {
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
 
-        private const val INJECTOR_KEY = "TestInjectorKey"
         private const val ENABLE_LOGGING = false
         private val PRODUCT_USAGE = setOf("TestProductUsage")
 
