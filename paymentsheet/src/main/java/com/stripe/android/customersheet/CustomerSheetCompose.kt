@@ -23,7 +23,6 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 fun rememberCustomerSheet(
     configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(),
     customerAdapter: CustomerAdapter,
-    callback: CustomerSheetResultCallback,
 ): CustomerSheet {
     val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
         "CustomerSheet must be created with access to a ViewModelStoreOwner"
@@ -42,7 +41,6 @@ fun rememberCustomerSheet(
             activityResultRegistryOwner = activityResultRegistryOwner,
             configuration = configuration,
             customerAdapter = customerAdapter,
-            callback = callback,
         )
     }
 }

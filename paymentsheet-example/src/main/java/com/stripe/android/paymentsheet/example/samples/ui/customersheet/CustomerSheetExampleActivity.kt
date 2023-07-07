@@ -44,8 +44,11 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                 val customerSheet = rememberCustomerSheet(
                     customerAdapter = viewModel.customerAdapter,
                     configuration = buildConfig(),
-                    callback = viewModel::onCustomerSheetResult,
                 )
+
+                val paymentSelection = customerSheet.paymentSelection.collectAsState()
+
+                println("JAMES: ${paymentSelection.value}")
 
                 val viewState by viewModel.state.collectAsState()
 

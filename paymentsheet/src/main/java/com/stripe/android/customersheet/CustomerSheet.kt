@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.customersheet.injection.CustomerSheetComponent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.utils.AnimationConstants
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 /**
@@ -27,14 +28,16 @@ class CustomerSheet @Inject internal constructor(
     private val application: Application,
     lifecycleOwner: LifecycleOwner,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
-    private val callback: CustomerSheetResultCallback,
 ) {
+
+    val paymentSelection: StateFlow<PaymentOptionSelection?> =
+        CustomerSessionViewModel.component.viewModel.paymentSelection
 
     private val customerSheetActivityLauncher =
         activityResultRegistryOwner.activityResultRegistry.register(
             "CustomerSheet",
             CustomerSheetContract(),
-            ::onCustomerSheetResult,
+            CustomerSessionViewModel.component.viewModel::onCustomerSheetResult,
         )
 
     init {
@@ -72,11 +75,6 @@ class CustomerSheet @Inject internal constructor(
      */
     fun resetCustomer() {
         CustomerSessionViewModel.clear()
-    }
-
-    private fun onCustomerSheetResult(result: InternalCustomerSheetResult?) {
-        requireNotNull(result)
-        callback.onResult(result.toPublicResult())
     }
 
     /**
@@ -188,7 +186,6 @@ class CustomerSheet @Inject internal constructor(
             activity: ComponentActivity,
             configuration: Configuration,
             customerAdapter: CustomerAdapter,
-            callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             return getInstance(
                 lifecycleOwner = activity,
@@ -196,7 +193,6 @@ class CustomerSheet @Inject internal constructor(
                 activityResultRegistryOwner = activity,
                 configuration = configuration,
                 customerAdapter = customerAdapter,
-                callback = callback,
             )
         }
 
@@ -212,7 +208,6 @@ class CustomerSheet @Inject internal constructor(
             fragment: Fragment,
             configuration: Configuration,
             customerAdapter: CustomerAdapter,
-            callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             return getInstance(
                 lifecycleOwner = fragment,
@@ -221,7 +216,6 @@ class CustomerSheet @Inject internal constructor(
                     ?: fragment.requireActivity(),
                 configuration = configuration,
                 customerAdapter = customerAdapter,
-                callback = callback,
             )
         }
 
@@ -231,7 +225,6 @@ class CustomerSheet @Inject internal constructor(
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             configuration: Configuration,
             customerAdapter: CustomerAdapter,
-            callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             val customerSessionViewModel =
                 ViewModelProvider(viewModelStoreOwner)[CustomerSessionViewModel::class.java]
@@ -239,7 +232,6 @@ class CustomerSheet @Inject internal constructor(
             val customerSessionComponent = customerSessionViewModel.createCustomerSessionComponent(
                 configuration = configuration,
                 customerAdapter = customerAdapter,
-                callback = callback,
             )
 
             val customerSheetComponent: CustomerSheetComponent =

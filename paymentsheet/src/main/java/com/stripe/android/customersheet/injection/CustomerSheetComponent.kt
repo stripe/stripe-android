@@ -8,7 +8,11 @@ import dagger.BindsInstance
 import dagger.Subcomponent
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-@Subcomponent
+@Subcomponent(
+    modules = [
+        CustomerSheetModule::class
+    ]
+)
 internal interface CustomerSheetComponent {
     val customerSheet: CustomerSheet
     val sessionComponent: CustomerSessionComponent

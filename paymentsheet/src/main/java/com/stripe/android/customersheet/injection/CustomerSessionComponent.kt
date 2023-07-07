@@ -4,9 +4,9 @@ import android.app.Application
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSessionViewModel
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.CustomerSheetResultCallback
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import dagger.BindsInstance
 import dagger.Component
 
@@ -14,6 +14,7 @@ import dagger.Component
 @CustomerSessionScope
 @Component(
     modules = [
+        CustomerSheetModule::class,
         CustomerSheetViewModelModule::class,
         StripeRepositoryModule::class,
     ]
@@ -22,9 +23,10 @@ internal interface CustomerSessionComponent {
     val customerSheetComponentBuilder: CustomerSheetComponent.Builder
     val customerSheetViewModelComponentBuilder: CustomerSheetViewModelComponent.Builder
 
+    val viewModel: CustomerSessionViewModel
+    val paymentOptionFactory: PaymentOptionFactory
     val configuration: CustomerSheet.Configuration
     val customerAdapter: CustomerAdapter
-    val callback: CustomerSheetResultCallback
 
     @Component.Builder
     interface Builder {
@@ -39,9 +41,6 @@ internal interface CustomerSessionComponent {
 
         @BindsInstance
         fun customerAdapter(customerAdapter: CustomerAdapter): Builder
-
-        @BindsInstance
-        fun callback(callback: CustomerSheetResultCallback): Builder
 
         fun build(): CustomerSessionComponent
     }

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.customersheet.injection.DaggerStripeCustomerAdapterComponent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 
 /**
@@ -146,6 +147,21 @@ interface CustomerAdapter {
                     is SavedSelection.Link -> Link
                     is SavedSelection.None -> null
                     is SavedSelection.PaymentMethod -> StripeId(id)
+                }
+            }
+
+            internal suspend fun PaymentOption.toPaymentSelection(
+                paymentMethodProvider: suspend (paymentMethodId: String) -> PaymentMethod?
+            ): PaymentSelection? {
+                return when (this) {
+                    is GooglePay -> PaymentSelection.GooglePay
+                    is Link -> PaymentSelection.Link
+                    is StripeId -> {
+                        val paymentMethod = paymentMethodProvider(id) ?: return null
+                        PaymentSelection.Saved(
+                            paymentMethod = paymentMethod
+                        )
+                    }
                 }
             }
         }

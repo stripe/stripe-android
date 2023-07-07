@@ -27,13 +27,11 @@ class CustomerSessionViewModelTest {
         val component1 = viewModel.createCustomerSessionComponent(
             configuration = mock(),
             customerAdapter = mock(),
-            callback = mock(),
         )
 
         val component2 = viewModel.createCustomerSessionComponent(
             configuration = mock(),
             customerAdapter = mock(),
-            callback = mock(),
         )
 
         assertThat(component1).isNotEqualTo(component2)
@@ -43,18 +41,15 @@ class CustomerSessionViewModelTest {
     fun `createCustomerSessionComponent returns the same session`() {
         val configuration = mock<CustomerSheet.Configuration>()
         val customerAdapter = mock<CustomerAdapter>()
-        val callback = mock<CustomerSheetResultCallback>()
 
         val component1 = viewModel.createCustomerSessionComponent(
             configuration = configuration,
             customerAdapter = customerAdapter,
-            callback = callback,
         )
 
         val component2 = viewModel.createCustomerSessionComponent(
             configuration = configuration,
             customerAdapter = customerAdapter,
-            callback = callback,
         )
 
         assertThat(component1).isEqualTo(component2)
@@ -72,7 +67,6 @@ class CustomerSessionViewModelTest {
         val component = viewModel.createCustomerSessionComponent(
             configuration = mock(),
             customerAdapter = mock(),
-            callback = mock(),
         )
 
         assertThat(component).isEqualTo(CustomerSessionViewModel.component)
@@ -83,7 +77,6 @@ class CustomerSessionViewModelTest {
         val component = viewModel.createCustomerSessionComponent(
             configuration = mock(),
             customerAdapter = mock(),
-            callback = mock(),
         )
 
         assertThat(component).isEqualTo(CustomerSessionViewModel.component)
