@@ -237,7 +237,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
             LinkHandler.ProcessingState.Cancelled -> {
-                _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
+                setContentVisible(true)
+                resetViewState()
             }
             is LinkHandler.ProcessingState.PaymentMethodCollected -> {
                 setContentVisible(true)
