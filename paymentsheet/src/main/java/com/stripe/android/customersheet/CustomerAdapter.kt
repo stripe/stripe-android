@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.customersheet.injection.DaggerStripeCustomerAdapterComponent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 
 /**
@@ -120,6 +121,32 @@ interface CustomerAdapter {
 
         internal data class StripeId(override val id: String) : PaymentOption(id)
 
+        internal fun toPaymentSelection(
+            paymentMethodProvider: (paymentMethodId: String) -> PaymentMethod?,
+        ): PaymentSelection? {
+            return when (this) {
+                is GooglePay -> {
+                    PaymentSelection.GooglePay
+                }
+                is Link -> {
+                    PaymentSelection.Link
+                }
+                is StripeId -> {
+                    paymentMethodProvider(id)?.let {
+                        PaymentSelection.Saved(it)
+                    }
+                }
+            }
+        }
+
+        internal fun toSavedSelection(): SavedSelection {
+            return when (this) {
+                is GooglePay -> SavedSelection.GooglePay
+                is Link -> SavedSelection.Link
+                is StripeId -> SavedSelection.PaymentMethod(id)
+            }
+        }
+
         @ExperimentalCustomerSheetApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
@@ -128,14 +155,6 @@ interface CustomerAdapter {
                     "google_pay" -> GooglePay
                     "link" -> Link
                     else -> StripeId(id)
-                }
-            }
-
-            internal fun PaymentOption.toSavedSelection(): SavedSelection {
-                return when (this) {
-                    is GooglePay -> SavedSelection.GooglePay
-                    is Link -> SavedSelection.Link
-                    is StripeId -> SavedSelection.PaymentMethod(id)
                 }
             }
 

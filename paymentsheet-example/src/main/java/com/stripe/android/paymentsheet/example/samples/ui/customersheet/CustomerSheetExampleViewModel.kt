@@ -50,7 +50,7 @@ class CustomerSheetExampleViewModel(
                 failure = {
                     CustomerAdapter.Result.failure(
                         it.exception,
-                        it.message
+                        "We could\'nt retrieve your information, please try again"
                     )
                 }
             )

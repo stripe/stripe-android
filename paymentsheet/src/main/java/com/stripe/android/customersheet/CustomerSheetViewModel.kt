@@ -136,25 +136,6 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    private fun CustomerAdapter.PaymentOption?.toPaymentSelection(
-        paymentMethodProvider: (paymentMethodId: String) -> PaymentMethod?,
-    ): PaymentSelection? {
-        return when (this) {
-            is CustomerAdapter.PaymentOption.GooglePay -> {
-                PaymentSelection.GooglePay
-            }
-            is CustomerAdapter.PaymentOption.Link -> {
-                PaymentSelection.Link
-            }
-            is CustomerAdapter.PaymentOption.StripeId -> {
-                paymentMethodProvider(id)?.let {
-                    PaymentSelection.Saved(it)
-                }
-            }
-            else -> null
-        }
-    }
-
     private fun onAddCardPressed() {
         val paymentMethodCode = PaymentMethod.Type.Card.code
         val formArguments = FormArguments(
@@ -474,13 +455,13 @@ internal class CustomerSheetViewModel @Inject constructor(
                             label = resources.getString(com.stripe.android.R.string.stripe_google_pay),
                         )
                     )
-                }.onFailure { cause, _ ->
+                }.onFailure { cause, displayMessage ->
                     logger.error(
                         msg = "Failed to persist Google Pay",
                         t = cause,
                     )
                     updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                        it.copy(errorMessage = resources.getString(R.string.stripe_something_went_wrong))
+                        it.copy(errorMessage = displayMessage)
                     }
                 }
         }

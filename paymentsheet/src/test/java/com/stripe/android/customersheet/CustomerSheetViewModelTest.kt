@@ -506,7 +506,7 @@ class CustomerSheetViewModelTest {
                                 message = "Cannot remove this payment method."
                             )
                         ),
-                        displayMessage = "Cannot remove this payment method."
+                        displayMessage = "We were unable to remove this payment method, try again."
                     )
                 }
             )
@@ -525,7 +525,7 @@ class CustomerSheetViewModelTest {
             viewState = awaitItem() as CustomerSheetViewState.SelectPaymentMethod
             assertThat(viewState.savedPaymentMethods).hasSize(1)
             assertThat(viewState.errorMessage)
-                .isEqualTo("Cannot remove this payment method.")
+                .isEqualTo("We were unable to remove this payment method, try again.")
         }
     }
 

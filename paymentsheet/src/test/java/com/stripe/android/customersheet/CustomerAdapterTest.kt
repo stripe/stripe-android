@@ -7,7 +7,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
-import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toSavedSelection
 import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
