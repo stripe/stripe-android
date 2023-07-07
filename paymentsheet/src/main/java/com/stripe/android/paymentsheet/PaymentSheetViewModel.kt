@@ -278,6 +278,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             LinkHandler.ProcessingState.Started -> {
                 updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
             }
+            LinkHandler.ProcessingState.CompleteWithoutLink -> {
+                checkout()
+            }
         }
     }
 
