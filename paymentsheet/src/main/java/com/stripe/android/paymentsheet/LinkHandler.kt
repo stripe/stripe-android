@@ -45,6 +45,8 @@ internal class LinkHandler @Inject constructor(
         data class PaymentMethodCollected(val paymentMethod: PaymentMethod) : ProcessingState()
 
         class CompletedWithPaymentResult(val result: PaymentResult) : ProcessingState()
+
+        object CompleteWithoutLink : ProcessingState()
     }
 
     private val _processingState =
@@ -102,7 +104,7 @@ internal class LinkHandler @Inject constructor(
                 }
                 AccountStatus.VerificationStarted,
                 AccountStatus.NeedsVerification -> {
-                    linkLauncher.present(configuration, params)
+                    _processingState.emit(ProcessingState.CompleteWithoutLink)
                 }
                 AccountStatus.SignedOut,
                 AccountStatus.Error -> {
@@ -137,7 +139,7 @@ internal class LinkHandler @Inject constructor(
         shouldCompleteLinkInlineFlow: Boolean
     ) {
         if (shouldCompleteLinkInlineFlow) {
-            launchLink(configuration, paymentMethodCreateParams)
+            _processingState.emit(ProcessingState.CompleteWithoutLink)
         } else {
             _processingState.emit(
                 ProcessingState.PaymentDetailsCollected(
@@ -152,16 +154,9 @@ internal class LinkHandler @Inject constructor(
 
     fun launchLink() {
         val config = linkConfiguration.value ?: return
-        launchLink(config)
-    }
 
-    fun launchLink(
-        configuration: LinkConfiguration,
-        paymentMethodCreateParams: PaymentMethodCreateParams? = null
-    ) {
         linkLauncher.present(
-            configuration,
-            paymentMethodCreateParams,
+            config,
         )
 
         _processingState.tryEmit(ProcessingState.Launched)

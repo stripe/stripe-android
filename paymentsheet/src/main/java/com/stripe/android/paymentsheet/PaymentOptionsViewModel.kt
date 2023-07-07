@@ -173,6 +173,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
             LinkHandler.ProcessingState.Started -> {
                 updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
             }
+            LinkHandler.ProcessingState.CompleteWithoutLink -> {
+                onUserSelection()
+            }
         }
     }
 

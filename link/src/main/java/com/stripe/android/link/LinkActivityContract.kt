@@ -6,7 +6,6 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.serialization.PopupPayload
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import javax.inject.Inject
 
@@ -34,7 +33,6 @@ class LinkActivityContract @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Args internal constructor(
         internal val configuration: LinkConfiguration,
-        internal val prefilledCardParams: PaymentMethodCreateParams? = null,
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
