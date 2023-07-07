@@ -3,6 +3,7 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.paymentsheet.R
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal fun createFailure(cause: Throwable?, displayMessage: String? = null): Any {
@@ -48,11 +49,11 @@ internal inline fun <R, T> CustomerAdapter.Result<T>.mapCatching(
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @Suppress("TooGenericExceptionCaught")
-internal inline fun <R, T> T.runCatching(block: T.() -> R): CustomerAdapter.Result<R> {
+private inline fun <R, T> T.runCatching(block: T.() -> R): CustomerAdapter.Result<R> {
     return try {
         CustomerAdapter.Result.success(block())
     } catch (e: Throwable) {
-        CustomerAdapter.Result.failure(e)
+        CustomerAdapter.Result.failure(e, null)
     }
 }
 

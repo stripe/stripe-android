@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
@@ -113,7 +113,12 @@ internal class CustomerSheetViewModel @Inject constructor(
 
             val paymentMethods = result.getOrNull()?.first ?: emptyList()
             val paymentSelection = result.getOrNull()?.second
-            val errorMessage = result.failureOrNull()?.displayMessage
+            val errorMessage = if (result.isFailure) {
+                result.failureOrNull()?.displayMessage
+                    ?: resources.getString(R.string.stripe_something_went_wrong)
+            } else {
+                null
+            }
 
             transition(
                 to = CustomerSheetViewState.SelectPaymentMethod(
@@ -306,8 +311,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                     )
                     updateViewState<CustomerSheetViewState.AddPaymentMethod> {
                         it.copy(
-                            errorMessage = (throwable as? StripeException)?.stripeError?.message
-                                ?: resources.getString(R.string.stripe_something_went_wrong),
+                            errorMessage = throwable.stripeErrorMessage(application),
                             isProcessing = false,
                         )
                     }
@@ -432,13 +436,13 @@ internal class CustomerSheetViewModel @Inject constructor(
                         )
                     )
                 }
-            }.onFailure { cause, _ ->
+            }.onFailure { cause, displayMessage ->
                 logger.error(
                     msg = "Failed to persist the payment selection: $savedPaymentSelection",
                     t = cause,
                 )
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                    it.copy(errorMessage = resources.getString(R.string.stripe_something_went_wrong))
+                    it.copy(errorMessage = displayMessage)
                 }
             }
         }

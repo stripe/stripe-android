@@ -490,7 +490,10 @@ class CustomerAdapterTest {
                 CustomerAdapter.Result.success("Success")
             },
             onFailure = { _, _ ->
-                CustomerAdapter.Result.failure(null)
+                CustomerAdapter.Result.failure(
+                    cause = null,
+                    displayMessage = null
+                )
             }
         )
         assertThat(newResult.value)

@@ -1,7 +1,7 @@
 package com.stripe.android.customersheet
 
 import android.content.Context
-import com.stripe.android.core.exception.StripeException
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.model.PaymentMethod
@@ -65,8 +65,7 @@ internal class StripeCustomerAdapter @Inject constructor(
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,
-                    displayMessage = it.stripeErrorMessage()
-                        ?: context.getString(R.string.stripe_something_went_wrong)
+                    displayMessage = it.stripeErrorMessage(context),
                 )
             }
         }
@@ -85,8 +84,7 @@ internal class StripeCustomerAdapter @Inject constructor(
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,
-                    displayMessage = it.stripeErrorMessage()
-                        ?: context.getString(R.string.stripe_something_went_wrong)
+                    displayMessage = it.stripeErrorMessage(context),
                 )
             }
         }
@@ -166,10 +164,6 @@ internal class StripeCustomerAdapter @Inject constructor(
     internal companion object {
         // 30 minutes, server-side timeout is 60
         internal const val CACHED_CUSTOMER_MAX_AGE_MILLIS = 60 * 30 * 1000L
-
-        fun Throwable.stripeErrorMessage(): String? {
-            return (this as? StripeException)?.stripeError?.message
-        }
     }
 }
 

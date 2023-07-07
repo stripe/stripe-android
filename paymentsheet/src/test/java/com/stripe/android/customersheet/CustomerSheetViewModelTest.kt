@@ -145,25 +145,26 @@ class CustomerSheetViewModelTest {
     fun `When payment methods cannot be loaded, errorMessage is emitted`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                paymentMethods = CustomerAdapter.Result.failure<List<PaymentMethod>>(
+                paymentMethods = CustomerAdapter.Result.failure(
                     cause = APIException(message = "Failed to retrieve payment methods."),
-                    displayMessage = "Failed to retrieve payment methods."
+                    displayMessage = "We could\'nt get your payment methods. Please try again."
                 )
             )
         )
         viewModel.viewState.test {
             assertThat(
                 (awaitItem() as CustomerSheetViewState.SelectPaymentMethod).errorMessage
-            ).isEqualTo("Failed to retrieve payment methods.")
+            ).isEqualTo("We could'nt get your payment methods. Please try again.")
         }
     }
 
     @Test
-    fun `When the selected payment method cannot be loaded, paymentSelection is null`() = runTest {
+    fun `When the selected payment method cannot be loaded, paymentSelection is null and an error message is displayed`() = runTest {
         val viewModel = createViewModel(
             customerAdapter = FakeCustomerAdapter(
-                selectedPaymentOption = CustomerAdapter.Result.failure<CustomerAdapter.PaymentOption?>(
-                    cause = Exception("Failed to retrieve selected payment option.")
+                selectedPaymentOption = CustomerAdapter.Result.failure(
+                    cause = Exception("Failed to retrieve selected payment option."),
+                    displayMessage = null,
                 )
             )
         )
@@ -172,7 +173,7 @@ class CustomerSheetViewModelTest {
             assertThat(viewState.paymentSelection)
                 .isEqualTo(null)
             assertThat(viewState.errorMessage)
-                .isEqualTo(null)
+                .isEqualTo("Something went wrong")
         }
     }
 
@@ -572,7 +573,8 @@ class CustomerSheetViewModelTest {
                 ),
                 onSetSelectedPaymentOption = {
                     CustomerAdapter.Result.failure(
-                        Exception("Unable to set payment option")
+                        cause = Exception("Unable to set payment option"),
+                        displayMessage = "Something went wrong"
                     )
                 }
             )
@@ -915,7 +917,7 @@ class CustomerSheetViewModelTest {
                                 message = "Cannot attach payment method."
                             )
                         ),
-                        displayMessage = "Cannot attach payment method."
+                        displayMessage = "We could not save this payment method. Please try again."
                     )
                 },
             ),
@@ -935,7 +937,7 @@ class CustomerSheetViewModelTest {
             viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
             assertThat(viewState.isProcessing).isTrue()
             viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
-            assertThat(viewState.errorMessage).isEqualTo("Cannot attach payment method.")
+            assertThat(viewState.errorMessage).isEqualTo("We could not save this payment method. Please try again.")
             assertThat(viewState.isProcessing).isFalse()
         }
     }

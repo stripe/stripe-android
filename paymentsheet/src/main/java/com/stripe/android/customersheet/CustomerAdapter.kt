@@ -196,7 +196,7 @@ interface CustomerAdapter {
 
             @ExperimentalCustomerSheetApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun <T> failure(cause: Throwable?, displayMessage: String? = null): Result<T> {
+            fun <T> failure(cause: Throwable?, displayMessage: String?): Result<T> {
                 return Result(createFailure(cause, displayMessage))
             }
         }
