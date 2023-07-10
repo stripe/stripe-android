@@ -745,12 +745,12 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private fun makeConfiguration(): PaymentSheet.Configuration {
         val defaultBilling = PaymentSheet.BillingDetails(
             address = PaymentSheet.Address(
-                line1 = "123 Main Street",
+                line1 = "354 Oyster Point Blvd",
                 line2 = null,
-                city = "Blackrock",
-                state = "Co. Dublin",
-                postalCode = "T37 F8HK",
-                country = "IE",
+                city = "South San Francisco",
+                state = "CA",
+                postalCode = "94080",
+                country = "US",
             ),
             email = "email@email.com",
             name = "Jenny Rosen",
