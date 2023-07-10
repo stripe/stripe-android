@@ -13,6 +13,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.uicore.elements.PhoneNumberController
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
@@ -23,7 +24,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -46,16 +46,6 @@ class InlineSignupViewModelTest {
     }
 
     @Test
-    fun `When email is provided it should not trigger lookup and should collect phone number`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL)
-            viewModel.toggleExpanded()
-            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingPhoneOrName)
-
-            verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
-        }
-
-    @Test
     fun `When email and phone are provided it should prefill all values`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = InlineSignupViewModel(
@@ -73,11 +63,17 @@ class InlineSignupViewModelTest {
                 linkEventsReporter = linkEventsReporter,
                 logger = Logger.noop()
             )
-            viewModel.toggleExpanded()
-            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingPhoneOrName)
-            assertThat(viewModel.phoneController.initialPhoneNumber).isEqualTo(CUSTOMER_PHONE)
 
-            verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
+            whenever(linkAccountManager.lookupConsumer(any(), any()))
+                .thenReturn(Result.success(null))
+
+            viewModel.toggleExpanded()
+            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 1) // Trigger lookup by waiting for delay.
+            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingPhoneOrName)
+            assertThat(viewModel.emailController.fieldValue.first()).isEqualTo(CUSTOMER_EMAIL)
+            assertThat(viewModel.phoneController.fieldValue.first()).isEqualTo(CUSTOMER_PHONE)
+
+            verify(linkAccountManager).lookupConsumer(any(), any())
         }
 
     @Test
