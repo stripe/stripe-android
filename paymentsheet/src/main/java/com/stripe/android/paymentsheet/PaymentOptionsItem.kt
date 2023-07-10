@@ -61,6 +61,12 @@ internal sealed class PaymentOptionsItem {
         SavedPaymentMethod,
         AddCard,
         GooglePay,
-        Link
+        Link,
     }
 }
+
+internal val PaymentOptionsItem.key: String
+    get() {
+        val paymentMethodId = (this as? PaymentOptionsItem.SavedPaymentMethod)?.paymentMethod?.id
+        return listOfNotNull(viewType, paymentMethodId).joinToString("-")
+    }
