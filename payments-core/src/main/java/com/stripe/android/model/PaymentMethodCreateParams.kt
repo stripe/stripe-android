@@ -587,6 +587,7 @@ data class PaymentMethodCreateParams internal constructor(
         fun createCard(
             cardParams: CardParams
         ): PaymentMethodCreateParams {
+            @OptIn(DelicateCardDetailsApi::class)
             return create(
                 card = Card(
                     number = cardParams.number,
