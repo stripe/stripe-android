@@ -45,7 +45,6 @@ class LinkActivityContractTest {
 
         val args = LinkActivityContract.Args(
             config,
-            null,
         )
         val stripeRepository = mock<StripeRepository>()
         whenever(stripeRepository.buildPaymentUserAgent(any())).thenReturn("test")

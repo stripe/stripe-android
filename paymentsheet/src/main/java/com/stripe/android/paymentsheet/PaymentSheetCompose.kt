@@ -57,7 +57,6 @@ fun rememberPaymentSheet(
  * @param createIntentCallback Called when the customer confirms the payment or setup.
  * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
  */
-@ExperimentalPaymentSheetDecouplingApi
 @Composable
 fun rememberPaymentSheet(
     createIntentCallback: CreateIntentCallback,
@@ -67,7 +66,6 @@ fun rememberPaymentSheet(
     return rememberPaymentSheet(paymentResultCallback)
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 @Composable
 private fun UpdateIntentConfirmationInterceptor(
     createIntentCallback: CreateIntentCallback,

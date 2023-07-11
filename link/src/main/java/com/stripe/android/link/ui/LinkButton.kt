@@ -150,7 +150,8 @@ private fun LinkAccountInfo(email: String) {
         text = email,
         modifier = Modifier
             .padding(6.dp),
-        color = MaterialTheme.linkColors.buttonLabel,
+        color = MaterialTheme.linkColors.buttonLabel
+            .copy(alpha = LocalContentAlpha.current),
         fontSize = 14.sp,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1
@@ -179,7 +180,8 @@ private fun PayWithText() {
         text = "Pay with", // TODO(jaynewstrom) Link: Add localization
         modifier = Modifier
             .padding(start = 6.dp),
-        color = MaterialTheme.linkColors.buttonLabel,
+        color = MaterialTheme.linkColors.buttonLabel
+            .copy(alpha = LocalContentAlpha.current),
         fontSize = 14.sp,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1

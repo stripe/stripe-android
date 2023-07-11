@@ -20,10 +20,8 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -44,7 +42,6 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
-import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -69,7 +66,6 @@ import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.RelayingPaymentSheetLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -127,7 +123,6 @@ internal class DefaultFlowControllerTest {
         mock<ActivityResultLauncher<LinkActivityContract.Args>>()
 
     private val linkPaymentLauncher = mock<LinkPaymentLauncher>()
-    private val linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>()
 
     private val lifeCycleOwner = mock<LifecycleOwner>()
 
@@ -602,7 +597,6 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with link payment method should launch LinkPaymentLauncher`() = runTest {
-        whenever(linkConfigurationCoordinator.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
         val flowController = createFlowController(
             paymentSelection = PaymentSelection.Link,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -616,45 +610,11 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), isNull())
-    }
-
-    @Test
-    fun `confirmPaymentSelection() with LinkInline and user signed in should launch LinkPaymentLauncher`() = runTest {
-        whenever(linkConfigurationCoordinator.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
-
-        val flowController = createFlowController(
-            paymentSelection = PaymentSelection.Link,
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
-            )
-        )
-
-        flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        )
-
-        flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded(
-                PaymentSelection.New.LinkInline(
-                    LinkPaymentDetails.New(
-                        PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                        mock(),
-                        PaymentMethodCreateParamsFixtures.DEFAULT_CARD
-                    )
-                )
-            )
-        )
-
-        flowController.confirm()
-
-        verify(linkPaymentLauncher).present(any(), eq(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
+        verify(linkPaymentLauncher).present(any())
     }
 
     @Test
     fun `confirmPaymentSelection() with LinkInline and user not signed in should confirm with PaymentLauncher`() = runTest {
-        whenever(linkConfigurationCoordinator.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
-
         val flowController = createFlowController(
             paymentSelection = PaymentSelection.Link,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -694,8 +654,6 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with Link and shipping should have shipping details in confirm params`() = runTest {
-        whenever(linkConfigurationCoordinator.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
-
         val flowController = createFlowController(
             paymentSelection = PaymentSelection.Link,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -746,8 +704,6 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with Link and no shipping should not have shipping details in confirm params`() = runTest {
-        whenever(linkConfigurationCoordinator.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
-
         val flowController = createFlowController(
             paymentSelection = PaymentSelection.Link,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -874,7 +830,6 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPayment() with Link should launch Link`() = runTest {
-        whenever(linkConfigurationCoordinator.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
         val flowController = createFlowController()
 
         flowController.configureExpectingSuccess(
@@ -885,7 +840,7 @@ internal class DefaultFlowControllerTest {
         )
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull())
+        verify(linkPaymentLauncher).present(any())
     }
 
     @Test
@@ -1212,7 +1167,7 @@ internal class DefaultFlowControllerTest {
         verify(paymentOptionActivityLauncher, never()).launch(any())
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class, DelicatePaymentSheetApi::class)
+    @OptIn(DelicatePaymentSheetApi::class)
     @Test
     fun `Sends correct analytics event based on force-success usage`() = runTest {
         val clientSecrets = listOf(
@@ -1325,7 +1280,6 @@ internal class DefaultFlowControllerTest {
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private fun createAndConfigureFlowControllerForDeferredIntent(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     ): DefaultFlowController {
@@ -1393,7 +1347,6 @@ internal class DefaultFlowControllerTest {
         productUsage = PRODUCT_USAGE,
         googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory(),
         linkLauncher = linkPaymentLauncher,
-        linkConfigurationCoordinator = linkConfigurationCoordinator,
         configurationHandler = FlowControllerConfigurationHandler(
             paymentSheetLoader = paymentSheetLoader,
             uiContext = testDispatcher,

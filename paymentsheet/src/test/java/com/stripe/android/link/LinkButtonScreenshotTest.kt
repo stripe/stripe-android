@@ -27,9 +27,23 @@ internal class LinkButtonScreenshotTest {
     }
 
     @Test
+    fun testNewUserDisabled() {
+        paparazziRule.snapshot {
+            LinkButton(email = null, enabled = false, onClick = { })
+        }
+    }
+
+    @Test
     fun testExistingUser() {
         paparazziRule.snapshot {
             LinkButton(email = "jaynewstrom@test.com", enabled = true, onClick = { })
+        }
+    }
+
+    @Test
+    fun testExistingUserDisabled() {
+        paparazziRule.snapshot {
+            LinkButton(email = "jaynewstrom@test.com", enabled = false, onClick = { })
         }
     }
 }

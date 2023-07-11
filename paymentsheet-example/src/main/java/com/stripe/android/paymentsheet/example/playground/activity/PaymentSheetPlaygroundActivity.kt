@@ -23,7 +23,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -186,7 +185,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private lateinit var addressLauncher: AddressLauncher
     private var shippingAddress: AddressDetails? = null
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         val shouldUseDarkMode = intent.extras?.get(FORCE_DARK_MODE_EXTRA) as Boolean?
         if (shouldUseDarkMode != null) {
@@ -571,7 +569,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewBinding.paymentMethod.isClickable = false
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private fun startCompleteCheckout() {
         if (viewModel.initializationType.value == InitializationType.Normal) {
             val clientSecret = viewModel.clientSecret.value ?: return
@@ -690,7 +687,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         )
     }
 
-    @OptIn(ExperimentalPaymentSheetDecouplingApi::class)
     private fun configureCustomCheckout() {
         if (viewModel.initializationType.value == InitializationType.Normal) {
             val clientSecret = viewModel.clientSecret.value ?: return
@@ -749,12 +745,12 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private fun makeConfiguration(): PaymentSheet.Configuration {
         val defaultBilling = PaymentSheet.BillingDetails(
             address = PaymentSheet.Address(
-                line1 = "123 Main Street",
+                line1 = "354 Oyster Point Blvd",
                 line2 = null,
-                city = "Blackrock",
-                state = "Co. Dublin",
-                postalCode = "T37 F8HK",
-                country = "IE",
+                city = "South San Francisco",
+                state = "CA",
+                postalCode = "94080",
+                country = "US",
             ),
             email = "email@email.com",
             name = "Jenny Rosen",

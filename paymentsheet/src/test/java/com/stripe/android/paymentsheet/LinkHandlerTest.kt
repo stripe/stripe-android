@@ -9,6 +9,8 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.analytics.LinkAnalyticsHelper
+import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
@@ -28,6 +30,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
@@ -45,23 +48,14 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `launchLink presents with configuration`() = runLinkTest {
-        handler.launchLink(configuration)
-
-        assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
-        processingStateTurbine.ensureAllEventsConsumed()
-
-        verify(linkLauncher).present(configuration, null)
-        verifyNoMoreInteractions(linkLauncher)
-    }
-
-    @Test
     fun `Completed result sets processing state to Completed`() = runLinkTest {
         handler.setupLink(
             LinkState(configuration, LinkState.LoginState.LoggedIn),
         )
         handler.launchLink()
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
+        verify(linkLauncher).present(configuration)
+        verifyNoMoreInteractions(linkLauncher)
         handler.onLinkActivityResult(LinkActivityResult.Completed(mock()))
         assertThat(processingStateTurbine.awaitItem()).isInstanceOf(
             LinkHandler.ProcessingState.PaymentMethodCollected::class.java
@@ -127,8 +121,9 @@ class LinkHandlerTest {
                 handler.payWithLinkInline(userInput, cardSelection(), shouldCompleteLinkFlow)
             }
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
-            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
-            verify(linkLauncher).present(eq(configuration), any())
+            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.CompleteWithoutLink)
+            verify(linkAnalyticsHelper).onLinkPopupSkipped()
+            verify(linkLauncher, never()).present(eq(configuration))
         }
 
         handler.accountStatus.test {
@@ -160,11 +155,40 @@ class LinkHandlerTest {
             }
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             assertThat(awaitItem()).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
-            verify(linkLauncher, never()).present(eq(configuration), any())
+            verify(linkLauncher, never()).present(eq(configuration))
         }
 
         handler.accountStatus.test {
             assertThat(awaitItem()).isEqualTo(AccountStatus.Verified)
+        }
+
+        processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
+        accountStatusTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
+    }
+
+    @Test
+    fun `payWithLinkInline completes successfully for existing user in custom flow`() = runLinkInlineTest(
+        shouldCompleteLinkFlowValues = listOf(false),
+    ) {
+        val userInput = UserInput.SignIn("example@example.com")
+
+        handler.setupLink(
+            state = LinkState(
+                loginState = LinkState.LoginState.LoggedOut,
+                configuration = configuration,
+            )
+        )
+
+        handler.processingState.test {
+            accountStatusFlow.emit(AccountStatus.NeedsVerification)
+            ensureAllEventsConsumed() // Begin with no events.
+            testScope.launch {
+                handler.payWithLinkInline(userInput, cardSelection(), shouldCompleteLinkFlow)
+            }
+            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
+            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.CompleteWithoutLink)
+            verify(linkAnalyticsHelper).onLinkPopupSkipped()
+            verify(linkLauncher, never()).present(eq(configuration))
         }
 
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
@@ -197,9 +221,10 @@ class LinkHandlerTest {
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.SignedOut)
             accountStatusFlow.emit(AccountStatus.Verified)
-            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
+            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.CompleteWithoutLink)
             assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
-            verify(linkLauncher).present(eq(configuration), any())
+            verify(linkAnalyticsHelper).onLinkPopupSkipped()
+            verify(linkLauncher, never()).present(eq(configuration))
         }
 
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
@@ -235,7 +260,7 @@ class LinkHandlerTest {
             accountStatusFlow.emit(AccountStatus.Verified)
             assertThat(awaitItem()).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
             assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
-            verify(linkLauncher, never()).present(eq(configuration), any())
+            verify(linkLauncher, never()).present(eq(configuration))
         }
 
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
@@ -263,7 +288,7 @@ class LinkHandlerTest {
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Error("Whoops"))
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Ready)
-            verify(linkLauncher, never()).present(eq(configuration), any())
+            verify(linkLauncher, never()).present(eq(configuration))
         }
 
         handler.accountStatus.test {
@@ -291,7 +316,7 @@ class LinkHandlerTest {
             }
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Ready)
-            verify(linkLauncher, never()).present(eq(configuration), any())
+            verify(linkLauncher, never()).present(eq(configuration))
         }
 
         handler.accountStatus.test {
@@ -325,10 +350,17 @@ private fun runLinkTest(
     val linkLauncher = mock<LinkPaymentLauncher>()
     val linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>()
     val savedStateHandle = SavedStateHandle()
+    val linkAnalyticsHelper = mock<LinkAnalyticsHelper>()
     val handler = LinkHandler(
         linkLauncher = linkLauncher,
         linkConfigurationCoordinator = linkConfigurationCoordinator,
         savedStateHandle = savedStateHandle,
+        linkAnalyticsComponentBuilder = mock<LinkAnalyticsComponent.Builder>().stub {
+            val component = object : LinkAnalyticsComponent {
+                override val linkAnalyticsHelper: LinkAnalyticsHelper = linkAnalyticsHelper
+            }
+            whenever(it.build()).thenReturn(component)
+        },
     )
     val processingStateTurbine = handler.processingState.testIn(backgroundScope)
     val accountStatusTurbine = handler.accountStatus.testIn(backgroundScope)
@@ -356,6 +388,7 @@ private fun runLinkTest(
             accountStatusFlow = accountStatusFlow,
             processingStateTurbine = processingStateTurbine,
             accountStatusTurbine = accountStatusTurbine,
+            linkAnalyticsHelper = linkAnalyticsHelper,
         )
     ) {
         testBlock()
@@ -389,6 +422,7 @@ private class LinkTestDataImpl(
     override val accountStatusFlow: MutableSharedFlow<AccountStatus>,
     override val processingStateTurbine: ReceiveTurbine<LinkHandler.ProcessingState>,
     override val accountStatusTurbine: ReceiveTurbine<AccountStatus>,
+    override val linkAnalyticsHelper: LinkAnalyticsHelper,
 ) : LinkTestData
 
 private interface LinkTestData {
@@ -401,6 +435,7 @@ private interface LinkTestData {
     val accountStatusFlow: MutableSharedFlow<AccountStatus>
     val processingStateTurbine: ReceiveTurbine<LinkHandler.ProcessingState>
     val accountStatusTurbine: ReceiveTurbine<AccountStatus>
+    val linkAnalyticsHelper: LinkAnalyticsHelper
 }
 
 private class LinkInlineTestData(

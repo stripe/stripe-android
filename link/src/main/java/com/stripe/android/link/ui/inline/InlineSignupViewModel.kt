@@ -95,7 +95,7 @@ internal class InlineSignupViewModel @Inject constructor(
 
     private var hasExpanded = false
 
-    private var debouncer = Debouncer(prefilledEmail)
+    private var debouncer = Debouncer()
 
     fun toggleExpanded() {
         _viewState.update { oldState ->
@@ -119,7 +119,7 @@ internal class InlineSignupViewModel @Inject constructor(
                     oldState.copy(
                         signUpState = signUpState,
                         userInput = when (signUpState) {
-                            SignUpState.InputtingEmail, SignUpState.VerifyingEmail -> null
+                            SignUpState.InputtingEmail, SignUpState.VerifyingEmail -> oldState.userInput
                             SignUpState.InputtingPhoneOrName ->
                                 mapToUserInput(
                                     email = consumerEmail.value,
@@ -183,7 +183,6 @@ internal class InlineSignupViewModel @Inject constructor(
                 } else {
                     _viewState.update { oldState ->
                         oldState.copy(
-                            userInput = null,
                             signUpState = SignUpState.InputtingPhoneOrName,
                             apiFailed = false
                         )
@@ -194,7 +193,6 @@ internal class InlineSignupViewModel @Inject constructor(
             onFailure = {
                 _viewState.update { oldState ->
                     oldState.copy(
-                        userInput = null,
                         signUpState = SignUpState.InputtingEmail,
                         apiFailed = it is APIConnectionException
                     )

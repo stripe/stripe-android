@@ -35,4 +35,8 @@ class LinkAnalyticsHelper @Inject internal constructor(
             }
         }
     }
+
+    fun onLinkPopupSkipped() {
+        linkEventsReporter.onPopupSkipped()
+    }
 }
