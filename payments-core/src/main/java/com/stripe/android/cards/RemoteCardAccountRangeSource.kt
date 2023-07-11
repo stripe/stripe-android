@@ -28,21 +28,25 @@ internal class RemoteCardAccountRangeSource(
         return cardNumber.bin?.let { bin ->
             _loading.value = true
 
-            val accountRanges =
-                stripeRepository.getCardMetadata(bin, requestOptions)?.accountRanges.orEmpty()
-            cardAccountRangeStore.save(bin, accountRanges)
+            val accountRanges = stripeRepository.getCardMetadata(
+                bin = bin,
+                options = requestOptions,
+            )?.accountRanges.orEmpty()
+
+            if (accountRanges.isNotEmpty()) {
+                cardAccountRangeStore.save(bin, accountRanges)
+            }
 
             _loading.value = false
 
-            when {
-                accountRanges.isNotEmpty() -> {
-                    if (cardNumber.isValidLuhn) {
-                        onCardMetadataMissingRange()
-                    }
-                    accountRanges
+            if (accountRanges.isNotEmpty()) {
+                val hasMatch = accountRanges.any { it.binRange.matches(cardNumber) }
+                if (!hasMatch && cardNumber.isValidLuhn) {
+                    onCardMetadataMissingRange()
                 }
-                else -> null
             }
+
+            accountRanges.takeIf { it.isNotEmpty() }
         }
     }
 
