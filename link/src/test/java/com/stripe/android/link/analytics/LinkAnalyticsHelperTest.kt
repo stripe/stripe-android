@@ -65,6 +65,18 @@ internal class LinkAnalyticsHelperTest {
         analyticsHelper.onLinkResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.LoggedOut))
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }
+
+    @Test
+    fun testOnLinkSkippedCalls_onPopupSkipped() {
+        val eventReporter = object : FakeLinkEventsReporter() {
+            override fun onPopupSkipped() {
+                calledCount++
+            }
+        }
+        val analyticsHelper = LinkAnalyticsHelper(eventReporter)
+        analyticsHelper.onLinkPopupSkipped()
+        assertThat(eventReporter.calledCount).isEqualTo(1)
+    }
 }
 
 private open class FakeLinkEventsReporter : LinkEventsReporter {
@@ -131,6 +143,10 @@ private open class FakeLinkEventsReporter : LinkEventsReporter {
     }
 
     override fun onPopupLogout() {
+        throw NotImplementedError()
+    }
+
+    override fun onPopupSkipped() {
         throw NotImplementedError()
     }
 }

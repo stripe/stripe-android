@@ -84,6 +84,10 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.PopupLogout)
     }
 
+    override fun onPopupSkipped() {
+        fireEvent(LinkEvent.PopupSkipped)
+    }
+
     private fun durationInSecondsFromStart(start: Long?) = start?.let {
         System.currentTimeMillis() - it
     }?.takeIf { it > 0 }?.let {

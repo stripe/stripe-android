@@ -67,4 +67,8 @@ internal sealed class LinkEvent : AnalyticsEvent {
     object PopupLogout : LinkEvent() {
         override val eventName = "link_popup_logout"
     }
+
+    object PopupSkipped : LinkEvent() {
+        override val eventName = "link_popup_skipped"
+    }
 }
