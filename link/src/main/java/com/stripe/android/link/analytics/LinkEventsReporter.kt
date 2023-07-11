@@ -22,4 +22,5 @@ internal interface LinkEventsReporter {
     fun onPopupCancel()
     fun onPopupError(error: Throwable)
     fun onPopupLogout()
+    fun onPopupSkipped()
 }
