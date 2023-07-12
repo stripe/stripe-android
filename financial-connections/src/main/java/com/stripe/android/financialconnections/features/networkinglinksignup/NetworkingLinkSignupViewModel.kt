@@ -16,7 +16,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
@@ -25,6 +24,10 @@ import com.stripe.android.financialconnections.features.networkinglinksignup.Net
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
+import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.NavigationDirections.networkingSaveToLinkVerification
+import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
@@ -55,7 +58,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
     private val sync: SynchronizeFinancialConnectionsSession,
-    private val goNext: GoNext,
+    private val navigationManager: NavigationManager,
     private val logger: Logger
 ) : MavericksViewModel<NetworkingLinkSignupState>(initialState) {
 
@@ -108,7 +111,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 saveToLinkWithStripeSucceeded.set(false)
                 logger.error("Error saving account to Link", error)
                 eventTracker.track(Error(PANE, error))
-                goNext(nextPane = Pane.SUCCESS)
+                navigationManager.navigate(NavigateToRoute(NavigationDirections.success))
             },
         )
         onAsync(
@@ -116,7 +119,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             onSuccess = { consumerSession ->
                 if (consumerSession.exists) {
                     eventTracker.track(NetworkingReturningConsumer(PANE))
-                    goNext(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION)
+                    navigationManager.navigate(NavigateToRoute(networkingSaveToLinkVerification))
                 } else {
                     eventTracker.track(NetworkingNewConsumer(PANE))
                 }
@@ -158,7 +161,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
 
     fun onSkipClick() = viewModelScope.launch {
         eventTracker.track(Click(eventName = "click.not_now", pane = PANE))
-        goNext(Pane.SUCCESS)
+        navigationManager.navigate(NavigateToRoute(NavigationDirections.success))
     }
 
     fun onSaveAccount() {
@@ -174,7 +177,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
                 selectedAccounts = selectedAccounts.map { it.id },
             ).also {
-                goNext(nextPane = Pane.SUCCESS)
+                navigationManager.navigate(NavigateToRoute(NavigationDirections.success))
             }
         }.execute { copy(saveAccountToLink = it) }
     }

@@ -1,34 +1,37 @@
-package com.stripe.android.financialconnections.domain
+package com.stripe.android.financialconnections.navigation
 
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.NavigationCommand
-import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.navigation.NavigationManager
+import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
-/**
- * Navigates to the next screen given a [Pane].
- */
-internal class GoNext @Inject constructor(
-    private val navigationManager: NavigationManager,
-    private val logger: Logger
-) {
+internal interface NavigationManager {
+    val navigationState: MutableStateFlow<NavigationState>
+    fun navigate(state: NavigationState)
+    fun onNavigated(state: NavigationState)
+}
 
-    operator fun invoke(
-        nextPane: Pane,
-        args: Map<String, Any?> = emptyMap()
-    ): NavigationCommand {
-        val nextPaneDirection = nextPane.toNavigationCommand(args)
-        logger.debug("Navigating to next pane: ${nextPaneDirection.destination}")
-        navigationManager.navigate(nextPaneDirection)
-        return nextPaneDirection
+internal class NavigationManagerImpl @Inject constructor(
+    private val logger: Logger
+) : NavigationManager {
+
+    override val navigationState: MutableStateFlow<NavigationState> =
+        MutableStateFlow(NavigationState.Idle)
+
+    override fun navigate(state: NavigationState) {
+        logger.debug("NavigationManager navigating to: $navigationState")
+        navigationState.value = state
+    }
+
+    override fun onNavigated(state: NavigationState) {
+        // clear navigation state, if state is the current state:
+        navigationState.compareAndSet(state, NavigationState.Idle)
     }
 }
 
 @Suppress("ComplexMethod")
 internal fun Pane.toNavigationCommand(
-    args: Map<String, Any?>
+    args: Map<String, Any?> = emptyMap()
 ): NavigationCommand = when (this) {
     Pane.INSTITUTION_PICKER -> NavigationDirections.institutionPicker
     Pane.PARTNER_AUTH -> NavigationDirections.partnerAuth
@@ -36,7 +39,8 @@ internal fun Pane.toNavigationCommand(
     Pane.ACCOUNT_PICKER -> NavigationDirections.accountPicker
     Pane.SUCCESS -> NavigationDirections.success
     Pane.MANUAL_ENTRY -> NavigationDirections.manualEntry
-    Pane.MANUAL_ENTRY_SUCCESS -> NavigationDirections.ManualEntrySuccess(args)
+    Pane.MANUAL_ENTRY_SUCCESS ->
+        NavigationDirections.ManualEntrySuccess(args)
     Pane.ATTACH_LINKED_PAYMENT_ACCOUNT -> NavigationDirections.attachLinkedPaymentAccount
     Pane.RESET -> NavigationDirections.reset
     Pane.NETWORKING_LINK_SIGNUP_PANE -> NavigationDirections.networkingLinkSignup

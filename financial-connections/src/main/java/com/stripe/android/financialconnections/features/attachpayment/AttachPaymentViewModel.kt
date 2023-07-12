@@ -14,13 +14,14 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
+import com.stripe.android.financialconnections.navigation.toNavigationCommand
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -36,7 +37,6 @@ internal class AttachPaymentViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val getManifest: GetManifest,
     private val getCachedConsumerSession: GetCachedConsumerSession,
-    private val goNext: GoNext,
     private val logger: Logger
 ) : MavericksViewModel<AttachPaymentState>(initialState) {
 
@@ -63,7 +63,10 @@ internal class AttachPaymentViewModel @Inject constructor(
                     activeInstitution = activeInstitution,
                     consumerSessionClientSecret = consumerSession?.clientSecret,
                     params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
-                ).also { goNext(it.nextPane ?: Pane.SUCCESS) }
+                ).also {
+                    val nextPane = it.nextPane ?: Pane.SUCCESS
+                    navigationManager.navigate(NavigateToRoute(nextPane.toNavigationCommand()))
+                }
             }
             eventTracker.track(PollAttachPaymentsSucceeded(authSession.id, millis))
             result
@@ -94,9 +97,11 @@ internal class AttachPaymentViewModel @Inject constructor(
         )
     }
 
-    fun onEnterDetailsManually() = navigationManager.navigate(NavigationDirections.manualEntry)
+    fun onEnterDetailsManually() =
+        navigationManager.navigate(NavigateToRoute(NavigationDirections.manualEntry))
 
-    fun onSelectAnotherBank() = navigationManager.navigate(NavigationDirections.reset)
+    fun onSelectAnotherBank() =
+        navigationManager.navigate(NavigateToRoute(NavigationDirections.reset))
 
     companion object : MavericksViewModelFactory<AttachPaymentViewModel, AttachPaymentState> {
 
