@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -163,6 +164,10 @@ internal fun Wallet(
         }
 
         state.link?.let { link ->
+            if (state.googlePay != null) {
+                Spacer(modifier = Modifier.requiredHeight(8.dp))
+            }
+
             LinkButton(
                 email = link.email,
                 enabled = state.buttonsEnabled,
