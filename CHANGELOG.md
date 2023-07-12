@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [FIXED][6992](https://github.com/stripe/stripe-android/pull/6992) Fixed an issue where incorrect padding was set on the Google Pay button.
+
 ## 20.27.0 - 2023-07-10
 
 ### PaymentSheet
