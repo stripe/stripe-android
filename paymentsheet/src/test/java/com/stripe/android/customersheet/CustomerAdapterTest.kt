@@ -22,7 +22,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.lang.IllegalStateException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertFailsWith
 
@@ -210,7 +209,9 @@ class CustomerAdapterTest {
             )
         )
         val result = adapter.detachPaymentMethod("pm_1234")
-        assertThat(result.getOrNull()).isNotNull()
+        assertThat(result.getOrNull()).isEqualTo(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
     }
 
     @Test

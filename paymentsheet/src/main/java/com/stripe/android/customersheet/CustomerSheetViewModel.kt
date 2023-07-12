@@ -113,9 +113,9 @@ internal class CustomerSheetViewModel @Inject constructor(
 
             val paymentMethods = result.getOrNull()?.first ?: emptyList()
             val paymentSelection = result.getOrNull()?.second
+            val failure = result.failureOrNull()
             val errorMessage = if (result.isFailure) {
-                result.failureOrNull()?.displayMessage
-                    ?: resources.getString(R.string.stripe_something_went_wrong)
+                failure?.displayMessage ?: failure?.cause?.stripeErrorMessage(application)
             } else {
                 null
             }
@@ -236,6 +236,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
                     it.copy(
                         errorMessage = displayMessage,
+                        isProcessing = false,
                     )
                 }
             }
@@ -465,7 +466,10 @@ internal class CustomerSheetViewModel @Inject constructor(
                         t = cause,
                     )
                     updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                        it.copy(errorMessage = displayMessage)
+                        it.copy(
+                            errorMessage = displayMessage,
+                            isProcessing = false,
+                        )
                     }
                 }
         }

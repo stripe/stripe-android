@@ -128,15 +128,12 @@ internal class StripeCustomerAdapter @Inject constructor(
         return getCustomerEphemeralKey()
             .mapCatching { customerEphemeralKey ->
                 setupIntentClientSecretProvider.provideSetupIntentClientSecret(customerEphemeralKey.customerId)
-            }.fold(
-                onSuccess = { it },
-                onFailure = { cause, displayMessage ->
-                    CustomerAdapter.Result.failure(
-                        cause = cause,
-                        displayMessage = displayMessage,
-                    )
-                }
-            )
+            }.getOrElse { cause, displayMessage ->
+                CustomerAdapter.Result.failure(
+                    cause = cause,
+                    displayMessage = displayMessage,
+                )
+            }
     }
 
     internal suspend fun getCustomerEphemeralKey(): CustomerAdapter.Result<CustomerEphemeralKey> {

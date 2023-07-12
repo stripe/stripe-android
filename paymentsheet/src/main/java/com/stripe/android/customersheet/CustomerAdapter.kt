@@ -199,6 +199,10 @@ interface CustomerAdapter {
             fun <T> failure(cause: Throwable?, displayMessage: String?): Result<T> {
                 return Result(createFailure(cause, displayMessage))
             }
+
+            private fun createFailure(cause: Throwable?, displayMessage: String? = null): Any {
+                return Failure(cause, displayMessage)
+            }
         }
     }
 }

@@ -3,19 +3,23 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.paymentsheet.R
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-internal fun createFailure(cause: Throwable?, displayMessage: String? = null): Any {
-    return CustomerAdapter.Result.Failure(cause, displayMessage)
-}
-
-@OptIn(ExperimentalCustomerSheetApi::class)
-internal fun<T> CustomerAdapter.Result<T>.getOrNull(): T? =
+internal fun <T> CustomerAdapter.Result<T>.getOrNull(): T? =
     when {
         isFailure -> null
         else -> value as T
     }
+
+@OptIn(ExperimentalCustomerSheetApi::class)
+internal fun <R, T : R> CustomerAdapter.Result<T>.getOrElse(
+    onFailure: (cause: Throwable?, displayMessage: String?) -> R
+): R {
+    return when (val failure = failureOrNull()) {
+        null -> value as T
+        else -> onFailure(failure.cause, failure.displayMessage)
+    }
+}
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal fun <R, T> CustomerAdapter.Result<T>.flatMap(
