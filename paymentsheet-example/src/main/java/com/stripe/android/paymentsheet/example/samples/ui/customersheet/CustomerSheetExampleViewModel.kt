@@ -40,7 +40,7 @@ class CustomerSheetExampleViewModel(
         customerEphemeralKeyProvider = {
             fetchCustomerEphemeralKey().fold(
                 success = {
-                    Result.success(
+                    CustomerAdapter.Result.success(
                         CustomerEphemeralKey.create(
                             customerId = it.customerId,
                             ephemeralKey = it.customerEphemeralKeySecret
@@ -48,19 +48,25 @@ class CustomerSheetExampleViewModel(
                     )
                 },
                 failure = {
-                    Result.failure(it.exception)
+                    CustomerAdapter.Result.failure(
+                        it.exception,
+                        "We could\'nt retrieve your information, please try again."
+                    )
                 }
             )
         },
         setupIntentClientSecretProvider = { customerId ->
             createSetupIntent(customerId).fold(
                 success = {
-                    Result.success(
+                    CustomerAdapter.Result.success(
                         it.clientSecret
                     )
                 },
                 failure = {
-                    Result.failure(it.exception)
+                    CustomerAdapter.Result.failure(
+                        it.exception,
+                        "We could\'nt retrieve your information, please try again."
+                    )
                 }
             )
         },
