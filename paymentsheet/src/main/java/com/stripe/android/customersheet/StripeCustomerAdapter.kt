@@ -125,18 +125,9 @@ internal class StripeCustomerAdapter @Inject constructor(
         if (setupIntentClientSecretProvider == null) {
             throw IllegalArgumentException("setupIntentClientSecretProvider cannot be null")
         }
-        return getCustomerEphemeralKey()
-            .mapCatching { customerEphemeralKey ->
-                setupIntentClientSecretProvider.provideSetupIntentClientSecret(customerEphemeralKey.customerId)
-            }.fold(
-                onSuccess = { it },
-                onFailure = { cause, displayMessage ->
-                    CustomerAdapter.Result.failure(
-                        cause = cause,
-                        displayMessage = displayMessage,
-                    )
-                }
-            )
+        return getCustomerEphemeralKey().flatMap { customerEphemeralKey ->
+            setupIntentClientSecretProvider.provideSetupIntentClientSecret(customerEphemeralKey.customerId)
+        }
     }
 
     internal suspend fun getCustomerEphemeralKey(): CustomerAdapter.Result<CustomerEphemeralKey> {

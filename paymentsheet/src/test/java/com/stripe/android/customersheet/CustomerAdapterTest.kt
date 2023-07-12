@@ -22,7 +22,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.lang.IllegalStateException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertFailsWith
 
@@ -210,7 +209,9 @@ class CustomerAdapterTest {
             )
         )
         val result = adapter.detachPaymentMethod("pm_1234")
-        assertThat(result.getOrNull()).isNotNull()
+        assertThat(result.getOrNull()).isEqualTo(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
     }
 
     @Test
@@ -361,7 +362,7 @@ class CustomerAdapterTest {
         val result = adapter.setSelectedPaymentOption(
             paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
         )
-        assertThat((result.value as CustomerAdapter.Result.Failure).cause?.message)
+        assertThat((result.value as CustomerAdapter.Result.Failure).cause.message)
             .isEqualTo("Unable to persist payment option StripeId(id=pm_1234)")
         assertThat(result.value.displayMessage)
             .isEqualTo("Something went wrong")
@@ -489,10 +490,10 @@ class CustomerAdapterTest {
             onSuccess = {
                 CustomerAdapter.Result.success("Success")
             },
-            onFailure = { _, _ ->
+            onFailure = { cause, displayMessage ->
                 CustomerAdapter.Result.failure(
-                    cause = null,
-                    displayMessage = null
+                    cause = cause,
+                    displayMessage = displayMessage
                 )
             }
         )

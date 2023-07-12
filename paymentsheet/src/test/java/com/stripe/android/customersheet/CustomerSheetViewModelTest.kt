@@ -154,7 +154,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             assertThat(
                 (awaitItem() as CustomerSheetViewState.SelectPaymentMethod).errorMessage
-            ).isEqualTo("We could'nt get your payment methods. Please try again.")
+            ).isEqualTo("We could\'nt get your payment methods. Please try again.")
         }
     }
 

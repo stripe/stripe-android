@@ -181,7 +181,7 @@ interface CustomerAdapter {
         val isFailure: Boolean get() = value is Failure
 
         internal data class Failure(
-            val cause: Throwable?,
+            val cause: Throwable,
             val displayMessage: String? = null
         )
 
@@ -196,8 +196,12 @@ interface CustomerAdapter {
 
             @ExperimentalCustomerSheetApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun <T> failure(cause: Throwable?, displayMessage: String?): Result<T> {
+            fun <T> failure(cause: Throwable, displayMessage: String?): Result<T> {
                 return Result(createFailure(cause, displayMessage))
+            }
+
+            private fun createFailure(cause: Throwable, displayMessage: String? = null): Any {
+                return Failure(cause, displayMessage)
             }
         }
     }
