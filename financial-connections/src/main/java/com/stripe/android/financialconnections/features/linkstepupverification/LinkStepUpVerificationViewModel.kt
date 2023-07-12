@@ -152,7 +152,6 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
         // Updates cached accounts with the one selected.
         updateCachedAccounts { listOf(selectedAccount) }
         navigationManager.navigate(NavigateToRoute(success))
-        Unit
     }.execute { copy(confirmVerification = it) }
 
     fun onClickableTextClick(text: String) {
