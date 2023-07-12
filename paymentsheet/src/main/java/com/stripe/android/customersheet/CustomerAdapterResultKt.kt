@@ -12,17 +12,7 @@ internal fun <T> CustomerAdapter.Result<T>.getOrNull(): T? =
     }
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-internal fun <R, T : R> CustomerAdapter.Result<T>.getOrElse(
-    onFailure: (cause: Throwable?, displayMessage: String?) -> R
-): R {
-    return when (val failure = failureOrNull()) {
-        null -> value as T
-        else -> onFailure(failure.cause, failure.displayMessage)
-    }
-}
-
-@OptIn(ExperimentalCustomerSheetApi::class)
-internal fun <R, T> CustomerAdapter.Result<T>.flatMap(
+internal inline infix fun <R, T> CustomerAdapter.Result<T>.flatMap(
     transform: (T) -> CustomerAdapter.Result<R>
 ): CustomerAdapter.Result<R> {
     return when {
@@ -64,7 +54,7 @@ private inline fun <R, T> T.runCatching(block: T.() -> R): CustomerAdapter.Resul
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal inline fun <R, T> CustomerAdapter.Result<T>.fold(
     onSuccess: (value: T) -> R,
-    onFailure: (cause: Throwable?, displayMessage: String?) -> R
+    onFailure: (cause: Throwable, displayMessage: String?) -> R
 ): R {
     return when (val failure = value as? CustomerAdapter.Result.Failure) {
         is CustomerAdapter.Result.Failure -> onFailure(failure.cause, failure.displayMessage)

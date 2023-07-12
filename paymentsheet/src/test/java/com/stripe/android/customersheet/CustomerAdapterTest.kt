@@ -490,9 +490,9 @@ class CustomerAdapterTest {
             onSuccess = {
                 CustomerAdapter.Result.success("Success")
             },
-            onFailure = { _, _ ->
+            onFailure = { cause, _ ->
                 CustomerAdapter.Result.failure(
-                    cause = null,
+                    cause = cause,
                     displayMessage = null
                 )
             }
