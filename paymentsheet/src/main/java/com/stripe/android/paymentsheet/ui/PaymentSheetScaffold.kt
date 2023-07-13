@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Surface
@@ -31,7 +32,10 @@ internal fun PaymentSheetScaffold(
         }
     }
 
-    val elevation by animateDpAsState(targetValue = targetElevation)
+    val elevation by animateDpAsState(
+        targetValue = targetElevation,
+        label = "PaymentSheetTopBarElevation",
+    )
 
     Column(modifier = modifier) {
         // We need to set a z-index to make sure that the Surface's elevation shadow is rendered
@@ -40,6 +44,12 @@ internal fun PaymentSheetScaffold(
             topBar()
         }
 
-        content(Modifier.verticalScroll(scrollState))
+        content(
+            // We provide the IME padding before the vertical scroll modifier to make sure that the
+            // content moves up correctly if it's covered by the keyboard when it's being focused.
+            Modifier
+                .imePadding()
+                .verticalScroll(scrollState)
+        )
     }
 }
