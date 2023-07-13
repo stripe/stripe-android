@@ -4,8 +4,6 @@ import android.view.View
 import android.view.WindowInsets
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
@@ -44,10 +42,5 @@ internal fun View.requestApplyInsetsWhenAttached() {
 internal fun PaymentSheetContentPadding() {
     val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
     Spacer(modifier = Modifier.requiredHeight(bottomPadding))
-
-    Spacer(modifier = Modifier.windowInsetsBottomHeight(ComposeWindowInsets.ime))
-
-    if (!ComposeWindowInsets.isImeVisible) {
-        Spacer(modifier = Modifier.windowInsetsBottomHeight(ComposeWindowInsets.navigationBars))
-    }
+    Spacer(modifier = Modifier.windowInsetsBottomHeight(ComposeWindowInsets.navigationBars))
 }
