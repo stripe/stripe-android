@@ -1014,3 +1014,36 @@ constructor(
         }
     }
 }
+
+internal val PaymentMethod.Type.requiresMandateForSetup: Boolean
+    get() = when (this) {
+        PaymentMethod.Type.AuBecsDebit,
+        PaymentMethod.Type.BacsDebit,
+        PaymentMethod.Type.Bancontact,
+        PaymentMethod.Type.CashAppPay,
+        PaymentMethod.Type.Eps,
+        PaymentMethod.Type.Ideal,
+        PaymentMethod.Type.Link,
+        PaymentMethod.Type.PayPal,
+        PaymentMethod.Type.SepaDebit,
+        PaymentMethod.Type.Sofort,
+        PaymentMethod.Type.USBankAccount -> true
+        PaymentMethod.Type.Affirm,
+        PaymentMethod.Type.AfterpayClearpay,
+        PaymentMethod.Type.Alipay,
+        PaymentMethod.Type.Blik,
+        PaymentMethod.Type.Card,
+        PaymentMethod.Type.CardPresent,
+        PaymentMethod.Type.Fpx,
+        PaymentMethod.Type.Giropay,
+        PaymentMethod.Type.GrabPay,
+        PaymentMethod.Type.Klarna,
+        PaymentMethod.Type.MobilePay,
+        PaymentMethod.Type.Netbanking,
+        PaymentMethod.Type.Oxxo,
+        PaymentMethod.Type.P24,
+        PaymentMethod.Type.RevolutPay,
+        PaymentMethod.Type.Upi,
+        PaymentMethod.Type.WeChatPay,
+        PaymentMethod.Type.Zip -> false
+    }

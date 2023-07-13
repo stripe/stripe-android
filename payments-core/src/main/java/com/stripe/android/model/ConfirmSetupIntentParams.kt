@@ -123,8 +123,9 @@ data class ConfirmSetupIntentParams internal constructor(
             return ConfirmSetupIntentParams(
                 clientSecret = clientSecret,
                 // infers default [MandateDataParams] based on the attached [paymentMethodType]
-                mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
-                    .takeIf { paymentMethodType.requiresMandate }
+                mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
+                    paymentMethodType.requiresMandateForSetup
+                }
             )
         }
 
