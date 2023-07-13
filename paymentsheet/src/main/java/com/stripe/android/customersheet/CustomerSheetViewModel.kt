@@ -166,6 +166,7 @@ internal class CustomerSheetViewModel @Inject constructor(
                 paymentMethodCode = paymentMethodCode,
                 formViewData = FormViewModel.ViewData(),
                 enabled = true,
+                primaryButtonEnabled = false,
                 isLiveMode = isLiveMode,
                 isProcessing = false,
             )
@@ -209,9 +210,13 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
     private fun onFormValuesChanged(formFieldValues: FormFieldValues?) {
-        // TODO (jameswoo) handle onFormValuesChanged
+        val isComplete = formFieldValues?.fieldValuePairs?.all {
+            it.value.isComplete
+        }
+        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+            it.copy(primaryButtonEnabled = isComplete ?: false)
+        }
     }
 
     private fun onItemRemoved(paymentMethod: PaymentMethod) {

@@ -58,6 +58,7 @@ internal sealed class CustomerSheetViewState(
         val paymentMethodCode: PaymentMethodCode,
         val formViewData: FormViewModel.ViewData,
         val enabled: Boolean,
+        val primaryButtonEnabled: Boolean,
         override val isLiveMode: Boolean,
         override val isProcessing: Boolean,
         val errorMessage: String? = null,

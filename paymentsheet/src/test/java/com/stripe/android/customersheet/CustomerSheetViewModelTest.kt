@@ -14,6 +14,8 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -589,6 +591,7 @@ class CustomerSheetViewModelTest {
                         )
                     ),
                     enabled = true,
+                    primaryButtonEnabled = true,
                     isLiveMode = false,
                     isProcessing = false,
                 )
@@ -623,6 +626,7 @@ class CustomerSheetViewModelTest {
                         )
                     ),
                     enabled = true,
+                    primaryButtonEnabled = false,
                     isLiveMode = false,
                     isProcessing = false,
                 )
@@ -662,6 +666,7 @@ class CustomerSheetViewModelTest {
             ),
             enabled = true,
             isLiveMode = false,
+            primaryButtonEnabled = true,
             isProcessing = false,
         )
         val viewModel = createViewModel(
@@ -722,6 +727,7 @@ class CustomerSheetViewModelTest {
                 ),
             ),
             enabled = true,
+            primaryButtonEnabled = true,
             isLiveMode = false,
             isProcessing = false,
         )
@@ -781,6 +787,7 @@ class CustomerSheetViewModelTest {
                 ),
             ),
             enabled = true,
+            primaryButtonEnabled = false,
             isLiveMode = false,
             isProcessing = false,
         )
@@ -831,6 +838,7 @@ class CustomerSheetViewModelTest {
                 ),
             ),
             enabled = true,
+            primaryButtonEnabled = false,
             isLiveMode = false,
             isProcessing = false,
         )
@@ -872,6 +880,7 @@ class CustomerSheetViewModelTest {
                 ),
             ),
             enabled = true,
+            primaryButtonEnabled = false,
             isLiveMode = false,
             isProcessing = false,
         )
@@ -909,6 +918,44 @@ class CustomerSheetViewModelTest {
             viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
             assertThat(viewState.errorMessage).isEqualTo("We could not save this payment method. Please try again.")
             assertThat(viewState.isProcessing).isFalse()
+        }
+    }
+
+    @Test
+    fun `When card form is complete, primary button should be enabled`() = runTest {
+        val initialViewState = CustomerSheetViewState.AddPaymentMethod(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            formViewData = FormViewModel.ViewData(),
+            enabled = true,
+            primaryButtonEnabled = false,
+            isLiveMode = false,
+            isProcessing = false,
+        )
+        val viewModel = createViewModel(
+            backstack = buildBackstack(initialViewState),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(viewState.primaryButtonEnabled).isFalse()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnFormValuesChanged(
+                    formFieldValues = FormFieldValues(
+                        fieldValuePairs = mapOf(
+                            IdentifierSpec.Generic("Test") to FormFieldEntry(
+                                value = "Test",
+                                isComplete = true,
+                            )
+                        ),
+                        showsMandate = false,
+                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    )
+                )
+            )
+
+            viewState = awaitItem() as CustomerSheetViewState.AddPaymentMethod
+            assertThat(viewState.primaryButtonEnabled).isTrue()
         }
     }
 

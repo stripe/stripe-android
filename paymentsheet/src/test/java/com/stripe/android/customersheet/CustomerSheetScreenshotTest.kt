@@ -156,6 +156,7 @@ class CustomerSheetScreenshotTest {
                     paymentMethodCode = PaymentMethod.Type.Card.code,
                     formViewData = FormViewModel.ViewData(),
                     enabled = true,
+                    primaryButtonEnabled = false,
                     isLiveMode = false,
                     isProcessing = false,
                     errorMessage = "This is an error message.",

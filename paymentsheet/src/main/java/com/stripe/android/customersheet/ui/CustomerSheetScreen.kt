@@ -181,8 +181,8 @@ internal fun AddCard(
 
         PrimaryButton(
             // TODO (jameswoo) add to lokalize
-            label = "Add",
-            isEnabled = true,
+            label = "Save",
+            isEnabled = viewState.primaryButtonEnabled,
             isLoading = viewState.isProcessing,
             onButtonClick = {
                 viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
