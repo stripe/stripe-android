@@ -12,6 +12,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.customersheet.injection.CustomerSheetComponent
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.PaymentOptionFactory
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.AnimationConstants
 import javax.inject.Inject
 
@@ -27,6 +29,7 @@ class CustomerSheet @Inject internal constructor(
     private val application: Application,
     lifecycleOwner: LifecycleOwner,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
+    private val paymentOptionFactory: PaymentOptionFactory,
     private val callback: CustomerSheetResultCallback,
 ) {
 
@@ -74,9 +77,36 @@ class CustomerSheet @Inject internal constructor(
         CustomerSessionViewModel.clear()
     }
 
+    /**
+     * Retrieves the customer's saved payment option selection or null if the customer does not have
+     * a persisted payment option selection.
+     */
+    suspend fun retrievePaymentOptionSelection(): CustomerSheetResult {
+        val adapter = CustomerSessionViewModel.component.customerAdapter
+        val selectedPaymentOption = adapter.retrieveSelectedPaymentOption()
+        val paymentMethods = adapter.retrievePaymentMethods()
+
+        val selection = selectedPaymentOption.mapCatching { paymentOption ->
+            paymentOption?.toPaymentSelection {
+                paymentMethods.getOrNull()?.find {
+                    it.id == paymentOption.id
+                }
+            }?.toPaymentOptionSelection(paymentOptionFactory)
+        }
+
+        return selection.fold(
+            onSuccess = {
+                CustomerSheetResult.Selected(it)
+            },
+            onFailure = { cause, _ ->
+                CustomerSheetResult.Error(cause)
+            }
+        )
+    }
+
     private fun onCustomerSheetResult(result: InternalCustomerSheetResult?) {
         requireNotNull(result)
-        callback.onResult(result.toPublicResult())
+        callback.onResult(result.toPublicResult(paymentOptionFactory))
     }
 
     /**
@@ -249,6 +279,25 @@ class CustomerSheet @Inject internal constructor(
                     .build()
 
             return customerSheetComponent.customerSheet
+        }
+
+        internal fun PaymentSelection?.toPaymentOptionSelection(
+            paymentOptionFactory: PaymentOptionFactory
+        ): PaymentOptionSelection? {
+            return when (this) {
+                is PaymentSelection.GooglePay -> {
+                    PaymentOptionSelection.GooglePay(
+                        paymentOption = paymentOptionFactory.create(this)
+                    )
+                }
+                is PaymentSelection.Saved -> {
+                    PaymentOptionSelection.PaymentMethod(
+                        paymentMethod = this.paymentMethod,
+                        paymentOption = paymentOptionFactory.create(this)
+                    )
+                }
+                else -> null
+            }
         }
     }
 }

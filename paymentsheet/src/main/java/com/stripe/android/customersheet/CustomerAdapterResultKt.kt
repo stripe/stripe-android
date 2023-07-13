@@ -72,7 +72,7 @@ internal inline fun <R, T> CustomerAdapter.Result<T>.onSuccess(
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal inline fun <R, T> CustomerAdapter.Result<T>.onFailure(
-    action: (cause: Throwable?, displayMessage: String?) -> R
+    action: (cause: Throwable, displayMessage: String?) -> R
 ): CustomerAdapter.Result<T> {
     failureOrNull()?.let {
         val displayMessage = it.displayMessage

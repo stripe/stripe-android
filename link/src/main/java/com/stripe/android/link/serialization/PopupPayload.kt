@@ -46,6 +46,15 @@ internal data class PopupPayload(
     @SerialName("paymentObject")
     val paymentObject: String = "link_payment_method"
 
+    @SerialName("loggerMetadata")
+    val loggerMetadata: Map<String, String> = emptyMap()
+
+    @SerialName("flags")
+    val flags: Map<String, String> = emptyMap()
+
+    @SerialName("experiments")
+    val experiments: Map<String, String> = emptyMap()
+
     @Serializable
     data class MerchantInfo(
         @SerialName("businessName")
@@ -113,7 +122,7 @@ internal data class PopupPayload(
                 ),
                 customerInfo = CustomerInfo(
                     email = customerEmail,
-                    country = customerBillingCountryCode,
+                    country = customerBillingCountryCode ?: merchantCountryCode,
                 ),
                 paymentInfo = stripeIntent.toPaymentInfo(),
                 appId = context.applicationInfo.packageName,

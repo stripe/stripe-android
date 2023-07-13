@@ -143,11 +143,42 @@ class CustomerSheetExampleViewModel(
     }
 
     fun onCustomerSheetResult(result: CustomerSheetResult) {
-        (state.value as? CustomerSheetExampleViewState.Data)?.let { state ->
-            _state.update {
-                state.copy(
-                    result = result
-                )
+        when (result) {
+            is CustomerSheetResult.Canceled -> {
+                updateDataViewState {
+                    it.copy(
+                        selection = result.selection,
+                        errorMessage = null,
+                    )
+                }
+            }
+            is CustomerSheetResult.Selected -> {
+                updateDataViewState {
+                    it.copy(
+                        selection = result.selection,
+                        errorMessage = null,
+                    )
+                }
+            }
+            is CustomerSheetResult.Error -> {
+                updateDataViewState {
+                    it.copy(
+                        selection = null,
+                        errorMessage = result.exception.message,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updateDataViewState(
+        transform: (CustomerSheetExampleViewState.Data) -> CustomerSheetExampleViewState.Data,
+    ) {
+        _state.update {
+            if (it is CustomerSheetExampleViewState.Data) {
+                transform(it)
+            } else {
+                it
             }
         }
     }

@@ -158,7 +158,7 @@ class CustomerSheetScreenshotTest {
                     enabled = true,
                     isLiveMode = false,
                     isProcessing = false,
-                    errorMessage = "This is an error message."
+                    errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = { it!! }
             )
