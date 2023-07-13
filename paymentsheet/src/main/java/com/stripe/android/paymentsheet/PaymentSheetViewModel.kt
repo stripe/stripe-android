@@ -15,7 +15,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -74,7 +73,6 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as StripeR
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     application: Application,
@@ -239,7 +237,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
             LinkHandler.ProcessingState.Cancelled -> {
-                _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
+                setContentVisible(true)
+                resetViewState()
             }
             is LinkHandler.ProcessingState.PaymentMethodCollected -> {
                 setContentVisible(true)
@@ -278,6 +277,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             LinkHandler.ProcessingState.Started -> {
                 updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+            }
+            LinkHandler.ProcessingState.CompleteWithoutLink -> {
+                checkout()
             }
         }
     }
@@ -641,7 +643,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val component = DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(application)
-                .injectorKey(DUMMY_INJECTOR_KEY)
                 .build()
                 .paymentSheetViewModelSubcomponentBuilder
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(starterArgsSupplier()))
@@ -663,7 +664,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 private val PaymentSheet.InitializationMode.isProcessingPayment: Boolean
     get() = when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> true

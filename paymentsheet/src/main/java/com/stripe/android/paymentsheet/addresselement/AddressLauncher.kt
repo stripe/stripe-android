@@ -10,8 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
-import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
 import com.stripe.android.utils.AnimationConstants
@@ -24,10 +22,6 @@ class AddressLauncher internal constructor(
     private val application: Application,
     private val activityResultLauncher: ActivityResultLauncher<AddressElementActivityContract.Args>
 ) {
-    @InjectorKey
-    private val injectorKey: String =
-        WeakMapInjectorRegistry.nextKey(requireNotNull(AddressLauncher::class.simpleName))
-
     /**
      * Constructor to be used when launching the address element from an Activity.
      *
@@ -72,7 +66,6 @@ class AddressLauncher internal constructor(
         val args = AddressElementActivityContract.Args(
             publishableKey,
             configuration,
-            injectorKey
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(

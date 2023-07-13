@@ -2,7 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>LongMethod:LinkButtonView.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) @Composable fun LinkButton( email: String?, enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:LinkInlineSignup.kt$@Composable internal fun LinkInlineSignup( merchantName: String, emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, signUpState: SignUpState, enabled: Boolean, expanded: Boolean, requiresNameCollection: Boolean, errorMessage: ErrorMessage?, toggleExpanded: () -> Unit, modifier: Modifier = Modifier )</ID>
     <ID>MagicNumber:DefaultLinkEventsReporter.kt$DefaultLinkEventsReporter$1000f</ID>
     <ID>MatchingDeclarationName:ErrorText.kt$ErrorTextStyle</ID>
@@ -14,7 +13,6 @@
     <ID>TooGenericExceptionCaught:LinkActivityResult.kt$e: Exception</ID>
     <ID>TooManyFunctions:DefaultLinkEventsReporter.kt$DefaultLinkEventsReporter : LinkEventsReporter</ID>
     <ID>TooManyFunctions:LinkEventsReporter.kt$LinkEventsReporter</ID>
-    <ID>TooManyFunctions:LinkPaymentLauncherComponent.kt$LinkPaymentLauncherComponent$Builder</ID>
     <ID>TopLevelPropertyNaming:PrimaryButton.kt$internal const val completedIconTestTag = "CompletedIcon"</ID>
     <ID>TopLevelPropertyNaming:PrimaryButton.kt$internal const val progressIndicatorTestTag = "CircularProgressIndicator"</ID>
   </CurrentIssues>

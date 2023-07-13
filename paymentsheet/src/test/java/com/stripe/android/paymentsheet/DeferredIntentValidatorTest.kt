@@ -9,7 +9,6 @@ import com.stripe.android.testing.PaymentIntentFactory
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal class DeferredIntentValidatorTest {
 
     @Test

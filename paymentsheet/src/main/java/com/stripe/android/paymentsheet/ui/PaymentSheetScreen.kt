@@ -4,7 +4,12 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,6 +60,8 @@ internal fun PaymentSheetScreen(
                     viewModel = viewModel,
                     modifier = scrollModifier,
                 )
+            } else {
+                Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
             }
         },
         modifier = modifier,
@@ -157,6 +164,10 @@ internal fun Wallet(
         }
 
         state.link?.let { link ->
+            if (state.googlePay != null) {
+                Spacer(modifier = Modifier.requiredHeight(8.dp))
+            }
+
             LinkButton(
                 email = link.email,
                 enabled = state.buttonsEnabled,

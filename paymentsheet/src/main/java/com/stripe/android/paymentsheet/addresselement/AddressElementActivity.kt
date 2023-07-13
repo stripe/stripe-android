@@ -92,7 +92,7 @@ internal class AddressElementActivity : ComponentActivity() {
                                 LoadingIndicator(modifier = Modifier.fillMaxSize())
                             }
                             composable(AddressElementScreen.InputAddress.route) {
-                                InputAddressScreen(viewModel.injector)
+                                InputAddressScreen(viewModel.inputAddressViewModelSubcomponentBuilderProvider)
                             }
                             composable(
                                 AddressElementScreen.Autocomplete.route,
@@ -108,7 +108,7 @@ internal class AddressElementActivity : ComponentActivity() {
                                         AddressElementScreen.Autocomplete.countryArg
                                     )
                                 AutocompleteScreen(
-                                    viewModel.injector,
+                                    viewModel.autoCompleteViewModelSubcomponentBuilderProvider,
                                     country
                                 )
                             }

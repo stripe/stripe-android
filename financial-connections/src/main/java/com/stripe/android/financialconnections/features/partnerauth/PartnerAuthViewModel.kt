@@ -18,7 +18,6 @@ import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -30,7 +29,11 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.NavigationDirections.accountPicker
+import com.stripe.android.financialconnections.navigation.NavigationDirections.manualEntry
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
+import com.stripe.android.financialconnections.navigation.toNavigationCommand
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -49,7 +52,6 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val uriUtils: UriUtils,
     private val postAuthSessionEvent: PostAuthSessionEvent,
     private val getManifest: GetManifest,
-    private val goNext: GoNext,
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
@@ -160,7 +162,12 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 
     fun onSelectAnotherBank() {
-        navigationManager.navigate(NavigationDirections.reset)
+        navigationManager.navigate(
+            NavigateToRoute(
+                command = NavigationDirections.reset,
+                popCurrentFromBackStack = true
+            )
+        )
     }
 
     fun onWebAuthFlowFinished(
@@ -219,7 +226,12 @@ internal class PartnerAuthViewModel @Inject constructor(
             } else {
                 // For OAuth institutions, navigate to Session cancellation's next pane.
                 postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
-                goNext(result.nextPane)
+                navigationManager.navigate(
+                    NavigateToRoute(
+                        command = result.nextPane.toNavigationCommand(),
+                        popCurrentFromBackStack = true
+                    )
+                )
             }
         }.onFailure {
             logger.error("failed cancelling session after cancelled web flow", it)
@@ -241,9 +253,19 @@ internal class PartnerAuthViewModel @Inject constructor(
                     publicToken = oAuthResults.publicToken
                 )
                 logger.debug("Session authorized!")
-                goNext(updatedSession.nextPane)
+                navigationManager.navigate(
+                    NavigateToRoute(
+                        command = updatedSession.nextPane.toNavigationCommand(),
+                        popCurrentFromBackStack = true
+                    )
+                )
             } else {
-                goNext(Pane.ACCOUNT_PICKER)
+                navigationManager.navigate(
+                    NavigateToRoute(
+                        command = accountPicker,
+                        popCurrentFromBackStack = true
+                    )
+                )
             }
         }.onFailure {
             logger.error("failed authorizing session", it)
@@ -251,9 +273,12 @@ internal class PartnerAuthViewModel @Inject constructor(
         }
     }
 
-    fun onEnterDetailsManuallyClick() {
-        navigationManager.navigate(NavigationDirections.manualEntry)
-    }
+    fun onEnterDetailsManuallyClick() = navigationManager.navigate(
+        NavigateToRoute(
+            command = manualEntry,
+            popCurrentFromBackStack = true
+        )
+    )
 
     fun onClickableTextClick(uri: String) {
         // if clicked uri contains an eventName query param, track click event.

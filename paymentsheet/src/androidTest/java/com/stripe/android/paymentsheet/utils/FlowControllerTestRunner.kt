@@ -6,7 +6,6 @@ import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.ExperimentalPaymentSheetDecouplingApi
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -28,7 +27,6 @@ internal class FlowControllerTestRunnerContext(
     }
 }
 
-@OptIn(ExperimentalPaymentSheetDecouplingApi::class)
 internal fun runFlowControllerTest(
     createIntentCallback: CreateIntentCallback? = null,
     paymentOptionCallback: PaymentOptionCallback,

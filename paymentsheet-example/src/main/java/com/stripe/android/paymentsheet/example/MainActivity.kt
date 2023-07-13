@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.example
 
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
@@ -70,20 +68,12 @@ class MainActivity : AppCompatActivity() {
                 titleResId = R.string.paymentsheet_serverside_confirmation_title,
                 subtitleResId = R.string.paymentsheet_serverside_confirmation_subtitle,
                 klass = ServerSideConfirmationCompleteFlowActivity::class.java,
-                badge = MenuItem.Badge(
-                    labelResId = R.string.beta_badge_label,
-                    onClick = this::openDecouplingBetaLink,
-                ),
                 section = MenuItem.Section.CompleteFlow,
             ),
             MenuItem(
                 titleResId = R.string.paymentsheet_custom_serverside_confirmation_title,
                 subtitleResId = R.string.paymentsheet_serverside_confirmation_subtitle,
                 klass = ServerSideConfirmationCustomFlowActivity::class.java,
-                badge = MenuItem.Badge(
-                    labelResId = R.string.beta_badge_label,
-                    onClick = this::openDecouplingBetaLink,
-                ),
                 section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(
@@ -258,12 +248,4 @@ private fun MenuItemRow(item: MenuItem) {
             }
         }
     }
-}
-
-private fun Context.openDecouplingBetaLink() {
-    val url = "https://stripe.com/docs/payments/finalize-payments-on-the-server?platform=mobile"
-    val intent = Intent(Intent.ACTION_VIEW).apply {
-        data = Uri.parse(url)
-    }
-    startActivity(intent)
 }

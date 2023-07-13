@@ -25,6 +25,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.NavigationState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.isCancellationError
@@ -134,7 +135,9 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 )
             }
             // navigate to next step
-            navigationManager.navigate(NavigationDirections.partnerAuth)
+            navigationManager.navigate(
+                NavigationState.NavigateToRoute(NavigationDirections.partnerAuth)
+            )
         }.execute { this }
     }
 
@@ -163,7 +166,9 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     fun onManualEntryClick() {
-        navigationManager.navigate(NavigationDirections.manualEntry)
+        navigationManager.navigate(
+            NavigationState.NavigateToRoute(NavigationDirections.manualEntry)
+        )
     }
 
     companion object :

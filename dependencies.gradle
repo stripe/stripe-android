@@ -57,7 +57,7 @@ ext.versions = [
         places                      : '3.0.0',
         playServices                : '1.6.4',
         playServicesTfLite          : '16.0.1',
-        playServicesWallet          : '19.2.0-beta01',
+        playServicesWallet          : '19.2.0',
         retrofit                    : '2.9.0',
         robolectric                 : '4.10.3',
         shot                        : '5.14.1',

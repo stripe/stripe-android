@@ -32,7 +32,6 @@ class AutocompleteScreenTest {
     private val args = AddressElementActivityContract.Args(
         "publishableKey",
         AddressLauncher.Configuration(),
-        "injectorKey"
     )
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val eventReporter = FakeEventReporter()

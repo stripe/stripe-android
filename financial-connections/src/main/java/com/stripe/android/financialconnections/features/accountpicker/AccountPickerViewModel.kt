@@ -16,7 +16,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAccountsSucceeded
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
@@ -27,6 +26,8 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
+import com.stripe.android.financialconnections.navigation.toNavigationCommand
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -39,7 +40,6 @@ internal class AccountPickerViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val selectAccounts: SelectAccounts,
     private val getManifest: GetManifest,
-    private val goNext: GoNext,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
@@ -188,16 +188,20 @@ internal class AccountPickerViewModel @Inject constructor(
                 sessionId = requireNotNull(manifest.activeAuthSession).id,
                 updateLocalCache = updateLocalCache
             )
-            goNext(accountsList.nextPane)
+            navigationManager.navigate(
+                NavigateToRoute(accountsList.nextPane.toNavigationCommand())
+            )
             accountsList
         }.execute {
             copy(selectAccounts = it)
         }
     }
 
-    fun selectAnotherBank() = navigationManager.navigate(NavigationDirections.reset)
+    fun selectAnotherBank() =
+        navigationManager.navigate(NavigateToRoute(NavigationDirections.reset))
 
-    fun onEnterDetailsManually() = navigationManager.navigate(NavigationDirections.manualEntry)
+    fun onEnterDetailsManually() =
+        navigationManager.navigate(NavigateToRoute(NavigationDirections.manualEntry))
 
     fun onLoadAccountsAgain() {
         setState { copy(canRetry = false) }

@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.injection
 import android.app.Application
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -32,9 +31,6 @@ internal interface PaymentSheetLauncherComponent {
     interface Builder {
         @BindsInstance
         fun application(application: Application): Builder
-
-        @BindsInstance
-        fun injectorKey(@InjectorKey injectorKey: String): Builder
 
         fun build(): PaymentSheetLauncherComponent
     }
