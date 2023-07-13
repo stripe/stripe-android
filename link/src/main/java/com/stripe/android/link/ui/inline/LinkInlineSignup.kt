@@ -176,10 +176,11 @@ internal fun LinkInlineSignup(
                         .fillMaxWidth()
                         .clip(MaterialTheme.linkShapes.small)
                 ) {
-                    Column(modifier = Modifier
-                        .clickable {
-                            toggleExpanded()
-                        }
+                    Column(
+                        modifier = Modifier
+                            .clickable {
+                                toggleExpanded()
+                            }
                     ) {
                         Row(
                             modifier = Modifier
