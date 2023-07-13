@@ -6,7 +6,7 @@ import dagger.Module
 import dagger.Provides
 
 @Module
-internal class CustomerSheetModule {
+internal object CustomerSheetModule {
     @Provides
     fun provideStripeImageLoader(context: Context): StripeImageLoader {
         return StripeImageLoader(context)

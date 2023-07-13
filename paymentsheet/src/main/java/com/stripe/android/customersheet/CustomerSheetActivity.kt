@@ -62,7 +62,6 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
                 BackHandler {
                     coroutineScope.launch {
-                        bottomSheetState.hide()
                         viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
                     }
                 }
