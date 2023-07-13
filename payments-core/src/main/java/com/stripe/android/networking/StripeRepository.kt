@@ -217,7 +217,7 @@ interface StripeRepository {
     suspend fun getCardMetadata(
         bin: Bin,
         options: ApiRequest.Options
-    ): CardMetadata?
+    ): Result<CardMetadata>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun start3ds2Auth(

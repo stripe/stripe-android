@@ -238,7 +238,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         return Result.failure(NotImplementedError())
     }
 
-    override suspend fun getCardMetadata(bin: Bin, options: ApiRequest.Options): CardMetadata {
+    override suspend fun getCardMetadata(bin: Bin, options: ApiRequest.Options): Result<CardMetadata> {
         TODO("Not yet implemented")
     }
 

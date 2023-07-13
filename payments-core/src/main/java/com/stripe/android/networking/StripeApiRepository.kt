@@ -860,21 +860,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun getCardMetadata(
         bin: Bin,
         options: ApiRequest.Options
-    ): CardMetadata? {
-        return runCatching {
-            fetchStripeModel(
-                apiRequestFactory.createGet(
-                    getEdgeUrl("card-metadata"),
-                    options.copy(stripeAccount = null),
-                    mapOf("key" to options.apiKey, "bin_prefix" to bin.value)
-                ),
-                CardMetadataJsonParser(bin)
-            ) {
-                // no-op
-            }
-        }.onFailure {
+    ): Result<CardMetadata> {
+        return fetchStripeModelResult(
+            apiRequestFactory.createGet(
+                getEdgeUrl("card-metadata"),
+                options.copy(stripeAccount = null),
+                mapOf("key" to options.apiKey, "bin_prefix" to bin.value)
+            ),
+            CardMetadataJsonParser(bin)
+        ).onFailure {
             fireAnalyticsRequest(PaymentAnalyticsEvent.CardMetadataLoadFailure)
-        }.getOrNull()
+        }
     }
 
     /**

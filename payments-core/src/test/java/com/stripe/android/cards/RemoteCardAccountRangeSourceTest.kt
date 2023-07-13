@@ -109,6 +109,7 @@ internal class RemoteCardAccountRangeSourceTest {
             )
         )
 
+        remoteCardAccountRangeSource.getAccountRange(CardNumberFixtures.VISA)
         verify(cardAccountRangeStore, never()).save(any(), any())
     }
 
@@ -187,7 +188,7 @@ internal class RemoteCardAccountRangeSourceTest {
         override suspend fun getCardMetadata(
             bin: Bin,
             options: ApiRequest.Options
-        ) = cardMetadata
+        ): Result<CardMetadata> = Result.success(cardMetadata)
     }
 
     private companion object {
