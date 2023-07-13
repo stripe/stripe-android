@@ -4,34 +4,30 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
-import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.customersheet.CustomerSheet.Companion.toPaymentOptionSelection
+import com.stripe.android.paymentsheet.model.PaymentOptionFactory
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal sealed class InternalCustomerSheetResult : Parcelable {
-    abstract fun toPublicResult(): CustomerSheetResult
+    abstract fun toPublicResult(
+        paymentOptionFactory: PaymentOptionFactory,
+    ): CustomerSheetResult
 
     /**
      * The customer selected a payment method
      */
     @Parcelize
-    class Selected internal constructor(
-        val paymentMethodId: String,
-        val drawableResourceId: Int,
-        val label: String,
+    data class Selected internal constructor(
+        val paymentSelection: PaymentSelection?
     ) : InternalCustomerSheetResult() {
-        @Suppress("DEPRECATION")
-        override fun toPublicResult(): CustomerSheetResult {
+        override fun toPublicResult(
+            paymentOptionFactory: PaymentOptionFactory,
+        ): CustomerSheetResult {
             return CustomerSheetResult.Selected(
-                selection = PaymentOptionSelection(
-                    paymentMethodId = paymentMethodId,
-                    // TODO (jameswoo) Use [PaymentOptionFactory]
-                    paymentOption = PaymentOption(
-                        drawableResourceId = drawableResourceId,
-                        label = label,
-                    )
-                )
+                selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory)
             )
         }
     }
@@ -40,9 +36,15 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
      * The customer canceled the sheet
      */
     @Parcelize
-    object Canceled : InternalCustomerSheetResult() {
-        override fun toPublicResult(): CustomerSheetResult {
-            return CustomerSheetResult.Canceled()
+    data class Canceled(
+        val paymentSelection: PaymentSelection?
+    ) : InternalCustomerSheetResult() {
+        override fun toPublicResult(
+            paymentOptionFactory: PaymentOptionFactory,
+        ): CustomerSheetResult {
+            return CustomerSheetResult.Canceled(
+                selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory)
+            )
         }
     }
 
@@ -53,7 +55,9 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     class Error internal constructor(
         val exception: Exception
     ) : InternalCustomerSheetResult() {
-        override fun toPublicResult(): CustomerSheetResult {
+        override fun toPublicResult(
+            paymentOptionFactory: PaymentOptionFactory,
+        ): CustomerSheetResult {
             return CustomerSheetResult.Error(exception)
         }
     }

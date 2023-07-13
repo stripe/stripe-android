@@ -12,6 +12,7 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.PaymentOptionSelection
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerSheetRequest
@@ -142,12 +143,53 @@ class CustomerSheetExampleViewModel(
         }
     }
 
-    fun onCustomerSheetResult(result: CustomerSheetResult) {
+    fun setInitialSelection(selection: PaymentOptionSelection?) {
         (state.value as? CustomerSheetExampleViewState.Data)?.let { state ->
             _state.update {
                 state.copy(
-                    result = result
+                    selection = selection
                 )
+            }
+        }
+    }
+
+    fun onCustomerSheetResult(result: CustomerSheetResult) {
+        when (result) {
+            is CustomerSheetResult.Canceled -> {
+                updateDataViewState {
+                    it.copy(
+                        selection = result.selection,
+                        errorMessage = null,
+                    )
+                }
+            }
+            is CustomerSheetResult.Selected -> {
+                updateDataViewState {
+                    it.copy(
+                        selection = result.selection,
+                        errorMessage = null,
+                    )
+                }
+            }
+            is CustomerSheetResult.Error -> {
+                updateDataViewState {
+                    it.copy(
+                        selection = null,
+                        errorMessage = result.exception.message,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updateDataViewState(
+        transform: (CustomerSheetExampleViewState.Data) -> CustomerSheetExampleViewState.Data,
+    ) {
+        _state.update {
+            if (it is CustomerSheetExampleViewState.Data) {
+                transform(it)
+            } else {
+                it
             }
         }
     }

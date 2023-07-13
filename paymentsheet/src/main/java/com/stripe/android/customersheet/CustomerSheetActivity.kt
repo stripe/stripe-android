@@ -16,8 +16,6 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
-import com.stripe.android.customersheet.CustomerSheetViewAction.OnDismissed
-import com.stripe.android.customersheet.InternalCustomerSheetResult.Canceled
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.AnimationConstants
@@ -63,17 +61,15 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                 }
 
                 BackHandler {
-                    // TODO This should call viewModel.handleViewAction(OnBackPressed). However,
-                    //  we need to change CustomerSheetActivityTest first to make that work.
                     coroutineScope.launch {
                         bottomSheetState.hide()
-                        finishWithResult(Canceled)
+                        viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
                     }
                 }
 
                 BottomSheet(
                     state = bottomSheetState,
-                    onDismissed = { viewModel.handleViewAction(OnDismissed) },
+                    onDismissed = { viewModel.handleViewAction(CustomerSheetViewAction.OnDismissed) },
                 ) {
                     CustomerSheetScreen(
                         viewState = viewState,
