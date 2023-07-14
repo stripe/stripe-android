@@ -135,7 +135,8 @@ internal class PartnerAuthViewModel @Inject constructor(
                eventTracker.logError(
                    extraMessage = "Error fetching payload / posting AuthSession",
                    error = it,
-                   logger = logger
+                   logger = logger,
+                   pane = Pane.PARTNER_AUTH
                )
             },
             onSuccess = { eventTracker.track(PaneLoaded(Pane.PARTNER_AUTH)) }
@@ -162,7 +163,8 @@ internal class PartnerAuthViewModel @Inject constructor(
                 eventTracker.logError(
                     extraMessage = "failed retrieving active session from cache",
                     error = it,
-                    logger = logger
+                    logger = logger,
+                    pane = Pane.PARTNER_AUTH
                 )
                 setState { copy(authenticationStatus = Fail(it)) }
             }
@@ -201,7 +203,8 @@ internal class PartnerAuthViewModel @Inject constructor(
             eventTracker.logError(
                 extraMessage = "Auth failed, cancelling AuthSession",
                 error = error,
-                logger = logger
+                logger = logger,
+                pane = Pane.PARTNER_AUTH
             )
             val authSession = getManifest().activeAuthSession
             when {
@@ -217,7 +220,8 @@ internal class PartnerAuthViewModel @Inject constructor(
             eventTracker.logError(
                 extraMessage = "failed cancelling session after failed web flow",
                 error = it,
-                logger = logger
+                logger = logger,
+                pane = Pane.PARTNER_AUTH
             )
         }
     }
@@ -249,7 +253,12 @@ internal class PartnerAuthViewModel @Inject constructor(
             }
         }.onFailure {
 
-            eventTracker.logError("failed cancelling session after cancelled web flow", it, logger)
+            eventTracker.logError(
+                "failed cancelling session after cancelled web flow",
+                it,
+                logger,
+                Pane.PARTNER_AUTH
+            )
             setState { copy(authenticationStatus = Fail(it)) }
         }
     }
@@ -286,7 +295,8 @@ internal class PartnerAuthViewModel @Inject constructor(
             eventTracker.logError(
                 extraMessage = "failed authorizing session",
                 error = it,
-                logger = logger
+                logger = logger,
+                pane = Pane.PARTNER_AUTH
             )
             setState { copy(authenticationStatus = Fail(it)) }
         }

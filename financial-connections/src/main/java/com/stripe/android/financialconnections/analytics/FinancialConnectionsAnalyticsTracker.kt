@@ -6,7 +6,7 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import java.util.Locale
 
 /**
@@ -20,13 +20,14 @@ internal interface FinancialConnectionsAnalyticsTracker {
 internal suspend fun FinancialConnectionsAnalyticsTracker.logError(
     extraMessage: String,
     error: Throwable,
-    logger: Logger
+    logger: Logger,
+    pane: Pane
 ) {
     // log error to analytics.
     track(
         FinancialConnectionsEvent.Error(
             extraMessage = extraMessage,
-            pane = FinancialConnectionsSessionManifest.Pane.PARTNER_AUTH,
+            pane = pane,
             exception = error
         )
     )
