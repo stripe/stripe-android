@@ -25,7 +25,6 @@ import javax.inject.Inject
 internal class LinkAccountManager @Inject constructor(
     private val config: LinkConfiguration,
     private val linkRepository: LinkRepository,
-    private val cookieStore: CookieStore,
     private val linkEventsReporter: LinkEventsReporter
 ) {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
@@ -120,7 +119,6 @@ internal class LinkAccountManager @Inject constructor(
     ): Result<LinkAccount> =
         linkRepository.consumerSignUp(email, phone, country, name, authSessionCookie, consentAction)
             .map { consumerSession ->
-                cookieStore.storeNewUserEmail(email)
                 setAccount(consumerSession)
             }
 
