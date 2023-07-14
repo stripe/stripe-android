@@ -14,8 +14,8 @@ internal fun Throwable.toEventParams(
     is WebAuthFlowFailedException -> mapOf(
         "error" to reason,
         "error_type" to reason,
+        "error_stacktrace" to stackTraceToString(),
         "error_message" to listOfNotNull(
-            location(),
             message,
             extraMessage
         ).joinToString(" "),
@@ -25,8 +25,8 @@ internal fun Throwable.toEventParams(
     is FinancialConnectionsError -> mapOf(
         "error" to name,
         "error_type" to name,
+        "error_stacktrace" to stackTraceToString(),
         "error_message" to listOfNotNull(
-            location(),
             stripeError?.message ?: message,
             extraMessage
         ).joinToString(" "),
@@ -36,30 +36,24 @@ internal fun Throwable.toEventParams(
     is StripeException -> mapOf(
         "error" to (stripeError?.type ?: this::class.java.simpleName),
         "error_type" to (stripeError?.type ?: this::class.java.simpleName),
+        "error_stacktrace" to stackTraceToString(),
         "error_message" to listOfNotNull(
-            location(),
-            (stripeError?.message ?: this.message)?.take(MAX_LOG_LENGTH),
+            (stripeError?.message ?: message)?.take(MAX_LOG_LENGTH),
             extraMessage
         ).joinToString(" "),
-        "code" to (stripeError?.code ?: this.statusCode.toString())
+        "code" to (stripeError?.code ?: statusCode.toString())
     )
 
     else -> mapOf(
         "error" to this::class.java.simpleName,
         "error_type" to this::class.java.simpleName,
+        "error_stacktrace" to stackTraceToString(),
         "error_message" to listOfNotNull(
-            message?.take(MAX_LOG_LENGTH)
+            message?.take(MAX_LOG_LENGTH),
+            extraMessage
         ).joinToString(" "),
         "code" to null
     )
 }
-
-private fun Throwable.location(): String? =
-    this.stackTrace.firstOrNull()?.let { stackTraceElement ->
-        val fileName = stackTraceElement.fileName
-        val lineNumber = stackTraceElement.lineNumber
-        "$fileName:$lineNumber:"
-    }
-
 
 private const val MAX_LOG_LENGTH = 100
