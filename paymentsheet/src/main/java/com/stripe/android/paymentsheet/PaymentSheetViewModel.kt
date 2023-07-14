@@ -237,11 +237,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
             LinkHandler.ProcessingState.Cancelled -> {
-                setContentVisible(true)
                 resetViewState()
             }
             is LinkHandler.ProcessingState.PaymentMethodCollected -> {
-                setContentVisible(true)
                 updateSelection(
                     PaymentSelection.Saved(
                         paymentMethod = processingState.paymentMethod,
@@ -251,14 +249,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 checkout()
             }
             is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
-                setContentVisible(true)
                 onPaymentResult(processingState.result)
             }
             is LinkHandler.ProcessingState.Error -> {
                 onError(processingState.message)
             }
             LinkHandler.ProcessingState.Launched -> {
-                setContentVisible(false)
                 startProcessing(CheckoutIdentifier.SheetBottomBuy)
             }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {

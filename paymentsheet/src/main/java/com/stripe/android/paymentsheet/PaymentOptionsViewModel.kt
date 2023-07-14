@@ -147,14 +147,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 TODO("This can't happen. Will follow up to remodel the states better.")
             }
             is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
-                setContentVisible(true)
                 onPaymentResult(processingState.result)
             }
             is LinkHandler.ProcessingState.Error -> {
                 onError(processingState.message)
             }
             LinkHandler.ProcessingState.Launched -> {
-                setContentVisible(false)
             }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
                 processingState.details?.let {
