@@ -14,7 +14,11 @@ internal fun Throwable.toEventParams(
     is WebAuthFlowFailedException -> mapOf(
         "error" to reason,
         "error_type" to reason,
-        "error_message" to location() + message,
+        "error_message" to listOfNotNull(
+            location(),
+            message,
+            extraMessage
+        ).joinToString(" "),
         "code" to null
     )
 
