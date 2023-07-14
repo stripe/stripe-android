@@ -252,7 +252,6 @@ internal class PartnerAuthViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-
             eventTracker.logError(
                 "failed cancelling session after cancelled web flow",
                 it,
