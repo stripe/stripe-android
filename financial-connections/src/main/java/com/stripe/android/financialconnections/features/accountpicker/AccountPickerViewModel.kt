@@ -12,9 +12,9 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLinkAccounts
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAccountsSucceeded
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
@@ -127,15 +127,23 @@ internal class AccountPickerViewModel @Inject constructor(
         onAsync(
             AccountPickerState::payload,
             onFail = {
-                eventTracker.track(Error(Pane.ACCOUNT_PICKER, it))
-                logger.error("Error retrieving accounts", it)
+                eventTracker.logError(
+                    logger = logger,
+                    pane = Pane.ACCOUNT_PICKER,
+                    extraMessage = "Error retrieving accounts",
+                    error = it
+                )
             },
         )
         onAsync(
             AccountPickerState::selectAccounts,
             onFail = {
-                eventTracker.track(Error(Pane.ACCOUNT_PICKER, it))
-                logger.error("Error selecting accounts", it)
+                eventTracker.logError(
+                    logger = logger,
+                    pane = Pane.ACCOUNT_PICKER,
+                    extraMessage = "Error selecting accounts",
+                    error = it
+                )
             }
         )
     }

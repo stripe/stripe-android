@@ -132,12 +132,12 @@ internal class PartnerAuthViewModel @Inject constructor(
         onAsync(
             PartnerAuthState::payload,
             onFail = {
-               eventTracker.logError(
-                   extraMessage = "Error fetching payload / posting AuthSession",
-                   error = it,
-                   logger = logger,
-                   pane = Pane.PARTNER_AUTH
-               )
+                eventTracker.logError(
+                    extraMessage = "Error fetching payload / posting AuthSession",
+                    error = it,
+                    logger = logger,
+                    pane = Pane.PARTNER_AUTH
+                )
             },
             onSuccess = { eventTracker.track(PaneLoaded(Pane.PARTNER_AUTH)) }
         )

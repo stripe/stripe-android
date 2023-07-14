@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.InstitutionSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.SearchSucceeded
+import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SearchInstitutions
@@ -74,15 +75,34 @@ internal class InstitutionPickerViewModel @Inject constructor(
             InstitutionPickerState::payload,
             onSuccess = { eventTracker.track(PaneLoaded(Pane.INSTITUTION_PICKER)) },
             onFail = {
-                logger.error("Error fetching initial payload", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(Pane.INSTITUTION_PICKER, it))
+                eventTracker.logError(
+                    extraMessage = "Error fetching initial payload",
+                    error = it,
+                    pane = Pane.INSTITUTION_PICKER,
+                    logger = logger
+                )
             }
         )
         onAsync(
             InstitutionPickerState::searchInstitutions,
             onFail = {
-                logger.error("Error searching institutions", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(Pane.INSTITUTION_PICKER, it))
+                eventTracker.logError(
+                    extraMessage = "Error searching institutions",
+                    error = it,
+                    pane = Pane.INSTITUTION_PICKER,
+                    logger = logger
+                )
+            }
+        )
+        onAsync(
+            InstitutionPickerState::selectInstitution,
+            onFail = {
+                eventTracker.logError(
+                    extraMessage = "Error selecting institution institutions",
+                    error = it,
+                    pane = Pane.INSTITUTION_PICKER,
+                    logger = logger
+                )
             }
         )
     }
@@ -195,7 +215,8 @@ internal data class InstitutionPickerState(
     val previewText: String? = null,
     val searchMode: Boolean = false,
     val payload: Async<Payload> = Uninitialized,
-    val searchInstitutions: Async<InstitutionResponse> = Uninitialized
+    val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
+    val selectInstitution: Async<Unit> = Uninitialized
 ) : MavericksState {
 
     data class Payload(
