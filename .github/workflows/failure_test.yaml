@@ -1,0 +1,18 @@
+name: Failure Test
+on:
+  pull_request:
+
+jobs:
+  failure-test:
+    name: failure-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Notify failure endpoint
+        id: notifyFailureEndpoint
+        run: |
+          ./scripts/notify_failure_endpoint.rb \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
+          "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}" \
+          RUN_MOBILESDK
