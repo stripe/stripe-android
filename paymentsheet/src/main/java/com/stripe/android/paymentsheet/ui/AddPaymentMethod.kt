@@ -51,14 +51,15 @@ internal fun AddPaymentMethod(
         }
     }
 
+    val arguments = remember(selectedItem) {
+        sheetViewModel.createFormArguments(selectedItem)
+    }
+
     val showLinkInlineSignup = sheetViewModel.showLinkInlineSignupView(
         selectedPaymentMethodCode,
-        linkAccountStatus
+        linkAccountStatus,
+        arguments.showCheckbox,
     )
-
-    val arguments = remember(selectedItem, showLinkInlineSignup) {
-        sheetViewModel.createFormArguments(selectedItem, showLinkInlineSignup)
-    }
 
     LaunchedEffect(arguments) {
         showCheckboxFlow.emit(arguments.showCheckbox)
@@ -126,7 +127,8 @@ private val BaseSheetViewModel.initiallySelectedPaymentMethodType: PaymentMethod
 
 private fun BaseSheetViewModel.showLinkInlineSignupView(
     paymentMethodCode: String,
-    linkAccountStatus: AccountStatus?
+    linkAccountStatus: AccountStatus?,
+    showSaveToCustomerCheckbox: Boolean,
 ): Boolean {
     val validStatusStates = setOf(
         AccountStatus.Verified,
@@ -135,10 +137,11 @@ private fun BaseSheetViewModel.showLinkInlineSignupView(
         AccountStatus.SignedOut,
     )
     val linkInlineSelectionValid = linkHandler.linkInlineSelection.value != null
-    return linkHandler.isLinkEnabled.value == true && stripeIntent.value
+    val ableToShowLink = linkHandler.isLinkEnabled.value == true && stripeIntent.value
         ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
         paymentMethodCode == PaymentMethod.Type.Card.code &&
         (linkAccountStatus in validStatusStates || linkInlineSelectionValid)
+    return !showSaveToCustomerCheckbox && ableToShowLink
 }
 
 internal fun FormFieldValues.transformToPaymentMethodCreateParams(
