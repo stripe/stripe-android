@@ -27,7 +27,6 @@ import org.mockito.kotlin.whenever
 class LinkAccountManagerTest {
     private val linkRepository = mock<LinkRepository>()
     private val linkEventsReporter = mock<LinkEventsReporter>()
-    private val cookieStore = mock<CookieStore>()
 
     private val verifiedSession = mock<ConsumerSession.VerificationSession>().apply {
         whenever(type).thenReturn(ConsumerSession.VerificationSession.SessionType.Sms)
@@ -47,16 +46,6 @@ class LinkAccountManagerTest {
             .thenReturn(Result.failure(Exception()))
 
         assertThat(accountManager.accountStatus.first()).isEqualTo(AccountStatus.Error)
-    }
-
-    @Test
-    fun `When new user email exists and network call fails then account status is Error`() = runSuspendTest {
-        val email = "email"
-        whenever(cookieStore.getNewUserEmail()).thenReturn(email)
-        whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
-            .thenReturn(Result.failure(Exception()))
-
-        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Error)
     }
 
     @Test
@@ -198,15 +187,6 @@ class LinkAccountManagerTest {
         }
 
     @Test
-    fun `signUp stores email when successfully signed up`() = runSuspendTest {
-        val accountManager = accountManager()
-
-        accountManager.signUp(EMAIL, "phone", "US", "name", ConsumerSignUpConsentAction.Checkbox)
-
-        verify(cookieStore).storeNewUserEmail(EMAIL)
-    }
-
-    @Test
     fun `createPaymentDetails for card does not retry on auth error`() =
         runSuspendTest {
             val accountManager = accountManager()
@@ -276,8 +256,7 @@ class LinkAccountManagerTest {
             shippingValues = null,
         ),
         linkRepository,
-        cookieStore,
-        linkEventsReporter
+        linkEventsReporter,
     )
 
     companion object {
