@@ -54,6 +54,7 @@ internal sealed class FinancialConnectionsEvent(
 
     class Complete(
         exception: Throwable?,
+        exceptionExtraMessage: String?,
         connectedAccounts: Int?
     ) : FinancialConnectionsEvent(
         name = "complete",
@@ -61,7 +62,7 @@ internal sealed class FinancialConnectionsEvent(
             "num_linked_accounts" to connectedAccounts?.toString(),
             "type" to if (exception == null) "object" else "error"
         )
-            .plus(exception?.toEventParams() ?: emptyMap())
+            .plus(exception?.toEventParams(exceptionExtraMessage) ?: emptyMap())
             .filterNotNullValues()
     )
 
@@ -244,7 +245,8 @@ internal sealed class FinancialConnectionsEvent(
 
     class Error(
         pane: Pane,
-        exception: Throwable
+        exception: Throwable,
+        extraMessage: String? = null,
     ) : FinancialConnectionsEvent(
         name = when (exception) {
             is FinancialConnectionsError,
@@ -253,7 +255,7 @@ internal sealed class FinancialConnectionsEvent(
         },
         params = (
             mapOf("pane" to pane.value)
-                .plus(exception.toEventParams())
+                .plus(exception.toEventParams(extraMessage))
                 .filterNotNullValues()
             )
     )

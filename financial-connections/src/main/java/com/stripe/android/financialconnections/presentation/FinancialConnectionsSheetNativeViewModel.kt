@@ -252,6 +252,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     eventTracker.track(
                         Complete(
                             exception = null,
+                            exceptionExtraMessage = null,
                             connectedAccounts = session.accounts.data.count()
                         )
                     )
@@ -281,10 +282,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     }
                 }
                 .onFailure { completeSessionError ->
-                    logger.error("Error completing session before closing", completeSessionError)
+                    val errorMessage = "Error completing session before closing"
+                    logger.error(errorMessage, completeSessionError)
                     eventTracker.track(
                         Complete(
                             exception = completeSessionError,
+                            exceptionExtraMessage = errorMessage,
                             connectedAccounts = null
                         )
                     )
