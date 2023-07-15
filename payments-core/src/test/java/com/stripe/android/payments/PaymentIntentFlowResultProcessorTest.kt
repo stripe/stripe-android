@@ -354,9 +354,9 @@ internal class PaymentIntentFlowResultProcessorTest {
             val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
 
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                requiresActionIntent,
-                requiresActionIntent,
-                succeededIntent,
+                Result.success(requiresActionIntent),
+                Result.success(requiresActionIntent),
+                Result.success(succeededIntent),
             )
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)

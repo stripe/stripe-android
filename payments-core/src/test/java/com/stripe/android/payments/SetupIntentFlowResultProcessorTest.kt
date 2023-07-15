@@ -188,9 +188,9 @@ internal class SetupIntentFlowResultProcessorTest {
             val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
 
             whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
-                requiresActionIntent,
-                requiresActionIntent,
-                succeededIntent,
+                Result.success(requiresActionIntent),
+                Result.success(requiresActionIntent),
+                Result.success(succeededIntent),
             )
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
