@@ -132,8 +132,6 @@ private fun BaseSheetViewModel.showLinkInlineSignupView(
 ): Boolean {
     val validStatusStates = setOf(
         AccountStatus.Verified,
-        AccountStatus.NeedsVerification,
-        AccountStatus.VerificationStarted,
         AccountStatus.SignedOut,
     )
     val linkInlineSelectionValid = linkHandler.linkInlineSelection.value != null
