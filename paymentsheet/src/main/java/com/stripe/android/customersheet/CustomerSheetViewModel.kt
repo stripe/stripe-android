@@ -138,7 +138,6 @@ internal class CustomerSheetViewModel @Inject constructor(
                             com.stripe.android.ui.core.R.string.stripe_continue_button_label
                         )
                     },
-                    primaryButtonEnabled = paymentSelection != null,
                     errorMessage = errorMessage,
                 )
             )
@@ -257,7 +256,6 @@ internal class CustomerSheetViewModel @Inject constructor(
                         primaryButtonLabel = resources.getString(
                             com.stripe.android.ui.core.R.string.stripe_continue_button_label
                         ),
-                        primaryButtonEnabled = true,
                     )
                 }
             }
@@ -266,7 +264,6 @@ internal class CustomerSheetViewModel @Inject constructor(
                     it.copy(
                         paymentSelection = null,
                         primaryButtonLabel = null,
-                        primaryButtonEnabled = false,
                     )
                 }
             }
@@ -287,6 +284,9 @@ internal class CustomerSheetViewModel @Inject constructor(
                 } ?: error("${currentViewState.paymentMethodCode} is not supported")
             }
             is CustomerSheetViewState.SelectPaymentMethod -> {
+                updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
+                    it.copy(isProcessing = true)
+                }
                 when (val paymentSelection = currentViewState.paymentSelection) {
                     is PaymentSelection.GooglePay -> selectGooglePay()
                     is PaymentSelection.Saved -> selectSavedPaymentMethod(paymentSelection)
@@ -409,7 +409,6 @@ internal class CustomerSheetViewModel @Inject constructor(
                 primaryButtonLabel = resources.getString(
                     PaymentsUiCoreR.string.stripe_continue_button_label
                 ),
-                primaryButtonEnabled = true,
             )
         }
     }
@@ -431,7 +430,10 @@ internal class CustomerSheetViewModel @Inject constructor(
                     t = cause,
                 )
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                    it.copy(errorMessage = displayMessage)
+                    it.copy(
+                        errorMessage = displayMessage,
+                        isProcessing = false,
+                    )
                 }
             }
         }
