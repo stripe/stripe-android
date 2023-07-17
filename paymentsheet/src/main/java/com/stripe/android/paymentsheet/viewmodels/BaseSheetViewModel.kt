@@ -423,7 +423,6 @@ internal abstract class BaseSheetViewModel(
             headerTextFactory.create(
                 screen = screen,
                 isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
-                isPaymentIntent = stripeIntent is PaymentIntent,
                 types = stripeIntent.paymentMethodTypes,
             )
         } else {
